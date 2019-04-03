@@ -53,19 +53,27 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.Tools;
 import com.openexchange.session.Session;
 
 /**
@@ -73,7 +81,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
+public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess implements PersonalAlarmAware {
 
     /**
      * Default 'X-WR-CALNAME' and 'SUMMARY' contents of an iCal that is not accessible
@@ -94,7 +102,10 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
      * @throws OXException If the context cannot be resolved
      */
     protected BasicSchedJoulesCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+        super(  session,
+                account,
+                parameters,
+                Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()));
     }
 
     @Override
@@ -103,7 +114,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected long getRefreshInterval() throws OXException {
+    protected long getRefreshInterval() {
         return account.getUserConfiguration().optLong(SchedJoulesFields.REFRESH_INTERVAL, 0);
     }
 
@@ -139,11 +150,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     @Override
     public long getRetryAfterErrorInterval(OXException e) {
         return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
-    }
-
-    @Override
-    public List<OXException> getWarnings() {
-        return null;
     }
 
     ///////////////////////////////////// HELPERS /////////////////////////////////
@@ -194,5 +200,20 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(account.getAccountId(), session.getUserId(), session.getContextId());
         }
         return key;
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return null;
+    }
+
+    @Override
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return updateAlarmsInternal(eventID, alarms, clientTimestamp);
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
+        return getAlarmTriggersInternal(actions);
     }
 }

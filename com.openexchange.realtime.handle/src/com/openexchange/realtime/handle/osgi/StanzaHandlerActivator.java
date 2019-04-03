@@ -58,7 +58,6 @@ import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
-import com.openexchange.realtime.handle.impl.iq.IQHandler;
 import com.openexchange.realtime.handle.impl.message.MessageHandler;
 import com.openexchange.realtime.handle.impl.message.ResourceListener;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -66,9 +65,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 public class StanzaHandlerActivator extends HousekeepingActivator {
 
-    private volatile Future<Object> messageFuture;
-
-    private volatile Future<Object> iqFuture;
+    private Future<Object> messageFuture;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -76,30 +73,23 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
         StanzaQueueServiceImpl queueService = new StanzaQueueServiceImpl();
         ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         messageFuture = threadPoolService.submit(ThreadPools.task(new MessageHandler(queueService.getMessageQueue())));
-        iqFuture = threadPoolService.submit(ThreadPools.task(new IQHandler(queueService.getIqQueue())));
         registerService(StanzaQueueService.class, queueService);
         getService(ResourceDirectory.class).addListener(new ResourceListener());
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
 
         Future<Object> messageFuture = this.messageFuture;
         if (messageFuture != null) {
             this.messageFuture = null;
             messageFuture.cancel(true);
-        }
-
-        Future<Object> iqFuture = this.iqFuture;
-        if (iqFuture != null) {
-            this.iqFuture = null;
-            iqFuture.cancel(true);
         }
     }
 

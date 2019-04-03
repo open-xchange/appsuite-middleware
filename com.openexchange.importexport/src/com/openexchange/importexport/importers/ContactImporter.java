@@ -122,7 +122,7 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
-        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes()));
+        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)));
     }
 
     /**

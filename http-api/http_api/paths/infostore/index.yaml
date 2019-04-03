@@ -23,4 +23,3 @@ requests:
   - NotifyRequest.yaml
   - UploadRequest.yaml
   - RestoreRequest.yaml
-  - ScanRequest.yaml

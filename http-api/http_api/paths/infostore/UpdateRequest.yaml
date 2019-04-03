@@ -82,6 +82,11 @@
         type: file
         description: The metadata as per `<input type="file" />`.
         required: true
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push token to restrict the generated drive event
+        required: false
     responses:
       200:
         description: |

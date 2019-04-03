@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
@@ -62,7 +61,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -111,7 +109,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
 
     /** <i>Meta</i>-fields of events that are always skipped when applying updated event data */
     private static final EventField[] SKIPPED_FIELDS = {
-        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.SEQUENCE, EventField.FLAGS
+        EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FLAGS
     };
 
     /**
@@ -135,6 +133,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     public UpdatePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
+    }
+
+    /**
+     * Initializes a new {@link UpdatePerformer}, taking over the settings from another update performer.
+     *
+     * @param updatePerformer The update performer to take over the settings from
+     */
+    protected UpdatePerformer(AbstractUpdatePerformer updatePerformer) {
+        super(updatePerformer);
     }
 
     /**
@@ -176,11 +183,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * Updates data of an existing event recurrence and tracks the update in the underlying calendar result.
      *
      * @param originalSeriesMaster The original series master event
-     * @param The recurrence identifier targeting the event occurrence to update
-     * @param eventData The updated event data
+     * @param recurrenceId The recurrence identifier targeting the event occurrence to update
+     * @param updatedEventData The updated event data
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
      */
-    private void updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
+    protected void updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
         recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalSeriesMaster, recurrenceId);
         if (contains(originalSeriesMaster.getDeleteExceptionDates(), recurrenceId)) {
             /*
@@ -215,13 +222,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+            Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-            for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
-                insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
-            }
+            insertAlarms(newExceptionEvent, newExceptionAlarms, true);
             newExceptionEvent = loadEventData(newExceptionEvent.getId());
             resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
             /*
@@ -254,8 +260,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original, plain event data
      * @param eventData The updated event data
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
+     * @return The updated event
      */
-    private void updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
+    protected Event updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
         /*
          * check if folder view on event is allowed as needed
          */
@@ -283,12 +290,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Check.noConflicts(storage, session, eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().previewChanges());
         }
         /*
-         * recursively perform pending deletions of change exceptions if required
+         * recursively perform pending deletions of change exceptions if required, checking permissions as needed
          */
-        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
-            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
-                delete(removedException);
-            }
+        for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
+            requireDeletePermissions(removedException);
+            delete(removedException);
         }
         /*
          * update event data in storage, checking permissions as required
@@ -300,7 +306,21 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * update passed alarms for calendar user, apply default alarms for newly added internal user attendees
          */
         if (eventData.containsAlarms()) {
-            updateAlarms(eventUpdate.getUpdate(), calendarUserId, storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId), eventData.getAlarms());
+            List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent, calendarUserId);
+            if(originalChangeExceptions != null) {
+
+                List<Event> copies = new ArrayList<>(originalChangeExceptions.size());
+                for(Event eve: originalChangeExceptions) {
+                    copies.add(EventMapper.getInstance().copy(eve, null, EventMapper.getInstance().getAssignedFields(eve)));
+                }
+                
+                List<Event> exceptionsWithAlarms = storage.getUtilities().loadAdditionalEventData(calendarUserId, copies, null);
+                Map<Event, List<Alarm>> alarmsToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, eventData.getAlarms(), exceptionsWithAlarms);
+                for (Entry<Event, List<Alarm>> toUpdate : alarmsToUpdate.entrySet()) {
+                    updateAlarms(toUpdate.getKey(), calendarUserId, toUpdate.getKey().getAlarms(), toUpdate.getValue());
+                }
+            }
+            updateAlarms(eventUpdate.getUpdate(), calendarUserId, originalAlarms, eventData.getAlarms());
         }
         for (int userId : getUserIDs(eventUpdate.getAttendeeUpdates().getAddedItems())) {
             List<Alarm> defaultAlarm = isAllDay(eventUpdate.getUpdate()) ? session.getConfig().getDefaultAlarmDate(userId) : session.getConfig().getDefaultAlarmDateTime(userId);
@@ -311,10 +331,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * recursively perform pending updates of change exceptions if required
          */
-        if (false == eventUpdate.getExceptionUpdates().isEmpty()) {
-            for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
-                updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
-            }
+        for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
+            updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
         }
         /*
          * track update result & update any stored alarm triggers of all users if required
@@ -335,6 +353,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
+        return updatedEvent;
     }
 
     /**
@@ -541,7 +560,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     /**
      * Selects the recurrence rule to use for the event update after a split has been performed on a recurring event series. This may be
      * necessary when the rule's <code>COUNT</code> attribute was modified during the split operation.
-     * 
+     *
      * @param originalSeriesMaster The original series master event (before the split)
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @param clientUpdate The updated event data as passed by the client
@@ -569,7 +588,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             RecurrenceRule clientRule = initRecurrenceRule(clientUpdate.getRecurrenceRule());
             RecurrenceRule originalRule = initRecurrenceRule(originalSeriesMaster.getRecurrenceRule());
             if (null != clientRule.getCount() && clientRule.getCount().equals(originalRule.getCount())) {
-                clientRule.setCount(updatedRule.getCount());
+                clientRule.setCount(updatedRule.getCount().intValue());
                 clientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
                 clientUpdate.setRecurrenceRule(clientRule.toString());
                 return new UnmodifiableEvent(clientUpdate);

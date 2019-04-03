@@ -50,14 +50,10 @@
 package com.openexchange.chronos.impl.session;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarConfig;
@@ -84,10 +80,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class DefaultCalendarSession implements CalendarSession {
 
-    private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
-
     private final CalendarService calendarService;
-    private final Map<String, Object> parameters;
+    private final CalendarParameters parameters;
     private final ServerSession session;
     private final EntityResolver entityResolver;
     private final HostData hostData;
@@ -101,18 +95,26 @@ public class DefaultCalendarSession implements CalendarSession {
      * @param calendarService A reference to the calendar service
      */
     public DefaultCalendarSession(Session session, CalendarService calendarService) throws OXException {
+        this(session, calendarService, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultCalendarSession}.
+     *
+     * @param session The underlying server session
+     * @param calendarService A reference to the calendar service
+     * @param Additional calendar parameters to use
+     */
+    public DefaultCalendarSession(Session session, CalendarService calendarService, CalendarParameters parameters) throws OXException {
         super();
         this.calendarService = calendarService;
-        this.parameters = new HashMap<String, Object>();
+        this.parameters = null != parameters ? parameters : new DefaultCalendarParameters();
         this.session = Check.hasCalendar(ServerSessionAdapter.valueOf(session));
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
         RequestContext requestContext = RequestContextHolder.get();
         this.hostData = null != requestContext ? requestContext.getHostData() : null;
         this.warnings = new ArrayList<OXException>();
         this.config = new CalendarConfigImpl(this, Services.getServiceLookup());
-        if (isDebugEnabled()) {
-            debug("New DefaultCalendarSession created. User: " + session.getUserId() + ", Context: " + session.getContextId());
-        }
     }
 
     @Override
@@ -177,53 +179,32 @@ public class DefaultCalendarSession implements CalendarSession {
 
     @Override
     public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
-        return this;
+        return parameters.set(parameter, value);
     }
 
     @Override
     public <T> T get(String parameter, Class<T> clazz) {
-        return get(parameter, clazz, null);
+        return parameters.get(parameter, clazz);
     }
 
     @Override
     public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
-        Object value = parameters.get(parameter);
-        return null == value ? defaultValue : clazz.cast(value);
+        return parameters.get(parameter, clazz, defaultValue);
     }
 
     @Override
     public boolean contains(String parameter) {
-        return parameters.containsKey(parameter);
+        return parameters.contains(parameter);
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        return Collections.unmodifiableSet(parameters.entrySet());
+        return parameters.entrySet();
     }
 
     @Override
     public String toString() {
         return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
-    }
-
-    @Override
-    public void debug(String message) {
-        if (SESSION_LOGGER.isDebugEnabled()) {
-            SESSION_LOGGER.debug("{}@{}: {}", this.getClass().getSimpleName(), System.identityHashCode(this), message);
-        }
-    }
-
-    @Override
-    public void debug(String message, Exception e) {
-        if (SESSION_LOGGER.isDebugEnabled()) {
-            SESSION_LOGGER.debug("{}@{}: {}", this.getClass().getSimpleName(), System.identityHashCode(this), message, e);
-        }
-    }
-
-    @Override
-    public boolean isDebugEnabled() {
-        return SESSION_LOGGER.isDebugEnabled();
     }
 
 }

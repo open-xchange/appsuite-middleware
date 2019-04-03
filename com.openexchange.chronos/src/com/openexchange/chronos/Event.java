@@ -86,6 +86,7 @@ public class Event {
     private String color;
     private String url;
     private double[] geo;
+    private AttendeePrivileges attendeePrivileges;
 
     private DateTime startDate;
     private DateTime endDate;
@@ -864,6 +865,42 @@ public class Event {
      */
     public boolean containsGeo() {
         return setFields.contains(EventField.GEO);
+    }
+    
+    /**
+     * Gets the privileges attendees have to modify the event.
+     *
+     * @return The {@link AttendeePrivileges}
+     */
+    public AttendeePrivileges getAttendeePrivileges() {
+        return attendeePrivileges;
+    }
+
+    /**
+     * Sets the privileges attendees have to modify the event.
+     *
+     * @param value The {@link AttendeePrivileges} to set.
+     */
+    public void setAttendeePrivileges(AttendeePrivileges value) {
+        attendeePrivileges = value;
+        setFields.add(EventField.ATTENDEE_PRIVILEGES);
+    }
+
+    /**
+     * Removes the attendee privilege for this event.
+     */
+    public void removeAttendeePrivileges() {
+        attendeePrivileges = null;
+        setFields.remove(EventField.ATTENDEE_PRIVILEGES);
+    }
+
+    /**
+     * Gets a value indicating whether an attendee privileges for this event have been set or not.
+     *
+     * @return <code>true</code> if {@link AttendeePrivileges} are set, <code>false</code>, otherwise
+     */
+    public boolean containsAttendeePrivileges() {
+        return setFields.contains(EventField.ATTENDEE_PRIVILEGES);
     }
 
     /**

@@ -127,7 +127,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         this.uids = tuids.toArray();
         if (length == messageCount) {
             command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
-            args = (1 == length ? new String[] { "1" } : ARGS_ALL);
+            args = (1 == length ? ARGS_FIRST : ARGS_ALL);
             uid = false;
         } else {
             command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);

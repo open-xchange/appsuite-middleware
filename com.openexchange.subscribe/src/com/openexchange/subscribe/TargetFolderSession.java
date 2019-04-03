@@ -59,7 +59,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-
 /**
  * {@link TargetFolderSession} - A {@link Session} based on a passed {@link TargetFolderDefinition} instance.
  *
@@ -67,8 +66,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class TargetFolderSession implements Session {
 
-    private final int contextId;
-    private final int userId;
+    private final int                 contextId;
+    private final int                 userId;
     private final Map<String, Object> params;
     private final Session             session;
 
@@ -107,6 +106,7 @@ public class TargetFolderSession implements Session {
         return session.getLocalIp();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setLocalIp(final String ip) {
         if (null == session) {
@@ -218,6 +218,7 @@ public class TargetFolderSession implements Session {
         return session.getHash();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setHash(final String hash) {
         if (null != session) {
@@ -233,6 +234,7 @@ public class TargetFolderSession implements Session {
         return session.getClient();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void setClient(final String client) {
         if (null != session) {

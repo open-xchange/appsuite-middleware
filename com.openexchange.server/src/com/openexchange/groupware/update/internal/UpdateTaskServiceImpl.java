@@ -73,6 +73,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
+import com.openexchange.groupware.update.TaskStatus;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskService;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkitJob;
@@ -103,11 +105,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         jobs = new ConcurrentHashMap<String, UpdateTaskToolkitJob<?>>(10, 0.9F, 1);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(int)
-     */
     @Override
     public List<Map<String, Object>> runUpdate(int contextId) throws RemoteException {
         try {
@@ -120,11 +117,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(java.lang.String)
-     */
     @Override
     public List<Map<String, Object>> runUpdate(String schemaName) throws RemoteException {
         try {
@@ -134,6 +126,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return getFailures(updateProcess);
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -141,17 +137,12 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#runAllUpdates(boolean)
-     */
     @Override
-    public String runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException {
+    public TaskStatus runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException {
         try {
             UpdateTaskToolkitJob<Void> job = UpdateTaskToolkit.runUpdateOnAllSchemas(throwExceptionOnFailure);
             addJob(job);
-            return job.getId();
+            return new TaskStatus(job.getId(), job.getStatusText());
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
@@ -161,11 +152,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#forceUpdateTask(int, java.lang.String)
-     */
     @Override
     public void forceUpdateTask(int contextId, String taskName) throws RemoteException {
         try {
@@ -179,17 +165,16 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#forceUpdateTask(java.lang.String, java.lang.String)
-     */
     @Override
     public void forceUpdateTask(String schemaName, String taskName) throws RemoteException {
         try {
             UpdateTaskToolkit.forceUpdateTask(taskName, schemaName);
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -197,11 +182,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#forceUpdateTaskOnAllSchemata(java.lang.String)
-     */
     @Override
     public void forceUpdateTaskOnAllSchemata(String taskName) throws RemoteException {
         try {
@@ -215,11 +195,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getExecutedTasksList(java.lang.String)
-     */
     @Override
     public List<Map<String, Object>> getExecutedTasksList(String schemaName) throws RemoteException {
         SchemaStore store = SchemaStore.getInstance();
@@ -238,6 +213,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return executedTasks;
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -245,11 +224,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getPendingTasksList(java.lang.String, boolean, boolean)
-     */
     @Override
     public List<Map<String, Object>> getPendingTasksList(String schemaName, boolean pending, boolean excluded, boolean namespaceAware) throws RemoteException {
         SchemaStore store = SchemaStore.getInstance();
@@ -297,6 +271,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return aux.values().parallelStream().collect(Collectors.toList());
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -304,11 +282,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getJobStatus(java.lang.String)
-     */
     @Override
     public String getJobStatus(String jobId) throws RemoteException {
         UpdateTaskToolkitJob<?> job = jobs.get(jobId);
@@ -329,11 +302,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         return "OK:" + stText;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getNamespaceAware()
-     */
     @Override
     public Map<String, Set<String>> getNamespaceAware() throws RemoteException {
         return UpdateTaskToolkit.getNamespaceAwareUpdateTasks();
@@ -343,7 +311,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /**
      * Schedules an update task job
-     * 
+     *
      * @param job The job to schedule
      */
     private void addJob(UpdateTaskToolkitJob<Void> job) {
@@ -385,7 +353,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /**
      * Drops the timer task if no jobs are running
-     * 
+     *
      * @return <code>true</code> if the timer task was dropped and the {@link TimerService} purged;
      *         <code>false</code> otherwise
      */
@@ -405,7 +373,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /**
      * Returns any failures the update task encountered
-     * 
+     *
      * @param updateProcess the {@link UpdateProcess}
      * @return the failures
      */
@@ -456,7 +424,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets the specified task name
-         * 
+         *
          * @param taskName The task name to set
          * @return <code>this</code> instance for chained calls
          */
@@ -467,7 +435,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets the specified task state
-         * 
+         *
          * @param taskState The task state to set
          * @return <code>this</code> instance for chained calls
          */
@@ -478,7 +446,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets the specified reason
-         * 
+         *
          * @param reason The reason to set
          * @return <code>this</code> instance for chained calls
          */
@@ -489,7 +457,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets the specified task class name
-         * 
+         *
          * @param className The task class name to set
          * @return <code>this</code> instance for chained calls
          */
@@ -500,7 +468,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets the specified schema name
-         * 
+         *
          * @param schema The schema name to set
          * @return <code>this</code> instance for chained calls
          */
@@ -511,7 +479,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets whether the task was executed successfully
-         * 
+         *
          * @param successful whether the task was executed successfully
          * @return <code>this</code> instance for chained calls
          */
@@ -522,7 +490,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets whether the last modified date of the task
-         * 
+         *
          * @param lastModified the last modified date of the task
          * @return <code>this</code> instance for chained calls
          */
@@ -533,7 +501,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Sets the specified task UUID
-         * 
+         *
          * @param uuid The task uuid to set
          * @return <code>this</code> instance for chained calls
          */
@@ -544,7 +512,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         /**
          * Builds an unmodifiable {@link Map} with the {@link TaskMetadata}
-         * 
+         *
          * @return an unmodifiable {@link Map} with the {@link TaskMetadata}
          */
         Map<String, Object> build() {

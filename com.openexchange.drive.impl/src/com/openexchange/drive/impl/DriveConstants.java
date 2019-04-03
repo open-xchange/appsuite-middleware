@@ -126,11 +126,6 @@ public class DriveConstants {
     public static final int MAX_PATH_SEGMENT_LENGTH = 255;
 
     /**
-     * The minimum expected API version the client has to support that is used if no other one is specified via configuration.
-     */
-    public static final int DEFAULT_MIN_API_VERSION = 1;
-
-    /**
      * The API version the backend supports currently.
      * 1: initial api version
      * 2: client defined exclusion filters

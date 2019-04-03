@@ -812,7 +812,7 @@ public class RdbUserStorage extends UserStorage {
         }
 
         // Proceed iterating users
-        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
         int[] userIds = users.keys();
         List<Set<String>> aliasList = userAlias.getAliases(contextId, userIds);
         int i = 0;

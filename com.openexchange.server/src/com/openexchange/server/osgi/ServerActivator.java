@@ -145,8 +145,7 @@ import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
-import com.openexchange.group.internal.FilteringGroupService;
-import com.openexchange.group.internal.GroupServiceImpl;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
@@ -161,6 +160,7 @@ import com.openexchange.groupware.infostore.autodelete.InfostoreAutodeleteFileVe
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.FilteringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.reminder.ReminderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -171,7 +171,9 @@ import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationL
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.imagetransformation.ImageMetadataService;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.json.FileBackedJSONStringProviderImpl;
@@ -184,6 +186,8 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
 import com.openexchange.login.listener.AutoLoginAwareLoginListener;
 import com.openexchange.login.listener.LoginListener;
+import com.openexchange.login.multifactor.MultifactorAutoLoginAwareListener;
+import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
@@ -224,6 +228,7 @@ import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.metadata.MetadataService;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
@@ -239,8 +244,10 @@ import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.search.SearchService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
@@ -255,6 +262,7 @@ import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
+import com.openexchange.startup.ThreadControlService;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -272,6 +280,7 @@ import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
+import com.openexchange.version.VersionService;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
 import net.htmlparser.jericho.Config;
@@ -327,7 +336,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, SegmentedUpdateService.class };
+        UserAgentParser.class, PasswordMechRegistry.class, LeanConfigurationService.class, VersionService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -412,17 +421,17 @@ public final class ServerActivator extends HousekeepingActivator {
         Config.LoggerProvider = LoggerProvider.DISABLED;
         // (Re-)Initialize server service registry with available services
         {
-            final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
             registry.clearRegistry();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
+            for (Class<?> clazz : getNeededServices()) {
+                Object service = getService(clazz);
                 if (null != service) {
-                    registry.addService(classes[i], service);
+                    registry.addService(clazz, service);
+                    if (DatabaseService.class == clazz) {
+                        Database.setDatabaseService((DatabaseService) service);
+                    }
                 }
             }
-
-            Database.setDatabaseService(getService(DatabaseService.class));
         }
         LOG.info("starting bundle: com.openexchange.server");
         /*
@@ -442,6 +451,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // Full-name builder
         track(ServerConfigService.class, new RegistryCustomizer<ServerConfigService>(context, ServerConfigService.class));
         track(FullNameBuilderService.class, new RegistryCustomizer<FullNameBuilderService>(context, FullNameBuilderService.class));
+        track(TranslatorFactory.class, new RegistryCustomizer<TranslatorFactory>(context, TranslatorFactory.class));
 
         // Mail account delete listener
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
@@ -466,6 +476,15 @@ public final class ServerActivator extends HousekeepingActivator {
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
         track(MailAuthenticityHandlerRegistry.class, new RegistryCustomizer<MailAuthenticityHandlerRegistry>(context, MailAuthenticityHandlerRegistry.class));
 
+        // Segmented updates
+        track(SegmentedUpdateService.class, new RegistryCustomizer<SegmentedUpdateService>(context, SegmentedUpdateService.class));
+
+        // Principal use count stuff
+        track(ResourceService.class, new RegistryCustomizer<ResourceService>(context, ResourceService.class));
+        track(ResourceStorage.class, new RegistryCustomizer<ResourceStorage>(context, ResourceStorage.class));
+        track(GroupStorage.class, new RegistryCustomizer<GroupStorage>(context, GroupStorage.class));
+        track(PrincipalUseCountService.class, new RegistryCustomizer<PrincipalUseCountService>(context, PrincipalUseCountService.class));
+
         // IP checker
         track(IPCheckService.class, new RegistryCustomizer<IPCheckService>(context, IPCheckService.class));
 
@@ -478,6 +497,8 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
+        track(ImageMetadataService.class, new RegistryCustomizer<ImageMetadataService>(context, ImageMetadataService.class));
+        track(MediaMetadataExtractorService.class, new RegistryCustomizer<MediaMetadataExtractorService>(context, MediaMetadataExtractorService.class));
 
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));
@@ -487,6 +508,12 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // CacheEventService
         track(CacheEventService.class, new RegistryCustomizer<CacheEventService>(context, CacheEventService.class));
+
+        // MetadataService
+        track(MetadataService.class, new RegistryCustomizer<MetadataService>(context, MetadataService.class));
+
+        // ThreadControlService
+        track(ThreadControlService.class, new RegistryCustomizer<ThreadControlService>(context, ThreadControlService.class));
 
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
@@ -605,6 +632,10 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track QuotaAwareSnippetService
          */
         track(QuotaAwareSnippetService.class, new RankingAwareRegistryCustomizer<QuotaAwareSnippetService>(context, QuotaAwareSnippetService.class));
+        /*
+         * Track GroupService
+         */
+        track(GroupService.class, new RegistryCustomizer<>(context, GroupService.class));
 
         /*
          * User Alias Service
@@ -632,6 +663,7 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
+        registerService(UserServiceInterceptor.class, new com.openexchange.tools.oxfolder.userinterceptor.UserFolderNameInterceptor(this));
 
         UserService userService = new FilteringUserService(new UserServiceImpl(interceptorRegistry, getService(PasswordMechRegistry.class)), this);
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
@@ -659,10 +691,6 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(Reloadable.class, ResponseWriter.getReloadable());
         registerService(CharsetProvider.class, new CustomCharsetProvider());
         registerService(FileBackedJSONStringProvider.class, new FileBackedJSONStringProviderImpl());
-        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(), this);
-        registerService(GroupService.class, groupService);
-        ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
-        registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
@@ -710,6 +738,9 @@ public final class ServerActivator extends HousekeepingActivator {
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new LoginNameRecorder(userService));
+        // Multifactor Services
+        registerService(AutoLoginAwareLoginListener.class, new MultifactorAutoLoginAwareListener());
+        ServerServiceRegistry.getInstance().addService(MultifactorChecker.class, new MultifactorChecker(this));
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());

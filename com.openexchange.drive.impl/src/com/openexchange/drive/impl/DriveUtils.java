@@ -87,6 +87,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DriveUtils}
@@ -154,7 +155,8 @@ public class DriveUtils {
                 return true; // no temp path
             }
         }
-        if (DriveConfig.getInstance().getExcludedDirectoriesPattern().matcher(path).matches()) {
+        ServerSession serverSession = session.getServerSession();
+        if (DriveConfig.getInstance().getExcludedDirectoriesPattern(serverSession.getContextId(), serverSession.getUserId()).matcher(path).matches()) {
             return true; // no (server-side) excluded paths
         }
         List<DirectoryPattern> directoryExclusions = session.getDriveSession().getDirectoryExclusions();
@@ -176,17 +178,17 @@ public class DriveUtils {
     }
 
     /**
-     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition. Only
-     * static / global exclusions are considered in this check.
+     * Gets a value indicating whether the supplied filename is ignored, i.e. it is excluded from synchronization by definition.
      *
      * @param fileName The filename to check
+     * @param session The session
      * @return <code>true</code> if the filename is considered to be ignored, <code>false</code>, otherwise
      */
-    public static boolean isIgnoredFileName(String fileName) {
+    public static boolean isIgnoredFileName(String fileName, Session session) {
         if (fileName.endsWith(DriveConstants.FILEPART_EXTENSION)) {
             return true; // no temporary upload files
         }
-        if (DriveConfig.getInstance().getExcludedFilenamesPattern().matcher(fileName).matches()) {
+        if (DriveConfig.getInstance().getExcludedFilenamesPattern(session.getContextId(), session.getUserId()).matcher(fileName).matches()) {
             return true; // no (server-side) excluded files
         }
         return false;
@@ -203,7 +205,7 @@ public class DriveUtils {
      * @throws OXException
      */
     public static boolean isIgnoredFileName(DriveSession session, String path, String fileName) throws OXException {
-        if (isIgnoredFileName(fileName)) {
+        if (isIgnoredFileName(fileName, session.getServerSession())) {
             return true;
         }
         List<FilePattern> fileExclusions = session.getFileExclusions();
@@ -514,9 +516,10 @@ public class DriveUtils {
      * Gets a value indicating whether a specific folder is synchronizable or not.
      *
      * @param folderID The folder identifier to check
+     * @param session The Drive session
      * @return <code>true</code> if the folder is synchronizable, <code>false</code>, otherwise
      */
-    public static boolean isSynchronizable(String folderID) {
+    public static boolean isSynchronizable(String folderID, DriveSession session) {
         if (null != folderID) {
             /*
              * check for numerical folder identifier, only allowing specific system folders if smaller than 20
@@ -537,10 +540,11 @@ public class DriveUtils {
             /*
              * check for blacklisted folders / disabled services
              */
-            if (DriveConfig.getInstance().isExcludedFolder(folderID)) {
+            ServerSession serverSession = session.getServerSession();
+            if (DriveConfig.getInstance().isExcludedFolder(folderID, serverSession.getContextId(), serverSession.getUserId())) {
                 return false;
             }
-            if (false == DriveConfig.getInstance().isEnabledService(new FolderID(folderID).getService())) {
+            if (false == DriveConfig.getInstance().isEnabledService(new FolderID(folderID).getService(), serverSession.getContextId(), serverSession.getUserId())) {
                 return false;
             }
             /*

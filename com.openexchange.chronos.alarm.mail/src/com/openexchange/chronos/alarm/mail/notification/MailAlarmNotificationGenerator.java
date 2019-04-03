@@ -240,7 +240,7 @@ public class MailAlarmNotificationGenerator {
         return new DateHelper(event, participant.getLocale(), participant.getTimeZone());
     }
 
-    private class PassthroughWrapper implements TypeWrapper {
+    private static class PassthroughWrapper implements TypeWrapper {
 
         /**
          * Initializes a new {@link PassthroughWrapper}.

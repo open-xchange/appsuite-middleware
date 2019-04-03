@@ -49,6 +49,7 @@
 
 package com.openexchange.find.facet;
 
+import java.io.Serializable;
 
 /**
  * Interface for several kinds objects that can be displayed by a client. Inheritors must implement hashCode() and equals().
@@ -56,7 +57,7 @@ package com.openexchange.find.facet;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public interface DisplayItem {
+public interface DisplayItem extends Serializable{
 
     /**
      * A display item must contain a default display name.

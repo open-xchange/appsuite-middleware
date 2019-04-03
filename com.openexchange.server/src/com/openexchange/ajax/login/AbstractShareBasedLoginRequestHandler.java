@@ -248,7 +248,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                                 }
                             }
                         };
-                        sessionToAdd.setEnhancement(effectiveEnhancement);
+                        sessionToAdd.addEnhancement(effectiveEnhancement);
                     }
                     session = sessiondService.addSession(sessionToAdd);
                     if (null == session) {

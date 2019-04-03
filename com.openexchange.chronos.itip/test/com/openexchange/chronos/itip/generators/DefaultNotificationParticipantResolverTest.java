@@ -69,7 +69,9 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -129,7 +131,7 @@ public class DefaultNotificationParticipantResolverTest {
     private final Context context = new ContextImpl(CONTEXT_ID);
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         // Init
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
@@ -149,7 +151,7 @@ public class DefaultNotificationParticipantResolverTest {
         resolver = new ITipNotificationParticipantResolver(util);
     }
 
-    private void prepareServices(Event updated, User onBehalfOf) throws OXException {
+    private void prepareServices(Event updated) throws OXException {
         List<MockUser> attendeesAsUser = ChronosTestTools.convertToUser(updated.getAttendees());
         PowerMockito.when(userService.getUser(ArgumentMatchers.any(Context.class), (int[]) ArgumentMatchers.any())).thenReturn(attendeesAsUser.toArray(new MockUser[] {}));
     }
@@ -158,11 +160,11 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_OnlyInternalAttendees_AllGood() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -178,11 +180,11 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_OnlyInternalAttendees_AliasAsParticipantMail() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        Attendee aliasAttendee = ChronosTestTools.createAttendee(CONTEXT_ID, null);
+        Attendee aliasAttendee = ChronosTestTools.createAttendee(CONTEXT_ID, (AttendeeField[]) null);
         String aliasMail = "alias@example.org";
         aliasAttendee.setUri(CalendarUtils.getURI("mailto:" + aliasMail));
         aliasAttendee.setCn("AliasName, forUser");
@@ -190,7 +192,7 @@ public class DefaultNotificationParticipantResolverTest {
         extenedAttendees.add(aliasAttendee);
         updated.setAttendees(extenedAttendees);
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -203,16 +205,16 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_WithExternalAttendees_AliasAsParticipantMail() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        Attendee external = ChronosTestTools.createExternalAttendee(CONTEXT_ID, null);
+        Attendee external = ChronosTestTools.createExternalAttendee(CONTEXT_ID, (AttendeeField[]) null);
         List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
         extenedAttendees.add(external);
         updated.setAttendees(extenedAttendees);
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -229,16 +231,16 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_WithGroupAttendees_GroupIsRemoved() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        Attendee group = ChronosTestTools.createGroup(CONTEXT_ID, null);
+        Attendee group = ChronosTestTools.createGroup(CONTEXT_ID, (AttendeeField[]) null);
         List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
         extenedAttendees.add(group);
         updated.setAttendees(extenedAttendees);
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -251,16 +253,16 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_WithResourceAttendees_ResourceIsResolved() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        Attendee resource = ChronosTestTools.createResource(CONTEXT_ID, null);
+        Attendee resource = ChronosTestTools.createResource(CONTEXT_ID, (AttendeeField[]) null);
         List<Attendee> extendedAttendees = new LinkedList<>(updated.getAttendees());
         extendedAttendees.add(resource);
         updated.setAttendees(extendedAttendees);
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
         PowerMockito.when(resources.getResource(ArgumentMatchers.anyInt(), ArgumentMatchers.any(Context.class))).thenReturn(ChronosTestTools.convertToResource(resource));
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
@@ -280,7 +282,7 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_OrganizerNotAttendee_OrganizerIsAdded() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
@@ -293,7 +295,7 @@ public class DefaultNotificationParticipantResolverTest {
             }
         }
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -306,7 +308,7 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_OrganizerNotSet_OrganizerIsFoundInAttendeeList() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
@@ -323,7 +325,7 @@ public class DefaultNotificationParticipantResolverTest {
             }
         }
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
         PowerMockito.when(userService.getUser(ArgumentMatchers.eq(session.getUserId()), ArgumentMatchers.any(Context.class))).thenReturn(user);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
@@ -337,7 +339,7 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_OrganizerNotSetAndUserNotAttendee_OrganizerIsFoundInAttendeeList() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
@@ -353,7 +355,7 @@ public class DefaultNotificationParticipantResolverTest {
             }
         }
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
         PowerMockito.when(userService.getUser(ArgumentMatchers.eq(session.getUserId()), ArgumentMatchers.any(Context.class))).thenReturn(user);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
@@ -367,11 +369,11 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_ExternalOrganizer_OrganizerIsFound() throws OXException {
 
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID, null);
+        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID, (AttendeeField[]) null);
 
         Organizer o = new Organizer();
         o.setEntity(externalAttendee.getEntity());
@@ -381,7 +383,7 @@ public class DefaultNotificationParticipantResolverTest {
         updated.setOrganizer(o);
         updated.getAttendees().add(externalAttendee);
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
@@ -394,11 +396,11 @@ public class DefaultNotificationParticipantResolverTest {
     public void testResolveAllRecipients_ExternalOrganizerNotAttendee_OrganizerIsAdded() throws OXException {
         // See bug 58461
         // Setup test data
-        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        Event updated = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         User user;
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
-        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID, null);
+        Attendee externalAttendee = ChronosTestTools.createExternalAttendee(CONTEXT_ID, (AttendeeField[]) null);
 
         Organizer o = new Organizer();
         o.setEntity(externalAttendee.getEntity());
@@ -406,9 +408,9 @@ public class DefaultNotificationParticipantResolverTest {
         o.setCn(externalAttendee.getCn());
         o.setUri(externalAttendee.getUri());
         updated.setOrganizer(o);
-        updated.getAttendees().add(ChronosTestTools.createExternalAttendee(CONTEXT_ID, null));
+        updated.getAttendees().add(ChronosTestTools.createExternalAttendee(CONTEXT_ID, (AttendeeField[]) null));
 
-        prepareServices(updated, onBehalfOf);
+        prepareServices(updated);
 
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());

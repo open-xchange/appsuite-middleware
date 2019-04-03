@@ -79,6 +79,7 @@ import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.contact.ContactService;
@@ -361,7 +362,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     }
 
     @Override
-    public void touchEvent(Context context, CalendarAccount account, String eventId) throws OXException {
+    public void touchEvent(Context context, CalendarAccount account, String eventId) {
         // nothing to do
     }
 

@@ -119,10 +119,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             dataProperties.put("PreviewLanguage", previewLanguage);
 
             // Generate preview
-            PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
-            LOG.debug("Obtained preview for file {} with MIME type {} from {} for user {} in context {}", fileHolder.getName(), mimeType, previewService.getClass().getSimpleName(), session.getUserId(), session.getContextId());
-
-            return previewDocument;
+            return previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
         } catch (RuntimeException rte) {
             throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
         }
@@ -274,14 +271,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                             mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
                             stream = fileHolder.getStream();
                             error = false;
-                            LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
                         } finally {
                             if (error) {
                                 Streams.close(tfh);
                             }
                         }
-                    } else {
-                        LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                     }
                     ModifyableFileHolder mfh = new ModifyableFileHolder(fileHolder);
                     mfh.setContentType(mimeType);

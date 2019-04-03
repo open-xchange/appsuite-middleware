@@ -351,7 +351,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
-        args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
+        args = 1 == messageCount ? ARGS_FIRST : ARGS_ALL;
         uid = false;
         length = fetchLen;
         command = getFetchCommand(isRev1, fp, loadBody, serverInfo);

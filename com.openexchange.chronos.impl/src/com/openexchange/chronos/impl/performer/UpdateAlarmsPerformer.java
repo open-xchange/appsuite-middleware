@@ -52,10 +52,16 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
@@ -106,6 +112,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
          * load original event data & alarms
          */
         Event originalEvent = loadEventData(objectId);
+        List<Event> exceptions = null;
         if (null != recurrenceId) {
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
@@ -113,6 +120,14 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
                 originalEvent = originalExceptionEvent;
             } else if (false == isSeriesException(originalEvent)) {
                 throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(objectId, recurrenceId);
+            }
+        } else {
+            if (isSeriesMaster(originalEvent)) {
+                List<Event> exceptionData = loadExceptionData(originalEvent);
+                exceptions = new ArrayList<>(exceptionData.size());
+                for(Event eve: exceptionData) {
+                    exceptions.add(storage.getUtilities().loadAdditionalEventData(calendarUserId, EventMapper.getInstance().copy(eve, null, (EventField[]) null), null));
+                }
             }
         }
         if (null != clientTimestamp) {
@@ -124,6 +139,14 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
          * perform alarm update & track results
          */
         if (updateAlarms(originalEvent, calendarUserId, originalAlarms, alarms)) {
+            if(exceptions != null) {
+                // Propagate alarm changes to exceptions
+                Map<Event, List<Alarm>> alarmToUpdate = AlarmUpdateProcessor.getUpdatedExceptions(originalAlarms, alarms == null ? Collections.emptyList() : alarms, exceptions);
+                for(Entry<Event, List<Alarm>> entry: alarmToUpdate.entrySet()) {
+                    updateAlarms(entry.getKey(), calendarUserId, entry.getKey().getAlarms(), entry.getValue());
+                }
+            }
+            
             touch(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
         }

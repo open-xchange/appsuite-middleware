@@ -71,6 +71,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -124,6 +125,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.ldap.SimUser;
@@ -154,7 +156,7 @@ import com.openexchange.user.UserService;
  * @since v7.8.4
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(OAuthAccessTokenService.class)
+@PrepareForTest({ OAuthAccessTokenService.class, SessionUtility.class })
 @PowerMockIgnore({ "javax.net.*", "javax.security.*", "javax.crypto.*" })
 public class SAMLWebSSOProviderOAuthTest {
 
@@ -207,6 +209,12 @@ public class SAMLWebSSOProviderOAuthTest {
         services.add(OAuthAccessTokenService.class, mock);
 
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        PowerMockito.mockStatic(SessionUtility.class);
+        PowerMockito.when(SessionUtility.getShardCookieValue()).thenReturn("default");
     }
 
     @Test

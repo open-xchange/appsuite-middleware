@@ -61,7 +61,7 @@ import com.openexchange.uadetector.internal.CachingUserAgentParser;
  */
 public class UADetectorActivator extends HousekeepingActivator {
 
-    private volatile CachingUserAgentParser parser;
+    private CachingUserAgentParser parser;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -76,7 +76,7 @@ public class UADetectorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         LoggerFactory.getLogger(UADetectorActivator.class).info("starting bundle: \"com.openexchange.uadetector\"");
         CachingUserAgentParser parser = new CachingUserAgentParser(false);
         this.parser = parser;
@@ -84,12 +84,12 @@ public class UADetectorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         LoggerFactory.getLogger(UADetectorActivator.class).info("stopping bundle: \"com.openexchange.uadetector\"");
         CachingUserAgentParser parser = this.parser;
         if (null != parser) {
-            parser.shutdown();
             this.parser = null;
+            parser.shutdown();
         }
         super.stopBundle();
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import java.nio.charset.StandardCharsets;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -662,7 +663,7 @@ public class ContactWriter extends CommonWriter {
                 if (imageData == null) {
                     writeValueNull(jsonArray);
                 } else {
-                    writeValue(new String(imageData), jsonArray);
+                    writeValue(new String(imageData, StandardCharsets.ISO_8859_1), jsonArray);
                 }
             }
         });

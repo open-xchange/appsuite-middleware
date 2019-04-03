@@ -49,11 +49,11 @@
 
 package com.openexchange.tools.mail.spam;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
 /**
@@ -96,7 +96,7 @@ public final class CommandExecutor {
      * @throws IOException
      */
     public void send(final String in) throws IOException {
-        inputStream.write(in.getBytes());
+        inputStream.write(in.getBytes(StandardCharsets.ISO_8859_1));
         inputStream.flush();
         inputStream.close();
     }
@@ -168,20 +168,10 @@ public final class CommandExecutor {
 
         @Override
         public void run() {
-            InputStreamReader isr = null;
-            BufferedReader br = null;
             try {
-                isr = new InputStreamReader(is);
-                br = new BufferedReader(isr);
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    buf.append(line).append('\n');
-                }
+                buf.append(Streams.stream2string(is, Charsets.UTF_8_NAME));
             } catch (final IOException ioe) {
                 LOG.error("", ioe);
-            } finally {
-                Streams.close(br);
-                Streams.close(isr);
             }
         }
 

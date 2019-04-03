@@ -67,9 +67,9 @@ import com.openexchange.filestore.impl.DbFileStorage2EntitiesResolver;
  */
 public class DefaultFileStorageActivator implements BundleActivator {
 
-    private volatile ServiceRegistration<FileStorageService> reg;
-    private volatile ServiceRegistration<FileStorage2EntitiesResolver> reg2;
-    private volatile ServiceTracker<FileStorageProvider, FileStorageProvider> tracker;
+    private ServiceRegistration<FileStorageService> fileStorageServiceRegistration;
+    private ServiceRegistration<FileStorage2EntitiesResolver> fileStorage2EntitiesResolverRegistration;
+    private ServiceTracker<FileStorageProvider, FileStorageProvider> fileStorageProviderTracker;
 
     /**
      * Initializes a new {@link DefaultFileStorageActivator}.
@@ -79,35 +79,35 @@ public class DefaultFileStorageActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         CompositeFileStorageService service = new CompositeFileStorageService(context);
 
         ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = new ServiceTracker<>(context, FileStorageProvider.class, service);
-        this.tracker = tracker;
+        this.fileStorageProviderTracker = tracker;
         tracker.open();
 
-        reg = context.registerService(FileStorageService.class, service, null);
-        reg2 = context.registerService(FileStorage2EntitiesResolver.class, new DbFileStorage2EntitiesResolver(), null);
+        fileStorageServiceRegistration = context.registerService(FileStorageService.class, service, null);
+        fileStorage2EntitiesResolverRegistration = context.registerService(FileStorage2EntitiesResolver.class, new DbFileStorage2EntitiesResolver(), null);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
-        ServiceRegistration<FileStorageService> reg = this.reg;
+    public synchronized void stop(BundleContext context) throws Exception {
+        ServiceRegistration<FileStorageService> reg = this.fileStorageServiceRegistration;
         if (null != reg) {
             reg.unregister();
-            this.reg = null;
+            this.fileStorageServiceRegistration = null;
         }
 
-        ServiceRegistration<FileStorage2EntitiesResolver> reg2 = this.reg2;
+        ServiceRegistration<FileStorage2EntitiesResolver> reg2 = this.fileStorage2EntitiesResolverRegistration;
         if (null != reg2) {
             reg2.unregister();
-            this.reg2 = null;
+            this.fileStorage2EntitiesResolverRegistration = null;
         }
 
-        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = this.tracker;
+        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = this.fileStorageProviderTracker;
         if (null != tracker) {
             tracker.close();
-            this.tracker = null;
+            this.fileStorageProviderTracker = null;
         }
     }
 

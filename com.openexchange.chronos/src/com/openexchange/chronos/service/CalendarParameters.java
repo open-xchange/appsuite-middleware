@@ -300,10 +300,24 @@ public interface CalendarParameters {
     static final String PARAMETER_COMMENT = "comment";
 
     /**
+     * {@link java.sql.Connection}
+     * <p/>
+     * The (dynamic) parameter name where the underlying database connection is held during transactions, or when slipstreaming a
+     * surrounding connection to the storage. Empty by default.
+     * 
+     * @return The parameter name where the underlying database connection is held during transactions
+     */
+    static String PARAMETER_CONNECTION() {
+        return new StringBuilder(java.sql.Connection.class.getName()).append('@').append(Thread.currentThread().getId()).toString();
+    }
+
+    /**
      * Sets a parameter.
+     * <p/>
+     * A value of <code>null</code> removes the parameter.
      *
      * @param parameter The parameter name to set
-     * @param value The value to set
+     * @param value The value to set, or <code>null</code> to remove the parameter
      * @return A self reference
      */
     <T> CalendarParameters set(String parameter, T value);

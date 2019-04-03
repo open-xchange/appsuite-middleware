@@ -64,6 +64,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DropboxActivator} - Activator for Dropbox bundle.
@@ -81,7 +82,9 @@ public final class DropboxActivator extends AbstractCloudStorageActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, SSLConfigurationService.class, ConfigViewFactory.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, 
+                                TimerService.class, OAuthService.class, OAuthAccessRegistryService.class, SSLConfigurationService.class, ConfigViewFactory.class,
+                                VersionService.class };
     }
 
     @Override

@@ -51,7 +51,6 @@ package com.openexchange.pluginsloaded.mbean.impl;
 
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
-import com.openexchange.exception.OXException;
 import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
@@ -78,14 +77,7 @@ public class PluginsLoadedMBeanImpl extends AnnotatedStandardMBean implements Pl
 
     @Override
     public boolean allPluginsLoaded() throws MBeanException {        
-        try {
-            return pluginsLoadedService.allPluginsloaded();
-        } catch (OXException e) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PluginsLoadedMBeanImpl.class);
-            logger.error("", e);
-            String message = e.getMessage();
-            throw new MBeanException(new Exception(message), message);
-        }
+        return pluginsLoadedService.allPluginsloaded();
     }
 
 }

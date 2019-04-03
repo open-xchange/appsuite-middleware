@@ -184,7 +184,7 @@ import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -1221,7 +1221,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static final String SUFFIX = "@" + Version.NAME;
+    private static final String SUFFIX = "@" + VersionService.NAME;
 
     private Part examinePart(final Part part, final String contentId) throws OXException {
         try {
@@ -4269,7 +4269,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
                 } catch (OXException ex) {
                     if (MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.equals(ex) || MimeMailExceptionCode.QUOTA_EXCEEDED.equals(ex)) {
-                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create();
+                        throw MailExceptionCode.UNABLE_TO_SAVE_DRAFT_QUOTA.create(ex);
                     }
                     throw ex;
 

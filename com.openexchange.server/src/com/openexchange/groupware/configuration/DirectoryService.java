@@ -54,8 +54,9 @@ package com.openexchange.groupware.configuration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
@@ -352,7 +353,7 @@ public final class DirectoryService {
     * @throws IOException if an error occurs while reading the file.
     */
     private static String[] loadLdapConf(final File ldapConfFile) throws IOException {
-        final BufferedReader br = new BufferedReader(new FileReader(ldapConfFile));
+        final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(ldapConfFile), StandardCharsets.ISO_8859_1));
         final String[] retval;
         try {
             String line = null;

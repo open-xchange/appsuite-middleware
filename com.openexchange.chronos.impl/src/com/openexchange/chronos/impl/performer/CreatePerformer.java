@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getResolvableEntities;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -122,10 +123,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             /*
              * group-scheduled event, assign & check organizer, sequence number and dynamic parent-folder identifier (for non-public folders)
              */
-            newEvent.setOrganizer(prepareOrganizer(session, folder, event.getOrganizer()));
+            newEvent.setOrganizer(prepareOrganizer(session, folder, event.getOrganizer(), getResolvableEntities(session, folder, event)));
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
             Check.internalOrganizerIsAttendee(newEvent);
+            newEvent.setAttendeePrivileges(event.containsAttendeePrivileges() ? 
+                Check.attendeePrivilegesAreValid(event.getAttendeePrivileges(), folder, newEvent.getOrganizer()) : null);
         }
         /*
          * check for conflicts & quota restrictions
@@ -178,7 +181,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());
         } else {
-            event.setUid(Check.uidIsUnique(session, storage, eventData));
+            event.setUid(Check.uidIsUnique(session, storage, eventData, calendarUserId));
         }
         /*
          * creation/modification/calendaruser metadata

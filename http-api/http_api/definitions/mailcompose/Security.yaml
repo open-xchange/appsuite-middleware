@@ -1,0 +1,20 @@
+type: object
+title: Security
+description: The security settings
+properties:
+  encrypt:
+    type: boolean
+  pgpInline:
+    type: boolean
+  sign:
+    type: boolean
+  language:
+    type: string
+  message:
+    type: string
+  pin: 
+    type: string
+  msgRef:
+    type: string
+  authentication:
+    type: string

@@ -60,7 +60,7 @@
       - in: query
         name: transformationNeeded
         type: boolean
-        description: Indicate if the image needs to be transformed. 
+        description: Indicate if the image needs to be transformed.
         required: false
       - in: query
         name: cropWidth
@@ -106,7 +106,7 @@
           - containforcedimension
           - cover
           - coverandcrop
-        required: false   
+        required: false
     responses:
       200:
         description: The picture with proper ETag and caching headers set.

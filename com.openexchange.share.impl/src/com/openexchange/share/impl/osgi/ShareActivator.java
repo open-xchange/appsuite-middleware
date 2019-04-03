@@ -142,10 +142,10 @@ public class ShareActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
-            private volatile ServiceRegistration<ShareService> shareRegistration;
+            private ServiceRegistration<ShareService> shareRegistration;
 
             @Override
-            public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
+            public synchronized CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
                 String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
 
@@ -161,7 +161,7 @@ public class ShareActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
+            public synchronized void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
                 ServiceRegistration<ShareService> shareRegistration = this.shareRegistration;
                 if (null != shareRegistration) {
                     this.shareRegistration = null;

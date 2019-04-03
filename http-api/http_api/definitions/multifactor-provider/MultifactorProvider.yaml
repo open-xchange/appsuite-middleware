@@ -1,0 +1,14 @@
+type: object
+properties:
+  name:
+    type: string
+    description: The name of the provider
+  backupProvider:
+    type: boolean
+    description: true, if the provider can act as "backup"-provider, false otherwise.
+  backupOnlyProvider:
+    type: boolean
+    description: true, if the provider can ONLY act as "backup"-provider, false otherwise.
+  
+
+  

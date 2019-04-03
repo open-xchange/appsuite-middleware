@@ -103,6 +103,7 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -977,8 +978,9 @@ public class DriveStorage {
     }
 
     public String getVersionComment() {
+        Session serverSession = session.getServerSession();
         String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        String product = DriveConfig.getInstance().getShortProductName();
+        String product = DriveConfig.getInstance().getShortProductName(serverSession.getContextId(), serverSession.getUserId());
         String format = StringHelper.valueOf(session.getDriveSession().getLocale()).getString(DriveStrings.VERSION_COMMENT);
         return String.format(format, product, device);
     }

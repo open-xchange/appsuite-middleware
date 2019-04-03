@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -141,15 +142,38 @@ public final class Charsets {
     }
 
     /**
+     * Gets the ASCII string from specified <code>ByteArrayInputStream</code> instance.
+     *
+     * @param is The {@link ByteArrayInputStream}
+     * @return The ASCII string
+     */
+    public static String toAsciiString(final ByteArrayInputStream is) {
+        int size = is.available();
+        if (size <= 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(size);
+        for (int i; (i = is.read()) >= 0;) {
+            sb.append((char) i);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Gets the ASCII string from specified bytes.
      *
      * @param bytes The bytes
      * @return The ASCII string
      */
     public static String toAsciiString(final byte[] bytes) {
-        final StringBuilder sb = new StringBuilder(bytes.length);
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append((char) (bytes[i] & 0x00FF));
+        int length = bytes.length;
+        if (length <= 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append((char) (bytes[i] & 0xff));
         }
         return sb.toString();
     }
@@ -171,7 +195,7 @@ public final class Charsets {
         }
         final StringBuilder sb = new StringBuilder(bytes.length);
         for (int i = 0 ; i < len ; i++) {
-            sb.append((char) (bytes[off + i] & 0x00FF));
+            sb.append((char) (bytes[off + i] & 0xff));
         }
         return sb.toString();
     }
@@ -179,7 +203,7 @@ public final class Charsets {
     /**
      * Gets specified string's ASCII bytes
      *
-     * @param str The string
+     * @param cs The string as {@link CharSequence}
      * @return The ASCII bytes
      */
     public static byte[] toAsciiBytes(final CharSequence cs) {
@@ -196,13 +220,7 @@ public final class Charsets {
         if (null == str) {
             return null;
         }
-        final int length = str.length();
-        if (0 == length) {
-            return new byte[0];
-        }
-        final byte[] ret = new byte[length];
-        str.getBytes(0, length, ret, 0);
-        return ret;
+        return str.getBytes(Charsets.US_ASCII);
     }
 
     private static final int _64K = 65536;
@@ -227,8 +245,7 @@ public final class Charsets {
                 out.write((byte) str.charAt(i++));
             }
         } else {
-            final byte[] ret = new byte[length];
-            str.getBytes(0, length, ret, 0);
+            final byte[] ret = str.getBytes(Charsets.US_ASCII);
             out.write(ret, 0, length);
         }
     }

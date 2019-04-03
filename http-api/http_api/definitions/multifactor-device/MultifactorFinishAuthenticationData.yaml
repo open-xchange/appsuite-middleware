@@ -1,0 +1,16 @@
+type: object
+description: The provider specific parameters required for authentication.
+properties:
+    secret_code:
+        type: string
+        description: (SMS, TOTP, BACKUP_STRING provider only) The secret authentication token.
+    clientData:
+        type: string
+        description: (U2F provider only) The U2F client data.
+    keyHandle:
+        type: string
+        description: (U2F provider only) The U2F key handle.
+    signatureData:
+        type: string
+        description: (U2F provider only) The signed U2F challenge.
+

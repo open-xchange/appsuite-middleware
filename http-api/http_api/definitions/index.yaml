@@ -3,11 +3,6 @@ CommonResponse:
   type: object
   properties:
     $ref: ./common/CommonResponseData.yaml
-# Anti-Virus
-AntiVirusScanResponse:
-  $ref: ./antivirus/AntiVirusScanResponse.yaml
-AntiVirusScanResultData:
-  $ref: ./antivirus/AntiVirusScanResultData.yaml
 # Module: login
 LoginResponse:
   $ref:  ./login/LoginResponse.yaml
@@ -171,6 +166,8 @@ MultipleFolderEventsResponse:
   $ref: ./chronos/MultipleFolderEventsResponse.yaml
 EventData:
   $ref: ./chronos/EventData.yaml
+ExtendedProperties:
+  $ref: ./chronos/ExtendedProperties.yaml
 MultipleEventData:
   $ref: ./chronos/MultipleEventData.yaml
 EventId:
@@ -382,8 +379,6 @@ InfoItemSharingNotificationData:
   $ref: ./infostore/InfoItemSharingNotificationData.yaml
 InfoItemsRestoreResponseData:
   $ref: ./infostore/InfoItemsRestoreResponseData.yaml
-InfoItemScanElement:
-  $ref: ./infostore/InfoItemScanElement.yaml
 InfoFolderPathData:
   $ref: ./infostore/FolderPathData.yaml
 # Module: attachments
@@ -406,6 +401,29 @@ ReminderUpdateBody:
   $ref: ./reminder/ReminderUpdateBody.yaml
 ReminderResponse:
   $ref: ./reminder/ReminderResponse.yaml
+# Module: multifactor-provider
+MultifactorProvidersResponse:
+  $ref: ./multifactor-provider/MultifactorProvidersResponse.yaml
+MultifactorProvider:
+  $ref: ./multifactor-provider/MultifactorProvider.yaml
+MultifactorDeviceResponse:
+  $ref: ./multifactor-device/MultifactorDeviceResponse.yaml
+MultifactorDevicesResponse:
+  $ref: ./multifactor-device/MultifactorDevicesResponse.yaml
+MultifactorDevice:
+  $ref: ./multifactor-device/MultifactorDevice.yaml
+MultifactorDeleteResponse:
+  $ref: ./multifactor-device/MultifactorDeleteResponse.yaml
+MultifactorStartRegistrationResponse:
+  $ref: ./multifactor-device/MultifactorStartRegistrationResponse.yaml
+MultifactorFinishRegistrationData:
+  $ref: ./multifactor-device/MultifactorFinishRegistrationData.yaml
+MultifactorFinishRegistrationResponse:
+  $ref: ./multifactor-device/MultifactorFinishRegistrationResponse.yaml
+MultifactorStartAuthenticationResponse:
+  $ref: ./multifactor-device/MultifactorStartAuthenticationResponse.yaml
+MultifactorFinishAuthenticationData:
+  $ref: ./multifactor-device/MultifactorFinishAuthenticationData.yaml
 # Module: multiple
 SingleRequest:
   $ref: ./multiple/SingleRequest.yaml
@@ -486,6 +504,15 @@ MailAccountValidationResponse:
   $ref: ./mailaccount/MailAccountValidationResponse.yaml
 MailAccountStatusResponse:
   $ref: ./mailaccount/MailAccountStatusResponse.yaml
+# Module: mailcompose
+MailComposeResponse:
+  $ref: ./mailcompose/MailComposeResponse.yaml
+MailComposeMessageModel:
+  $ref: ./mailcompose/MessageModel.yaml
+MailComposeAttachmentResponse:
+  $ref: ./mailcompose/MailComposeAttachmentResponse.yaml
+MailComposeAttachment:
+  $ref: ./mailcompose/Attachment.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml

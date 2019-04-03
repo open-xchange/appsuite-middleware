@@ -119,8 +119,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
@@ -1135,7 +1135,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             if (tool.existsDisplayName(ctx, usrdata, i(usrdata.getId()))) {
-                throw new InvalidDataException("The displayname is already used");
+                try {
+                    ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
+                    ConfigView view = configViewFactory.getView(-1, ctx.getId().intValue());
+                    if (null == view || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+                        // Do enforce unique display names
+                        throw new InvalidDataException("The displayname is already used");
+                    }
+                } catch (OXException e) {
+                    LOGGER.debug("Unable to get \"com.openexchange.user.enforceUniqueDisplayName\". Fallback to enforce display name uniqueness.", e);
+                    throw new InvalidDataException("The displayname is already used");
+                }
             }
             final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
 

@@ -161,7 +161,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
                 iterator = timedResult.results();
                 while (iterator.hasNext()) {
                     AttachmentMetadata metadata = iterator.next();
-                    if (null != attachmentIDs) {
+                    if (metadata != null) {
                         attachmentIDs.add(I(metadata.getId()));
                     }
                 }

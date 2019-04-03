@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.icap.ICAPClient;
 import com.openexchange.icap.ICAPMethod;
@@ -128,15 +129,15 @@ public class TestClient {
         sendFile(prepareData(9000));
     }
 
-    private static void send512WithPreview() throws OXException, IOException {
+    private static void send512WithPreview() throws OXException, IOException, ExecutionException {
         sendFileWithPreview(prepareData(512));
     }
 
-    private static void send1100WithPreview() throws OXException, IOException {
+    private static void send1100WithPreview() throws OXException, IOException, ExecutionException {
         sendFileWithPreview(prepareData(1100));
     }
 
-    private static void send9000WithPreview() throws OXException, IOException {
+    private static void send9000WithPreview() throws OXException, IOException, ExecutionException {
         sendFileWithPreview(prepareData(9000));
     }
 
@@ -160,7 +161,7 @@ public class TestClient {
         sendFile(prepareForDelivery(data.getBytes()), data.getBytes(), -1);
     }
 
-    private static void sendFileWithPreview(String data) throws OXException, IOException {
+    private static void sendFileWithPreview(String data) throws OXException, IOException, ExecutionException {
         ICAPOptions options = client.getOptions(server, port, service);
         sendFile(prepareForDelivery(data.getBytes()), data.getBytes(), options.getPreviewSize());
     }

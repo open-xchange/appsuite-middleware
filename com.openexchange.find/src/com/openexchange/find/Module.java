@@ -81,7 +81,15 @@ public enum Module {
     /**
      * Drive module.
      */
-    DRIVE("drive"), ;
+    DRIVE("drive"),
+    /**
+     * Resource module.
+     */
+    RESOURCE("resource"),
+    /**
+     * Group module
+     */
+    GROUPS("groups");
 
     private static final Map<String, Module> modulesByName = new HashMap<String, Module>();
     static {

@@ -59,6 +59,7 @@ import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -117,8 +118,8 @@ public class ExpandPropertyReport extends PROPFINDAction {
                     List<Element> propertiesToExpand = requestedProperty.getChildren("property", Protocol.DAV_NS);
                     if (0 < propertiesToExpand.size()) {
                         Element expandedElement = new Element(marshalledProperty.getName(), marshalledProperty.getNamespace());
-                        for (Element hrefElement : marshalledProperty.getChildren("href", Protocol.DAV_NS)) {
-                            WebdavResource expandedResource = request.getFactory().resolveResource(hrefElement.getValue());
+                        for (WebdavPath path : getHrefPaths(request, marshalledProperty)) {
+                            WebdavResource expandedResource = request.getFactory().resolveResource(path);
                             List<Element> expandedProperties = requestedProperty.getChildren("property", Protocol.DAV_NS);
                             Element expandedProperty = expandProperty(request, expandedProperties, expandedResource);
                             expandedElement.addContent(expandedProperty);

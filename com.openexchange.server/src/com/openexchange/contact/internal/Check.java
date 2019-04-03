@@ -53,6 +53,10 @@ import static com.openexchange.contact.internal.Tools.parse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.internal.mapping.ContactMapper;
 import com.openexchange.contact.storage.ContactStorage;
@@ -71,7 +75,9 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link Check} - Static utility functions for the contact service.
@@ -80,7 +86,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  */
 public final class Check {
 
-	public static void argNotNull(final Object object, final String argumentName) {
+    public static void argNotNull(final Object object, final String argumentName) {
 		if (null == object) {
 			throw new IllegalArgumentException("the passed argument '" + argumentName + "' may not be null");
 		}
@@ -108,17 +114,19 @@ public final class Check {
 		}
 	}
 
-	public static void canWriteOwn(final EffectivePermission permission, final Session session) throws OXException {
-		if (false == permission.canWriteOwnObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
-		}
-	}
+    public static void canWriteOwn(final EffectivePermission permission, final Session session) throws OXException {
+        if (false == permission.canWriteOwnObjects()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
+        }
+        checkForSubscription(session, String.valueOf(permission.getFuid()), session.getContextId());
+    }
 
-	public static void canWriteAll(final EffectivePermission permission, final Session session) throws OXException {
-		if (false == permission.canWriteAllObjects()) {
-			throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
-		}
-	}
+    public static void canWriteAll(final EffectivePermission permission, final Session session) throws OXException {
+        if (false == permission.canWriteAllObjects()) {
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
+        }
+        checkForSubscription(session, String.valueOf(permission.getFuid()), session.getContextId());
+    }
 
 	public static void canReadAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
 		if (false == permission.canReadAllObjects()) {
@@ -126,23 +134,26 @@ public final class Check {
 		}
 	}
 
-	public static void canCreateObjects(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
-		if (false == permission.canCreateObjects()) {
-			throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
-		}
-	}
+    public static void canCreateObjects(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
+        if (false == permission.canCreateObjects()) {
+            throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+        }
+        checkForSubscription(session, folderID, session.getContextId());
+    }
 
-	public static void canDeleteOwn(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
-		if (false == permission.canDeleteOwnObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
-		}
-	}
+    public static void canDeleteOwn(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
+        if (false == permission.canDeleteOwnObjects()) {
+            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+        }
+        checkForSubscription(session, folderID, session.getContextId());
+    }
 
-	public static void canDeleteAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
-		if (false == permission.canDeleteAllObjects()) {
-			throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
-		}
-	}
+    public static void canDeleteAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
+        if (false == permission.canDeleteAllObjects()) {
+            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+        }
+        checkForSubscription(session, folderID, session.getContextId());
+    }
 
     public static void isContactFolder(final FolderObject folder, final Session session) throws OXException {
 		if (FolderObject.CONTACT != folder.getModule()) {
@@ -174,7 +185,8 @@ public final class Check {
         }
     }
 
-	public static void validateSearch(final ContactSearchObject contactSearch) throws OXException {
+    @SuppressWarnings("deprecation")
+    public static void validateSearch(final ContactSearchObject contactSearch) throws OXException {
 		Search.checkPatternLength(contactSearch);
 		if (0 != contactSearch.getIgnoreOwn() || null != contactSearch.getAnniversaryRange() ||
 				null != contactSearch.getBirthdayRange() || null != contactSearch.getBusinessPostalCodeRange() ||
@@ -217,32 +229,7 @@ public final class Check {
 			/*
 			 * check display name
 			 */
-			if (update.containsDisplayName()) {
-				if (Tools.isEmpty(update.getDisplayName())) {
-					throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
-				}
-				if (null == original || false == update.getDisplayName().equals(original.getDisplayName())) {
-    				/*
-    				 * check if display name is already in use
-    				 */
-    		    	CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
-    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-    				    ContactField.DISPLAY_NAME, SingleOperation.EQUALS, update.getDisplayName()));
-    				searchTerm.addSearchTerm(Tools.createContactFieldTerm(
-    				    ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
-    				SearchIterator<Contact> searchIterator = null;
-    				try {
-    					searchIterator = storage.search(
-    					    session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
-    					if (searchIterator.hasNext()) {
-    						throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(session.getContextId(), update.getObjectID());
-    					}
-    				} finally {
-    				    Tools.close(searchIterator);
-    				}
-				}
-			}
+			checkDisplayNameUniqueness(storage, session, folderID, update, original);
 	        /*
 	         * check primary mail address
 	         */
@@ -255,7 +242,88 @@ public final class Check {
 		}
 	}
 
-	/**
+    /**
+     * Ensures that the display name is unique. Skip the check if configuration allows same display names.
+     * 
+     * @param storage The {@link ContactStorage} to search for the display name in
+     * @param session The current {@link Session}
+     * @param folderID The folder identifier to search contacts in
+     * @param update The updated {@link Contact}
+     * @param original The original {@link Contact}. Can be <code>null</code>
+     * @throws OXException
+     *             <li> {@link ContactExceptionCodes#DISPLAY_NAME_MANDATORY} if the new display name is empty as per {@link Strings#isEmpty(String)} </li>
+     *             <li>{@link ContactExceptionCodes#DISPLAY_NAME_IN_USE} if display names must be unique and is already in use</li>
+     *             <li> {@link com.openexchange.server.ServiceExceptionCode#SERVICE_UNAVAILABLE} if {@link ConfigViewFactory} is not available </li>
+     */
+    private static void checkDisplayNameUniqueness(ContactStorage storage, Session session, String folderID, Contact update, Contact original) throws OXException {
+        if (false == update.containsDisplayName()) {
+            return;
+        }
+        if (Tools.isEmpty(update.getDisplayName())) {
+            throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
+        }
+        
+        ConfigViewFactory configViewFactory = ContactServiceLookup.getService(ConfigViewFactory.class, true);
+        ConfigView view = configViewFactory.getView(-1, session.getContextId());
+        if (null != view && false == view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+            // Do not enforce unique display names
+            return;
+        }
+
+        if (null != original && update.getDisplayName().equals(original.getDisplayName())) {
+            // Was set before and is unchanged
+            return;
+        }
+
+        /*
+         * check if display name is already in use
+         */
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.FOLDER_ID, SingleOperation.EQUALS, folderID));
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.DISPLAY_NAME, SingleOperation.EQUALS, sanitizeDisplayName(update.getDisplayName())));
+        searchTerm.addSearchTerm(Tools.createContactFieldTerm(ContactField.OBJECT_ID, SingleOperation.NOT_EQUALS, Integer.valueOf(update.getObjectID())));
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator = storage.search(session, searchTerm, new ContactField[] { ContactField.OBJECT_ID }, new SortOptions(0, 1));
+            if (searchIterator.hasNext()) {
+                throw ContactExceptionCodes.DISPLAY_NAME_IN_USE.create(Integer.valueOf(session.getContextId()), Integer.valueOf(update.getObjectID()));
+            }
+        } finally {
+            Tools.close(searchIterator);
+        }
+    }
+
+    private static final Pattern MULTIPLE_WILDCARD_PATTERN = Pattern.compile("\\*");
+    
+    private static final Pattern SINGLE_WILDCARD_PATTERN = Pattern.compile("\\?");
+
+    /**
+     * Sanitize special characters to avoid generic searches
+     * 
+     * @param update The updated display name to search for
+     * @return A sanitized version of the display name
+     */
+    private static String sanitizeDisplayName(String displayName) {
+        // Sanitize '*'
+        Matcher matcher = MULTIPLE_WILDCARD_PATTERN.matcher(displayName);
+        StringBuffer sb = new StringBuffer(displayName.length());
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "\\\\*");
+        }
+        matcher.appendTail(sb);
+
+        // Sanitize '?'
+        matcher = SINGLE_WILDCARD_PATTERN.matcher(sb.toString());
+        sb.setLength(0);
+        while (matcher.find()) {
+            matcher.appendReplacement(sb, "\\\\?");
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
+    }
+
+    /**
 	 * Checks the supplied delta contact for possible changes to read-only fields. If read-only are about to be modified to a value
 	 * different from the currently stored value, an appropriate exception is thrown. If they're going to be set to the property's
 	 * default value, the properties are removed from the delta reference.
@@ -324,5 +392,15 @@ public final class Check {
 	private Check() {
 		// prevent instantiation
 	}
+
+    private static void checkForSubscription(Session session, String fid, int cid) throws OXException {
+        Object parameter = session.getParameter(Session.PARAM_SUBSCRIPTION_ADMIN);
+        if (parameter != null && Boolean.parseBoolean(parameter.toString())) {
+            return;
+        }
+        if (new OXFolderAccess(ServerSessionAdapter.valueOf(session).getContext()).isSubscriptionFolder(fid, cid)) {
+            throw ContactExceptionCodes.WRITE_IN_SUBSCRIPTION_NOT_ALLOWED.create(fid);
+        }
+    }
 
 }

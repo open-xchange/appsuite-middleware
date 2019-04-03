@@ -120,7 +120,7 @@ public class SerializedCachingLoader {
                     }
                 } else {
                     // We have to load it, too.
-                    LOG.warn("Found 2 threads loading object \"" + String.valueOf(key) + "\" after 1 second into Cache \"" + regionName + "\"");
+                    LOG.warn("Found 2 threads loading object \"{}\" after 1 second into Cache \"{}\"", String.valueOf(key), regionName);
                 }
             } else {
                 // Only other option is that the cache contains the delegate object.

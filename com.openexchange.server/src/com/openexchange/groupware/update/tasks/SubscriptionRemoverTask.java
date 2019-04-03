@@ -53,6 +53,11 @@ import static com.openexchange.tools.sql.DBUtils.tablesExist;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -61,6 +66,7 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.java.Autoboxing;
 
 
 /**
@@ -69,8 +75,10 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionRemoverTask implements UpdateTaskV2 {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(SubscriptionRemoverTask.class);
 
-    private final String subscriptionSourceId;
+    private final List<String> subscriptionSourceIds;
 
     /**
      * Initializes a new {@link SubscriptionRemoverTask}.
@@ -78,7 +86,28 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
      * @param subscriptionSourceId The identifier
      */
     public SubscriptionRemoverTask(final String subscriptionSourceId) {
-        this.subscriptionSourceId = subscriptionSourceId;
+        super();
+        this.subscriptionSourceIds = Collections.singletonList(subscriptionSourceId);
+    }
+
+    /**
+     * Initializes a new {@link SubscriptionRemoverTask}.
+     *
+     * @param subscriptionSourceIds A list of identifier
+     */
+    public SubscriptionRemoverTask(final List<String> subscriptionSourceIds) {
+        super();
+        this.subscriptionSourceIds = subscriptionSourceIds;
+    }
+
+    /**
+     * Initializes a new {@link SubscriptionRemoverTask}.
+     *
+     * @param subscriptionSourceIds A list of identifier
+     */
+    public SubscriptionRemoverTask(String... subscriptionSourceIds) {
+        super();
+        this.subscriptionSourceIds = Arrays.asList(subscriptionSourceIds);
     }
 
     @Override
@@ -90,6 +119,13 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
     public String[] getDependencies() {
         return new String[0];
     }
+    
+    /* @formatter:off */
+    private static final String SQL = "DELETE sub, conf_string, conf_bool FROM subscriptions AS sub "
+                                    + "LEFT JOIN genconf_attributes_strings AS conf_string ON sub.configuration_id = conf_string.id AND sub.cid = conf_string.cid "
+                                    + "LEFT JOIN genconf_attributes_bools as conf_bool ON sub.configuration_id = conf_bool.id AND sub.cid = conf_bool.cid "
+                                    + "WHERE sub.source_id = ?;";
+    /* @formatter:on */
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
@@ -104,11 +140,16 @@ public class SubscriptionRemoverTask implements UpdateTaskV2 {
             con.setAutoCommit(false);
             rollback = 1;
 
-            stmt = con.prepareStatement("DELETE subscriptions, genconf_attributes_strings, genconf_attributes_bools FROM subscriptions, genconf_attributes_strings, genconf_attributes_bools WHERE subscriptions.source_id = ? AND genconf_attributes_strings.id = subscriptions.configuration_id AND genconf_attributes_bools.id = subscriptions.configuration_id AND genconf_attributes_strings.cid = subscriptions.cid AND genconf_attributes_bools.cid = subscriptions.cid;");
-            stmt.setString(1, subscriptionSourceId);
-            stmt.executeUpdate();
-
+            stmt = con.prepareStatement(SQL);
+            for (String id : subscriptionSourceIds) {
+                stmt.setString(1, id);
+                stmt.addBatch();
+            }
+            int[] deleted = stmt.executeBatch();
             con.commit();
+            
+            Integer result = Autoboxing.I(Arrays.stream(deleted).reduce(Integer::sum).getAsInt());
+            LOG.info("Removed {} invalid subscriptions.", result);
             rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

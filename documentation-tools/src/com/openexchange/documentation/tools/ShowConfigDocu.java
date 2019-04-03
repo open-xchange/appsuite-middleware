@@ -59,11 +59,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
 import com.openxchange.documentation.tools.internal.ConfigDocu;
 import com.openxchange.documentation.tools.internal.Property;
 
@@ -95,13 +95,13 @@ public class ShowConfigDocu {
     };
 
     static {
-        options.addOption(OptionBuilder.withLongOpt("help").hasArg(false).withDescription("Prints this usage.").isRequired(false).create(HELP_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("tag").hasArgs(1).withDescription("If set only properties with the given tag are returned.").isRequired(false).create(TAG_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("search").hasArgs(1).withDescription("If set only properties which match the given search term are returned.").isRequired(false).create(SEARCH_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("key").hasArgs(1).withDescription("If set only properties with a key which contains the given term are returned.").isRequired(false).create(KEY_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("only-key").hasArg(false).withDescription("Prints only the key for each property.").isRequired(false).create(ONLY_KEY_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("print-tags").hasArg(false).withDescription("Prints a list of available tags.").isRequired(false).create(PRINT_TAG_OPTION));
-        options.addOption(OptionBuilder.withLongOpt("no-color").hasArg(false).withDescription("Removes ansi color formatting.").isRequired(false).create(ANSI_OPTION));
+        options.addOption(Option.builder(HELP_OPTION).longOpt("help").hasArg(false).desc("Prints this usage.").required(false).build());
+        options.addOption(Option.builder(TAG_OPTION).longOpt("tag").hasArg().numberOfArgs(1).desc("If set only properties with the given tag are returned.").required(false).build());
+        options.addOption(Option.builder(SEARCH_OPTION).longOpt("search").hasArg().numberOfArgs(1).desc("If set only properties which match the given search term are returned.").required(false).build());
+        options.addOption(Option.builder(KEY_OPTION).longOpt("key").hasArg().numberOfArgs(1).desc("If set only properties with a key which contains the given term are returned.").required(false).build());
+        options.addOption(Option.builder(ONLY_KEY_OPTION).longOpt("only-key").hasArg(false).desc("Prints only the key for each property.").required(false).build());
+        options.addOption(Option.builder(PRINT_TAG_OPTION).longOpt("print-tags").hasArg(false).desc("Prints a list of available tags.").required(false).build());
+        options.addOption(Option.builder(ANSI_OPTION).longOpt("no-color").hasArg(false).desc("Removes ansi color formatting.").required(false).build());
     }
 
     private static final String CONFIG_CASCADE_TAG  = "Config Cascade";
@@ -109,7 +109,7 @@ public class ShowConfigDocu {
 
     public static void main(String[] args) {
 
-        CommandLineParser parser = new PosixParser();
+        CommandLineParser parser = new DefaultParser();
         try {
             CommandLine parse = parser.parse(options, args);
             if(parse.hasOption(HELP_OPTION)) {

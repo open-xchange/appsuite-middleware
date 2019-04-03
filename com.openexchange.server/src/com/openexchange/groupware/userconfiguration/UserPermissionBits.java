@@ -774,6 +774,18 @@ public class UserPermissionBits implements Serializable, Cloneable {
     public boolean isPublication() {
         return hasPermission(PUBLICATION);
     }
+    
+    /**
+     * Sets if this user configuration indicates to enable publication.
+     *
+     * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
+     * 
+     * @deprecated Since v7.10.2
+     */
+    @Deprecated
+    public void setPublication(final boolean publication) {
+        setPermission(publication, PUBLICATION);
+    }
 
     /**
      * Checks if this user configuration indicates that the user may use Exchange Active Sync

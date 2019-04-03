@@ -84,7 +84,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
         FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
     };
 
-    private static Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionAddGuestGroup.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionAddGuestGroup.class);
 
     /**
      * Default constructor.

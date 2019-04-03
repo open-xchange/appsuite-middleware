@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -124,32 +125,57 @@ public class ICal4JParser {
     }
 
     public net.fortuna.ical4j.model.Calendar parse(CalendarBuilder builder, final BufferedReader reader, int importLimit) throws IOException, ParserException, OXException {
-        StringBuilder ical = new StringBuilder();
         StringBuilder chunk = new StringBuilder();
-        int lines = 0;
+        StringBuilder ical = new StringBuilder();
+        
+        boolean read = false;
+        boolean beginFound = false;
+        boolean inTransition = false;
+        
+        int lineCount = 0;
         int eventCount = 0;
+        
         for (String line; (line = reader.readLine()) != null;) {
-            if (importLimit > -1 && line.startsWith("BEGIN:VEVENT")) {
-                // Track numbers of events
-                eventCount++;
-                if (eventCount > importLimit) {
-                    LOGGER.info("The defined maximum value of {} events for the property {} was exceeded. Aborting the import.", I(importLimit), ICalParameters.IMPORT_LIMIT);
+            if (!beginFound) {
+                if (line.endsWith("BEGIN:VCALENDAR")) {
+                    line = removeByteOrderMarks(line);
+                }
+                if (line.startsWith("BEGIN:VCALENDAR")) {
+                    beginFound = true;
+                } else if (!"".equals(line)) {
+                    continue; // ignore bad lines between "VCALENDAR" Tags.
+                }
+            } else if (line.startsWith("END:VCALENDAR")) { //hack to fix bug 11958
+                break;
+            }
+            if (line.matches("\\s*")) {
+                continue;
+            }
+            if (line.matches("^\\s*BEGIN:VEVENT")) {
+                inTransition = true;
+                if (importLimit >= 0 && eventCount++ > importLimit) {
+                    // Too many events
+                    LOGGER.debug("The defined maximum value of {} events was exceeded. Aborting the import.", I(importLimit));
                     throw ICalExceptionCodes.TOO_MANY_IMPORTS.create();
                 }
+            } else if (line.matches("^\\s*END:VEVENT")) {
+                inTransition = false;
             }
+            read = true;
             chunk.append(line).append('\n');
-            if (++lines > 1000) {
-                // Apply workarounds in smaller chunks to keep the used heap space as small as feasible
+            if (++lineCount > 1000 && false == inTransition) {
                 ical.append(applyWorkarounds(chunk));
-                lines = 0;
                 chunk = new StringBuilder();
+                lineCount = 0;
             }
         }
-        if (lines > 0) {
-            ical.append(applyWorkarounds(chunk));
+        if (!read) {
+            throw ICalExceptionCodes.NO_CALENDAR.create();
         }
+        chunk.append("END:VCALENDAR");
+        ical.append(applyWorkarounds(chunk));
+        return builder.build(new UnsynchronizedStringReader(ical.toString())); // FIXME: Encoding?
 
-        return builder.build(new UnsynchronizedStringReader(ical.toString()));// FIXME: Encoding?
     }
 
     private String applyWorkarounds(StringBuilder sb) {
@@ -326,5 +352,37 @@ public class ICal4JParser {
          * We ignore those.
          */
         return input.replaceAll("\nATTACH(.*?);ID=(.+?)([:;])", "\nATTACH$1$3");
+    }
+    
+    private String removeByteOrderMarks(String line){
+        char[] buf = line.toCharArray();
+        int length = buf.length;
+
+        final char first = buf[0];
+        if(length > 3) {
+            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+                if(Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+                    return new String(Arrays.copyOfRange(buf, 3, length));
+                }
+                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+                    return new String(Arrays.copyOfRange(buf, 3, length));
+                }
+            }
+        }
+        if(length > 1) {
+            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
+                    return new String(Arrays.copyOfRange(buf, 2, length));
+                }
+            }
+        }
+        if(length > 0) {
+            if(Character.getNumericValue(first) < 0) {
+                if(Character.getType(first) == 16) {
+                    return new String(Arrays.copyOfRange(buf, 1, length));
+                }
+            }
+        }
+        return line;
     }
 }

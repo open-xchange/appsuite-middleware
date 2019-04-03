@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.factory;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -112,7 +113,9 @@ public final class EventFactory {
 
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
-        singleEvent.setAttendees(Collections.singletonList(attendee));
+        ArrayList<Attendee> atts = new ArrayList<>();
+        atts.add(attendee);
+        singleEvent.setAttendees(atts);
         singleEvent.setStartDate(startDate);
         singleEvent.setEndDate(endDate);
         singleEvent.setTransp(TranspEnum.OPAQUE);
@@ -124,7 +127,7 @@ public final class EventFactory {
 
     /**
      * Creates a simple two hour event with the specified amount of occurrences and recurring frequency
-     * 
+     *
      * @param userId The user identifier
      * @param summary The summary of the event
      * @param occurences The number of occurrences
@@ -140,7 +143,7 @@ public final class EventFactory {
 
     /**
      * Creates a simple two hour event with the specified amount of occurrences and recurring frequency
-     * 
+     *
      * @param userId The user identifier
      * @param summary The summary of the event
      * @param occurences The number of occurences
@@ -194,7 +197,7 @@ public final class EventFactory {
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
         return seriesEvent;
     }
-    
+
     public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, DateTimeData until, RecurringFrequency freq, Weekday weekday, String folderId) {
         EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate, folderId);
         seriesEvent.setRrule("FREQ=" + freq.name() + ";BYDAY=" + weekday.name() + ";UNTIL=" + until.getValue());

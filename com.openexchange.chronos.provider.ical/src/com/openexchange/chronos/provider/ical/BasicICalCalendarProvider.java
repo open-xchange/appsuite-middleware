@@ -57,9 +57,9 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.NAME;
+import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.REFRESH_INTERVAL;
 import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.URI;
-import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.EnumSet;
@@ -77,6 +77,7 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
 import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
@@ -124,22 +125,24 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
     }
 
     @Override
-    public void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
     public void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // Update default alarms
+        BasicCachingCalendarAccess connect = (BasicCachingCalendarAccess) connect(session, account, parameters);
+        connect.updateDefaultAlarms();
+    }
+
+    @Override
+    public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 

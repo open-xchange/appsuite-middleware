@@ -207,9 +207,9 @@ public class PushRequest {
     private String[] getArgsFromPacket(final DatagramPacket datagramPacket) throws OXException {
         final byte[] b = new byte[datagramPacket.getLength()];
         System.arraycopy(datagramPacket.getData(), 0, b, 0, b.length);
-        final String data = new String(b);
+        final String data = new String(b, com.openexchange.java.Charsets.UTF_8);
 
-            LOG.debug("push request data: {}", data);
+        LOG.debug("push request data: {}", data);
 
         /*
          * Split: MAGIC\1Length\1Data
@@ -223,7 +223,6 @@ public class PushRequest {
         }
 
         final int length = parseLength(s, pos++);
-
 
         if (currentLength + length > b.length || length < 0) {
             /*

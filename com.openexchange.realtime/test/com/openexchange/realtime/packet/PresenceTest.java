@@ -53,11 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import org.junit.Test;
 import com.google.common.base.Optional;
-import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -80,14 +77,11 @@ public class PresenceTest {
 
     private static byte priority = 1;
 
-     @Test
-     public void testInitialPresenceBuilder() throws OXException {
+    @Test
+    public void testInitialPresenceBuilder() {
         RealtimeException realtimeException = RealtimeExceptionFactory.getInstance().create(RealtimeExceptionCodes.SESSION_INVALID);
-        
-        Presence initialPresence = Presence.builder()
-            .from(fromID)
-            .error(realtimeException)
-            .build();
+
+        Presence initialPresence = Presence.builder().from(fromID).error(realtimeException).build();
 
         assertEquals(fromID, initialPresence.getFrom());
         assertNull(initialPresence.getTo());
@@ -99,8 +93,8 @@ public class PresenceTest {
         assertEquals(4, initialPresence.getPayloadTrees().size());
     }
 
-     @Test
-     public void testUpdatePresenceBuilder() {
+    @Test
+    public void testUpdatePresenceBuilder() {
         // @formatter:off
         Presence updatePresence = Presence.builder()
             .from(fromID)
@@ -135,41 +129,8 @@ public class PresenceTest {
 
     }
 
-     @Test
-     public void testCopyConstructor() throws OXException {
-        // @formatter:off
-        Presence awayPresence = Presence.builder()
-            .from(fromID)
-            .state(away)
-            .message(message)
-            .priority(priority)
-            .build();
-        // @formatter:on
-
-        Presence copiedAwayPresence = new Presence(awayPresence);
-
-        awayPresence.setFrom(new ID("ox", "francisco.laguna", "premium", "macbook air"));
-        awayPresence.setPriority((byte) -1);
-        awayPresence.setState(PresenceState.DO_NOT_DISTURB);
-        awayPresence.setMessage("Planning the future of the ox backend");
-
-        assertEquals(fromID, copiedAwayPresence.getFrom());
-        assertEquals(message, copiedAwayPresence.getMessage());
-        assertEquals(priority, copiedAwayPresence.getPriority());
-        assertEquals(away, copiedAwayPresence.getState());
-
-        assertEquals(message, getFirstTreeRootData(copiedAwayPresence.getPayloadTrees(Presence.MESSAGE_PATH)));
-        assertEquals(priority, getFirstTreeRootData(copiedAwayPresence.getPayloadTrees(Presence.PRIORITY_PATH)));
-        assertEquals(away, getFirstTreeRootData(copiedAwayPresence.getPayloadTrees(Presence.STATUS_PATH)));
-    }
-
-    private Object getFirstTreeRootData(Collection<PayloadTree> trees) {
-        List<PayloadTree> payloads = new ArrayList<PayloadTree>(trees);
-        return payloads.get(0).getRoot().getData();
-    }
-
-     @Test
-     public void testInitialPresencePayloads() {
+    @Test
+    public void testInitialPresencePayloads() {
         Presence presence = new Presence();
         Optional<Byte> priorityOpt = presence.getSinglePayload(Presence.PRIORITY_PATH, Byte.class);
         assertEquals(0, priorityOpt.get().byteValue());
@@ -183,8 +144,8 @@ public class PresenceTest {
         assertEquals(Optional.absent(), presence.getSinglePayload(Presence.ERROR_PATH, RealtimeException.class));
     }
 
-     @Test
-     public void testMessageRemoval() {
+    @Test
+    public void testMessageRemoval() {
         Presence presence = new Presence();
 
         Optional<String> messageOpt = presence.getSinglePayload(Presence.MESSAGE_PATH, String.class);

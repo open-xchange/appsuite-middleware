@@ -91,7 +91,7 @@ public class AnonymousGuestFoldersTest extends ShareTest {
          *  - invisible
          *    - share
          */
-        root = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
+        root = insertPublicFolder(FolderObject.INFOSTORE);
         root.setDefaultFolder(true);
         root.setType(PublicType.getInstance().getType());
         updateFolder(EnumAPI.OX_NEW, root);

@@ -54,7 +54,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
+import com.openexchange.java.GeoLocation;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultDocumentMetadata}
@@ -95,7 +100,25 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected Map<String, String> properties;
     protected boolean shareable;
     protected InfostoreFolderPath originFolderPath;
+    protected Date captureDate;
+    protected GeoLocation geoLocation;
+    protected Long width = null;
+    protected Long height = null;
+    private String cameraMake = null;
+    private String cameraModel = null;
+    private Long cameraIsoSpeed = null;
+    private Double cameraAperture = null;
+    private Double cameraExposureTime = null;
+    private Double cameraFocalLength = null;
+    protected Map<String, Object> mediaMeta;
+    protected MediaStatus mediaStatus = null;
 
+    /**
+     * Initializes a new {@link DefaultDocumentMetadata}.
+     */
+    protected DefaultDocumentMetadata() {
+        super();
+    }
 
     @Override
     public String getProperty(String key) {
@@ -149,11 +172,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
 
     @Override
     public long getOriginalFolderId() {
-        if (originalFolderId < 0) {
-            return getFolderId();
-        }
-
-        return originalFolderId;
+        return originalFolderId >= 0 ? originalFolderId : getFolderId();
     }
 
     @Override
@@ -285,6 +304,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
         return 0;
     }
 
+    @Override
     public void setSequenceNumber(long sequenceNumber) {
         this.sequenceNumber = sequenceNumber;
     }
@@ -407,6 +427,169 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
         this.originFolderPath = originFolderPath;
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        return captureDate;
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        this.captureDate = captureDate;
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        return geoLocation;
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        this.geoLocation = geoLocation;
+    }
+
+    @Override
+    public Long getWidth() {
+        return width;
+    }
+
+    @Override
+    public void setWidth(long width) {
+        if (width < 0) {
+            this.width = null;
+        } else {
+            this.width = Long.valueOf(width);
+        }
+    }
+
+    @Override
+    public Long getHeight() {
+        return height;
+    }
+
+    @Override
+    public void setHeight(long height) {
+        if (height < 0) {
+            this.height = null;
+        } else {
+            this.height = Long.valueOf(height);
+        }
+    }
+
+    @Override
+    public Long getCameraIsoSpeed() {
+        return cameraIsoSpeed;
+    }
+
+    @Override
+    public void setCameraIsoSpeed(long isoSpeed) {
+        if (isoSpeed < 0) {
+            this.cameraIsoSpeed = null;
+        } else {
+            this.cameraIsoSpeed = Long.valueOf(isoSpeed);
+        }
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        return cameraAperture;
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        if (aperture < 0) {
+            this.cameraAperture = null;
+        } else {
+            this.cameraAperture = Double.valueOf(aperture);
+        }
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        return cameraExposureTime;
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        if (exposureTime < 0) {
+            this.cameraExposureTime = null;
+        } else {
+            this.cameraExposureTime = Double.valueOf(exposureTime);
+        }
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        return cameraFocalLength;
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
+        if (focalLength < 0) {
+            this.cameraFocalLength = null;
+        } else {
+            this.cameraFocalLength = Double.valueOf(focalLength);
+        }
+    }
+
+    @Override
+    public String getCameraMake() {
+        return cameraMake;
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        this.cameraMake = cameraMake;
+    }
+
+    @Override
+    public String getCameraModel() {
+        return cameraModel;
+    }
+
+    @Override
+    public void setCameraModel(String cameraModel) {
+        this.cameraModel = cameraModel;
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        return mediaMeta;
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        this.mediaMeta = mediaMeta;
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        return mediaStatus;
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(Session session) {
+        MediaStatus mediaStatus = getMediaStatus();
+        if (null != mediaStatus) {
+            return mediaStatus;
+        }
+
+        MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
+        if (null == extractorService) {
+            return null;
+        }
+
+        try {
+            return extractorService.isScheduledForMediaMetadataExtraction(this, session) ? MediaStatus.pending() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus mediaStatus) {
+        this.mediaStatus = mediaStatus;
     }
 
     @Override

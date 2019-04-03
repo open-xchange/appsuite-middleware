@@ -64,9 +64,11 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.loader.ClientIdentifierProvider;
 import com.openexchange.pns.mobile.api.facade.ClientConfig;
 import com.openexchange.pns.mobile.api.facade.MobileApiFacadeMessageGenerator;
 import com.openexchange.pns.mobile.api.facade.MobileApiFacadePushConfiguration;
+import com.openexchange.pns.mobile.api.facade.internal.OXBrandingMailApp;
 
 /**
  * {@link MobileApiFacadePushStuffActivator}
@@ -99,6 +101,7 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator imp
 
     @Override
     protected void startBundle() throws Exception {
+        registerService(ClientIdentifierProvider.class, new OXBrandingMailApp());
         registerService(Reloadable.class, this);
         reinit(getService(ConfigurationService.class), getService(ConfigViewFactory.class));
     }

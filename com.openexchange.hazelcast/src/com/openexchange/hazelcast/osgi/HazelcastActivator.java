@@ -100,11 +100,11 @@ public class HazelcastActivator implements BundleActivator {
 
     private boolean stopped; // Guarded by synchronized
 
-    volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
-    volatile ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
-    volatile ServiceTracker<ManagementService, ManagementService> managementTracker;
-    volatile ServiceRegistration<HazelcastInstance> serviceRegistration;
-    volatile HazelcastInstance hazelcastInstance;
+    ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
+    ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
+    ServiceTracker<ManagementService, ManagementService> managementTracker;
+    ServiceRegistration<HazelcastInstance> serviceRegistration;
+    HazelcastInstance hazelcastInstance;
 
     /**
      * Initializes a new {@link HazelcastActivator}.
@@ -115,13 +115,12 @@ public class HazelcastActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         /*
          * track HazelcastConfigurationService
          */
-        synchronized (this) {
-            stopped = false;
-        }
+        stopped = false;
+        final HazelcastActivator hzActivator = this;
         ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> customizer =
             new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
 
@@ -130,12 +129,14 @@ public class HazelcastActivator implements BundleActivator {
                 HazelcastConfigurationService configService = context.getService(reference);
                 try {
                     if (configService.isEnabled()) {
-                        HazelcastInstance hazelcast = startHazelcastInstance(configService);
-                        // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
-                        if (null != hazelcast) {
-                            serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
-                            hazelcastInstance = hazelcast;
-                            HazelcastMBeanImpl.setHazelcastInstance(hazelcast);
+                        synchronized (hzActivator) {
+                            HazelcastInstance hazelcast = startHazelcastInstance(configService);
+                            // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
+                            if (null != hazelcast) {
+                                serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
+                                hazelcastInstance = hazelcast;
+                                HazelcastMBeanImpl.setHazelcastInstance(hazelcast);
+                            }
                         }
                     } else {
                         String lf = Strings.getLineSeparator();

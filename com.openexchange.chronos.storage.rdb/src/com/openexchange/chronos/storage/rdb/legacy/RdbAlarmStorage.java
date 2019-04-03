@@ -339,7 +339,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             return getAlarms(event, userID, reminderData);
         } catch (OXException e) {
-            addInvalidDataWaring(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Ignoring invalid legacy " + reminderData + " for user " + userID, e);
+            addInvalidDataWarning(event.getId(), EventField.ALARMS, ProblemSeverity.MINOR, "Ignoring invalid legacy " + reminderData + " for user " + userID, e);
             return null;
         }
     }
@@ -655,8 +655,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, REMINDER_MODULE);
             stmt.setInt(parameterIndex++, eventID);
-            for (Integer userID : userIDs) {
-                stmt.setInt(parameterIndex++, i(userID));
+            for (int userID : userIDs) {
+                stmt.setInt(parameterIndex++, userID);
             }
             return logExecuteUpdate(stmt);
         }
@@ -698,8 +698,8 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, eventID);
-            for (Integer userID : userIDs) {
-                stmt.setInt(parameterIndex++, i(userID));
+            for (int userID : userIDs) {
+                stmt.setInt(parameterIndex++, userID);
             }
             return logExecuteUpdate(stmt);
         }

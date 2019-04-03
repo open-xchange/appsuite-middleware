@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.chronos.CalendarUserType;
@@ -100,22 +102,31 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The parsed principal URL, or <code>null</code> if the URL couldn't be parsed
      */
     public static PrincipalURL parse(String principalURL) {
-        if (null != principalURL && principalURL.startsWith("/principals/")) {
-            Matcher matcher = URL_PATTERN.matcher(principalURL);
-            if (matcher.find() && 2 == matcher.groupCount()) {
+        if (null != principalURL) {
+            if (false == principalURL.startsWith("/")) {
                 try {
-                    switch (matcher.group(1)) {
-                        case "resources":
-                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE);
-                        case "groups":
-                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP);
-                        case "users":
-                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL);
-                        default:
-                            throw new IllegalArgumentException(matcher.group(1));
+                    principalURL = new URI(principalURL).getPath();
+                } catch (URISyntaxException e) {
+                    // ignore
+                }
+            }
+            if (principalURL.startsWith("/principals/")) {
+                Matcher matcher = URL_PATTERN.matcher(principalURL);
+                if (matcher.find() && 2 == matcher.groupCount()) {
+                    try {
+                        switch (matcher.group(1)) {
+                            case "resources":
+                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.RESOURCE);
+                            case "groups":
+                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.GROUP);
+                            case "users":
+                                return new PrincipalURL(Integer.parseInt(matcher.group(2)), CalendarUserType.INDIVIDUAL);
+                            default:
+                                throw new IllegalArgumentException(matcher.group(1));
+                        }
+                    } catch (IllegalArgumentException e) {
+                        org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
                     }
-                } catch (IllegalArgumentException e) {
-                    org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
                 }
             }
         }

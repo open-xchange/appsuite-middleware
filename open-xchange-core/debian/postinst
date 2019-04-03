@@ -596,6 +596,36 @@ EOF
       fi
       ox_scr_done ${SCR}
     }
+
+    SCR=SCR-391
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="video/x-matroska mkv"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-422
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="image/heic heic"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      type="image/heif heif"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
 }
 
 setConfigFilePermissions() {

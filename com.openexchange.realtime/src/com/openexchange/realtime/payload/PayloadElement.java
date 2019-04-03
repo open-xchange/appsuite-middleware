@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.payload;
 
-import static com.openexchange.realtime.util.CopyObject.copyObject;
 import java.io.Serializable;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -91,20 +90,6 @@ public class PayloadElement implements VisitablePayload, Serializable, Comparabl
         this.elementName = elementName;
         this.format = format;
         this.namespace = namespace;
-    }
-
-    /**
-     * Initializes a new {@link PayloadElement} based on another PayloadElement.
-     * @param otherPayloadElement The other PayloadElement, must not be null
-     * @throws IllegalArgumentException If the other PayloadElement is null
-     */
-    public PayloadElement(PayloadElement otherPayloadElement) {
-        //TODO: Change object to serializable in Stanza + PayloadTree
-        this.data = copyObject((Serializable)otherPayloadElement.data);
-        this.elementName = otherPayloadElement.elementName;
-        this.format = otherPayloadElement.format;
-        this.namespace = otherPayloadElement.namespace;
-
     }
 
     /**

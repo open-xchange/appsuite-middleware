@@ -50,6 +50,7 @@
 package com.openexchange.realtime.hazelcast.serialization.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -91,15 +92,16 @@ public final class Services {
      *
      * @param clazz The service's class
      * @return The service or null if absent
+     * @throws OXException
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static <S extends Object> S getService(Class<? extends S> clazz) {
+    public static <S extends Object> S getService(Class<? extends S> clazz) throws OXException {
         ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
             throw new IllegalStateException(
                 "Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.hazelcast.serialization\" not started?");
         }
-        return serviceLookup.getService(clazz);
+        return serviceLookup.getServiceSafe(clazz);
     }
 
     /**

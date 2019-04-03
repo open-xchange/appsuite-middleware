@@ -81,12 +81,12 @@ public class PropertyDrivenMapper extends AbstractOutlookMapper {
             String key = String.valueOf(entry.getKey());
             String value = String.valueOf(entry.getValue());
             if ("encoding".equals(key)) {
-                LOG.debug("Using encoding: " + value);
+                LOG.debug("Using encoding: {}", value);
                 this.encoding = value;
             } else {
                 ContactField mappedField = ContactMapper.getInstance().getMappedField(key);
                 if (null == mappedField) {
-                    LOG.debug("No contact field found for: \"" + key + "\"");
+                    LOG.debug("No contact field found for: \"{}\"", key);
                 } else {
                     store(mappedField, value);
                 }

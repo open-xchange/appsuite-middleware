@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires: coreutils
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -31,6 +31,7 @@ Requires:      which
 %endif
 Requires:      sed
 Requires:      coreutils
+Requires:      perl
 Conflicts:     open-xchange-core < 7.10.0
 %description
 System integration specific infrastructure
@@ -71,6 +72,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %ghost /opt/open-xchange/etc/scr_db
 
 %changelog
+* Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.2 release
 * Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.2 release
 * Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>

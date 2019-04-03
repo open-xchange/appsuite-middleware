@@ -54,7 +54,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -62,6 +61,7 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
+import com.openexchange.java.Autoboxing;
 
 /**
  *
@@ -70,32 +70,11 @@ import com.openexchange.admin.rmi.factory.UserFactory;
  */
 public class GroupTest extends UserTest {
 
-    // list of chars that must be valid
     private final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
-
-    private Context context;
-
-    /**
-     * Initialises a new {@link GroupTest}.
-     */
-    public GroupTest() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractTest#setUp()
-     */
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        context = getContextManager().create(contextAdminCredentials);
-    }
 
     @Test
     public void testCreateGroup() throws Exception {
-        int id = getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, contextAdminCredentials).getId();
+        int id = Autoboxing.i(getGroupManager().create(GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis()), context, contextAdminCredentials).getId());
         assertTrue("group id > 0 expected", id > 0);
     }
 
@@ -187,7 +166,7 @@ public class GroupTest extends UserTest {
     public void testLoadGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load from server
         Group srv_group = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
@@ -202,7 +181,7 @@ public class GroupTest extends UserTest {
     public void testLoadGroupIdentifiedByName() throws Exception {
         Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load from server
         Group tmp = new Group();
@@ -219,7 +198,7 @@ public class GroupTest extends UserTest {
     public void testLoadGroupIdentifiedByID() throws Exception {
         Group addgroup = GroupFactory.createGroup(VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load from server
         Group tmp = new Group(createdgroup.getId());
@@ -235,7 +214,7 @@ public class GroupTest extends UserTest {
     public void testAddMemberToGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
@@ -249,7 +228,7 @@ public class GroupTest extends UserTest {
         User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -260,7 +239,7 @@ public class GroupTest extends UserTest {
     public void testAddMemberToGroupIdentifiedByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
@@ -276,7 +255,7 @@ public class GroupTest extends UserTest {
         User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -287,7 +266,7 @@ public class GroupTest extends UserTest {
     public void testAddMemberToGroupIdentifiedByID() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
@@ -302,7 +281,7 @@ public class GroupTest extends UserTest {
         User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -313,7 +292,7 @@ public class GroupTest extends UserTest {
     public void testRemoveMemberFromGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
 
@@ -328,7 +307,7 @@ public class GroupTest extends UserTest {
         User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -340,7 +319,7 @@ public class GroupTest extends UserTest {
         remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -352,7 +331,7 @@ public class GroupTest extends UserTest {
     public void testRemoveMemberFromGroupIdentifiedByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
 
@@ -360,14 +339,14 @@ public class GroupTest extends UserTest {
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
-        // add user as groupmember
+        // add user as group member
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
         User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -382,7 +361,7 @@ public class GroupTest extends UserTest {
         remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -394,7 +373,7 @@ public class GroupTest extends UserTest {
     public void testRemoveMemberFromGroupIdentifiedByID() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
 
@@ -402,14 +381,14 @@ public class GroupTest extends UserTest {
         UserModuleAccess access = new UserModuleAccess();
         User createduser = addUser(context, usr, access);
 
-        // add user as groupmember
+        // add user as group member
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
 
         // now get all members of group, and check if user is member
         User[] remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         boolean foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -423,7 +402,7 @@ public class GroupTest extends UserTest {
         remote_members = getGroupManager().getMembers(createdgroup, context, contextAdminCredentials);
         foundmember = false;
         for (User element : remote_members) {
-            if (element.getId() == createduser.getId().intValue()) {
+            if (Autoboxing.i(element.getId()) == createduser.getId().intValue()) {
                 foundmember = true;
             }
         }
@@ -435,7 +414,7 @@ public class GroupTest extends UserTest {
     public void testChangeGroup() throws Exception {
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load group from server
         Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
@@ -464,7 +443,7 @@ public class GroupTest extends UserTest {
     public void testChangeGroupIdentifiedbyID() throws Exception {
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load group from server
         Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
@@ -490,10 +469,10 @@ public class GroupTest extends UserTest {
 
     @Test(expected = InvalidDataException.class)
     public void testChangeNull() throws Exception {
-        // change group displayname and name to null, this must fail
+        // change group display name and name to null, this must fail
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load group from server
         Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
@@ -514,10 +493,10 @@ public class GroupTest extends UserTest {
 
     @Test
     public void testChangeAllowedNull() throws Exception {
-        // change group displayname and name to null, this must fail
+        // change group display name and name to null, this must fail
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load group from server
         Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
@@ -545,7 +524,7 @@ public class GroupTest extends UserTest {
     public void testChangeGroupIdentifiedbyName() throws Exception {
         Group addgroup = GroupFactory.createGroup("changed_this_group" + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("expected id > 0", createdgroup.getId() > 0);
+        assertTrue("expected id > 0", Autoboxing.i(createdgroup.getId()) > 0);
 
         // load group from server
         Group srv_response = getGroupManager().getData(createdgroup, context, contextAdminCredentials);
@@ -572,7 +551,7 @@ public class GroupTest extends UserTest {
     public void testGetMembers() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
@@ -591,7 +570,7 @@ public class GroupTest extends UserTest {
     public void testGetMembersByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
@@ -613,7 +592,7 @@ public class GroupTest extends UserTest {
     public void testlistGroupsForUser() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
@@ -640,7 +619,7 @@ public class GroupTest extends UserTest {
     public void testlistGroupsForUserByName() throws Exception {
         Group addgroup = GroupFactory.createGroup("memberaddgroup" + VALID_CHAR_TESTGROUP + System.currentTimeMillis());
         Group createdgroup = getGroupManager().create(addgroup, context, contextAdminCredentials);
-        assertTrue("group id > 0 expected", createdgroup.getId() > 0);
+        assertTrue("group id > 0 expected", Autoboxing.i(createdgroup.getId()) > 0);
 
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);

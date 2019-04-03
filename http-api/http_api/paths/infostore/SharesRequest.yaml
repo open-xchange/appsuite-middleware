@@ -17,6 +17,11 @@
         type: string
         description: '"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
         required: false
+      - in: query
+        name: pregenerate_previews
+        type: boolean
+        description: If set to "true" preview generation is triggered in the background for all files in request result
+        required: false
     responses:
       200:
         description: |

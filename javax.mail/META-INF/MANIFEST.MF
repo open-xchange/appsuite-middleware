@@ -132,6 +132,6 @@ Bundle-ClassPath: lib/EmailAddress.jar,
  lib/libidn-1.9.jar,
  lib/jtnef-2.0.0.jar,
  lib/emailaddress-rfc2822-1.1.0.jar,
- lib/poi-3.13.jar,
+ lib/poi-3.17.jar,
  .
 Bundle-Activator: javax.mail.osgi.JavaMailActivator

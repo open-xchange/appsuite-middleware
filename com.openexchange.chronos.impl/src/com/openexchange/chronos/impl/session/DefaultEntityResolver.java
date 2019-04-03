@@ -161,7 +161,20 @@ public class DefaultEntityResolver implements EntityResolver {
                 /*
                  * try and resolve external calendar user address to internal calendar user, enhance with static properties
                  */
-                applyEntityData(resolveExternals(attendee, attendee.getCuType(), resolveResourceIds));
+                applyEntityData(resolveExternals(attendee, attendee.getCuType(), resolveResourceIds, null));
+            }
+        }
+        return attendees;
+    }
+    
+    @Override
+    public List<Attendee> prepare(List<Attendee> attendees, int[] resolvableEntities) throws OXException {
+        if (null != attendees) {
+            for (Attendee attendee : attendees) {
+                /*
+                 * try and resolve external calendar user address to internal calendar user, enhance with static properties
+                 */
+                applyEntityData(resolveExternals(attendee, attendee.getCuType(), true, resolvableEntities));
             }
         }
         return attendees;
@@ -169,17 +182,22 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType) throws OXException {
-        return prepare(calendarUser, cuType, false);
+        return prepare(calendarUser, cuType, false, null);
     }
 
-    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds) throws OXException {
+    @Override
+    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, int[] resolvableEntities) throws OXException {
+        return prepare(calendarUser, cuType, false, resolvableEntities);
+    }
+
+    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds, int[] resolvableEntities) throws OXException {
         if (null == calendarUser) {
             return null;
         }
         /*
          * try and resolve external calendar user address to internal calendar user, enhance with static properties
          */
-        return applyEntityData(resolveExternals(calendarUser, cuType, resolveResourceIds), cuType);
+        return applyEntityData(resolveExternals(calendarUser, cuType, resolveResourceIds, resolvableEntities), cuType);
     }
 
     @Override
@@ -505,7 +523,7 @@ public class DefaultEntityResolver implements EntityResolver {
         Integer iD = I(id);
         FolderObject folder = knownFolders.get(iD);
         if (null == folder) {
-            folder = loadFolder(iD, optConnection);
+            folder = loadFolder(id, optConnection);
             knownFolders.put(iD, folder);
         }
         return folder;
@@ -585,18 +603,18 @@ public class DefaultEntityResolver implements EntityResolver {
         return attendee;
     }
 
-    private <T extends CalendarUser> T resolveExternals(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds) throws OXException {
+    private <T extends CalendarUser> T resolveExternals(T calendarUser, CalendarUserType cuType, boolean resolveResourceIds, int[] resolvableEntities) throws OXException {
         if (null != calendarUser) {
             if (false == isInternal(calendarUser, cuType)) {
                 ResourceId resourceId = resolveExternals(calendarUser.getUri(), resolveResourceIds, true);
-                if (null != resourceId) {
+                if (null != resourceId && (null == resolvableEntities || com.openexchange.tools.arrays.Arrays.contains(resolvableEntities, resourceId.getEntity()))) {
                     /*
                      * resolved successfully; cross-check calendar user type, auto-correct if required
                      */
                     if (Attendee.class.isInstance(calendarUser)) {
                         Attendee attendee = (Attendee) calendarUser;
                         if (false == resourceId.getCalendarUserType().matches(attendee.getCuType())) {
-                            LOG.warn("Wrong calendar user type {} for internal entity {} ({}), auto-correcting to {}.", 
+                            LOG.warn("Wrong calendar user type {} for internal entity {} ({}), auto-correcting to {}.",
                                 attendee.getCuType(), I(attendee.getEntity()), attendee.getUri(), resourceId.getCalendarUserType());
                             attendee.setCuType(resourceId.getCalendarUserType());
                         }
@@ -606,14 +624,14 @@ public class DefaultEntityResolver implements EntityResolver {
                     calendarUser.setEntity(resourceId.getEntity());
                 }
             }
-            resolveExternals(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL, resolveResourceIds);
+            resolveExternals(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL, resolveResourceIds, resolvableEntities);
         }
         return calendarUser;
     }
 
     /**
      * Tries to resolve a calendar user address URI to its corresponding internal resource identifier.
-     * 
+     *
      * @param uri The URI to resolve
      * @param resolveResourceIds <code>true</code> to resolve (internal) resource identifiers, <code>false</code>, otherwise
      * @param considerAliases <code>true</code> to consider user aliases when resolving <code>mailto:</code>-URIs, <code>false</code>, otherwise
@@ -651,7 +669,7 @@ public class DefaultEntityResolver implements EntityResolver {
         }
         User user;
         try {
-            user = services.getService(UserService.class).searchUser(mail, context, considerAliases);
+            user = services.getServiceSafe(UserService.class).searchUser(mail, context, considerAliases);
         } catch (OXException e) {
             if ("USR-0014".equals(e.getErrorCode())) {
                 user = null;
@@ -668,7 +686,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     private Resource loadResource(int entity) throws OXException {
         try {
-            return services.getService(ResourceService.class).getResource(entity, context);
+            return services.getServiceSafe(ResourceService.class).getResource(entity, context);
         } catch (OXException e) {
             if ("RES-0012".equals(e.getErrorCode())) {
                 throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, String.valueOf(entity), I(entity), CalendarUserType.RESOURCE);
@@ -679,7 +697,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     private Group loadGroup(int entity) throws OXException {
         try {
-            return services.getService(GroupService.class).getGroup(context, entity);
+            return services.getServiceSafe(GroupService.class).getGroup(context, entity);
         } catch (OXException e) {
             if ("GRP-0017".equals(e.getErrorCode())) {
                 throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, String.valueOf(entity), I(entity), CalendarUserType.GROUP);
@@ -690,7 +708,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     private User loadUser(int entity) throws OXException {
         try {
-            return services.getService(UserService.class).getUser(entity, context);
+            return services.getServiceSafe(UserService.class).getUser(entity, context);
         } catch (OXException e) {
             if ("USR-0010".equals(e.getErrorCode())) {
                 throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, String.valueOf(entity), I(entity), CalendarUserType.INDIVIDUAL);
@@ -701,7 +719,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     private User[] loadUsers(int[] entities) throws OXException {
         try {
-            return services.getService(UserService.class).getUser(context, entities);
+            return services.getServiceSafe(UserService.class).getUser(context, entities);
         } catch (OXException e) {
             if ("USR-0010".equals(e.getErrorCode())) {
                 if (null != e.getLogArgs() && 0 < e.getLogArgs().length) {

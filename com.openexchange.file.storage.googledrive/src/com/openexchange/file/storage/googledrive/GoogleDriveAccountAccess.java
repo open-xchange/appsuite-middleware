@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.googledrive;
 
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -75,9 +76,9 @@ import com.openexchange.session.Session;
  */
 public final class GoogleDriveAccountAccess implements CapabilityAware {
 
-    private final FileStorageAccount account;
+    private final @NonNull FileStorageAccount account;
 
-    private final Session session;
+    private final @NonNull Session session;
 
     private final FileStorageService service;
 
@@ -85,12 +86,12 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
 
     /**
      * Initializes a new {@link GoogleDriveAccountAccess}.
-     * 
+     *
      * @param service The {@link FileStorageService}
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      */
-    public GoogleDriveAccountAccess(FileStorageService service, FileStorageAccount account, Session session) {
+    public GoogleDriveAccountAccess(FileStorageService service, @NonNull FileStorageAccount account, @NonNull Session session) {
         super();
         this.service = service;
         this.account = account;

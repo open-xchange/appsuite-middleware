@@ -85,7 +85,7 @@ import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
  * {@link ConsistencyTest}
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -205,10 +205,12 @@ public class ConsistencyTest {
 
         PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
         PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getCompostionSpaceAttachmentFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
         PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerContext", Context.class)).withArguments(Matchers.any(Context.class));
         PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getSnippetFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
         PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getPreviewCacheFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
         PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getVCardFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
+        PowerMockito.doReturn(new TreeSet<String>()).when(consistency, PowerMockito.method(ConsistencyServiceImpl.class, "getCompostionSpaceAttachmentFileStoreLocationsPerUser", Context.class, User.class)).withArguments(Matchers.any(Context.class), Matchers.any(User.class));
     }
 
     // Tests //
@@ -516,4 +518,5 @@ public class ConsistencyTest {
 
         database.put(context, dm);
     }
+
 }

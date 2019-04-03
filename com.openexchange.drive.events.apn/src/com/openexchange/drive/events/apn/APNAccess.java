@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.events.apn;
 
+import java.util.Arrays;
+
 /**
  * {@link APNAccess}
  *
@@ -57,8 +59,10 @@ package com.openexchange.drive.events.apn;
 public class APNAccess {
 
     private final String password;
-    private final Object keystore;
+    private final String stringKeystore;
+    private final byte[] bytesKeystore;
     private final boolean production;
+    private int hash = 0;
 
     /**
      * Initializes a new {@link APNAccess}.
@@ -66,18 +70,36 @@ public class APNAccess {
      * @param keystore A keystore containing the private key and the certificate signed by Apple. <p/>
      *                 The following formats can be used:
      *                 <ul>
-     *                 <li><code>java.io.File</code></li>
-     *                 <li><code>java.io.InputStream</code></li>
      *                 <li><code>byte[]</code></li>
-     *                 <li><code>java.security.KeyStore</code></li>
      *                 <li><code>java.lang.String</code> for a file path</li>
      *                 </ul>
      * @param password The keystore's password.
      * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
      */
-    public APNAccess(Object keystore, String password, boolean production) {
+    public APNAccess(String keystore, String password, boolean production) {
         super();
-        this.keystore = keystore;
+        this.stringKeystore = keystore;
+        this.bytesKeystore = null;
+        this.password = password;
+        this.production = production;
+    }
+
+    /**
+     * Initializes a new {@link APNAccess}.
+     *
+     * @param keystore A keystore containing the private key and the certificate signed by Apple. <p/>
+     *                 The following formats can be used:
+     *                 <ul>
+     *                 <li><code>byte[]</code></li>
+     *                 <li><code>java.lang.String</code> for a file path</li>
+     *                 </ul>
+     * @param password The keystore's password.
+     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
+     */
+    public APNAccess(byte[] keystore, String password, boolean production) {
+        super();
+        this.stringKeystore = null;
+        this.bytesKeystore = keystore;
         this.password = password;
         this.production = production;
     }
@@ -97,7 +119,7 @@ public class APNAccess {
      * @return The keystore
      */
     public Object getKeystore() {
-        return keystore;
+        return null == stringKeystore ? bytesKeystore : stringKeystore;
     }
 
     /**
@@ -107,6 +129,53 @@ public class APNAccess {
      */
     public boolean isProduction() {
         return production;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = hash; // Does not need to be thread-safe
+        if (result == 0) {
+            int prime = 31;
+            result = 1;
+            result = prime * result + (production ? 1231 : 1237);
+            result = prime * result + ((password == null) ? 0 : password.hashCode());
+            result = prime * result + ((stringKeystore == null) ? 0 : stringKeystore.hashCode());
+            result = prime * result + Arrays.hashCode(bytesKeystore);
+            this.hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof APNAccess)) {
+            return false;
+        }
+        APNAccess other = (APNAccess) obj;
+        if (production != other.production) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        if (stringKeystore == null) {
+            if (other.stringKeystore != null) {
+                return false;
+            }
+        } else if (!stringKeystore.equals(other.stringKeystore)) {
+            return false;
+        }
+        if (!Arrays.equals(bytesKeystore, other.bytesKeystore)) {
+            return false;
+        }
+        return true;
     }
 
 }

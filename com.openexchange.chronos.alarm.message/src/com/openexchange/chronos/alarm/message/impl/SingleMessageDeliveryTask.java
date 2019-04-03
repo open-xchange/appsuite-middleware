@@ -400,23 +400,23 @@ class SingleMessageDeliveryTask implements Runnable {
      * @param event The event of the alarm
      */
     private void sendMessage(Event event) {
-            Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
-            try {
-                int userId = trigger.getUserId();
-                int contextId = ctx.getContextId();
-                if(notificationService.isEnabled(userId, contextId)) {
+        Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
+        try {
+            int userId = trigger.getUserId();
+            int contextId = ctx.getContextId();
+            if (notificationService.isEnabled(userId, contextId)) {
                 if (checkRateLimit(alarm.getAction(), notificationService.getRate(userId, contextId), trigger.getUserId(), ctx.getContextId())) {
-                        notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
-                        LOG.trace("Message successfully send for {}", key);
-                    } else {
-                        LOG.info("Due to the rate limit it is not possible to send the message for {}", key);
-                    }
+                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
+                    LOG.trace("Message successfully send for {}", key);
                 } else {
-                    LOG.trace("Message dropped because the AlarmNotificationService is not enabled for user {}.", trigger.getUserId());
+                    LOG.info("Due to the rate limit it is not possible to send the message for {}", key);
                 }
-            } catch (OXException e) {
-                LOG.warn("Unable to send message for calendar alarm ({}): {}", key, e.getMessage(), e);
+            } else {
+                LOG.trace("Message dropped because the AlarmNotificationService is not enabled for user {}.", trigger.getUserId());
             }
+        } catch (OXException e) {
+            LOG.warn("Unable to send message for calendar alarm ({}): {}", key, e.getMessage(), e);
+        }
     }
 
     private static final String RATE_LIMIT_PREFIX = "MESSAGE_ALARM_";

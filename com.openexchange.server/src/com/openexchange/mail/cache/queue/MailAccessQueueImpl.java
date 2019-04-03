@@ -158,7 +158,20 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
 
     @Override
     public boolean equals(final Object obj) {
-        return priorityQueue.equals(obj);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof MailAccessQueueImpl)) {
+            return false;
+        }
+        MailAccessQueueImpl other = (MailAccessQueueImpl) obj;
+        if (capacity != other.capacity) {
+            return false;
+        }
+        if (isDeprecated() != other.isDeprecated()) {
+            return false;
+        }
+        return priorityQueue.equals(other.priorityQueue);
     }
 
     @Override

@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RDB storage for totp multifactor devices
+Bundle-SymbolicName: com.openexchange.multifactor.provider.u2f.storage.rdb
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.multifactor.provider.u2f.storage.rdb
+Bundle-Activator: com.openexchange.multifactor.provider.u2f.storage.rdb.osgi.RdbU2FMultifactorStorageActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.update,
+ com.openexchange.multifactor,
+ com.openexchange.multifactor.exceptions,
+ com.openexchange.multifactor.provider.u2f.impl,
+ com.openexchange.multifactor.provider.u2f.storage,
+ com.openexchange.multifactor.storage,
+ com.openexchange.multifactor.storage.impl,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.slf4j
+

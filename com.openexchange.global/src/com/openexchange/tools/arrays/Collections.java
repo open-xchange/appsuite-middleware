@@ -49,12 +49,8 @@
 
 package com.openexchange.tools.arrays;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +60,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.java.Streams;
 
 /**
  * Methods for easy handling of collections.
@@ -72,11 +67,6 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Collections {
-
-    /**
-     * Logger.
-     */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Collections.class);
 
     /**
      * Prevent instantiation
@@ -329,37 +319,6 @@ public final class Collections {
             return n;
         }
 
-    }
-
-    /**
-     * Returns a copy of the object, or <tt>null</tt> if the object cannot be serialized.
-     */
-    public static Object copy(final Serializable orig) {
-        ObjectOutputStream out = null;
-        try {
-            /*
-             * Write the object out to a byte array
-             */
-            final FastByteArrayOutputStream fbos = new FastByteArrayOutputStream();
-            out = new ObjectOutputStream(fbos);
-            out.writeObject(orig);
-            out.flush();
-            out.close();
-            out = null;
-            /*
-             * Retrieve an input stream from the byte array and read a copy of the object back in
-             */
-            final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
-            return in.readObject();
-        } catch (final IOException e) {
-            LOG.error("", e);
-            return null;
-        } catch (final ClassNotFoundException cnfe) {
-            LOG.error("", cnfe);
-            return null;
-        } finally {
-            Streams.close(out);
-        }
     }
 
     public static <T> Enumeration<T> iter2enum(final Iterator<T> iter) {

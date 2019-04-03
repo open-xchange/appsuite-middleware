@@ -210,7 +210,7 @@ public final class XMLUtils {
     }
 
     public static Document parse(final String in) throws ParserConfigurationException, SAXException, IOException {
-        return parse(in.getBytes());
+        return parse(in.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
     public static Document parse(final byte[] in) throws ParserConfigurationException, SAXException, IOException {
@@ -331,27 +331,6 @@ public final class XMLUtils {
         trans.transform(source, sr);
         bos.close();
         return bos.toString();
-    }
-
-    public static String toString(final Node node, final int indent) {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTo(node, out, indent);
-        return out.toString();
-    }
-
-    public static String toString(final Node node) {
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        writeTo(node, out);
-        return out.toString();
-    }
-
-    public static void printDOM(final Node node) {
-        printDOM("", node);
-    }
-
-    public static void printDOM(final String words, final Node node) {
-        System.out.println(words);
-        System.out.println(toString(node));
     }
 
     public static Attr getAttribute(final Element el, final String attrName) {

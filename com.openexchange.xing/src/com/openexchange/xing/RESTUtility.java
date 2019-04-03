@@ -141,7 +141,7 @@ public class RESTUtility {
         case PUT: {
             final HttpPut put = new HttpPut(url);
             if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
             }
             req = put;
         }
@@ -149,7 +149,7 @@ public class RESTUtility {
         case POST: {
             final HttpPost post = new HttpPost(url);
             if (null != requestInformation) {
-                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"),requestInformation.toString().getBytes().length, ContentType.APPLICATION_JSON));
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME),requestInformation.toString().getBytes(com.openexchange.java.Charsets.UTF_8).length, ContentType.APPLICATION_JSON));
             }
             req = post;
         }
@@ -361,7 +361,7 @@ public class RESTUtility {
         {
             final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
             if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
             }
             req = put;
         }
@@ -370,7 +370,7 @@ public class RESTUtility {
         {
             final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
             if (null != requestInformation) {
-                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
             }
             req = post;
         }
@@ -412,7 +412,7 @@ public class RESTUtility {
         try {
             final HttpEntity ent = response.getEntity();
             if (ent != null) {
-                final InputStreamReader in = new InputStreamReader(ent.getContent());
+                final InputStreamReader in = new InputStreamReader(ent.getContent(), com.openexchange.java.Charsets.UTF_8);
                 // Wrap this with a Buffer, so we can re-parse it if it's
                 // not JSON
                 // Has to be at least 16384, because this is defined as the buffer size in
@@ -486,7 +486,7 @@ public class RESTUtility {
         InputStream contentStream = null;
         try {
             contentStream = entity.getContent();
-            scanner = new Scanner(contentStream);
+            scanner = new Scanner(contentStream, com.openexchange.java.Charsets.UTF_8_NAME);
             scanner.useDelimiter("&");
 
             Map<String, String> result = new HashMap<String, String>();
@@ -626,9 +626,9 @@ public class RESTUtility {
             // We have to encode the whole line, then remove + and / encoding
             // to get a good OAuth URL.
             if (apiVersion > 0) {
-                trgt = URLEncoder.encode(new StringBuilder(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(new StringBuilder(16).append("/v").append(apiVersion).append(trgt).toString(), com.openexchange.java.Charsets.UTF_8_NAME);
             } else {
-                trgt = URLEncoder.encode(new StringBuilder(16).append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(new StringBuilder(16).append(trgt).toString(), com.openexchange.java.Charsets.UTF_8_NAME);
             }
             trgt = trgt.replace("%2F", "/");
 

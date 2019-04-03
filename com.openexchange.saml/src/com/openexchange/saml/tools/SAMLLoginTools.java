@@ -85,6 +85,11 @@ public class SAMLLoginTools {
     public static final String PARAM_LOGIN_PATH = "loginPath";
 
     /**
+     * The <code>shard</code> parameter name.
+     */
+    public static final String PARAM_SHARD = "shard";
+
+    /**
      * The <code>samlLogin</code> login action.
      */
     public static final String ACTION_SAML_LOGIN = "samlLogin";

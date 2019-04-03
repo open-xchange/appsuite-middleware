@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.json.osgi;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
@@ -100,9 +99,10 @@ import com.openexchange.timer.TimerService;
 public class RTJSONActivator extends AJAXModuleActivator {
 
     private static final Logger LOG = LoggerFactory.getLogger(RTJSONActivator.class);
-    private final AtomicBoolean isStopped = new AtomicBoolean(true);
+
+    private boolean isStopped = true;
     private RealtimeActions realtimeActions;
-    private volatile RTJSONHandler handler;
+    private RTJSONHandler handler;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,7 +113,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         JSONServiceRegistry.SERVICES.set(this);
         ManagementHouseKeeper managementHouseKeeper = ManagementHouseKeeper.getInstance();
         managementHouseKeeper.initialize(this);
@@ -171,12 +171,13 @@ public class RTJSONActivator extends AJAXModuleActivator {
         for(RealtimeJanitor realtimeJanitor : RealtimeJanitors.getInstance().getJanitors()) {
             registerService(RealtimeJanitor.class, realtimeJanitor, realtimeJanitor.getServiceProperties());
         }
-        isStopped.set(false);
+        isStopped = false;
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        if (isStopped.compareAndSet(false, true)) {
+    public synchronized void stopBundle() throws Exception {
+        if (!isStopped) {
+            isStopped = true;
             ManagementHouseKeeper.getInstance().cleanup();
             RealtimeJanitors.getInstance().cleanup();
             RTJSONHandler handler = this.handler;
@@ -190,7 +191,7 @@ public class RTJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected synchronized void handleAvailability(Class<?> clazz) {
         if (allAvailable()) {
             LOG.info("{} regained all needed services {}. Going to restart bundle.", this.getClass().getSimpleName(), clazz.getSimpleName());
             try {
@@ -202,8 +203,8 @@ public class RTJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
-        if (!isStopped.get()) {
+    protected synchronized void handleUnavailability(Class<?> clazz) {
+        if (!isStopped) {
             LOG.warn(
                 "{} is handling unavailibility of needed service {}. Going to stop bundle.",
                 this.getClass().getSimpleName(),

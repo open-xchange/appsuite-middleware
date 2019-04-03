@@ -92,7 +92,7 @@ public class ConfigTools {
         if (NON_PERSISTENT_IDENTIFIER.equals(tmp.toLowerCase())) {
             return NON_PERSISTENT_VALUE;
         }
-        return (int) (TimeSpanParser.parseTimespan(tmp).longValue() / 1000);
+        return (int) (TimeSpanParser.parseTimespanToPrimitive(tmp) / 1000);
     }
 
     /**
@@ -119,7 +119,7 @@ public class ConfigTools {
         if (NON_PERSISTENT_IDENTIFIER.equals(tmp.toLowerCase())) {
             return NON_PERSISTENT_VALUE;
         }
-        return TimeSpanParser.parseTimespan(tmp).longValue();
+        return TimeSpanParser.parseTimespanToPrimitive(tmp);
     }
 
     /**

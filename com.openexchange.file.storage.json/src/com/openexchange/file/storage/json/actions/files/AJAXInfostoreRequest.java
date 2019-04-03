@@ -147,12 +147,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private StreamedUploadFile streamedUploadFile;
     private StreamedUploadFileIterator streamedUploadFiles;
     private boolean streamedUploadFailed;
+    private final Boolean pregeneratePreviews;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         super();
         this.data = requestData;
         this.session = session;
         streamedUploadFailed = false;
+        pregeneratePreviews = null;
     }
 
     @Override
@@ -190,6 +192,15 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     @Override
     public boolean getBoolParameter(final String name) {
         return AJAXRequestDataTools.parseBoolParameter(name, data);
+    }
+
+    @Override
+    public boolean isPregeneratePreviews() {
+        Boolean pregeneratePreviews = this.pregeneratePreviews;
+        if (null == pregeneratePreviews) {
+            pregeneratePreviews = Boolean.valueOf(getBoolParameter(Param.PREGENERATE_PREVIEWS.getName()));
+        }
+        return pregeneratePreviews.booleanValue();
     }
 
     @Override

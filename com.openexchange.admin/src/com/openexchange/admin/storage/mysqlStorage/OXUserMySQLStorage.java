@@ -140,7 +140,6 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -617,13 +616,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.isConvertDriveUserFolders()) {
                 convertDriveUserFolders(ctx, usrdata, con);
-            }
-
-            if (usrdata.getDisplay_name() != null) {
-                // update folder name via ox api if 'display name' was changed
-                final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
-
-                OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, contextId);
             }
 
             storeFolderTree(ctx, con, usrdata, userId);
@@ -2491,6 +2483,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setEditPassword(user.hasPermission(UserConfiguration.EDIT_PASSWORD));
             acc.setCollectEmailAddresses(user.hasPermission(UserConfiguration.COLLECT_EMAIL_ADDRESSES));
             acc.setMultipleMailAccounts(user.hasPermission(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS));
+            acc.setPublication(user.hasPermission(UserConfiguration.PUBLICATION));
             acc.setSubscription(user.hasPermission(UserConfiguration.SUBSCRIPTION));
             acc.setActiveSync(user.hasPermission(UserConfiguration.ACTIVE_SYNC));
             acc.setUSM(user.hasPermission(UserConfiguration.USM));
@@ -2701,6 +2694,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             user.setCollectEmailAddresses(access.isCollectEmailAddresses());
             user.setMultipleMailAccounts(access.isMultipleMailAccounts());
             user.setSubscription(access.isSubscription());
+            user.setPublication(access.isPublication());
             user.setActiveSync(access.isActiveSync());
             user.setUSM(access.isUSM());
             user.setOLOX20(access.isOLOX20());

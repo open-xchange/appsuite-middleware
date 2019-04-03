@@ -860,7 +860,6 @@ public class HideAdminServiceImplTest {
 
         TimedResult<DocumentMetadata> result = serviceSpy.removeAdminFromObjectPermissions(contextId, original);
 
-        assertTrue(result.equals(original));
         assertEquals(original.sequenceNumber(), result.sequenceNumber());
         assertNull(original.results());
     }

@@ -76,4 +76,19 @@ public interface ContextExtended extends Context {
      */
     void setReadOnly(boolean readOnly);
 
+    /**
+     * Checks if context-associated database schema needs an update since there are pending update tasks.
+     *
+     * @return <code>true</code> if update is needed; otherwise <code>false</code>
+     */
+    boolean isUpdateNeeded();
+
+    /**
+     * Sets that context-associated database schema needs an update since there are pending update tasks. However, actual update has not yet
+     * been triggered.
+     *
+     * @param updateNeeded The update-needed flag to set
+     */
+    void setUpdateNeeded(boolean updateNeeded);
+
 }

@@ -54,6 +54,7 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderPar
 import java.io.Serializable;
 import java.util.Comparator;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
@@ -96,12 +97,12 @@ public final class MailPath implements Cloneable, Serializable {
     /**
      * Gets the mail path corresponding to given folder full name and message UID
      *
-     * @param accountId The account ID
-     * @param folder The folder full name
-     * @param mailId The mail ID
+     * @param accountId The account identifier
+     * @param folder The folder identifier
+     * @param mailId The mail identifier
      * @return The mail path as {@link String}
      */
-    public static String getMailPath(final int accountId, final String folder, final String mailId) {
+    public static String getMailPath(int accountId, String folder, String mailId) {
         return new StringBuilder(32).append(prepareFullname(accountId, folder)).append(SEPERATOR).append(mailId).toString();
     }
 
@@ -113,8 +114,8 @@ public final class MailPath implements Cloneable, Serializable {
      * @return The corresponding mail paths
      * @throws OXException If mail paths cannot be generated
      */
-    public static MailPath[] getMailPaths(final String mailPaths) throws OXException {
-        return getMailPaths(mailPaths.split(" *, *"));
+    public static MailPath[] getMailPaths(String mailPaths) throws OXException {
+        return null == mailPaths ? null : getMailPaths(Strings.splitByComma(mailPaths));
     }
 
     /**
@@ -125,12 +126,28 @@ public final class MailPath implements Cloneable, Serializable {
      * @return The corresponding mail paths
      * @throws OXException If mail paths cannot be generated
      */
-    public static MailPath[] getMailPaths(final String[] mailPaths) throws OXException {
-        final MailPath[] retval = new MailPath[mailPaths.length];
+    public static MailPath[] getMailPaths(String[] mailPaths) throws OXException {
+        if (null == mailPaths) {
+            return null;
+        }
+
+        MailPath[] retval = new MailPath[mailPaths.length];
         for (int i = 0; i < mailPaths.length; i++) {
-            retval[i] = new MailPath(mailPaths[i]);
+            String sMailPath = mailPaths[i];
+            retval[i] = Strings.isEmpty(sMailPath) ? null : new MailPath(sMailPath);
         }
         return retval;
+    }
+
+    /**
+     * Returns the mail path for given mail path's string representation.
+     *
+     * @param mailPath The mail path's string representation
+     * @return The mail path or <code>null</code> (if given string is <code>null</code> or empty)
+     * @throws OXException If mail path's string representation cannot be parsed
+     */
+    public static MailPath getMailPathFor(String mailPath) throws OXException {
+        return Strings.isEmpty(mailPath) ? null : new MailPath(mailPath);
     }
 
     /**
@@ -139,16 +156,21 @@ public final class MailPath implements Cloneable, Serializable {
      * @param mailPaths The mail IDs
      * @return The extracted IDs
      */
-    public static String[] getUIDs(final MailPath[] mailPaths) {
-        final String[] retval = new String[mailPaths.length];
+    public static String[] getUIDs(MailPath[] mailPaths) {
+        if (null == mailPaths) {
+            return null;
+        }
+
+        String[] retval = new String[mailPaths.length];
         for (int i = 0; i < mailPaths.length; i++) {
-            retval[i] = mailPaths[i].mailID;
+            MailPath mailPath = mailPaths[i];
+            retval[i] = null == mailPath ? null : mailPath.mailID;
         }
         return retval;
     }
 
     /*-
-     * --------------------------------------------------------- Fields ---------------------------------------------------------
+     * -------------------------------------------------------------- Fields ---------------------------------------------------------------
      */
 
     private int accountId;

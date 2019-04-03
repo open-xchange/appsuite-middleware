@@ -81,11 +81,15 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String MISSING_ORGANIZER_MSG = "Organizer must also be an attendee.";
 
+    public static final String DIFFERENT_ORGANIZER_MSG = "All appointments of a series must contain the same organizer.";
+
     public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";
 
     public static final String UNSUPPORTED_FOLDER_MSG = "The supplied folder is not supported. Please select a valid folder and try again.";
 
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
+
+    public static final String OUT_OF_SEQUENCE_MSG = "The changes could not be applied because a newer version of the appointment already exists.";
 
     public static final String UID_CONFLICT_MSG = "The appointment could not be created due to another conflicting appointment with the same unique identifier.";
 
@@ -137,6 +141,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String IGNORED_INVALID_DATA_MSG = "The value for \"%2$s\" is invalid and wasn't applied.";
 
+    public static final String INVALID_DATA_MSG = "The value for \"%1$s\" is invalid and cannot be applied.";
+
     public static final String UNSUPPORTED_DATA_MSG = "The value for \"%2$s\" is not supported and wasn't applied.";
 
     public static final String UNKNOWN_INTERNAL_ATTENDEE_MSG = "The '%1$s' is either not an internal user or does not exist.";
@@ -154,7 +160,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
     public static final String TOO_MANY_ATTENDEES_MSG = "The appointment contains too many participants.";
 
     public static final String TOO_MANY_ALARMS_MSG = "The appointment contains too many reminders.";
-
+    
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

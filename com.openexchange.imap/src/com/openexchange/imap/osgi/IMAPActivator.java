@@ -106,6 +106,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 
@@ -133,7 +134,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
             EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class,
-            SSLConfigurationService.class, UserAwareSSLConfigurationService.class, CharsetService.class };
+            SSLConfigurationService.class, UserAwareSSLConfigurationService.class, CharsetService.class, VersionService.class };
     }
 
     @Override

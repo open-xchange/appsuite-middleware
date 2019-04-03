@@ -55,6 +55,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import org.slf4j.Logger;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.TransformationContext;
@@ -66,7 +67,10 @@ import com.openexchange.imagetransformation.TransformationContext;
  */
 public class RotateTransformation implements ImageTransformation {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RotateTransformation.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(RotateTransformation.class);
+    }
 
     private static final RotateTransformation INSTANCE = new RotateTransformation();
 
@@ -110,12 +114,12 @@ public class RotateTransformation implements ImageTransformation {
     @Override
     public BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException {
         if (null == imageInformation) {
-            LOG.debug("No image information available, unable to rotate image");
+            LoggerHolder.LOG.debug("No image information available, unable to rotate image");
             return sourceImage;
         }
         AffineTransform exifTransformation = getExifTransformation(new ImageInformation(imageInformation.orientation, sourceImage.getWidth(), sourceImage.getHeight()));
         if (null == exifTransformation) {
-            LOG.debug("No EXIF transformation available, unable to rotate image");
+            LoggerHolder.LOG.debug("No EXIF transformation available, unable to rotate image");
             return sourceImage;
         }
         // Draw rotated picture if its orientation is greater than 4

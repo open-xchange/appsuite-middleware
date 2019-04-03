@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -107,10 +107,13 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(new Option(OPT_CONTEXT_SHORT, OPT_CONTEXT_LONG, true, "A valid context identifier"));
-        options.addOption(new Option(OPT_USER_SHORT, OPT_USER_LONG, true, "A valid user identifier"));
-        options.addOption(new Option(OPT_CONFIGURATION_SHORT, OPT_CONFIGURATION_LONG, true, "Outputs the configuration associated with the given user. Filter by providing a pattern of the property."));
-        options.addOption(new Option(OPT_CAPABILITIES_SHORT, OPT_CAPABILITIES_LONG, false, "Outputs the capabilities associated with the given user."));
+        OptionGroup optionGroup = new OptionGroup();
+        optionGroup.addOption(createArgumentOption(OPT_CONFIGURATION_SHORT, OPT_CONFIGURATION_LONG, "userConfiguration", "Outputs the configuration associated with the given user. Filter by providing a pattern of the property.", true));
+        optionGroup.addOption(createSwitch(OPT_CAPABILITIES_SHORT, OPT_CAPABILITIES_LONG, "Outputs the capabilities associated with the given user.", true));
+        options.addOptionGroup(optionGroup);
+
+        options.addOption(createArgumentOption(OPT_CONTEXT_SHORT, OPT_CONTEXT_LONG, "contextId", "A valid context identifier", true));
+        options.addOption(createArgumentOption(OPT_USER_SHORT, OPT_USER_LONG, "userId", "A valid user identifier", true));
     }
 
     /**
@@ -258,6 +261,6 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "getuserconfigurationsource -c <contextId> -u <userId> [-a | -o <userConfiguration>] " + BASIC_MASTER_ADMIN_USAGE;
+        return "getuserconfigurationsource -c <contextId> -i <userId> [-a | -o <userConfiguration>] " + BASIC_CONTEXT_ONLY_ADMIN_USAGE;
     }
 }

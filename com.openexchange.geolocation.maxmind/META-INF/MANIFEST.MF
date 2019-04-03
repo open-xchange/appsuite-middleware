@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The Geo lcoation service based on MaxMind
+Bundle-Name: The Geo location service based on MaxMind
 Bundle-SymbolicName: com.openexchange.geolocation.maxmind
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
@@ -12,6 +12,7 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.databind.node,
  com.google.common.net,
  com.openexchange.config,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.geolocation,
  com.openexchange.java,
@@ -22,7 +23,4 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.osgi.framework.wiring,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-ClassPath: lib/geoip2-2.8.1-SNAPSHOT.jar,
- lib/maxmind-db-1.2.1.jar,
- .
 Bundle-Activator: com.openexchange.geolocation.maxmind.osgi.MaxMindGeoLocationServiceActivator

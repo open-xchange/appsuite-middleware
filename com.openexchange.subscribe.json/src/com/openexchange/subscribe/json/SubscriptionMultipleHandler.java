@@ -89,6 +89,7 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@SuppressWarnings("deprecation")
 public class SubscriptionMultipleHandler implements MultipleHandler {
 
     /** The actions that require a request body */

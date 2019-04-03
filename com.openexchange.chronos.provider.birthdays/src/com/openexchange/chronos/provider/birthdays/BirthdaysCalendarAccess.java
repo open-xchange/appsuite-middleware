@@ -87,6 +87,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.extensions.BasicCTagAware;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
@@ -267,13 +268,12 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         List<Contact> contacts = getBirthdayContacts();
         if (isExpandOccurrences()) {
             return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
-        } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
         }
+        return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
     }
 
     @Override
-    public List<Event> getChangeExceptions(String seriesId) throws OXException {
+    public List<Event> getChangeExceptions(String seriesId) {
         // no change exceptions possible
         return Collections.emptyList();
     }
@@ -291,7 +291,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         }
         Event originalEvent = eventConverter.getSeriesMaster(getBirthdayContact(eventID.getObjectID()));
         AlarmPreparator.getInstance().prepareEMailAlarms(session, services.getOptionalService(CalendarUtilities.class), alarms);
-        UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms);
+        UpdateResult updateResult = getAlarmHelper().updateAlarms(originalEvent, alarms, false);
         DefaultCalendarResult result = new DefaultCalendarResult(session, session.getUserId(), FOLDER_ID, null, null == updateResult ? null : Collections.singletonList(updateResult), null);
         return notifyHandlers(result);
     }
@@ -316,9 +316,8 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         List<Contact> contacts = searchBirthdayContacts(SearchAdapter.getContactSearchTerm(filters, queries));
         if (isExpandOccurrences()) {
             return postProcess(eventConverter.getOccurrences(contacts, getFrom(), getUntil(), getTimeZone()));
-        } else {
-            return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
         }
+        return postProcess(eventConverter.getSeriesMasters(contacts, getFrom(), getUntil(), getTimeZone()));
     }
 
     @Override

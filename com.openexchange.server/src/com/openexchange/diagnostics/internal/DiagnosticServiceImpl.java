@@ -64,7 +64,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.diagnostics.DiagnosticService;
-import com.openexchange.version.Version;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DiagnosticServiceImpl}
@@ -142,7 +143,7 @@ public class DiagnosticServiceImpl implements DiagnosticService {
      */
     @Override
     public String getVersion() {
-        return Version.getInstance().getVersionString();
+        return ServerServiceRegistry.getServize(VersionService.class).getVersionString();
     }
 
     /////////////////////////////////////// HELPERS ///////////////////////////////////

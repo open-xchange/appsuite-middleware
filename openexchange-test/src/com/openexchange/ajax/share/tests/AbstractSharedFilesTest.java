@@ -49,15 +49,12 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONException;
 import org.junit.Before;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -82,6 +79,7 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
     protected FolderObject userDestFolder;
     protected File file;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -95,13 +93,13 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
         super();
     }
 
-    protected void addUserPermission(int userId) throws OXException, IOException, JSONException {
+    protected void addUserPermission(int userId) {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(2);
         permissions.add(new DefaultFileStorageObjectPermission(userId, false, FileStorageObjectPermission.WRITE)); //shared to internal user
         file.getObjectPermissions().addAll(permissions);
     }
 
-    protected void addGuestPermission(ShareRecipient shareRecipient) throws OXException, IOException, JSONException {
+    protected void addGuestPermission(ShareRecipient shareRecipient) {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(2);
 
         DefaultFileStorageGuestObjectPermission guestPermission = new DefaultFileStorageGuestObjectPermission();

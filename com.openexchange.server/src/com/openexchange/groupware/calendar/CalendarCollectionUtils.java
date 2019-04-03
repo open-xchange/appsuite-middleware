@@ -319,6 +319,7 @@ public final class CalendarCollectionUtils {
             }
             recurringStart = calDataObject.getRecurringStart();
         } else {
+            calc_timezone = TimeZone.getDefault().getID();
             recurringStart = ((cdao.getStartDate().getTime() / Constants.MILLI_DAY) * Constants.MILLI_DAY);
         }
 
@@ -652,7 +653,7 @@ public final class CalendarCollectionUtils {
     }
 
     /**
-     * 
+     *
      * @param date
      * @param ignoreDate
      * @param cdao

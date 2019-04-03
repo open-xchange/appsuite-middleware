@@ -55,6 +55,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
@@ -133,6 +134,11 @@ public class AlarmPreparator {
         if (!alarm.containsDescription()) {
             alarm.setDescription("Reminder");
         }
+        /*
+         * ensure the alarm-agent is set to "server", too
+         * see also https://tools.ietf.org/html/draft-daboo-valarm-extensions-04#section-7
+         */
+        AlarmUtils.addExtendedProperty(alarm, new ExtendedProperty("ALARM-AGENT", "SERVER"), true);
     }
 
     /**

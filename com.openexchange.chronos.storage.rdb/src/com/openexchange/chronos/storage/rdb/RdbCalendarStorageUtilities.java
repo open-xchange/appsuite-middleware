@@ -82,7 +82,7 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
         EventField.TIMESTAMP, EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.MODIFIED_BY,
         EventField.SEQUENCE, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID,
         EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_DATES,
-        EventField.CLASSIFICATION, EventField.TRANSP
+        EventField.CLASSIFICATION, EventField.TRANSP, EventField.ATTENDEE_PRIVILEGES
     };
 
     /** The attendee fields that are preserved for reference in <i>tombstone</i> attendees */

@@ -148,7 +148,7 @@ public final class ResourceUpdateTest {
             /*
              * Load via storage API
              */
-            Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+            Resource storageVersion = ServerServiceRegistry.getServize(ResourceStorage.class, true).getResource(id, ctx);
             /*
              * Compare values
              */
@@ -166,7 +166,7 @@ public final class ResourceUpdateTest {
             /*
              * Load via storage API
              */
-            storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+            storageVersion = ServerServiceRegistry.getServize(ResourceStorage.class, true).getResource(id, ctx);
             /*
              * Compare values
              */
@@ -203,7 +203,7 @@ public final class ResourceUpdateTest {
             /*
              * Load via storage API
              */
-            final Resource storageVersion = ResourceStorage.getInstance().getResource(id, ctx);
+            final Resource storageVersion = ServerServiceRegistry.getServize(ResourceStorage.class, true).getResource(id, ctx);
 
             /*
              * Compare values

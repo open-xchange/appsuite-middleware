@@ -68,6 +68,7 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.mixins.PrincipalURL;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.principals.groups.GroupPrincipalCollection;
 import com.openexchange.dav.principals.groups.GroupPrincipalResource;
 import com.openexchange.dav.principals.resources.ResourcePrincipalCollection;
@@ -76,7 +77,7 @@ import com.openexchange.dav.principals.users.UserPrincipalCollection;
 import com.openexchange.dav.principals.users.UserPrincipalResource;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
@@ -240,7 +241,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                          */
                         if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                             try {
-                                Group[] foundGroups = GroupStorage.getInstance().searchGroups(pattern, false, factory.getContext());
+                                Group[] foundGroups = Services.getService(GroupService.class).search(factory.getContext(), pattern, false);
                                 if (null != foundGroups) {
                                     groups.addAll(Arrays.asList(foundGroups));
                                 }
@@ -251,7 +252,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
                             int groupID = extractPrincipalID(pattern, CalendarUserType.GROUP);
                             if (-1 != groupID) {
                                 try {
-                                    Group group = GroupStorage.getInstance().getGroup(groupID, factory.getContext());
+                                    Group group = Services.getService(GroupService.class).getGroup(factory.getContext(), groupID);
                                     if (null != group) {
                                         groups.add(group);
                                     }
@@ -378,14 +379,13 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
         PrincipalURL principalURL = PrincipalURL.parse(trimmedPattern);
         if (null != principalURL && cuType.equals(principalURL.getType())) {
             return principalURL.getPrincipalID();
-        } else {
-            /*
-             * try resource ID
-             */
-            ResourceId resourceId = ResourceId.parse(trimmedPattern);
-            if (null != resourceId && resourceId.getCalendarUserType().equals(cuType)) {
-                return resourceId.getEntity();
-            }
+        }
+        /*
+         * try resource ID
+         */
+        ResourceId resourceId = ResourceId.parse(trimmedPattern);
+        if (null != resourceId && resourceId.getCalendarUserType().equals(cuType)) {
+            return resourceId.getEntity();
         }
         return -1;
     }

@@ -68,6 +68,7 @@ import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
@@ -922,6 +923,35 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeGeo();
+            }
+        });
+        mappings.put(EventField.ATTENDEE_PRIVILEGES, new IntegerMapping<Event>("attendeePrivileges", "Attendee Privileges") {
+
+            @Override
+            public void set(Event event, Integer value) {
+                if (null != value && value.intValue() == 1) {
+                    event.setAttendeePrivileges(DefaultAttendeePrivileges.MODIFY);
+                    return;
+                }
+                event.setAttendeePrivileges(DefaultAttendeePrivileges.DEFAULT);
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsAttendeePrivileges();
+            }
+
+            @Override
+            public Integer get(Event event) {
+                if (CalendarUtils.hasAttendeePrivileges(event, DefaultAttendeePrivileges.MODIFY)) {
+                    return Integer.valueOf(1);
+                }
+                return Integer.valueOf(0);
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeAttendeePrivileges();
             }
         });
         mappings.put(EventField.FILENAME, new VarCharMapping<Event>("filename", "Filename") {

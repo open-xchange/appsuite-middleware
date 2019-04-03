@@ -92,7 +92,7 @@ import com.openexchange.secret.recovery.SecretMigrator;
  */
 public class FileStorageRdbActivator extends HousekeepingActivator {
 
-    private volatile WhiteboardSecretService secretService;
+    private WhiteboardSecretService secretService;
 
     /**
      * Initializes a new {@link FileStorageRdbActivator}.
@@ -109,7 +109,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             Services.setServices(this);
             DeleteListenerRegistry.initInstance();
@@ -181,7 +181,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
             super.stopBundle();
             /*

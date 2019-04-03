@@ -59,7 +59,7 @@ public class IncomingServer extends Server {
     private IncomingType type;
 
     public enum IncomingType {
-        POP3(Server.POP3), IMAP(Server.IMAP);
+        POP3(Server.POP3_STRING), IMAP(Server.IMAP_STRING);
 
         private final String keyword;
 
@@ -68,10 +68,10 @@ public class IncomingServer extends Server {
         }
 
         public static IncomingType getIncomingType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.POP3)) {
+            if (keyword.equalsIgnoreCase(Server.POP3_STRING)) {
                 return POP3;
             }
-            if (keyword.equalsIgnoreCase(Server.IMAP)) {
+            if (keyword.equalsIgnoreCase(Server.IMAP_STRING)) {
                 return IMAP;
             }
             return null;

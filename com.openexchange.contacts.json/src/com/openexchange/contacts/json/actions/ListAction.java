@@ -136,8 +136,7 @@ public class ListAction extends ContactAction {
                 }
             }
             return new AJAXRequestResult(sortedContacts, lastModified, "contact");
-        } else {
-        	return new AJAXRequestResult(contacts, lastModified, "contact");
         }
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 }

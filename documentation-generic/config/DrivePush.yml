@@ -1,0 +1,248 @@
+feature_name: Drive Push
+feature_description: |
+  Properties related to the drive push implementation
+properties:
+    - key: com.openexchange.drive.events.apn.[os].enabled
+      description: |
+        Enables or disables push event notifications to clients using the Apple Push
+        Notification service (APNS). This requires a valid
+        configuration for the APNS certificate and keys,
+        or install the restricted components packages for drive.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn.[os].keystore", "com.openexchange.drive.events.apn.[os].password"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.[os].keystore
+      description: |
+        Specifies the path to the local keystore file (PKCS #12) containing the APNS
+        certificate and keys for the application, e.g.
+        "/opt/open-xchange/etc/drive-apns.p12". Required if
+        [[com.openexchange.drive.events.apn.[os].enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.drive.events.apn.[os].enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.[os].password
+      description: |
+        Specifies the password used when creating the referenced keystore containing
+        the certificate of the application. Note that blank or null passwords
+        are in violation of the PKCS #12 specifications. Required if
+        [[com.openexchange.drive.events.apn.[os].enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.drive.events.apn.[os].enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple", "Credential"]
+    - key: com.openexchange.drive.events.apn.[os].production
+      description: |
+        Indicates which APNS service is used when sending push notifications. 
+        A value of <code>true</code> will use the production service, a value of
+        <code>false</code> the sandbox service.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
+      defaultValue: true
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn.[os].feedbackQueryInterval
+      description: |
+        Configures the interval between queries to the APN feedback service for the
+        subscribed devices. The value can be defined using units of measurement:
+        "D" (=days), "W" (=weeks) and "H" (=hours).
+        Leaving this parameter empty disables the feedback queries on this node.
+        Since each received feedback is processed cluster-wide, only one node in the
+        cluster should be enabled here.
+
+        [os] must be replaced with the operation system you want to configure. Available options are 'ios' and 'macos'.
+      defaultValue: 1D
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]   
+    - key: com.openexchange.drive.events.gcm.enabled
+      description: |
+        Enables or disables push event notifications to clients using the Google
+        Firebase Cloud Messaging (FCM) service. This requires a valid configuration for the
+        FCM API key.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.gcm.key"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Android"]
+    - key: com.openexchange.drive.events.gcm.key
+      description: |
+        Specifies the API key of the server application. Required if
+        [[com.openexchange.drive.events.gcm.enabled]] is <code>true</code> and the package
+        containing the restricted drive components is not installed.
+      defaultValue:
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.drive.events.gcm.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Android"]
+    - key: com.openexchange.drive.events.blockingLongPolling.enabled
+      description: |
+        Configures whether blocking long polling for pushing synchronization events
+        to clients may be used as fallback when no other long polling handlers are
+        available due to missing support of the HTTP service. Handling long polling
+        in a blocking manner consumes a server thread, and should therefore only be
+        enabled for testing purposes.
+      defaultValue: false
+      version:
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push"]
+    - key: com.openexchange.drive.events.apn2.ios.enabled
+      description: |
+        Enables or disables push event notifications to clients using the HTTP/2 base Apple Push
+        Notification service (APNS HTTP/2) for iOS devices. This requires a valid
+        configuration for the APNS options,
+        or install the restricted components packages for drive.  
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn2.ios.keystore", "com.openexchange.drive.events.apn2.ios.password"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.authtype
+      description: |
+        Specifies the authentication type to use for the APNS HTTP/2 push.
+        Allows the values "certificate" and "jwt"
+        "certificates" signals to connect to APNs using provider certificates while
+        "jwt" signals to connect to APNs using provider authentication JSON Web Token (JWT)
+      defaultValue: certificate
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.topic
+      description: |
+        Configures the apps's topic, which is typically the bundle ID of the app
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.drive.events.apn2.ios.enabled
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.keystore
+      description: |
+        Specifies the path to the local keystore file (PKCS #12) containing the APNS HTTP/2
+        certificate and keys for the iOS application, e.g.
+        "/opt/open-xchange/etc/drive-apns.p12". Required if
+        [[com.openexchange.drive.events.apn2.enabled]] is <code>true"</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>certificate</code> and the package containing the restricted drive components is not installed.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.password
+      description: |
+        Specifies the password used when creating the referenced keystore containing
+        the certificate of the iOS application. Note that blank or null passwords
+        are in violation of the PKCS #12 specifications. Required if
+        [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>certificate</code> and the package containing the restricted drive components is not installed.
+      defaultValue:
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple", "Credential"]
+    - key: com.openexchange.drive.events.apn2.ios.production
+      description: |
+        Indicates which APNS service is used when sending push notifications to iOS
+        devices. A value of <code>true</code> will use the production service, a value of
+        <code>false</code> the sandbox service.
+      defaultValue: true
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.privatekey
+      description: |
+        Specifies the private key file used to connect to APNs using provider authentication JSON Web Token (JWT)
+        Required if [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>jwt</code> and the package containing the restricted drive components is not installed.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.keyid
+      description: |
+        Specifies the key identifier used to connect to APNs using provider authentication JSON Web Token (JWT)
+        Required if [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>jwt</code> and the package containing the restricted drive components is not installed.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]
+    - key: com.openexchange.drive.events.apn2.ios.teamid
+      description: |
+        Specifies the team identifier used to connect to APNs using provider authentication JSON Web Token (JWT)
+        Required if [[com.openexchange.drive.events.apn2.enabled]] is <code>true</code>, [[com.openexchange.drive.events.apn2.ios.authtype]]
+        is <code>jwt</code> and the package containing the restricted drive components is not installed.
+      defaultValue: 
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      related: ["com.openexchange.drive.events.apn2.ios.enabled", "com.openexchange.drive.events.apn2.ios.authtype"]
+      file: drive.properties
+      packageName: open-xchange-drive
+      tags: ["Drive", "Push", "Apple"]      

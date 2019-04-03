@@ -190,6 +190,14 @@ public class UserConfiguration implements Serializable, Cloneable {
      * The permission bit for subscription access.
      */
     public static final int SUBSCRIPTION = UserPermissionBits.SUBSCRIPTION;
+    
+    /**
+     * The permission bit for publication access.
+     * 
+     * @deprecated Since v7.10.2
+     */
+    @Deprecated
+    public static final int PUBLICATION = UserPermissionBits.PUBLICATION;
 
     /**
      * The permission bit for active sync access.

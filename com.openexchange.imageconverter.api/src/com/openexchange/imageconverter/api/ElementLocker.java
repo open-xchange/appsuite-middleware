@@ -49,7 +49,7 @@
 
 package com.openexchange.imageconverter.api;
 
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
+import static com.openexchange.java.Strings.isNotEmpty;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.imageconverter.api.ElementLock.LockMode;

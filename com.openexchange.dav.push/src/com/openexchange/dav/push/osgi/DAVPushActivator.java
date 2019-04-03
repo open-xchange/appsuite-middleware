@@ -86,6 +86,7 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+import com.openexchange.version.VersionService;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -96,19 +97,20 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public class DAVPushActivator extends HousekeepingActivator implements Reloadable  {
 
-    private volatile PushSubscribeFactory factory;
+    private PushSubscribeFactory factory;
 //    private ServiceRegistration<ApnOptionsProvider> optionsProviderRegistration;
 //    private ServiceRegistration<EventHandler> eventHandlerRegistration;
 //    private List<ServiceRegistration<PushNotificationTransport>> pushTransportRegistrations;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class<?>[] { HttpService.class, ConfigurationService.class, PushNotificationService.class, PushSubscriptionRegistry.class, ConfigViewFactory.class, CapabilityService.class, VersionService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
         try {
+            Services.setServiceLookup(this);
             getLogger(DAVPushActivator.class).info("starting bundle {}", context.getBundle());
             /*
              * register push subscribe servlet
@@ -141,14 +143,14 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         getLogger(DAVPushActivator.class).info("stopping bundle {}", context.getBundle());
         reinit(null);
         super.stopBundle();
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         try {
             reinit(configService);
         } catch (Exception e) {

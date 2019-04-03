@@ -55,6 +55,8 @@ import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDates;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.hasAttendeePrivileges;
+import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastNonHiddenUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -93,6 +95,7 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -389,6 +392,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
         Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+        Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
         Check.quotaNotExceeded(storage, session);
         storage.getEventStorage().insertEvent(newExceptionEvent);
         List<Attendee> attendees = new ArrayList<Attendee>(originalSeriesMaster.getAttendees());
@@ -400,9 +404,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         attendees.add(updatedAttendee);
         storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), attendees);
         storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-        for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
+        for (Entry<Integer, List<Alarm>> entry : newExceptionAlarms.entrySet()) {
             if (originalAttendee.getEntity() != i(entry.getKey())) {
-                insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
+                insertAlarms(newExceptionEvent, i(entry.getKey()), entry.getValue(), true);
             }
         }
         /*
@@ -421,6 +425,36 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
+    }
+
+    /**
+     * Prepares a map of copied alarms per user based on the original alarms associated with the series master event, prior inserting them
+     * for a newly created overridden instance.
+     * <p/>
+     * Only alarms with <i>relative</i> triggers are considered, and certain alarm properties are not copied.
+     *
+     * @param masterAlarmsPerUser The original map of alarms per user id of the series master event
+     * @return The copy of alarms per user id to use for a new change exception event, or an empty map if there are none
+     */
+    protected static Map<Integer, List<Alarm>> prepareExceptionAlarms(Map<Integer, List<Alarm>> masterAlarmsPerUser) throws OXException {
+        if (null == masterAlarmsPerUser) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<Alarm>> copiedAlarmsPerUser = new HashMap<Integer, List<Alarm>>(masterAlarmsPerUser.size());
+        for (Entry<Integer, List<Alarm>> entry : masterAlarmsPerUser.entrySet()) {
+            List<Alarm> masterAlarms = filterRelativeTriggers(entry.getValue());
+            if (null == masterAlarms || masterAlarms.isEmpty()) {
+                continue;
+            }
+            AlarmField[] copiedFields = com.openexchange.tools.arrays.Arrays.remove(
+                AlarmField.values(), AlarmField.ID, AlarmField.UID, AlarmField.RELATED_TO, AlarmField.ACKNOWLEDGED);
+            List<Alarm> copiedAlarms = new ArrayList<Alarm>(masterAlarms.size());
+            for (Alarm alarm : masterAlarms) {
+                copiedAlarms.add(AlarmMapper.getInstance().copy(alarm, null, copiedFields));
+            }
+            copiedAlarmsPerUser.put(entry.getKey(), copiedAlarms);
+        }
+        return copiedAlarmsPerUser;
     }
 
     /**
@@ -518,7 +552,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             int[] alarmIDs = getAlarmIDs(removedItems);
             storage.getAlarmStorage().deleteAlarms(event.getId(), userId, alarmIDs);
             for(int i: alarmIDs) {
-                toDelete.add(i);
+                toDelete.add(I(i));
             }
         }
         /*
@@ -534,8 +568,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                 alarm.setUid(itemUpdate.getOriginal().getUid());
                 alarm.setTimestamp(System.currentTimeMillis());
                 alarms.add(Check.alarmIsValid(alarm, itemUpdate.getUpdatedFields().toArray(new AlarmField[itemUpdate.getUpdatedFields().size()])));
-                toDelete.add(alarm.getId());
-                toAdd.add(alarm.getId());
+                Integer alarmId = I(alarm.getId());
+                toDelete.add(alarmId);
+                toAdd.add(alarmId);
             }
             final String folderView = getFolderView(event, userId);
             if (false == folderView.equals(event.getFolderId())) {
@@ -561,7 +596,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          */
         List<Alarm> insertAlarms = insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
         for(Alarm alarm: insertAlarms) {
-            toAdd.add(alarm.getId());
+            toAdd.add(I(alarm.getId()));
         }
         List<Alarm> loadAlarms = storage.getAlarmStorage().loadAlarms(event, userId);
         storage.getAlarmTriggerStorage().deleteTriggersById(toDelete);
@@ -569,13 +604,13 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             loadAlarms = new ArrayList<Alarm>(loadAlarms);
             Iterator<Alarm> iterator = loadAlarms.iterator();
             while (iterator.hasNext()) {
-                if (!toAdd.contains(iterator.next().getId())) {
+                if (!toAdd.contains(I(iterator.next().getId()))) {
                     iterator.remove();
                 }
             }
         }
         // only insert the filtered alarms of the current user
-        storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(userId, loadAlarms));
+        storage.getAlarmTriggerStorage().insertTriggers(event, Collections.singletonMap(I(userId), loadAlarms));
 
         return true;
     }
@@ -777,6 +812,38 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Checks that the current session's user is able to act as the organizer in case the event represents a group scheduled event.
+     *
+     * @param originalEvent The event to check the calendar user's role in
+     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
+     * @throws OXException In case the calendar user is <b>not</b> the organizer and further checks on e.g. attendee privileges as per {@link Event#getAttendeePrivileges()} fail
+     */
+    private void requireOrganizerSchedulingResource(Event originalEvent, boolean assumeExternalOrganizerUpdate) throws OXException {
+        if (PublicType.getInstance().equals(folder.getType())) {
+            /*
+             * event located in public folder, assume change as or on behalf of organizer
+             */
+            return;
+        }
+        if (false == isGroupScheduled(originalEvent)) {
+            /*
+             * non group-schedule events, nothing to check
+             */
+            return;
+        }
+        if (false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
+            /*
+             * calendar user is not organizer of group scheduled event, throw error if configured
+             */
+            OXException e = CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getCn());
+            if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
+                throw e;
+            }
+            session.addWarning(e);
+        }
+    }
+
+    /**
      * Checks that a specific event can be updated by the current session's user under the perspective of the current folder, by either
      * requiring write access for <i>own</i> or <i>all</i> objects, based on the user being the creator of the event or not.
      * <p/>
@@ -813,40 +880,16 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
+        /*
+         * allow update for internally organized events if 'modify' attendee privileges are set
+         */
+        if (hasAttendeePrivileges(originalEvent, DefaultAttendeePrivileges.MODIFY) && false == hasExternalOrganizer(originalEvent)) {
+            return;
+        }
+        /*
+         * require organizer, otherwise
+         */
         requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
-    }
-
-    /**
-     * Checks that the current session's user is able to act as the organizer in case the event represents a group scheduled event.
-     *
-     * @param originalEvent The event to check the calendar user's role in
-     * @param assumeExternalOrganizerUpdate <code>true</code> if an external organizer update can be assumed, <code>false</code>, otherwise
-     * @throws OXException {@link CalendarExceptionCodes#NOT_ORGANIZER}
-     */
-    private void requireOrganizerSchedulingResource(Event originalEvent, boolean assumeExternalOrganizerUpdate) throws OXException {
-        if (PublicType.getInstance().equals(folder.getType())) {
-            /*
-             * event located in public folder, assume change as or on behalf of organizer
-             */
-            return;
-        }
-        if (false == isGroupScheduled(originalEvent)) {
-            /*
-             * non group-schedule events, nothing to check
-             */
-            return;
-        }
-        if (false == isOrganizer(originalEvent, calendarUserId) && false == assumeExternalOrganizerUpdate) {
-            /*
-             * calendar user is not organizer of group scheduled event, throw error if configured
-             */
-            OXException e = CalendarExceptionCodes.NOT_ORGANIZER.create(
-                folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getCn());
-            if (session.getConfig().isRestrictAllowedAttendeeChanges()) {
-                throw e;
-            }
-            session.addWarning(e);
-        }
     }
 
     /**
@@ -981,7 +1024,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * <li>or the calendar user is the organizer of the event</li>
      * <li>or the calendar user is the last <i>non-hidden</i> internal user attendee in the event</li>
      * </ul>
-     *
+     * <p/>
+     * Note: Even if attendees are allowed to modify the event, deletion is out of scope.
+     * 
      * @param originalEvent The original event to check
      * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
      */

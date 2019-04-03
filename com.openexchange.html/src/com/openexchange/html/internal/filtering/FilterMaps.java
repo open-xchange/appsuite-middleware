@@ -53,9 +53,11 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -382,7 +384,7 @@ public final class FilterMaps {
                 + "html.style.word-spacing=\"n\"\n"
                 + "html.style.z-index=\"0\"\n"
                 + "html.style.-moz-box-sizing=\"border-box\"\n"
-                + "html.style.-webkit-box-sizing=\"border-box\"\n" 
+                + "html.style.-webkit-box-sizing=\"border-box\"\n"
                 + "\n"
                 + "\n"
                 + "# CSS combi-map\n"
@@ -549,6 +551,18 @@ public final class FilterMaps {
             for (final String tagName : SINGLE_TAGS) {
                 if (!map.containsKey(tagName)) {
                     map.put(tagName, null);
+                }
+            }
+            // Add commonly allowed attributes
+            List<String> commonAttributes = Arrays.asList("desktop", "mobile", "tablet", "id", "class", "style");
+            for (Map.Entry<String, Map<String,Set<String>>> entry : map.entrySet()) {
+                Map<String, Set<String>> allowedAttributes = entry.getValue();
+                if (allowedAttributes != null) {
+                    for (String commonAttribute : commonAttributes) {
+                        if (!allowedAttributes.containsKey(commonAttribute)) {
+                            allowedAttributes.put(commonAttribute, null);
+                        }
+                    }
                 }
             }
             staticHTMLMap = Collections.unmodifiableMap(map);

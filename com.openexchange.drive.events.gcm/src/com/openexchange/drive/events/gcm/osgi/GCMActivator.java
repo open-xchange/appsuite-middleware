@@ -49,14 +49,18 @@
 
 package com.openexchange.drive.events.gcm.osgi;
 
-import com.openexchange.config.ConfigurationService;
+import java.util.Properties;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.gcm.GCMKeyProvider;
+import com.openexchange.drive.events.gcm.internal.DriveEventsGCMProperty;
 import com.openexchange.drive.events.gcm.internal.GCMDriveEventPublisher;
-import com.openexchange.drive.events.gcm.internal.Services;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link GCMActivator}
@@ -76,45 +80,60 @@ public class GCMActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { GCMKeyProvider.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.gcm");
-        Services.set(this);
-        ConfigurationService configService = Services.getService(ConfigurationService.class, true);
-        if (configService.getBoolProperty("com.openexchange.drive.events.gcm.enabled", false)) {
-            /*
-             * register GCM key provider if specified via config file (with a low ranking)
-             */
-            final String configuredKey = configService.getProperty("com.openexchange.drive.events.gcm.key");
-            if (Strings.isNotEmpty(configuredKey)) {
-                registerService(GCMKeyProvider.class, new GCMKeyProvider() {
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+        track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-                    @Override
-                    public String getKey() {
-                        return configuredKey;
+            private GCMKeyProvider provider;
+
+            @Override
+            public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                Properties properties = service.load(DriveEventsGCMProperty.FRAGMENT_FILE_NAME);
+                if (properties != null) {
+                    String key = properties.getProperty(DriveEventsGCMProperty.KEY.getFQPropertyName());
+                    if (Strings.isNotEmpty(key)) {
+                        provider = () -> key;
+                        registerService(GCMKeyProvider.class, provider);
                     }
-                }, 1);
-                LOG.info("Successfully registered GCM key provider.");
-            } else {
-                LOG.info("No default GCM key configured in \"Push\" section in file 'drive.properties', skipping registration for default GCM key provider.");
+                }
             }
-            /*
-             * register publisher
-             */
-            getService(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher());
-        } else {
-            LOG.info("Drive events via GCM are disabled, skipping publisher registration.");
-        }
+
+            @Override
+            public synchronized void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if (provider != null) {
+                    unregisterService(provider);
+                }
+            }
+        });
+        openTrackers();
+        /*
+         * register publisher
+         */
+        getServiceSafe(DriveEventService.class).registerPublisher(new GCMDriveEventPublisher(this));
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.gcm");
-        Services.set(null);
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }
-
 }

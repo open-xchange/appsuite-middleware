@@ -70,6 +70,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
@@ -948,6 +949,28 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 geoLocationJson.put(ChronosJsonFields.Geo.LATITUDE, from.getGeo()[0]);
                 geoLocationJson.put(ChronosJsonFields.Geo.LONGITUDE, from.getGeo()[1]);
                 return geoLocationJson;
+            }
+        });
+        mappings.put(EventField.ATTENDEE_PRIVILEGES, new StringMapping<Event>(ChronosJsonFields.ATTENDEE_PRIVILEGES, null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsAttendeePrivileges();
+            }
+
+            @Override
+            public void set(Event object, String value) throws OXException {
+                object.setAttendeePrivileges(DefaultAttendeePrivileges.MODIFY.getValue().equalsIgnoreCase(value) ? DefaultAttendeePrivileges.MODIFY : DefaultAttendeePrivileges.DEFAULT);
+            }
+
+            @Override
+            public String get(Event object) {
+                return object.getAttendeePrivileges().getValue();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeAttendeePrivileges();
             }
         });
         mappings.put(EventField.ATTENDEES, new AttendeesMapping<Event>(ChronosJsonFields.ATTENDEES, null) {

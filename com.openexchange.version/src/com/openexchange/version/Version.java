@@ -57,6 +57,7 @@ import com.openexchange.version.internal.Numbers;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
+@Deprecated
 public class Version {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Version.class);

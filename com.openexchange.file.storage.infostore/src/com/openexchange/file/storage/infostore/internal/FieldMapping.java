@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -100,6 +99,19 @@ public class FieldMapping {
         field2metadata.put(File.Field.OBJECT_PERMISSIONS, Metadata.OBJECT_PERMISSIONS_LITERAL);
         field2metadata.put(File.Field.SHAREABLE, Metadata.SHAREABLE_LITERAL);
         field2metadata.put(File.Field.ORIGIN, Metadata.ORIGIN_LITERAL);
+        field2metadata.put(File.Field.CAPTURE_DATE, Metadata.CAPTURE_DATE_LITERAL);
+        field2metadata.put(File.Field.WIDTH, Metadata.WIDTH_LITERAL);
+        field2metadata.put(File.Field.HEIGHT, Metadata.HEIGHT_LITERAL);
+        field2metadata.put(File.Field.CAMERA_MAKE, Metadata.CAMERA_MAKE_LITERAL);
+        field2metadata.put(File.Field.CAMERA_MODEL, Metadata.CAMERA_MODEL_LITERAL);
+        field2metadata.put(File.Field.CAMERA_ISO_SPEED, Metadata.CAMERA_ISO_SPEED_LITERAL);
+        field2metadata.put(File.Field.CAMERA_APERTURE, Metadata.CAMERA_APERTURE_LITERAL);
+        field2metadata.put(File.Field.CAMERA_EXPOSURE_TIME, Metadata.CAMERA_EXPOSURE_TIME_LITERAL);
+        field2metadata.put(File.Field.CAMERA_FOCAL_LENGTH, Metadata.CAMERA_FOCAL_LENGTH_LITERAL);
+        field2metadata.put(File.Field.GEOLOCATION, Metadata.GEOLOCATION_LITERAL);
+        field2metadata.put(File.Field.MEDIA_META, Metadata.MEDIA_META_LITERAL);
+        field2metadata.put(File.Field.MEDIA_STATUS, Metadata.MEDIA_STATUS_LITERAL);
+        field2metadata.put(File.Field.MEDIA_DATE, Metadata.MEDIA_DATE_LITERAL);
     }
 
     public static Metadata getMatching(File.Field field) {

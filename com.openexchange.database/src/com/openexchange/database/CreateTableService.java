@@ -67,16 +67,17 @@ import com.openexchange.exception.OXException;
 public interface CreateTableService {
 
     /**
-     * This method should give all table names that have to exist before the {@link #perform(Connection)} method is called. You can use this
-     * if your table has foreign keys to some other tables.
-     * @return an array with table names that have to exist before the {@link #perform(Connection)} method is called.
+     * This method should return all names of those table that have to exist before the {@link #perform(Connection)} method is called.
+     * For instance if a table has foreign keys constraints to other tables.
+     *
+     * @return An array with table names that have to exist before the {@link #perform(Connection)} method is called.
      */
     String[] requiredTables();
 
     /**
-     * This method must give all names of tables that are create during call of the {@link #perform(Connection)} method. Maybe some other
-     * tables require your before they can be created.
-     * @return an array with table names that are created during call of the {@link #perform(Connection)} method.
+     * This method must return all names of those tables that shall be created during call of the {@link #perform(Connection)} method.
+     *
+     * @return An array with table names that are created during call of the {@link #perform(Connection)} method.
      */
     String[] tablesToCreate();
 
@@ -84,6 +85,7 @@ public interface CreateTableService {
      * The implementation of this method should create the required tables on the given database connection. The connection is already
      * configured to use the correct schema. The given connection is already in a transaction. Do not modify the transaction state of the
      * connection.
+     *
      * @param con writable connection in a transaction state.
      * @throws OXException should be thrown if creating the table fails.
      */

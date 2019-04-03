@@ -52,6 +52,7 @@ package com.openexchange.file.storage.googledrive;
 import java.io.IOException;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -69,22 +70,22 @@ public abstract class AbstractGoogleDriveAccess {
     private static final String MIME_TYPE_DIRECTORY = GoogleDriveConstants.MIME_TYPE_DIRECTORY;
     // private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
 
-    protected final GoogleDriveOAuthAccess googleDriveAccess;
+    protected final @NonNull GoogleDriveOAuthAccess googleDriveAccess;
 
-    protected final Session session;
+    protected final @NonNull Session session;
 
-    protected final FileStorageAccount account;
+    protected final @NonNull FileStorageAccount account;
 
     protected String rootFolderIdentifier;
 
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
-     * 
+     *
      * @param googleDriveAccess The {@link GoogleDriveAccountAccess} to use
      * @param account The {@link FileStorageAccount}
      * @param session The {@link Session}
      */
-    protected AbstractGoogleDriveAccess(final GoogleDriveOAuthAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
+    protected AbstractGoogleDriveAccess(final @NonNull GoogleDriveOAuthAccess googleDriveAccess, final @NonNull FileStorageAccount account, final @NonNull Session session) {
         super();
         this.googleDriveAccess = googleDriveAccess;
         this.account = account;
@@ -147,7 +148,7 @@ public abstract class AbstractGoogleDriveAccess {
 
     /**
      * Moves the given file to the trash
-     * 
+     *
      * @param drive The client API
      * @param fileId The identifier of the file to trash
      * @throws IOException On error

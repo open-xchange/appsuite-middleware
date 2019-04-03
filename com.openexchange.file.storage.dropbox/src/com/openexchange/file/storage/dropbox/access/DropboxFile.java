@@ -51,10 +51,15 @@ package com.openexchange.file.storage.dropbox.access;
 
 import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
 import java.util.Date;
+import com.dropbox.core.v2.files.Dimensions;
 import com.dropbox.core.v2.files.FileMetadata;
+import com.dropbox.core.v2.files.GpsCoordinates;
+import com.dropbox.core.v2.files.MediaMetadata;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.java.GeoLocation;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
@@ -69,9 +74,9 @@ public class DropboxFile extends DefaultFile {
 
     /**
      * Initialises a new {@link DropboxFile}.
-     * 
+     *
      * @param metadata The {@link FileMetadata} of the Dropbox file
-     * @param userId The identifier of the user to use as created/modified-by information
+     * @param userid The identifier of the user to use as created/modified-by information
      */
     public DropboxFile(FileMetadata metadata, int userid) {
         super();
@@ -91,6 +96,8 @@ public class DropboxFile extends DefaultFile {
         setFileMIMEType(DropboxServices.getService(MimeTypeMap.class).getContentType(metadata.getName()));
         setFileName(metadata.getName());
         setTitle(metadata.getName());
+
+        applyMediaInfo(metadata);
     }
 
     /**
@@ -104,7 +111,7 @@ public class DropboxFile extends DefaultFile {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.DefaultFile#getSequenceNumber()
      */
     @Override
@@ -114,7 +121,7 @@ public class DropboxFile extends DefaultFile {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.AbstractFile#toString()
      */
     @Override
@@ -125,7 +132,7 @@ public class DropboxFile extends DefaultFile {
 
     /**
      * Extracts the folder from the specified full path
-     * 
+     *
      * @param path The full path to extract the parent folder
      * @return The extracted parent folder
      */
@@ -133,4 +140,36 @@ public class DropboxFile extends DefaultFile {
         int lastIndex = path.lastIndexOf('/');
         return path.substring(0, lastIndex);
     }
+
+    /**
+     * Set photo/video related properties if available
+     *
+     * @param metadata The {@link FileMetadata}
+     */
+    private void applyMediaInfo(FileMetadata metadata) {
+        if (null == metadata.getMediaInfo()) {
+            setMediaStatus(MediaStatus.none());
+            return;
+        }
+
+        if (metadata.getMediaInfo().isMetadata()) {
+            setMediaStatus(MediaStatus.success());
+            MediaMetadata values = metadata.getMediaInfo().getMetadataValue();
+            setCaptureDate(values.getTimeTaken());
+            GpsCoordinates coordinates = values.getLocation();
+            if (null != coordinates) {
+                setGeoLocation(new GeoLocation(coordinates.getLatitude(), coordinates.getLongitude()));
+            }
+            Dimensions dimensions = values.getDimensions();
+            if (null != dimensions) {
+                setHeight(values.getDimensions().getHeight());
+                setWidth(values.getDimensions().getWidth());
+            }
+        } else if (metadata.getMediaInfo().isPending()) {
+            setMediaStatus(MediaStatus.pending());
+        } else {
+            setMediaStatus(MediaStatus.failure());
+        }
+    }
+
 }

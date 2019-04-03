@@ -92,6 +92,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPrevi
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.MailFilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.MetadataResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
@@ -104,6 +105,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.JobInfoResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.MetadataMapResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.SecureContentAPIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
@@ -200,6 +202,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             defaultConverter.addConverter(new DownloadPreviewResultConverter());
             defaultConverter.addConverter(new PreviewImageResultConverter());
             defaultConverter.addConverter(new PreviewThumbResultConverter(getOptionalService(ConfigurationService.class)));
+            defaultConverter.addConverter(new MetadataResultConverter());
 
             /*-
              * TODO: Mail converters
@@ -264,6 +267,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
         DispatcherServlet.registerRenderer(new PreviewResponseRenderer());
         DispatcherServlet.registerRenderer(new JobInfoResponseRenderer());
+        DispatcherServlet.registerRenderer(new MetadataMapResponseRenderer());
 
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());

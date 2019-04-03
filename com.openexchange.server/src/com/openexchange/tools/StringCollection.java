@@ -259,7 +259,7 @@ public final class StringCollection {
     }
 
     public static String disarmSQLString(final String s) {
-        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(), DSO, DSOR), DAP, DAPR));
+        return new String(replaceGivenBytes(replaceGivenBytes(s.getBytes(com.openexchange.java.Charsets.UTF_8), DSO, DSOR), DAP, DAPR));
     }
 
     /**

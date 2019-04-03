@@ -163,7 +163,7 @@ public enum Utilities {
 
         long timespan;
         try {
-            timespan = TimeSpanParser.parseTimespan(value).longValue();
+            timespan = TimeSpanParser.parseTimespanToPrimitive(value);
         } catch (IllegalArgumentException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, propertyName);
         }

@@ -86,9 +86,8 @@ public class Activator extends HousekeepingActivator {
 
     private static final String METADATA_PREFIX = "meta";
 
-    private volatile ServicePublisher servicePublisher;
-
-    private volatile ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker;
+    private ServicePublisher servicePublisher;
+    private ServiceTracker<ConfigViewFactory,ConfigViewFactory> serviceTracker;
 
     /**
      * Initializes a new {@link Activator}.
@@ -103,13 +102,13 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         servicePublisher = new OSGiServicePublisher(context);
         registerListenerForConfigurationService();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
         unregisterListenerForConfigurationService();
         ServicePublisher servicePublisher = this.servicePublisher;
@@ -119,7 +118,7 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    public void handleConfigurationUpdate(final ConfigViewFactory viewFactory) {
+    public synchronized void handleConfigurationUpdate(final ConfigViewFactory viewFactory) {
         LOG.info("Updating configtree");
         try {
             ConfigView view = viewFactory.getView();

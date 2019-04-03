@@ -85,6 +85,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginJsonEnhancer;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
@@ -282,7 +283,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
             Future<JSONObject> optRampUp = rampUpAsync(serverSession, req);
 
             // Write response
-            JSONObject json = new JSONObject(12);
+            JSONObject json = new JSONObject(13);
             LoginWriter.write(result, json);
             if (result instanceof LoginJsonEnhancer) {
                 ((LoginJsonEnhancer) result).enhanceJson(json);
@@ -473,6 +474,9 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                     if (clientOverride != null) {
                         client = clientOverride;
                     }
+                }
+                if (MultifactorChecker.requiresMultifactor(session)) {
+                    client = "multifactor";
                 }
                 for (LoginRampUpService rampUpService : rampUpServices) {
                     if (rampUpService.contributesTo(client)) {

@@ -81,26 +81,33 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(YahooOAuthActivator.class);
 
-    private volatile OAuthService oauthService;
-    private volatile YahooOAuthServiceMetaData oAuthMetaData;
+    private OAuthService oauthService;
+    private YahooOAuthServiceMetaData oAuthMetaData;
+
+    /**
+     * Initializes a new {@link YahooOAuthActivator}.
+     */
+    public YahooOAuthActivator() {
+        super();
+    }
 
     /** Gets OAuthService */
-    public OAuthService getOauthService() {
+    public synchronized OAuthService getOauthService() {
         return oauthService;
     }
 
     /** Sets OAuthService */
-    public void setOauthService(final OAuthService oauthService) {
+    public synchronized void setOauthService(final OAuthService oauthService) {
         this.oauthService = oauthService;
     }
 
     /** Gets OAuthServiceMetaDataYahooImpl */
-    public YahooOAuthServiceMetaData getOAuthMetaData() {
+    public synchronized YahooOAuthServiceMetaData getOAuthMetaData() {
         return oAuthMetaData;
     }
 
     /** Sets OAuthServiceMetaDataYahooImpl */
-    public void setOAuthMetaData(final YahooOAuthServiceMetaData oauthMetaData) {
+    public synchronized void setOAuthMetaData(final YahooOAuthServiceMetaData oauthMetaData) {
         this.oAuthMetaData = oauthMetaData;
     }
 
@@ -110,7 +117,7 @@ public class YahooOAuthActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServices(this);
         oauthService = getService(OAuthService.class);
         oAuthMetaData = new YahooOAuthServiceMetaData(this);

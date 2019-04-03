@@ -395,9 +395,23 @@ public abstract class MailServletInterface {
     public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws OXException;
 
     /**
-     * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
+     * 
+     * Returns a list of conversations within the given folder
+     *
+     * @param folder The folder to search mails in
+     * @param includeSent Whether to include sent mails or not
+     * @param cache Whether caller allows to serve this call with possibly cached content
+     * @param sortCol The column used for sorting
+     * @param order The order of the sorting
+     * @param fields The fields to get
+     * @param headerFields The header fields to get
+     * @param fromToIndices An optional request range for pagination
+     * @param max A reference used to compute the look ahead value in case indexRange is missing
+     * @param searchTerm The search term
+     * @return A list of conversations
+     * @throws OXException in case of errors
      */
-    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, long lookAhead, com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException;
+    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, long max, com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.

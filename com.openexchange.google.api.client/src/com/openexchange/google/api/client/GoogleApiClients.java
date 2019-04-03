@@ -80,6 +80,7 @@ import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -167,7 +168,7 @@ public class GoogleApiClients {
                 oauthAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, oauthAccount), new ExponentialBackOffRetryPolicy());
             }
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, oauthAccount, session);
+            throw OAuthUtil.handleScribeOAuthException(e, oauthAccount, session);
         }
         return oauthAccount;
     }
@@ -233,7 +234,7 @@ public class GoogleApiClients {
             // Check expiry
             return scribeOAuthService.getExpiry(googleAccount.getToken());
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, googleAccount, session);
+            throw OAuthUtil.handleScribeOAuthException(e, googleAccount, session);
         }
     }
 
@@ -272,7 +273,7 @@ public class GoogleApiClients {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
             return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, googleAccount, session);
+            throw OAuthUtil.handleScribeOAuthException(e, googleAccount, session);
         }
     }
 
@@ -305,10 +306,19 @@ public class GoogleApiClients {
             // Check expiry
             return scribeOAuthService.getExpiry(googleAccount.getToken());
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw handleScribeOAuthException(e, googleAccount, session);
+            throw OAuthUtil.handleScribeOAuthException(e, googleAccount, session);
         }
     }
 
+    /**
+     * Handles the specified {@link OAuthException} for the specified {@link OAuthAccount} and the
+     * specified {@link Session} and returns an appropriate {@link OXException}.
+     * 
+     * @param e The exception to handle
+     * @param googleAccount the {@link OAuthAccount}
+     * @param session The groupware session
+     * @return The appropriate OXException
+     */
     static OXException handleScribeOAuthException(OAuthException e, OAuthAccount googleAccount, Session session) {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
             List<Object> displayArgs = new ArrayList<>(2);
@@ -318,7 +328,7 @@ public class GoogleApiClients {
         }
 
         String exMessage = e.getMessage();
-        String errorMsg = parseErrorFrom(exMessage);
+        String errorMsg = parseKeyFrom(exMessage, "error");
         if (Strings.isEmpty(errorMsg)) {
             return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
         }
@@ -328,10 +338,24 @@ public class GoogleApiClients {
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
+
+        String errorDescription = parseKeyFrom(exMessage, "error_description");
+        if (Strings.isEmpty(errorDescription)) {
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+        }
+        if (errorDescription.contains("Missing required parameter: refresh_token")) {
+             return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(googleAccount.getDisplayName(), googleAccount.getId());
+        }
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
     }
 
-    private static String parseErrorFrom(String message) {
+    /**
+     * Parses the specified key from from the specified message
+     * 
+     * @param message The message from which to parse the error code
+     * @return The error code, or <code>null</code> if none can be parsed
+     */
+    private static String parseKeyFrom(String message, String key) {
         if (Strings.isEmpty(message)) {
             return null;
         }
@@ -344,7 +368,7 @@ public class GoogleApiClients {
 
         try {
             JSONObject jo = new JSONObject(message.substring(pos + marker.length(), message.length() - 1));
-            return jo.optString("error", null);
+            return jo.optString(key, null);
         } catch (JSONException e) {
             // Apparent no JSON response
             return null;
@@ -449,7 +473,7 @@ public class GoogleApiClients {
                 return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
             } catch (OAuthException e) {
                 OAuthAccount dbAccount = getDBAccount();
-                throw handleScribeOAuthException(e, dbAccount, getSession());
+                throw OAuthUtil.handleScribeOAuthException(e, dbAccount, getSession());
             }
         }
     }

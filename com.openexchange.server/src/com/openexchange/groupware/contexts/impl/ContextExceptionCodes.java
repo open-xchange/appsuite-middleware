@@ -76,7 +76,7 @@ public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
      */
     SQL_ERROR("SQL problem: %1$s.", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 6),
     /**
-     * Updating database ... Try again later.
+     * Updating database... Try again later.
      */
     UPDATE("Updating database ... Try again later.", ContextExceptionMessage.UPDATE_MSG, Category.CATEGORY_TRY_AGAIN, 7),
     /**
@@ -90,7 +90,14 @@ public enum ContextExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The context %d is located in server with id %d
      */
-    LOCATED_IN_ANOTHER_SERVER("The context %d is located in server with id %d", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12);
+    LOCATED_IN_ANOTHER_SERVER("The context %d is located in server with id %d", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12),
+    /**
+     * Database update needed.
+     * <p>
+     * <b>Note</b>: This error code intentionally uses the same display message as {@link ContextExceptionCodes#UPDATE}
+     */
+    UPDATE_NEEDED("Database update needed.", ContextExceptionMessage.UPDATE_MSG, Category.CATEGORY_SERVICE_DOWN, 13),
+    ;
 
     /**
      * (Log) Message of the exception.

@@ -69,8 +69,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@link BufferingQueue}
  * <p/>
  * Wraps an event queue as a buffer for elements that should be available in the queue after a defined timespan. Offering the same
- * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(BufferedElement)}, up to a defined maximum
- * duration, or may replace the existing element via {@link #offerOrReplace(BufferedElement)}.
+ * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(Object)}, up to a defined maximum
+ * duration, or may replace the existing element via {@link #offerOrReplace(Object)}.
  * <p/>
  * Useful to construct send- or receive-buffers capable of eliminating or stalling multiple duplicate elements before they get available
  * for consumers.
@@ -179,6 +179,19 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
     public BufferingQueue(Collection<? extends E> c, long defaultDelayDuration, long defaultMaxDelayDuration) {
         this(defaultDelayDuration, defaultMaxDelayDuration);
         this.addAll(c);
+    }
+
+    /**
+     * Gets the lock.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Use with care
+     * </div>
+     *
+     * @return The lock
+     */
+    public ReentrantLock getLock() {
+        return lock;
     }
 
     /**
@@ -295,7 +308,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
 
     /**
      * Inserts the specified element into this delay queue if not already contained. Otherwise (meaning already contained), the
-     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     * contained element's delay is reseted (up to contained element's defined maxDelayDuration).
      *
      * @param e The element to add
      * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
@@ -307,7 +320,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
 
     /**
      * Inserts the specified element into this delay queue if not already contained. Otherwise (meaning already contained), the
-     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     * contained element's delay is reseted (up to contained element's defined maxDelayDuration).
      *
      * @param e The element to add
      * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
@@ -349,7 +362,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
 
     /**
      * Inserts multiple elements into this queue if not already contained. Otherwise (meaning already contained), the
-     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     * contained element's delay is reseted (up to contained element's defined maxDelayDuration).
      *
      * @param c The elements to add
      * @return <tt>true</tt> if at least one element was added; otherwise <code>false</code> if all elements were already contained
@@ -361,7 +374,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
 
     /**
      * Inserts multiple elements into this queue if not already contained. Otherwise (meaning already contained), the
-     * contained elements delay is reseted (up to contained element's defined maxDelayDuration).
+     * contained element's delay is reseted (up to contained element's defined maxDelayDuration).
      *
      * @param c The elements to add
      * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
@@ -639,9 +652,8 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
-                    } else {
-                        nanos = available.awaitNanos(nanos);
                     }
+                    nanos = available.awaitNanos(nanos);
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
@@ -908,8 +920,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         lock.lock();
         try {
             for (Iterator<BufferedElement<E>> it = q.iterator(); it.hasNext();) {
-                BufferedElement<E> next = it.next();
-                if (o.equals(next.getElement())) {
+                if (o.equals(it.next().getElement())) {
                     it.remove();
                     return true;
                 }
@@ -1040,6 +1051,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
             hash = source.hash;
         }
 
+        @SuppressWarnings("rawtypes") // Type safety is ensured by invoking list
         @Override
         public int compareTo(Delayed o) {
             long thisStamp = this.stamp;

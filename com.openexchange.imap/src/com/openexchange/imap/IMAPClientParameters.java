@@ -55,10 +55,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 import com.sun.mail.imap.IMAPStore;
 
 
@@ -245,7 +246,7 @@ public enum IMAPClientParameters {
         String localIp = session.getLocalIp();
         clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), Strings.isEmpty(localIp) ? LOCAL_HOST : localIp);
         clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-        clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
+        clientParams.put(IMAPClientParameters.VERSION.getParamName(), Services.getService(VersionService.class).getVersionString());
         imapStore.setClientParameters(clientParams);
     }
 

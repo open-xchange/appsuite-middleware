@@ -1,0 +1,15 @@
+/multifactor/device?action=all:
+  get:
+    operationId: multifactorDeviceActionAll
+    tags:
+      - Multifactor
+    summary: Gets all multifactor devices 
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+        200:
+          description: |
+            A JSON object containing the result of the operation. In case of errors the
+            responsible fields in the response are filled (see [Error handling](#error-handling)).
+          schema:
+            $ref: "#/definitions/MultifactorDevicesResponse"

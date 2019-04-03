@@ -371,7 +371,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, accountId)));
                 account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, accountId)));
             } catch (OXException e) {
-                if (false == CryptoErrorMessage.BadPassword.equals(e)) {
+                if (CryptoErrorMessage.BadPassword.equals(e)) {
                     throw e;
                 }
 
@@ -863,7 +863,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
                 account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
             } catch (OXException e) {
-                if (false == CryptoErrorMessage.BadPassword.equals(e)) {
+                if (CryptoErrorMessage.BadPassword.equals(e)) {
                     throw e;
                 }
 

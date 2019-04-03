@@ -71,66 +71,67 @@ public enum KnownApi implements API {
     /**
      * Twitter
      */
-    TWITTER("Twitter", "com.openexchange.oauth.twitter", "twitter", TwitterApi.class),
+    TWITTER("Twitter", "com.openexchange.oauth.twitter", "twitter", "api.twitter.com", TwitterApi.class),
     /**
      * LinkedIn
      */
-    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", "linkedin", LinkedInApi.class),
+    LINKEDIN("LinkedIn", "com.openexchange.oauth.linkedin", "linkedin", "api.linkedin.com", LinkedInApi.class),
     /**
      * Other/unknown
      */
-    OTHER("Other", "com.openexchange.oauth.other", "other", Api.class),
+    OTHER("Other", "com.openexchange.oauth.other", "other", "", Api.class),
     /**
      * MSN
      */
-    MSN("MSN", "com.openexchange.oauth.msn", "msn", MsLiveConnectApi.class),
+    MSN("MSN", "com.openexchange.oauth.msn", "msn", "apis.live.net", MsLiveConnectApi.class),
     /**
      * Yahoo
      */
-    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", "yahoo", YahooApi2.class),
+    YAHOO("Yahoo", "com.openexchange.oauth.yahoo", "yahoo", "social.yahooapis.com", YahooApi2.class),
     /**
      * Tumblr
      */
-    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", "tumblr", TumblrApi.class),
+    TUMBLR("Tumblr", "com.openexchange.oauth.tumblr", "tumblr", "www.tumblr.com", TumblrApi.class),
     /**
      * Flickr
      */
-    FLICKR("Flickr", "com.openexchange.oauth.flickr", "flickr", FlickrApi.class),
+    FLICKR("Flickr", "com.openexchange.oauth.flickr", "flickr", "api.flickr.com", FlickrApi.class),
     /**
      * Dropbox
      */
-    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", "dropbox", DropboxApi2.class),
+    DROPBOX("Dropbox", "com.openexchange.oauth.dropbox", "dropbox", "api.dropbox.com", DropboxApi2.class),
     /**
      * XING
      */
-    XING("XING", "com.openexchange.oauth.xing", "xing", XingApi.class),
+    XING("XING", "com.openexchange.oauth.xing", "xing", "api.xing.com", XingApi.class),
     /**
      * vkontakte
      */
-    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", "vkontakte", VkontakteApi.class),
+    VKONTAKTE("Vkontakte.ru", "com.openexchange.oauth.vkontakte", "vkontakte", "api.vkontakte.ru", VkontakteApi.class),
     /**
      * Google
      */
-    GOOGLE("Google", "com.openexchange.oauth.google", "google", Google2Api.class),
+    GOOGLE("Google", "com.openexchange.oauth.google", "google", "www.googleapis.com", Google2Api.class),
     /**
      * Box.com
      */
-    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", "boxcom", BoxApi.class),
+    BOX_COM("Box.com", "com.openexchange.oauth.boxcom", "boxcom", "app.box.com", BoxApi.class),
     /**
      * Copy.com
      */
-    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom", CopyApi.class),
+    COPY_COM("Copy.com", "com.openexchange.oauth.copycom", "copycom", "api.copy.com", CopyApi.class),
     /**
      * Microsoft Graph
      * 
      * @see <a href="https://developer.microsoft.com/en-us/graph/docs/concepts/overview">Microsoft Graph</a>
      */
-    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "microsoftgraph", MicrosoftGraphApi.class);
+    MICROSOFT_GRAPH("Microsoft", "com.openexchange.oauth.microsoft.graph", "microsoftgraph", "graph.microsoft.com", MicrosoftGraphApi.class);
     ;
 
     private final String serviceId;
     private final String displayName;
     private final String capability;
+    private final String url;
     private final Class<? extends Api> apiClass;
 
     /**
@@ -139,43 +140,35 @@ public enum KnownApi implements API {
      * @param displayName The display name
      * @param serviceId The service identifier
      * @param capability The capability name
+     * @param url The API's URL
      * @param apiClass The api class
      */
-    private KnownApi(String displayName, String serviceId, String capability, Class<? extends Api> apiClass) {
+    private KnownApi(String displayName, String serviceId, String capability, String url, Class<? extends Api> apiClass) {
         this.displayName = displayName;
         this.serviceId = serviceId;
         this.capability = capability;
+        this.url = url;
         this.apiClass = apiClass;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.API#getServiceId()
-     */
     @Override
     public String getServiceId() {
         return serviceId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.API#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.API#getCapability()
-     */
     @Override
     public String getCapability() {
         return capability;
+    }
+
+    @Override
+    public String getURL() {
+        return url;
     }
 
     /**

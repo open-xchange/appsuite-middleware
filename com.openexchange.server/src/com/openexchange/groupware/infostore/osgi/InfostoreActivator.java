@@ -85,6 +85,7 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.LockCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyCleaner;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
+import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.AutodeleteEditable;
 import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.MaxVersionCount;
 import com.openexchange.groupware.settings.tree.modules.infostore.autodelete.RetentionDays;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -224,6 +225,9 @@ public class InfostoreActivator implements BundleActivator {
 
             // Register settings
             List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings = new ArrayList<ServiceRegistration<ConfigTreeEquivalent>>(4);
+            AutodeleteEditable autodeleteEditable = new AutodeleteEditable(); // --> Statically registered via ConfigTree class
+            registeredSettings.add(context.registerService(ConfigTreeEquivalent.class, autodeleteEditable, null));
+
             MaxVersionCount maxVersionCount = new MaxVersionCount(); // --> Statically registered via ConfigTree class
             registeredSettings.add(context.registerService(ConfigTreeEquivalent.class, maxVersionCount, null));
 

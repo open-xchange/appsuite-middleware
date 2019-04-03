@@ -77,4 +77,11 @@ public interface API {
      * @return the capability name
      */
     String getCapability();
+
+    /**
+     * Returns the provider's API URL
+     * 
+     * @return the provider's API URL
+     */
+    String getURL();
 }

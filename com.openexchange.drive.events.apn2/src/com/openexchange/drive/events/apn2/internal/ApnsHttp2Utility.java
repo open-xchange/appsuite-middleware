@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.apn2.internal;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -111,9 +112,13 @@ public class ApnsHttp2Utility {
         try {
             ApnsClientBuilder clientBuilder;
             if (AuthType.CERTIFICATE == options.getAuthType()) {
-                clientBuilder = new ApnsClientBuilder()
-                    .setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
-                    .setClientCredentials(options.getKeystore(), options.getPassword());
+                if (null != options.getKeystore()) {
+                    clientBuilder = new ApnsClientBuilder().setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                        .setClientCredentials(options.getKeystore(), options.getPassword());
+                } else {
+                    clientBuilder = new ApnsClientBuilder().setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)
+                        .setClientCredentials(new ByteArrayInputStream(options.getKeystoreBytes()), options.getPassword());
+                }
             } else {
                 clientBuilder = new ApnsClientBuilder()
                     .setApnsServer(options.isProduction() ? ApnsClientBuilder.PRODUCTION_APNS_HOST : ApnsClientBuilder.DEVELOPMENT_APNS_HOST)

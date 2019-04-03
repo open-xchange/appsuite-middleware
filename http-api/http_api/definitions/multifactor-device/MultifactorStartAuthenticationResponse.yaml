@@ -1,0 +1,42 @@
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: Authentication response data
+    properties:
+        challenge:
+          type: object
+          description: A challenge required to be solved for authentication
+          properties:
+            phoneNumberTail:
+              type: string
+              description: (SMS provider only) The last digits of the phone number where the secret token was sent to 
+            backupStringLength:
+              type: integer
+              description: (BACKUP_STRING provider only) The length of the secret token required for authentication
+            requestId:
+              type: string
+              description: (U2F provider only) The U2F request ID
+            signRequests:
+              type: array
+              description: (U2F provider only) A list of U2F challenges which needs to be solved for authentication
+              items:
+                type: object
+                description: (U2F provider only) A U2F challenge which needs to be solved for authentication
+                properties:
+                    version: 
+                      type: string
+                      description: (U2F provider only) The U2F version 
+                    challenge:
+                      type: string
+                      description: (U2F provider only) The U2F challenge data which needs to be signed by the client
+                    appId:
+                      type: string
+                      description: (U2F provider only) The U2F APP-ID
+                    keyHandle:
+                      type: string
+                      description: (U2F provider only) The U2F Key-handle
+                    requestId:
+                      type: string
+                      description: (U2F provider only) The U2F request ID
+

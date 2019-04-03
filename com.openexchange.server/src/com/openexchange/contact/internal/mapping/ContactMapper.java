@@ -2412,24 +2412,6 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
-        //        mappings.put(ContactField.LINKS, new ("") {
-        //
-        //            @Override
-        //            public void set(Contact contact,  value) {
-        //                contact.setLinks(value);
-        //            }
-        //
-        //            @Override
-        //            public boolean isSet(Contact contact) {
-        //                return contact.containsLinks();
-        //            }
-        //
-        //            @Override
-        //            public  get(Contact contact) {
-        //                return contact.getLinks();
-        //            }
-        //        });
-
         mappings.put(ContactField.FOLDER_ID, new ContactMapping<Integer>() {
 
             @Override
@@ -2827,10 +2809,6 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             @Override
             public Boolean get(Contact contact) {
                 return contact.getMarkAsDistribtuionlist();
-            }
-
-            @Override
-            public void validate(Contact contact) throws OXException {
             }
 
             @Override

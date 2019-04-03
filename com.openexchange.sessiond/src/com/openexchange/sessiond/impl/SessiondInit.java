@@ -95,7 +95,7 @@ public class SessiondInit implements Initialization {
     }
 
     @Override
-    public void stop() {
+    public void stop() throws OXException {
         if (!started.get()) {
             LOG.error("{} has not been started", SessiondInit.class.getName());
             return;

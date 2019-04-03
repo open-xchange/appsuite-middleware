@@ -9,11 +9,14 @@ import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
+import com.openexchange.java.GeoLocation;
+import com.openexchange.session.Session;
 
 /*
  *
@@ -363,6 +366,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
         document.setSequenceNumber(sequenceNumber);
     }
 
+    @Override
     public FolderPath getOrigin() {
         InfostoreFolderPath folderPath = document.getOriginFolderPath();
         return null == folderPath ? null : FolderPath.copyOf(folderPath);
@@ -371,6 +375,131 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public void setOrigin(FolderPath origin) {
         document.setOriginFolderPath(null == origin ? null : InfostoreFolderPath.copyOf(origin));
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        return document.getCaptureDate();
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        document.setCaptureDate(captureDate);
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        return document.getGeoLocation();
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        document.setGeoLocation(geoLocation);
+    }
+
+    @Override
+    public Long getWidth() {
+        return document.getWidth();
+    }
+
+    @Override
+    public void setWidth(long width) {
+        document.setWidth(width);
+    }
+
+    @Override
+    public Long getHeight() {
+        return document.getHeight();
+    }
+
+    @Override
+    public void setHeight(long height) {
+        document.setHeight(height);
+    }
+
+    @Override
+    public Long getCameraIsoSpeed() {
+        return document.getCameraIsoSpeed();
+    }
+
+    @Override
+    public void setCameraIsoSpeed(long isoSpeed) {
+        document.setCameraIsoSpeed(isoSpeed);
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        return document.getCameraAperture();
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        document.setCameraAperture(aperture);
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        return document.getCameraExposureTime();
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        document.setCameraExposureTime(exposureTime);
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        return document.getCameraFocalLength();
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
+        document.setCameraFocalLength(focalLength);
+    }
+
+    @Override
+    public String getCameraMake() {
+        return document.getCameraMake();
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        document.setCameraMake(cameraMake);
+    }
+
+    @Override
+    public String getCameraModel() {
+        return document.getCameraModel();
+    }
+
+    @Override
+    public void setCameraModel(String cameraModel) {
+        document.setCameraModel(cameraModel);
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        return document.getMediaMeta();
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        document.setMediaMeta(mediaMeta);
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        return document.getMediaStatus();
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus mediaStatus) {
+        document.setMediaStatus(mediaStatus);
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(Session session) {
+        return document.getMediaStatusForClient(session);
     }
 
 }

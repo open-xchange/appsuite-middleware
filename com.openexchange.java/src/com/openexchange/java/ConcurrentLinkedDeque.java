@@ -299,6 +299,7 @@ public class ConcurrentLinkedDeque<E>
 
         // Unsafe mechanics
 
+        @SuppressWarnings("hiding")
         private static final sun.misc.Unsafe UNSAFE;
         private static final long prevOffset;
         private static final long itemOffset;
@@ -307,7 +308,7 @@ public class ConcurrentLinkedDeque<E>
         static {
             try {
                 UNSAFE = sun.misc.Unsafe.getUnsafe();
-                Class k = Node.class;
+                Class<?> k = Node.class;
                 prevOffset = UNSAFE.objectFieldOffset
                     (k.getDeclaredField("prev"));
                 itemOffset = UNSAFE.objectFieldOffset
@@ -847,6 +848,7 @@ public class ConcurrentLinkedDeque<E>
      * @throws NullPointerException if the specified collection or any
      *         of its elements are null
      */
+    @SuppressWarnings("null") // Is warned for <code>t</code>, but can't happen
     public ConcurrentLinkedDeque(Collection<? extends E> c) {
         // Copy c into a private chain of Nodes
         Node<E> h = null, t = null;
@@ -1186,6 +1188,7 @@ public class ConcurrentLinkedDeque<E>
      *         of its elements are null
      * @throws IllegalArgumentException if the collection is this deque
      */
+    @SuppressWarnings("null") // Is warned for <code>last</code>, but can't happen
     @Override
     public boolean addAll(Collection<? extends E> c) {
         if (c == this) {
@@ -1430,7 +1433,7 @@ public class ConcurrentLinkedDeque<E>
     }
 
     /** Forward iterator */
-    private class Itr extends AbstractItr {
+    class Itr extends AbstractItr {
         @Override
         Node<E> startNode() { return first(); }
         @Override
@@ -1438,7 +1441,7 @@ public class ConcurrentLinkedDeque<E>
     }
 
     /** Descending iterator */
-    private class DescendingItr extends AbstractItr {
+    class DescendingItr extends AbstractItr {
         @Override
         Node<E> startNode() { return last(); }
         @Override
@@ -1474,6 +1477,7 @@ public class ConcurrentLinkedDeque<E>
      * Reconstitutes the instance from a stream (that is, deserializes it).
      * @param s the stream
      */
+    @SuppressWarnings("null") // Is warned for <code>t</code>, but can't happen
     private void readObject(java.io.ObjectInputStream s)
         throws java.io.IOException, ClassNotFoundException {
         s.defaultReadObject();
@@ -1516,7 +1520,7 @@ public class ConcurrentLinkedDeque<E>
         NEXT_TERMINATOR.prev = NEXT_TERMINATOR;
         try {
             UNSAFE = sun.misc.Unsafe.getUnsafe();
-            Class k = ConcurrentLinkedDeque.class;
+            Class<?> k = ConcurrentLinkedDeque.class;
             headOffset = UNSAFE.objectFieldOffset
                 (k.getDeclaredField("head"));
             tailOffset = UNSAFE.objectFieldOffset

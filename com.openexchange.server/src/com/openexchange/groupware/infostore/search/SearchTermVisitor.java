@@ -259,4 +259,85 @@ public interface SearchTermVisitor {
      * @throws OXException If visit attempt fails
      */
     void visit(CreatedByTerm createdByTerm) throws OXException;
+
+    /**
+     * The visitation for media date term.
+     *
+     * @param mediaDateTerm The visited media date term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(MediaDateTerm mediaDateTerm) throws OXException;
+
+    /**
+     * The visitation for capture date term.
+     *
+     * @param captureDateTerm The visited capture date term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CaptureDateTerm captureDateTerm) throws OXException;
+
+    /**
+     * The visitation for ISO speed term.
+     *
+     * @param cameraIsoSpeedTerm The visited ISO speed term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraIsoSpeedTerm cameraIsoSpeedTerm) throws OXException;
+
+    /**
+     * The visitation for aperture term.
+     *
+     * @param cameraApertureTerm The visited term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraApertureTerm cameraApertureTerm) throws OXException;
+
+    /**
+     * The visitation for exposure time term.
+     *
+     * @param cameraExposureTimeTerm The visited term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraExposureTimeTerm cameraExposureTimeTerm) throws OXException;
+
+    /**
+     * The visitation for focal length term.
+     *
+     * @param cameraFocalLengthTerm The visited term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraFocalLengthTerm cameraFocalLengthTerm) throws OXException;
+
+    /**
+     * The visitation for width term.
+     *
+     * @param widthTerm The visited width term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(WidthTerm widthTerm) throws OXException;
+
+    /**
+     * The visitation for height term.
+     *
+     * @param heightTerm The visited height term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(HeightTerm heightTerm) throws OXException;
+
+    /**
+     * The visitation for camera model term.
+     *
+     * @param cameraModelTerm The visited camera model term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraModelTerm cameraModelTerm) throws OXException;
+
+    /**
+     * The visitation for camera make term.
+     *
+     * @param cameraMakeTerm The visited camera make term
+     * @throws OXException If visit attempt fails
+     */
+    void visit(CameraMakeTerm cameraMakeTerm);
+
 }

@@ -98,9 +98,11 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.find.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.find.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.folder.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.fragment.properties.loader"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.geolocation"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.geolocation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.guest.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.search"/>
@@ -148,6 +150,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.attachment.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.authenticity.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.categories"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.compose.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.compose.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping.spi"/>
@@ -155,6 +159,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.message.timeline"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metadata"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metrics"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.metrics.dropwizard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.json"/>
@@ -173,6 +178,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.objectusecount"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.objectusecount.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.principalusecount"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.principalusecount.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oxscripts.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.password.mechanism"/>
@@ -208,6 +215,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.server"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ajax.requesthandler.jobqueue.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serverconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serverconfig.impl"/>

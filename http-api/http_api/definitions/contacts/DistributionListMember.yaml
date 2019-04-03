@@ -9,6 +9,9 @@ properties:
   display_name:
     type: string
     description: The display name.
+  sort_name:
+    type: string
+    description: A name which can be used for sorting.
   mail:
     type: string
     description: The email address (optional if you are referring to an internal contact).

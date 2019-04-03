@@ -76,6 +76,7 @@ public class ContextImpl implements ContextExtended {
     private boolean enabled = true;
     private boolean updating = false;
     private boolean readOnly = false;
+    private boolean updateNeeded = false;
     private final Map<String, List<String>> attributes;
 
     public ContextImpl(final int contextId) {
@@ -187,6 +188,16 @@ public class ContextImpl implements ContextExtended {
     @Override
     public boolean isUpdating() {
         return updating;
+    }
+
+    @Override
+    public boolean isUpdateNeeded() {
+        return updateNeeded;
+    }
+
+    @Override
+    public void setUpdateNeeded(boolean updateNeeded) {
+        this.updateNeeded = updateNeeded;
     }
 
     @Override

@@ -111,7 +111,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
                             throw new OXException(e);
                         }
                     } else {
-                        LOG.warn("Method '" + action.getClass() + "." + method.getName() + "' is annotated with @OAuthScopeCheck but its signature is invalid!");
+                        LOG.warn("Method ''{}.{}'' is annotated with @OAuthScopeCheck but its signature is invalid!", action.getClass(), method.getName());
                     }
                 }
             }

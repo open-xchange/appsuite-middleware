@@ -78,7 +78,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 /**
  * This class implements the group storage using a relational database.
  */
-public class RdbGroupStorage extends GroupStorage {
+public class RdbGroupStorage implements GroupStorage {
 
     private static final String SELECT_GROUPS = "SELECT id,identifier,displayName,lastModified FROM groups WHERE cid=?";
     private static final String SELECT_DELETED_GROUPS = "SELECT id,identifier,displayName,lastModified FROM del_groups WHERE cid=?";
@@ -216,7 +216,12 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public Group getGroup(final int gid, final Context context) throws OXException {
-        return getGroup(new int[] { gid }, context)[0];
+        return getGroup(gid, true, context);
+    }
+
+    @Override
+    public Group getGroup(final int gid, boolean loadMembers, final Context context) throws OXException {
+        return getGroup(new int[] { gid }, loadMembers, context)[0];
     }
 
     /**
@@ -224,6 +229,10 @@ public class RdbGroupStorage extends GroupStorage {
      */
     @Override
     public Group[] getGroup(final int[] groupIds, final Context context) throws OXException {
+        return getGroup(groupIds, true, context);
+    }
+
+    private Group[] getGroup(final int[] groupIds, boolean loadMembers, final Context context) throws OXException {
         final int length = groupIds.length;
         if (0 == length) {
             return new Group[0];
@@ -249,7 +258,9 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
-                group.setMember(selectMember(con, context, group.getIdentifier()));
+                if (loadMembers) {
+                    group.setMember(selectMember(con, context, group.getIdentifier()));
+                }
                 groups.put(group.getIdentifier(), group);
             }
         } catch (final SQLException e) {

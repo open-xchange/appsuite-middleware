@@ -27,13 +27,13 @@ msgstr "ファイルをDriveアプリケーションに同期する"
 
 # Mail + Calendar + Address Book
 msgid "Mail + Calendar + Address Book"
-msgstr "メール + 予定表 + アドレス帳"
+msgstr "メール + カレンダー + アドレス帳"
 
 # To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
 msgid ""
 "To synchronize your Mail, Calendar, Tasks and Address Book data, download "
 "and install our desktop application."
-msgstr "メール、予定表、仕事、連絡先データを同期するには、デスクトップアプリケーションをダウンロードし、インストールします。"
+msgstr "メール、カレンダー、タスク、連絡先データを同期するには、デスクトップアプリケーションをダウンロードし、インストールします。"
 
 # Drive App
 msgid "Drive App"
@@ -53,7 +53,7 @@ msgstr "メールをメールアプリケーションに同期します。"
 
 # Calendar + Address Book
 msgid "Calendar + Address Book"
-msgstr "予定表 + アドレス帳"
+msgstr "カレンダー + アドレス帳"
 
 # Synchronize your Calendar and Address Book data with your device.
 msgid "Synchronize your Calendar and Address Book data with your device."
@@ -65,13 +65,13 @@ msgstr "OX Sync"
 
 # Synchronize all your appointments and contacts
 msgid "Synchronize all your appointments and contacts"
-msgstr "全てのアポイントと連絡先を同期します。"
+msgstr "全ての予定と連絡先を同期します。"
 
 # To manually setup your Calendar and Address Book accounts, please use the following information.
 msgid ""
 "To manually setup your Calendar and Address Book accounts, please use the "
 "following information."
-msgstr "予定表とアドレス帳アカウントを手動で設定するには、次の情報をご利用ください。"
+msgstr "カレンダーとアドレス帳アカウントを手動で設定するには、次の情報をご利用ください。"
 
 # Updater
 msgid "Updater"
@@ -93,17 +93,17 @@ msgstr "Connector for Microsoft Outlook®"
 msgid ""
 "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
 "Shared and System Folders to Microsoft Outlook® clients."
-msgstr "メール、予定表、連絡先、仕事に加え、パブリック フォルダ、共有フォルダ、システム フォルダを Microsoft Outlook® クライアントに同期します。"
+msgstr "メール、カレンダー、連絡先、タスクに加え、パブリック フォルダー、共有フォルダー、システム フォルダーを Microsoft Outlook® クライアントに同期します。"
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
 msgid "Synchronize your Mail, Calendar and Address Book data with your device."
-msgstr "メール、予定表およびアドレス帳をご利用のデバイスと同期します。"
+msgstr "メール、カレンダーおよびアドレス帳をご利用のデバイスと同期します。"
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
 msgid ""
 "To manually setup your Mail, Calendar and Address Book accounts, please use "
 "the following information."
-msgstr "メール、予定表とアドレス帳アカウントを手動で設定するには、次の情報をご利用ください。"
+msgstr "メール、カレンダーとアドレス帳アカウントを手動で設定するには、次の情報をご利用ください。"
 
 # Mail
 msgid "Mail"

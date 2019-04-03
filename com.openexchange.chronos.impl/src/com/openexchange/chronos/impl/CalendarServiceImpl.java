@@ -69,12 +69,14 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
+import com.openexchange.chronos.impl.performer.ChangeOrganizerPerformer;
 import com.openexchange.chronos.impl.performer.ClearPerformer;
 import com.openexchange.chronos.impl.performer.CreatePerformer;
 import com.openexchange.chronos.impl.performer.DeletePerformer;
@@ -389,6 +391,21 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
+    public CalendarResult changeOrganizer(CalendarSession session, EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
+        /*
+         * update organizer, notify handlers & return userized result
+         */
+        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
+            @Override
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new ChangeOrganizerPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), organizer, L(clientTimestamp));
+
+            }
+        }.executeUpdate()).getUserizedResult();
+    }
+
+    @Override
     public CalendarResult deleteEvent(CalendarSession session, final EventID eventID, final long clientTimestamp) throws OXException {
         /*
          * delete event, notify handlers & return userized result
@@ -436,9 +453,17 @@ public class CalendarServiceImpl implements CalendarService {
     @Override
     public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
         Boolean oldSuppressItip = session.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        Boolean oldIgnoreStorageWarnings = session.get(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.class);
+        Boolean oldCheckConflicts = session.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class);
         try {
             if (null == oldSuppressItip) {
                 session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            }
+            if (null == oldIgnoreStorageWarnings) {
+                session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
+            }
+            if (null == oldCheckConflicts) {
+                session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
             }
             /*
              * import events
@@ -461,6 +486,8 @@ public class CalendarServiceImpl implements CalendarService {
             return importResults;
         } finally {
             session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, oldSuppressItip);
+            session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, oldIgnoreStorageWarnings);
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, oldCheckConflicts);
         }
     }
 

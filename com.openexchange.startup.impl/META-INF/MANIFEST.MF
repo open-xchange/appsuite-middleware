@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.database.migration,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.startup,
  com.openexchange.version,
  org.osgi.framework,

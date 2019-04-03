@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.tools.console;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import com.openexchange.groupware.update.TaskStatus;
 import com.openexchange.groupware.update.UpdateTaskService;
 
 /**
@@ -97,7 +98,8 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
-        updateTaskService.runAllUpdates(failOnError);
+        TaskStatus taskStatus = updateTaskService.runAllUpdates(failOnError);
+        System.out.println("Scheduled an asynchronous job with id: " + taskStatus.getJobId() + "\n" + taskStatus.getStatusText());
         return null;
     }
 

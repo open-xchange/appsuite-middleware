@@ -1,4 +1,4 @@
-/drive?action=upload:
+/drive?action=upload&binary=true:
   put:
     operationId: uploadFile
     tags:

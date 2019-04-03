@@ -270,16 +270,16 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 String desc = stringHelper.getString(MailStrings.PUBLISHED_ATTACHMENT_INFO);
                 {
                     final String subject = (String) storeProps.get("subject");
-                    desc = desc.replaceFirst("#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
+                    desc = Strings.replaceSequenceWith(desc, "#SUBJECT#", com.openexchange.java.Strings.quoteReplacement(null == subject ? stringHelper.getString(MailStrings.DEFAULT_SUBJECT) : subject));
                 }
                 {
                     final Date date = (Date) storeProps.get("date");
                     final String repl = date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(date, DateFormat.LONG, locale, TimeZone.getDefault()));
-                    desc = desc.replaceFirst("#DATE#", repl);
+                    desc = Strings.replaceSequenceWith(desc, "#DATE#", repl);
                 }
                 {
                     final InternetAddress[] to = (InternetAddress[]) storeProps.get("to");
-                    desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
+                    desc = Strings.replaceSequenceWith(desc, "#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
                 }
                 file.setDescription(desc);
                 modifiedColumns.add(Field.DESCRIPTION);

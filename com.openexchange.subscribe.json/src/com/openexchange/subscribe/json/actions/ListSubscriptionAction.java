@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.FallbackSubscriptionService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -97,6 +98,11 @@ public class ListSubscriptionAction extends AbstractSubscribeAction {
 	                if (subscription != null) {
 	                    subscriptions.add(subscription);
 	                }
+                } else {
+                    final Subscription subscription = FallbackSubscriptionService.getInstance().getSubscription(context, id);
+                    if (subscription != null) {
+                        subscriptions.add(subscription);
+                    }
 	            }
 			}
 

@@ -63,10 +63,15 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class QuartzActivator extends HousekeepingActivator {
 
-    private volatile ServiceRegistration<QuartzService> quartzServiceRegistration;
-
+    private ServiceRegistration<QuartzService> quartzServiceRegistration;
     private QuartzServiceImpl quartzServiceImpl;
 
+    /**
+     * Initializes a new {@link QuartzActivator}.
+     */
+    public QuartzActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -74,7 +79,7 @@ public class QuartzActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(QuartzActivator.class);
         log.info("Starting bundle: org.quartz");
         try {
@@ -89,7 +94,7 @@ public class QuartzActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(QuartzActivator.class);
         log.info("Stopping bundle: org.quartz");
         try {

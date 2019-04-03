@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.io.FileInputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import org.junit.After;
@@ -200,7 +201,7 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
@@ -280,7 +281,7 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
@@ -361,7 +362,7 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
@@ -442,7 +443,7 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 

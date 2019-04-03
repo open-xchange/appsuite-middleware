@@ -221,7 +221,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                         addresses.add(new InternetAddress(emailAddress));
                     }
                 } catch (AddressException addressException) {
-                    LOG.warn("Unable to add address " + emailAddress + " to ContactCollector.", addressException);
+                    LOG.warn("Unable to add address {} to ContactCollector.", emailAddress, addressException);
                 }
             }
 
@@ -278,7 +278,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                             addresses.add(new InternetAddress(mail));
                         }
                     } catch (AddressException addressException) {
-                        LOG.warn("Unable to add address " + mail + " to ContactCollector.", addressException);
+                        LOG.warn("Unable to add address {} to ContactCollector.", mail, addressException);
                     }
                 }
             }

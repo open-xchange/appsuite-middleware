@@ -131,6 +131,11 @@ public enum AntiVirusServiceExceptionCodes implements DisplayableOXExceptionCode
      * <li>The Anti-Virus service is absent.</li>
      */
     ANTI_VIRUS_SERVICE_ABSENT("The Anti-Virus service is absent.", AntiVirusServiceExceptionMessages.ANTI_VIRUS_SERVICE_UNAVAILABLE, CATEGORY_SERVICE_DOWN, 14),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The remote host '%1$s' cannot be resolved.</li>
+     */
+    UNKNOWN_HOST("The remote host '%1$s' cannot be resolved.", CATEGORY_ERROR, 15),
     ;
 
     public static final String PREFIX = "ANTI-VIRUS-SERVICE";

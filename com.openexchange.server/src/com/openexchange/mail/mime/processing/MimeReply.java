@@ -535,7 +535,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                     textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                     textPart.setHeader(
                         MessageHeaders.HDR_CONTENT_TYPE,
-                        MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                        Strings.replaceSequenceWith(MimeTypes.MIME_TEXT_PLAIN_TEMPL, "#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
                     multipart.addBodyPart(textPart);
                     MessageUtility.setContent(multipart, replyMsg);
                     // forwardMsg.setContent(multipart);
@@ -587,7 +587,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                 final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);
+                generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, session, accountId, list);
 
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
@@ -758,13 +758,13 @@ public final class MimeReply extends AbstractMimeProcessing {
      * @throws MessagingException
      * @throws IOException
      */
-    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
+    static boolean generateReplyText(final MailMessage msg, final ContentType retvalContentType, final StringHelper strHelper, final LocaleAndTimeZone ltz, final UserSettingMail usm, final Session session, final int accountId, final List<String> replyTexts) throws OXException, MessagingException, IOException {
         final StringBuilder textBuilder = new StringBuilder(8192);
         final ContentType contentType = msg.getContentType();
         boolean found = false;
         if (contentType.startsWith(MULTIPART)) {
             final ParameterContainer pc =
-                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, mailSession, session, msg, ltz, replyTexts);
+                new ParameterContainer(retvalContentType, textBuilder, strHelper, usm, session, msg, ltz, replyTexts);
             found |= gatherAllTextContents(msg, contentType, accountId, pc);
         } else if (contentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(contentType.getBaseType())) {
             if (retvalContentType.getPrimaryType() == null) {
@@ -915,7 +915,6 @@ public final class MimeReply extends AbstractMimeProcessing {
                         pc.strHelper,
                         pc.ltz,
                         pc.usm,
-                        pc.mailSession,
                         pc.session,
                         accountId,
                         pc.replyTexts);
@@ -932,7 +931,6 @@ public final class MimeReply extends AbstractMimeProcessing {
                             pc.strHelper,
                             pc.ltz,
                             pc.usm,
-                            pc.mailSession,
                             pc.session,
                             accountId,
                             pc.replyTexts);
@@ -1014,9 +1012,9 @@ public final class MimeReply extends AbstractMimeProcessing {
                 if (pc.retvalContentType.getPrimaryType() == null) {
                     String text = MimeProcessingUtility.handleInlineTextPart(part, partContentType, pc.usm.isDisplayHtmlInlineContent());
                     if (isEmpty(text)) {
-                        final String htmlContent = getHtmlContent(multipartPart, count);
+                        String htmlContent = getHtmlContent(multipartPart, count);
                         if (null != htmlContent) {
-                            final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                             text = null == htmlService ? "" : htmlService.html2text(htmlContent, true);
                         }
                     }
@@ -1037,11 +1035,49 @@ public final class MimeReply extends AbstractMimeProcessing {
                         final ContentType nextContentType = nextPart.getContentType();
                         if (nextContentType.startsWith(TEXT) && (avoidHTML ? !nextContentType.startsWith(TEXT_HTM) : true) && MimeProcessingUtility.isInline(nextPart, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
                             String text = MimeProcessingUtility.handleInlineTextPart(nextPart, nextContentType, pc.usm.isDisplayHtmlInlineContent());
-                            pc.textBuilder.append(text);
+                            if (text != null && text.length() > 0) {
+                                if (pc.retvalContentType.startsWith(TEXT_HTM)) {
+                                    if (nextContentType.startsWith(TEXT_HTM)) {
+                                        pc.textBuilder.append(text);
+                                    } else {
+                                        // Don't append non-HTML to HTML
+                                    }
+                                } else {
+                                    if (nextContentType.startsWith(TEXT_HTM)) {
+                                        // Don't append HTML to non-HTML
+                                    } else {
+                                        pc.textBuilder.append(text);
+                                    }
+                                }
+                            }
+                        } else if (nextContentType.startsWith("image/") && MimeProcessingUtility.isInline(nextPart, nextContentType) && pc.retvalContentType.startsWith(TEXT_HTM)) {
+                            final String imageURL;
+                            String fileName = nextPart.getFileName();
+                            {
+                                final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                                if (null == fileName) {
+                                    final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
+                                    fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
+                                }
+                                final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(accountId, pc.origMail.getFolder())).id(pc.origMail.getMailId()).build();
+                                imageURL = imgSource.generateUrl(imageLocation, pc.session);
+                            }
+                            final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                            pc.textBuilder.append(imgTag);
                         } else if (nextContentType.startsWith(MULTIPART)) {
                             gatherAllTextContents(nextPart, nextContentType, accountId, pc);
                         }
                     }
+
+                    if (pc.retvalContentType.startsWith(TEXT_HTM)) {
+                        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                        if (htmlService != null) {
+                            String compositeHtml = pc.textBuilder.toString();
+                            pc.textBuilder.setLength(0);
+                            pc.textBuilder.append(htmlService.getWellFormedHTMLDocument(compositeHtml));
+                        }
+                    }
+
                     return true;
                 }
                 found = true;
@@ -1148,13 +1184,12 @@ public final class MimeReply extends AbstractMimeProcessing {
         final StringBuilder textBuilder;
         final StringHelper strHelper;
         final UserSettingMail usm;
-        final javax.mail.Session mailSession;
         final Session session;
         final MailMessage origMail;
         final LocaleAndTimeZone ltz;
         final List<String> replyTexts;
 
-        ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final javax.mail.Session mailSession, final Session session, final MailMessage origMail, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
+        ParameterContainer(final ContentType retvalContentType, final StringBuilder textBuilder, final StringHelper strHelper, final UserSettingMail usm, final Session session, final MailMessage origMail, final LocaleAndTimeZone ltz, final List<String> replyTexts) {
             super();
             this.origMail = origMail;
             this.session = session;
@@ -1162,7 +1197,6 @@ public final class MimeReply extends AbstractMimeProcessing {
             this.textBuilder = textBuilder;
             this.strHelper = strHelper;
             this.usm = usm;
-            this.mailSession = mailSession;
             this.ltz = ltz;
             this.replyTexts = replyTexts;
         }

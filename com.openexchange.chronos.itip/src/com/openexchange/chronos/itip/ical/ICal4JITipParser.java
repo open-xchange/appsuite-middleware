@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
@@ -78,12 +77,13 @@ import com.openexchange.java.Strings;
  */
 public class ICal4JITipParser {
 
-    public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, int owner, CalendarSession session) throws OXException {
+    public List<ITipMessage> parseMessage(InputStream ical, int owner, CalendarSession session) throws OXException {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
         ICalService iCalService = Services.getService(ICalService.class);
         ICalParameters parameters = iCalService.initParameters();
         parameters.set(ICalParameters.IGNORE_UNSET_PROPERTIES, Boolean.TRUE);
+        parameters.set(ICalParameters.IGNORE_ALARM, Boolean.TRUE);
         ImportedCalendar calendar = iCalService.importICal(ical, parameters);
 
         boolean microsoft = looksLikeMicrosoft(calendar);
@@ -122,7 +122,7 @@ public class ICal4JITipParser {
         if (event.getAttendees() == null || event.getAttendees().isEmpty()) {
             return;
         }
-        session.getEntityResolver().prepare(event.getAttendees());
+        session.getEntityResolver().prepare(event.getAttendees(), new int[] { session.getUserId() });
         if (ITipMethod.REPLY.equals(methodValue) && event.containsAttendees() && null != event.getAttendees() && event.getAttendees().size() == 1 && event.containsExtendedProperties() && null != event.getExtendedProperties()) {
             // Set attendee comment that is stored in the extended properties
             ExtendedProperties extendedProperties = event.getExtendedProperties();
@@ -142,7 +142,7 @@ public class ICal4JITipParser {
             return;
         }
 
-        session.getEntityResolver().prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL);
+        session.getEntityResolver().prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL, new int[] { session.getUserId() });
     }
 
     private boolean looksLikeMicrosoft(ImportedCalendar calendar) {

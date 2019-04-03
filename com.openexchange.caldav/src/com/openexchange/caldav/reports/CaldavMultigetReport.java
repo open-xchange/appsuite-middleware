@@ -49,9 +49,6 @@
 
 package com.openexchange.caldav.reports;
 
-import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -96,7 +93,7 @@ public class CaldavMultigetReport extends PROPFINDAction {
          * get paths of requested resources
          */
         Document requestBody = requireRequestBody(request);
-        List<WebdavPath> paths = getPaths(request, requestBody);
+        List<WebdavPath> paths = getHrefPaths(request, requestBody.getRootElement());
         /*
          * resolve & marshal requested resources
          */
@@ -141,28 +138,6 @@ public class CaldavMultigetReport extends PROPFINDAction {
          * send multistatus response
          */
         sendMultistatusResponse(response, multistatusElement);
-    }
-
-    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
-        if (requestBody == null) {
-            return Collections.emptyList();
-        }
-
-        List<Element> children = requestBody.getRootElement().getChildren("href", DAV_NS);
-        if (children == null || children.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
-        int length = req.getURLPrefix().length();
-        for (Object object : children) {
-            Element href = (Element) object;
-            String url = href.getText();
-            url = url.substring(length);
-            paths.add(((GroupwareCaldavFactory) req.getFactory()).decode(new WebdavPath(url)));
-        }
-
-        return paths;
     }
 
 }

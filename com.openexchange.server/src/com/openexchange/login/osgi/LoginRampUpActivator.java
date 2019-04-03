@@ -93,4 +93,10 @@ public class LoginRampUpActivator extends HousekeepingActivator {
         });
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        closeTrackers();
+        super.stopBundle();
+    }
+
 }

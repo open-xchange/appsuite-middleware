@@ -55,13 +55,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.tx.AbstractDBAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
@@ -70,6 +70,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.GeoLocation;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 import com.openexchange.tools.session.ServerSession;
@@ -193,10 +194,21 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
         final GetSwitch get = new GetSwitch(doc);
         int index = parameterIndex;
         for(final Metadata m : fields) {
-            if (Metadata.META_LITERAL.getId() == m.getId()) {
-                setMeta(index++, stmt, doc);
-            } else if (Metadata.ORIGIN_LITERAL.getId() == m.getId()) {
+            int id = m.getId();
+            if (Metadata.META_LITERAL.getId() == id) {
+                setMeta(index++, stmt, doc.getMeta());
+            } else if (Metadata.MEDIA_META_LITERAL.getId() == id) {
+                setMeta(index++, stmt, doc.getMediaMeta());
+            } else if (Metadata.ORIGIN_LITERAL.getId() == id) {
                 setOriginPath(index++, stmt, doc);
+            } else if (Metadata.GEOLOCATION_LITERAL.getId() == id) {
+                setGeoLocation(index++, stmt, doc);
+            } else if (Metadata.MEDIA_STATUS_LITERAL.getId() == id) {
+                setMediaStatus(index++, stmt, doc);
+            } else if (Metadata.WIDTH == id || Metadata.HEIGHT == id || Metadata.CAMERA_ISO_SPEED == id) {
+                setIfNotNullAndPositive(index++, stmt, (Long) m.doSwitch(get));
+            } else if (Metadata.CAMERA_APERTURE == id || Metadata.CAMERA_EXPOSURE_TIME == id || Metadata.CAMERA_FOCAL_LENGTH == id) {
+                setMediaFieldIfNotNullAndPositive(index++, stmt, (Double) m.doSwitch(get));
             } else {
                 stmt.setObject(index++, process(m, m.doSwitch(get)));
             }
@@ -215,8 +227,54 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
         case Metadata.LOCKED_UNTIL:
         case Metadata.LAST_MODIFIED_UTC:
             return Long.valueOf(((Date) value).getTime());
+        case Metadata.CAPTURE_DATE:
+        case Metadata.MEDIA_DATE:
+            return null == value ? null : Long.valueOf(((Date) value).getTime());
         case Metadata.LAST_MODIFIED:
             return (value != null) ? Long.valueOf(((Date) value).getTime()) : Long.valueOf(System.currentTimeMillis());
+        }
+    }
+
+    private final void setIfNotNullAndPositive(int parameterIndex, PreparedStatement stmt, Long value) throws SQLException {
+        if (null == value || value.longValue() < 0) {
+            stmt.setNull(parameterIndex, java.sql.Types.INTEGER);
+        } else {
+            stmt.setObject(parameterIndex, value);
+        }
+    }
+
+    private final void setMediaFieldIfNotNullAndPositive(int parameterIndex, PreparedStatement stmt, Double value) throws SQLException {
+        if (null == value || value.longValue() < 0) {
+            stmt.setNull(parameterIndex, java.sql.Types.DOUBLE);
+        } else {
+            double x = value.doubleValue();
+            if (x == Double.POSITIVE_INFINITY) {
+                // Store a negative value to signal infinity
+                stmt.setObject(parameterIndex, Double.valueOf(-1));
+            } else if (x == Double.NEGATIVE_INFINITY || Double.isNaN(x)) {
+                // Such a value cannot be stored
+                stmt.setNull(parameterIndex, java.sql.Types.DOUBLE);
+            } else {
+                stmt.setObject(parameterIndex, value);
+            }
+        }
+    }
+
+    private final void setMediaStatus(int parameterIndex, final PreparedStatement stmt, final DocumentMetadata doc) throws SQLException {
+        MediaStatus status = doc.getMediaStatus();
+        if (null == status) {
+            stmt.setNull(parameterIndex, java.sql.Types.VARCHAR);
+        } else {
+            stmt.setString(parameterIndex, status.toString());
+        }
+    }
+
+    private final void setGeoLocation(int parameterIndex, final PreparedStatement stmt, final DocumentMetadata doc) throws SQLException {
+        GeoLocation geolocation = doc.getGeoLocation();
+        if (null == geolocation) {
+            stmt.setNull(parameterIndex, java.sql.Types.VARCHAR); // geolocation
+        } else {
+            stmt.setString(parameterIndex, geolocation.toSqlPoint()); // geolocation
         }
     }
 
@@ -229,8 +287,7 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
         }
     }
 
-    private final void setMeta(int parameterIndex, final PreparedStatement stmt, final DocumentMetadata doc) throws SQLException {
-        final Map<String, Object> meta = doc.getMeta();
+    private final void setMeta(int parameterIndex, PreparedStatement stmt, Map<String, Object> meta) throws SQLException {
         if (null == meta || meta.isEmpty()) {
             stmt.setNull(parameterIndex, java.sql.Types.BLOB); // meta
         } else {
@@ -239,7 +296,8 @@ public abstract class AbstractInfostoreAction extends AbstractDBAction {
                 if (null == coerced || JSONObject.NULL.equals(coerced)) {
                     stmt.setNull(parameterIndex, java.sql.Types.BLOB); // meta
                 } else {
-                    stmt.setBinaryStream(parameterIndex, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
+                    JSONValue jValue = (JSONValue) coerced;
+                    stmt.setBinaryStream(parameterIndex, jValue.getStream(true)); // meta
                 }
             } catch (final JSONException e) {
                 throw new SQLException("Meta information could not be coerced to a JSON equivalent.", e);

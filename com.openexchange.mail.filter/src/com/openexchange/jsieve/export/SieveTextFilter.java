@@ -68,7 +68,6 @@ import org.apache.jsieve.parser.generated.SieveParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.IfStructureCommand;
 import com.openexchange.jsieve.commands.RequireCommand;
@@ -594,20 +593,27 @@ public final class SieveTextFilter {
     }
 
     private int getActionCommandSize(final List<ActionCommand> actionCommands) {
+        if (null == actionCommands) {
+            return 0;
+        }
         int size = 0;
-        if (null != actionCommands) {
-            for (final ActionCommand actionCommand : actionCommands) {
-                if (Commands.VACATION.equals(actionCommand.getCommand()) || Commands.ENOTIFY.equals(actionCommand.getCommand()) || Commands.PGP_ENCRYPT.equals(actionCommand.getCommand())) {
+        for (final ActionCommand actionCommand : actionCommands) {
+            switch (actionCommand.getCommand()) {
+                case ENOTIFY:
+                case PGP_ENCRYPT:
+                case VACATION:
                     // The text arguments for vacation end method for enotify are the last in the list
-                    final ArrayList<Object> arguments = actionCommand.getArguments();
-                    final int size2 = arguments.size();
-                    if (0 < size2) {
-                        final ArrayList<String> object = (ArrayList<String>) arguments.get(size2 - 1);
-                        size += countLines(object.get(0)) + 1;
+                    ArrayList<Object> arguments = actionCommand.getArguments();
+                    int argumentsSize = arguments.size();
+                    if (argumentsSize > 0) {
+                        ArrayList<String> object = (ArrayList<String>) arguments.get(argumentsSize - 1);
+                        for (String o : object) {
+                            size += countLines(o) + 1;
+                        }
                     }
-                } else {
+                    break;
+                default:
                     size++;
-                }
             }
         }
         return size;
@@ -694,7 +700,7 @@ public final class SieveTextFilter {
             try {
                 addPlainTextToRule(wholeText, commentedText, ruleComment, rightRule);
             } catch (Exception e) {
-                LOG.warn("Unable to add add rule because of: " + e.getMessage());
+                LOG.warn("Unable to add add rule", e);
                 // continue in case an error occurs
             }
             printErrorForUser(MailFilterExceptionCode.SIEVE_ERROR.create(errorMsg));

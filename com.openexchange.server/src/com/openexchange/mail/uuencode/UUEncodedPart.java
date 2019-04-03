@@ -187,7 +187,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         try {
             BufferedReader br = null;
             try {
-                br = new BufferedReader(new InputStreamReader(getInputStream()));
+                br = new BufferedReader(new InputStreamReader(getInputStream(), com.openexchange.java.Charsets.UTF_8));
                 String line = null;
                 while ((line = br.readLine()) != null) {
                     encodedPart.append(line).append('\n');

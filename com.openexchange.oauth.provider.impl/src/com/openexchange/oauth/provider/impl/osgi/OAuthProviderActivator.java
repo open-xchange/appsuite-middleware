@@ -319,7 +319,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
             "jcs.region." + regionName + ".elementattributes.IdleTime=360\n" +
             "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" +
             "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" +
-            "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
+            "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes(com.openexchange.java.Charsets.UTF_8);
         getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf), true);
         return new CachingOAuthClientStorage(new RdbOAuthClientStorage(this), this);
     }

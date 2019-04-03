@@ -122,7 +122,7 @@ public class MoveTest extends CalDAVTest {
         String summary = "serie";
         String location = "test";
         Date start = TimeTools.D("next sunday at 11:30");
-        Date end = TimeTools.D("next friday at 12:45");
+        Date end = TimeTools.D("next sunday at 12:45");
         Appointment appointment = generateAppointment(start, end, uid, summary, location);
         List<Participant> participants = new ArrayList<Participant>();
         participants.add(new UserParticipant(getClient().getValues().getUserId()));

@@ -70,9 +70,7 @@ public class ComplexDisplayItem implements DisplayItem {
      * Initializes a new {@link ComplexDisplayItem}.
      *
      * @param displayName
-     * @param name
      * @param detail
-     * @param imageUrl
      */
     public ComplexDisplayItem(String displayName, String detail) {
         super();

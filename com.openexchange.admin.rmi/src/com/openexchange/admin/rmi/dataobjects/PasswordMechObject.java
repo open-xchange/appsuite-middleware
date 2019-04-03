@@ -63,26 +63,23 @@ public interface PasswordMechObject {
     String getPasswordMech();
 
     /**
-     * Represents the password encryption mechanism, value is a password
-     * mechanism. Currently supported mechanisms are "{CRYPT}" and "{SHA}",
-     * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.
+     * Represents the password encryption mechanism, value is a password mechanism.
      *
-     * @param passwordMech
-     *            the passwordMech to set
+     * @param passwordMech The passwordMech to set
      */
-    void setPasswordMech(final String passwordMech);
+    void setPasswordMech(String passwordMech);
 
     /**
-     * Return the password of this user object.
+     * Returns the password of this user object.
      *
      * @return A {@link String} containing the password
      */
     String getPassword();
 
     /**
-     * Return the salt of this user object.
+     * Returns the salt of this user object.
      *
-     * @return A {@link byte[]} containing the salt
+     * @return A byte array containing the salt
      */
     byte[] getSalt();
 }

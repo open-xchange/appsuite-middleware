@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -63,6 +63,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -94,7 +95,7 @@ public class TestContextToolkit {
     public int resolveResource(final String resource, final Context ctx) {
         ResourceStorage rStorage = null;
         try {
-            rStorage = ResourceStorage.getInstance();
+            rStorage = ServerServiceRegistry.getServize(ResourceStorage.class, true);
             return rStorage.searchResources(resource, ctx)[0].getIdentifier();
         } catch (final OXException e) {
             e.printStackTrace();
@@ -107,10 +108,10 @@ public class TestContextToolkit {
     }
 
     public int resolveGroup(final String group, final Context ctx) {
-        GroupStorage gStorage = null;
+        GroupService groupService = null;
         try {
-            gStorage = GroupStorage.getInstance();
-            return gStorage.searchGroups(group, true, ctx)[0].getIdentifier();
+            groupService = ServerServiceRegistry.getServize(GroupService.class, true);
+            return groupService.search(ctx, group, true)[0].getIdentifier();
         } catch (final OXException e) {
             e.printStackTrace();
             return -1;
@@ -148,10 +149,10 @@ public class TestContextToolkit {
     }
 
     public Group loadGroup(final int id, final Context ctx) {
-        GroupStorage gStorage = null;
+        GroupService groupService = null;
         try {
-            gStorage = GroupStorage.getInstance();
-            return gStorage.getGroup(id, ctx);
+            groupService = ServerServiceRegistry.getServize(GroupService.class, true);
+            return groupService.getGroup(ctx, id);
         } catch (final OXException e) {
             e.printStackTrace();
             return null;

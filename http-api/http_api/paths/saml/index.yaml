@@ -1,0 +1,7 @@
+requests:
+  - InitRequest.yaml
+  - LoginRequest.yaml
+  - LogoutRequest.yaml
+  - ACSRequest.yaml
+  - SLSRequest.yaml
+  - MetadataRequest.yaml

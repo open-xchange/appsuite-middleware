@@ -50,7 +50,6 @@
 package com.openexchange.group.json.actions;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -75,10 +74,8 @@ public final class GetAction extends AbstractGroupAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        GroupService groupService = this.services.getService(GroupService.class);
-        Group group = groupService.getGroup(req.getSession().getContext(), req.checkInt(PARAMETER_ID));
-
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException {
+        Group group = services.getServiceSafe(GroupService.class).getGroup(req.getSession().getContext(), req.checkInt(PARAMETER_ID));
         return new AJAXRequestResult(group, group.getLastModified(), "group");
     }
 }

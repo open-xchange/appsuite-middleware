@@ -155,5 +155,12 @@ public interface CalendarConfig {
      * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
      */
     boolean isRestrictAllowedAttendeeChanges();
+    
+    /**
+     * Gets a value indicating whether it is allowed to change the organizer of an event or not.
+     * 
+     * @return <code>true</code> if organizer changes are allowed, <code>false</code> otherwise
+     */
+    boolean isOrganizerChangeAllowed();
 
 }

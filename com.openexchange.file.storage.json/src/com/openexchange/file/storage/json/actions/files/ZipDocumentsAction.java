@@ -54,15 +54,16 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.ziputil.ZipMaker;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -119,15 +120,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
         zipMaker.checkThreshold(threshold());
 
         AJAXRequestData ajaxRequestData = request.getRequestData();
-        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            // Set HTTP response headers
-            {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("attachment");
-                DownloadUtility.appendFilenameParameter("documents.zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
-                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-            }
-
+        if (ZipUtility.setHttpResponseHeaders("documents.zip", ajaxRequestData)) {
             // Write ZIP archive
             long bytesWritten = 0;
             try {
@@ -144,19 +137,19 @@ public class ZipDocumentsAction extends AbstractFileAction {
             return result;
         }
 
-        // No direct response possible
+        // No direct response possible. Create ThresholdFileHolder...
+        ThresholdFileHolder fileHolder = ZipUtility.prepareThresholdFileHolder("documents.zip");
+        try {
+            // Create ZIP archive
+            zipMaker.writeZipArchive(fileHolder.asOutputStream());
 
-        // Create archive
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        fileHolder.setDisposition("attachment");
-        fileHolder.setName("documents.zip");
-        fileHolder.setContentType("application/zip");
-        fileHolder.setDelivery("download");
-
-        // Create ZIP archive
-        zipMaker.writeZipArchive(fileHolder.asOutputStream());
-
-        ajaxRequestData.setFormat("file");
-        return new AJAXRequestResult(fileHolder, "file");
+            ajaxRequestData.setFormat("file");
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null;
+            return requestResult;
+        } finally {
+            Streams.close(fileHolder);
+        }
     }
+
 }

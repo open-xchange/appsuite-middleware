@@ -120,6 +120,7 @@ public class PushEventHandler implements org.osgi.service.event.EventHandler {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private <V> V requireProperty(String name, Event event) {
         Object object = event.getProperty(name);
         if (null == object) {
@@ -142,7 +143,7 @@ public class PushEventHandler implements org.osgi.service.event.EventHandler {
                 }
             }
         }
-        return null;
+        return map;
     }
 
 }

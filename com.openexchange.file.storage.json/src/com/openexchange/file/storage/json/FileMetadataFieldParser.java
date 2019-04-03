@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,7 +79,7 @@ public class FileMetadataFieldParser {
      * Converts the given value into its internal representation if the given field
      * is supported.
      *
-     * @param field The fiele
+     * @param field The field
      * @param value The fields value
      * @return The converted object or the original value, if the filed is not supported
      * @throws JSONException
@@ -113,7 +112,7 @@ public class FileMetadataFieldParser {
             JSONArray jsonArray = (JSONArray) val;
             List<FileStorageObjectPermission> objectPermissions = new ArrayList<FileStorageObjectPermission>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {
-                objectPermissions.add(parseObjetPermission(jsonArray.getJSONObject(i), null)); //TODO: timezone from user/request?
+                objectPermissions.add(parseObjetPermission(jsonArray.getJSONObject(i)));
             }
             return objectPermissions;
         default:
@@ -137,10 +136,9 @@ public class FileMetadataFieldParser {
      * Parses an object permission from the supplied JSON object.
      *
      * @param jsonObject The JSON object to parse
-     * @param timeZone The client timezone to consider, or <code>null</code> to not apply timezone offsets to parsed timestamps
      * @return The parsed permission
      */
-    private static FileStorageObjectPermission parseObjetPermission(JSONObject jsonObject, TimeZone timeZone) throws OXException, JSONException {
+    private static FileStorageObjectPermission parseObjetPermission(JSONObject jsonObject) throws OXException, JSONException {
         if (false == jsonObject.hasAndNotNull("bits")) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create("bits");
         }
@@ -157,25 +155,24 @@ public class FileMetadataFieldParser {
             parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, null)); //TODO: timezone from user/request?
             parsedGuestPermission.setPermissions(bits);
             return parsedGuestPermission;
-        } else {
-            /*
-             * parse as already known permission entity
-             */
-            DefaultFileStorageObjectPermission parsedPermission = new DefaultFileStorageObjectPermission();
-            if (false == jsonObject.has("entity")) {
-                throw FileStorageExceptionCodes.MISSING_PARAMETER.create("entity");
-            }
-            parsedPermission.setEntity(jsonObject.getInt("entity"));
-            if (jsonObject.has("group")) {
-                parsedPermission.setGroup(jsonObject.getBoolean("group"));
-            } else if (null != type) {
-                parsedPermission.setGroup(RecipientType.GROUP == type);
-            } else {
-                throw FileStorageExceptionCodes.MISSING_PARAMETER.create("group");
-            }
-            parsedPermission.setPermissions(bits);
-            return parsedPermission;
         }
+        /*
+         * parse as already known permission entity
+         */
+        DefaultFileStorageObjectPermission parsedPermission = new DefaultFileStorageObjectPermission();
+        if (false == jsonObject.has("entity")) {
+            throw FileStorageExceptionCodes.MISSING_PARAMETER.create("entity");
+        }
+        parsedPermission.setEntity(jsonObject.getInt("entity"));
+        if (jsonObject.has("group")) {
+            parsedPermission.setGroup(jsonObject.getBoolean("group"));
+        } else if (null != type) {
+            parsedPermission.setGroup(RecipientType.GROUP == type);
+        } else {
+            throw FileStorageExceptionCodes.MISSING_PARAMETER.create("group");
+        }
+        parsedPermission.setPermissions(bits);
+        return parsedPermission;
     }
 
 }

@@ -88,6 +88,9 @@ import com.sun.mail.util.PropUtil;
  */
 
 public class InternetHeaders {
+
+    private static final String CRLF = "\r\n";
+
     private static final boolean ignoreWhitespaceLines =
 	PropUtil.getBooleanSystemProperty("mail.mime.ignorewhitespacelines",
 					    false);
@@ -451,7 +454,7 @@ public class InternetHeaders {
 			    lineBuffer.append(lt);
 		    } else {
 			if (lineBuffer.length() > 0)
-			    lineBuffer.append("\r\n");
+			    lineBuffer.append(CRLF);
 			lineBuffer.append(line);
 		    }
 		} else {
@@ -534,7 +537,7 @@ public class InternetHeaders {
                     lineBuffer.append(lt);
                 } else {
                 if (lineBuffer.length() > 0)
-                    lineBuffer.append("\r\n");
+                    lineBuffer.append(CRLF);
                 lineBuffer.append(line);
                 }
             } else {
@@ -857,7 +860,7 @@ public class InternetHeaders {
 	    char c = line.charAt(0);
 	    if (c == ' ' || c == '\t') {
 		InternetHeader h = headers.get(headers.size() - 1);
-		h.line += "\r\n" + line;
+		h.line += CRLF + line;
 	    } else
 		headers.add(new InternetHeader(line));
 	} catch (StringIndexOutOfBoundsException e) {
@@ -895,5 +898,14 @@ public class InternetHeaders {
      */
     public Enumeration<String> getNonMatchingHeaderLines(String[] names) {
 	return (new MatchStringEnum(headers, names, false));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(headers.size() << 5);
+        for (InternetHeader header : headers) {
+            sb.append(header.line).append(CRLF);
+        }
+        return sb.toString();
     }
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
-import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -214,9 +213,9 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
             final String lmsg = com.openexchange.java.Strings.toLowerCase(e.getMessage());
             if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                 // Assume client-initiated connection closure
-                LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(data.getFileName()) ? "" : " " + data.getFileName()), e);
+                LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file", e);
             } else {
-                LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(data.getFileName()) ? "" : " " + data.getFileName()), e);
+                LOG.warn("Lost connection to client while trying to output file", e);
             }
         } catch (final com.sun.mail.util.MessageRemovedIOException e) {
             sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", data.getResponse());
@@ -230,9 +229,9 @@ public class OutputBinaryContentAction implements IFileResponseRendererAction {
                  * For the next write attempt by us, the peer's TCP stack will issue an RST,
                  * which results in this exception and message at the sender.
                  */
-                LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(data.getFileName()) ? "" : " " + data.getFileName()), e);
+                LOG.debug("Client dropped connection while trying to output file", e);
             } else {
-                LOG.warn("Lost connection to input or output end-point while trying to output file{}", (isEmpty(data.getFileName()) ? "" : " " + data.getFileName()), e);
+                LOG.warn("Lost connection to input or output end-point while trying to output file", e);
             }
         }
 

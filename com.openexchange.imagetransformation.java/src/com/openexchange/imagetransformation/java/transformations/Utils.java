@@ -67,6 +67,7 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import org.slf4j.Logger;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -101,7 +102,10 @@ import com.twelvemonkeys.imageio.stream.ByteArrayImageInputStream;
  */
 public class Utils {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
+    }
 
     private static final Map<String, ImageReaderSpi> READER_SPI_BY_EXTENSION;
     private static final Map<String, ImageReaderSpi> READER_SPI_BY_FORMAT_NAME;
@@ -161,10 +165,10 @@ public class Utils {
                     try {
                         if (readerSpi.canDecodeInput(inputStream)) {
                             reader = readerSpi.createReaderInstance();
-                            LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
+                            LoggerHolder.LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
                         }
                     } catch (IOException e) {
-                        LOG.debug("Error probing for suitable image reader", e);
+                        LoggerHolder.LOG.debug("Error probing for suitable image reader", e);
                     } finally {
                         inputStream.reset();
                     }
@@ -178,7 +182,7 @@ public class Utils {
                     throw new IOException("No image reader available for format " + optContentType);
                 }
                 reader = readers.next();
-                LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
+                LoggerHolder.LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
             }
 
             // Successfully obtained ImageReader instance. Return it.
@@ -300,7 +304,7 @@ public class Utils {
                 }
             }
         } catch (Exception e) {
-            LOG.debug("error reading Exif orientation", e);
+            LoggerHolder.LOG.debug("error reading Exif orientation", e);
         }
         return 0;
     }
@@ -356,7 +360,7 @@ public class Utils {
                 return selectedIndex;
             }
         } catch (IOException e) {
-            LOG.debug("Error determining most appropriate image index", e);
+            LoggerHolder.LOG.debug("Error determining most appropriate image index", e);
         }
         return 0;
     }

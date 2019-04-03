@@ -65,7 +65,7 @@ public class SolverFactory {
 
     /**
      * Creates a new InfoItem {@link ProblemSolver}
-     * 
+     *
      * @param action The repair action
      * @param database The database implementation
      * @param storage the file storage
@@ -86,7 +86,7 @@ public class SolverFactory {
 
     /**
      * Creates a new attachment {@link ProblemSolver}
-     * 
+     *
      * @param action The repair action
      * @param attachmentBase The attachment base
      * @param storage the file storage
@@ -106,7 +106,7 @@ public class SolverFactory {
 
     /**
      * Creates a new snippet {@link ProblemSolver}
-     * 
+     *
      * @param action The repair action
      * @param storage The file storage
      * @return the new {@link ProblemSolver}
@@ -125,7 +125,7 @@ public class SolverFactory {
 
     /**
      * Creates a new vcard {@link ProblemSolver}
-     * 
+     *
      * @param action The repair action
      * @param storage The file storage
      * @return the new {@link ProblemSolver}
@@ -142,8 +142,27 @@ public class SolverFactory {
     }
 
     /**
+     * Creates a new composition space attachment {@link ProblemSolver}
+     *
+     * @param action The repair action
+     * @param storage The file storage
+     * @return the new {@link ProblemSolver}
+     */
+    public static final ProblemSolver createCompositionSpaceAttachmentSolver(RepairAction action, FileStorage storage) {
+        switch (action) {
+            case DELETE:
+                return new DeleteBrokenMailComposeAttachmentReferenceResolver();
+            case CREATE_DUMMY:
+                return new CreateDummyFileForMailComposeAttachmentSolver(storage);
+            case CREATE_ADMIN_INFOITEM:
+            default:
+                return new DoNothingSolver();
+        }
+    }
+
+    /**
      * Creates a new missing entry {@link ProblemSolver}
-     * 
+     *
      * @param action The repair action
      * @param storage The file storage
      * @return the new {@link ProblemSolver}

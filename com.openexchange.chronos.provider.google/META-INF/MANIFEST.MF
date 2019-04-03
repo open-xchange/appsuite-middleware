@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Google Calendar Provider
 Bundle-SymbolicName: com.openexchange.chronos.provider.google
+Automatic-Module-Name: com.openexchange.chronos.provider.google
 Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.chronos.provider.google.osgi.Activator
 Bundle-Vendor: OX Software GmbH
@@ -9,6 +10,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis.auth.oauth2,
  com.google.api.client.googleapis.javanet,
+ com.google.api.client.googleapis.json,
  com.google.api.client.googleapis.services,
  com.google.api.client.http,
  com.google.api.client.http.javanet,
@@ -59,6 +61,7 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.subscribe,
+ com.openexchange.tools.arrays,
  com.openexchange.tools.id,
  com.openexchange.tools.oxfolder.property,
  com.openexchange.tools.session,

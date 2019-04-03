@@ -49,6 +49,9 @@
 
 package com.openexchange.login.internal;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -66,7 +69,7 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     private final LoginRequest request;
     private final User user;
     private final Context ctx;
-    private SessionEnhancement enhancement;
+    private final List<SessionEnhancement> enhancements;
 
     /**
      * Initializes a new {@link AddSessionParameterImpl}.
@@ -82,6 +85,7 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
         this.request = request;
         this.user = user;
         this.ctx = ctx;
+        this.enhancements = Collections.synchronizedList(new ArrayList<SessionEnhancement>());
     }
 
     @Override
@@ -145,12 +149,17 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     }
 
     @Override
-    public SessionEnhancement getEnhancement() {
-        return enhancement;
+    public List<SessionEnhancement> getEnhancements() {
+        return enhancements;
     }
 
-    public void setEnhancement(SessionEnhancement enhancement) {
-        this.enhancement = enhancement;
+    /**
+     * Add a sessionEnhancement
+     * 
+     * @param enhancement
+     */
+    public void addEnhancement(SessionEnhancement enhancement) {
+        enhancements.add(enhancement);
     }
 
     @Override

@@ -59,7 +59,7 @@ import com.openexchange.user.UserService;
 
 /**
  *
- * {@link PasswordChangeHistoryActivator}
+ * {@link PasswordChangeRestActivator}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
@@ -69,7 +69,7 @@ public final class PasswordChangeRestActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordChangeRestActivator.class);
 
     /**
-     * Initializes a new {@link PasswordChangeHistoryActivator}
+     * Initializes a new {@link PasswordChangeRestActivator}
      */
     public PasswordChangeRestActivator() {
         super();

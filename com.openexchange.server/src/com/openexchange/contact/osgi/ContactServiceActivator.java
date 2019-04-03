@@ -52,6 +52,7 @@ package com.openexchange.contact.osgi;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.admin.HideAdminService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.internal.ContactServiceImpl;
 import com.openexchange.contact.internal.ContactServiceLookup;
@@ -89,7 +90,7 @@ public class ContactServiceActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class,
-            UserConfigurationService.class, UserPermissionService.class, ThreadPoolService.class, UserService.class };
+            UserConfigurationService.class, UserPermissionService.class, ThreadPoolService.class, UserService.class, ConfigViewFactory.class };
     }
 
     @Override

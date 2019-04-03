@@ -101,8 +101,6 @@ import com.openexchange.session.Session;
  */
 public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
-    private static final String DEFAULT_CALENDAR_NAME = "Google Calendar";
-
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
 
     private final GoogleOAuthAccess oauthAccess;
@@ -119,7 +117,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
      * @throws OXException
      */
     public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
-        super(session, account, parameters);
+        super(session, account, parameters, null);
         refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
         requestTimeout = GoogleCalendarConfig.getRetryOnErrorInterval(session);
         try {
@@ -266,10 +264,11 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             com.google.api.services.calendar.Calendar.Events.List list = googleCal.events().list(folderId);
+            list.setAlwaysIncludeEmail(Boolean.TRUE);
 
             if (token != null) {
                 if (isSyncToken) {
-                    list.setShowDeleted(true);
+                    list.setShowDeleted(Boolean.TRUE);
                     list.setSyncToken(token);
                 } else {
                     list.setPageToken(token);

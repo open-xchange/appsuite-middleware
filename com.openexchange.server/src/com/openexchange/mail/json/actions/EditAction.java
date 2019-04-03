@@ -64,7 +64,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -164,7 +164,7 @@ public final class EditAction extends AbstractMailAction {
                 msgIdentifier = msi.saveDraft(composedMail, false, accountId);
 
                 if (null != csid && null != msgref) {
-                    CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                    OldCompositionSpace space = OldCompositionSpace.getCompositionSpace(csid, session);
                     space.addCleanUp(msgref);
                 }
             }

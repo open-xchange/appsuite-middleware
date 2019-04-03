@@ -1,0 +1,25 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: LockoutService
+Bundle-SymbolicName: com.openexchange.multifactor.lockoutService
+Bundle-Version: 7.10.2
+Bundle-Activator: com.openexchange.multifactor.lockoutService.impl.MultifactorLockoutServiceActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: com.openexchange.multifactor.lockoutService
+Import-Package: ch.qos.logback.classic,
+ com.hazelcast.cache.impl,
+ com.openexchange.caching,
+ com.openexchange.config,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.multifactor,
+ com.openexchange.osgi,
+ com.openexchange.ratelimit,
+ com.openexchange.server,
+ com.openexchange.server.services,
+ com.openexchange.session,
+ com.openexchange.session.inspector,
+ org.osgi.framework,
+ org.slf4j

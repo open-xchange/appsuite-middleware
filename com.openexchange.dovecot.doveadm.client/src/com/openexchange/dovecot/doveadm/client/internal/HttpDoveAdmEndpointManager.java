@@ -70,6 +70,7 @@ import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClientExceptionCodes;
+import com.openexchange.dovecot.doveadm.client.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.endpointpool.Endpoint;
@@ -78,7 +79,7 @@ import com.openexchange.rest.client.endpointpool.EndpointManager;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link HttpDoveAdmEndpointManager}
@@ -125,9 +126,9 @@ public class HttpDoveAdmEndpointManager {
         }
     }
 
-    private static CloseableHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) {
+    private static CloseableHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) throws OXException {
         ClientConfig clientConfig = ClientConfig.newInstance()
-            .setUserAgent("OX Dovecot Http Client v" + Version.getInstance().getVersionString())
+            .setUserAgent("OX Dovecot Http Client v" + Services.getService(VersionService.class).getVersionString())
             .setMaxTotalConnections(totalConnections)
             .setMaxConnectionsPerRoute(maxConnectionsPerRoute)
             .setConnectionTimeout(connectTimeout)

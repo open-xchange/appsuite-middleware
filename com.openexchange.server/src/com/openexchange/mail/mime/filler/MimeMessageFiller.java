@@ -84,6 +84,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.idn.IDNA;
 import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
@@ -103,6 +104,7 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageDataSource;
@@ -144,10 +146,15 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.IpAddressRenderer;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.utils.MsisdnUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
-import com.openexchange.version.Version;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.version.VersionService;
 import com.sun.mail.util.BASE64DecoderStream;
 import com.sun.mail.util.QPDecoderStream;
 
@@ -344,7 +351,7 @@ public class MimeMessageFiller {
      */
     public static String getMailerInfo() {
         if (MailProperties.getInstance().isAppendVersionToMailerHeader()) {
-            return new StringBuilder("Open-Xchange Mailer v").append(Version.getInstance().getVersionString()).toString();
+            return new StringBuilder("Open-Xchange Mailer v").append(ServerServiceRegistry.getServize(VersionService.class).getVersionString()).toString();
         }
         return "Open-Xchange Mailer";
     }
@@ -395,7 +402,8 @@ public class MimeMessageFiller {
 
     private static final String[] SUPPRESS_HEADERS = {
         MessageHeaders.HDR_X_OX_VCARD, MessageHeaders.HDR_X_OXMSGREF, MessageHeaders.HDR_X_OX_MARKER, MessageHeaders.HDR_X_OX_NOTIFICATION,
-        MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, HDR_X_MAILER };
+        MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY, HDR_X_MAILER, MessageHeaders.HDR_X_OX_SHARED_ATTACHMENTS,
+        MessageHeaders.HDR_X_OX_SECURITY, MessageHeaders.HDR_X_OX_META };
 
     /**
      * Sets necessary headers in specified MIME message: <code>From</code>/ <code>Sender</code>, <code>To</code>, <code>Cc</code>,
@@ -541,12 +549,7 @@ public class MimeMessageFiller {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
             if (isCustomOrReplyHeader(name)) {
-                String value = entry.getValue();
-                if(HDR_REFERENCES.equals(name)) {
-                    mimeMessage.setHeader(name, MimeMessageUtility.fold(12, value));
-                } else {
-                    mimeMessage.setHeader(name, value);
-                }
+                mimeMessage.setHeader(name, MimeMessageUtility.fold(name.length() + 2, entry.getValue()));
             }
         }
     }
@@ -572,7 +575,7 @@ public class MimeMessageFiller {
                 }
             } else {
                 String replyTo = compositionParameters.getReplyToAddress();
-                if (replyTo != null) {
+                if (!isEmpty(replyTo)) {
                     try {
                         mimeMessage.setReplyTo(QuotedInternetAddress.parse(replyTo, true));
                     } catch (final AddressException e) {
@@ -676,6 +679,91 @@ public class MimeMessageFiller {
              */
             mimeMessage.setHeader(HDR_REFERENCES, MimeMessageUtility.fold(12, refBuilder.toString()));
         }
+    }
+
+    /**
+     * Resolves specified "from" address to associated account identifier
+     *
+     * @param session The session
+     * @param from The from address
+     * @param checkTransportSupport <code>true</code> to check transport support
+     * @param checkFrom <code>true</code> to check for validity
+     * @return The account identifier
+     * @throws OXException If address cannot be resolved
+     */
+    public static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
+        // Resolve "From" to proper mail account to select right transport server
+        int accountId = doResolveFrom2Account(session, from, checkTransportSupport);
+
+        if (accountId < 0) {
+            if (checkFrom && null != from) {
+                // Check aliases
+                try {
+                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
+                    final User user = session.getUser();
+                    final String[] aliases = user.getAliases();
+                    for (final String alias : aliases) {
+                        validAddrs.add(new QuotedInternetAddress(alias));
+                    }
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                        MsisdnUtility.addMsisdnAddress(validAddrs, session);
+                        final String address = from.getAddress();
+                        final int pos = address.indexOf('/');
+                        if (pos > 0) {
+                            from.setAddress(address.substring(0, pos));
+                        }
+                    }
+                    if (!validAddrs.contains(from)) {
+                        throw MailExceptionCode.INVALID_SENDER.create(from.toString());
+                    }
+                } catch (final AddressException e) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            }
+            accountId = MailAccount.DEFAULT_ID;
+        }
+
+        return accountId;
+    }
+
+    private static int doResolveFrom2Account(ServerSession session, InternetAddress from, boolean checkTransportSupport) throws OXException {
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        int user = session.getUserId();
+        int cid = session.getContextId();
+
+        int accountId;
+        if (null == from) {
+            // No "From" address given. Assume primary account
+            accountId = MailAccount.DEFAULT_ID;
+        } else {
+            String address = from.getAddress();
+            if (address.indexOf("xn--") >= 0) { // The special ACE notation always starts with "xn--" prefix
+                // Seems to be in ACE notation; therefore try with its IDN representation
+                accountId = storageService.getTransportByPrimaryAddress(IDNA.toIDN(address), user, cid);
+                if (accountId < 0) {
+                    // Retry with ACE representation
+                    accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
+                }
+            } else {
+                accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
+            }
+
+            // Check if resolved to non-primary account and required "multiplemailaccounts" permission is granted
+            if (accountId > 0 && (false == session.getUserPermissionBits().isMultipleMailAccounts())) {
+                throw MailExceptionCode.INVALID_SENDER.create(from.toString());
+            }
+        }
+
+        if (checkTransportSupport && accountId >= 0) {
+            // Check if determined account supports mail transport
+            TransportAccount account = storageService.getTransportAccount(accountId, user, cid);
+            if (null == account.getTransportServer()) {
+                // Account does not support mail transport
+                throw MailExceptionCode.NO_TRANSPORT_SUPPORT.create(account.getName(), Integer.valueOf(accountId));
+            }
+        }
+
+        return accountId;
     }
 
     /**
@@ -1017,7 +1105,7 @@ public class MimeMessageFiller {
                 } else {
                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                     if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(Strings.replaceSequenceWith(htmlService.getConformHTML(HTML_SPACE, charset), HTML_SPACE, ""), contentType)));
                     } else {
                         mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
                     }
@@ -1651,12 +1739,10 @@ public class MimeMessageFiller {
             final MimeBodyPart html = new MimeBodyPart();
             if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
                 html.setDataHandler(new DataHandler(new MessageDataSource(
-                    htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""),
+                    Strings.replaceSequenceWith(htmlService.getConformHTML(HTML_SPACE, charset), HTML_SPACE, ""),
                     contentType)));
-                // html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
             } else {
                 html.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
-                // html.setContent(wellFormedHTMLContent, contentType);
             }
             html.setHeader(HDR_MIME_VERSION, VERSION_1_0);
             html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
@@ -1709,7 +1795,7 @@ public class MimeMessageFiller {
         return MimeMessageUtility.blankSrc(imageTag);
     }
 
-    private static final String VERSION_NAME = Version.NAME;
+    private static final String VERSION_NAME = VersionService.NAME;
 
     private static final Pattern PATTERN_SRC_ATTR = Pattern.compile("(?i)src=\"[^\"]*\"");
 
@@ -1943,7 +2029,7 @@ public class MimeMessageFiller {
             if (imageProvider.isLocalFile()) {
                 tmp.setLength(0);
                 tmp.append(PATTERN_DASHES.matcher(id).replaceAll(""));
-                tmp.append('@').append(Version.NAME);
+                tmp.append('@').append(VersionService.NAME);
                 cid = tmp.toString();
             } else {
                 cid = id;

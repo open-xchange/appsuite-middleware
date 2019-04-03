@@ -49,6 +49,7 @@
 
 package com.openexchange.jsieve.export;
 
+import static com.openexchange.java.Charsets.UTF_8;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -99,7 +100,7 @@ public class SieveHandler {
     /**
      * The logger.
      */
-    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SieveHandler.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SieveHandler.class);
 
     /**
      * The constant for CRLF (carriage-return line-feed).
@@ -379,7 +380,7 @@ public class SieveHandler {
          * Set timeout to the one specified in the config file or the one which was explicitly set
          */
         s_sieve.setSoTimeout(getEffectiveReadTimeout(configuredTimeout));
-        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
+        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 
         if (!getServerWelcome()) {
@@ -422,7 +423,7 @@ public class SieveHandler {
                  * S: OK
                  */
                 measureStart();
-                bos_sieve.write(commandBuilder.append("STARTTLS").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+                bos_sieve.write(commandBuilder.append("STARTTLS").append(CRLF).toString().getBytes(UTF_8));
                 bos_sieve.flush();
                 measureEnd("startTLS");
                 commandBuilder.setLength(0);
@@ -443,7 +444,7 @@ public class SieveHandler {
                  * Switch to TLS
                  */
                 s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
-                bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
+                bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), UTF_8));
                 bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
                 /*
                  * Fire CAPABILITY command but only for cyrus that is not sieve draft conform to sent CAPABILITY response again
@@ -452,7 +453,7 @@ public class SieveHandler {
                 final String implementation = capa.getImplementation();
                 if (implementation.matches(mailFilterConfig.getProperty(userId, contextId, MailFilterProperty.nonRFCCompliantTLSRegex))) {
                     measureStart();
-                    bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(com.openexchange.java.Charsets.UTF_8));
+                    bos_sieve.write(commandBuilder.append("CAPABILITY").append(CRLF).toString().getBytes(UTF_8));
                     bos_sieve.flush();
                     measureEnd("capability");
                     commandBuilder.setLength(0);
@@ -509,7 +510,7 @@ public class SieveHandler {
         }
 
         final String capability = SIEVE_CAPABILITY;
-        bos_sieve.write(capability.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(capability.getBytes(UTF_8));
         bos_sieve.flush();
 
         // Forget previous capabilities
@@ -595,10 +596,10 @@ public class SieveHandler {
         String put = commandBuilder.append(SIEVE_PUT).append('\"').append(script_name).append("\" {").append(script.length).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        bos_sieve.write(put.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(put.getBytes(UTF_8));
         bos_sieve.write(script);
 
-        bos_sieve.write(CRLF.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(CRLF.getBytes(UTF_8));
         bos_sieve.flush();
 
         String currentLine = bis_sieve.readLine();
@@ -645,7 +646,7 @@ public class SieveHandler {
         }
         final StringBuilder sb = new StringBuilder(32);
         final String get = sb.append(SIEVE_GET_SCRIPT).append('"').append(script_name).append('"').append(CRLF).toString();
-        bos_sieve.write(get.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(get.getBytes(UTF_8));
         bos_sieve.flush();
         sb.setLength(0);
         /*-
@@ -858,7 +859,7 @@ public class SieveHandler {
         }
 
         final String active = SIEVE_LIST;
-        bos_sieve.write(active.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(active.getBytes(UTF_8));
         bos_sieve.flush();
 
         final ArrayList<String> list = new ArrayList<String>();
@@ -895,7 +896,7 @@ public class SieveHandler {
         }
 
         final String active = SIEVE_LIST;
-        bos_sieve.write(active.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(active.getBytes(UTF_8));
         bos_sieve.flush();
 
         String scriptname = null;
@@ -941,7 +942,7 @@ public class SieveHandler {
         final String delete = commandBuilder.append(SIEVE_DELETE).append('"').append(script_name).append('"').append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        bos_sieve.write(delete.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(delete.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -965,7 +966,7 @@ public class SieveHandler {
      */
     public void close() throws IOException, UnsupportedEncodingException {
         if (null != bos_sieve) {
-            bos_sieve.write(SIEVE_LOGOUT.getBytes(com.openexchange.java.Charsets.UTF_8));
+            bos_sieve.write(SIEVE_LOGOUT.getBytes(UTF_8));
             bos_sieve.flush();
         }
         if (null != s_sieve) {
@@ -1003,11 +1004,11 @@ public class SieveHandler {
         {
             String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"XOAUTH2\" {").append(irs.length()).append("+}").append(CRLF).toString();
             commandBuilder.setLength(0);
-            bos_sieve.write(auth_mech_string.getBytes());
+            bos_sieve.write(auth_mech_string.getBytes(UTF_8));
         }
 
-        bos_sieve.write(irs.getBytes());
-        bos_sieve.write(CRLF.getBytes());
+        bos_sieve.write(irs.getBytes(UTF_8));
+        bos_sieve.write(CRLF.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -1086,11 +1087,11 @@ public class SieveHandler {
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
 
-            bos_sieve.write(new String(SIEVE_AUTH + "\"GSSAPI\" {" + b64resp.length() + "+}").getBytes());
-            bos_sieve.write(CRLF.getBytes());
+            bos_sieve.write(new String(SIEVE_AUTH + "\"GSSAPI\" {" + b64resp.length() + "+}").getBytes(UTF_8));
+            bos_sieve.write(CRLF.getBytes(UTF_8));
             bos_sieve.flush();
-            bos_sieve.write(b64resp.getBytes());
-            bos_sieve.write(CRLF.getBytes());
+            bos_sieve.write(b64resp.getBytes(UTF_8));
+            bos_sieve.write(CRLF.getBytes(UTF_8));
             bos_sieve.flush();
 
             while (true) {
@@ -1131,11 +1132,11 @@ public class SieveHandler {
                             b64resp = com.openexchange.tools.encoding.Base64.encode(response);
                             respLiteral = "{" + b64resp.length() + "+}";
                         }
-                        bos_sieve.write(new String(respLiteral + CRLF).getBytes());
+                        bos_sieve.write(new String(respLiteral + CRLF).getBytes(UTF_8));
                         if (null != response && response.length > 0) {
-                            bos_sieve.write(new String(b64resp + CRLF).getBytes());
+                            bos_sieve.write(new String(b64resp + CRLF).getBytes(UTF_8));
                         } else {
-                            bos_sieve.write(CRLF.getBytes());
+                            bos_sieve.write(CRLF.getBytes(UTF_8));
                         }
                         bos_sieve.flush();
                     }
@@ -1170,9 +1171,9 @@ public class SieveHandler {
         commandBuilder.setLength(0);
 
         // We don't need to specify an encoding here because all strings contain only ASCII Text
-        bos_sieve.write(auth_mech_string.getBytes());
-        bos_sieve.write(user_size.getBytes());
-        bos_sieve.write(user_auth_pass_64.getBytes());
+        bos_sieve.write(auth_mech_string.getBytes(UTF_8));
+        bos_sieve.write(user_size.getBytes(UTF_8));
+        bos_sieve.write(user_auth_pass_64.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -1198,7 +1199,7 @@ public class SieveHandler {
         final String auth_mech_string = commandBuilder.append(SIEVE_AUTH).append("\"LOGIN\"").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        bos_sieve.write(auth_mech_string.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(auth_mech_string.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -1219,8 +1220,8 @@ public class SieveHandler {
         final String user_size = commandBuilder.append('{').append((user64.length() - 2)).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        bos_sieve.write(user_size.getBytes(com.openexchange.java.Charsets.UTF_8));
-        bos_sieve.write(user64.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(user_size.getBytes(UTF_8));
+        bos_sieve.write(user64.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -1241,8 +1242,8 @@ public class SieveHandler {
         final String pass_size = commandBuilder.append('{').append((pass64.length() - 2)).append("+}").append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        bos_sieve.write(pass_size.getBytes(com.openexchange.java.Charsets.UTF_8));
-        bos_sieve.write(pass64.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(pass_size.getBytes(UTF_8));
+        bos_sieve.write(pass64.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -1260,16 +1261,6 @@ public class SieveHandler {
     }
 
     /**
-     * Old method for compatibility reasons
-     *
-     * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
-     */
-    @Deprecated
-    protected SieveResponse.Code parseSIEVEResponse(final String resp) {
-        return parseSIEVEResponse(resp, null);
-    }
-
-    /**
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
      *
@@ -1277,7 +1268,7 @@ public class SieveHandler {
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
-    protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
+    protected SieveResponse parseSIEVEResponse(final String resp, final String multiline) {
         if (!useSIEVEResponseCodes || null == resp) {
             return null;
         }
@@ -1287,16 +1278,15 @@ public class SieveHandler {
         if (m.matches()) {
             final int gcount = m.groupCount();
             if (gcount > 1) {
-                final SieveResponse.Code ret = SieveResponse.Code.getCode(m.group(1));
+                final SieveResponse.Code code = SieveResponse.Code.getCode(m.group(1));
                 final String group = m.group(2);
                 if (group.startsWith("{")) {
                     // Multi line, use the multiline parsed before here
-                    ret.setMessage(multiline);
+                    return new SieveResponse(code, multiline);
                 } else {
                     // Single line
-                    ret.setMessage(group);
+                    return new SieveResponse(code, group);
                 }
-                return ret;
             }
         }
         return null;
@@ -1310,7 +1300,7 @@ public class SieveHandler {
         final String active = commandBuilder.append(SIEVE_ACTIVE).append('\"').append(sieve_script_name).append('\"').append(CRLF).toString();
         commandBuilder.setLength(0);
 
-        bos_sieve.write(active.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.write(active.getBytes(UTF_8));
         bos_sieve.flush();
 
         while (true) {
@@ -1337,7 +1327,7 @@ public class SieveHandler {
         }
 
         if (scriptactive) {
-            bos_sieve.write(SIEVE_DEACTIVE.getBytes(com.openexchange.java.Charsets.UTF_8));
+            bos_sieve.write(SIEVE_DEACTIVE.getBytes(UTF_8));
             bos_sieve.flush();
 
             while (true) {

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
+import static com.openexchange.chronos.json.fields.ChronosJsonFields.COMMENT;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
@@ -112,8 +113,8 @@ public class DeleteAction extends ChronosAction {
 
             try {
                 array = temp.getJSONArray(EVENTS);
-                if (temp.has(BODY_PARAM_COMMENT)) {
-                    calendarAccess.set(BODY_PARAM_COMMENT, temp.get(BODY_PARAM_COMMENT));
+                if (temp.has(COMMENT)) {
+                    calendarAccess.set(COMMENT, temp.get(COMMENT));
                 }
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);

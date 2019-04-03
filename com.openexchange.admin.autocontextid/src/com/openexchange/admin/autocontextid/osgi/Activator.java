@@ -60,6 +60,7 @@ import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
@@ -74,13 +75,13 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSetConfigurationService(null, service);
             initCache(service);
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            track(DBMigrationExecutorService.class, new AutoCIDDBMigrationServiceTracker(this, context));
             openTrackers();
 
             final Hashtable<String, String> props = new Hashtable<String, String>(2);
             props.put("name", "OXContext");
             LOG.info(OXContextPluginInterface.class.getName());
             registerService(OXContextPluginInterface.class, new OXAutoCIDContextImpl(), props);
-
         } catch (final SQLException e) {
             LOG.error("", e);
             throw e;
@@ -101,6 +102,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class };
     }
 }

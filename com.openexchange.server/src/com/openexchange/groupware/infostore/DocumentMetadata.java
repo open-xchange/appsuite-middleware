@@ -54,7 +54,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.java.GeoLocation;
+import com.openexchange.session.Session;
 
 public interface DocumentMetadata extends Serializable {
 
@@ -241,5 +244,186 @@ public interface DocumentMetadata extends Serializable {
      * @param originFolderPath
      */
     void setOriginFolderPath(InfostoreFolderPath originFolderPath);
+
+
+    // ------------------------------------------------------------ MEDIA STUFF ------------------------------------------------------------
+
+    /**
+     * Gets the capture date of the image associated with this file
+     *
+     * @return The capture date
+     */
+    Date getCaptureDate();
+
+    /**
+     * Sets the capture date of the image associated with this file
+     *
+     * @param captureDate The capture date
+     */
+    void setCaptureDate(Date captureDate);
+
+    /**
+     * Gets the geo location of the media resource associated with this file
+     *
+     * @return The geo location
+     */
+    GeoLocation getGeoLocation();
+
+    /**
+     * Sets the geo location of the media resource associated with this file
+     *
+     * @param geoLocation The geo location
+     */
+    void setGeoLocation(GeoLocation geoLocation);
+
+    /**
+     * Gets the width of the media resource associated with this file
+     *
+     * @return The width or <code>null</code> if unknown/not set
+     */
+    Long getWidth();
+
+    /**
+     * Sets the width of the media resource associated with this file
+     *
+     * @param width The width
+     */
+    void setWidth(long width);
+
+    /**
+     * Gets the height of the media resource associated with this file
+     *
+     * @return The height or <code>null</code> if unknown/not set
+     */
+    Long getHeight();
+
+    /**
+     * Sets the height of the media resource associated with this file
+     *
+     * @param heigth The height
+     */
+    void setHeight(long height);
+
+    /**
+     * Gets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @return The camera make or <code>null</code> if unknown/not set
+     */
+    String getCameraMake();
+
+    /**
+     * Sets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @param cameraMake The model make
+     */
+    void setCameraMake(String cameraMake);
+
+    /**
+     * Gets the model name or model number of the equipment used to create the photo.
+     *
+     * @return The camera model or <code>null</code> if unknown/not set
+     */
+    String getCameraModel();
+
+    /**
+     * Sets the model name or model number of the equipment used to create the photo
+     *
+     * @param cameraModel The model name
+     */
+    void setCameraModel(String cameraModel);
+
+    /**
+     * Gets ISO speed value of a camera or input device associated with this file
+     *
+     * @return The ISO speed value or <code>null</code> if unknown/not set
+     */
+    Long getCameraIsoSpeed();
+
+    /**
+     * Sets ISO speed value of a camera or input device associated with this file
+     *
+     * @param isoSpeed The ISO speed value
+     */
+    void setCameraIsoSpeed(long isoSpeed);
+
+    /**
+     * Gets the aperture used to create the photo (f-number).
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraAperture();
+
+    /**
+     * Set the aperture used to create the photo (f-number).
+     *
+     * @param aperture The aperture
+     */
+    void setCameraAperture(double aperture);
+
+    /**
+     * Gets the focal length used to create the photo, in millimeters.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraFocalLength();
+
+    /**
+     * Sets the focal length used to create the photo, in millimeters.
+     *
+     * @param focalLength The focal length
+     */
+    void setCameraFocalLength(double focalLength);
+
+    /**
+     * Gets the length of the exposure, in seconds.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraExposureTime();
+
+    /**
+     * Sets the length of the exposure, in seconds.
+     *
+     * @param exposureTime The exposure time
+     */
+    void setCameraExposureTime(double exposureTime);
+
+    /**
+     * Gets the meta information for the media resource associated with this file
+     *
+     * @return The meta information
+     */
+    Map<String, Object> getMediaMeta();
+
+    /**
+     * Sets the meta information for the media resource associated with this file
+     *
+     * @param mediaMeta The meta information
+     */
+    void setMediaMeta(Map<String, Object> mediaMeta);
+
+    /**
+     * Gets the status of parsing/analyzing media meta-data from the media resource
+     *
+     * @return The media status
+     */
+    MediaStatus getMediaStatus();
+
+    /**
+     * Sets the status of parsing/analyzing media meta-data from the media resource
+     *
+     * @param infostoreMediaStatus The media status
+     */
+    void setMediaStatus(MediaStatus infostoreMediaStatus);
+
+    /**
+     * Gets the status of parsing/analyzing media meta-data from the media resource for the client
+     *
+     * @param session The client-associated session
+     * @return The media status
+     */
+    MediaStatus getMediaStatusForClient(Session session);
+
+    // --------------------------------------------------------- END OF MEDIA STUFF --------------------------------------------------------
 
 }

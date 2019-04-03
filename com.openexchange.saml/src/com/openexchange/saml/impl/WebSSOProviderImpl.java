@@ -115,6 +115,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -277,7 +278,8 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter(LoginServlet.PARAMETER_ACTION, SAMLLoginTools.ACTION_SAML_LOGIN + getPathString(backend.getPath()))
-                .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken);
+                .setParameter(SAMLLoginTools.PARAM_TOKEN, sessionToken)
+                .setParameter(SAMLLoginTools.PARAM_SHARD, SessionUtility.getShardCookieValue());
 
             String loginPath = requestInfo.getLoginPath();
             if (loginPath != null) {
@@ -713,7 +715,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
     private void sendLogoutResponseViaPOST(String responseXML, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         try {
-            String encoded = Base64.encodeBase64String(responseXML.getBytes());
+            String encoded = Base64.encodeBase64String(responseXML.getBytes(com.openexchange.java.Charsets.UTF_8));
             TemplateService templateService = services.getService(TemplateService.class);
             OXTemplate template = templateService.loadTemplate(config.getLogoutResponseTemplate());
             Map<String, String> vars = new HashMap<String, String>(5);

@@ -79,7 +79,6 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.resource.ResourceService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -95,7 +94,7 @@ public class FindBasicActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, FolderService.class, MailService.class,
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
-            ThreadPoolService.class, IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class,
+            ThreadPoolService.class, IDBasedFolderAccessFactory.class, ConfigurationService.class,
             InfostoreSearchEngine.class, FileStorageServiceRegistry.class, ConfigViewFactory.class,
             IDBasedCalendarAccessFactory.class, RecurrenceService.class, LeanConfigurationService.class, ConversionService.class
         };

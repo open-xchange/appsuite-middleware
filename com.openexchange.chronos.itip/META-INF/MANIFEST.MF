@@ -6,7 +6,8 @@ Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.chronos.itip.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.ajax,
+Import-Package: com.google.common.collect,
+ com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler,

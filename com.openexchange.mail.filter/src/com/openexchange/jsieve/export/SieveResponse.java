@@ -55,6 +55,34 @@ package com.openexchange.jsieve.export;
  */
 public class SieveResponse {
 
+    private final String message;
+    private final Code code;
+
+    /**
+     * Initializes a new {@link SieveResponse}.
+     */
+    public SieveResponse(Code code, String message) {
+        super();
+        this.code = code;
+        this.message = message;
+    }
+
+    /**
+     * @return the message
+     */
+    public final String getMessage() {
+        return message;
+    }
+
+    /**
+     * Gets the code
+     *
+     * @return The code
+     */
+    public Code getCode() {
+        return code;
+    }
+
     public static enum Code {
         /*
          * https://tools.ietf.org/html/rfc5804#section-1.3
@@ -75,8 +103,6 @@ public class SieveResponse {
 
         private final String sieveCode;
 
-        private String message;
-
         private final int detailnumber;
 
         private Code(final String sieveCode, final int detailNumber) {
@@ -89,20 +115,6 @@ public class SieveResponse {
          */
         public final String getSieveCode() {
             return sieveCode;
-        }
-
-        /**
-         * @return the message
-         */
-        public final String getMessage() {
-            return message;
-        }
-
-        /**
-         * @param message the message to set
-         */
-        public final void setMessage(String message) {
-            this.message = message;
         }
 
         /**

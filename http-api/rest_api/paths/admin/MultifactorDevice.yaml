@@ -1,0 +1,42 @@
+'/admin/v1/contexts/{context-id}/users/{user-id}/multifactor/devices/{provider-name}/{device-id}':
+  delete:
+    operationId: multifactor-delete-device
+    tags:
+      - Admin
+    parameters:
+      - description: The context the user is in
+        format: int32
+        in: path
+        name: context-id
+        required: true
+        type: integer
+      - description: The ID representing the user
+        format: int32
+        in: path
+        name: user-id
+        required: true
+        type: integer
+      - description: The name of the provider to delete the device for
+        in: path
+        name: provider-name
+        required: true
+        type: string
+      - description: The ID of the device to delete
+        in: path
+        name: device-id
+        required: true
+        type: string
+    produces:
+      - application/json
+    responses:
+      '200':
+        description: If the device was deleted
+      '401':
+        description: Not authorized
+      '404':
+        description: Not found. If path is wrong, or if the given provider, or device was not found.
+      '500':
+        description: 'Internal server error that might have multiple reasons. Response contains error message.'
+    security:
+      - contextAdminAuth: []
+    summary: Deletes a multifactor authentication device.

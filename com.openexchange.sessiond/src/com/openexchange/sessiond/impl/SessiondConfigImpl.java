@@ -67,14 +67,14 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L; // 6 minutes
     private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L; // 1 hour
 
-    private int maxSession = 50000;
-    private int maxSessionsPerClient = 0;
-    private long sessionShortLifeTime = 60L * 60L * 1000L;
-    private long randomTokenTimeout = 30000L;
-    private long longLifeTime = 7L * 24L * 60L * 60L * 1000L;
-    private boolean autoLogin = false;
-    private boolean asyncPutToSessionStorage = true;
-    private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
+    private final int maxSession;
+    private final int maxSessionsPerClient;
+    private final long sessionShortLifeTime;
+    private final long randomTokenTimeout;
+    private final long longLifeTime;
+    private final boolean autoLogin;
+    private final boolean asyncPutToSessionStorage;
+    private final String obfuscationKey;
 
     /**
      * Initializes a new {@link SessiondConfigImpl}.
@@ -83,15 +83,15 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
      */
     public SessiondConfigImpl(ConfigurationService conf) {
         super();
-        maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
+        maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", 50000);
         LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession={}", maxSession);
 
-        maxSessionsPerClient = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerClient", maxSessionsPerClient);
+        maxSessionsPerClient = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerClient", 0);
         LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient={}", maxSessionsPerClient);
 
-        sessionShortLifeTime = conf.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", (int) sessionShortLifeTime);
+        long sessionShortLifeTime = conf.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", ((int) (60L * 60L * 1000L)));
         String tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
-        longLifeTime = ConfigTools.parseTimespan(tmp);
+        long longLifeTime = ConfigTools.parseTimespan(tmp);
         if (sessionShortLifeTime < SHORT_CONTAINER_LIFE_TIME) {
             sessionShortLifeTime = SHORT_CONTAINER_LIFE_TIME;
         }
@@ -101,10 +101,12 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         if (longLifeTime < sessionShortLifeTime) {
             longLifeTime = sessionShortLifeTime;
         }
-        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime={}", sessionShortLifeTime);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime={}", longLifeTime);
+        this.sessionShortLifeTime = sessionShortLifeTime;
+        this.longLifeTime = longLifeTime;
+        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime={}", this.sessionShortLifeTime);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime={}", this.longLifeTime);
 
-        tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "30000");
+        tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", Integer.toString(30000));
         randomTokenTimeout = ConfigTools.parseTimespan(tmp);
         LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout={}", randomTokenTimeout);
 
@@ -114,7 +116,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         tmp = conf.getProperty("com.openexchange.sessiond.asyncPutToSessionStorage", "true");
         asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
 
-        obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", obfuscationKey);
+        obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn");
     }
 
     @Override

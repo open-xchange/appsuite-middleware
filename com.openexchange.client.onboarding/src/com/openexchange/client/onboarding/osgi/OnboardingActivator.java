@@ -90,7 +90,7 @@ import com.openexchange.user.UserService;
  */
 public class OnboardingActivator extends HousekeepingActivator {
 
-    private volatile OnboardingServiceImpl registry;
+    private OnboardingServiceImpl registry;
 
     /**
      * Initializes a new {@link OnboardingActivator}.
@@ -102,11 +102,11 @@ public class OnboardingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
- TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class, SessiondService.class };
+            TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class, SessiondService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
         OnboardingImageDataSource.setBundle(context.getBundle());
 
@@ -172,7 +172,7 @@ public class OnboardingActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
         OnboardingServiceImpl registry = this.registry;
         if (null != registry) {

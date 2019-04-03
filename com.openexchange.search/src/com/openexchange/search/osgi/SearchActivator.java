@@ -64,7 +64,7 @@ import com.openexchange.search.internal.SearchServiceImpl;
  */
 public final class SearchActivator implements BundleActivator {
 
-    private volatile ServiceRegistration<SearchService> searchServiceRegistration;
+    private ServiceRegistration<SearchService> searchServiceRegistration;
 
     /**
      * Initializes a new {@link SearchActivator}.
@@ -74,7 +74,7 @@ public final class SearchActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(SearchActivator.class);
         logger.info("Starting bundle: com.openexchange.search");
         try {
@@ -86,7 +86,7 @@ public final class SearchActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(SearchActivator.class);
         logger.info("Stopping bundle: com.openexchange.search");
         try {

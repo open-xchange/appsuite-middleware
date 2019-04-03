@@ -53,6 +53,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.UnknownHostException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import org.joda.time.Duration;
@@ -227,7 +229,13 @@ public class AntiVirusServiceImpl implements AntiVirusService {
         OperationMode mode = OperationMode.parse(leanConfigurationService.getProperty(AntiVirusProperty.mode));
 
         ICAPClient client = services.getService(ICAPClientFactoryService.class).getOrCreate();
-        ICAPOptions options = client.getOptions(server, port, service);
+        ICAPOptions options;
+        try {
+            options = client.getOptions(server, port, service);
+        } catch (ExecutionException e) {
+            LOG.error("", e);
+            return new AntiVirusResultImpl.Builder().withError(AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage())).build();
+        }
 
         // No unique id? No caching, just scan and return
         if (Strings.isEmpty(uniqueId)) {
@@ -289,6 +297,9 @@ public class AntiVirusServiceImpl implements AntiVirusService {
             ICAPResponse response = client.execute(createBuilder(options, server, port, service, mode, inputStream, contentLength).build());
             logTraceInformation(start, System.currentTimeMillis(), contentLength);
             return parser.parse(response);
+        } catch (UnknownHostException e) {
+            LOG.error("", e);
+            return new AntiVirusResultImpl.Builder().withError(AntiVirusServiceExceptionCodes.UNKNOWN_HOST.create(e, e.getMessage())).build();
         } catch (IOException e) {
             LOG.error("", e);
             return new AntiVirusResultImpl.Builder().withError(AntiVirusServiceExceptionCodes.IO_ERROR.create(e, e.getMessage())).build();

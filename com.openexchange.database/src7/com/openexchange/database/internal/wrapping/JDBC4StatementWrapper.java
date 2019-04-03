@@ -126,9 +126,9 @@ public abstract class JDBC4StatementWrapper implements Statement {
         if (sqlException.getCause() instanceof java.net.SocketTimeoutException) {
             String catalog = getCatalogSafe(con);
             if (null == catalog) {
-                LOG.error("Read timeout encountered for the following statement: {}", Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query));
+                LOG.error("Read timeout encountered for the following statement: {}", Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query), sqlException);
             } else {
-                LOG.error("Read timeout encountered for the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query));
+                LOG.error("Read timeout encountered for the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, null == query ? "<unknown>" : query), sqlException);
             }
         }
     }

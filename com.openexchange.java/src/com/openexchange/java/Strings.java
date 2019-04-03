@@ -253,7 +253,8 @@ public class Strings {
 
     /**
      * High speed test for whitespace! Faster than the java one (from some testing).
-     *
+     * 
+     * @param c The character to check 
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isWhitespace(final char c) {
@@ -280,6 +281,7 @@ public class Strings {
     /**
      * High speed test for ASCII numbers!
      *
+     * @param c The character to check  
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isDigit(final char c) {
@@ -303,10 +305,11 @@ public class Strings {
     /**
      * High speed test for punctuation character!
      *
+     * @param c The character to check 
      * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
      */
-    public static boolean isPunctuation(char ch) {
-        switch (ch) {
+    public static boolean isPunctuation(char c) {
+        switch (c) {
             case '!':
             case '"':
             case '#':
@@ -349,6 +352,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter!
      *
+     * @param c The character to check  
      * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
      */
     public static boolean isAsciiLetter(final char c) {
@@ -358,6 +362,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter or digit!
      *
+     * @param c The character to check 
      * @return <code>true</code> if the indicated character is an ASCII letter or digit; otherwise <code>false</code>
      */
     public static boolean isAsciiLetterOrDigit(final char c) {
@@ -367,7 +372,7 @@ public class Strings {
     /**
      * Gets specified string's ASCII bytes
      *
-     * @param str The string
+     * @param cs The string
      * @return The ASCII bytes
      */
     public static byte[] toAsciiBytes(final CharSequence cs) {
@@ -606,7 +611,7 @@ public class Strings {
         return P_SPLIT_CRLF.split(s, 0);
     }
 
-    private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
+    // private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
 
     /**
      * Splits given string by tabs.
@@ -615,10 +620,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByTab(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_TAB.split(s, 0);
+        return splitBy(s, '\t', false);
     }
 
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
@@ -644,6 +646,7 @@ public class Strings {
      * @param replacement The replacement character
      * @return The string with all occurrences replaced
      */
+    @SuppressWarnings("null")
     public static String replaceSequenceWith(String s, String sequence, char replacement) {
         if ((null == s) || (null == sequence)) {
             return s;
@@ -667,7 +670,7 @@ public class Strings {
         }
 
         if (prev > 0) {
-            sb.append(s.substring(prev, s.length()));
+            sb.append(s.substring(prev));
         }
         return null == sb ? s : sb.toString();
     }
@@ -680,6 +683,7 @@ public class Strings {
      * @param replacement The replacement
      * @return The string with all occurrences replaced
      */
+    @SuppressWarnings("null")
     public static String replaceSequenceWith(String s, String sequence, String replacement) {
         if ((null == s) || (null == sequence) || (null == replacement)) {
             return s;
@@ -703,7 +707,7 @@ public class Strings {
         }
 
         if (prev > 0) {
-            sb.append(s.substring(prev, s.length()));
+            sb.append(s.substring(prev));
         }
         return null == sb ? s : sb.toString();
     }
@@ -909,12 +913,12 @@ public class Strings {
     }
 
     /**
-     * Joins a collection of objects by connecting the results of their #toString() method with a connector
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector.
+     * Can be <code>null</code> if collection == null or empty string if collection is empty
      *
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @param builder The string builder to use
-     * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final Collection<? extends Object> coll, final String connector, final StringBuilder builder) {
         if (coll == null) {
@@ -938,12 +942,12 @@ public class Strings {
     }
 
     /**
-     * Joins an array of integers by connecting their String representations with a connector
+     * Joins an array of integers by connecting their String representations with a connector.
+     * Can be <code>null</code> if collection == null or empty string if collection is empty
      *
      * @param arr Integers to be connected
      * @param connector Connector place between two objects
      * @param builder The string builder to use
-     * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final int[] arr, final String connector, final StringBuilder builder) {
         final List<Integer> list = new LinkedList<Integer>();
@@ -958,7 +962,7 @@ public class Strings {
      * starting from <code>beginIndex</code> and going until the <code>endIndex</code> inclusively.
      * If the <code>endIndex</code> lies outside the <code>array</code> length, then the array's length
      * will be used as an <code>endIndex</code>.
-     * 
+     *
      * @param array The elements of the array to join
      * @param connector The connector string
      * @param beginIndex The begin index
@@ -999,22 +1003,22 @@ public class Strings {
 
     public static String join(final byte[] arr, final String connector) {
         final List<Byte> list = new LinkedList<Byte>();
-        for (final Byte i : arr) {
-            list.add(i);
+        for (byte i : arr) {
+            list.add(Byte.valueOf(i));
         }
         return join(list, connector);
     }
 
+    private static final byte[][] BYTE_ORDER_MARKS = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
     /**
      * Removes byte order marks from UTF8 strings.
-     *
+     * 
+     * @param str The string to remove byte marks on 
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
-        final byte[][] byteOrderMarks = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
-
         final byte[] bytes = str.getBytes();
-        for (final byte[] bom : byteOrderMarks) {
+        for (final byte[] bom : BYTE_ORDER_MARKS) {
             if (bom.length > bytes.length) {
                 continue;
             }
@@ -1135,7 +1139,7 @@ public class Strings {
      * @return The quoted string.
      */
     public static String quote(final String s) {
-        return concat('"', s, '"');
+        return concat(Character.valueOf('"'), s, Character.valueOf('"'));
     }
 
     /**
@@ -1168,6 +1172,7 @@ public class Strings {
      * Removes surrounding characters from a string in case it is actually surrounded.
      *
      * @param s The value to be un-char'd
+     * @param c The character to remove
      * @return The un-char'd value or <code>null</code>
      */
     public static String unchar(final String s, final char c) {
@@ -1208,11 +1213,11 @@ public class Strings {
     }
 
     /**
-     * Generates a string of code points for given string
+     * Generates a string of code points for given string and print it
+     * either to the given stream or to {@link System#out}
      *
      * @param str The string
      * @param out The print stream to print to
-     * @return The code points
      */
     public static void outCodePoints(final String str, final PrintStream out) {
         if (null == out) {
@@ -1222,7 +1227,12 @@ public class Strings {
         }
     }
 
-    /** ASCII-wise to upper-case */
+    /**
+     * ASCII-wise to upper-case
+     * 
+     * @param chars The {@link CharSequence} to transform
+     * @return A new String with upper case characters
+     */
     public static String toUpperCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -1247,7 +1257,12 @@ public class Strings {
         return null == builder ? chars.toString() : builder.toString();
     }
 
-    /** ASCII-wise to lower-case */
+    /**
+     * ASCII-wise to lower-case
+     * 
+     * @param chars The {@link CharSequence} to transform
+     * @return A new String with lower case characters
+     */
     public static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -1280,6 +1295,7 @@ public class Strings {
      * @param s The string
      * @return The lower-case string
      */
+    @SuppressWarnings("null")
     public static String asciiLowerCase(String s) {
         if (null == s) {
             return null;
@@ -1648,7 +1664,6 @@ public class Strings {
             sb.delete(0, st);
         }
 
-
         return sb;
     }
 
@@ -1816,7 +1831,7 @@ public class Strings {
 
     /**
      * Converts the specified byte count to its counterpart human readable format.
-     * 
+     *
      * @param bytes The amount of bytes to convert
      * @param si Whether the SI notation will be used.
      * @return The human readable format
@@ -1828,6 +1843,6 @@ public class Strings {
         }
         int exp = (int) (Math.log(bytes) / Math.log(unit));
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
-        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+        return String.format("%.1f %sB", Double.valueOf(bytes / Math.pow(unit, exp)), pre);
     }
 }

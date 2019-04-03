@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -200,7 +201,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                     throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(account.getAccountId()));
                 }
                 if (storedAccount.getLastModified().getTime() > clientTimestamp) {
-                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
                 }
             }
             txPolicy.commit(connection);
@@ -257,7 +258,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                     throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
                 }
                 if (storedAccount.getLastModified().getTime() > clientTimestamp) {
-                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
                 }
             }
         } catch (SQLException e) {

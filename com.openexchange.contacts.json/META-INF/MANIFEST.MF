@@ -6,7 +6,8 @@ Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.contacts.json.osgi.ContactJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.fasterxml.jackson.core,
+Import-Package: com.davekoelle,
+ com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
  com.fasterxml.jackson.core.io,

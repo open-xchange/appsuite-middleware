@@ -98,7 +98,7 @@ public class WarningsTest extends VCardTest {
         assertNotNull(vCardImport.getContact());
         List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
-        Assert.assertEquals(1, warnings.size());
+        Assert.assertFalse(warnings.isEmpty());
     }
 
          @Test

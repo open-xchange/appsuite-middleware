@@ -161,11 +161,19 @@ public final class SessionHandler {
      * Initializes the {@link SessionHandler session handler}
      *
      * @param config The appropriate configuration
+     * @throws OXException 
      */
-    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) {
+    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) throws OXException {
         SessionHandler.config = config;
         SessionHandler.userConfigRegistry = userConfigRegistry;
-        SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());
+        // @formatter:off
+        SessionData sessionData = new SessionData(  config.getNumberOfSessionContainers(), 
+                                                    config.getMaxSessions(), 
+                                                    config.getRandomTokenTimeout(), 
+                                                    config.getNumberOfLongTermSessionContainers(), 
+                                                    config.isAutoLogin() 
+                                                    );
+        // @formatter:on
         SESSION_DATA_REF.set(sessionData);
         noLimit = (config.getMaxSessions() == 0);
         asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
@@ -803,7 +811,9 @@ public final class SessionHandler {
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, Origin origin, SessionEnhancement enhancement, String userAgent) throws OXException {
+
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, Origin origin, List<SessionEnhancement> enhancements, String userAgent) throws OXException {
+
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -817,12 +827,15 @@ public final class SessionHandler {
         // Create and optionally enhance new session instance
         SessionImpl newSession;
         {
-            if (null == enhancement) {
+            if (null == enhancements) {
                 newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
             } else {
                 // Create intermediate SessionDescription instance to offer more flexibility to possible SessionEnhancement implementations
+
                 SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
-                enhancement.enhanceSession(sessionDescription);
+                for (SessionEnhancement enhancement: enhancements) {
+                    enhancement.enhanceSession(sessionDescription);
+                }
                 newSession = new SessionImpl(sessionDescription);
                 sessionDescription = null;
             }
@@ -1685,6 +1698,57 @@ public final class SessionHandler {
         SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? 0 : sessionData.countSessions();
     }
+    
+    /**
+     * Gets the total number of sessions
+     * 
+     * @return The total number of sessions
+     */
+    public static int getMetricTotalSessions() {
+        return getNumberOfActiveSessions();
+    }
+    
+    /**
+     * Gets the number of active sessions (Sessions within the first two short-term containers).
+     *  
+     * @return The number of active sessions
+     */
+    public static int getMetricActiveSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if(sessionData == null) {
+            return 0;
+        }
+        int[] shortTermSessionsPerContainer = sessionData.getShortTermSessionsPerContainer();
+        return shortTermSessionsPerContainer.length < 2 ? 0 : shortTermSessionsPerContainer[0]+shortTermSessionsPerContainer[1];
+    }
+    
+    /**
+     * Gets the number of sessions in the short-term container
+     * 
+     * @return The number of sessions in the short-term container
+     */
+    public static int getMetricShortSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if(sessionData == null) {
+            return 0;
+        }
+        return sessionData.getNumShortTerm();
+    }
+    
+    /**
+     * Gets the number of sessions in the long-term container
+     * 
+     * @return the number of sessions in the long-term container
+     */
+    public static int getMetricLongSessions() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if(sessionData == null) {
+            return 0;
+        }
+        return sessionData.getNumLongTerm();
+    }
+    
+    
 
     public static int[] getNumberOfLongTermSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();

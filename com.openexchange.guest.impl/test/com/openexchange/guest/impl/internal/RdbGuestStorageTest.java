@@ -323,7 +323,7 @@ public class RdbGuestStorageTest {
 
         rdbGuestStorage.removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
 
-        Mockito.verify(log, Mockito.times(1)).error(ArgumentMatchers.anyString());
+        Mockito.verify(log, Mockito.times(1)).error(ArgumentMatchers.anyString(), ArgumentMatchers.anyLong(), ArgumentMatchers.anyString());
         Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST_ASSIGNMENT);
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
     }

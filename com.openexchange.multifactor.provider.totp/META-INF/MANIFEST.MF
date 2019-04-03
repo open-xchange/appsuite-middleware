@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Totp provider for multifactor authentication
+Bundle-SymbolicName: com.openexchange.multifactor.provider.totp
+Automatic-Module-Name: com.openexchange.multifactor.provider.totp
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Activator: com.openexchange.multifactor.provider.totp.osgi.TotpProviderActivator
+Bundle-ClassPath: .,
+ lib/core-3.3.3.jar,
+ lib/javase-3.3.3.jar
+Import-Package: 
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.i18n.tools,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.multifactor,
+ com.openexchange.multifactor.exceptions,
+ com.openexchange.multifactor.storage.impl,
+ com.openexchange.multifactor.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javax.crypto,
+ javax.crypto.spec,
+ javax.imageio,
+ org.apache.commons.codec.binary,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.multifactor.provider.totp,
+ com.openexchange.multifactor.provider.totp.storage

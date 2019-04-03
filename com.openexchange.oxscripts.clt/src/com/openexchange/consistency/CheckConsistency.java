@@ -106,7 +106,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
      * Defines the policy for a 'repair' {@link Action}
      */
     private enum Policy {
-        missing_entry_for_file, missing_file_for_attachment, missing_file_for_infoitem, missing_file_for_snippet, missing_file_for_vcard;
+        missing_entry_for_file, missing_file_for_attachment, missing_file_for_infoitem, missing_file_for_snippet, missing_file_for_vcard, missing_attachment_file_for_mail_compose;
     }
 
     /**
@@ -303,6 +303,8 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         sb.append("\n- \"-r ").append(Policy.missing_file_for_attachment.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the attachment item pointing to a non-existing file");
         sb.append("\n- \"-r ").append(Policy.missing_file_for_snippet.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the snippet item");
         sb.append("\n- \"-r ").append(Policy.missing_file_for_snippet.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the snippet item pointing to a non-existing file");
+        sb.append("\n- \"-r ").append(Policy.missing_attachment_file_for_mail_compose.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the mail compose attachment item");
+        sb.append("\n- \"-r ").append(Policy.missing_attachment_file_for_mail_compose.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the mail compose attachment item pointing to a non-existing file");
         sb.append("\n- \"-r ").append(Policy.missing_file_for_vcard.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the vcard item");
         sb.append("\n- \"-r ").append(Policy.missing_file_for_vcard.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the vcard item pointing to a non-existing file");
 

@@ -55,6 +55,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -721,8 +722,7 @@ public class Sender {
         if (stream == null) {
             return "";
         }
-        BufferedReader reader =
-            new BufferedReader(new InputStreamReader(stream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
         StringBuilder content = new StringBuilder();
         String newLine;
         do {

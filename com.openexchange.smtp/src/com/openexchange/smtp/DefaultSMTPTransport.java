@@ -175,7 +175,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
     }
 
     @Override
-    protected OXException handleMessagingException(MessagingException e, MailConfig config) throws OXException {
+    protected OXException handleMessagingException(MessagingException e, MailConfig config) {
         return MimeMailException.handleMessagingException(e, config, session);
     }
 

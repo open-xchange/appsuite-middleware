@@ -63,6 +63,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -84,6 +85,7 @@ import com.openexchange.chronos.itip.generators.HTMLWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -131,11 +133,14 @@ public class UpdateITipAnalyzerTest2 {
 
     private CalendarSession session;
 
+    @Mock
+    private EntityResolver entityResolver;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        original = ChronosTestTools.createEvent(CONTEXT_ID, null);
+        original = ChronosTestTools.createEvent(CONTEXT_ID, (EventField[]) null);
         update = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
         wrapper = new HTMLWrapper();
 
@@ -148,10 +153,17 @@ public class UpdateITipAnalyzerTest2 {
         CalendarUtilities u = ITipMockFactory.mockUtilities();
         session = ITipMockFactory.mockCalendarSession(CONTEXT_ID, user.getId(), serverSession, u);
 
+        Mockito.when(session.getEntityResolver()).thenReturn(entityResolver);
+        Attendee attendee = new Attendee();
+        attendee.setEntity(user.getId());
+        Mockito.when(entityResolver.prepareUserAttendee(user.getId())).thenReturn(attendee);
+
         // Mock used service classes
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(UserService.class)).thenReturn(this.userService);
+        PowerMockito.when(Services.getService(UserService.class, true)).thenReturn(this.userService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
+        PowerMockito.when(Services.getService(ContextService.class, true)).thenReturn(this.contextService);
 
         // Mock settings
         PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);

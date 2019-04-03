@@ -31,6 +31,12 @@
           Only events which end before this date are returned.
         required: false
       - $ref: "#/parameters/QueryParamChronosExpand"
+      - in: query
+        name: usedGroups
+        type: string
+        description: |
+         In case the client resolves groups into single attendees the client can provide the ids 
+         of the groups he used (resolved) as a comma separated list. This way the usecount of those groups will be increased.
       - in: body
         name: updateBody
         description: A JSON object containing the event's data.
@@ -81,6 +87,12 @@
       - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - in: query
+        name: usedGroups
+        type: string
+        description: |
+         In case the client resolves groups into single attendees the client can provide the ids 
+         of the groups he used (resolved) as a comma separated list. This way the usecount of those groups will be increased.
       - in: query
         name: timestamp
         type: integer

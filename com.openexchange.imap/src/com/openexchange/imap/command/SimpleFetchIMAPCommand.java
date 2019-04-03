@@ -150,7 +150,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         uid = false;
         length = seqNums.length;
         map = new TLongObjectHashMap<MailMessage>(length);
-        args = length == messageCount ? (1 == length ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
+        args = length == messageCount ? (1 == length ? ARGS_FIRST : ARGS_ALL) : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
         if (0 == length) {
             returnDefaultValue = true;
         }
@@ -181,7 +181,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         if (length == messageCount) {
             fetchProfile.add(UIDFolder.FetchProfileItem.UID);
             command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo);
-            args = (1 == length ? new String[] { "1" } : ARGS_ALL);
+            args = (1 == length ? ARGS_FIRST : ARGS_ALL);
             uid = false;
         } else {
             command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo);

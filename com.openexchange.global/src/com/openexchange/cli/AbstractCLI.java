@@ -65,6 +65,9 @@ import org.apache.commons.cli.ParseException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCLI<R, C> {
+    
+    /** Defines the extended width of the help screen */
+    public static final int EXTENDED_WIDTH = 120;
 
     /** The associated options */
     protected Options options;
@@ -221,7 +224,7 @@ public abstract class AbstractCLI<R, C> {
      * @param options The help output
      */
     protected void printHelp(Options options) {
-        printHelp(options, HelpFormatter.DEFAULT_WIDTH);
+        printHelp(options, EXTENDED_WIDTH);
     }
 
     /**

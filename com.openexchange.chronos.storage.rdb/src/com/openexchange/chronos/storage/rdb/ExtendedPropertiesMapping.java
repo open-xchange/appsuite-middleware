@@ -55,7 +55,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.ExtendedPropertyParameter;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.java.Streams;
 
@@ -75,6 +79,86 @@ public abstract class ExtendedPropertiesMapping<O> extends DefaultDbMapping<Exte
      */
     protected ExtendedPropertiesMapping(String columnLabel, String readableName) {
         super(columnLabel, readableName, Types.BLOB);
+    }
+
+    @Override
+    public void validate(O object) throws OXException {
+        ExtendedProperties extendedProperties = get(object);
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return;
+        }
+        for (ExtendedProperty property : extendedProperties) {
+            validateString(property.getName());
+            Object value = property.getValue();
+            if (String.class.isInstance(value)) {
+                validateString((String) value);
+            }
+            List<ExtendedPropertyParameter> parameters = property.getParameters();
+            if (null != parameters) {
+                for (ExtendedPropertyParameter parameter : parameters) {
+                    validateString(parameter.getName());
+                    validateString(parameter.getValue());
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean replaceAll(O object, String regex, String replacement) throws OXException {
+        ExtendedProperties extendedProperties = get(object);
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return false;
+        }
+        boolean hasReplacedAny = false;
+        for (int i = 0; i < extendedProperties.size(); i++) {
+            ExtendedProperty property = extendedProperties.get(i);
+            String name = property.getName();
+            Object value = property.getValue();
+            List<ExtendedPropertyParameter> parameters = property.getParameters();
+            boolean hasReplaced = false;
+            if (null != name) {
+                String replaced = name.replaceAll(regex, replacement);
+                if (false == name.equals(replaced)) {
+                    name = replaced;
+                    hasReplaced = true;
+                }
+            }
+            if (null != value && String.class.isInstance(value)) {
+                String replaced = ((String) value).replaceAll(regex, replacement);
+                if (false == value.equals(replaced)) {
+                    value = replaced;
+                    hasReplaced = true;
+                }
+            }
+            if (null != parameters && 0 < parameters.size()) {
+                for (int j = 0; j < parameters.size(); j++) {
+                    String parameterName = parameters.get(j).getName();
+                    if (null != parameterName) {
+                        String replaced = parameterName.replaceAll(regex, replacement);
+                        if (false == parameterName.equals(replaced)) {
+                            parameters.set(j, new ExtendedPropertyParameter(replaced, parameters.get(j).getValue()));
+                            hasReplaced = true;
+                        }
+                    }
+                    String parameterValue = parameters.get(j).getValue();
+                    if (null != parameterValue) {
+                        String replaced = parameterValue.replaceAll(regex, replacement);
+                        if (false == parameterValue.equals(replaced)) {
+                            parameters.set(j, new ExtendedPropertyParameter(parameters.get(j).getName(), replaced));
+                            hasReplaced = true;
+                        }
+                    }
+                }
+            }
+            if (hasReplaced) {
+                extendedProperties.set(i, new ExtendedProperty(name, value, parameters));
+                hasReplacedAny = true;
+            }
+        }
+        if (hasReplacedAny) {
+            set(object, extendedProperties);
+        }
+        return hasReplacedAny;
     }
 
     @Override

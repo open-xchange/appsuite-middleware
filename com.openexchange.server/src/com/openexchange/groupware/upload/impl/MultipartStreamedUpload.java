@@ -54,8 +54,8 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -89,7 +89,7 @@ import com.openexchange.session.Session;
  * @since v7.10.1
  */
 public class MultipartStreamedUpload implements StreamedUpload {
-    
+
     /**
      * Thrown in case <code>requireStartingFormField</code> parameter is set to <code>true</code> and multipart upload does not start with a
      * simple form field.
@@ -107,7 +107,7 @@ public class MultipartStreamedUpload implements StreamedUpload {
         public synchronized Throwable fillInStackTrace() {
             return this;
         }
-        
+
         /**
          * Gets the first file item, which is <b>not</b> a simple form field.
          *
@@ -117,7 +117,7 @@ public class MultipartStreamedUpload implements StreamedUpload {
             return item;
         }
     }
-    
+
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final Map<String, String> formFields;
@@ -133,13 +133,13 @@ public class MultipartStreamedUpload implements StreamedUpload {
 
     /**
      * Initializes a new {@link MultipartStreamedUpload}.
-     * 
+     *
      * @throws MissingStartingFormField If <code>requireStartingFormField</code> parameter is set to <code>true</code> and multipart upload
      * does not start with a simple form field.
      */
     public MultipartStreamedUpload(FileItemIterator iter, String uuid, List<StreamedUploadFileListener> listeners, String action, String fileName, String requestCharacterEncoding, boolean requireStartingFormField, Session session) throws OXException {
         super();
-        formFields = new HashMap<String, String>();
+        formFields = new LinkedHashMap<String, String>();
         iteratorCreated = false;
         this.iter = iter;
         this.uuid = uuid;
@@ -209,6 +209,11 @@ public class MultipartStreamedUpload implements StreamedUpload {
     @Override
     public String getFormField(String fieldName) {
         return formFields.get(fieldName);
+    }
+
+    @Override
+    public String getFirstFormField() {
+        return formFields.isEmpty() ? null : formFields.values().iterator().next();
     }
 
     @Override

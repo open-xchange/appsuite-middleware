@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.sql.Connection;
@@ -1396,7 +1397,7 @@ public class OXFolderTools {
                         return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
                     case FolderObject.CALENDAR:
                         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-                        calendarSession.set(Connection.class.getName(), readCon);
+                        calendarSession.set(PARAMETER_CONNECTION(), readCon);
                         return false == calendarSession.getCalendarService().getUtilities().containsForeignEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
@@ -1417,7 +1418,7 @@ public class OXFolderTools {
                         return tasks.isFolderEmpty(ctx, fo.getObjectID());
                     case FolderObject.CALENDAR:
                         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-                        calendarSession.set(Connection.class.getName(), readCon);
+                        calendarSession.set(PARAMETER_CONNECTION(), readCon);
                         return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);

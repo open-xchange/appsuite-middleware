@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/tika-core-1.19.1.jar" sourcepath="lib/source/tika-core-1.19.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tika-parsers-1.19.1.jar" sourcepath="lib/source/tika-parsers-1.19.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad-4.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-schemas-4.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-4.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/poi-4.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/pdfbox-tools-2.0.12.jar" sourcepath="lib/source/pdfbox-tools-2.0.12-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/parso-2.0.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tika-parsers-1.20.jar" sourcepath="lib/source/tika-parsers-1.20-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/tika-core-1.20.jar" sourcepath="lib/source/tika-core-1.20-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/rome-1.12.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/rome-utils-1.12.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-4.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-4.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-ooxml-schemas-4.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poi-scratchpad-4.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pdfbox-tools-2.0.13.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/parso-2.0.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junrar-2.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/curvesapi-1.05.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/opennlp-tools-1.9.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jmatio-1.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jhighlight-1.0.3.jar"/>
@@ -19,16 +23,12 @@
 	<classpathentry exported="true" kind="lib" path="lib/ctakes-core-4.0.0.jar" sourcepath="lib/source/ctakes-core-4.0.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/uimaj-core-3.0.0.jar" sourcepath="lib/source/uimaj-core-3.0.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cdm-4.5.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/curvesapi-1.04.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/geoapi-3.0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grib-4.5.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/httpservices-4.5.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/java-libpst-0.8.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jcip-annotations-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/junrar-0.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/netcdf4-4.5.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/rome-1.5.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/rome-utils-1.5.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/sentiment-analysis-parser-0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/sis-metadata-0.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/sis-netcdf-0.8.jar"/>

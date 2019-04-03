@@ -2891,7 +2891,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         if (!usr.isContextadmin()) {
             if (existsDisplayName(ctx, usr, 0)) {
-                throw new InvalidDataException("The displayname is already used");
+                try {
+                    ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
+                    ConfigView view = configViewFactory.getView(-1, ctx.getId().intValue());
+                    if (null == view || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+                        // Do enforce unique display names
+                        throw new InvalidDataException("The displayname is already used");
+                    }
+                } catch (OXException e) {
+                    log.debug("Unable to get \"com.openexchange.user.enforceUniqueDisplayName\". Fallback to enforce display name uniqueness.", e);
+                    throw new InvalidDataException("The displayname is already used", e);
+                }
+
             }
         }
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {

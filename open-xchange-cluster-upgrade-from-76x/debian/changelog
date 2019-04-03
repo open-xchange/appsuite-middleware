@@ -1,3 +1,9 @@
+open-xchange-cluster-upgrade-from-76x (7.10.2-1) stable; urgency=medium
+
+  * First preview for 7.10.2 release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 28 Mar 2019 13:47:17 +0100
+
 open-xchange-cluster-upgrade-from-76x (7.10.2-0) unstable; urgency=medium
 
   * prepare for 7.10.2 release

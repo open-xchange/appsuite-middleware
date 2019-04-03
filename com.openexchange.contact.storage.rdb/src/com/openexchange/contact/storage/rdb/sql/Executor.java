@@ -1140,7 +1140,7 @@ public class Executor {
         }
     }
 
-    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws OXException, SQLException {
+    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws SQLException {
         if (null != objectIDs && objectIDs.length > 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("DELETE FROM object_use_count WHERE cid=?");
@@ -1170,7 +1170,7 @@ public class Executor {
         }
     }
 
-    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws OXException, SQLException {
+    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM object_use_count WHERE cid=?");
         if (Integer.MIN_VALUE != objectID) {
@@ -1295,7 +1295,7 @@ public class Executor {
             // Cannot return any match
             return EmptyResultSet.getInstance();
         } catch (SQLException e) {
-            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
     }
@@ -1310,7 +1310,7 @@ public class Executor {
             LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
             return rowCount;
         } catch (SQLException e) {
-            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
     }

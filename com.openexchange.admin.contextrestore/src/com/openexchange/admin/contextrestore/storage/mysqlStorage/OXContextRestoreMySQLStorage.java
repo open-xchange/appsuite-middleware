@@ -55,9 +55,12 @@ package com.openexchange.admin.contextrestore.storage.mysqlStorage;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,9 +100,9 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             File file = tempfilemap.get(poolidandschema.getSchema());
             BufferedReader reader;
             try {
-                reader = new BufferedReader(new FileReader(file));
+                reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
             } catch (final FileNotFoundException e1) {
-                throw new OXContextRestoreException(Code.CONFIGDB_FILE_NOT_FOUND);
+                throw new OXContextRestoreException(Code.CONFIGDB_FILE_NOT_FOUND, e1);
             }
             try {
                 connection = Database.get(poolId, poolidandschema.getSchema());

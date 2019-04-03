@@ -116,6 +116,16 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
     int set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
 
     /**
+     * Validates the value of the mapped property in an object, throwing exceptions if validation fails.
+     * <p/>
+     * Called prior the value is set in a prepared statement.
+     *
+     * @param object The object to validate the value in
+     * @throws OXException If validation fails
+     */
+    void validate(O object) throws OXException;
+
+    /**
      * Sets the value of the mapped property in an object.
      *
      * @param resultSet the result set to read out the value from

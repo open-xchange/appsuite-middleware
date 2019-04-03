@@ -110,11 +110,11 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 public class AdminActivator extends HousekeepingActivator {
 
-    private volatile AdminDaemon daemon;
+    private AdminDaemon daemon;
 
     /**
      * Initializes a new {@link AdminActivator}.
@@ -125,11 +125,11 @@ public class AdminActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class, VersionService.class };
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         AdminServiceRegistry.getInstance().addService(ThreadPoolService.class, getService(ThreadPoolService.class));
 
@@ -231,7 +231,7 @@ public class AdminActivator extends HousekeepingActivator {
             log.info("Version: {}", headers.get("Bundle-Version"));
             log.info("Name: {}", headers.get("Bundle-SymbolicName"));
         }
-        log.info("Build: {}", Version.getInstance().getVersionString());
+        log.info("Build: {}", getServiceSafe(VersionService.class).getVersionString());
         log.info("Admindaemon successfully started.");
 
         // The listener which is called if a new plugin is registered
@@ -283,7 +283,7 @@ public class AdminActivator extends HousekeepingActivator {
      * {@inheritDoc}
      */
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         {
             TaskManager taskManager = TaskManager.getInstance();
             if (null != taskManager) {

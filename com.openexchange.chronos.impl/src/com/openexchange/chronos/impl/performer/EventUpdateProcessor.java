@@ -57,7 +57,6 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
-import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -89,6 +88,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -127,6 +127,8 @@ import com.openexchange.groupware.tools.mappings.Mapping;
  */
 public class EventUpdateProcessor implements EventUpdate {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
+
     private final CalendarSession session;
     private final CalendarUser calendarUser;
     private final CalendarFolder folder;
@@ -137,8 +139,6 @@ public class EventUpdateProcessor implements EventUpdate {
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
-
-    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
 
     /**
      * Initializes a new {@link EventUpdateProcessor}.
@@ -230,6 +230,12 @@ public class EventUpdateProcessor implements EventUpdate {
     @Override
     public SimpleCollectionUpdate<Attachment> getAttachmentUpdates() {
         return attachmentUpdates;
+    }
+
+    @Override
+    public String toString() {
+        return "EventUpdateProcessor [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates + 
+            ", attachmentUpdates=" + attachmentUpdates + ", exceptionUpdates=" + exceptionUpdates + "]";
     }
 
     /**
@@ -324,18 +330,20 @@ public class EventUpdateProcessor implements EventUpdate {
         } else {
             adjustForGroupScheduled(originalEvent, updatedEvent);
         }
-        /*
-         * reset attendee's partstats if required
-         */
-        if (needsParticipationStatusReset(originalEvent, updatedEvent)) {
-            resetParticipationStatus(updatedEvent.getAttendees());
+        if (CalendarUtils.isInternal(originalEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            /*
+             * reset attendee's partstats if required & increment sequence number as needed
+             */
+            if (needsParticipationStatusReset(originalEvent, updatedEvent)) {
+                resetParticipationStatus(updatedEvent.getAttendees());
+            }
+            if (originalEvent.getSequence() >= updatedEvent.getSequence() && needsSequenceNumberIncrement(originalEvent, updatedEvent)) {
+                updatedEvent.setSequence(originalEvent.getSequence() + 1);
+            }
         }
         /*
-         * apply timestamp/last-modified info & increment sequence number as needed
+         * apply timestamp/last-modified info
          */
-        if (originalEvent.getSequence() >= updatedEvent.getSequence() && needsSequenceNumberIncrement(originalEvent, updatedEvent)) {
-            updatedEvent.setSequence(originalEvent.getSequence() + 1);
-        }
         Consistency.setModified(session, timestamp, updatedEvent, session.getUserId());
     }
 
@@ -344,8 +352,21 @@ public class EventUpdateProcessor implements EventUpdate {
             case GEO:
                 Check.geoLocationIsValid(updatedEvent);
                 break;
+            case ATTENDEE_PRIVILEGES:
+                /*
+                 * check validity based on folder / organizer
+                 */
+                Check.attendeePrivilegesAreValid(updatedEvent.getAttendeePrivileges(), folder, updatedEvent.getOrganizer());
+                /*
+                 * deny different values for change exceptions
+                 */
+                if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                    false == EventMapper.getInstance().get(EventField.ATTENDEE_PRIVILEGES).equals(originalSeriesMaster, updatedEvent))) {
+                    throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), updatedField);
+                }
+                break;
             case CLASSIFICATION:
-                if (isPublicClassification(originalEvent) == isPublicClassification(updatedEvent)) {
+                if (Classification.PUBLIC.matches(originalEvent.getClassification()) && Classification.PUBLIC.matches(updatedEvent.getClassification())) {
                     /*
                      * reset to original value if classification matches
                      */
@@ -364,6 +385,9 @@ public class EventUpdateProcessor implements EventUpdate {
                             String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                     }
                 }
+                break;
+            case SEQUENCE:
+                Check.requireInSequence(originalEvent, updatedEvent);
                 break;
             case ORGANIZER:
                 /*
@@ -451,8 +475,9 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * only consider whitelist of fields in attendee scheduling resources as needed
          */
-        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity()) &&
-            b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+        boolean isAttendeeSchedulingResource = isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity());
+        boolean ignoreForbiddenAttendeenChanges = b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE));
+        if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges) {
             EnumSet<EventField> consideredFields = EnumSet.of(
                 EventField.ALARMS, EventField.ATTENDEES, EventField.TRANSP, EventField.DELETE_EXCEPTION_DATES, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED
             );
@@ -467,7 +492,7 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         updatedFields.remove(EventField.FOLDER_ID);
         updatedFields.remove(EventField.ALARMS);
-        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity())) {
+        if (isAttendeeSchedulingResource) {
             //TODO: TRANSP is not yet handled as per-user property, so ignore changes in attendee scheduling resources for now
             updatedFields.remove(EventField.TRANSP);
         }
@@ -485,8 +510,7 @@ public class EventUpdateProcessor implements EventUpdate {
             /*
              * only consider 'own' attendee in attendee scheduling resources as needed
              */
-            if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity()) &&
-                b(session.get(CalendarParameters.PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES, Boolean.class, Boolean.FALSE))) {
+            if (isAttendeeSchedulingResource && ignoreForbiddenAttendeenChanges) {
                 Attendee changedUserAttendee = find(changedAttendees, calendarUser);
                 List<Attendee> updatedAttendees = new ArrayList<Attendee>(originalEvent.getAttendees().size());
                 for (Attendee originalAttendee : originalEvent.getAttendees()) {
@@ -517,7 +541,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
          */
         if (null == originalEvent.getOrganizer()) {
-            updatedEvent.setOrganizer(prepareOrganizer(session, folder, updatedEvent.getOrganizer()));
+            updatedEvent.setOrganizer(prepareOrganizer(session, folder, updatedEvent.getOrganizer(), null));
         } else if (updatedEvent.containsOrganizer()) {
             Organizer organizer = session.getEntityResolver().prepare(updatedEvent.getOrganizer(), CalendarUserType.INDIVIDUAL);
             if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
@@ -606,16 +630,14 @@ public class EventUpdateProcessor implements EventUpdate {
             EventField.COLOR, EventField.URL, EventField.GEO
         };
         for (EventField field : basicFields) {
-            propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions);
+            propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions, false);
         }
         /*
          * always take over a change in classification (to prevent different classification in event series)
          */
-        Mapping<? extends Object, Event> classificationMapping = EventMapper.getInstance().get(EventField.CLASSIFICATION);
-        if (false == classificationMapping.equals(originalMaster, updatedMaster) && false == isNullOrEmpty(changedChangeExceptions)) {
-            for (Event changeException : changedChangeExceptions) {
-                classificationMapping.copy(updatedMaster, changeException);
-            }
+        EventField[] overwrittenFields = { EventField.CLASSIFICATION, EventField.ATTENDEE_PRIVILEGES };
+        for (EventField field : overwrittenFields) {
+            propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions, true);
         }
         /*
          * take over changes in start- and/or end-date based on calculated original timeslot
@@ -644,22 +666,25 @@ public class EventUpdateProcessor implements EventUpdate {
     }
 
     /**
-     * Propagates an update of a specific property in a series master event to any change exception events, i.e. the property is also
-     * updated in the change exception events if their value equals the value of the original series event.
+     * Propagates an update of a specific property in a series master event to any change exception events, i.e. the new property value is
+     * also applied in the change exception events. Optionally, the value is only taken over if the value in the change exception equals
+     * the value of the original series event.
      *
      * @param originalMaster The original series master event being updated
-     * @param updatedmaster The updated series master event
+     * @param updatedMaster The updated series master event
      * @param field The event field to propagate
      * @param changeExceptions The list of events to propagate the field update to
+     * @param overwrite <code>true</code> to always apply the updated value in the change exceptions, <code>false</code> to only apply the
+     *            new value if the property's value is unchanged from the original series master event
      * @return The (possibly adjusted) list of change exception events
      */
-    private static List<Event> propagateFieldUpdate(Event originalMaster, Event updatedMaster, EventField field, List<Event> changeExceptions) throws OXException {
+    private static List<Event> propagateFieldUpdate(Event originalMaster, Event updatedMaster, EventField field, List<Event> changeExceptions, boolean overwrite) throws OXException {
         Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
         if (mapping.equals(originalMaster, updatedMaster) || isNullOrEmpty(changeExceptions)) {
             return changeExceptions;
         }
         for (Event changeException : changeExceptions) {
-            if (mapping.equals(originalMaster, changeException)) {
+            if (overwrite || mapping.equals(originalMaster, changeException)) {
                 mapping.copy(updatedMaster, changeException);
             }
         }
@@ -874,9 +899,9 @@ public class EventUpdateProcessor implements EventUpdate {
      */
     private boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
         /*
-         * reset participation status if change is performed by organizer, and a different time period will be occupied by the update
+         * reset participation status if a different time period will be occupied by the update
          */
-        return CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity()) && coversDifferentTimePeriod(originalEvent, updatedEvent);
+        return coversDifferentTimePeriod(originalEvent, updatedEvent);
     }
 
 }

@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -108,11 +109,14 @@ import liquibase.resource.ResourceAccessor;
  */
 public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTaskChange, CustomTaskRollback {
 
+    private final boolean considerOnlyDuplicates;
+
     /**
      * Initializes a new {@link ChangeFilestore2UserPrimaryKeyCustomTaskChange}.
      */
     public ChangeFilestore2UserPrimaryKeyCustomTaskChange() {
         super();
+        considerOnlyDuplicates = true;
     }
 
     @Override
@@ -163,6 +167,8 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
             configDbCon.commit();
             rollback = 2;
+
+            changePrimaryKeyFromFilestore2UserTable(configDbCon, logger);
         } catch (SQLException e) {
             logger.error("Failed to change PRIMARY KEY for \"filestore2user\" table", e);
             throw new CustomChangeException("SQL error", e);
@@ -184,13 +190,21 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
     private void execute(Connection configDbCon, org.slf4j.Logger logger) throws CustomChangeException {
         try {
-            Map<SchemaInfo, TIntObjectMap<TIntSet>> mapping = readInUsers(configDbCon, logger);
-            if (false == mapping.isEmpty()) {
-                Map<UserAndContext, Integer> user2filestore = determineFilestoreIdsFor(mapping, configDbCon, logger);
-                updateFilestoreAssociation(user2filestore, configDbCon, logger);
+            if (!considerOnlyDuplicates) {
+                Map<SchemaInfo, TIntObjectMap<TIntSet>> mapping = readInUsers(configDbCon, logger);
+                if (false == mapping.isEmpty()) {
+                    Map<UserAndContext, Integer> user2filestore = determineFilestoreIdsFor(mapping, configDbCon, logger);
+                    updateFilestoreAssociation(user2filestore, configDbCon, logger);
+                }
             }
 
-            changePrimaryKeyFromFilestore2UserTable(configDbCon, logger);
+            Set<UserAndContext> duplicateEntries = getDuplicateEntries(configDbCon, logger);
+            if (false == duplicateEntries.isEmpty()) {
+                for (UserAndContext uac : duplicateEntries) {
+                    int filestoreId = determineFilestoreIdFor(uac.userId, uac.contextId, configDbCon, logger);
+                    updateFilestoreAssociation(Collections.singletonMap(uac, Integer.valueOf(filestoreId <= 0 ? 0 : filestoreId)), configDbCon, logger);
+                }
+            }
         } catch (SQLException e) {
             throw new CustomChangeException("SQL error", e);
         } catch (NoConnectionToDatabaseException e) {
@@ -465,6 +479,76 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
         return map;
     }
 
+    private int determineFilestoreIdFor(int userId, int contextId, Connection configDbCon, org.slf4j.Logger logger) throws SQLException, NoConnectionToDatabaseException {
+        DatabaseSchema databaseSchema;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = configDbCon.prepareStatement("SELECT write_db_pool_id, db_schema, url, driver, login, password, name FROM context_server2db_pool JOIN db_pool ON context_server2db_pool.write_db_pool_id = db_pool.db_pool_id WHERE cid=?");
+                stmt.setInt(1, contextId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return 0;
+                }
+
+                databaseSchema = new DatabaseSchema(rs.getInt(1), rs.getString(7), rs.getString(3), rs.getString(4), rs.getString(5), rs.getString(6), rs.getString(2));
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+        }
+
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = getSimpleSQLConnectionFor(databaseSchema.url, databaseSchema.driver, databaseSchema.login, databaseSchema.password);
+
+            stmt = con.prepareStatement("SELECT filestore_id FROM user WHERE cid=? AND id=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return 0;
+            }
+
+            int filestoreId = rs.getInt(1);
+            logger.info("Looked-up filestore {} for user {} in context {}", Integer.valueOf(filestoreId), Integer.valueOf(userId), Integer.valueOf(contextId));
+            return filestoreId;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    con.close();
+                } catch (Exception e) {
+                    logger.warn("Failed to close connection to database {}", databaseSchema, e);
+                }
+            }
+        }
+    }
+
+    private Set<UserAndContext> getDuplicateEntries(Connection configDbCon, org.slf4j.Logger logger) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = configDbCon.prepareStatement("SELECT cid, user FROM filestore2user GROUP BY cid, user HAVING COUNT(*) > 1");
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                logger.info("No duplicate entries in \"filestore2user\" table");
+                return Collections.emptySet();
+            }
+
+            Set<UserAndContext> duplicateUsers = new LinkedHashSet<>();
+            do {
+                duplicateUsers.add(new UserAndContext(rs.getInt(2), rs.getInt(1)));
+            } while (rs.next());
+            logger.info("Detected {} duplicate entries in \"filestore2user\" table", Integer.valueOf(duplicateUsers.size()));
+            return duplicateUsers;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     private Map<SchemaInfo, TIntObjectMap<TIntSet>> readInUsers(Connection configDbCon, org.slf4j.Logger logger) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -590,15 +674,15 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
-    private static final class DatabaseHost {
+    private static class DatabaseHost {
 
-        final int dbId;
-        final String name;
-        final String url;
-        final String driver;
-        final String login;
-        final String password;
-        int hash = 0;
+        protected final int dbId;
+        protected final String name;
+        protected final String url;
+        protected final String driver;
+        protected final String login;
+        protected final String password;
+        private int hash = 0;
 
         DatabaseHost(int dbId, String name, String url, String driver, String login, String password) {
             super();
@@ -651,6 +735,71 @@ public class ChangeFilestore2UserPrimaryKeyCustomTaskChange implements CustomTas
             }
             return sb.toString();
         }
+    }
+
+    private static class DatabaseSchema extends DatabaseHost {
+
+        final String schema;
+
+        DatabaseSchema(int dbId, String name, String url, String driver, String login, String password, String schema) {
+            super(dbId, name, url, driver, login, password);
+            this.schema = schema;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = super.hashCode();
+            result = prime * result + dbId;
+            result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!super.equals(obj)) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            DatabaseSchema other = (DatabaseSchema) obj;
+            if (dbId != other.dbId) {
+                return false;
+            }
+            if (schema == null) {
+                if (other.schema != null) {
+                    return false;
+                }
+            } else if (!schema.equals(other.schema)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(32);
+            if (name != null) {
+                sb.append(name).append('@');
+            }
+            if (url != null) {
+                sb.append(extractHostName(url));
+            }
+            if (sb.length() > 0) {
+                sb.append(" (id=").append(dbId).append(')');
+            } else {
+                sb.append(dbId);
+            }
+            if (schema != null) {
+                sb.append(' ').append(schema);
+            }
+            return sb.toString();
+        }
+
     }
 
     /**

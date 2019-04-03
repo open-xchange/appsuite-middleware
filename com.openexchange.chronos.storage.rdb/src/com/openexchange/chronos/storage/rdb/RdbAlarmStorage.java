@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.io.InputStream;
@@ -431,7 +432,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 try (ResultSet rs = stmt.executeQuery()) {
                     Map<String, Long> retval = new HashMap<>();
                     while (rs.next()) {
-                        retval.put(rs.getString("event"), rs.getLong("MAX(timestamp)"));
+                        retval.put(rs.getString("event"), L(rs.getLong("MAX(timestamp)")));
                     }
                     return retval;
                 }
@@ -727,7 +728,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param alarm The alarm to adjust
      * @return The (possibly adjusted) alarm reference
      */
-    private Alarm adjustPriorSave(String eventId, Alarm alarm) {
+    private Alarm adjustPriorSave(String eventId, Alarm alarm) throws OXException {
         /*
          * get or initialize new extended properties container
          */
@@ -751,6 +752,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         if (alarm.containsAttendees()) {
             encdodeAttendees(eventId, extendedProperties, alarm.getAttendees());
         }
+        /*
+         * validate properties afterwards
+         */
+        MAPPER.validateAll(alarm);
         return alarm;
     }
 
@@ -773,7 +778,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             try {
                 attendee = entityProcessor.adjustAfterLoad(attendee);
             } catch (OXException e) {
-                addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
+                addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
             }
             attendees.add(attendee);
         }
@@ -804,7 +809,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 try {
                     attachment.setSize(Long.parseLong(sizeParameter.getValue()));
                 } catch (NumberFormatException e) {
-                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
+                    addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
                 }
             }
             ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
@@ -814,7 +819,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                     fileHolder.write(BaseEncoding.base64().decode((String) attachmentProperty.getValue()));
                     attachment.setData(fileHolder);
                 } catch (IllegalArgumentException | OXException e) {
-                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                    addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                     Streams.close(fileHolder);
                 }
             } else {
@@ -849,7 +854,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                         parameters.add(new ExtendedPropertyParameter("ENCODING", "BASE64"));
                         parameters.add(new ExtendedPropertyParameter("VALUE", "BINARY"));
                     } catch (IOException | OXException e) {
-                        addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                        addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                         value = null;
                     }
                 } else {

@@ -77,6 +77,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.FromAddressProvider;
@@ -360,7 +361,7 @@ public final class MimeForward extends AbstractMimeProcessing {
 
     private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceMetaEquiv(final String html, final ContentType contentType) {
+    static String replaceMetaEquiv(final String html, final ContentType contentType) {
         final Matcher m = PAT_META_CT.matcher(html);
         final MatcherReplacer mr = new MatcherReplacer(m, html);
         final StringBuilder replaceBuffer = new StringBuilder(html.length());
@@ -589,7 +590,7 @@ public final class MimeForward extends AbstractMimeProcessing {
             textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             textPart.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,
-                MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                Strings.replaceSequenceWith(MimeTypes.MIME_TEXT_PLAIN_TEMPL, "#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
             multipart.addBodyPart(textPart);
             MessageUtility.setContent(multipart, forwardMsg);
             // forwardMsg.setContent(multipart);
@@ -624,7 +625,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @throws MessagingException
      * @throws IOException
      */
-    private static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm, final MailMessage origMail, final Session session, final boolean alt) throws OXException, MessagingException, IOException {
+    public static String getFirstSeenText(final MailPart multipartPart, final ContentType retvalContentType, final UserSettingMail usm, final MailMessage origMail, final Session session, final boolean alt) throws OXException, MessagingException, IOException {
         final ContentType contentType = multipartPart.getContentType();
         final int count = multipartPart.getEnclosedCount();
         final ContentType partContentType = new ContentType();
@@ -703,9 +704,46 @@ public final class MimeForward extends AbstractMimeProcessing {
                     final ContentType nextContentType = nextPart.getContentType();
                     if (nextContentType.startsWith(TEXT) && MimeProcessingUtility.isInline(part, nextContentType) && !MimeProcessingUtility.isSpecial(nextContentType.getBaseType())) {
                         String nextText = MimeProcessingUtility.handleInlineTextPart(nextPart, retvalContentType, usm.isDisplayHtmlInlineContent());
-                        sb.append(nextText);
+                        if (nextText != null && nextText.length() > 0) {
+                            if (retvalContentType.startsWith(TEXT_HTM)) {
+                                if (nextContentType.startsWith(TEXT_HTM)) {
+                                    sb.append(nextText);
+                                } else {
+                                    // Don't append non-HTML to HTML
+                                }
+                            } else {
+                                if (nextContentType.startsWith(TEXT_HTM)) {
+                                    // Don't append HTML to non-HTML
+                                } else {
+                                    sb.append(nextText);
+                                }
+                            }
+                        }
+                    } else if (nextContentType.startsWith("image/") && MimeProcessingUtility.isInline(nextPart, nextContentType) && retvalContentType.startsWith(TEXT_HTM)) {
+                        final String imageURL;
+                        String fileName = nextPart.getFileName();
+                        {
+                            final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+                            if (null == fileName) {
+                                final String ext = MimeType2ExtMap.getFileExtension(nextContentType.getBaseType());
+                                fileName = new StringBuilder("image").append(j).append('.').append(ext).toString();
+                            }
+                            final ImageLocation imageLocation = new ImageLocation.Builder(fileName).folder(prepareFullname(origMail.getAccountId(), origMail.getFolder())).id(origMail.getMailId()).build();
+                            imageURL = imgSource.generateUrl(imageLocation, session);
+                        }
+                        final String imgTag = "<img src=\"" + imageURL + "&scaleType=contain&width=800\" alt=\"\" style=\"display: block\" id=\"" + fileName + "\">";
+                        sb.append(imgTag);
                     }
                 }
+
+                if (retvalContentType.startsWith(TEXT_HTM)) {
+                    HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    if (htmlService != null) {
+                        String compositeHtml = sb.toString();
+                        return htmlService.getWellFormedHTMLDocument(compositeHtml);
+                    }
+                }
+
                 return sb.toString();
             } else if (partContentType.startsWith(MULTIPART)) {
                 final String text = getFirstSeenText(part, retvalContentType, usm, origMail, session, alt);
@@ -745,7 +783,7 @@ public final class MimeForward extends AbstractMimeProcessing {
      * @param session The user's session
      * @return The forward text
      */
-    private static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
+    static String generateForwardText(String firstSeenText, LocaleAndTimeZone ltz, MailMessage msg, boolean html, Session session) {
         String forwardPrefix = generatePrefixText(MailStrings.FORWARD_PREFIX, ltz, msg);
         if (html) {
             forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);

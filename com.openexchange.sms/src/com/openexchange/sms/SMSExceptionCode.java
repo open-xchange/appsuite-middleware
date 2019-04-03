@@ -63,15 +63,25 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.8.1
  */
 public enum SMSExceptionCode implements DisplayableOXExceptionCode {
-
+    /**
+     * Could not parse phone number %1$s
+     */
     PARSING_ERROR("Could not parse phone number %1$s", Category.CATEGORY_USER_INPUT, 1, SMSExceptionMessages.PARSING_ERROR_MSG),
-
+    /**
+     * Unknown country tag: %1$s
+     */
     UNKNOWN_COUNTRY("Unknown country tag: %1$s", Category.CATEGORY_USER_INPUT, 2, SMSExceptionMessages.UNKNOWN_COUNTRY_MSG),
-
+    /**
+     * Message could not be sent: %1$s
+     */
     NOT_SENT("Message could not be sent: %1$s", Category.CATEGORY_ERROR, 3),
-
+    /**
+     * Message is too long (%1$s characters). Maximum size is %2$s characters.
+     */
     MESSAGE_TOO_LONG("Message is too long (%1$s characters). Maximum size is %2$s characters.", Category.CATEGORY_USER_INPUT, 4, SMSExceptionMessages.MESSAGE_TOO_LONG_MSG),
-
+    /**
+     * Service %1$s is not available.
+     */
     SERVICE_UNAVAILABLE("Service %1$s is not available.", Category.CATEGORY_ERROR, 5),
     ;
 

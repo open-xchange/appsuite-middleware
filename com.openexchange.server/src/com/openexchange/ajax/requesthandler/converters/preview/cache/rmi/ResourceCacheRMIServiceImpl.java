@@ -83,7 +83,10 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
 
-    private static Logger LOG = LoggerFactory.getLogger(ResourceCacheRMIServiceImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ResourceCacheRMIServiceImpl.class);
+    }
 
     /** The cache reference */
     public static AtomicReference<ResourceCache> CACHE_REF = new AtomicReference<ResourceCache>();
@@ -111,7 +114,7 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         try {
             contextIds = getContextIds();
         } catch (OXException e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
         }
@@ -120,11 +123,11 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
             try {
                 resourceCache.clearFor(contextId.intValue());
             } catch (OXException e) {
-                LOG.error("", e);
+                LoggerHolder.LOG.error("", e);
                 String message = e.getMessage();
                 throw new RemoteException(message, new Exception(message));
             } catch (RuntimeException e) {
-                LOG.error("", e);
+                LoggerHolder.LOG.error("", e);
                 String message = e.getMessage();
                 throw new RemoteException(message, new Exception(message));
             }
@@ -145,7 +148,7 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
         try {
             resourceCache.clearFor(contextId);
         } catch (Exception e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
         }
@@ -217,7 +220,7 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
                 try {
                     responseBuilder.append(processContext(cid, invalidsSet, databaseService));
                 } catch (Exception e) {
-                    LOG.error("Context {} could not be processed", Integer.valueOf(cid), e);
+                    LoggerHolder.LOG.error("Context {} could not be processed", Integer.valueOf(cid), e);
                     responseBuilder.append("Context ").append(cid).append(" could not be processed: >>>").append(e.getMessage()).append("<<<");
                 }
                 return true;
@@ -230,7 +233,7 @@ public class ResourceCacheRMIServiceImpl implements ResourceCacheRMIService {
 
             return responseBuilder.toString();
         } catch (Exception e) {
-            LOG.error("", e);
+            LoggerHolder.LOG.error("", e);
             String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
         }

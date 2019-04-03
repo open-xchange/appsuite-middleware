@@ -72,7 +72,7 @@ import com.openexchange.file.storage.search.DescriptionTerm;
 import com.openexchange.file.storage.search.FileMimeTypeTerm;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.FileSizeTerm;
-import com.openexchange.file.storage.search.LastModifiedTerm;
+import com.openexchange.file.storage.search.MediaDateTerm;
 import com.openexchange.file.storage.search.NotTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -152,11 +152,11 @@ public final class Utils {
                 long to = timeFrame.getTo();
                 if (to < 0L) {
                     facetTerms.add(buildDateTerm(fromComparison, from));
+                } else {
+                    SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from);
+                    SearchTerm<?> toTerm = buildDateTerm(toComparison, to);
+                    facetTerms.add(new AndTerm(Arrays.<SearchTerm<?>> asList(fromTerm, toTerm)));
                 }
-
-                SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from);
-                SearchTerm<?> toTerm = buildDateTerm(toComparison, to);
-                facetTerms.add(new AndTerm(Arrays.<SearchTerm<?>> asList(fromTerm, toTerm)));
             } else {
                 facetTerms.add(prepareFilterTerm(Collections.singletonList(dateFilter), OP.OR, OP.OR));
             }
@@ -547,7 +547,7 @@ public final class Utils {
                 break;
         }
 
-        return null == pattern ? null : new LastModifiedTerm(pattern);
+        return null == pattern ? null : new MediaDateTerm(pattern);
     }
 
     /**

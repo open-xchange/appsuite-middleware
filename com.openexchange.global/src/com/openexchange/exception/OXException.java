@@ -218,7 +218,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     private final int count;
     private final Map<String, String> properties;
     private final List<Category> categories;
-    private final List<ProblematicAttribute> problematics;
+    private transient final List<ProblematicAttribute> problematics;
     private final Map<String, Object> arguments;
 
     private Object[] displayArgs;

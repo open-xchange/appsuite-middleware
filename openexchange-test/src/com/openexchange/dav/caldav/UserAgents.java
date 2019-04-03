@@ -66,6 +66,8 @@ public final class UserAgents {
 
     public static final String IOS_9_1 = "iOS/9.1 (13B143) dataaccessd/1.0";
 
+    public static final String IOS_12_0 = "iOS/12.0 (16A366) dataaccessd/1.0";
+
     public static final String EM_CLIENT_6_0 = "eM Client/6.0.24144.0";
 
     public static final String[] MACOS_ALL = { MACOS_10_7_3

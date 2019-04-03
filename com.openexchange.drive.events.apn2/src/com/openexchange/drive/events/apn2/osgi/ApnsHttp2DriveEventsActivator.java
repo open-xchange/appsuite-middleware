@@ -52,19 +52,23 @@ package com.openexchange.drive.events.apn2.osgi;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
+import java.util.Properties;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options.AuthType;
-import com.openexchange.drive.events.apn2.DefaultIOSApnsHttp2OptionsProvider;
-import com.openexchange.drive.events.apn2.IOSApnsHttp2OptionsProvider;
-import com.openexchange.drive.events.apn2.internal.ApnsHttp2DriveEventPublisher;
+import com.openexchange.drive.events.apn2.ApnsHttp2OptionsProvider;
+import com.openexchange.drive.events.apn2.internal.DriveEventsAPN2IOSProperty;
 import com.openexchange.drive.events.apn2.internal.IOSApnsHttp2DriveEventPublisher;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
@@ -87,115 +91,175 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class,
-            ThreadPoolService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class, ThreadPoolService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { ApnsHttp2OptionsProvider.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.apn2");
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+        track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-        ConfigurationService configService = getService(ConfigurationService.class);
-        DriveEventService eventService = getService(DriveEventService.class);
+            private ApnsHttp2OptionsProvider provider;
 
+            @Override
+            public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                Properties properties = service.load(DriveEventsAPN2IOSProperty.FRAGMENT_FILE_NAME);
+                if (properties != null) {
+                    ApnsHttp2Options option = createOption(properties, service);
+                    if (option != null) {
+                        provider = () -> option;
+                        registerService(ApnsHttp2OptionsProvider.class, provider);
+                    }
+                }
+            }
+
+            @Override
+            public synchronized void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if (provider != null) {
+                    unregisterService(provider);
+                }
+            }
+        });
+        openTrackers();
         /*
-         * iOS
+         * register publisher
          */
-        if (configService.getBoolProperty("com.openexchange.drive.events.apn2.ios.enabled", false)) {
-            /*
-             * register APN certificate provider for iOS if specified via config file (with a low ranking)
-             */
-            ApnsHttp2Options options = getOptions(configService, "com.openexchange.drive.events.apn2.ios.");
-            if (null != options) {
-                registerService(IOSApnsHttp2OptionsProvider.class, new DefaultIOSApnsHttp2OptionsProvider(options), 1);
-                LOG.info("Successfully registered APNS HTTP/2 options provider for iOS.");
-            } else {
-                LOG.info("No default APNS HTTP/2 options configured for iOS in \"Push\" section in file 'drive.properties', skipping registration for default iOS options provider.");
-            }
-            /*
-             * register publisher
-             */
-            ApnsHttp2DriveEventPublisher publisher = new IOSApnsHttp2DriveEventPublisher(this);
-            eventService.registerPublisher(publisher);
-        } else {
-            LOG.info("Drive events for iOS clients via APNS HTTP/2 are disabled, skipping publisher registration.");
-        }
+        getServiceSafe(DriveEventService.class).registerPublisher(new IOSApnsHttp2DriveEventPublisher(this));
     }
 
-    private ApnsHttp2Options getOptions(ConfigurationService configService, String prefix) throws Exception {
-        // Auth type
-        AuthType authType = AuthType.authTypeFor(configService.getProperty(prefix + "authtype"));
-        if (null == authType) {
-            LOG.info("Missing or invalid authentication type in APNS HTTP/2 options for drive events. Assuming {} instead.", AuthType.CERTIFICATE.name());
-            authType = AuthType.CERTIFICATE;
-        }
-
-        ApnsHttp2Options apnsHttp2Options;
-        if (authType == AuthType.CERTIFICATE) {
-            // Keystore name
-            String keystoreName = configService.getProperty(prefix + "keystore");
-            if (Strings.isEmpty(keystoreName)) {
-                LOG.info("Missing \"keystore\" APNS HTTP/2 option for drive events. Ignoring APNS HTTP/2 configuration for drive events.");
-                return null;
-            }
-
-            // Topic
-            String topic = configService.getProperty(prefix + "topic");
-            if (null == topic) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "topic");
-            }
-
-            // Proceed if enabled for associated client
-            String password = configService.getProperty(prefix + "password");
-            if (null == password) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "password");
-            }
-
-            boolean production = configService.getBoolProperty(prefix + "production", true);
-            apnsHttp2Options = createOptions(keystoreName, password, production, topic);
-        } else if (authType == AuthType.JWT) {
-            String privateKeyFile = configService.getProperty(prefix + "privatekey");
-            if (null == privateKeyFile) {
-                LOG.info("Missing \"privatekey\" APNS HTTP/2 option for drive events. Ignoring APNS HTTP/2 configuration for drive events.");
-                return null;
-            }
-
-            String keyId = configService.getProperty(prefix + "keyid");
-            if (null == keyId) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "keyid");
-            }
-
-            String teamId = configService.getProperty(prefix + "teamid");
-            if (null == teamId) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "teamid");
-            }
-
-            // Topic
-            String topic = configService.getProperty(prefix + "topic");
-            if (null == topic) {
-                throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "topic");
-            }
-
-            boolean production = configService.getBoolProperty(prefix + "production", true);
-            apnsHttp2Options = createOptions(privateKeyFile, keyId, teamId, production, topic);
-        } else {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "authtype");
-        }
-
-        LOG.info("Parsed APNS HTTP/2 options for drive events.");
-        return apnsHttp2Options;
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 
-    private ApnsHttp2Options createOptions(String resourceName, String password, boolean production, String topic) {
-        return new ApnsHttp2Options(new File(resourceName), password, production, topic);
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
     }
 
-    private ApnsHttp2Options createOptions(String privateKeyFile, String keyId, String teamId, boolean production, String topic) throws OXException {
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
+    }
+
+    /**
+     * Creates a {@link ApnsHttp2Options} from the given {@link Properties} object
+     *
+     * @param properties The {@link Properties} object containing all required properties
+     * @param service The {@link FragmentPropertiesLoader}
+     * @return the {@link ApnsHttp2Options} or null if some properties are missing
+     */
+    protected ApnsHttp2Options createOption(Properties properties, FragmentPropertiesLoader service) {
+
+        AuthType authType;
         try {
-            return new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
-        } catch (IOException e) {
-            throw ConfigurationExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            String authTypeString = optProperty(properties, DriveEventsAPN2IOSProperty.authtype);
+            if (Strings.isEmpty(authTypeString)) {
+                LOG.debug("Apn2 is not configured in the given properties object. Fallback to null.");
+                return null;
+            }
+            authType = AuthType.authTypeFor(authTypeString);
+            if (AuthType.CERTIFICATE.equals(authType)) {
+                /*
+                 * get certificate options
+                 */
+                String keystoreName = getProperty(properties, DriveEventsAPN2IOSProperty.keystore);
+                if (Strings.isEmpty(keystoreName)) {
+                    return null;
+                }
+
+                String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
+                String password = getProperty(properties, DriveEventsAPN2IOSProperty.password);
+                boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPN2IOSProperty.production));
+
+                // Check file path validity
+                File keystoreFile = new File(keystoreName);
+                if (keystoreFile.exists()) {
+                    return new ApnsHttp2Options(keystoreFile, password, production, topic);
+                }
+
+                // Assume keystore file is given as resource identifier
+                try {
+                    byte[] keystoreBytes = Streams.stream2bytes(service.loadResource(keystoreName));
+                    if(keystoreBytes.length == 0) {
+                        return null;
+                    }
+                    return new ApnsHttp2Options(keystoreBytes, password, production, topic);
+                } catch (IOException e) {
+                    LOG.warn("Failed to load keystore from resource {}", keystoreName, e);
+                }
+            }
+            if (AuthType.JWT.equals(authType)) {
+                /*
+                 * get jwt options
+                 */
+                String privateKeyFileName = getProperty(properties, DriveEventsAPN2IOSProperty.privatekey);
+                if (Strings.isEmpty(privateKeyFileName)) {
+                    return null;
+                }
+
+                try {
+                    byte[] privateKey;
+                    File privateKeyFile = new File(privateKeyFileName);
+                    if (privateKeyFile.exists()) {
+                        privateKey = Files.readAllBytes(privateKeyFile.toPath());
+                    } else {
+                        // Assume private key file is given as resource identifier
+                        privateKey = Streams.stream2bytes(service.loadResource(privateKeyFileName));
+                        if(privateKey.length == 0) {
+                            return null;
+                        }
+                    }
+
+                    String keyId = getProperty(properties, DriveEventsAPN2IOSProperty.keyid);
+                    String teamId = getProperty(properties, DriveEventsAPN2IOSProperty.teamid);
+                    String topic = getProperty(properties, DriveEventsAPN2IOSProperty.topic);
+                    boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPN2IOSProperty.production));
+                    return new ApnsHttp2Options(privateKey, keyId, teamId, production, topic);
+                } catch (IOException e) {
+                    LOG.error("Error instantiating APNS HTTP/2 options from {}", privateKeyFileName, e);
+                    return null;
+                }
+            }
+        } catch (OXException e1) {
+            // nothing to do
         }
+        return null;
+    }
+
+    /**
+     * Get the given property from the {@link Properties} object
+     *
+     * @param properties The {@link Properties} object
+     * @param prop The {@link Property} to return
+     * @return The string value of the property
+     * @throws OXException In case the property is missing
+     */
+    private String getProperty(Properties properties, Property prop) throws OXException {
+        String result = optProperty(properties, prop);
+        if (result == null) {
+            // This should never happen as long as the shipped fragment contains a proper properties file
+            LOG.error("Missing required property from fragment: {}", prop.getFQPropertyName());
+            throw OXException.general("Missing property: " + prop.getFQPropertyName());
+        }
+        return result;
+    }
+
+    /**
+     * Optionally gets the given property from the {@link Properties} object.
+     *
+     * @param properties The {@link Properties} object
+     * @param prop The {@link Property} to return
+     * @return The string value of the property or null
+     */
+    private String optProperty(Properties properties, Property prop) {
+        return properties.getProperty(prop.getFQPropertyName());
     }
 
 }

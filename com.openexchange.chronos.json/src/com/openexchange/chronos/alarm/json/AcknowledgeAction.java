@@ -51,6 +51,7 @@ package com.openexchange.chronos.alarm.json;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -58,9 +59,13 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
+import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
@@ -99,22 +104,31 @@ public class AcknowledgeAction extends AbstractChronosAlarmAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        Date now = new Date();
         Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
         EventID eventID = parseIdParameter(requestData);
-        Event event = calendarAccess.getEvent(eventID);
+        Event event;
+        EventField[] originalFields = calendarAccess.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        try {
+            EventField[] fields = new EventField[] { EventField.ALARMS, EventField.TIMESTAMP };
+            calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, fields);
+            event = calendarAccess.getEvent(eventID);
+        } finally {
+            calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, originalFields);
+        }
         List<Alarm> alarms = event.getAlarms();
         if (null == alarms) {
             return new AJAXRequestResult();
         }
+        List<Alarm> updatedAlarms = new ArrayList<Alarm>(alarms.size());
         for (Alarm alarm : alarms) {
             if (alarm.getId() == alarmId.intValue()) {
-                alarm.setAcknowledged(now);
-                break;
+                alarm = AlarmMapper.getInstance().copy(alarm, null, (AlarmField[]) null);
+                alarm.setAcknowledged(new Date());
             }
+            updatedAlarms.add(alarm);
         }
 
-        CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());
+        CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, updatedAlarms, event.getTimestamp());
         return new AJAXRequestResult(updateAlarms, CalendarResultConverter.INPUT_FORMAT);
     }
 

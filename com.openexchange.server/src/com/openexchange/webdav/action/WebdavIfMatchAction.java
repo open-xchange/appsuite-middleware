@@ -50,6 +50,7 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -85,30 +86,31 @@ public class WebdavIfMatchAction extends AbstractAction {
 	}
 
 	private void check(WebdavRequest req, boolean mustMatch) throws WebdavProtocolException {
-		String header = req.getHeader(mustMatch ? "If-Match" : "If-None-Match");
-		if (null != header) {
-			WebdavResource res = req.getResource();
-			if (res.exists() && res.isCollection()) {
-				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
-			}
-			boolean foundMatch = false;
-			if (res.exists()) {
-				String eTag = res.getETag();
-				for (String tag : header.split("\\s*,\\s*")) {
-					if (null != tag && 0 < tag.length()) {
-						if ("*".equals(tag) || eTag.equals(tag) ||
-								(tag.startsWith("\"") && tag.endsWith("\"") && 2 < tag.length() &&
-										eTag.equals( tag.substring(1, tag.length() - 1)))) {
-							foundMatch = true;
-							break;
-						}
-					}
-				}
-			}
-			if (foundMatch != mustMatch) {
-			    throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), statusCode);
-		    }
-		}
+        String header = req.getHeader(mustMatch ? "If-Match" : "If-None-Match");
+        if (null != header) {
+            boolean foundMatch = matchesAny(req.getResource(), header.split("\\s*,\\s*"));
+            if (foundMatch != mustMatch) {
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), statusCode);
+            }
+        }
 	}
+
+    private static boolean matchesAny(WebdavResource resource, String[] tags) throws WebdavProtocolException {
+        if (resource.exists()) {
+            String eTag = resource.getETag();
+            for (String tag : tags) {
+                if (Strings.isEmpty(tag)) {
+                    continue;
+                }
+                if ("*".equals(tag) || tag.equals(eTag)) {
+                    return true;
+                }
+                if (tag.startsWith("\"") && tag.endsWith("\"") && 2 < tag.length() && eTag.equals(tag.substring(1, tag.length() - 1))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 }

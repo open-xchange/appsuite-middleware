@@ -92,11 +92,11 @@ public class GlobalDbConfigsReloadable implements Reloadable {
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         if (GLOBAL_DB_REF.get() == null) {
-            LOG.error("Cannot reload " + GlobalDbInit.CONFIGFILE + ". GlobalDatabaseServiceImpl not available.");
+            LOG.error("Cannot reload {}. GlobalDatabaseServiceImpl not available.", GlobalDbInit.CONFIGFILE);
             return;
         }
         if (DB_MIGRATION_EXECUTOR_REF.get() == null) {
-            LOG.error("Cannot reload " + GlobalDbInit.CONFIGFILE + ". DBMigrationExecutorService not available.");
+            LOG.error("Cannot reload {}. DBMigrationExecutorService not available.", GlobalDbInit.CONFIGFILE);
             return;
         }
 

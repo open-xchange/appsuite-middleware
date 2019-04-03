@@ -301,9 +301,12 @@ public class FilteringFolderService implements FolderService, RestoringFolderSer
 
     @Override
     public FolderResponse<Void> updateFolder(Folder folder, Date timeStamp, User user, Context context, FolderServiceDecorator decorator) throws OXException {
+        if (null == folder.getPermissions()) {
+            return delegate.updateFolder(folder, timeStamp, user, context, decorator); // not needed without 'set' permissions
+        }
         HideAdminService hideAdminService = ServerServiceRegistry.getInstance().getService(HideAdminService.class, false);
-        if (hideAdminService == null) {
-            return delegate.updateFolder(folder, timeStamp, user, context, decorator);
+        if (null == hideAdminService || false == hideAdminService.showAdmin(context.getContextId())) {
+            return delegate.updateFolder(folder, timeStamp, user, context, decorator); // currently not available or not applicable in this context
         }
         UserizedFolder originalFolder = getOriginalFolder(folder.getTreeID(), folder.getID(), user, context, decorator);
         Permission[] enhancedFolderPermissions = hideAdminService.addAdminToFolderPermissions(context.getContextId(), originalFolder.getPermissions(), folder.getPermissions());
@@ -313,9 +316,12 @@ public class FilteringFolderService implements FolderService, RestoringFolderSer
 
     @Override
     public FolderResponse<Void> updateFolder(Folder folder, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException {
+        if (null == folder.getPermissions()) {
+            return delegate.updateFolder(folder, timeStamp, session, decorator); // not needed without 'set' permissions
+        }
         HideAdminService hideAdminService = ServerServiceRegistry.getInstance().getService(HideAdminService.class, false);
-        if (hideAdminService == null) {
-            return delegate.updateFolder(folder, timeStamp, session, decorator);
+        if (null == hideAdminService || false == hideAdminService.showAdmin(session.getContextId())) {
+            return delegate.updateFolder(folder, timeStamp, session, decorator); // currently not available or not applicable in this context
         }
         UserizedFolder originalFolder = getOriginalFolder(folder.getTreeID(), folder.getID(), session, decorator);
         Permission[] enhancedFolderPermissions = hideAdminService.addAdminToFolderPermissions(session.getContextId(), originalFolder.getPermissions(), folder.getPermissions());

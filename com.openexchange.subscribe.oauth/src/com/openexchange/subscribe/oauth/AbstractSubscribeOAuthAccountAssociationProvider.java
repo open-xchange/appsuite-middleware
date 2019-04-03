@@ -53,6 +53,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
@@ -73,6 +75,8 @@ import com.openexchange.subscribe.SubscriptionStorage;
  * @since v7.10.1
  */
 public abstract class AbstractSubscribeOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSubscribeOAuthAccountAssociationProvider.class);
 
     private static final String TREE_ID = "1";
     private final String sourceId;
@@ -97,7 +101,12 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
         Collection<OAuthAccountAssociation> associations = null;
         FolderService folderService = services.getService(FolderService.class);
         for (Subscription subscription : getSubscriptionsOfUser(session)) {
-            if (OAuthUtil.getAccountId(subscription.getConfiguration()) != accountId) {
+            try {
+                if (OAuthUtil.getAccountId(subscription.getConfiguration()) != accountId) {
+                    continue;
+                }
+            } catch (IllegalArgumentException e) {
+                LOGGER.error("Possible malfunctioning subscribe oauth account with id: {}, for user: {}, in context {}.", accountId, session.getUserId(), session.getContextId(), e);
                 continue;
             }
             if (null == associations) {

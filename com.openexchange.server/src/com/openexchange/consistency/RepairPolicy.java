@@ -76,5 +76,9 @@ public enum RepairPolicy {
     /**
      * It will handle any missing vcards
      */
-    MISSING_FILE_FOR_VCARD;
+    MISSING_FILE_FOR_VCARD,
+    /**
+     * It will handle any missing composition space attachments
+     */
+    MISSING_ATTACHMENT_FILE_FOR_MAIL_COMPOSE;
 }

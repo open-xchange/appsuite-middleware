@@ -68,10 +68,11 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.CustomizableDelta;
 import com.openexchange.groupware.results.CustomizableTimedResult;
+import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.CustomizableSearchIterator;
-import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.FilteringSearchIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
@@ -244,18 +245,7 @@ public class HideAdminServiceImpl implements HideAdminService {
         if (documents == null || showAdmin(contextId)) {
             return documents;
         }
-
-        final int adminUserId = getAdminUserId(contextId);
-        return new CustomizableTimedResult<DocumentMetadata>(documents, new Customizer<DocumentMetadata>() {
-
-            @Override
-            public DocumentMetadata customize(DocumentMetadata thing) throws OXException {
-                if (thing.getObjectPermissions() != null) {
-                    return new PermissionFilterDocumentMetadataImpl(adminUserId, thing);
-                }
-                return thing;
-            }
-        });
+        return new CustomizableTimedResult<DocumentMetadata>(documents, new PermissionFilterDocumentCustomizer(getAdminUserId(contextId)));
     }
 
     @Override
@@ -263,18 +253,15 @@ public class HideAdminServiceImpl implements HideAdminService {
         if (searchIterator == null || searchIterator.size() == 0 || showAdmin(contextId)) {
             return searchIterator;
         }
+        return new CustomizableSearchIterator<>(searchIterator, new PermissionFilterDocumentCustomizer(getAdminUserId(contextId)));
+    }
 
-        final int adminUserId = getAdminUserId(contextId);
-        return new CustomizableSearchIterator<>(searchIterator, new Customizer<DocumentMetadata>() {
-
-            @Override
-            public DocumentMetadata customize(DocumentMetadata thing) throws OXException {
-                if (thing.getObjectPermissions() != null) {
-                    return new PermissionFilterDocumentMetadataImpl(adminUserId, thing);
-                }
-                return thing;
-            }
-        });
+    @Override
+    public Delta<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable Delta<DocumentMetadata> delta) throws OXException {
+        if (delta == null || showAdmin(contextId)) {
+            return delta;
+        }
+        return new CustomizableDelta<>(delta, new PermissionFilterDocumentCustomizer(getAdminUserId(contextId)));
     }
 
     @Override

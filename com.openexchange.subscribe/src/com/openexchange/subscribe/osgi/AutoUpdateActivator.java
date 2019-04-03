@@ -130,7 +130,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         }
 
         @Override
-        public void handleLogin(LoginResult login) throws OXException {
+        public void handleLogin(LoginResult login) {
             try {
                 ConfigView view = getService(ConfigViewFactory.class).getView(login.getUser().getId(), login.getContext().getContextId());
                 if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, false)) {
@@ -182,7 +182,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         }
 
         @Override
-        public void handleLogout(LoginResult logout) throws OXException {
+        public void handleLogout(LoginResult logout) {
             // nothing to do
         }
 

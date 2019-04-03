@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
  */
 public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements IPCheckMBean, DynamicMBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IPCheckMBeanImpl.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(IPCheckMBeanImpl.class);
 
     private final MetricAware<IPCheckMetricCollector> metricAware;
     private IPCheckMetricCollector metricCollector;
@@ -140,15 +140,17 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     private void startTask() {
         TimerService timerService = getService(TimerService.class);
+        IPCheckMetricCollector collector = this.metricCollector;
+        LinkedBlockingDeque<Measurement> tmp_measurements = this.measurements;
         Runnable task = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    long accepted = metricCollector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
-                    long denied = metricCollector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
-                    long ipChanges = metricCollector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
-                    measurements.add(new Measurement(accepted, denied, ipChanges));
+                    long accepted = collector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
+                    long denied = collector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
+                    long ipChanges = collector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
+                    tmp_measurements.add(new Measurement(accepted, denied, ipChanges));
                     cleanUp();
                 } catch (Exception e) {
                     LOGGER.error("{}", e.getMessage(), e);
@@ -160,8 +162,8 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
              */
             private void cleanUp() {
                 long minTime = System.currentTimeMillis() - WINDOW_SIZE;
-                for (Measurement measurement; (measurement = measurements.peek()) != null && measurement.timestamp < minTime;) {
-                    measurements.poll();
+                for (Measurement measurement; (measurement = tmp_measurements.peek()) != null && measurement.timestamp < minTime;) {
+                    tmp_measurements.poll();
                 }
             }
         };

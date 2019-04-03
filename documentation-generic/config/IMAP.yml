@@ -811,3 +811,38 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.refthreader.cache.enabled
+      description: |
+        Controls whether caching is enabled for mail conversation threads.
+        
+        When a client queries the first chunk of conversation threads, a
+        look-ahead of 1,000 E-Mails is performed, from which Message-ID, References, and In-Reply-To headers are retrieved in order to
+        compile nested conversation threads. If caching is enabled, all E-Mails of all compiled conversation threads are filled with
+        requested fields from client to be able to put those conversation threads into a volatile cache, which is then checked when client
+        requests subsequent chunks.
+        
+        If caching is disabled, only the E-Mails residing in the requested chunk are filled with passed fields from client and returned. A
+        request for a subsequent chunk would then cause to build conversations threads again from look-ahead result set.
+        
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.refthreader.cache.prefillCache
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.refthreader.cache.prefillCache
+      description: |
+        Controls whether conversation threads which are not contained in client-specified chunk are put into cache or not. If disabled, only
+        the currently requested chunk is put into cache. If client queries a different chunk later on, conversation threads need to be build
+        again.
+        
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: com.openexchange.imap.refthreader.cache.enabled
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]

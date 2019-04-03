@@ -56,6 +56,7 @@ import com.openexchange.control.internal.GeneralControlMBean;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ControlActivator}
@@ -66,7 +67,7 @@ public final class ControlActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ControlActivator.class);
 
-    private volatile Thread shutdownHookThread;
+    private Thread shutdownHookThread;
 
     /**
      * Initializes a new {@link ControlActivator}
@@ -77,18 +78,17 @@ public final class ControlActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class[] { VersionService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.control");
         try {
             /*
              * Create & open service tracker
              */
-            track(ManagementService.class, new HousekeepingManagementTracker(context, GeneralControlMBean.MBEAN_NAME, GeneralControlMBean.DOMAIN, new GeneralControl(context)));
+            track(ManagementService.class, new HousekeepingManagementTracker(context, GeneralControlMBean.MBEAN_NAME, GeneralControlMBean.DOMAIN, new GeneralControl(context, getServiceSafe(VersionService.class))));
             openTrackers();
             /*
              * Add shutdown hook
@@ -103,7 +103,7 @@ public final class ControlActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.control");
         try {
             final Thread shutdownHookThread = this.shutdownHookThread;

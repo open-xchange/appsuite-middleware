@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
+import static com.openexchange.java.Strings.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.lang.StringUtils.isNotEmpty;
 import static org.apache.commons.lang.StringUtils.lowerCase;
 import java.io.File;
 import java.io.FileInputStream;
@@ -154,7 +154,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction#call(com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper)
      */
     @Override
@@ -483,8 +483,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
                         if (LOG.isDebugEnabled()) {
                             try {
                                 LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", repetitiveFile.getName(), writeBrokenImage2Disk(repetitiveFile, tmpDirReference).getPath(), e);
-                            } catch (final Exception excp) {
-                                LOG.error("Unable to transform image from {}", repetitiveFile.getName(), e);
+                            } catch (IOException | OXException excp) {
+                                LOG.error("Unable to transform image from {}", repetitiveFile.getName(), excp);
                             }
                         } else {
                             LOG.error("Unable to transform image from {}", repetitiveFile.getName(), e);

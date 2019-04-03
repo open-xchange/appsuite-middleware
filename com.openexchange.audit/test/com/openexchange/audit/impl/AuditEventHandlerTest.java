@@ -700,7 +700,6 @@ public class AuditEventHandlerTest {
         this.auditEventHandler.handleInfostoreEvent(event, stringBuilder);
 
         Assert.assertTrue(stringBuilder.toString().startsWith("EVENT TYPE: ACCESS; "));
-        Assert.assertTrue(stringBuilder.toString().contains("PUBLISH: " + "172.16.13.71"));
     }
 
     @Test(expected = IllegalArgumentException.class)

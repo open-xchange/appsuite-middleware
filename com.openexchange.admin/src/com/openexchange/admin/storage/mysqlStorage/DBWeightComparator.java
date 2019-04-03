@@ -77,10 +77,10 @@ public class DBWeightComparator implements Comparator<DatabaseHandle> {
     }
 
     private int getMissingUnits(final DatabaseHandle db) {
-        return getAverageUnits(db) - db.getCount();
+        return getAverageUnits() - db.getCount();
     }
 
-    private int getAverageUnits(final DatabaseHandle db) {
+    private int getAverageUnits() {
         return totalUnits * 100 / totalWeight;
     }
 

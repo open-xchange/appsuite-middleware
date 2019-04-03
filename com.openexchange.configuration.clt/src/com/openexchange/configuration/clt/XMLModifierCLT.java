@@ -527,6 +527,9 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
     }
 
     private static Node findOnAttributes(List<Node> nodes, Node node) {
+        if (null == nodes) {
+            return null;
+        }
         for (Node other : nodes) {
             if (!diffAttributes(node, other, new LinkedList<String>())) {
                 return other;

@@ -66,6 +66,7 @@ import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 public class SpamExpertsActivator extends HousekeepingActivator {
 
@@ -78,7 +79,8 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 	@Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class, HttpService.class, MailService.class, SSLSocketFactoryProvider.class };
+        return new Class<?>[] { UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class, 
+                                HttpService.class, MailService.class, SSLSocketFactoryProvider.class, VersionService.class };
     }
 
 	@Override
@@ -103,7 +105,7 @@ public class SpamExpertsActivator extends HousekeepingActivator {
         });
 
         String alias = getService(ConfigurationService.class).getProperty("com.openexchange.custom.spamexperts.panel_servlet", "/ajax/spamexperts/panel").trim();
-		SpamExpertsServlet spamExpertsServlet = new SpamExpertsServlet(config);
+		SpamExpertsServlet spamExpertsServlet = new SpamExpertsServlet(config, getServiceSafe(VersionService.class));
 		this.spamExpertsServlet = spamExpertsServlet;
         servletRegistration = new HTTPServletRegistration(context, spamExpertsServlet, alias);
 	}

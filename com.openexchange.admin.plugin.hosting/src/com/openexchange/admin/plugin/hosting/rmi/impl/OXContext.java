@@ -58,8 +58,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -70,6 +72,7 @@ import com.openexchange.admin.plugin.hosting.services.PluginInterfaces;
 import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.plugin.hosting.tools.DatabaseDataMover;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
+import com.openexchange.admin.plugins.OXContextPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -98,7 +101,6 @@ import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXContextCommonImpl;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
-import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
@@ -287,7 +289,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        LOGGER.debug(ctx + " - " + capasToAdd.toString() + " | " + capasToRemove.toString());
+        LOGGER.debug("{} - {} | {}", ctx, capasToAdd.toString(), capasToRemove.toString());
 
         try {
             if (!tool.existsContext(ctx)) {
@@ -506,23 +508,60 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            // Trigger plugin extensions
+            // Trigger plug-in extensions for pre-deletion
+            Map<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfos = null;
             {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
-                    for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
-                        try {
-                            oxContextPlugin.delete(ctx, auth);
-                        } catch (final PluginException e) {
-                            LOGGER.error("", e);
-                            throw StorageException.wrapForRMI(e);
+                    List<OXContextPluginInterface> plugins = pluginInterfaces.getContextPlugins().getServiceList();
+                    for (final OXContextPluginInterface oxContextPlugin : plugins) {
+                        if (oxContextPlugin instanceof OXContextPluginInterfaceExtended) {
+                            OXContextPluginInterfaceExtended extended = (OXContextPluginInterfaceExtended) oxContextPlugin;
+                            try {
+                                Map<String, Object> undoInfo = extended.undoableDelete(ctx, auth);
+                                if (undoInfo != null) {
+                                    if (undeleteInfos == null) {
+                                        undeleteInfos = new LinkedHashMap<OXContextPluginInterfaceExtended, Map<String,Object>>(plugins.size());
+                                    }
+                                    undeleteInfos.put(extended, undoInfo);
+                                }
+                            } catch (final PluginException e) {
+                                LOGGER.error("", e);
+                                throw StorageException.wrapForRMI(e);
+                            }
+                        } else {
+                            try {
+                                oxContextPlugin.delete(ctx, auth);
+                            } catch (final PluginException e) {
+                                LOGGER.error("", e);
+                                throw StorageException.wrapForRMI(e);
+                            }
                         }
                     }
                 }
             }
 
-            oxcox.delete(ctx);
-            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
+            if (undeleteInfos == null) {
+                oxcox.delete(ctx);
+            } else {
+                boolean deleted = false;
+                try {
+                    oxcox.delete(ctx);
+                    deleted = true;
+                } finally {
+                    if (!deleted) {
+                        for (Map.Entry<OXContextPluginInterfaceExtended, Map<String, Object>> undeleteInfo : undeleteInfos.entrySet()) {
+                            try {
+                                Map<String, Object> undoInfo = undeleteInfo.getValue();
+                                undeleteInfo.getKey().undelete(ctx, undoInfo);
+                            } catch (PluginException x) {
+                                LOGGER.warn("Undeletion failed", x);
+                            }
+                        }
+                    }
+                }
+            }
+
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);

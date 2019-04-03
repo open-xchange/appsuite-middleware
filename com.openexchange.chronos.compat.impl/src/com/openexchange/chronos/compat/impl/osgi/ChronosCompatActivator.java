@@ -66,9 +66,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class ChronosCompatActivator extends HousekeepingActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosCompatActivator.class);
-
-    private volatile CalendarAttachmentHandler attachmentHandler;
+    private CalendarAttachmentHandler attachmentHandler;
 
     /**
      * Initializes a new {@link ChronosCompatActivator}.
@@ -83,9 +81,10 @@ public class ChronosCompatActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
+        Logger logger = LoggerFactory.getLogger(ChronosCompatActivator.class);
         try {
-            LOG.info("starting bundle {}", context.getBundle());
+            logger.info("starting bundle {}", context.getBundle());
             /*
              * inject legacy calendar attachment authorization & listener
              */
@@ -95,14 +94,14 @@ public class ChronosCompatActivator extends HousekeepingActivator {
             this.attachmentHandler = attachmentHandler;
             openTrackers();
         } catch (Exception e) {
-            LOG.error("error starting {}", context.getBundle(), e);
+            logger.error("error starting {}", context.getBundle(), e);
             throw e;
         }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle {}", context.getBundle());
+    protected synchronized void stopBundle() throws Exception {
+        LoggerFactory.getLogger(ChronosCompatActivator.class).info("stopping bundle {}", context.getBundle());
         CalendarAttachmentHandler attachmentHandler = this.attachmentHandler;
         if (null != attachmentHandler) {
             Attachments.getListenerChooserForModule(Types.APPOINTMENT).removeForEverything(attachmentHandler);

@@ -60,8 +60,6 @@ import java.util.EnumMap;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmField;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Repeat;
@@ -372,6 +370,23 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             @Override
             public void remove(Alarm object) {
                 object.removeExtendedProperties();
+            }
+
+            @Override
+            public boolean replaceAll(Alarm object, String regex, String replacement) throws OXException {
+                if (super.replaceAll(object, regex, replacement)) {
+                    /*
+                     * also replace in properties that get encoded as extended properties
+                     */
+                    if (object.containsDescription() && null != object.getDescription()) {
+                        object.setDescription(object.getDescription().replaceAll(regex, replacement));
+                    }
+                    if (object.containsSummary() && null != object.getSummary()) {
+                        object.setSummary(object.getSummary().replaceAll(regex, replacement));
+                    }
+                    return true;
+                }
+                return false;
             }
         });
 

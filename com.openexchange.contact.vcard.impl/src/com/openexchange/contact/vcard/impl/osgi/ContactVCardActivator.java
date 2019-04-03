@@ -59,6 +59,7 @@ import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ContactVCardActivator}
@@ -70,6 +71,11 @@ public class ContactVCardActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
+    }
+    
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { VersionService.class };
     }
 
     @Override

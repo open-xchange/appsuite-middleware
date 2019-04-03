@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import javax.net.ssl.SSLException;
 import org.apache.commons.codec.CharEncoding;
@@ -98,6 +99,7 @@ import com.openexchange.rest.client.v2.RESTResponse;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @deprecated Use {@link AbstractRESTClient} instead.
  */
+@Deprecated
 public class RESTExecutor {
 
     private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.UTF_8);
@@ -302,7 +304,7 @@ public class RESTExecutor {
         try {
             final HttpEntity ent = response.getEntity();
             if (ent != null) {
-                final InputStreamReader in = new InputStreamReader(ent.getContent());
+                final InputStreamReader in = new InputStreamReader(ent.getContent(), StandardCharsets.UTF_8);
                 // Wrap this with a Buffer, so we can re-parse it if it's
                 // not JSON
                 // Has to be at least 16384, because this is defined as the buffer size in

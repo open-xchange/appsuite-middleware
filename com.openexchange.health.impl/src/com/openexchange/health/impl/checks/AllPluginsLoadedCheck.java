@@ -49,7 +49,6 @@
 
 package com.openexchange.health.impl.checks;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.health.MWHealthCheck;
 import com.openexchange.health.MWHealthCheckResponse;
 import com.openexchange.health.impl.MWHealthCheckResponseImpl;
@@ -88,11 +87,7 @@ public class AllPluginsLoadedCheck implements MWHealthCheck {
     @Override
     public MWHealthCheckResponse call() {
         PluginsLoadedService service = services.getService(PluginsLoadedService.class);
-        try {
-            return new MWHealthCheckResponseImpl(NAME, null, service.allPluginsloaded());
-        } catch (OXException e) {
-            return new MWHealthCheckResponseImpl(NAME, null, false);
-        }
+        return new MWHealthCheckResponseImpl(NAME, null, service.allPluginsloaded());
     }
 
 }

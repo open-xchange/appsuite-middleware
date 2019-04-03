@@ -135,13 +135,12 @@ public class DriveJsonActivator extends AJAXModuleActivator {
         trackService(HostnameService.class);
         openTrackers();
         /*
-         * register blocking long polling listener factory if allowed by configuration
+         * register blocking long polling listener factory
          *
          */
-        if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.drive.events.blockingLongPolling.enabled", false)) {
-            LOG.info("Registering blocking long polling listener factory...");
-            registerService(LongPollingListenerFactory.class, new BlockingListenerFactory());
-        }
+        LOG.info("Registering blocking long polling listener factory...");
+        registerService(LongPollingListenerFactory.class, new BlockingListenerFactory(this));
+
         registerService(BodyParser.class, UploadActionBodyParser.getInstance());
     }
 

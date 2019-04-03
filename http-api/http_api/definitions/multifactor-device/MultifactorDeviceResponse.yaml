@@ -1,0 +1,7 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: A multifactor device.
+    $ref: "#/definitions/MultifactorDevice"

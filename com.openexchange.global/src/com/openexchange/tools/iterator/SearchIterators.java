@@ -50,6 +50,7 @@
 package com.openexchange.tools.iterator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -63,7 +64,10 @@ import com.openexchange.exception.OXException;
  */
 public final class SearchIterators {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SearchIterators.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SearchIterators.class);
+    }
 
     /**
      * Initializes a new {@link SearchIterators}.
@@ -83,7 +87,7 @@ public final class SearchIterators {
                 iterator.close();
             } catch (final Exception e) {
                 // Ignore
-                LOGGER.error("Closing SearchIterator instance failed", e);
+                LoggerHolder.LOGGER.error("Closing SearchIterator instance failed", e);
             }
         }
     }
@@ -98,11 +102,20 @@ public final class SearchIterators {
         if (null == iterator) {
             return null;
         }
-        List<T> list = new ArrayList<T>();
-        while (iterator.hasNext()) {
-            list.add(iterator.next());
+
+        try {
+            if (!iterator.hasNext()) {
+                return Collections.emptyList();
+            }
+
+            List<T> list = new ArrayList<T>();
+            do {
+                list.add(iterator.next());
+            } while (iterator.hasNext());
+            return list;
+        } finally {
+            close(iterator);
         }
-        return list;
     }
 
     @SuppressWarnings("rawtypes")

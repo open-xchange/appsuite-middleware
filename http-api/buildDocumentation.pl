@@ -24,15 +24,15 @@ system("node", "resolve.js", $api, "--debug");
 
 if ($deps) {
     printf("Installing Bootprint...\n");
-    system("npm", "install", "-g", "bootprint");
+    system("sudo", "npm", "install", "-g", "bootprint", "--save");
     printf("Installing Bootprint-OpenAPI...\n");
-    system("npm", "install", "-g", "bootprint-openapi");
+    system("sudo", "npm", "install", "-g", "bootprint-openapi", "--save");
     printf("Installing swagger-tools...\n");
-    system("npm", "install", "swagger-tools", "--save");
+    system("sudo", "npm", "install", "swagger-tools", "--save");
     printf("Installing js-yaml...\n");
-    system("npm", "install", "js-yaml", "--save");
+    system("sudo", "npm", "install", "js-yaml", "--save");
     printf("Installing json-schema-ref-parser...\n");
-    system("npm", "install", "json-schema-ref-parser", "--save");
+    system("sudo", "npm", "install", "json-schema-ref-parser", "--save");
 }
 printf("Generating documentation pages...\n");
 system("bootprint", "openapi", $api."/swagger.json", $target);

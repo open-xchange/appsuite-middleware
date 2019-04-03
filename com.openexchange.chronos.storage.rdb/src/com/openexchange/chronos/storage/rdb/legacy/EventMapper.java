@@ -877,7 +877,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         return mappings;
 	}
 
-    private static SortedSet<RecurrenceId> deserializeExceptionDates(String timestamps) throws NumberFormatException {
+    static SortedSet<RecurrenceId> deserializeExceptionDates(String timestamps) throws NumberFormatException {
         if (null == timestamps) {
             return null;
         }
@@ -889,7 +889,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         return dates;
     }
 
-    private static String serializeExceptionDates(SortedSet<RecurrenceId> dates) {
+    static String serializeExceptionDates(SortedSet<RecurrenceId> dates) {
         if (null == dates || 0 == dates.size()) {
             return null;
         }

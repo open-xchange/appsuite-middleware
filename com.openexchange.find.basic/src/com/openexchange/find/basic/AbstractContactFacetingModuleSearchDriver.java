@@ -49,9 +49,7 @@ package com.openexchange.find.basic;
  */
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
@@ -68,7 +66,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.java.Strings;
-import com.openexchange.resource.Resource;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -161,43 +158,6 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             Collections.singletonList(String.valueOf(FolderObject.SYSTEM_LDAP_FOLDER_ID)),
             autocompleteRequest.getLimit(),
             autocompleteRequest.getOptions().includeContextAdmin());
-    }
-
-    /**
-     * Performs the resources auto-complete search.
-     *
-     * @param session The session associated with this auto-complete request
-     * @param autocompleteRequest The auto-complete request
-     * @return The resulting resources
-     * @throws OXException If auto-complete search fails for any reason
-     */
-    protected List<Resource> autocompleteResources(ServerSession session, AutocompleteRequest autocompleteRequest) throws OXException {
-        Resource[] resources = Services.getResourceService().searchResources(autocompleteRequest.getPrefix(), session.getContext());
-        if (null == resources) {
-            return Collections.emptyList();
-        }
-        List<Resource> resourceList = Arrays.asList(resources);
-        if (1 < resourceList.size()) {
-            Collections.sort(resourceList, new Comparator<Resource>() {
-
-                @Override
-                public int compare(Resource o1, Resource o2) {
-                    String name1 = null != o1 ? o1.getDisplayName() : null;
-                    String name2 = null != o2 ? o2.getDisplayName() : null;
-                    if (null == name1) {
-                        return null == name2 ? 0 : -1;
-                    } else if (null == name2) {
-                        return 1;
-                    } else {
-                        return name1.compareTo(name2);
-                    }
-                }
-            });
-            if (autocompleteRequest.getLimit() > resourceList.size()) {
-                resourceList.subList(0, autocompleteRequest.getLimit()).clear();
-            }
-        }
-        return resourceList;
     }
 
     /**

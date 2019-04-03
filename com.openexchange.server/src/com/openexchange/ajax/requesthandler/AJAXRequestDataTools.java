@@ -496,7 +496,8 @@ public class AJAXRequestDataTools {
                 LOG.error(e.getMessage(), e);
             }
         }
-        final int lastIndex = pathInfo.lastIndexOf(';');
+
+        int lastIndex = pathInfo.lastIndexOf(';');
         if (lastIndex > 0) {
             pathInfo = pathInfo.substring(0, lastIndex);
         }

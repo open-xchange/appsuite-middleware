@@ -366,9 +366,9 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         if (null != externalAttendee) {
                             attendees.add(entityResolver.applyEntityData(externalAttendee));
                             String message = "Falling back to external attendee representation for non-existent user " + userAttendee;
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
+                            addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
                         } else {
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + userAttendee, e);
+                            addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + userAttendee, e);
                         }
                         continue;
                     }
@@ -395,13 +395,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         /*
                          * no suitable entry in prg_date_rights (anymore), skip attendee
                          */
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping orphaned user attendee " + userAttendee, null);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping orphaned user attendee " + userAttendee, null);
                     } else {
                         /*
                          * no suitable entry in prg_date_rights (anymore), take over as individual user attendee
                          */
                         attendees.add(userAttendee);
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Preserving orphaned user attendee " + userAttendee, null);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Preserving orphaned user attendee " + userAttendee, null);
                     }
                 }
             }
@@ -416,7 +416,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         /*
                          * duplicate calendar user; just skip
                          */
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping duplicate " + internalAttendee, null);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping duplicate " + internalAttendee, null);
                         continue;
                     }
                     try {
@@ -426,7 +426,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                             /*
                              * invalid calendar user; possibly a no longer existing group or resource - skip
                              */
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, "Skipping non-existent " + internalAttendee, e);
+                            addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, "Skipping non-existent " + internalAttendee, e);
                             continue;
                         }
                         throw e;
@@ -465,7 +465,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 CalendarUserType probedCUType = entityResolver.probeCUType(entity);
                 if (null != probedCUType && false == probedCUType.equals(cuType)) {
                     String message = "Auto-correcting stored calendar user type for " + internalAttendee + " to \"" + probedCUType + '"';
-                    addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, message, e);
+                    addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, message, e);
                     internalAttendee.setCuType(probedCUType);
                     return internalAttendee;
                 }

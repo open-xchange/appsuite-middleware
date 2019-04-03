@@ -103,11 +103,13 @@ import com.openexchange.groupware.update.tasks.Release781UpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
 import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
+import com.openexchange.groupware.update.tasks.UnsupportedSubscriptionsRemoverTask;
 import com.openexchange.groupware.update.tasks.UserClearDelTablesTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableTask;
+import com.openexchange.groupware.update.tasks.objectusagecount.CreatePrincipalUseCountTableTask;
 import com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks;
 
 /**
@@ -163,7 +165,7 @@ public final class InternalList {
     private static UpdateTaskV2[] TASKS = null;
 
     private static UpdateTaskV2[] genTaskList() {
-        List<UpdateTaskV2> list = new ArrayList<>();
+        List<UpdateTaskV2> list = new ArrayList<>(256);
 
         // Renames "Unified INBOX" to "Unified Mail"
         list.add(new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask());
@@ -701,12 +703,12 @@ public final class InternalList {
 
         // Drops the unused "Shared address book" from database
         list.add(new com.openexchange.groupware.update.tasks.DropUnusedSharedAddressBookFolder());
-        
+
         // +++++++++++++++++++++++++++++++++ Version 7.10.1 starts here. +++++++++++++++++++++++++++++++++
-        
+
         // Adds the 'salt' column to 'user' and 'del_user' table in preparation for usage in the following release
         list.add(new com.openexchange.groupware.update.tasks.AddUserSaltColumnTask());
-        
+
         // +++++++++++++++++++++++++++++++++ Version 7.10.2 starts here. +++++++++++++++++++++++++++++++++
 
         // Drop unused tables, see MW-1092
@@ -716,10 +718,21 @@ public final class InternalList {
         list.add(new com.openexchange.groupware.update.tasks.DropVCardPrincipalTableTask());
         list.add(new com.openexchange.groupware.update.tasks.DropPrgContactsLinkageTableTask());
 
+        // Extends infostore document tables media-related fields
+        list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTable());
+        list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV2());
+        list.add(new com.openexchange.groupware.update.tasks.AddMediaFieldsForInfostoreDocumentTableV3());
+        
+        // Add principal table update task
+        list.add(new CreatePrincipalUseCountTableTask());
+        
+        list.add(new UnsupportedSubscriptionsRemoverTask());
+
         // +++++++++++++++++++++++++++++++++ Version 7.10.3 starts here. +++++++++++++++++++++++++++++++++
         // TODO Enable UpdateTask with 7.10.3, see MW-1108
         // list.add(new com.openexchange.groupware.update.tasks.DropPublicationTablesTask());
         // list.add(new com.openexchange.groupware.update.tasks.DeleteOXMFSubscriptionTask());
+
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

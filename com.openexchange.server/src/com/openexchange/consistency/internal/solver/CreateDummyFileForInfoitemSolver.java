@@ -71,11 +71,10 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateDummyFileForInfoitemSolver.class);
 
     private final DatabaseImpl database;
-
     private final User admin;
 
     /**
-     * Initialises a new {@link CreateDummyFileForInfoitemSolver}.
+     * Initializes a new {@link CreateDummyFileForInfoitemSolver}.
      *
      * @param database The database
      * @param storage

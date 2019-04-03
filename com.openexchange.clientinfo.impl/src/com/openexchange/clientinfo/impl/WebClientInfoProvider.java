@@ -63,6 +63,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.uadetector.UserAgentParser;
 import net.sf.uadetector.OperatingSystem;
@@ -120,7 +121,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
 
     @Override
     public ClientInfo getClientInfo(Session session) {
-        if (null != session) {
+        if (null != session && Origin.HTTP_JSON.equals(session.getOrigin())) {
             // Get User-Agent from session
             String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
             if (Strings.isEmpty(userAgent)) {

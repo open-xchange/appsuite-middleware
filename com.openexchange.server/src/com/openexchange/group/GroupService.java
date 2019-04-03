@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
  * This service defines the API to the groups component.
@@ -96,14 +97,35 @@ public interface GroupService {
     Group getGroup(Context context, int groupId) throws OXException;
 
     /**
-     * Returns the denoted groups.
+     * Returns the denoted group.
      *
      * @param context The context
-     * @param groupIds An array of group identifiers
-     * @return The groups
-     * @throws OXException If one group cannot be returned
+     * @param groupId The group identifier
+     * @param loadMembers Whether to load members or not.
+     * @return The group
+     * @throws OXException If group cannot be returned
      */
-    Group[] getGroup(Context context, int[] groupIds) throws OXException;
+    Group getGroup(Context context, int groupId, boolean loadMembers) throws OXException;
+
+    /**
+     * Returns the all groups of a given context.
+     *
+     * @param ctx The context
+     * @param loadMembers Whether to load members or not.
+     * @return An array of groups
+     * @throws OXException If group cannot be returned
+     */
+    Group[] getGroups(Context ctx, boolean loadMembers) throws OXException;
+    
+    /**
+     * Returns the groups with the given ids
+     *
+     * @param ctx The context
+     * @param ids An array of group ids to get
+     * @return An array of groups
+     * @throws OXException If group cannot be returned
+     */
+    Group[] listGroups(Context ctx, int[] ids) throws OXException;
 
     /**
      * Searches for groups by their display name.
@@ -116,11 +138,35 @@ public interface GroupService {
      */
     Group[] search(Context context, String pattern, boolean loadMembers) throws OXException;
 
+    /**
+     * Lists all groups in the given context
+     * 
+     * @param context The context
+     * @param loadMembers Whether to load member or not
+     * @return The groups in the given context
+     * @throws OXException
+     */
     Group[] listAllGroups(Context context, boolean loadMembers) throws OXException;
 
+    /**
+     * Gets all groups within the context which has been modified since the given date
+     * 
+     * @param context The context
+     * @param modifiedSince The boundary date
+     * @return An array of groups which has been modified since the given date
+     * @throws OXException
+     */
     Group[] listModifiedGroups(Context context, Date modifiedSince) throws OXException;
 
-    Group[] listDeletedGroups(Context context, Date modifiedSince) throws OXException;
+    /**
+     * Gets all groups within the context which has been deleted since the given date
+     * 
+     * @param context The context
+     * @param deletedSince The boundary date
+     * @return An array of groups which has been deleted since the given date
+     * @throws OXException
+     */
+    Group[] listDeletedGroups(Context context, Date deletedSince) throws OXException;
 
     /**
      * Updates a group.
@@ -133,4 +179,26 @@ public interface GroupService {
      * @throws OXException if some problem occurs.
      */
     void update(Context context, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException;
+    
+    /**
+     * Similar to {@link #search(Context, String, boolean)} but sorts the results according to the use count.
+     *
+     * @param session The user session
+     * @param pattern this pattern will be searched in the displayName of the group.
+     * @param loadMembers - switch whether members should be loaded too (decreases performance, don't use if not needed)
+     * @return an array of groups that match the search pattern sorted by use count.
+     * @throws OXException if searching has some storage related problem.
+     */
+    public Group[] searchGroups(Session session, String pattern, boolean loadMembers) throws OXException;
+
+    /**
+     * Similar to {@link #getGroups(Context, boolean)} but sorts the results according to the use count.
+     *
+     * @param session The user session
+     * @param loadMembers Whether to load members or not.
+     * @return An array of groups
+     * @throws OXException If group cannot be returned
+     */
+    public Group[] getGroups(Session session, boolean loadMembers) throws OXException;
+
 }

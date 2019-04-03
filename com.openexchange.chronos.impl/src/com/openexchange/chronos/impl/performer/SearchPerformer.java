@@ -256,13 +256,13 @@ public class SearchPerformer extends AbstractQueryPerformer {
         SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
             .addSearchTerm(eventFolderTerm)
             .addSearchTerm(new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(entityID)))
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, entityID))
                 .addSearchTerm(attendeeFolderTerm))
         ;
         if (onlyOwn) {
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(searchTerm)
-                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, userID));
+                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, I(userID)));
         }
         return searchTerm;
     }
@@ -329,7 +329,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
     private List<CalendarFolder> getFolders(List<String> folderIds) throws OXException {
         List<CalendarFolder> folders;
         if (null == folderIds) {
-            folders = getVisibleFolders(session);
+            folders = getVisibleFolders(session, Permission.READ_OWN_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
         } else {
             folders = new ArrayList<CalendarFolder>(folderIds.size());
             for (String folderId : folderIds) {

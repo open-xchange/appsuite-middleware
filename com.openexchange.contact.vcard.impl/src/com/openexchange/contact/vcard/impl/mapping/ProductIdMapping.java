@@ -51,9 +51,10 @@ package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 import ezvcard.VCard;
 import ezvcard.property.ProductId;
 import ezvcard.property.RawProperty;
@@ -85,11 +86,14 @@ public class ProductIdMapping extends AbstractMapping {
     }
 
     private static String getValue() {
-        String versionString = Version.getInstance().optVersionString();
-        if (null == versionString) {
+        VersionService versionService = VCardServiceLookup.getOptionalService(VersionService.class);
+        String versionString = null;
+        if (null == versionService) {
             versionString = "<unknown version>";
+        } else {
+            versionString = versionService.getVersionString();
         }
-        return "-//" + Version.NAME + "//" + versionString + "//EN";
+        return "-//" + VersionService.NAME + "//" + versionString + "//EN";
     }
 
 }

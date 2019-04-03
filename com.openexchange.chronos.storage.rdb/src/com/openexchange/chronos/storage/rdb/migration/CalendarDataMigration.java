@@ -344,7 +344,7 @@ public class CalendarDataMigration {
      * @param connection The write connection to release
      * @param updated <code>true</code> if there were changes, <code>false</code>, otherwise
      */
-    private void release(Connection connection, boolean updated) throws OXException, SQLException {
+    private void release(Connection connection, boolean updated) throws SQLException {
         if (null != connection) {
             try {
                 if (false == connection.getAutoCommit()) {
@@ -425,7 +425,7 @@ public class CalendarDataMigration {
          * read from source storage: event tombstones, corresponding attendees
          */
         LOG.trace("Loading next chunk of {} event tombstones, with timestamp > {}...", I(length), L(lastTimestamp));
-        SingleSearchTerm searchTerm = getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, lastTimestamp);
+        SingleSearchTerm searchTerm = getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(lastTimestamp));
         SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, Order.ASC)).setLimits(0, length);
         List<Event> events = sourceStorage.getEventStorage().searchEventTombstones(searchTerm, searchOptions, EventField.values());
         if (null == events || 0 == events.size()) {

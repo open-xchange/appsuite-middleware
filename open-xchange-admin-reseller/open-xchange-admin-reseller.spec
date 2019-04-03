@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,12 +65,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/etc/plugin
 %config(noreplace) /opt/open-xchange/etc/plugin/*
-%dir /opt/open-xchange/etc/mysql
-%config(noreplace) /opt/open-xchange/etc/mysql/*
 %doc com.openexchange.admin.reseller.rmi/javadoc
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Thu Mar 28 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First preview for 7.10.2 release
 * Thu Oct 18 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 prepare for 7.10.2 release
 * Thu Oct 11 2018 Jan Bauerdick <jan.bauerdick@open-xchange.com>

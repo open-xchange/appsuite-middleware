@@ -126,44 +126,38 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
             ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
             Event original = determineOriginalEvent(change, processed, session);
+            Event updatedEvent;
 
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
                     adjusteAttendeesPartStats(action, original, event, diff, owner);
-                    event = updateEvent(original, event, session);
-                    if (null == event) {
-                        LOGGER.warn("No event found to process.");
-                        continue NextChange;
-                    }
+                    updatedEvent = updateEvent(original, event, session);
                 } else {
                     continue NextChange;
                 }
             } else if (exceptionCreate) {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
-                event = updateEvent(masterEvent, event, session);
-                if (null == event) {
-                    LOGGER.warn("No event found to process.");
-                    continue NextChange;
-                }
+                updatedEvent = updateEvent(masterEvent, event, session);
             } else {
                 ensureFolderId(event, session);
                 event.removeId();
-                event = createEvent(event, session);
-                if (null == event) {
-                    LOGGER.warn("No event found to process.");
-                    continue NextChange;
-                }
+                updatedEvent = createEvent(event, session);
+            }
+
+            // Check before continuing
+            if (null == updatedEvent) {
+                LOGGER.warn("No event found to process.");
+                continue NextChange;
             }
 
             if (!change.isException()) {
-                processed.put(event.getUid(), event);
+                processed.put(updatedEvent.getUid(), updatedEvent);
             }
 
-            event = util.loadEvent(event, session);
-            writeMail(action, original, event, session, owner);
-            result.add(event);
+            writeMail(action, original, updatedEvent, session, owner);
+            result.add(updatedEvent);
         }
 
         return result;
@@ -173,34 +167,29 @@ public class UpdatePerformer extends AbstractActionPerformer {
         EventUpdate diff = session.getUtilities().compare(original, event, true, (EventField[]) null);
 
         Event update = new Event();
-        boolean write = false;
         if (!diff.getUpdatedFields().isEmpty()) {
             EventMapper.getInstance().copy(diff.getUpdate(), update, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
-            write = true;
-        }
+            update.setFolderId(original.getFolderId());
+            update.setId(original.getId());
 
-        update.setFolderId(original.getFolderId());
-        update.setId(original.getId());
+            if (!update.containsSequence()) {
+                update.setSequence(original.getSequence());
+            }
+            if (!update.containsUid()) {
+                update.setUid(original.getUid());
+            }
+            if (!update.containsOrganizer()) {
+                update.setOrganizer(original.getOrganizer());
+            }
+            if (original.containsSeriesId()) {
+                update.setSeriesId(original.getSeriesId());
+            }
+            if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
+                update.setRecurrenceId(event.getRecurrenceId());
+            } else if (original.containsRecurrenceId()) {
+                update.setRecurrenceId(original.getRecurrenceId());
+            }
 
-        if (!update.containsSequence()) {
-            update.setSequence(original.getSequence());
-        }
-        if (!update.containsUid()) {
-            update.setUid(original.getUid());
-        }
-        if (!update.containsOrganizer()) {
-            update.setOrganizer(original.getOrganizer());
-        }
-        if (original.containsSeriesId()) {
-            update.setSeriesId(original.getSeriesId());
-        }
-        if (!original.containsRecurrenceId() && event.containsRecurrenceId()) {
-            update.setRecurrenceId(event.getRecurrenceId());
-        } else if (original.containsRecurrenceId()) {
-            update.setRecurrenceId(original.getRecurrenceId());
-        }
-
-        if (write) {
             CalendarResult calendarResult = session.getCalendarService().updateEventAsOrganizer(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
             /*
              * Check creations first because;
@@ -208,13 +197,17 @@ public class UpdatePerformer extends AbstractActionPerformer {
              * + To create exceptions master needs to be updated. Nevertheless the created exception must be returned
              */
             if (false == calendarResult.getCreations().isEmpty()) {
-                update = calendarResult.getCreations().get(0).getCreatedEvent();
+                return calendarResult.getCreations().get(0).getCreatedEvent();
             }
-            if (null == update && false == calendarResult.getUpdates().isEmpty()) {
-                update = calendarResult.getUpdates().get(0).getUpdate();
+            if (false == calendarResult.getUpdates().isEmpty()) {
+                return calendarResult.getUpdates().get(0).getUpdate();
             }
+            LOGGER.debug("Did write data but unable to find correct element to return.");
+            return null;
         }
-        return update;
+
+        LOGGER.debug("Did not write any data.");
+        return null;
     }
 
     /**
@@ -258,7 +251,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             List<Attendee> attendees = new LinkedList<>(event.getAttendees());
 
             // Get attendee to add
-            Attendee attendee = CalendarUtils.find(attendees, owner);
+            Attendee attendee = CalendarUtils.find(attendees, session.getEntityResolver().prepareUserAttendee(owner));
             if (null == attendee) {
                 attendee = loadAttendee(session, owner);
             } else {
@@ -268,7 +261,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             // Update from attributes
             if (null != confirm) {
                 attendee.setPartStat(confirm);
-                attendee.setRsvp(false);
+                attendee.setRsvp(Boolean.FALSE);
             }
             if (Strings.isNotEmpty(message)) {
                 attendee.setComment(message);

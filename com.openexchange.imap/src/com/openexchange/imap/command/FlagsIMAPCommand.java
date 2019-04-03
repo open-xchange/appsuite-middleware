@@ -159,7 +159,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
-        args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
+        args = 1 == messageCount ? ARGS_FIRST : ARGS_ALL;
         if (flags == null) {
             returnDefaultValue = true;
             flagsStr = null;

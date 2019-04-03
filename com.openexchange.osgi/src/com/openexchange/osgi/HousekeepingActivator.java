@@ -220,6 +220,14 @@ public abstract class HousekeepingActivator extends DeferredActivator {
             }
         });
 
+        // Check for possible optional services
+        Class<?>[] optionalServices = getOptionalServices();
+        if (null != optionalServices) {
+            for (final Class<?> clazz : optionalServices) {
+                trackService(clazz);
+            }
+        }
+
         // Invoking ServiceTracker.open() more than once is a no-op, therefore it can be safely called from here.
         if (!serviceTrackers.isEmpty()) {
             openTrackers();
@@ -308,7 +316,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param service The service reference
      * @param properties The service's properties
      */
-    protected <S> void registerService (final String className, final Object service, final Dictionary<String, ?> properties) {
+    protected void registerService(final String className, final Object service, final Dictionary<String, ?> properties) {
         serviceRegistrations.put(service, context.registerService(className, service, properties));
     }
 
@@ -317,7 +325,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @param className The service's class name
      * @param service The service reference
      */
-    protected <S> void registerService (final String className, final Object service) {
+    protected void registerService(final String className, final Object service) {
         registerService(className, service, null);
     }
 
@@ -355,6 +363,10 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Gets the classes of the optional services.
      * <p>
      * They appear when available in activator's service collection.
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * <p>
+     * <b>NOTE</b>: Don't forget to open tracker(s) with {@link #openTrackers()}.
+     * </div>
      *
      * @return The array of {@link Class} instances of optional services
      */
@@ -477,13 +489,6 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Opens all trackers.
      */
     protected void openTrackers() {
-        final Class<?>[] optionalServices = getOptionalServices();
-        if (null != optionalServices) {
-            for (final Class<?> clazz : optionalServices) {
-                trackService(clazz);
-            }
-        }
-
         for (final ServiceTracker<?, ?> tracker : serviceTrackers) {
             tracker.open();
         }

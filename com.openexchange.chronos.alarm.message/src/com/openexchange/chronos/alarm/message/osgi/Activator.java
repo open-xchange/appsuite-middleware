@@ -155,7 +155,7 @@ public class Activator extends HousekeepingActivator {
         }
         int overdueWaitTime = Math.abs(leanConfig.getIntProperty(MessageAlarmConfig.OVERDUE));
         if (workerCount > 1) {
-            LOG.warn("Using " + workerCount + " mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.");
+            LOG.warn("Using {} mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.", workerCount);
         }
 
         AlarmNotificationServiceRegistry registry = new AlarmNotificationServiceRegistry();

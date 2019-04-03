@@ -74,6 +74,7 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Change;
 import com.google.api.services.drive.model.FileList;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -120,7 +121,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param accountAccess A Google Drive account access reference
      * @param folderAccess A Google Drive folder access reference
      */
-    public GoogleDriveFileAccess(GoogleDriveOAuthAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess, GoogleDriveFolderAccess folderAccess) {
+    public GoogleDriveFileAccess(@NonNull GoogleDriveOAuthAccess googleDriveAccess, @NonNull FileStorageAccount account, @NonNull Session session, GoogleDriveAccountAccess accountAccess, GoogleDriveFolderAccess folderAccess) {
         super(googleDriveAccess, account, session);
         this.accountAccess = accountAccess;
         this.folderAccess = folderAccess;
@@ -180,7 +181,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
         try {
-            return null != getMetadata(folderId, id, version, Collections.singletonList(Field.ID), 0);
+            return null != getMetadata(folderId, id, version, Collections.singletonList(Field.ID));
         } catch (OXException e) {
             if (FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FOLDER_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.equals(e)) {
                 return false;
@@ -191,7 +192,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        return getMetadata(folderId, id, version, ALL_FIELDS, 0);
+        return getMetadata(folderId, id, version, ALL_FIELDS);
     }
 
     @Override
@@ -201,10 +202,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveFileMetadata(file, sequenceNumber, modifiedFields, 0);
-    }
-
-    private IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields, int retryCount) throws OXException {
         if (null != modifiedFields && false == (modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.VERSION))) {
             /*
              * File was changed, but neither the name nor the version changed. Nothing to update in the meta data
@@ -225,7 +222,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                          */
                         {
                             String fileName = file.getFileName();
-                            if (containsFileName(searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0), fileName)) {
+                            if (containsFileName(searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null), fileName)) {
                                 throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
                             }
                         }
@@ -242,7 +239,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                         NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
                             String fileNameToTest = fileName.toString();
-                            if (containsFileName(searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0), fileNameToTest)) {
+                            if (containsFileName(searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null), fileNameToTest)) {
                                 fileName.advance();
                             } else {
                                 fileNameToUse = fileNameToTest;
@@ -258,10 +255,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
-        return copy(source, version, destFolder, update, newFil, modifiedFields, 0);
-    }
-
-    private IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFil, List<Field> modifiedFields, int retryCount) throws OXException {
         return new BackOffPerformer<IDTuple>(googleDriveAccess, account, session) {
 
             @Override
@@ -299,10 +292,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
-        return move(source, destFolder, sequenceNumber, update, modifiedFields, 0);
-    }
-
-    private IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields, int retryCount) throws OXException {
         String id = source.getId();
         return new BackOffPerformer<IDTuple>(googleDriveAccess, account, session) {
 
@@ -354,10 +343,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
-        return getDocument(folderId, id, version, 0);
-    }
-
-    private InputStream getDocument(String folderId, String id, String version, int retryCount) throws OXException {
         return new BackOffPerformer<InputStream>(googleDriveAccess, account, session) {
 
             @Override
@@ -370,19 +355,15 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 checkFileValidity(file);
                 if (CURRENT_VERSION == version) {
                     return drive.files().get(id).executeMediaAsInputStream();
-                } else {
-                    return drive.revisions().get(id, version).executeMediaAsInputStream();
                 }
+
+                return drive.revisions().get(id, version).executeMediaAsInputStream();
             }
         }.perform(id);
     }
 
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
-        return getThumbnailStream(folderId, id, version, 0);
-    }
-
-    private InputStream getThumbnailStream(String folderId, String id, String version, int retryCount) throws OXException {
         return new BackOffPerformer<InputStream>(googleDriveAccess, account, session) {
 
             @Override
@@ -414,10 +395,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data, sequenceNumber, modifiedFields, 0);
-    }
-
-    private IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, int retryCount) throws OXException {
         return new BackOffPerformer<IDTuple>(googleDriveAccess, account, session) {
 
             @Override
@@ -439,7 +416,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                             NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                             while (null == fileNameToUse) {
                                 String fileNameToTest = fileName.toString();
-                                if (containsFileName(searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0), fileNameToTest)) {
+                                if (containsFileName(searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null), fileNameToTest)) {
                                     fileName.advance();
                                 } else {
                                     fileNameToUse = fileNameToTest;
@@ -475,7 +452,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                      */
                     {
                         String fileName = file.getFileName();
-                        if (containsFileName(searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null, 0), fileName)) {
+                        if (containsFileName(searchByFileNamePattern(fileName, file.getFolderId(), false, Arrays.asList(Field.ID, Field.FILENAME), null, null), fileName)) {
                             throw FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create();
                         }
                     }
@@ -492,10 +469,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
-        removeDocument(folderId, sequenceNumber, 0);
-    }
-
-    private void removeDocument(String folderId, long sequenceNumber, int retryCount) throws OXException {
         new BackOffPerformer<Void>(googleDriveAccess, account, session) {
 
             @Override
@@ -541,10 +514,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
-        return removeDocument(ids, sequenceNumber, hardDelete, 0);
-    }
-
-    private List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete, int retryCount) throws OXException {
         return new BackOffPerformer<List<IDTuple>>(googleDriveAccess, account, session) {
 
             @Override
@@ -598,10 +567,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        return getDocuments(folderId, fields, sort, order, 0);
-    }
-
-    private TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         return new BackOffPerformer<TimedResult<File>>(googleDriveAccess, account, session) {
 
             @Override
@@ -638,7 +603,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         List<File> files = new LinkedList<>();
         for (IDTuple idTuple : ids) {
-            files.add(getMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION, fields, 0));
+            files.add(getMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION, fields));
         }
         return new FileTimedResult(files);
     }
@@ -650,10 +615,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
-        return getDelta(folderId, updateSince, fields, sort, order, ignoreDeleted, 0);
-    }
-
-    private Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted, int retryCount) throws OXException {
         return new BackOffPerformer<Delta<File>>(googleDriveAccess, account, session) {
 
             @Override
@@ -716,8 +677,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         try {
+            List<Field> fieldsToUse = Field.addDateFieldsIfNeeded(fields, sort);
             // Search by pattern
-            List<File> files = searchByFileNamePattern(pattern, folderId, includeSubfolders, fields, sort, order, 0);
+            List<File> files = searchByFileNamePattern(pattern, folderId, includeSubfolders, fieldsToUse, sort, order);
 
             // Start, end...
             if ((start != NOT_SET) && (end != NOT_SET)) {
@@ -746,10 +708,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
-        return getSequenceNumbers(folderIds, 0);
-    }
-
-    private Map<String, Long> getSequenceNumbers(List<String> folderIds, int retryCount) throws OXException {
         return new BackOffPerformer<Map<String, Long>>(googleDriveAccess, account, session) {
 
             @Override
@@ -780,7 +738,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param order The sort order to apply
      * @return The found files
      */
-    List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
+    List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order) throws OXException {
         return new BackOffPerformer<List<File>>(googleDriveAccess, account, session) {
 
             @Override
@@ -874,7 +832,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param fields The fields to include
      * @return The file
      */
-    GoogleDriveFile getMetadata(String folderId, String id, String version, List<Field> fields, int retryCount) throws OXException {
+    GoogleDriveFile getMetadata(String folderId, String id, String version, List<Field> fields) throws OXException {
         return new BackOffPerformer<GoogleDriveFile>(googleDriveAccess, account, session) {
 
             @Override
@@ -909,7 +867,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         if (null == folderId && null != file && null != file.getParents() && 0 < file.getParents().size()) {
             folderId = file.getParents().get(0);
         }
-        return new GoogleDriveFile(folderId, fileId, userId, getRootFolderId()).parseGoogleDriveFile(file, fields);
+        List<Field> fieldsToUse = Field.addDateFieldsIfNeeded(fields, null);
+        return new GoogleDriveFile(folderId, fileId, userId, getRootFolderId()).parseGoogleDriveFile(file, fieldsToUse);
     }
 
     void checkFileValidity(com.google.api.services.drive.model.File file) throws OXException {
@@ -934,6 +893,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     /**
      * Gets the Google Drive fields to query from the service corresponding to the supplied {@link Field} collection. The mandatory {@link GoogleDriveConstants#FIELDS_DEFAULT} are always included.
+     * <p>
+     * Check <a href="https://developers.google.com/drive/api/v2/search-parameters">https://developers.google.com/drive/api/v2/search-parameters</a>
      *
      * @param requestedFields The fields as requested by the client, or {@link FileStorageFileAccess#ALL_FIELDS} to query all known fields
      * @param additionalFields Additional fields to include
@@ -962,6 +923,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     break;
                 case FILE_MD5SUM:
                     stringBuilder.append(",md5Checksum");
+                    break;
                 default:
                     break;
             }
@@ -1028,7 +990,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     /**
      * Get the name of the file. If a file with the same name already exists the file name
      * will be incremented until it is unique.
-     * 
+     *
      * @param drive The {@link Drive}
      * @param destFolder The folder the file is in
      * @param name The name the file
@@ -1071,7 +1033,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     /**
      * Deletes the specified Files from the user's Drive.
-     * 
+     *
      * @param drive The drive API
      * @param hardDelete <code>true</code> to delete permanently, <code>false</code> to put them in trash
      * @param childList The files to delete
@@ -1089,7 +1051,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     /**
      * Handles the file name change
-     * 
+     *
      * @param update The updated metadata of the file
      * @param modifiedFields The modified fields
      * @param srcFile The source file
@@ -1108,7 +1070,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     /**
      * Checks whether the file name was modified
-     * 
+     *
      * @param update The updated metadata of the file
      * @param modifiedFields The modified fields
      * @param srcFile The source file
@@ -1120,15 +1082,16 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     /**
      * Checks in the specified list with files
-     * 
+     *
      * @param hits The list with the files
      * @param filename The filename to search for
      * @return <code>true</code> if the file is contained in the hits list, <code>false</code> otherwise
      */
     boolean containsFileName(List<File> hits, String filename) {
         for (File file : hits) {
-            if (file.getFileName().equals(filename))
+            if (file.getFileName().equals(filename)) {
                 return true;
+            }
         }
         return false;
     }

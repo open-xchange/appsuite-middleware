@@ -222,6 +222,14 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      * Group %1$s can't be used for object permissions.
      */
     VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP("Group %1$s can't be used for object permissions.", CATEGORY_USER_INPUT, 2107, InfostoreExceptionMessages.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP_MSG_DISPLAY),
+    /**
+     * An I/O error occurred: %1$s
+     */
+    IO_ERROR("An I/O error occurred: %1$s", CATEGORY_ERROR, 2108),
+    /**
+     * An unexpected error occurred: %1$s
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", CATEGORY_ERROR, 2109),
     ;
 
     private final String message;

@@ -1,0 +1,206 @@
+feature_name: Multifactor
+feature_description: |
+  See [[https://documentation.open-xchange.com/{{version}}/middleware/components/multifactor.html]] for more informations.
+properties:
+    - key: com.openexchange.multifactor.totp.enabled
+      description: |
+        The main switch to enable/disable TOTP Multifactor Provider.
+      defaultValue: false
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "TOTP"]
+
+    - key: com.openexchange.multifactor.totp.maximumQrCodeLength
+      description: |
+        Defines the maximum amount of characters allowed to be included in a TOTP QR-Code created by the server
+      defaultValue: 300
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "TOTP"]
+      
+    - key: com.openexchange.multifactor.u2f.enabled
+      description: |
+        The main switch to enable/disable U2F Multifactor Provider.
+      defaultValue: false
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "U2F"]
+      
+    - key: com.openexchange.multifactor.u2f.appId
+      description: |
+        Set the ApplicationID for U2F.  This is usually the host/domain.  
+        Needs to be set only when the server is unable to determine the correct host name from the http request.
+      defaultValue: empty
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "U2F"]
+
+    - key: com.openexchange.multifactor.u2f.tokenLifetime
+      description: |
+        Defines the lifetime (in seconds) of a U2F challenge token for authentication; i.e this is the time the client needs to resolve the challenge.
+      defaultValue: 60
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "U2F"]
+      
+    - key: com.openexchange.multifactor.sms.enabled
+      description: |
+        The main switch to enable/disable SMS Multifactor Provider.
+      defaultValue: false
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "SMS"]
+
+    - key: com.openexchange.multifactor.sms.backup
+      description: |
+        Defines if the SMS provider can also be used as "backup provider".
+        I.E. This defines if it's possible for a user to register SMS based backup devices.
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "SMS"]
+      
+    - key: com.openexchange.multifactor.sms.tokenLength
+      description: |
+        Sets the number of characters sent to the SMS device as the challenge
+      defaultValue: 8
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "SMS"]
+      
+    - key: com.openexchange.multifactor.sms.tokenLifetime
+      description: |
+        The length of time (in seconds) that an SMS token will remain valid.
+      defaultValue: 120
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "SMS"]
+      
+    - key: com.openexchange.multifactor.sms.maxTokenAmount
+      description: |
+        The maximum amount of active tokens a user is allowed to own at a point in time
+      defaultValue: 5
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "SMS"]
+      
+    - key: com.openexchange.multifactor.backupString.enabled
+      description: |
+        The main switch to enable/disable Backup String Multifactor Provider.
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "BackupString"]
+      
+    - key: com.openexchange.multifactor.backupString.stringLength
+      description: |
+        Sets the length of the backup string
+      defaultValue: 32
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "BackupString"]
+      
+    - key: com.openexchange.multifactor.maxBadAttempts
+      description: |
+        Maximum number of bad attempts before a lockout
+      defaultValue: 6
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "Lockout"]
+      
+    - key: com.openexchange.multifactor.lockoutTime
+      description: |
+        Number of minutes an account is locked out after max bad attempts is exceeded
+      defaultValue: 6
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.multifactor.maxBadAttempts
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor", "Lockout"]
+      
+    - key: com.openexchange.multifactor.recentAuthRequired
+      description: |
+        List of urls that require a recent multifactor authentication. If a user has a multifactor device
+        set up, he must have authenticated within the recentAuthenticationTime as well as since this browser
+        session was set up.
+      defaultValue: "multifactor/device?action=delete, multifactor/provider?action=startRegistration"
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.multifactor.recentAuthenticationTime
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor"]
+      
+    - key: com.openexchange.multifactor.recentAuthenticationTime
+      description: |
+        This Time, in minutes, that a multifactor authentication is considered "recent".
+        
+        Some actions (defined in com.openexchange.multifactor.recentAuthRequired) require that the client performed
+        multifactor authentication recently. If the multifactor authentication happened prior the configured amount of
+        minutes, the authentication will be denied.
+        
+        Number of minutes until a valid multifactor authentication is no longer considered recent.
+      defaultValue: 10
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.multifactor.recentAuthRequired
+      file: multifactor.properties
+      packageName: open-xchange-multifactor
+      tags: ["Multifactor"]
+      

@@ -100,13 +100,15 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getClientToken(),
             param.isTransient(),
             param.getOrigin(),
-            param.getEnhancement(),
+            param.getEnhancements(),
+
             param.getUserAgent());
     }
 
     @Override
     public boolean storeSession(String sessionId) throws OXException {
-        return SessionHandler.storeSession(sessionId, true);
+        // Assume 'addIfAbsent' is false to force update of the session in session storage
+        return SessionHandler.storeSession(sessionId, false);
     }
 
     @Override

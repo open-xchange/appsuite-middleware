@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -227,8 +228,7 @@ public final class OXFolderDowngradeSQL {
 			final String folderTable, final String permTable, final Connection writeCon) throws SQLException {
 		PreparedStatement stmt = null;
 		try {
-			stmt = writeCon.prepareStatement(SQL_DROP_MODULE_SYS_PERMS.replaceFirst(RPL_PERM, permTable).replaceFirst(
-					RPL_FOLDER, folderTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_DROP_MODULE_SYS_PERMS, RPL_PERM, permTable), RPL_FOLDER, folderTable));
 			int pos = 1;
 			stmt.setInt(pos++, cid);
 			stmt.setInt(pos++, cid);
@@ -269,7 +269,7 @@ public final class OXFolderDowngradeSQL {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = readCon.prepareStatement(SQL_SEL_MOD_PRIV_FLD.replaceFirst(RPL_FOLDER, folderTable));
+			stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_MOD_PRIV_FLD, RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, FolderObject.PRIVATE);
 			stmt.setInt(3, owner);
@@ -309,7 +309,7 @@ public final class OXFolderDowngradeSQL {
 		}
 		PreparedStatement stmt = null;
 		try {
-			stmt = writeCon.prepareStatement(SQL_DEL_FLD_PERMS.replaceFirst(RPL_PERM, permTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DEL_FLD_PERMS, RPL_PERM, permTable));
 			final TIntIterator iter = fuids.iterator();
 			for (int i = size; i-- > 0;) {
 				stmt.setInt(1, cid);
@@ -345,7 +345,7 @@ public final class OXFolderDowngradeSQL {
         }
 		PreparedStatement stmt = null;
 		try {
-			stmt = writeCon.prepareStatement(SQL_DEL_FLDS.replaceFirst(RPL_FOLDER, folderTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DEL_FLDS, RPL_FOLDER, folderTable));
 			final TIntIterator iter = fuids.iterator();
             for (int i = size; i-- > 0;) {
 				stmt.setInt(1, cid);
@@ -397,8 +397,7 @@ public final class OXFolderDowngradeSQL {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = readCon.prepareStatement((all ? SQL_SEL_PUBLIC_FLDS_ALL : SQL_SEL_PUBLIC_FLDS_WO_DEFAULT)
-					.replaceFirst(RPL_PERM, permTable).replaceFirst(RPL_FOLDER, folderTable));
+			stmt = readCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith((all ? SQL_SEL_PUBLIC_FLDS_ALL : SQL_SEL_PUBLIC_FLDS_WO_DEFAULT), RPL_PERM, permTable), RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, cid);
 			stmt.setInt(3, module);
@@ -449,7 +448,7 @@ public final class OXFolderDowngradeSQL {
 		ResultSet rs = null;
 		final int fuid;
 		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_DEF_FLD.replaceFirst(RPL_FOLDER, folderTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_DEF_FLD, RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, module);
 			stmt.setInt(3, entity);
@@ -464,7 +463,7 @@ public final class OXFolderDowngradeSQL {
 			stmt = null;
 		}
 		try {
-			stmt = writeCon.prepareStatement(SQL_DEL_DEF_FLD_PERM.replaceFirst(RPL_PERM, permTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DEL_DEF_FLD_PERM, RPL_PERM, permTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, fuid);
 			stmt.setInt(3, entity);
@@ -500,7 +499,7 @@ public final class OXFolderDowngradeSQL {
 		ResultSet rs = null;
 		final List<Permission> perms;
 		try {
-			stmt = writeCon.prepareStatement(SQL_LOAD_PERMS.replaceFirst(RPL_PERM, permTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_LOAD_PERMS, RPL_PERM, permTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, fuid);
 			rs = stmt.executeQuery();
@@ -586,7 +585,7 @@ public final class OXFolderDowngradeSQL {
 			final String permTable, final Connection wc, final int cid) throws SQLException {
 		PreparedStatement stmt = null;
 		try {
-			stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_PERM.replaceFirst(RPL_PERM, permTable));
+			stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_UPDATE_PERM, RPL_PERM, permTable));
 			stmt.setInt(1, permission.fp);
 			stmt.setInt(2, permission.orp);
 			stmt.setInt(3, permission.owp);
@@ -610,7 +609,7 @@ public final class OXFolderDowngradeSQL {
 			final Connection wc, final int cid) throws SQLException {
 		PreparedStatement stmt = null;
 		try {
-			stmt = wc.prepareStatement(SQL_DELETE_PERM.replaceFirst(RPL_PERM, permTable));
+			stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_PERM, RPL_PERM, permTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, permission.entity);
 			stmt.setInt(3, permission.fuid);
@@ -671,7 +670,7 @@ public final class OXFolderDowngradeSQL {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_PERM, permTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_SEL_SHARED_PERMS, RPL_FOLDER, folderTable), RPL_PERM, permTable));
             stmt.setInt(1, cid);
             stmt.setInt(2, entity);
             stmt.setInt(3, FolderObject.PRIVATE);
@@ -683,7 +682,7 @@ public final class OXFolderDowngradeSQL {
             rs.close();
             rs = null;
             stmt.close();
-            stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS.replaceAll(RPL_PERM, permTable).replaceFirst(RPL_FOLDER, folderTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_DEL_SHARED_PERMS, RPL_PERM, permTable), RPL_FOLDER, folderTable));
             stmt.setInt(1, cid);
             stmt.setInt(2, cid);
             stmt.setInt(3, entity);
@@ -695,7 +694,7 @@ public final class OXFolderDowngradeSQL {
             stmt = null;
         }
         try {
-            stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS_FOREIGN.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_PERM, permTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_SEL_SHARED_PERMS_FOREIGN, RPL_FOLDER, folderTable), RPL_PERM, permTable));
             stmt.setInt(1, cid);
             stmt.setInt(2, entity);
             stmt.setInt(3, FolderObject.PRIVATE);
@@ -707,7 +706,7 @@ public final class OXFolderDowngradeSQL {
             rs.close();
             rs = null;
             stmt.close();
-            stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS_FOREIGN.replaceAll(RPL_PERM, permTable).replaceFirst(RPL_FOLDER, folderTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_DEL_SHARED_PERMS_FOREIGN, RPL_PERM, permTable), RPL_FOLDER, folderTable));
             stmt.setInt(1, cid);
             stmt.setInt(2, cid);
             stmt.setInt(3, entity);
@@ -753,7 +752,7 @@ public final class OXFolderDowngradeSQL {
 		ResultSet rs = null;
 		final TIntList fuids;
 		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_SUB_INFO_FLD.replaceAll(RPL_FOLDER, folderTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_SUB_INFO_FLD, RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
             stmt.setInt(2, FolderObject.INFOSTORE);
             stmt.setInt(3, cid);
@@ -784,7 +783,7 @@ public final class OXFolderDowngradeSQL {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_SUB2_INFO_FLD.replaceFirst(RPL_FOLDER, folderTable));
+			stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_SUB2_INFO_FLD, RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, fuid);
 			rs = stmt.executeQuery();

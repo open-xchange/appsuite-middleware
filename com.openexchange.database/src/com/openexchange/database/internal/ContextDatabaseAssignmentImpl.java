@@ -412,16 +412,18 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void invalidateAssignment(int... contextIds) {
+        if (contextIds == null || contextIds.length <= 0) {
+            return;
+        }
+
         Cache myCache = this.cache;
         if (null != myCache) {
             try {
-                if (contextIds != null && contextIds.length > 0) {
-                    List<Serializable> keys = new ArrayList<Serializable>(contextIds.length << 1);
-                    for (int contextId : contextIds) {
-                        keys.add(myCache.newCacheKey(contextId));
-                    }
-                    myCache.remove(keys);
+                List<Serializable> keys = new ArrayList<Serializable>(contextIds.length << 1);
+                for (int contextId : contextIds) {
+                    keys.add(myCache.newCacheKey(contextId));
                 }
+                myCache.remove(keys);
             } catch (final OXException e) {
                 LOG.error("Error while removing database assignment from cache.", e);
             }

@@ -147,6 +147,13 @@ The properties are stored as-is in the database, and are accessible in the same 
 
 In the Chronos stack, there's no dedicated "principal". Instead, it is ensured that the organizer is always the actual calendar owner for newly created events (An exception to this rule are imported scheduling object resources from external organizers, as described at RFC 6638, section 3.2.2.2). In case the event is created on behalf of the folder owner by another calendar user (e.g. the secretary), this is expressed via the ``SENT-BY`` attribute within the organizer.       
 
+## Changing the organizer
+
+Since v.7.10.2 the organizer of an event can hand the event over to another *internal* CU. Doing so, the other CU becomes the new organizer of the event thus is able to change the event.
+The feature is deactivated by default and can be activated by setting the property ``com.openexchange.calendar.allowChangeOfOrganizer`` to ``true``. When changing the organizer the server will generate a notification to all attendees, optional giving the old organizer the possibility to announce why the event was transmitted to another CU.
+
+The change can only be performed if all attendees, the acting and the new organizer are internal users. The reason for this restriction is that even though the iTIP standard supports such changes most implementations do not. Changing the organizer on events with external CUs will lead to inconsistent events across the different systems and is therefore prohibited.
+
 ## Conversion 
 
 In order to convert between the legacy properties for organizer/principal and the organizer as it is used within the Chronos stack, the following conversions are performed:
@@ -476,7 +483,7 @@ As one exception, the calendar client from Thunderbird/Lightning does not synchr
 
 ## External Calendar Account Caching
 
-The default calendar providers implemented by Open-Xchange (like ICal, SchedJoules, ...) use a generic caching approach to avoid expensive calls to external resources as much as possible. This means that events (and all related information like attendees and alarms) from the external resource gets persisted like events from the internal calendar after their first retrieval. All upcoming requests will be answered by the cache until a defined refresh interval is exceeded.
+The default calendar providers implemented by Open-Xchange (like ICal, SchedJoules, ...) use a generic caching approach to avoid expensive calls to external resources as much as possible. This means that events (and all related information like attendees and description) from the external resource gets persisted like events from the internal calendar after their first retrieval. All upcoming requests will be answered by the cache until a defined refresh interval is exceeded. Please be aware that alarms and attachments are not synched.
 
 The caching layer itself is able to handle information on a per-folder base. Cached folders that have been deleted on the remote site will be removed immediately from the cache while new folders on remote will be cached instantly. 
 
@@ -565,12 +572,24 @@ While not necessarily needed, for now events are still stored using the calendar
 
 Eventually, once no backwards compatibility is needed anymore, this quirk will be removed, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
 
+## Organizer and Attendee Copies
+
+Group-scheduled meetings appear in the calendars of all attendees and the organizer. So, figuratively speaking, this means that multiple copies of the event are stored individually in the corresponding folders of the participants. The copies are updated based on certain scheduling rules that model the message flow between organizer and attendees - the iCalendar Transport-Independent Interoperability Protocol (iTIP). The concrete handling of organizer and attendee copies depends on if the *organizer copy* resides on the server, i.e. the event has been organized by an internal calendar user, or if an internal calendar user received a meeting request from an external calendar user. 
+
+In the first case, where an internal calendar user is the organizer, a single event instance - the *master* copy - is used and shared with all other internal attendees. Updates performed on this master copy are directly applied and visible for all other internal calendar users. If configured, notification messages about the changes are also sent to internal users. Externally invited attendees receive the updates via iTIP, usually via email (iMIP). 
+
+Group-scheduled meetings with an external organizer usually arrive via iMIP at the inbox of an internal recipient. When replying, the event data is taken over into their personal calendar folder, representing the so-called *attendee copy* of the event - the organizer's master copy resides on a foreign calendaring system in this scenario. The same handling also applies for events that arrive via iMIP, but contain an organizer whose email address refers to another internal user (e.g. when a calendar client is used by the organizer that is not connected to the server). In contrast to an internally organized event where the server has control over the master copy, the attendee copy is stored for each invited user individually in that case. So, even if multiple internal users from the same context attend in an externally organized event, each of them will have an own attendee copy, whose lifecycle is completely decoupled from other attendee copies of the same event. This is necessary, as meeting requests from external scheduling systems may be different for different recipients, so that a single copy cannot be maintained. For example, the organizer's calendar system might hide the attendees in the guest list from each other, or, when attendees are removed, the cancel message may only be sent to the deleted attendees, while no updated meeting request is forwarded to the other ones.
+
+Technically, in such events where the organizer copy is not located on the server, only the attendee representing the actual calendar user gets resolved into an internal entity, while all other attendees as well as the organizer are still treated as external calendar users. So, even if one attendee copy changes locally (due to one user changing its participation status), this is not reflected in the other one as long as an update by the organizer is received. 
+
 ***
 
 **_References / further reading:_**
 
 - https://bugs.horde.org/ticket/10697
 - com.openexchange.chronos.impl.Utils#isEnforceDefaultAttendee
+- https://tools.ietf.org/html/rfc5546
+- https://tools.ietf.org/html/rfc6047
 
 ***
 
@@ -651,9 +670,13 @@ However, iCalendar standards require to consider different *roles* here - mainly
 
 > "Attendees" are allowed to make some changes to a scheduling object resource, though key properties such as start time, end time, location, and summary are typically under the control of the "Organizer".
 
-In order to comply with the standards, the new calendaring stack introduces appropriate restrictions in case the user is not the organizer, or is not acting on behalf of him. Effectively, the permitted changes then boil down to modifications of the user's personal alarms and his own participation status. Additionally, the attendee is still allowed to remove himself from an event (beyond declining it). Those changes can also be performed on a single instance of a recurring event series (which may indirectly cause new change and/or delete exceptions for the series).
+In order to comply with the standards, the new calendaring stack introduces appropriate restrictions (per default) in case the user is not the organizer, or is not acting on behalf of him. Effectively, the permitted changes then boil down to modifications of the user's personal alarms and his own participation status. Additionally, the attendee is still allowed to remove himself from an event (beyond declining it). Those changes can also be performed on a single instance of a recurring event series (which may indirectly cause new change and/or delete exceptions for the series).
 
 When acting on behalf of another user in a *shared* calendar folder, always this shared folder's owner is considered when determining if the event is updated as organizer or attendee. In *public* folders, the original creator is stored as the organizer implicitly. All consecutive changes by other internal users can then be performed on behalf of this organizer, provided that the underlying permissions in the folder are sufficient. See also chapter Permissions below for further details. 
+
+## Attendee Privileges
+
+As stated above, attendees are usually quite limited regarding the allowed changes. To still allow modifications by other calendar users for specific events, the organizer of an event can assign elevated attendee privileges on a per-event basis. Doing so, he allows other attendees to modify event properties that would normally require the <i>organizer role</i>. Those modifications are then performed <i>on behalf</i> of the organizer implicitly. This <i>on behalf</i>-relationship will be used throughout the stack, e.g. also when sending subsequent scheduling messages like iMIP. However, regardless of the granted attendee privileges, the restrictions as per RFC 6638, section 3.2.2.1 still apply when accessing the server via CalDAV.      
 
 ## Delete as Attendee
 

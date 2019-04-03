@@ -87,7 +87,6 @@ import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.smtp.services.Services;
-import com.openexchange.version.Version;
 
 
 /**
@@ -97,7 +96,7 @@ import com.openexchange.version.Version;
  * @since v7.8.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ContextStorage.class, Version.class})
+@PrepareForTest({ContextStorage.class})
 public class NoReplySMTPTransportTest {
 
     private static final int CONTEXT_ID = 1;
@@ -118,13 +117,6 @@ public class NoReplySMTPTransportTest {
     @Before
     public void setUp() throws Exception {
         server = SimpleSmtpServer.start(8025);
-        mockStatic(Version.class);
-        when(Version.getInstance()).thenReturn(new Version() {
-            @Override
-            public String getVersionString() {
-                return "7.8.0";
-            }
-        });
     }
 
     @After

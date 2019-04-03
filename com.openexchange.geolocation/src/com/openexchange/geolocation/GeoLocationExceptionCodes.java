@@ -76,6 +76,14 @@ public enum GeoLocationExceptionCodes implements DisplayableOXExceptionCode {
      * The specified host '%1$s' cannot be resolved to an IP address
      */
     UNABLE_TO_RESOLVE_HOST("The specified host '%1$s' cannot be resolved to an IP address", CATEGORY_ERROR, 4),
+    /**
+     * Storage service provider with id '%1$s' is not registered.
+     */
+    UNKNOWN_STORAGE_SERVICE_PROVIDER("Storage service provider with id '%1$s' is not registered.", CATEGORY_CONFIGURATION, 5),
+    /**
+     * The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'
+     */
+    STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED("The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'", CATEGORY_CONFIGURATION, 6),
     ;
 
     private final int number;
@@ -133,5 +141,15 @@ public enum GeoLocationExceptionCodes implements DisplayableOXExceptionCode {
      */
     public OXException create(Throwable cause, Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 }

@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -30,6 +30,7 @@ Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
 Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
+Requires:      open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 Conflicts:     open-xchange-publish < 7.10.2
 Obsoletes:     open-xchange-publish < 7.10.2
@@ -625,6 +626,36 @@ EOF
       fi
       ox_scr_done ${SCR}
     }
+
+    SCR=SCR-391
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="video/x-matroska mkv"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-422
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="image/heic heic"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      type="image/heif heif"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -665,6 +696,7 @@ exit 0
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %dir /opt/open-xchange/etc/hazelcast
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir /var/spool/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
@@ -673,6 +705,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.2 release
 * Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.2 release
 * Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>

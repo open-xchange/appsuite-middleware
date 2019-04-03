@@ -86,8 +86,8 @@ public final class POP3Activator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3Activator.class);
 
-    private volatile POP3StorageProviderServiceTrackerCustomizer customizer;
-    private volatile MailAccountPOP3StorageProvider builtInProvider;
+    private POP3StorageProviderServiceTrackerCustomizer customizer;
+    private MailAccountPOP3StorageProvider builtInProvider;
 
     /**
      * Initializes a new {@link POP3Activator}
@@ -118,7 +118,7 @@ public final class POP3Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         try {
             /*
              * (Re-)Initialize service registry with available services
@@ -167,7 +167,7 @@ public final class POP3Activator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         try {
             // Remove built-in provider
             final POP3StorageProviderServiceTrackerCustomizer customizer = this.customizer;

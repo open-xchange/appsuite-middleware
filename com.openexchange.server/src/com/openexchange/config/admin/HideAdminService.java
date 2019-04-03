@@ -60,6 +60,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -178,6 +179,16 @@ public interface HideAdminService {
      * @throws OXException
      */
     SearchIterator<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable SearchIterator<DocumentMetadata> searchIterator) throws OXException;
+
+    /**
+     * Removes the administrator from given object and returns the result in an new object. If the provided object is <code>null</code>, empty or the feature is disabled the original object will be returned.
+     *
+     * @param contextId The context identifier
+     * @param delta {@link Delta} containing {@link DocumentMetadata} that might be filtered
+     * @return A new object that does not contain the administrator. If the provided one was <code>null</code>, empty or the feature is disabled the original object will be returned
+     * @throws OXException
+     */
+    Delta<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable Delta<DocumentMetadata> delta) throws OXException;
 
     /**
      * Adds the administrator permission to the given list of {@link ObjectPermission} if previously available. If the original object is <code>null</code>, empty or the feature is disabled the original object will be returned.

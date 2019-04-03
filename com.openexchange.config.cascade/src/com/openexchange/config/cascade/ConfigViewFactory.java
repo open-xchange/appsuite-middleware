@@ -65,6 +65,7 @@ public interface ConfigViewFactory {
      * <ol>
      * <li>USER; if not available, falls-back to:</li>
      * <li>CONTEXT; if not available, falls-back to:</li>
+     * <li>CONTEXT-SET; if not available, falls-back to:</li>
      * <li>SERVER</li>
      * </ol>
      *

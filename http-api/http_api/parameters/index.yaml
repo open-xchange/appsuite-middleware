@@ -550,3 +550,18 @@ QueryParamChronosPushToken:
   description: |
     The client's push token to allow filtering of push events for modified calendar data
   required: false
+
+# Multifactor parameters
+QueryParamMultifactorProviderName:
+  name: providerName
+  in: query 
+  type: string
+  required: true
+  description: The name of the multifactor provider
+QueryParamMultifactorDeviceId:
+  in: query
+  name: deviceId
+  type: string
+  required: true
+  description: The ID of the multifactor device
+

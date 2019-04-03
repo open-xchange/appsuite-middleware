@@ -174,7 +174,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         uids = DEFAULT_RETVAL;
         this.destFolderName = prepareStringArgument(destFolderName);
         retval = DEFAULT_RETVAL;
-        args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
+        args = 1 == messageCount ? ARGS_FIRST : ARGS_ALL;
         length = -1;
     }
 

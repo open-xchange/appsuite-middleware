@@ -51,8 +51,8 @@ package com.openexchange.mail.parser.handlers;
 
 import java.io.InputStream;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -97,7 +97,7 @@ public final class InlineContentHandler implements MailMessageHandler {
         super();
         size = cids.size();
         this.cids = cids;
-        inlineContents = new HashMap<String, MailPart>(size);
+        inlineContents = new LinkedHashMap<String, MailPart>(size);
     }
 
     /**

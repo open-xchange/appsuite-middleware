@@ -85,6 +85,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
@@ -224,8 +225,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
          */
         List<Event> events = new ArrayList<Event>(eventIDs.size());
         for (EventID requestedID : eventIDs) {
-            Integer accountId = I(getAccountId(requestedID.getFolderID()));
-            Event event = find(eventsPerAccountId.get(accountId), getRelativeId(requestedID));
+            int accountId = getAccountId(requestedID.getFolderID());
+            Event event = find(eventsPerAccountId.get(I(accountId)), getRelativeId(requestedID));
             events.add(null != event ? withUniqueID(event, accountId) : null);
         }
         return events;
@@ -567,6 +568,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             return new IDManglingCalendarResult(result, account.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+    
+    @Override
+    public CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarResult result = calendarAccess.changeOrganizer(getRelativeId(eventID), organizer, clientTimestamp);
+            return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
         }
     }
 

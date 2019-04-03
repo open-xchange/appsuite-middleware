@@ -110,36 +110,36 @@ public class InvalidDataException extends Exception {
     }
 
     /**
-     * Set the fieldname which are not correct in the object
+     * Gets the field names, which are not correct in the object
      *
-     * @return
+     * @return The incorrect field names or <code>null</code>
      */
     public final ArrayList<String> getFieldnames() {
         return fieldnames;
     }
 
     /**
-     * Get the fieldnames of the object which aren't correct (maybe null if no fieldnames can be specified)
+     * Sets the field names of the object which aren't correct (maybe null if no field names can be specified)
      *
-     * @param fieldnames
+     * @param fieldnames The field names to set
      */
     public final void setFieldnames(ArrayList<String> fieldnames) {
         this.fieldnames = fieldnames;
     }
 
     /**
-     * Get the Name of the object which is affected by this exception
+     * Get the name of the object which is affected by this exception
      *
-     * @return
+     * @return The object name or <code>null</code>
      */
     public final String getObjectname() {
         return objectname;
     }
 
     /**
+     * Set the name of the object which is affected by this exception
      *
-     *
-     * @param objectname
+     * @param objectname The name to set
      */
     public final void setObjectname(String objectname) {
         this.objectname = objectname;
@@ -152,7 +152,7 @@ public class InvalidDataException extends Exception {
             sb.append("The following field are invalid:\n");
             sb.append(fieldnames);
         }
-        return super.toString();
+        return sb.toString();
     }
 
 }

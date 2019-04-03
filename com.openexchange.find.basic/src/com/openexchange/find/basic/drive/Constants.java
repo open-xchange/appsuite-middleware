@@ -180,7 +180,9 @@ public final class Constants {
         "*.jpeg",
         "*.gif",
         "*.tiff",
-        "*.bmp"
+        "*.bmp",
+        "*.heic",
+        "*.heif"
     };   
     
     /** The file extension used match {@link Type#VIDEO}. */    

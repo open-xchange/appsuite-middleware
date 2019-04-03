@@ -49,6 +49,8 @@
 
 package com.openexchange.crypto;
 
+import java.io.InputStream;
+import java.security.Key;
 import com.openexchange.exception.OXException;
 
 /**
@@ -86,5 +88,25 @@ public class SimCryptoService implements CryptoService {
     @Override
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
+    }
+
+    @Override
+    public String encrypt(String data, Key key) throws OXException {
+        return encrypted;
+    }
+
+    @Override
+    public String decrypt(String encryptedPayload, Key key) throws OXException {
+        return decrypted;
+    }
+
+    @Override
+    public InputStream encryptingStreamFor(InputStream in, Key key) throws OXException {
+        return in;
+    }
+
+    @Override
+    public InputStream decryptingStreamFor(InputStream in, Key key) throws OXException {
+        return in;
     }
 }

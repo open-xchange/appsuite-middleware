@@ -74,8 +74,6 @@ import com.openexchange.session.Session;
  */
 public class RdbContactQuotaProvider implements QuotaProvider {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactQuotaProvider.class);
-
     private static final String MODULE_ID = "contact";
 
     public RdbContactQuotaProvider() {

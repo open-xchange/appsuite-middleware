@@ -89,13 +89,15 @@ public final class ListAction extends AbstractGroupAction {
         }
 
         List<Integer> groupIds = new LinkedList<Integer>();
-        for (int a = 0; a < jBody.length(); a++) {
+
+        int length = jBody.length();
+        for (int a = 0; a < length; a++) {
             JSONObject jData = jBody.getJSONObject(a);
             groupIds.add(DataParser.checkInt(jData, DataFields.ID));
         }
 
         GroupService groupService = this.services.getService(GroupService.class);
-        Group[] groupsResult = groupService.getGroup(req.getSession().getContext(), groupIds.stream().mapToInt(i -> i).toArray());
+        Group[] groupsResult = groupService.listGroups(req.getSession().getContext(), groupIds.stream().mapToInt(i -> i).toArray());
 
         List<Group> groupList = new LinkedList<Group>();
         Date timestamp = new Date(0);

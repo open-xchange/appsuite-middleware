@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -98,6 +99,18 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
     private static final String SAVE_AS_TYPE = "application/octet-stream";
+
+    /** The default width when requesting a thumbnail image */
+    public static final int THUMBNAIL_WIDTH = 160;
+
+    /** The default height when requesting a thumbnail image */
+    public static final int THUMBNAIL_HEIGHT = 160;
+
+    /** The default scale type when requesting a thumbnail image */
+    public static final String THUMBNAIL_SCALE_TYPE = ScaleType.COVER.getKeyword();
+
+    /** The default delivery value when requesting a thumbnail image */
+    public static final String THUMBNAIL_DELIVERY = IDataWrapper.VIEW;
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
@@ -159,9 +172,9 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
     }
 
     /**
-     * Sets the image scaler.
+     * Sets the client reference to the image service.
      *
-     * @param scaler The image scaler
+     * @param imageClient The client reference to the image service
      */
     public void setImageClient(IImageClient imageClient) {
         imageClientAction.setImageClient(imageClient);
@@ -242,7 +255,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             }
             return;
         } catch (OXException e) {
-            String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
+            String message = "Exception while trying to output file";
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
                 Throwable cause = e;
@@ -262,12 +275,11 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             }
         } catch (ImageTransformationDeniedIOException e) {
             // Quit with 406
-            String message = isEmpty(fileName) ? "Exception while trying to output image" : new StringBuilder("Exception while trying to output image ").append(fileName).toString();
-            LOG.error(message, e);
+            LOG.error("Exception while trying to output image", e);
             sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
         } catch (Exception e) {
-            String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
-            LOG.error(message, e);
+            String message = "Exception while trying to output file";
+            LOG.error("Exception while trying to output file", e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
         } finally {
             close(data.getDocumentData(), data.getFile());
@@ -320,7 +332,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
             if (!tmpDir.mkdirs()) {
                 throw new IllegalArgumentException("Directory " + path + " does not exist and cannot be created.");
             }
-            LOG.info("Directory " + path + " did not exist, but could be created.");
+            LOG.info("Directory {} did not exist, but could be created.", path);
         }
         if (!tmpDir.isDirectory()) {
             throw new IllegalArgumentException(path + " is not a directory.");

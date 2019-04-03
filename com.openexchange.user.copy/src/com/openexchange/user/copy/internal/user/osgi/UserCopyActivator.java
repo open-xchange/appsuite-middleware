@@ -62,7 +62,7 @@ import org.osgi.util.tracker.ServiceTracker;
  */
 public class UserCopyActivator implements BundleActivator {
 
-    private volatile ServiceTracker<Object, Object> tracker;
+    private ServiceTracker<Object, Object> tracker;
 
     /**
      * Initializes a new {@link UserCopyActivator}.
@@ -72,7 +72,7 @@ public class UserCopyActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         UserCopyTaskRegisterer registerer = new UserCopyTaskRegisterer(context);
         ServiceTracker<Object, Object> tracker = new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer);
         this.tracker = tracker;
@@ -80,7 +80,7 @@ public class UserCopyActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public synchronized void stop(final BundleContext context) throws Exception {
         ServiceTracker<Object, Object> tracker = this.tracker;
         if (null != tracker) {
             this.tracker = null;

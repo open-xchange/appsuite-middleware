@@ -108,7 +108,6 @@ public class IDMangler {
      * Parses specified mangled identifier into its String components.
      *
      * @param mangled The mangled identifier
-     * @param stateMachine <code>true</code> for state machine based parsing; otherwise <code>false</code>
      * @return The identifier's components
      */
     public static List<String> unmangle(String mangled) {

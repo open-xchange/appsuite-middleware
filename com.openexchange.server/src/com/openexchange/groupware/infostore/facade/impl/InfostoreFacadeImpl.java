@@ -60,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -72,8 +73,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
+import com.openexchange.annotation.NonNull;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
@@ -81,6 +86,7 @@ import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.UserizedIDTuple;
 import com.openexchange.file.storage.composition.FileID;
@@ -131,6 +137,12 @@ import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateObjectPermissionAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
+import com.openexchange.groupware.infostore.media.EstimationResult;
+import com.openexchange.groupware.infostore.media.ExtractorResult;
+import com.openexchange.groupware.infostore.media.FileStorageInputStreamProvider;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractor;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractorService;
+import com.openexchange.groupware.infostore.media.MediaMetadataExtractors;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.FileDelta;
@@ -157,6 +169,7 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
@@ -165,6 +178,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.share.ShareService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -176,16 +190,21 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
+import gnu.trove.impl.Constants;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -197,7 +216,11 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
+    }
+
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<>();
 
@@ -208,6 +231,300 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      */
     public static void setQuotaFileStorageService(QuotaFileStorageService service) {
         QFS_REF.set(service);
+    }
+
+    static int getMaxCallerRunsCountForMediaDataExtraction(ServerSession session) {
+        int defaultValue = 100;
+
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null != viewFactory) {
+            try {
+                ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+                int maxCallerCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.groupware.infostore.media.maxCallerRunsCount", defaultValue, view);
+                return maxCallerCount <= 0 ? defaultValue : maxCallerCount;
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+        return defaultValue;
+    }
+
+    /** A simple task to schedule a new media metadata extraction */
+    private static class ScheduledExtractionTask implements Runnable {
+
+        private final DocumentMetadata document;
+        private final QuotaFileStorage fileStorage;
+        private final MediaMetadataExtractorService extractorService;
+        private final Map<String, Object> optArguments;
+        private final ServerSession session;
+
+        ScheduledExtractionTask(DocumentMetadata document, QuotaFileStorage fileStorage, MediaMetadataExtractorService extractorService, Map<String, Object> optArguments, ServerSession session) {
+            super();
+            this.document = document;
+            this.fileStorage = fileStorage;
+            this.extractorService = extractorService;
+            this.optArguments = optArguments;
+            this.session = session;
+        }
+
+        @Override
+        public void run() {
+            try {
+                extractorService.scheduleMediaMetadataExtraction(document, fileStorage, optArguments, session);
+            } catch (Exception e) {
+                LoggerHolder.LOG.warn("Failed scheduling of media metadata extraction for document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
+            }
+        }
+    }
+
+    /** Abstract class allowing to retrieve the identifier of the owner for the folder, in which a given document resides */
+    private static class AbstractFolderOwnerProvider {
+
+        protected final InfostoreFacadeImpl infostore;
+        protected final ServerSession session;
+        private TIntIntMap folderOwners;
+
+        /**
+         * Initializes a new {@link AbstractFolderOwnerProvider}.
+         *
+         * @param infostore The infostore instance
+         * @param session The session
+         */
+        protected AbstractFolderOwnerProvider(InfostoreFacadeImpl infostore, ServerSession session) {
+            super();
+            this.infostore = infostore;
+            this.session = session;
+        }
+
+        /**
+         * Gets the real folder owner for given document; provided that document's original folder is set.
+         *
+         * @param document The document
+         * @param dbService The database service
+         * @param context The associated context
+         * @return The real folder owner
+         * @throws OXException If real folder owner cannot be returned
+         */
+        public static int getFolderOwnerFor(DocumentMetadata document, DBService dbService, Context context) throws OXException {
+            Connection readCon = null;
+            try {
+                readCon = dbService.getReadConnection(context);
+                OXFolderAccess folderAccess = new OXFolderAccess(readCon, context);
+                FolderObject folder = folderAccess.getFolderObject((int) document.getOriginalFolderId());
+                return InfostoreSecurityImpl.getFolderOwner(folder);
+            } finally {
+                dbService.releaseReadConnection(context, readCon);
+            }
+        }
+
+        /**
+         * Gets the identifier of the owner for the folder, in which given document resides.
+         *
+         * @param document The document providing the folder identifier
+         * @return The folder owner or <code>-1</code>
+         * @throws OXException If folder owner cannot be returned
+         */
+        protected int getFolderOwner(DocumentMetadata document) throws OXException {
+            TIntIntMap folderOwners = this.folderOwners;
+            if (null == folderOwners) {
+                int folderOwner = getFolderOwnerFor(document, infostore, session.getContext());
+                folderOwners = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
+                this.folderOwners = folderOwners;
+                folderOwners.put((int) document.getFolderId(), folderOwner);
+                return folderOwner;
+            }
+
+            int folderId = (int) document.getFolderId();
+            int folderOwner = folderOwners.get(folderId);
+            if (folderOwner < 0) {
+                folderOwner = getFolderOwnerFor(document, infostore, session.getContext());
+                folderOwners.put(folderId, folderOwner);
+            }
+            return folderOwner;
+
+        }
+    }
+
+    /** The document customizer caring about triggering media metadata extraction dependent on the media status */
+    private static class TriggerMediaMetaDataExtractionDocumentCustomizer extends AbstractFolderOwnerProvider implements DocumentCustomizer {
+
+        private final QuotaFileStorage optFileStorage;
+        private final DocumentCustomizer optSuccessor;
+        private int maxTriggerCount;
+
+        /**
+         * Initializes a new {@link TriggerMediaMetaDataExtractionDocumentCustomizer}.
+         */
+        TriggerMediaMetaDataExtractionDocumentCustomizer(InfostoreFacadeImpl infostore, QuotaFileStorage optFileStorage, ServerSession session) {
+            this(infostore, optFileStorage, session, null);
+        }
+
+        /**
+         * Initializes a new {@link TriggerMediaMetaDataExtractionDocumentCustomizer}.
+         */
+        TriggerMediaMetaDataExtractionDocumentCustomizer(InfostoreFacadeImpl infostore, QuotaFileStorage optFileStorage, ServerSession session, DocumentCustomizer optSuccessor) {
+            super(infostore, session);
+            this.optFileStorage = optFileStorage;
+            this.optSuccessor = optSuccessor;
+            maxTriggerCount = getMaxCallerRunsCountForMediaDataExtraction(session);
+        }
+
+        @Override
+        public DocumentMetadata handle(DocumentMetadata document) throws OXException {
+            if (infostore.considerMediaDataExtraction(document)) {
+                QuotaFileStorage fileStorage = this.optFileStorage;
+                if (null == fileStorage) {
+                    int folderOwner = getFolderOwner(document);
+                    fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
+                }
+
+                boolean forceBackground = maxTriggerCount == 0; // If expired, background extraction is supposed to be performed
+                TriggerMediaMetaDataExtractionResult result = infostore.triggerMediaDataExtraction(document, null, true, forceBackground, fileStorage, session);
+                if (result.performedByCaller) {
+                    maxTriggerCount--;
+                }
+            }
+            return optSuccessor == null ? document : optSuccessor.handle(document);
+        }
+    }
+
+    /** The <code>SearchIterator</code> caring about triggering media metadata extraction dependent on the media status */
+    private static class TriggerMediaMetaDataExtractionSearchIterator extends AbstractFolderOwnerProvider implements SearchIterator<DocumentMetadata> {
+
+        private final SearchIterator<DocumentMetadata> searchIterator;
+        private int maxTriggerCount;
+
+        /**
+         * Initializes a new {@link SearchIteratorImplementation}.
+         */
+        TriggerMediaMetaDataExtractionSearchIterator(SearchIterator<DocumentMetadata> searchIterator, InfostoreFacadeImpl infostore, ServerSession session) {
+            super(infostore, session);
+            this.searchIterator = searchIterator;
+            maxTriggerCount = getMaxCallerRunsCountForMediaDataExtraction(session);
+        }
+
+        @Override
+        public boolean hasNext() throws OXException {
+            return searchIterator.hasNext();
+        }
+
+        @Override
+        public DocumentMetadata next() throws OXException {
+            DocumentMetadata document = searchIterator.next();
+            if (document != null && infostore.considerMediaDataExtraction(document)) {
+                int folderOwner = getFolderOwner(document);
+                if (folderOwner > 0) {
+                    QuotaFileStorage fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
+
+                    boolean forceBackground = maxTriggerCount == 0; // If expired, background extraction is supposed to be performed
+                    TriggerMediaMetaDataExtractionResult result = infostore.triggerMediaDataExtraction(document, null, true, forceBackground, fileStorage, session);
+                    if (result.performedByCaller) {
+                        maxTriggerCount--;
+                    }
+                }
+            }
+            return document;
+        }
+
+        @Override
+        public void close() {
+            searchIterator.close();
+        }
+
+        @Override
+        public int size() {
+            return searchIterator.size();
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            return searchIterator.hasWarnings();
+        }
+
+        @Override
+        public void addWarning(OXException warning) {
+            searchIterator.addWarning(warning);
+        }
+
+        @Override
+        public OXException[] getWarnings() {
+            return searchIterator.getWarnings();
+        }
+    }
+
+    private static class TriggerMediaMetaDataExtractionByCollection extends AbstractFolderOwnerProvider {
+
+        private final Collection<DocumentMetadata> documents;
+        private int maxTriggerCount;
+
+        /**
+         * Initializes a new {@link SearchIteratorImplementation}.
+         */
+        TriggerMediaMetaDataExtractionByCollection(Collection<DocumentMetadata> documents, InfostoreFacadeImpl infostore, ServerSession session) {
+            super(infostore, session);
+            this.documents = documents;
+            maxTriggerCount = getMaxCallerRunsCountForMediaDataExtraction(session);
+        }
+
+        /**
+         * Consider this instance's documents for possible triggering of media meta-data extraction.
+         *
+         * @throws OXException If consideration fails
+         */
+        void considerDocuments() throws OXException {
+            for (DocumentMetadata document : documents) {
+                if (infostore.considerMediaDataExtraction(document)) {
+                    int folderOwner = getFolderOwner(document);
+                    if (folderOwner > 0) {
+                        QuotaFileStorage fileStorage = infostore.getFileStorage(folderOwner, session.getContextId());
+
+                        boolean forceBackground = maxTriggerCount == 0; // If expired, background extraction is supposed to be performed
+                        TriggerMediaMetaDataExtractionResult result = infostore.triggerMediaDataExtraction(document, null, true, forceBackground, fileStorage, session);
+                        if (result.performedByCaller) {
+                            maxTriggerCount--;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static class TriggerMediaMetaDataExtractionResult {
+
+        @NonNull
+        static final TriggerMediaMetaDataExtractionResult NEITHER_NOR = new TriggerMediaMetaDataExtractionResult(null, false);
+
+        @NonNull
+        static final TriggerMediaMetaDataExtractionResult CALLER_RAN = new TriggerMediaMetaDataExtractionResult(null, true);
+
+        // ---------------------------------------------------------------------------------------------------------------------------------
+
+        /** The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed by caller) */
+        final Runnable extraction;
+
+        /** <code>true</code> if extraction has been performed by caller; otherwise <code>false</code> */
+        final boolean performedByCaller;
+
+        /**
+         * Initializes a new {@link TriggerMediaMetaDataExtractionResult}.
+         *
+         * @param scheduleExtraction The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed by caller)
+         */
+        TriggerMediaMetaDataExtractionResult(Runnable scheduleExtraction) {
+            this(scheduleExtraction, false);
+        }
+
+        /**
+         * Initializes a new {@link TriggerMediaMetaDataExtractionResult}.
+         *
+         * @param extraction The job, which is supposed to save the media metadata, or <code>null</code> (if not applicable or performed by caller)
+         * @param performedByCaller <code>true</code> if extraction has been performed by caller; otherwise <code>false</code>
+         */
+        private TriggerMediaMetaDataExtractionResult(Runnable extraction, boolean performedByCaller) {
+            super();
+            this.extraction = extraction;
+            this.performedByCaller = performedByCaller;
+        }
     }
 
     private static class FileRemoveInfo {
@@ -235,10 +552,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     private final ThreadLocal<List<FileRemoveInfo>> fileIdRemoveList = new ThreadLocal<>();
     private final ThreadLocal<TIntObjectMap<TIntSet>> guestCleanupList = new ThreadLocal<>();
+    private final ThreadLocal<List<Runnable>> pendingInvocations = new ThreadLocal<>();
 
     private final TouchInfoitemsWithExpiredLocksListener expiredLocksListener;
 
-    private final ObjectPermissionLoader objectPermissionLoader;
+    final ObjectPermissionLoader objectPermissionLoader;
     private final NumberOfVersionsLoader numberOfVersionsLoader;
     private final LockedUntilLoader lockedUntilLoader;
     private final SearchEngineImpl searchEngine;
@@ -331,15 +649,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * adjust parent folder if required
          */
-        if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
+        if (getSharedFilesFolderID() == folderId || false == permission.canReadObjectInFolder()) {
             document.setOriginalFolderId(document.getFolderId());
-            document.setFolderId(getSharedFilesFolderID(session));
+            document.setFolderId(getSharedFilesFolderID());
             /*
              * Re-sharing of files is not allowed.
              */
             document.setShareable(false);
         } else {
             document.setShareable(permission.canShareObject());
+        }
+        /*
+         * trigger media meta-data extraction
+         */
+        if (considerMediaDataExtraction(document)) {
+            int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(document, this, context);
+            QuotaFileStorage fileStorage = getFileStorage(folderOwner, context.getContextId());
+            triggerMediaDataExtraction(document, null, true, false, fileStorage, session);
         }
         /*
          * add further metadata and return
@@ -353,6 +679,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * load document metadata (including object permissions)
          */
         DocumentMetadata document = objectPermissionLoader.add(load(id, version, context), context, null);
+        /*
+         * trigger media meta-data extraction
+         */
+        if (considerMediaDataExtraction(document)) {
+            ServerSession session = getSession(null);
+            if (null != session) {
+                int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(document, this, context);
+                if (folderOwner > 0) {
+                    QuotaFileStorage fileStorage = getFileStorage(folderOwner, context.getContextId());
+                    triggerMediaDataExtraction(document, null, true, false, fileStorage, session);
+                }
+            }
+        }
         /*
          * add further metadata and return
          */
@@ -418,15 +757,24 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * adjust parent folder if required, add further metadata
          */
-        if (getSharedFilesFolderID(session) == folderId || false == permission.canReadObjectInFolder()) {
+        if (getSharedFilesFolderID() == folderId || false == permission.canReadObjectInFolder()) {
             metadata.setOriginalFolderId(metadata.getFolderId());
-            metadata.setFolderId(getSharedFilesFolderID(session));
+            metadata.setFolderId(getSharedFilesFolderID());
             /*
              * Re-sharing of files is not allowed.
              */
             metadata.setShareable(false);
         } else {
             metadata.setShareable(permission.canShareObject());
+        }
+        /*
+         * trigger media meta-data extraction
+         */
+        QuotaFileStorage fileStorage = null;
+        if (considerMediaDataExtraction(metadata)) {
+            int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(metadata, this, context);
+            fileStorage = getFileStorage(folderOwner, context.getContextId());
+            triggerMediaDataExtraction(metadata, null, true, false, fileStorage, session);
         }
         metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
@@ -439,13 +787,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * add file to result, otherwise
          */
-        final FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
+        if (null == fileStorage) {
+            int folderOwner = AbstractFolderOwnerProvider.getFolderOwnerFor(metadata, this, context);
+            fileStorage = getFileStorage(folderOwner, context.getContextId());
+        }
+        final FileStorage fs = fileStorage;
         final String filestoreLocation = metadata.getFilestoreLocation();
         InputStreamClosure isClosure = new InputStreamClosure() {
 
             @Override
             public InputStream newStream() throws OXException, IOException {
-                return null == filestoreLocation ? Streams.EMPTY_INPUT_STREAM : fileStorage.getFile(filestoreLocation);
+                return null == filestoreLocation ? Streams.EMPTY_INPUT_STREAM : fs.getFile(filestoreLocation);
             }
         };
         return new DocumentAndMetadataImpl(metadata, isClosure, eTag);
@@ -563,7 +915,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 usage = fileStorage.getUsage();
             }
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for user {} in context {}", I(folderOwner), I(contextId), e);
+            LoggerHolder.LOG.warn("Error getting file storage quota for user {} in context {}", I(folderOwner), I(contextId), e);
         }
 
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
@@ -703,6 +1055,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         getValidationChain().validate(session, document, null, null);
         CheckSizeSwitch.checkSizes(document, this, context);
 
+        Runnable pending = null;
         FilenameReserver filenameReserver = null;
         try {
             filenameReserver = new FilenameReserverImpl(context, this);
@@ -756,12 +1109,23 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0), session), true);
 
             if (data != null) {
-                SaveFileAction saveFile = new SaveFileAction(getFileStorage(targetFolderPermission.getFolderOwner(), session.getContextId()), data, document.getFileSize());
+                QuotaFileStorage fileStorage = getFileStorage(targetFolderPermission.getFolderOwner(), session.getContextId());
+                SaveFileAction saveFile = new SaveFileAction(fileStorage, data, document.getFileSize());
                 perform(saveFile, false);
                 document.setVersion(1);
                 document.setFilestoreLocation(saveFile.getFileStorageID());
                 document.setFileMD5Sum(saveFile.getChecksum());
                 document.setFileSize(saveFile.getByteCount());
+
+                Runnable extraction = triggerMediaDataExtraction(document, null, false, false, fileStorage, session).extraction;
+                if (null != extraction) {
+                    List<Runnable> tasks = pendingInvocations.get();
+                    if (null == tasks) {
+                        pending = extraction;
+                    } else {
+                        tasks.add(extraction);
+                    }
+                }
 
                 perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document), session), true);
             }
@@ -771,7 +1135,207 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             if (null != filenameReserver) {
                 filenameReserver.cleanUp();
             }
+            if (null != pending) {
+                pending.run();
+            }
         }
+    }
+
+    /**
+     * Check if client requested to schedule/perform media metadata extraction
+     *
+     * @return <code>true</code> to schedule/perform media metadata extraction; otherwise <code>false</code>
+     */
+    private boolean shouldTriggerMediaDataExtraction() {
+        // It's true if the log property is not null and is equal, ignoring case, to the string "true"
+        return Boolean.parseBoolean(LogProperties.get(LogProperties.Name.FILE_STORAGE_PREGENERATE_PREVIEWS));
+    }
+
+    /**
+     * Checks whether media metadata extraction should be triggered for given document
+     *
+     * @param document The document to examine
+     * @return <code>true</code> to trigger media metadata extraction; otherwise <code>false</code>
+     */
+    boolean considerMediaDataExtraction(DocumentMetadata document) {
+        // Either not yet handled (no media status available), a severe error occurred in previous attempt or media status was generated with an older version
+        MediaStatus mediaStatus = document.getMediaStatus();
+        return mediaStatus == null || MediaStatus.Status.ERROR == mediaStatus.getStatus() || mediaStatus.getVersion() < MediaStatus.getApplicationVersionNumber();
+    }
+
+    /**
+     * Triggers the extraction of possible media information for specified document
+     *
+     * @param document The document to extract from
+     * @param updatedColumns The optional updated columns
+     * @param save Whether to immediately save current media metadata
+     * @param forceBackground Whether extraction is forced to be performed as background task
+     * @param fileStorage The storage holding file content
+     * @param session The session
+     * @return The result
+     */
+    @NonNull
+    TriggerMediaMetaDataExtractionResult triggerMediaDataExtraction(final DocumentMetadata document, Collection<Metadata> updatedColumns, boolean save, boolean forceBackground, final QuotaFileStorage fileStorage, final ServerSession session) {
+        InputStream documentData = null;
+        try {
+            // Acquire needed service
+            final MediaMetadataExtractorService extractorService = ServerServiceRegistry.getInstance().getService(MediaMetadataExtractorService.class);
+            if (null == extractorService) {
+                // No extractor service available
+                return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
+            }
+
+            // Obtain binary data from file storage
+            FileStorageInputStreamProvider streamProvider = new FileStorageInputStreamProvider(document.getFilestoreLocation(), fileStorage);
+
+            // Check...
+            EstimationResult result = extractorService.estimateEffort(streamProvider, document);
+            if (result.isNotApplicable()) {
+                // No extractors or not applicable
+                document.setMediaStatus(MediaStatus.none());
+                if (null != updatedColumns) {
+                    Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
+                }
+                if (save) {
+                    MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
+                }
+                return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
+            }
+
+            // Check for low effort
+            if (result.isLowEffort() && !forceBackground) {
+                // Low effort... Perform with current thread
+                try {
+                    ExtractorResult extractorResult;
+                    {
+                        MediaMetadataExtractor optExtractor = result.getExtractor();
+                        if (null != optExtractor) {
+                            documentData = result.getDocumentData();
+                            extractorResult = extractorService.extractAndApplyMediaMetadataUsing(optExtractor, documentData, streamProvider, document, result.getOptionalArguments());
+                        } else {
+                            extractorResult = extractorService.extractAndApplyMediaMetadata(streamProvider, document, result.getOptionalArguments());
+                        }
+                    }
+
+                    switch (extractorResult) {
+                        case INTERRUPTED:
+                            Thread.interrupted();
+                            //$FALL-THROUGH$
+                        case ACCEPTED_BUT_FAILED:
+                            document.setMediaStatus(MediaStatus.failure());
+                            if (null != updatedColumns) {
+                                Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
+                            }
+                            if (save) {
+                                MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.failure(), document, session);
+                            }
+                            return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
+                        case SUCCESSFUL:
+                            {
+                                document.setMediaStatus(MediaStatus.success());
+                                if (null != updatedColumns) {
+                                    List<Metadata> modifiedColumns = new ArrayList<>(8);
+                                    modifiedColumns.add(Metadata.MEDIA_STATUS_LITERAL);
+                                    if (document.getCaptureDate() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAPTURE_DATE_LITERAL);
+                                    }
+                                    if (document.getGeoLocation() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.GEOLOCATION_LITERAL);
+                                    }
+                                    if (document.getWidth() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.WIDTH_LITERAL);
+                                    }
+                                    if (document.getHeight() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.HEIGHT_LITERAL);
+                                    }
+                                    if (document.getCameraIsoSpeed() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_ISO_SPEED_LITERAL);
+                                    }
+                                    if (document.getCameraAperture() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_APERTURE_LITERAL);
+                                    }
+                                    if (document.getCameraExposureTime() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_EXPOSURE_TIME_LITERAL);
+                                    }
+                                    if (document.getCameraFocalLength() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_FOCAL_LENGTH_LITERAL);
+                                    }
+                                    if (document.getCameraMake() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_MAKE_LITERAL);
+                                    }
+                                    if (document.getCameraModel() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.CAMERA_MODEL_LITERAL);
+                                    }
+                                    if (document.getMediaMeta() != null) {
+                                        Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_META_LITERAL);
+                                    }
+                                }
+                                if (save) {
+                                    DocumentMetadataImpl documentToPass = new DocumentMetadataImpl(document);
+                                    documentToPass.setSequenceNumber(document.getSequenceNumber());
+                                MediaMetadataExtractors.saveMediaMetaDataFromDocument(documentToPass, document, session);
+                                }
+                                return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
+                            }
+                        case NONE:
+                            // fall-through
+                        default:
+                            document.setMediaStatus(MediaStatus.none());
+                            if (null != updatedColumns) {
+                                Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
+                            }
+                            if (save) {
+                                MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
+                            }
+                            return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
+                    }
+                } catch (Exception e) {
+                    LoggerHolder.LOG.debug("Failed to extract media metadata from document {} ({}) with version {} in context {}", I(document.getId()), document.getFileName(), I(document.getVersion()), I(session.getContextId()), e);
+                    document.setMediaStatus(MediaStatus.error());
+                    if (null != updatedColumns) {
+                        Metadata.addIfAbsent(updatedColumns, Metadata.MEDIA_STATUS_LITERAL);
+                    }
+                    if (save) {
+                        MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.error(), document, session);
+                    }
+                    return TriggerMediaMetaDataExtractionResult.CALLER_RAN;
+                }
+            }
+
+            // Schedule...
+            if (save) {
+                try {
+                    extractorService.scheduleMediaMetadataExtraction(document, fileStorage, result.getOptionalArguments(), session);
+                } catch (Exception e) {
+                    LoggerHolder.LOG.warn("Failed scheduling of media metadata extraction for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
+                    try {
+                        MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
+                    } catch (Exception x) {
+                        LoggerHolder.LOG.warn("Failed restoring '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), x);
+                    }
+                }
+                return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
+            }
+            Runnable scheduleTask = new ScheduledExtractionTask(document, fileStorage, extractorService, result.getOptionalArguments(), session);
+            return new TriggerMediaMetaDataExtractionResult(scheduleTask);
+        } catch (OXException e) {
+            LoggerHolder.LOG.warn("Failed extraction of media metadata for document {} with version {} in context {}", I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
+        } finally {
+            Streams.close(documentData);
+        }
+
+        document.setMediaStatus(MediaStatus.none());
+        if (null != updatedColumns) {
+            updatedColumns.add(Metadata.MEDIA_STATUS_LITERAL);
+        }
+        if (save) {
+            try {
+                MediaMetadataExtractors.saveMediaStatusForDocument(MediaStatus.none(), document, session);
+            } catch (OXException e) {
+                LoggerHolder.LOG.warn("Failed setting '{}' media status for document {} with version {} in context {}", MediaStatus.Status.NONE.getIdentifier(), I(document.getId()), I(document.getVersion()), I(session.getContextId()), e);
+            }
+        }
+        return TriggerMediaMetaDataExtractionResult.NEITHER_NOR;
     }
 
     private long getUsedQuota(final Context context) throws OXException {
@@ -823,7 +1387,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
     }
 
-    // FIXME Move 2 query builder
     private int getNextVersionNumberForInfostoreObject(final int cid, final int infostore_id, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -893,14 +1456,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 if (null != args && 3 < args.length && Long.class.isInstance(args[3])) {
                     long actualSize = ((Long) args[3]).longValue();
                     if (actualSize != metadata.getFileSize()) {
-                        LOG.debug("Detected invalid file size {} in stored metadata for file {}", L(length), I(metadata.getId()), e);
+                        LoggerHolder.LOG.debug("Detected invalid file size {} in stored metadata for file {}", L(length), I(metadata.getId()), e);
                         try {
                             DocumentMetadataImpl updatedMetadata = new DocumentMetadataImpl(metadata);
                             updatedMetadata.setFileSize(actualSize);
                             perform(new UpdateVersionAction(this, QUERIES, session.getContext(), updatedMetadata, metadata, new Metadata[] { Metadata.FILE_SIZE_LITERAL }, metadata.getSequenceNumber(), session), true);
-                            LOG.info("Auto-corrected invalid file size in stored metadata for file {}", I(metadata.getId()));
+                            LoggerHolder.LOG.info("Auto-corrected invalid file size in stored metadata for file {}", I(metadata.getId()));
                         } catch (Exception x) {
-                            LOG.warn("Error auto-correcting invalid file size in stored metadata for file {}", I(metadata.getId()), x);
+                            LoggerHolder.LOG.warn("Error auto-correcting invalid file size in stored metadata for file {}", I(metadata.getId()), x);
                         }
                     }
                 }
@@ -946,7 +1509,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Check permissions
         Context context = session.getContext();
-        int sharedFilesFolderID = getSharedFilesFolderID(session);
+        int sharedFilesFolderID = getSharedFilesFolderID();
         EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, document.getId());
         if (false == infoPerm.canWriteObject() || contains(modifiedColumns, Metadata.OBJECT_PERMISSIONS_LITERAL) && (document.getFolderId() == sharedFilesFolderID || false == infoPerm.canShareObject())) {
             throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
@@ -1151,80 +1714,160 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     private void storeNewData(SaveParameters parameters) throws OXException {
-        int folderAdmin = parameters.getOptFolderAdmin();
-        QuotaFileStorage qfs = getFileStorage(folderAdmin, parameters.getContext().getContextId());
-        if (0 < parameters.getOffset()) {
-            AppendFileAction appendFile = new AppendFileAction(qfs, parameters.getData(), parameters.getOldDocument().getFilestoreLocation(), parameters.getDocument().getFileSize(), parameters.getOffset());
-            perform(appendFile, false);
-            parameters.getDocument().setFilestoreLocation(parameters.getOldDocument().getFilestoreLocation());
-            parameters.getDocument().setFileSize(appendFile.getByteCount() + parameters.getOffset());
-            parameters.getDocument().setFileMD5Sum(null); // invalidate due to append-operation
-            parameters.getUpdatedCols().addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL));
-        } else {
-            SaveFileAction saveFile = new SaveFileAction(qfs, parameters.getData(), parameters.getDocument().getFileSize());
-            perform(saveFile, false);
-            parameters.getDocument().setFilestoreLocation(saveFile.getFileStorageID());
-            parameters.getDocument().setFileSize(saveFile.getByteCount());
-            parameters.getDocument().setFileMD5Sum(saveFile.getChecksum());
-            parameters.getUpdatedCols().addAll(Arrays.asList(Metadata.FILE_MD5SUM_LITERAL, Metadata.FILE_SIZE_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL));
-        }
+        Runnable pending = null;
+        try {
+            ServerSession session = parameters.getSession();
+            int folderAdmin = parameters.getOptFolderAdmin();
+            QuotaFileStorage qfs = getFileStorage(folderAdmin, parameters.getContext().getContextId());
+            if (0 < parameters.getOffset()) {
+                AppendFileAction appendFile = new AppendFileAction(qfs, parameters.getData(), parameters.getOldDocument().getFilestoreLocation(), parameters.getDocument().getFileSize(), parameters.getOffset());
+                perform(appendFile, false);
+                parameters.getDocument().setFilestoreLocation(parameters.getOldDocument().getFilestoreLocation());
+                parameters.getDocument().setFileSize(appendFile.getByteCount() + parameters.getOffset());
+                // Invalidate following fields due to append-operation
+                parameters.getDocument().setFileMD5Sum(null);
+                parameters.getDocument().setCaptureDate(null);
+                parameters.getDocument().setGeoLocation(null);
+                parameters.getDocument().setWidth(-1);
+                parameters.getDocument().setHeight(-1);
+                parameters.getDocument().setCameraIsoSpeed(-1);
+                parameters.getDocument().setCameraAperture(-1);
+                parameters.getDocument().setCameraExposureTime(-1);
+                parameters.getDocument().setCameraFocalLength(-1);
+                parameters.getDocument().setCameraMake(null);
+                parameters.getDocument().setCameraModel(null);
+                parameters.getDocument().setMediaMeta(null);
+                parameters.getDocument().setMediaStatus(null);
+                parameters.getUpdatedCols().addAll(Arrays.asList(
+                    Metadata.FILE_MD5SUM_LITERAL,
+                    Metadata.FILE_SIZE_LITERAL,
+                    Metadata.CAPTURE_DATE_LITERAL,
+                    Metadata.GEOLOCATION_LITERAL,
+                    Metadata.WIDTH_LITERAL,
+                    Metadata.HEIGHT_LITERAL,
+                    Metadata.CAMERA_MAKE_LITERAL,
+                    Metadata.CAMERA_MODEL_LITERAL,
+                    Metadata.CAMERA_ISO_SPEED_LITERAL,
+                    Metadata.CAMERA_APERTURE_LITERAL,
+                    Metadata.CAMERA_EXPOSURE_TIME_LITERAL,
+                    Metadata.CAMERA_FOCAL_LENGTH_LITERAL,
+                    Metadata.MEDIA_META_LITERAL,
+                    Metadata.MEDIA_STATUS_LITERAL));
 
-        final GetSwitch get = new GetSwitch(parameters.getOldDocument());
-        final SetSwitch set = new SetSwitch(parameters.getDocument());
-        for (Metadata m : new Metadata[] { Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.URL_LITERAL }) {
-            if (parameters.getUpdatedCols().contains(m)) {
-                continue;
-            }
-            set.setValue(m.doSwitch(get));
-            m.doSwitch(set);
-        }
-
-        parameters.getDocument().setCreatedBy(parameters.getFileCreatedBy());
-        if (!parameters.getUpdatedCols().contains(Metadata.CREATION_DATE_LITERAL)) {
-            parameters.getDocument().setCreationDate(new Date());
-        }
-
-        // Set version
-        ServerSession session = parameters.getSession();
-        boolean newVersion = false;
-        final UndoableAction action;
-        if (parameters.isIgnoreVersion()) {
-            parameters.getDocument().setVersion(parameters.getOldDocument().getVersion());
-            parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
-            parameters.getUpdatedCols().add(Metadata.FILESTORE_LOCATION_LITERAL);
-            action = new UpdateVersionAction(this, QUERIES, parameters.getContext(), parameters.getDocument(), parameters.getOldDocument(), parameters.getUpdatedCols().toArray(new Metadata[parameters.getUpdatedCols().size()]), parameters.getSequenceNumber(), session);
-
-            // Remove old file "version" if not appended
-            if (0 >= parameters.getOffset()) {
-                removeFile(parameters.getContext(), parameters.getOldDocument().getFilestoreLocation(), security.getFolderOwner(parameters.getOldDocument(), parameters.getContext()));
-            }
-        } else {
-            Connection con = null;
-            try {
-                con = getReadConnection(parameters.getContext());
-                parameters.getDocument().setVersion(getNextVersionNumberForInfostoreObject(parameters.getContext().getContextId(), parameters.getDocument().getId(), con));
-                parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
-            } catch (final SQLException e) {
-                LOG.error("SQLException: ", e);
-            } finally {
-                releaseReadConnection(parameters.getContext(), con);
-            }
-
-            action = new CreateVersionAction(this, QUERIES, parameters.getContext(), Collections.singletonList(parameters.getDocument()), session);
-            newVersion = true;
-        }
-
-        // Perform action
-        perform(action, true);
-
-        // Auto-delete old versions (if applicable)
-        if (newVersion && folderAdmin > 0) {
-            int id = parameters.getDocument().getId();
-            if (id != NEW && checkAutodeleteCapabilitySafe(folderAdmin, session)) {
-                int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(folderAdmin, session.getContextId());
-                if (maxVersions > 0) {
-                    new InfostoreAutodeletePerformer(this).removeVersionsByMaxCount(id, maxVersions, session);
+                Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, false, qfs, session).extraction;
+                if (null != extraction) {
+                    List<Runnable> tasks = pendingInvocations.get();
+                    if (null == tasks) {
+                        pending = extraction;
+                    } else {
+                        tasks.add(extraction);
+                    }
                 }
+            } else {
+                SaveFileAction saveFile = new SaveFileAction(qfs, parameters.getData(), parameters.getDocument().getFileSize());
+                perform(saveFile, false);
+                parameters.getDocument().setFilestoreLocation(saveFile.getFileStorageID());
+                parameters.getDocument().setFileSize(saveFile.getByteCount());
+                parameters.getDocument().setFileMD5Sum(saveFile.getChecksum());
+                parameters.getDocument().setCaptureDate(null);
+                parameters.getDocument().setGeoLocation(null);
+                parameters.getDocument().setWidth(-1);
+                parameters.getDocument().setHeight(-1);
+                parameters.getDocument().setCameraIsoSpeed(-1);
+                parameters.getDocument().setCameraAperture(-1);
+                parameters.getDocument().setCameraExposureTime(-1);
+                parameters.getDocument().setCameraFocalLength(-1);
+                parameters.getDocument().setCameraMake(null);
+                parameters.getDocument().setCameraModel(null);
+                parameters.getDocument().setMediaMeta(null);
+                parameters.getDocument().setMediaStatus(null);
+                parameters.getUpdatedCols().addAll(Arrays.asList(
+                    Metadata.FILE_MD5SUM_LITERAL,
+                    Metadata.FILE_SIZE_LITERAL,
+                    Metadata.CAPTURE_DATE_LITERAL,
+                    Metadata.GEOLOCATION_LITERAL,
+                    Metadata.WIDTH_LITERAL,
+                    Metadata.HEIGHT_LITERAL,
+                    Metadata.CAMERA_MAKE_LITERAL,
+                    Metadata.CAMERA_MODEL_LITERAL,
+                    Metadata.CAMERA_ISO_SPEED_LITERAL,
+                    Metadata.CAMERA_APERTURE_LITERAL,
+                    Metadata.CAMERA_EXPOSURE_TIME_LITERAL,
+                    Metadata.CAMERA_FOCAL_LENGTH_LITERAL,
+                    Metadata.MEDIA_META_LITERAL,
+                    Metadata.MEDIA_STATUS_LITERAL));
+
+                Runnable extraction = triggerMediaDataExtraction(parameters.getDocument(), parameters.getUpdatedCols(), false, false, qfs, session).extraction;
+                if (null != extraction) {
+                    List<Runnable> tasks = pendingInvocations.get();
+                    if (null == tasks) {
+                        pending = extraction;
+                    } else {
+                        tasks.add(extraction);
+                    }
+                }
+            }
+
+            final GetSwitch get = new GetSwitch(parameters.getOldDocument());
+            final SetSwitch set = new SetSwitch(parameters.getDocument());
+            for (Metadata m : new Metadata[] { Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL, Metadata.URL_LITERAL }) {
+                if (parameters.getUpdatedCols().contains(m)) {
+                    continue;
+                }
+                set.setValue(m.doSwitch(get));
+                m.doSwitch(set);
+            }
+
+            parameters.getDocument().setCreatedBy(parameters.getFileCreatedBy());
+            if (!parameters.getUpdatedCols().contains(Metadata.CREATION_DATE_LITERAL)) {
+                parameters.getDocument().setCreationDate(new Date());
+            }
+
+            // Set version
+            boolean newVersion = false;
+            final UndoableAction action;
+            if (parameters.isIgnoreVersion()) {
+                parameters.getDocument().setVersion(parameters.getOldDocument().getVersion());
+                parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
+                parameters.getUpdatedCols().add(Metadata.FILESTORE_LOCATION_LITERAL);
+                action = new UpdateVersionAction(this, QUERIES, parameters.getContext(), parameters.getDocument(), parameters.getOldDocument(), parameters.getUpdatedCols().toArray(new Metadata[parameters.getUpdatedCols().size()]), parameters.getSequenceNumber(), session);
+
+                // Remove old file "version" if not appended
+                if (0 >= parameters.getOffset()) {
+                    removeFile(parameters.getContext(), parameters.getOldDocument().getFilestoreLocation(), security.getFolderOwner(parameters.getOldDocument(), parameters.getContext()));
+                }
+            } else {
+                Connection con = null;
+                try {
+                    con = getReadConnection(parameters.getContext());
+                    parameters.getDocument().setVersion(getNextVersionNumberForInfostoreObject(parameters.getContext().getContextId(), parameters.getDocument().getId(), con));
+                    parameters.getUpdatedCols().add(Metadata.VERSION_LITERAL);
+                } catch (final SQLException e) {
+                    LoggerHolder.LOG.error("SQL error", e);
+                } finally {
+                    releaseReadConnection(parameters.getContext(), con);
+                }
+
+                action = new CreateVersionAction(this, QUERIES, parameters.getContext(), Collections.singletonList(parameters.getDocument()), session);
+                newVersion = true;
+            }
+
+            // Perform action
+            perform(action, true);
+
+            // Auto-delete old versions (if applicable)
+            if (newVersion && folderAdmin > 0) {
+                int id = parameters.getDocument().getId();
+                if (id != NEW && checkAutodeleteCapabilitySafe(folderAdmin, session)) {
+                    int maxVersions = InfostoreAutodeleteSettings.getMaxNumberOfFileVersions(folderAdmin, session.getContextId());
+                    if (maxVersions > 0) {
+                        new InfostoreAutodeletePerformer(this).removeVersionsByMaxCount(id, maxVersions, session);
+                    }
+                }
+            }
+        } finally {
+            if (null != pending) {
+                pending.run();
             }
         }
     }
@@ -1243,21 +1886,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
             return InfostoreAutodeleteSettings.hasAutodeleteCapability(folderAdmin, session.getContextId());
         } catch (Exception e) {
-            LOG.error("Failed to check for the capability required to perform auto-deletion of versions. Assumin that capability is not granted for now.", e);
+            LoggerHolder.LOG.error("Failed to check for the capability required to perform auto-deletion of versions. Assumin that capability is not granted for now.", e);
             return false;
         }
     }
 
     @Override
     public void removeDocument(final long folderId, final long date, final ServerSession session) throws OXException {
-        if (folderId == getSharedFilesFolderID(session)) {
+        if (folderId == getSharedFilesFolderID()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION.create();
         }
         Context context = session.getContext();
         String whereClause = "infostore.folder_id = " + folderId;
-        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
         if (!allDocuments.isEmpty()) {
-            List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+            List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
             objectPermissionLoader.add(allDocuments, context, objectPermissionLoader.load(folderId, context));
             removeDocuments(allDocuments, allVersions, date, session, null);
         }
@@ -1405,7 +2048,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return Collections.emptyList();
         }
         if (1 == ids.length) {
-            return InfostoreIterator.allDocumentsWhere("infostore.id = " + ids[0], metadata, provider, context).asList();
+            return SearchIterators.asList(InfostoreIterator.allDocumentsWhere("infostore.id = " + ids[0], metadata, provider, context));
         }
         StringBuilder StringBuilder = new StringBuilder("infostore.id IN (");
         StringBuilder.append(String.valueOf(ids[0]));
@@ -1413,7 +2056,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             StringBuilder.append(',').append(String.valueOf(ids[i]));
         }
         StringBuilder.append(')');
-        return InfostoreIterator.allDocumentsWhere(StringBuilder.toString(), metadata, provider, context).asList();
+        return SearchIterators.asList(InfostoreIterator.allDocumentsWhere(StringBuilder.toString(), metadata, provider, context));
     }
 
     /**
@@ -1657,8 +2300,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Strings.join(objectIDs, ",", stringBuilder);
             whereClause = stringBuilder.append(')').toString();
         }
-        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
         objectPermissionLoader.add(allDocuments, context, idsToFolders.keySet());
 
         // Ensure folder ids are consistent between request and existing documents
@@ -1714,8 +2357,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             Strings.join(objectIDs, ",", stringBuilder);
             whereClause = stringBuilder.append(')').toString();
         }
-        List<DocumentMetadata> allDocuments = InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allDocuments = SearchIterators.asList(InfostoreIterator.allDocumentsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere(whereClause, Metadata.VALUES_ARRAY, this, context));
 
         // Ensure folder ids are consistent between request and existing documents
         for (DocumentMetadata document : allDocuments) {
@@ -1762,7 +2405,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) throws OXException {
-        return removeVersion(id, versionIds, true, session);
+        return removeVersion(id, versionIds, true, true, session);
     }
 
     /**
@@ -1771,11 +2414,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param id The document identifier
      * @param versionIds The identifiers of the versions to remove
      * @param allowRemoveCurrentVersion <code>true</code> to allow removing the current version; otherwise <code>false</code>
+     * @param updateLastModified Whether last-modified information is supposed to be updated
      * @param session The session
      * @return The identifiers of those versions that could <b>not</b> be deleted successfully
      * @throws OXException If remove operation fails
      */
-    public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, ServerSession session) throws OXException {
+    public int[] removeVersion(int id, int[] versionIds, boolean allowRemoveCurrentVersion, boolean updateLastModified, ServerSession session) throws OXException {
         if (null == versionIds || 0 == versionIds.length) {
             return new int[0];
         }
@@ -1790,7 +2434,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             checkWriteLock(metadata, session);
         } catch (OXException x) {
-            LOG.trace("", x);
+            LoggerHolder.LOG.trace("", x);
             return versionIds;
         }
         EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
@@ -1808,7 +2452,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         versions.setLength(versions.length() - 1);
         versions.append(')');
 
-        List<DocumentMetadata> allVersions = InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ", Metadata.VALUES_ARRAY, this, context).asList();
+        List<DocumentMetadata> allVersions = SearchIterators.asList(InfostoreIterator.allVersionsWhere("infostore_document.infostore_id = " + id + " AND infostore_document.version_number IN " + versions.toString() + " and infostore_document.version_number != 0 ", Metadata.VALUES_ARRAY, this, context));
 
         boolean anyRemoved = false;
         boolean removeCurrent = false;
@@ -1843,8 +2487,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         update.setModifiedBy(session.getUserId());
 
         final Set<Metadata> updatedFields = new HashSet<>();
-        updatedFields.add(Metadata.LAST_MODIFIED_LITERAL);
-        updatedFields.add(Metadata.MODIFIED_BY_LITERAL);
+        if (updateLastModified || removeCurrent) {
+            updatedFields.add(Metadata.LAST_MODIFIED_LITERAL);
+            updatedFields.add(Metadata.MODIFIED_BY_LITERAL);
+        }
 
         if (removeCurrent) {
 
@@ -1877,7 +2523,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     updatedFields.add(Metadata.TITLE_LITERAL);
                 }
             }
-            perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata, updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
+            if (!updatedFields.isEmpty()) {
+                perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata, updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
+            }
 
             // Remove Versions
             perform(new DeleteVersionAction(this, QUERIES, context, allVersions, session), true);
@@ -1912,17 +2560,22 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, Context context, User user, UserPermissionBits permissionBits) throws OXException {
-        return getDocuments(context, user, permissionBits, folderId, columns, sort, order, start, end);
+        return getDocuments(context, user, null, permissionBits, folderId, columns, sort, order, start, end);
     }
 
     @Override
     public TimedResult<DocumentMetadata> getDocuments(final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
-        return getDocuments(session.getContext(), session.getUser(), session.getUserPermissionBits(), folderId, columns, sort, order, start, end);
+        return getDocuments(session.getContext(), session.getUser(), session, session.getUserPermissionBits(), folderId, columns, sort, order, start, end);
     }
 
     @Override
     public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] fields = Tools.getFieldsToQuery(columns, Metadata.LAST_MODIFIED_LITERAL, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        fields = addDateFieldsIfNeeded(fields, sort);
+        if (shouldTriggerMediaDataExtraction) {
+            fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
+        }
         Context context = session.getContext();
         /*
          * search documents shared by user
@@ -1934,6 +2587,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             documents = Tools.removeNonPrivate(iterator, session, db);
         } finally {
             SearchIterators.close(iterator);
+        }
+        if (shouldTriggerMediaDataExtraction) {
+            /*
+             * trigger media meta-data extraction
+             */
+            new TriggerMediaMetaDataExtractionByCollection(documents, this, session).considerDocuments();
         }
         if (contains(columns, Metadata.SHAREABLE_LITERAL)) {
             for (DocumentMetadata document : documents) {
@@ -1969,33 +2628,47 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (false == infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
+        cols = addDateFieldsIfNeeded(cols, sort);
+        if (shouldTriggerMediaDataExtraction) {
+            cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
+        }
         InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
-        iter.setCustomizer(new DocumentCustomizer() {
+        try {
+            DocumentCustomizer customizer = new DocumentCustomizer() {
 
-            @Override
-            public DocumentMetadata handle(DocumentMetadata document) {
-                if (false == infoPerm.canReadObjectInFolder()) {
-                    document.setOriginalFolderId(document.getFolderId());
-                    document.setFolderId(getSharedFilesFolderID(session));
-                    /*
-                     * Re-sharing of files is not allowed.
-                     */
-                    document.setShareable(false);
-                } else {
-                    document.setShareable(infoPerm.canShareObject());
+                @Override
+                public DocumentMetadata handle(DocumentMetadata document) {
+                    if (false == infoPerm.canReadObjectInFolder()) {
+                        document.setOriginalFolderId(document.getFolderId());
+                        document.setFolderId(getSharedFilesFolderID());
+                        /*
+                         * Re-sharing of files is not allowed.
+                         */
+                        document.setShareable(false);
+                    } else {
+                        document.setShareable(infoPerm.canShareObject());
+                    }
+                    return document;
                 }
-                return document;
+            };
+            if (shouldTriggerMediaDataExtraction) {
+                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
             }
-        });
-        TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
-        if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
-            timedResult = lockedUntilLoader.add(timedResult, context, Collections.singleton(I(id)));
+            iter.setCustomizer(customizer);
+            TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iter);
+            if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
+                timedResult = lockedUntilLoader.add(timedResult, context, Collections.singleton(I(id)));
+            }
+            if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
+                timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
+            }
+            iter = null; // Avoid premature closing
+            return timedResult;
+        } finally {
+            SearchIterators.close(iter);
         }
-        if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
-            timedResult = objectPermissionLoader.add(timedResult, context, Collections.singleton(I(id)));
-        }
-        return timedResult;
     }
 
     @Override
@@ -2004,7 +2677,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         final User user = session.getUser();
         final Map<Integer, Long> idsToFolders = Tools.getIDsToFolders(ensureFolderIDs(context, ids));
         List<Integer> objectIDs = Tools.getObjectIDs(ids);
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
+        cols = addDateFieldsIfNeeded(cols, null);
+        if (shouldTriggerMediaDataExtraction) {
+            cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
+        }
         /*
          * pre-fetch object permissions if needed for result anyway
          */
@@ -2015,7 +2693,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          */
         final Map<Long, EffectiveInfostoreFolderPermission> knownFolderPermissions = new HashMap<>();
         InfostoreIterator iterator = InfostoreIterator.list(Autoboxing.I2i(objectIDs), cols, this, session.getContext());
-        iterator.setCustomizer(new DocumentCustomizer() {
+        DocumentCustomizer customizer = new DocumentCustomizer() {
 
             @Override
             public DocumentMetadata handle(DocumentMetadata document) throws OXException {
@@ -2052,14 +2730,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      */
                     if (false == infostorePermission.canReadObjectInFolder()) {
                         Long requestedFolderID = idsToFolders.get(I(document.getId()));
-                        if (null == requestedFolderID || getSharedFilesFolderID(session) != requestedFolderID.intValue()) {
+                        if (null == requestedFolderID || getSharedFilesFolderID() != requestedFolderID.intValue()) {
                             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                         }
                         /*
                          * adjust parent folder id to match requested identifier
                          */
                         document.setOriginalFolderId(document.getFolderId());
-                        document.setFolderId(getSharedFilesFolderID(session));
+                        document.setFolderId(getSharedFilesFolderID());
                         /*
                          * Re-sharing of files is not allowed.
                          */
@@ -2070,7 +2748,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                      * adjust parent folder id to match requested identifier
                      */
                     Long requestedFolderID = idsToFolders.get(I(document.getId()));
-                    if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
+                    if (getSharedFilesFolderID() == requestedFolderID.intValue()) {
                         document.setOriginalFolderId(document.getFolderId());
                         document.setFolderId(requestedFolderID.longValue());
                         /*
@@ -2083,7 +2761,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 }
                 return document;
             }
-        });
+        };
+        if (shouldTriggerMediaDataExtraction) {
+            customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
+        }
+        iterator.setCustomizer(customizer);
         /*
          * wrap iterator into timed result, adding additional metadata as needed
          */
@@ -2114,8 +2796,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         InfostoreIterator newIter = null;
         InfostoreIterator modIter = null;
         InfostoreIterator delIter = null;
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
-        final int sharedFilesFolderID = getSharedFilesFolderID(session);
+        cols = addDateFieldsIfNeeded(cols, sort);
+        if (shouldTriggerMediaDataExtraction) {
+            cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
+        }
+        final int sharedFilesFolderID = getSharedFilesFolderID();
         if (folderId == sharedFilesFolderID) {
             DocumentCustomizer customizer = new DocumentCustomizer() {
 
@@ -2126,6 +2813,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     return document;
                 }
             };
+            if (shouldTriggerMediaDataExtraction) {
+                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
+            }
             newIter = InfostoreIterator.newSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
             newIter.setCustomizer(customizer);
             modIter = InfostoreIterator.modifiedSharedDocumentsForUser(context, user, columns, sort, order, updateSince, this);
@@ -2143,15 +2833,25 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 onlyOwn = true;
             }
 
+            DocumentCustomizer customizer = null;
+            if (shouldTriggerMediaDataExtraction) {
+                QuotaFileStorage fileStorage = getFileStorage(isperm.getFolderOwner(), context.getContextId());
+                customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session);
+            }
+
             if (onlyOwn) {
                 newIter = InfostoreIterator.newDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
+                newIter.setCustomizer(customizer);
                 modIter = InfostoreIterator.modifiedDocumentsByCreator(folderId, user.getId(), cols, sort, order, updateSince, this, context);
+                modIter.setCustomizer(customizer);
                 if (!ignoreDeleted) {
                     delIter = InfostoreIterator.deletedDocumentsByCreator(folderId, user.getId(), sort, order, updateSince, this, context);
                 }
             } else {
                 newIter = InfostoreIterator.newDocuments(folderId, cols, sort, order, updateSince, this, context);
+                newIter.setCustomizer(customizer);
                 modIter = InfostoreIterator.modifiedDocuments(folderId, cols, sort, order, updateSince, this, context);
+                modIter.setCustomizer(customizer);
                 if (!ignoreDeleted) {
                     delIter = InfostoreIterator.deletedDocuments(folderId, sort, order, updateSince, this, context);
                 }
@@ -2171,13 +2871,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
         }
 
-        final SearchIterator<DocumentMetadata> it;
-        if (ignoreDeleted) {
-            it = SearchIteratorAdapter.emptyIterator();
-        } else {
-            it = delIter;
-        }
-
+        SearchIterator<DocumentMetadata> it = ignoreDeleted ? SearchIteratorAdapter.emptyIterator() : delIter;
         Delta<DocumentMetadata> delta = new FileDelta(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
             delta = lockedUntilLoader.add(delta, context, locks);
@@ -2278,9 +2972,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public int countDocuments(final long folderId, final ServerSession session) throws OXException {
-        if (folderId == getSharedFilesFolderID(session)) {
-            InfostoreIterator it = InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, null, 0, -1, -1, this);
-            return it.asList().size();
+        if (folderId == getSharedFilesFolderID()) {
+            return SearchIterators.asList(InfostoreIterator.sharedDocumentsForUser(session.getContext(), session.getUser(), ObjectPermission.READ, new Metadata[] { Metadata.ID_LITERAL }, null, 0, -1, -1, this)).size();
         }
 
         boolean onlyOwn = false;
@@ -2301,7 +2994,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public boolean hasFolderForeignObjects(final long folderId, final ServerSession session) throws OXException {
-        if (folderId == getSharedFilesFolderID(session)) {
+        if (folderId == getSharedFilesFolderID()) {
             return true;
         }
 
@@ -2348,9 +3041,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * perform search & enhance results with additional metadata as needed
          */
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        fields = addDateFieldsIfNeeded(fields, sortedBy);
+        if (shouldTriggerMediaDataExtraction) {
+            fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
+        }
         SearchIterator<DocumentMetadata> searchIterator = searchEngine.search(session, query, all, own, fields, sortedBy, dir, start, end);
-        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID);
+        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID, shouldTriggerMediaDataExtraction);
     }
 
     @Override
@@ -2368,9 +3066,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * perform search & enhance results with additional metadata as needed
          */
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        fields = addDateFieldsIfNeeded(fields, sortedBy);
+        if (shouldTriggerMediaDataExtraction) {
+            fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
+        }
         SearchIterator<DocumentMetadata> searchIterator = searchEngine.search(session, searchTerm, all, own, fields, sortedBy, dir, start, end);
-        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID);
+        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID, shouldTriggerMediaDataExtraction);
     }
 
     @Override
@@ -2392,9 +3095,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * perform search & enhance results with additional metadata as needed
          */
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        fields = addDateFieldsIfNeeded(fields, sortedBy);
+        if (shouldTriggerMediaDataExtraction) {
+            fields = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(fields);
+        }
         SearchIterator<DocumentMetadata> searchIterator = searchEngine.search(session, searchTerm, all, own, fields, sortedBy, dir, start, end);
-        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID);
+        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID, shouldTriggerMediaDataExtraction);
     }
 
     /**
@@ -2405,23 +3113,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param fields The requested fields
      * @param permissionsByFolderID A map holding the effective permissions of all used folders during the search, or <code>null</code> to
      *            assume all documents being readable & shareable by the current user
+     * @param shouldTriggerMediaDataExtraction <code>true</code> to trigger extraction of media metadata; otherwise <code>false</code>
      * @return The enhanced search results
      */
-    private SearchIterator<DocumentMetadata> postProcessSearch(ServerSession session, SearchIterator<DocumentMetadata> searchIterator, Metadata[] fields, final Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID) throws OXException {
+    @SuppressWarnings("resource")
+    private SearchIterator<DocumentMetadata> postProcessSearch(ServerSession session, SearchIterator<DocumentMetadata> searchIterator, Metadata[] fields, final Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID, boolean shouldTriggerMediaDataExtraction) throws OXException {
         /*
          * check requested metadata
          */
         int sharedFilesFolderID = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
         boolean containsSharedFilesResults = null != permissionsByFolderID && permissionsByFolderID.containsKey(I(sharedFilesFolderID));
-        boolean addLocked = contains(fields, Metadata.LOCKED_UNTIL_LITERAL);
-        boolean addNumberOfVersions = contains(fields, Metadata.NUMBER_OF_VERSIONS_LITERAL);
-        boolean addObjectPermissions = contains(fields, Metadata.OBJECT_PERMISSIONS_LITERAL);
-        boolean addShareable = contains(fields, Metadata.SHAREABLE_LITERAL);
+        Set<Metadata> set = Metadata.contains(fields, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL);
+        boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
+        boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
+        boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
+        boolean addShareable = set.contains(Metadata.SHAREABLE_LITERAL);
         if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable && false == containsSharedFilesResults) {
             /*
              * stick to plain search iterator result if no further metadata is needed
              */
-            return searchIterator;
+            return shouldTriggerMediaDataExtraction ? new TriggerMediaMetaDataExtractionSearchIterator(searchIterator, this, session) : searchIterator;
         }
         /*
          * prepare customizable search iterator to add additional metadata as requested
@@ -2436,6 +3147,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return SearchIteratorAdapter.emptyIterator();
         }
         List<Integer> objectIDs = Tools.getIDs(documents);
+        if (shouldTriggerMediaDataExtraction) {
+            /*
+             * trigger media meta-data extraction
+             */
+            new TriggerMediaMetaDataExtractionByCollection(documents, this, session).considerDocuments();
+        }
         /*
          * add object permissions if requested or needed to evaluate "shareable" flag
          */
@@ -2506,34 +3223,41 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
     }
 
-    private Metadata[] addSequenceNumberIfNeeded(final Metadata[] columns) {
-        for (final Metadata metadata : columns) {
-            if (metadata == Metadata.SEQUENCE_NUMBER_LITERAL) {
-                return columns;
+    /**
+     * Adds capture date and last-modified date to metadata array in case field is {@link Metadata#MEDIA_DATE} requested.
+     *
+     * @param columns The metadata fields to enhance
+     * @param optSort The sort field or <code>null</code>
+     * @return The possibly enhanced metadata fields
+     */
+    private Metadata[] addDateFieldsIfNeeded(final Metadata[] columns, Metadata optSort) {
+        boolean mediaDateRequested = (Metadata.MEDIA_DATE_LITERAL == optSort);
+        for (int j = columns.length; !mediaDateRequested && j-- > 0;) {
+            if (columns[j] == Metadata.MEDIA_DATE_LITERAL) {
+                mediaDateRequested = true;
             }
         }
-        final Metadata[] copy = new Metadata[columns.length + 1];
-        int i = 0;
-        for (final Metadata metadata : columns) {
-            copy[i++] = metadata;
+
+        if (!mediaDateRequested) {
+            return columns;
         }
-        copy[i] = Metadata.SEQUENCE_NUMBER_LITERAL;
-        return copy;
+
+        // When sorting by media sort date (either capture date or fall-back to last-modified) ensure both fields are queried
+        return Metadata.addIfAbsent(columns, Metadata.LAST_MODIFIED_LITERAL, Metadata.CAPTURE_DATE_LITERAL);
+    }
+
+    private Metadata[] addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(final Metadata[] columns) {
+        return Metadata.addIfAbsent(columns, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.VERSION_LITERAL,
+            Metadata.MEDIA_STATUS_LITERAL, Metadata.FILESTORE_LOCATION_LITERAL, Metadata.FILE_MIMETYPE_LITERAL, Metadata.FILENAME_LITERAL,
+            Metadata.SEQUENCE_NUMBER_LITERAL);
+    }
+
+    private Metadata[] addSequenceNumberIfNeeded(final Metadata[] columns) {
+        return Metadata.addIfAbsent(columns, Metadata.SEQUENCE_NUMBER_LITERAL);
     }
 
     private Metadata[] addFilenameIfNeeded(final Metadata[] columns) {
-        for (final Metadata metadata : columns) {
-            if (metadata == Metadata.FILENAME_LITERAL) {
-                return columns;
-            }
-        }
-        final Metadata[] copy = new Metadata[columns.length + 1];
-        int i = 0;
-        for (final Metadata metadata : columns) {
-            copy[i++] = metadata;
-        }
-        copy[i] = Metadata.FILENAME_LITERAL;
-        return copy;
+        return Metadata.addIfAbsent(columns, Metadata.FILENAME_LITERAL);
     }
 
     public InfostoreSecurity getSecurity() {
@@ -2605,7 +3329,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                             try {
                                 fileStorage.deleteFile(removeInfo.fileId);
                             } catch (Exception e) {
-                                LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, I(removeInfo.folderAdmin), I(removeInfo.contextId), e);
+                                LoggerHolder.LOG.error("Failed to delete file {} from storage of owner {} in context {}", removeInfo.fileId, I(removeInfo.folderAdmin), I(removeInfo.contextId), e);
                             }
                             return null;
                         }
@@ -2634,7 +3358,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 try {
                                     fileStorage.deleteFiles(locations.toArray(new String[locations.size()]));
                                 } catch (Exception e) {
-                                    LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, I(key.getUserId()), I(key.getContextId()), e);
+                                    LoggerHolder.LOG.error("Failed to delete files {} from storage of owner {} in context {}", locations, I(key.getUserId()), I(key.getContextId()), e);
                                 }
                                 return null;
                             }
@@ -2664,13 +3388,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                                 try {
                                     shareService.scheduleGuestCleanup(contextID, guestIDs);
                                 } catch (Exception e) {
-                                    LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), I(contextID), e);
+                                    LoggerHolder.LOG.error("Failed to clean-up guests {} in context {}", Arrays.toString(guestIDs), I(contextID), e);
                                 }
                                 return null;
                             }
                         };
                         ThreadPools.submitElseExecute(task);
                     }
+                }
+            }
+        }
+        /*
+         * remaining pending invocations
+         */
+        List<Runnable> tasks = pendingInvocations.get();
+        if (null != tasks && !tasks.isEmpty()) {
+            for (Runnable task : tasks) {
+                try {
+                    task.run();
+                } catch (Exception e) {
+                    LoggerHolder.LOG.error("Failed to perform task {}", task.getClass().getName(), e);
                 }
             }
         }
@@ -2704,6 +3441,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public void finish() throws OXException {
         fileIdRemoveList.set(null);
         guestCleanupList.set(null);
+        pendingInvocations.set(null);
         db.finish();
         ServiceMethod.FINISH.callUnsafe(security);
         lockManager.finish();
@@ -2735,6 +3473,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public void startTransaction() throws OXException {
         fileIdRemoveList.set(new LinkedList<InfostoreFacadeImpl.FileRemoveInfo>());
         guestCleanupList.set(new TIntObjectHashMap<TIntSet>());
+        pendingInvocations.set(new LinkedList<Runnable>());
         db.startTransaction();
         ServiceMethod.START_TRANSACTION.callUnsafe(security);
         lockManager.startTransaction();
@@ -2808,140 +3547,161 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         return new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator(), new ObjectPermissionValidator(this));
     }
 
-    private TimedResult<DocumentMetadata> getDocuments(Context context, final User user, UserPermissionBits permissionBits, final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end) throws OXException {
+    private TimedResult<DocumentMetadata> getDocuments(Context context, final User user, ServerSession optSession, UserPermissionBits permissionBits, final long folderId, Metadata[] columns, Metadata sort, int order, int start, int end) throws OXException {
         /*
          * get appropriate infostore iterator
          */
+        boolean shouldTriggerMediaDataExtraction = shouldTriggerMediaDataExtraction();
         Metadata[] cols = addSequenceNumberIfNeeded(columns);
-        final long sharedFilesFolderID = getSharedFilesFolderID(context, user);
+        cols = addDateFieldsIfNeeded(cols, sort);
+        if (shouldTriggerMediaDataExtraction) {
+            cols = addFieldsForTriggeringMediaMetaDataExtractionIfNeeded(cols);
+        }
+        final long sharedFilesFolderID = getSharedFilesFolderID();
         final EffectiveInfostoreFolderPermission folderPermission;
-        InfostoreIterator iterator;
-        if (sharedFilesFolderID == folderId) {
-            /*
-             * load readable documents from virtual shared files folder
-             */
-            folderPermission = null;
-            iterator = InfostoreIterator.sharedDocumentsForUser(context, user, ObjectPermission.READ, cols, sort, order, start, end, db);
-            iterator.setCustomizer(new DocumentCustomizer() {
+        InfostoreIterator iterator = null;
+        try {
+            if (sharedFilesFolderID == folderId) {
+                /*
+                 * load readable documents from virtual shared files folder
+                 */
+                folderPermission = null;
+                iterator = InfostoreIterator.sharedDocumentsForUser(context, user, ObjectPermission.READ, cols, sort, order, start, end, db);
+                DocumentCustomizer customizer = new DocumentCustomizer() {
 
-                @Override
-                public DocumentMetadata handle(DocumentMetadata document) {
-                    document.setOriginalFolderId(document.getFolderId());
-                    document.setFolderId(sharedFilesFolderID);
-                    return document;
-                }
-            });
-        } else {
-
-            if (null == permissionBits) {
-                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-            }
-            /*
-             * load all / own objects from physical folder
-             */
-            folderPermission = security.getFolderPermission(folderId, context, user, permissionBits);
-            if (folderPermission.canReadAllObjects()) {
-                iterator = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
-            } else if (folderPermission.canReadOwnObjects()) {
-                iterator = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
-            } else {
-                throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-            }
-        }
-        /*
-         * check requested metadata
-         */
-        boolean addLocked = contains(columns, Metadata.LOCKED_UNTIL_LITERAL);
-        boolean addNumberOfVersions = contains(columns, Metadata.NUMBER_OF_VERSIONS_LITERAL);
-        boolean addObjectPermissions = contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL);
-        boolean addShareable = contains(columns, Metadata.SHAREABLE_LITERAL);
-        if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
-            /*
-             * stick to plain infostore timed result if no further metadata is needed
-             */
-            return new InfostoreTimedResult(iterator);
-        }
-        /*
-         * prepare customizable timed result to add additional metadata as requested
-         */
-        final List<DocumentMetadata> documents = iterator.asList();
-        if (0 == documents.size()) {
-            return com.openexchange.groupware.results.Results.emptyTimedResult();
-        }
-        long maxSequenceNumber = 0;
-        List<Integer> objectIDs = new ArrayList<>(documents.size());
-        for (DocumentMetadata document : documents) {
-            maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
-            objectIDs.add(Integer.valueOf(document.getId()));
-        }
-        final long sequenceNumber = maxSequenceNumber;
-        TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
-
-            @Override
-            public SearchIterator<DocumentMetadata> results() throws OXException {
-                return new SearchIteratorAdapter<>(documents.iterator());
-            }
-
-            @Override
-            public long sequenceNumber() throws OXException {
-                return sequenceNumber;
-            }
-        };
-        /*
-         * add object permissions if requested or needed to evaluate "shareable" flag
-         */
-        if (addObjectPermissions) {
-            timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
-        }
-        if (addLocked) {
-            timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
-        }
-        if (addNumberOfVersions) {
-            timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
-        }
-        if (addShareable) {
-            final boolean hasSharedFolderAccess = permissionBits.hasFullSharedFolderAccess();
-            timedResult = new CustomizableTimedResult<>(timedResult, new Customizer<DocumentMetadata>() {
-
-                @Override
-                public DocumentMetadata customize(DocumentMetadata document) throws OXException {
-                    if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
-                        /*
-                         * no permissions to share or re-share
-                         */
-                        document.setShareable(false);
-                    } else {
-                        /*
-                         * set "shareable" flag based on folder permissions
-                         */
-                        document.setShareable(null != folderPermission && (folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId()));
+                    @Override
+                    public DocumentMetadata handle(DocumentMetadata document) {
+                        document.setOriginalFolderId(document.getFolderId());
+                        document.setFolderId(sharedFilesFolderID);
+                        return document;
                     }
-                    return document;
+                };
+                if (shouldTriggerMediaDataExtraction) {
+                    customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, getSession(optSession), customizer);
                 }
-            });
+                iterator.setCustomizer(customizer);
+            } else {
+                if (null == permissionBits) {
+                    throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+                }
+                /*
+                 * load all / own objects from physical folder
+                 */
+                folderPermission = security.getFolderPermission(folderId, context, user, permissionBits);
+                if (folderPermission.canReadAllObjects()) {
+                    iterator = InfostoreIterator.documents(folderId, cols, sort, order, start, end, this, context);
+                } else if (folderPermission.canReadOwnObjects()) {
+                    iterator = InfostoreIterator.documentsByCreator(folderId, user.getId(), cols, sort, order, start, end, this, context);
+                } else {
+                    throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+                }
+                if (shouldTriggerMediaDataExtraction) {
+                    QuotaFileStorage fileStorage = getFileStorage(folderPermission.getFolderOwner(), context.getContextId());
+                    iterator.setCustomizer(new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession)));
+                }
+            }
+            /*
+             * check requested metadata
+             */
+            Set<Metadata> set = Metadata.contains(columns, Metadata.LOCKED_UNTIL_LITERAL, Metadata.NUMBER_OF_VERSIONS_LITERAL, Metadata.OBJECT_PERMISSIONS_LITERAL, Metadata.SHAREABLE_LITERAL);
+            boolean addLocked = set.contains(Metadata.LOCKED_UNTIL_LITERAL);
+            boolean addNumberOfVersions = set.contains(Metadata.NUMBER_OF_VERSIONS_LITERAL);
+            boolean addObjectPermissions = set.contains(Metadata.OBJECT_PERMISSIONS_LITERAL);
+            boolean addShareable = set.contains(Metadata.SHAREABLE_LITERAL);
+            if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable) {
+                /*
+                 * stick to plain infostore timed result if no further metadata is needed
+                 */
+                InfostoreTimedResult timedResult = new InfostoreTimedResult(iterator);
+                iterator = null; // Avoid premature closing
+                return timedResult;
+            }
+            /*
+             * prepare customizable timed result to add additional metadata as requested
+             */
+            final List<DocumentMetadata> documents = SearchIterators.asList(iterator);
+            if (0 == documents.size()) {
+                return com.openexchange.groupware.results.Results.emptyTimedResult();
+            }
+            long maxSequenceNumber = 0;
+            List<Integer> objectIDs = new ArrayList<>(documents.size());
+            for (DocumentMetadata document : documents) {
+                maxSequenceNumber = Math.max(maxSequenceNumber, document.getSequenceNumber());
+                objectIDs.add(Integer.valueOf(document.getId()));
+            }
+            final long sequenceNumber = maxSequenceNumber;
+            TimedResult<DocumentMetadata> timedResult = new TimedResult<DocumentMetadata>() {
+
+                @Override
+                public SearchIterator<DocumentMetadata> results() throws OXException {
+                    return new SearchIteratorAdapter<>(documents.iterator());
+                }
+
+                @Override
+                public long sequenceNumber() throws OXException {
+                    return sequenceNumber;
+                }
+            };
+            /*
+             * add object permissions if requested or needed to evaluate "shareable" flag
+             */
+            if (addObjectPermissions) {
+                timedResult = objectPermissionLoader.add(timedResult, context, objectIDs);
+            }
+            if (addLocked) {
+                timedResult = lockedUntilLoader.add(timedResult, context, objectIDs);
+            }
+            if (addNumberOfVersions) {
+                timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
+            }
+            if (addShareable) {
+                final boolean hasSharedFolderAccess = permissionBits.hasFullSharedFolderAccess();
+                timedResult = new CustomizableTimedResult<>(timedResult, new Customizer<DocumentMetadata>() {
+
+                    @Override
+                    public DocumentMetadata customize(DocumentMetadata document) throws OXException {
+                        if (false == hasSharedFolderAccess || sharedFilesFolderID == folderId) {
+                            /*
+                             * no permissions to share or re-share
+                             */
+                            document.setShareable(false);
+                        } else {
+                            /*
+                             * set "shareable" flag based on folder permissions
+                             */
+                            document.setShareable(null != folderPermission && (folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == user.getId()));
+                        }
+                        return document;
+                    }
+                });
+            }
+            return timedResult;
+        } finally {
+            SearchIterators.close(iterator);
         }
-        return timedResult;
     }
 
     /**
      * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
      *
-     * @param session The session
      * @return The identifier of the shared documents folder
      */
-    int getSharedFilesFolderID(ServerSession session) {
-        return getSharedFilesFolderID(session.getContext(), session.getUser());
-    }
-
-    /**
-     * Gets the identifier of the folder holding single documents shared to the session's user based on extended object permissions.
-     *
-     * @param context The context
-     * @param user The user
-     * @return The identifier of the shared documents folder
-     */
-    private int getSharedFilesFolderID(Context context, User user) {
+    protected int getSharedFilesFolderID() {
         return FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+    }
+
+    private ServerSession getSession(ServerSession optSession) throws OXException {
+        if (null != optSession) {
+            return optSession;
+        }
+
+        ServerSession session = ThreadLocalSessionHolder.getInstance().getSessionObject();
+        if (null != session) {
+            return session;
+        }
+
+        String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
+        return null == sessionId ? null : ServerSessionAdapter.valueOf(SessiondService.SERVICE_REFERENCE.get().getSession(sessionId));
     }
 
 }

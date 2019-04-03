@@ -89,9 +89,11 @@ public class SimSessiondService implements SessiondService {
             existing = sessionsById.putIfAbsent(session.getSessionID(), session);
         } while (existing != null);
 
-        SessionEnhancement enhancement = param.getEnhancement();
-        if (null != enhancement) {
-            enhancement.enhanceSession(session);
+        List<SessionEnhancement> enhancements = param.getEnhancements();
+        if (null != enhancements) {
+            for (SessionEnhancement enhancement: enhancements) {
+                enhancement.enhanceSession(session);
+            }
         }
         return session;
     }

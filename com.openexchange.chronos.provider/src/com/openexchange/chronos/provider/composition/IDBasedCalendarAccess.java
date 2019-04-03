@@ -63,6 +63,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarFolder;
@@ -507,6 +508,28 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The update result
      */
     CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException;
+    
+    /**
+     * Updates the event's organizer to the new one.
+     * <p>
+     * Current restrictions are:
+     * 
+     * <li>The event has to be a group scheduled event</li>
+     * <li>All attendees of the event have to be internal</li>
+     * <li>The new organizer must be an internal user</li>
+     * <li>The change has to be performed for one of these:
+     * <ul> a single event</ul>
+     * <ul> a series master, efficiently updating for the complete series</ul>
+     * <ul> a specific recurrence of the series, efficiently performing a series split. Only allowed if {@link com.openexchange.chronos.RecurrenceRange#THISANDFUTURE} is set</ul>
+     * </li>
+     * 
+     * @param eventID The {@link EventID} of the event to change. Optional having a recurrence ID set to perform a series split.
+     * @param organizer The new organizer
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The updated event
+     * @throws OXException In case the organizer change is not allowed
+     */
+    CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing event.
@@ -551,9 +574,10 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <p/>
      * The following calendar parameters are evaluated:
      * <ul>
-     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
-     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}, defaulting to {@link Boolean#FALSE} unless overridden</li>
      * <li>{@link CalendarParameters#PARAMETER_SUPPRESS_ITIP}, defaulting to {@link Boolean#TRUE} unless overridden</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_STORAGE_WARNINGS}, defaulting to {@link Boolean#TRUE} unless overridden</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
      * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
      * </ul>
      *

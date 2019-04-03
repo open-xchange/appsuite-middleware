@@ -356,7 +356,7 @@ public class LocalReportService extends AbstractReportService {
     }
 
     private void finishUpReport(Report report) throws OXException {
-        LOG.info("Finish report with uuid: " + report.getUUID());
+        LOG.info("Finish report with uuid: {}", report.getUUID());
         for (ReportSystemHandler handler : Services.getSystemHandlers()) {
             if (handler.appliesTo(report.getType())) {
                 handler.runSystemReport(report);

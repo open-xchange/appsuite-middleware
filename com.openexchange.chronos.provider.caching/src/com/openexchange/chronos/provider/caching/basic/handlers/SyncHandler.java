@@ -183,7 +183,7 @@ public class SyncHandler extends AbstractExtensionHandler {
         return new OSGiCalendarStorageOperation<Map<String, EventsResult>>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
-            protected Map<String, EventsResult> call(CalendarStorage storage) throws OXException {
+            protected Map<String, EventsResult> call(CalendarStorage storage) {
                 Map<String, EventsResult> eventsResults = new HashMap<String, EventsResult>();
                 for (String resourceName : resourceNames) {
                     try {

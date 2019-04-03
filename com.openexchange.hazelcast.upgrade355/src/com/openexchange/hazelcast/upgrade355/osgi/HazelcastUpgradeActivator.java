@@ -74,7 +74,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class);
 
-    private volatile UpgradedCacheListener cacheListener;
+    private UpgradedCacheListener cacheListener;
 
     /**
      * Initializes a new {@link HazelcastUpgradeActivator}.
@@ -89,7 +89,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.hazelcast.upgrade355\"");
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
@@ -106,7 +106,7 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(HazelcastUpgradeActivator.class).info("stopping bundle: \"com.openexchange.hazelcast.upgrade355\"");
         UpgradedCacheListener cacheListener = this.cacheListener;
         if (null != cacheListener) {

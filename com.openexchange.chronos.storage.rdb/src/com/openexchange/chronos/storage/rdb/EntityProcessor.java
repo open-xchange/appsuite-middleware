@@ -77,6 +77,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.EntityUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
@@ -154,9 +155,10 @@ public class EntityProcessor {
      *
      * @param attendee The attendee to adjust
      * @param usedEntities The so far used entities to avoid hash collisions when generating virtual entity identifiers for external attendees
+     * @param entitySalt Random to enrich the hash calculation for the entity identifiers of external attendees
      * @return The (possibly adjusted) attendee reference
      */
-    public Attendee adjustPriorInsert(Attendee attendee, Set<Integer> usedEntities) throws OXException {
+    public Attendee adjustPriorInsert(Attendee attendee, Set<Integer> usedEntities, int entitySalt) throws OXException {
         if (isInternal(attendee)) {
             /*
              * track entity & remove redundant properties for non-individual internal attendees
@@ -173,7 +175,7 @@ public class EntityProcessor {
          * assign and track entity & store email as extended parameter if needed
          */
         Attendee savedAttendee = com.openexchange.chronos.common.mapping.AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
-        savedAttendee.setEntity(determineEntity(attendee, usedEntities));
+        savedAttendee.setEntity(EntityUtils.determineEntity(attendee, usedEntities, entitySalt));
         if (Strings.isNotEmpty(attendee.getEMail()) && false == attendee.getEMail().equals(extractEMailAddress(attendee.getUri()))) {
             List<ExtendedPropertyParameter> extendedParameters = savedAttendee.getExtendedParameters();
             if (null == extendedParameters) {
@@ -377,28 +379,6 @@ public class EntityProcessor {
         } catch (IOException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
-    }
-
-    /**
-     * Determines the next unique entity identifier to use when inserting an entry into the <code>calendar_attendee</code> table. For
-     * <i>internal</i> attendees, this is always the (already unique) entity identifier itself. For <i>external</i> attendees, the
-     * identifier is always negative and based on the hash code of the URI.
-     *
-     * @param attendee The attendee to determine the entity for
-     * @param usedEntities The so far used entities to avoid hash collisions
-     * @return The entity
-     */
-    private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
-        if (isInternal(attendee)) {
-            usedEntities.add(I(attendee.getEntity()));
-            return attendee.getEntity();
-        }
-        String uri = attendee.getUri();
-        int entity = -1 * Math.abs(null != uri ? uri.hashCode() : 1);
-        while (false == usedEntities.add(I(entity))) {
-            entity--;
-        }
-        return entity;
     }
 
 }

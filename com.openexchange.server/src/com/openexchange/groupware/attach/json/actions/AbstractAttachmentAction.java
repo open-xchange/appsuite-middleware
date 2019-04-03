@@ -79,6 +79,8 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
 
     protected static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
     private final AtomicLong maxUploadSize;
 
     protected final ServiceLookup serviceLookup;
@@ -93,16 +95,16 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
     }
 
     protected int requireNumber(final AJAXRequestData req, final String parameter) throws OXException {
-        final String value = req.getParameter(parameter);
+        String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
-        } catch (final NumberFormatException nfe) {
-            throw AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value);
+        } catch (NumberFormatException nfe) {
+            throw AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(nfe, parameter, value);
         }
     }
 
     protected static void require(final AJAXRequestData req, final String... parameters) throws OXException {
-        for (final String param : parameters) {
+        for (String param : parameters) {
             if (req.getParameter(param) == null) {
                 throw UploadException.UploadCode.MISSING_PARAM.create(param);
             }
@@ -126,10 +128,12 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
                 cur = maxUploadSize.get();
             } while (!maxUploadSize.compareAndSet(cur, configuredSize));
         }
-        final long maxUploadSize = this.maxUploadSize.get();
+
+        long maxUploadSize = this.maxUploadSize.get();
         if (maxUploadSize == 0) {
             return;
         }
+
         if (size > maxUploadSize) {
             if (!requestData.containsParameter(CALLBACK)) {
                 requestData.putParameter(CALLBACK, "error");
@@ -148,7 +152,7 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
 
     /**
      * Returns the value of the specified parameter as an integer array
-     * 
+     *
      * @param requestData The request data
      * @param name The name of the parameter
      * @return An integer list or <code>null</code> if the parameter is absent

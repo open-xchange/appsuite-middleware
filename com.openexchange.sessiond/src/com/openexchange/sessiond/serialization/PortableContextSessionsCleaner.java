@@ -98,7 +98,7 @@ public class PortableContextSessionsCleaner extends AbstractCustomPortable imple
         try {
             return SessionHandler.removeContextSessions(this.contextIds);
         } catch (Exception exception) {
-            LOG.error("Unable to remove sessions for context ids: " + Strings.concat(", ", contextIds));
+            LOG.error("Unable to remove sessions for context ids: {}", Strings.concat(", ", contextIds));
             throw exception;
         }
     }

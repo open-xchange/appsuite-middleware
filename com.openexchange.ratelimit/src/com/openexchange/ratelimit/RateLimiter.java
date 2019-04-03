@@ -81,4 +81,16 @@ public interface RateLimiter {
      */
     boolean acquire(long permits);
 
+    /**
+     * Returns true if already at limit
+     * 
+     * @return true if it is exceeded, false otherwise
+     */
+    boolean exceeded();
+
+    /**
+     * Removes all previous permits for the user and id associated with this rateLimiter
+     */
+    void reset();
+
 }

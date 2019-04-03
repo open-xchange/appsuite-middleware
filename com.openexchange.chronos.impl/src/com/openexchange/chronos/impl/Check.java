@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
@@ -59,15 +60,18 @@ import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeePrivileges;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -83,6 +87,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -190,6 +195,21 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that an incoming event update has no sequence number smaller than the original event's sequence number.
+     *
+     * @param originalEvent The original event being updated
+     * @param eventUpdate The updated event data
+     * @return The passed event update, after the sequence number was checked
+     * @throws OXException {@link CalendarExceptionCodes#OUT_OF_SEQUENCE}
+     */
+    public static Event requireInSequence(Event originalEvent, Event eventUpdate) throws OXException {
+        if (eventUpdate.containsSequence() && eventUpdate.getSequence() < originalEvent.getSequence()) {
+            throw CalendarExceptionCodes.OUT_OF_SEQUENCE.create(originalEvent.getId(), I(eventUpdate.getSequence()), I(originalEvent.getSequence()));
+        }
+        return eventUpdate;
+    }
+
+    /**
      * Checks that a specific event is actually present in the supplied folder. Based on the folder type, the event's public folder
      * identifier or the attendee's personal calendar folder is checked.
      *
@@ -239,6 +259,31 @@ public class Check extends com.openexchange.chronos.common.Check {
         if (startDate.isFloating() != endDate.isFloating()) {
             throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(startDate), String.valueOf(endDate));
         }
+    }
+
+    /**
+     * Checks that the attendee privileges are supported based on the given folder's type and event organizer, if it's not <code>null</code>
+     * and different from {@link DefaultAttendeePrivileges#DEFAULT}.
+     *
+     * @param privileges The attendee privileges to check, or <code>null</code> to skip the check
+     * @param folder The target folder for the event
+     * @param organizer The event's organizer
+     * @return The passed privileges, after they were checked for validity
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static AttendeePrivileges attendeePrivilegesAreValid(AttendeePrivileges privileges, CalendarFolder folder, Organizer organizer) throws OXException {
+        if (null != privileges && DefaultAttendeePrivileges.MODIFY.getValue().equalsIgnoreCase(privileges.getValue())) {
+            /*
+             * 'modify' privilege only allowed in non-public folders, with internal organizer
+             */
+            if (PublicType.getInstance().equals(folder.getType())) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ATTENDEE_PRIVILEGES, "Incompatible folder type");
+            }
+            if (null != organizer && false == isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ATTENDEE_PRIVILEGES, "Not allowed for externally organized events");
+            }
+        }
+        return privileges;
     }
 
     /**
@@ -326,6 +371,29 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that the supplied event's unique identifier (UID) is not already used for another event within the scope of a specific
+     * calendar user, i.e. the unique identifier is resolved to events residing in the user's <i>personal</i>, as well as <i>public</i>
+     * calendar folders.
+     * 
+     * @param session The calendar session
+     * @param storage A reference to the calendar storage
+     * @param event The event to check
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved in
+     * @return The passed event's unique identifier, after it was checked for uniqueness
+     * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
+     */
+    public static String uidIsUnique(CalendarSession session, CalendarStorage storage, Event event, int calendarUserId) throws OXException {
+        String uid = event.getUid();
+        if (Strings.isNotEmpty(uid)) {
+            EventID existingId = new ResolvePerformer(session, storage).resolveByUid(uid, calendarUserId);
+            if (null != existingId) {
+                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId.getObjectID());
+            }
+        }
+        return uid;
+    }
+
+    /**
      * Checks that a specific unique identifier (UID) is not already used for another event within the same context.
      *
      * @param session The calendar session
@@ -340,6 +408,50 @@ public class Check extends com.openexchange.chronos.common.Check {
             throw CalendarExceptionCodes.UID_CONFLICT.create(uid, existingId);
         }
         return uid;
+    }
+
+    /**
+     * Checks that the unique identifier (UID) matches in all events from a calendar object resource, i.e. it is either undefined, or
+     * equal in all events.
+     *
+     * @param event The primary event to check the UID in, or <code>null</code> to just check the further events
+     * @param events Further events to check the UID for equality, or <code>null</code> to just check the first event
+     * @return The event's common unique identifier, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String uidMatches(Event event, Event... events) throws OXException {
+        String uid = null != event ? event.getUid() : null != events && 0 < events.length ? events[0].getUid() : null;
+        if (null != events) {
+            for (Event e : events) {
+                if (false == Objects.equals(uid, e.getUid())) {
+                    throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
+                }
+            }
+        }
+        return uid;
+    }
+
+    /**
+     * Checks that the organizer matches in all events from a calendar object resource, i.e. it is either undefined, or equal in all
+     * events.
+     *
+     * @param event The primary event to check the organizer in, or <code>null</code> to just check the further events
+     * @param events Further events to check the organizer for equality, or <code>null</code> to just check the first event
+     * @return The event's common organizer, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#DIFFERENT_ORGANIZER}
+     * @see CalendarUtils#matches(CalendarUser, CalendarUser)
+     */
+    public static Organizer organizerMatches(Event event, Event... events) throws OXException {
+        Organizer organizer = null != event ? event.getOrganizer() : null != events && 0 < events.length ? events[0].getOrganizer() : null;
+        if (null != events) {
+            for (Event e : events) {
+                if (false == CalendarUtils.matches(organizer, e.getOrganizer())) {
+                    String id = null != event ? event.getId() : 0 < events.length ? events[0].getId() : null;
+                    throw CalendarExceptionCodes.DIFFERENT_ORGANIZER.create(id, organizer, e.getOrganizer());
+                }
+            }
+        }
+        return organizer;
     }
 
     /**

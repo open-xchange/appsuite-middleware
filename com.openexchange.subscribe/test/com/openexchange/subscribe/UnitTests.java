@@ -66,9 +66,7 @@ import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
     ContactFolderMultipleUpdaterStrategyTest.class,
     ContactFolderUpdaterStrategyTest.class,
     SubscriptionExecutionServiceImplTest.class,
-//    SubscriptionSQLStorageTest.class,
     CompositeSubscriptionSourceDiscoveryServiceTest.class,
-    MicroformatAppointmentParserTest.class,
     StrategyFolderUpdaterTest.class,
     SubscriptionSourceCollectorTest.class
 })

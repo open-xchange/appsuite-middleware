@@ -100,6 +100,11 @@ public class SingleStreamedUpload implements StreamedUpload {
     }
 
     @Override
+    public String getFirstFormField() {
+        return null;
+    }
+
+    @Override
     public Iterator<String> getFormFieldNames() {
         return Collections.emptyIterator();
     }

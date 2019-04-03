@@ -56,7 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
-import com.openexchange.resource.internal.ResourceServiceImpl;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -82,7 +82,7 @@ public final class AllAction extends AbstractResourceAction {
     @Override
     protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
 
-        com.openexchange.resource.Resource[] resources = ResourceServiceImpl.getInstance().searchResources(STR_ALL, req.getSession().getContext());
+        com.openexchange.resource.Resource[] resources = services.getServiceSafe(ResourceService.class).searchResources(STR_ALL, req.getSession().getContext());
         Date timestamp;
         List<Resource> list = new LinkedList<Resource>();
 

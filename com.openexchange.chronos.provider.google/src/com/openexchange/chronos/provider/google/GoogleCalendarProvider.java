@@ -336,7 +336,7 @@ public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
             }
             return newUserConfiguration.get(GoogleCalendarConfigField.FOLDER) != null;
         } catch (JSONException e) {
-            LOG.debug("Error while comparing configured folder names: " + e.getMessage());
+            LOG.debug("Error while comparing configured folder names: {}", e.getMessage());
             return false;
         }
     }

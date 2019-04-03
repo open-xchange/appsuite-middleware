@@ -48,6 +48,7 @@
  */
 package com.openexchange.rest.services.jersey;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -81,6 +82,15 @@ public class OXExceptionMapper implements ExceptionMapper<OXException> {
     @Context
     private UriInfo uriInfo;
 
+    @Context
+    protected HttpServletResponse servletResponse;
+
+    /**
+     * Initializes a new {@link OXExceptionMapper}.
+     */
+    public OXExceptionMapper() {
+        super();
+    }
 
     @Override
     public Response toResponse(OXException e) {
@@ -108,12 +118,10 @@ public class OXExceptionMapper implements ExceptionMapper<OXException> {
     private static final class CustomStatus implements StatusType {
 
         private final int code;
-
         private final Object msg;
-
         private final Status defaultStatus;
 
-        public CustomStatus(int code, Object msg) {
+        CustomStatus(int code, Object msg) {
             super();
             this.code = code;
             this.msg = msg;

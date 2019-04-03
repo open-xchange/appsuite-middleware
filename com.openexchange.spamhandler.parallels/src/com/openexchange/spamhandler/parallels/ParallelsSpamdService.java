@@ -53,6 +53,7 @@ import static com.openexchange.custom.parallels.impl.ParallelsOptions.PROPERTY_A
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -253,7 +254,7 @@ public class ParallelsSpamdService implements SpamdService {
 
                 final DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
                 final DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-                final Document doc = docBuilder.parse (new ByteArrayInputStream(xml_rpc_response.getBytes()));
+                final Document doc = docBuilder.parse (new ByteArrayInputStream(xml_rpc_response.getBytes(StandardCharsets.UTF_8)));
 
                 // normalize text representation
                 doc.getDocumentElement().normalize();

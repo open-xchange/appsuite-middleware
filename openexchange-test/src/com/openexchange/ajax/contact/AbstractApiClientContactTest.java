@@ -440,6 +440,13 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         return contactObj;
     }
 
+    /**
+     * Creates and remembers the given contact and returns its id
+     * 
+     * @param contactObj The {@link ContactData}
+     * @return The contact id
+     * @throws Exception
+     */
     public String createContact(final ContactData contactObj) throws Exception {
         ContactUpdateResponse response = contactsApi.createContact(apiClient.getSession(), contactObj);
         assertNull(response.getErrorDesc(), response.getError());

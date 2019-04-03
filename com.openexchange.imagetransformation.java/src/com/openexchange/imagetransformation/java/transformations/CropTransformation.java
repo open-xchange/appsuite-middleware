@@ -55,6 +55,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
+import org.slf4j.Logger;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.TransformationContext;
@@ -66,7 +67,10 @@ import com.openexchange.imagetransformation.TransformationContext;
  */
 public class CropTransformation implements ImageTransformation {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CropTransformation.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CropTransformation.class);
+    }
 
     private final int x, y, width, height;
 
@@ -98,7 +102,7 @@ public class CropTransformation implements ImageTransformation {
             try {
                 targetImage = new BufferedImage(width, height, sourceImage.getType(), (IndexColorModel)sourceImage.getColorModel());
             } catch (ClassCastException e) {
-                LOG.debug("Can't reuse source image's color model, falling back to defaults.", e);
+                LoggerHolder.LOG.debug("Can't reuse source image's color model, falling back to defaults.", e);
                 targetImage = new BufferedImage(width, height, sourceImage.getType());
             }
             Graphics2D graphics = targetImage.createGraphics();

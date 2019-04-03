@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.autodelete;
 
+import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -71,6 +72,11 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.1
  */
 public class InfostoreAutodeleteSettings {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreAutodeleteSettings.class);
+    }
 
     /** The property name for the flag whether a user may change/edit the auto-delete settings */
     private static final String PROPERTY_EDITABLE_AUTODELETE_SETTINGS = "com.openexchange.infostore.autodelete.editable";
@@ -257,22 +263,34 @@ public class InfostoreAutodeleteSettings {
     }
 
     private static int getInt(String attrName, String propNameForDefault, int defaultValue, int userId, int contextId, Session optSession) throws OXException {
+        // Get user
         User user = getUserBySession(userId, contextId, optSession);
-        String attr = user.getAttributes().get(attrName);
-        int value;
-        if (Strings.isEmpty(attr)) {
-            ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-            if (null == configViewFactory) {
-                // Disabled by default
-                return 0;
-            }
 
-            ConfigView configView = configViewFactory.getView(userId, contextId);
-            value = ConfigViews.getDefinedIntPropertyFrom(propNameForDefault, defaultValue, configView);
-        } else {
-            value = Integer.parseUnsignedInt(attr);
+        // Grab attribute by specified attribute name
+        String attr = user.getAttributes().get(attrName);
+        if (Strings.isEmpty(attr)) {
+            // No such attribute. Determine value by configuration
+            return getIntByConfig(propNameForDefault, defaultValue, userId, contextId);
         }
-        return value;
+
+        try {
+            return Integer.parseUnsignedInt(attr.trim());
+        } catch (NumberFormatException e) {
+            // Invalid attribute value. Determine value by configuration
+            LoggerHolder.LOG.warn("Non-numeric value contained in user attribute {}", attrName, e);
+            return getIntByConfig(propNameForDefault, defaultValue, userId, contextId);
+        }
+    }
+
+    private static int getIntByConfig(String propNameForDefault, int defaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == configViewFactory) {
+            // Disabled by default
+            return defaultValue;
+        }
+
+        ConfigView configView = configViewFactory.getView(userId, contextId);
+        return ConfigViews.getDefinedIntPropertyFrom(propNameForDefault, defaultValue, configView);
     }
 
     private static void setInt(String attrName, int maxVersions, int userId, int contextId, Session optSession) throws OXException {
@@ -282,19 +300,11 @@ public class InfostoreAutodeleteSettings {
     // ---------------------------------------------------------------------------------------------------------------------------
 
     private static User getUserBySession(int userId, int contextId, Session optSession) throws OXException {
-        if (optSession instanceof ServerSession) {
-            return ((ServerSession) optSession).getUser();
-        }
-
-        return UserStorage.getInstance().getUser(userId, contextId);
+        return optSession instanceof ServerSession ? ((ServerSession) optSession).getUser() : UserStorage.getInstance().getUser(userId, contextId);
     }
 
     private static Context getContextBySession(int contextId, Session optSession) throws OXException {
-        if (optSession instanceof ServerSession) {
-            return ((ServerSession) optSession).getContext();
-        }
-
-        return ContextStorage.getInstance().getContext(contextId);
+        return optSession instanceof ServerSession ? ((ServerSession) optSession).getContext() : ContextStorage.getInstance().getContext(contextId);
     }
 
 }

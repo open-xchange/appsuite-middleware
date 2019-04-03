@@ -244,7 +244,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (IOException e) {
-                throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
+                throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
             }
         }
     }

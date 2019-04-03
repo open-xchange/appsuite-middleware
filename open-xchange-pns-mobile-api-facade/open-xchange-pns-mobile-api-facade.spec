@@ -7,14 +7,14 @@ BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-BuildRequires: open-xchange-core
+BuildRequires: open-xchange-pns-impl
 %if 0%{?suse_version}
 BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -23,7 +23,6 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Mobile API Facade for Push Notification Service
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-pns-impl >= @OXVERSION@
 
 %description
@@ -61,6 +60,8 @@ GLOBIGNORE='*'
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Mar 28 2019 Thorben Betten <thorben.betten@open-xchange.com>
+First preview for 7.10.2 release
 * Thu Oct 18 2018 Thorben Betten <thorben.betten@open-xchange.com>
 prepare for 7.10.2 release
 * Thu Oct 11 2018 Thorben Betten <thorben.betten@open-xchange.com>

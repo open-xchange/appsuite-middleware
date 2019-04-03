@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -169,7 +170,7 @@ public final class SpamHandlerRegistry {
     public static SpamHandler getSpamHandlerBySession(Session session, int accountId, MailProvider mailProvider) throws OXException {
         if (MailAccount.DEFAULT_ID != accountId) {
             // No spam handler for external accounts
-            LOG.debug("As per design no spam handler for the external account {} of user {} in context {}.", accountId, session.getUserId(), session.getContextId());
+            LOG.debug("As per design no spam handler for the external account {} of user {} in context {}.", I(accountId), I(session.getUserId()), I(session.getContextId()));
             return NoSpamHandler.getInstance();
         }
 

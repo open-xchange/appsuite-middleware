@@ -306,8 +306,11 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             if (null == loadedMailAccount) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
             }
-            jsonAccount = DefaultMailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
+            MailAccount mailAccount = checkFullNames(loadedMailAccount, storageService, session);
+            mailAccount = checkSpamInfo(mailAccount, session);
+            jsonAccount = DefaultMailAccountWriter.write(mailAccount);
         } else {
+            newAccount = checkSpamInfo(newAccount, session);
             jsonAccount = DefaultMailAccountWriter.write(newAccount);
         }
 

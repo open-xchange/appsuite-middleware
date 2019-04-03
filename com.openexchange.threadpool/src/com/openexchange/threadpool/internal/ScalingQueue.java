@@ -166,7 +166,7 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
     private ThreadPoolExecutor executor;
 
     /**
-     * The associated thread po<ol service.
+     * The associated thread pool service.
      */
     private ThreadPoolService threadPool;
 
@@ -188,7 +188,8 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
 
     /**
      * Creates an appropriate {@link RejectedExecutionHandler} instance for this queue that re-inserts rejected tasks into this queue.
-     *
+     * 
+     * @param defaultHandler The {@link RejectedExecutionHandler} 
      * @return The appropriate {@link RejectedExecutionHandler} instance
      */
     public RejectedExecutionHandler createRejectedExecutionHandler(final RejectedExecutionHandler defaultHandler) {
@@ -206,6 +207,8 @@ public class ScalingQueue extends LinkedBlockingQueue<Runnable> {
 
     /**
      * Sets the executor this queue belongs to.
+     * 
+     * @param executor The {@link ThreadPoolExecutor}
      */
     public synchronized void setThreadPoolExecutor(final ThreadPoolExecutor executor) {
         this.executor = executor;

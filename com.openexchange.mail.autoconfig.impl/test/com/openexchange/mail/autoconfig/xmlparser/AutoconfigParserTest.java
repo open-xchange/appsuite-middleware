@@ -54,13 +54,13 @@ import java.io.FileInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-
 /**
  * {@link AutoconfigParserTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class AutoconfigParserTest {
+
     private FileInputStream autoconfigFile;
 
     @Before
@@ -70,11 +70,12 @@ public class AutoconfigParserTest {
 
     /**
      * Just checking if parsing throws an error.
+     * 
      * @throws Exception
      */
-         @Test
-     public void testFullFile() throws Exception {
-        ClientConfig config = new AutoconfigParser().getConfig(autoconfigFile);
+    @Test
+    public void testFullFile() throws Exception {
+        new AutoconfigParser().getConfig(autoconfigFile);
         assertTrue(true);
     }
 }

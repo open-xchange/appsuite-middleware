@@ -103,7 +103,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTooManyEvents", 1002, folderId);
 
         // Try create with expand 'true'
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, false, false, false, null, fromStr, untilStr, true);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, false, false, false, null, fromStr, untilStr, true, null);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
@@ -121,7 +121,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Update event with expand 'true'
         EventData eventData = actualEventData;
         eventData.setDescription("Changed description");
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), getUpdateBody(eventData), eventManager.getLastTimeStamp(), null, null, false, false, false, null, fromStr, untilStr, true);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), getUpdateBody(eventData), eventManager.getLastTimeStamp(), null, null, false, false, false, null, fromStr, untilStr, true, null);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
 
@@ -155,7 +155,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         }
 
         // Try create with expand 'true'
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, false, false, false, null, null, null, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, false, false, false, null, null, null, false, null);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
@@ -171,7 +171,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
             actualEventData.addAttendeesItem(AttendeeFactory.createIndividual(mail));
         }
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), getUpdateBody(actualEventData), eventManager.getLastTimeStamp(), null, null, false, false, false, null, null, null, false);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), getUpdateBody(actualEventData), eventManager.getLastTimeStamp(), null, null, false, false, false, null, null, null, false, null);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }
@@ -195,7 +195,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         }
 
         // Try create with expand 'true'
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, false, false, false, null, null, null, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, false, false, false, null, null, null, false, null);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
@@ -210,7 +210,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
             actualEventData.addAlarmsItem(AlarmFactory.createDisplayAlarm("-PT"+x+"M"));
         }
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), getUpdateBody(actualEventData), eventManager.getLastTimeStamp(), null, null, false, false, false, null, null, null, false);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), getUpdateBody(actualEventData), eventManager.getLastTimeStamp(), null, null, false, false, false, null, null, null, false, null);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }

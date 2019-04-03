@@ -440,6 +440,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         return vCard;
     }
 
+    protected VCardResource getVCard(final String uid, String collection) throws Exception {
+        String href = "/carddav/" + collection + "/" + uid + ".vcf";
+        return getVCardResource(href);
+    }
+
     protected VCardResource getVCardResource(String href) throws Exception {
         GetMethod get = new GetMethod(getWebDAVClient().getBaseURI() + href);
         String vCard = getWebDAVClient().doGet(get);
@@ -454,11 +459,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         if (null == folderIDs || 0 == folderIDs.length) {
             filter = "{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}";
         } else if (1 == folderIDs.length) {
-            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "['=' , {'field' : 'fid'}, '" + folderIDs[0] + "']" + "]})";
+            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[0] + "']" + "]})";
         } else {
-            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "[ 'or', " + "['=' , {'field' : 'fid'}, '" + folderIDs[0] + "'] ";
+            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "[ 'or', " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[0] + "'] ";
             for (int i = 1; i < folderIDs.length; i++) {
-                filter = filter + ", " + "['=' , {'field' : 'fid'}, '" + folderIDs[i] + "'] ";
+                filter = filter + ", " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[i] + "'] ";
             }
             filter = filter + "]" + "]})";
         }
@@ -469,16 +474,6 @@ public abstract class CardDAVTest extends WebDAVTest {
         Contact[] contacts = cotm.searchAction(getSearchFilter(uid, folderIDs), null == columnIDs ? Contact.ALL_COLUMNS : columnIDs, -1, null);
         return null != contacts && 0 < contacts.length ? contacts[0] : null;
     }
-
-    //	protected Contact getContact(String uid, int folderID) {
-    //		Contact[] contacts = cotm.allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
-    //		for (Contact contact : contacts) {
-    //			if (uid.equals(contact.getUid())) {
-    //				return cotm.getAction(contact);
-    //			}
-    //		}
-    //		return null;
-    //	}
 
     protected Contact getContact(String uid) throws InterruptedException, JSONException {
         return getContact(uid, null);

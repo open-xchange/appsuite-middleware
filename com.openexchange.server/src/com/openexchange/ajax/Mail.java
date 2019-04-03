@@ -234,7 +234,7 @@ public class Mail extends PermissionServlet {
             return resp.getWriter();
         } catch (final IllegalStateException ise) {
             // The getOutputStream() method has already been called for given HttpServletResponse
-            return new PrintWriter(resp.getOutputStream());
+            return new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), com.openexchange.java.Charsets.UTF_8)));
         }
     }
 

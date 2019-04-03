@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.FallbackSubscriptionService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -171,13 +172,13 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
         if (source != null && !source.equals("")) {
             final SubscriptionSource s = getDiscovery(session).getSource(source);
             if (s == null) {
-                return null;
+                return FallbackSubscriptionService.getInstance().getSubscription(session.getContext(), id);
             }
             service = s.getSubscribeService();
         } else {
             final SubscriptionSource s = getDiscovery(session).getSource(session.getContext(), id);
             if (s == null) {
-                return null;
+                return FallbackSubscriptionService.getInstance().getSubscription(session.getContext(), id);
             }
             service = s.getSubscribeService();
         }
@@ -191,12 +192,12 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
 
     /**
      * Checks if the given subscription is allowed to become execute. Currently this check is only against OXMF subscriptions
-     * 
+     *
      * @param subscription The {@link Subscription} to check
      * @throws OXException Thrown if the {@link Subscription} the subscription is defined as not allowed to update/create
      */
     protected void checkAllowed(Subscription subscription) throws OXException {
-        if (subscription.containsSource() && subscription.getSource().getId().startsWith(MICROFORMATS_ID) && !isCreateModifyEnabled()) {
+        if (subscription.containsSource() == false || (subscription.containsSource() && subscription.getSource().getId().startsWith(MICROFORMATS_ID) && !isCreateModifyEnabled())) {
             throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
         }
     }

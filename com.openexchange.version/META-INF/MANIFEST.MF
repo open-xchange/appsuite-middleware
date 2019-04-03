@@ -5,11 +5,13 @@ Bundle-SymbolicName: com.openexchange.version
 Bundle-Version: 7.10.2
 OXVersion: 7.10.2
 OXBuildDate: 2018-11-27
-OXRevision: 0
+OXRevision: 1
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: org.osgi.framework,
+Import-Package: com.openexchange.exception,
+ com.openexchange.osgi,
+ org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.version

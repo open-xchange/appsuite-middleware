@@ -53,6 +53,7 @@ import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.java.Strings;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 
 
@@ -83,6 +84,11 @@ public class WebDAVClientInfoProvider implements ClientInfoProvider {
         if (null == session) {
             return null;
         }
+
+        if (!isWebDAV(session)) {
+            return null;
+        }
+
         String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
         if (Strings.isEmpty(userAgent)) {
             return getClientInfo(session.getClient());
@@ -126,8 +132,7 @@ public class WebDAVClientInfoProvider implements ClientInfoProvider {
             return new WebDAVClientInfo("DavFS2 (WebDAV)", OS_FAMILY_LINUX);
         }
 
-        // Unknown WebDAV client or CalDAV/CardDAV client. Let next provider check...
-        return null;
+        return new WebDAVClientInfo("Generic WebDAV", "unknown");
     }
 
     @Override
@@ -144,6 +149,14 @@ public class WebDAVClientInfoProvider implements ClientInfoProvider {
             }
         }
         return null;
+    }
+
+    private boolean isWebDAV(Session session) {
+        Origin origin = session.getOrigin();
+        if (null != origin) {
+            return Origin.WEBDAV_ICAL.equals(origin) || Origin.WEBDAV_INFOSTORE.equals(origin) || Origin.WEBDAV_VCARD.equals(origin);
+        }
+        return false;
     }
 
 }

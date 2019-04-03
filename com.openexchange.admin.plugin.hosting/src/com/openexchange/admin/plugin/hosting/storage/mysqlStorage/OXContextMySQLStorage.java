@@ -118,6 +118,7 @@ import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage;
 import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.utils.CreateTableRegistry;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -222,6 +223,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         {
             LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
             Utils.removeFileStorages(ctx, true);
+            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
             LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
         }
 
@@ -954,7 +956,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("Now revoking entries in configdb (cs2dbpool) for context {}", ctx.getId());
                 updateContextServer2DbPool(dbHandleBackup, configdb_write_con, i(ctx.getId()));
             } catch (PoolException e) {
-                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", e);
+                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for {}!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", ctx.getId(), e);
             }
             throw new StorageException(tde);
         } catch (final SQLException sql) {
@@ -3749,6 +3751,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 List<SchemaCount> schemaCounts = entry.getValue();
                 Map<String, Integer> containedSchemas = db2ContainedSchemas.get(databases.get(Integer.valueOf(poolId)));
 
+                if (containedSchemas == null || containedSchemas.isEmpty()) {
+                    continue;
+                }
+
                 // Insert with 100-sized batches
                 for (List<SchemaCount> schemaCountSublist : Lists.partition(schemaCounts, 100)) {
                     Set<String> insertLockFor = null;
@@ -3803,7 +3809,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Inserts existing schemas to 'contexts_per_dbschema' (if not contained).
-     * 
+     *
      * @param database The {@link Database}
      * @param schemata The schemata to insert
      * @param db2ContainedSchemata A map with the already contained database schemata
