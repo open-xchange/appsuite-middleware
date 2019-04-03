@@ -8,6 +8,8 @@ With Open-Xchange Middleware version 7.8.3 Web Socket connections are supported.
 
 Moreover, a Web Socket connection is cluster-wide registered. Thus a message created on cluster member A reaches possible open Web Sockets on cluster member B.
 
+For a comprehensive guide to setup up mail push, please see [here]({{ site.baseurl }}/middleware/components/mailpush/mailpush.html)
+
 ## Prerequisites
 
 In order to use Web Socket transport the load-balancing and/or proxy'ing Web Server needs to be prepared to also

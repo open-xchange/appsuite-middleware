@@ -9,6 +9,8 @@ user-associated push notification messages to multiple clients in a transport-ag
 
 Although designed to fit a general purpose approach, at first routing "new mail" notification messages via Web Sockets to the App Suite UI is the primary focus of the current implemenation.
 
+For a comprehensive guide to setup up mail push, please see [here]({{ site.baseurl }}/middleware/components/mailpush/mailpush.html)
+
 ## Installation
 
 1. Install the "open-xchange-websockets-grizzly" package and follow the instructions from "Web Sockets" article
