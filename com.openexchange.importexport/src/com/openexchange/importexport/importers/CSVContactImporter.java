@@ -544,7 +544,7 @@ public class CSVContactImporter extends AbstractImporter {
                 }
                 for (ContactFieldMapper mapper : entry.getValue()) {
                     int mappedFields = getMappedFields(mapper, parsedFirstLine.get(0));
-                    if (mappedFields > maxMappedFields || mappedFields == maxMappedFields && entry.getKey().equals(detectedCharset)) {
+                    if (mappedFields > maxMappedFields || mappedFields != 0 && mappedFields == maxMappedFields && entry.getKey().equals(detectedCharset)) {
                         maxMappedFields = mappedFields;
                         bestMapper = mapper;
                         bestParser = csvParser;
