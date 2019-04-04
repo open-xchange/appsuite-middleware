@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -94,13 +95,13 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
 
             LOG.info("Clearing obsolete fields in 'del_dlist'...");
             int cleared = clearDeletedDistributionLists(connection);
-            LOG.info("Cleared {} rows in 'del_dlist'.", cleared);
+            LOG.info("Cleared {} rows in 'del_dlist'.", I(cleared));
             LOG.info("Clearing obsolete fields in 'del_contacts_image'...");
             cleared = clearDeletedContactImages(connection);
-            LOG.info("Cleared {} rows in 'del_contacts_image'.", cleared);
+            LOG.info("Cleared {} rows in 'del_contacts_image'.", I(cleared));
             LOG.info("Clearing obsolete fields in 'del_contacts'...");
             cleared = clearDeletedContacts(connection);
-            LOG.info("Cleared {} rows in 'del_contacts'.", cleared);
+            LOG.info("Cleared {} rows in 'del_contacts'.", I(cleared));
 
             connection.commit();
             rollback = 2;

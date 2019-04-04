@@ -1,5 +1,6 @@
 ---
 title: OX-Report Client
+icon: fa-flag-checkered
 ---
 
 # Introduction

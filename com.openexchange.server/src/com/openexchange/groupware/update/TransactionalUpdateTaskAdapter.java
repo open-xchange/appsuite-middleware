@@ -121,6 +121,7 @@ public abstract class TransactionalUpdateTaskAdapter extends UpdateTaskAdapter {
      * @return <code>true</code> if changes are required; otherwise <code>false</code> for no-op
      * @throws SQLException If an SQL error occurs
      */
+    @SuppressWarnings("unused")
     protected boolean needsChanges(Connection con) throws SQLException{
         return true;
     }

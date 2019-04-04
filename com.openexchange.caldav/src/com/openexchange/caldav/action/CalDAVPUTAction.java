@@ -91,7 +91,7 @@ public class CalDAVPUTAction extends PUTAction {
         try {
             return Long.parseLong(factory.getConfigValue("MAX_UPLOAD_SIZE", String.valueOf(defaultValue)));
         } catch (NumberFormatException | OXException e) {
-            LOG.warn("Error reading value for \"MAX_UPLOAD_SIZE\", falling back to {}.", defaultValue, e);
+            LOG.warn("Error reading value for \"MAX_UPLOAD_SIZE\", falling back to {}.", Long.valueOf(defaultValue), e);
             return defaultValue;
         }
     }

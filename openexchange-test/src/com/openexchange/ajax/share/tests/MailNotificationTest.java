@@ -442,6 +442,22 @@ public class MailNotificationTest extends ShareTest {
         assertNotNull(image);
         byte[] expectedBytes = BaseEncoding.base64().decode(SIGNATURE_IMAGE);
         byte[] imageBytes = ByteStreams.toByteArray(image.getInputStream());
+
+        // Logging to find cause for failed test on jenkins
+        System.out.println("START LOGGING FOR MAILNOTIFICATIONTEST");
+        StringBuilder sb = new StringBuilder();
+        System.out.println("imageBytes:");
+        sb = new StringBuilder();
+        for (int i = 0; i < imageBytes.length; i++) {
+            sb.append(imageBytes[i]).append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        System.out.println(sb.toString());
+        System.out.println("imageBytes encoded:");
+        System.out.println(BaseEncoding.base64().encode(imageBytes));
+        System.out.println("END LOGGING FOR MAILNOTIFICATIONTEST");
+        System.out.println();
+
         assertArrayEquals("Signature image doesn't match", expectedBytes, imageBytes);
     }
 

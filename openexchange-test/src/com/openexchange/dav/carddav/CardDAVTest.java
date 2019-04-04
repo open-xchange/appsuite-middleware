@@ -110,6 +110,7 @@ import net.sourceforge.cardme.vcard.exceptions.VCardException;
 @RunWith(Parameterized.class)
 public abstract class CardDAVTest extends WebDAVTest {
 
+    @SuppressWarnings("hiding")
     protected static final int TIMEOUT = 10000;
 
     private int folderId;
@@ -213,11 +214,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
     }
 
-    protected String postVCard(String uid, String vCard, float maxSimilarity) throws Exception {
-        return postVCard(uid, vCard, "Contacts", maxSimilarity);
+    protected String postVCard(String vCard, float maxSimilarity) throws Exception {
+        return postVCard(vCard, "Contacts", maxSimilarity);
     }
 
-    protected String postVCard(String uid, String vCard, String collection, float maxSimilarity) throws Exception {
+    protected String postVCard(String vCard, String collection, float maxSimilarity) throws Exception {
         PostMethod post = null;
         try {
             final String href = "/carddav/" + collection;
@@ -475,20 +476,20 @@ public abstract class CardDAVTest extends WebDAVTest {
         return null != contacts && 0 < contacts.length ? contacts[0] : null;
     }
 
-    protected Contact getContact(String uid) throws InterruptedException, JSONException {
+    protected Contact getContact(String uid) throws JSONException {
         return getContact(uid, null);
     }
 
-    protected List<Contact> getContacts(int folderID) throws InterruptedException, JSONException {
+    protected List<Contact> getContacts(int folderID) {
         Contact[] contacts = cotm.allAction(folderID);
         return Arrays.asList(contacts);
     }
 
-    protected Contact getContact(String uid, int folderID) throws InterruptedException, JSONException {
+    protected Contact getContact(String uid, int folderID) throws JSONException {
         return getContact(uid, new int[] { folderID });
     }
 
-    protected Contact getContact(String uid, int[] folderIDs) throws InterruptedException, JSONException {
+    protected Contact getContact(String uid, int[] folderIDs) throws JSONException {
         return this.searchContact(uid, folderIDs, null);
     }
 

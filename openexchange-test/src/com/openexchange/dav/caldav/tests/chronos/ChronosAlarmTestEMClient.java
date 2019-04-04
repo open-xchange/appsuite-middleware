@@ -136,7 +136,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify event on client
          */
@@ -266,7 +267,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify event on client
          */
@@ -423,7 +425,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify event on client
          */
@@ -553,7 +556,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify event on client
          */
@@ -689,7 +693,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         /*
          * verify event on server
          */
-        verifyEvent(uid, true, "-PT15M");
+        EventData remember = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(remember.getId());
         /*
          * verify event on client
          */
@@ -872,6 +877,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(event.getId());
 
         /*
          * verify event & exception on client
@@ -1075,6 +1081,7 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event & exception on server
          */
         EventData event = verifyEvent(uid, true, "-PT15M");
+        rememberEvent(event.getId());
 
         /*
          * verify event & exception on client

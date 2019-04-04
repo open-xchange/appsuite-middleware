@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.antivirus.impl.impl;
+package com.openexchange.antivirus.impl;
 
 import com.openexchange.antivirus.AntiVirusResult;
 import com.openexchange.exception.OXException;
@@ -62,159 +62,76 @@ public class AntiVirusResultImpl implements AntiVirusResult {
 
     private static final long serialVersionUID = -5834482033190623039L;
 
-    private String isTag;
-    private String antiVirusServiceId;
-    private Boolean infected;
-    private OXException error;
-    private String threatName;
-    private long scanTimestamp;
-    private boolean scanned;
+    private final String isTag;
+    private final String antiVirusServiceId;
+    private final Boolean infected;
+    private final OXException error;
+    private final String threatName;
+    private final long scanTimestamp;
+    private final boolean scanned;
 
     /**
-     * Initialises a new {@link AntiVirusResultImpl}.
+     * Initializes a new {@link AntiVirusResultImpl}.
      */
-    public AntiVirusResultImpl() {
+    AntiVirusResultImpl(String isTag, String antiVirusServiceId, Boolean infected, OXException error, String threatName, long scanTimestamp, boolean scanned) {
         super();
+        this.isTag = isTag;
+        this.antiVirusServiceId = antiVirusServiceId;
+        this.infected = infected;
+        this.error = error;
+        this.threatName = threatName;
+        this.scanTimestamp = scanTimestamp;
+        this.scanned = scanned;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#getAntiVirusServiceId()
-     */
     @Override
     public String getAntiVirusServiceId() {
         return antiVirusServiceId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#getISTag()
-     */
     @Override
     public String getISTag() {
         return isTag;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#isInfected()
-     */
     @Override
     public Boolean isInfected() {
         return infected;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#getWarnings()
-     */
     @Override
     public OXException getError() {
         return error;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#getThreatName()
-     */
     @Override
     public String getThreatName() {
         return threatName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#getScanTimestamp()
-     */
     @Override
     public long getScanTimestamp() {
         return scanTimestamp;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#isStreamScanned()
-     */
     @Override
     public boolean isStreamScanned() {
         return scanned;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.antivirus.AntiVirusResult#setStreamScanned(boolean)
-     */
-    @Override
-    public void setStreamScanned(boolean scanned) {
-        this.scanned = scanned;
-    }
-
-    ////////////////////////////////// SETTERS ////////////////////////////////////
-
-    /**
-     * Sets the antiVirusServiceId
-     *
-     * @param antiVirusServiceId The antiVirusServiceId to set
-     */
-    private void setAntiVirusServiceId(String antiVirusServiceId) {
-        this.antiVirusServiceId = antiVirusServiceId;
-    }
-
-    /**
-     * Sets the infected
-     *
-     * @param infected The infected to set
-     */
-    private void setInfected(Boolean infected) {
-        this.infected = infected;
-    }
-
-    /**
-     * Sets the ISTag
-     * 
-     * @param isTag The ISTag to set
-     */
-    private void setIsTag(String isTag) {
-        this.isTag = isTag;
-    }
-
-    /**
-     * Sets the error
-     *
-     * @param error The error to set
-     */
-    private void setError(OXException error) {
-        this.error = error;
-    }
-
-    /**
-     * Sets the threatName
-     *
-     * @param threatName The threatName to set
-     */
-    private void setThreatName(String threatName) {
-        this.threatName = threatName;
-    }
-
-    /**
-     * Sets the scanTimestamp
-     *
-     * @param scanTimestamp The scanTimestamp to set
-     */
-    private void setScanTimestamp(long scanTimestamp) {
-        this.scanTimestamp = scanTimestamp;
-    }
 
     ////////////////////////////////// BUILDER ///////////////////////////////////
 
+    /**
+     * Creates a new builder instance
+     *
+     * @return The new builder instance
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The builder for an instance of <code>AntiVirusResultImpl</code> */
     public static final class Builder {
 
         private String isTag;
@@ -228,7 +145,7 @@ public class AntiVirusResultImpl implements AntiVirusResult {
         /**
          * Initialises a new {@link AntiVirusResultImpl.Builder}.
          */
-        public Builder() {
+        Builder() {
             super();
         }
 
@@ -300,7 +217,7 @@ public class AntiVirusResultImpl implements AntiVirusResult {
 
         /**
          * Sets the streamScanned
-         * 
+         *
          * @param scanned The screamScanned value
          * @return this Builder instance for chained calls;
          */
@@ -310,22 +227,12 @@ public class AntiVirusResultImpl implements AntiVirusResult {
         }
 
         /**
-         * Builds the {@link AntiVirusResult}
-         * 
-         * @return the {@link AntiVirusResult}
+         * Builds the resulting instance of {@code AntiVirusResultImpl} from this builder's arguments.
+         *
+         * @return The {@code AntiVirusResultImpl} instance
          */
-        public AntiVirusResult build() {
-            AntiVirusResultImpl result = new AntiVirusResultImpl();
-            result.setAntiVirusServiceId(antiVirusServiceId);
-            result.setInfected(infected);
-            result.setIsTag(isTag);
-            result.setScanTimestamp(scanTimestamp);
-            result.setThreatName(threatName);
-            result.setStreamScanned(scanned);
-            if (error != null) {
-                result.setError(error);
-            }
-            return result;
+        public AntiVirusResultImpl build() {
+            return new AntiVirusResultImpl(isTag, antiVirusServiceId, infected, error, threatName, scanTimestamp, scanned);
         }
     }
 }

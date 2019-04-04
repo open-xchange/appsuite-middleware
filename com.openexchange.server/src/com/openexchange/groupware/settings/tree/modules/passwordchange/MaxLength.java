@@ -81,7 +81,7 @@ public class MaxLength implements PreferencesItemService {
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 int property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
-                setting.setSingleValue(property);
+                setting.setSingleValue(Integer.valueOf(property));
             }
 
             @Override

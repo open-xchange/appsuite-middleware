@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -141,7 +142,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
                 repairStmt.setInt(3, row.id);
                 repairStmt.addBatch();
 
-                logger.info("Fixed appointment {}/{} (cid/id) old count: {} new count: {}", row.cid, row.id, row.count, row.realCount);
+                logger.info("Fixed appointment {}/{} (cid/id) old count: {} new count: {}", I(row.cid), I(row.id), I(row.count), I(row.realCount));
             }
             repairStmt.executeBatch();
 

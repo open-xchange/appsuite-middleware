@@ -214,13 +214,6 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
         /**
          * {@inheritDoc}
          */
-        public boolean hasSize() {
-            return true;
-        }
-
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public T next() throws OXException {
             if (data.isEmpty()) {

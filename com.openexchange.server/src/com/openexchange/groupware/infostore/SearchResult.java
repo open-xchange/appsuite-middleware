@@ -67,7 +67,7 @@ public class SearchResult implements Serializable {
 
 	private int max;
 
-	public List getEntries() {
+	public List<Serializable> getEntries() {
 		return entries;
 	}
 

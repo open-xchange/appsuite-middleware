@@ -1,5 +1,6 @@
 ---
 title: Proxy support
+icon: fa-arrows-alt
 ---
 
 # Introduction

@@ -1,5 +1,6 @@
 ---
 title: Push Notification Service
+icon: fa-bell
 ---
 
 # Introduction
@@ -8,6 +9,8 @@ Starting with v7.8.3 the Open-Xchange Middleware implemented a generic Push Noti
 user-associated push notification messages to multiple clients in a transport-agnostic way.
 
 Although designed to fit a general purpose approach, at first routing "new mail" notification messages via Web Sockets to the App Suite UI is the primary focus of the current implemenation.
+
+For a comprehensive guide to setup up mail push, please see [here]({{ site.baseurl }}/middleware/components/mailpush/mailpush.html)
 
 ## Installation
 

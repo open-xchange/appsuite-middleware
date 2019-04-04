@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -138,7 +139,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
                     // A column whose VARCHAR size shall possibly be changed
                     final int size = rs.getInt("COLUMN_SIZE");
                     if (size >= DESIRED_SIZE) {
-                        LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName, name, size, DESIRED_SIZE);
+                        LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName, name, I(size), I(DESIRED_SIZE));
                         return;
                     }
                 }

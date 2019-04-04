@@ -114,7 +114,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
                         field = CacheAccess.class.getDeclaredField("cacheControl");
                         field.setAccessible(true);
                         cacheControlField = field;
-                    } catch (final Exception e) {
+                    } catch (@SuppressWarnings("unused") final Exception e) {
                         return null;
                     }
                 }
@@ -144,7 +144,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
         CompositeCache tmp;
         try {
             tmp = (CompositeCache) cacheControlField().get(cache);
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") final Exception e) {
             tmp = null;
         }
         cacheControl = tmp;
@@ -204,7 +204,7 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
                             final Field auxCachesField = CompositeCache.class.getDeclaredField("auxCaches");
                             auxCachesField.setAccessible(true);
                             tmp = (AuxiliaryCache[]) auxCachesField.get(cacheControl);
-                        } catch (final Exception e) {
+                        } catch (@SuppressWarnings("unused") final Exception e) {
                             tmp = null;
                         }
                         localOnly = Boolean.TRUE;

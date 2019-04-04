@@ -105,7 +105,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
 
     @Override
     protected TaskResource createResource(Task object, WebdavPath url) throws OXException {
-        return new TaskResource(factory, this, object, url);
+        return new TaskResource(caldavFactory, this, object, url);
     }
 
     @Override
@@ -142,7 +142,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
 
     @Override
     protected Collection<Task> getObjects() throws OXException {
-        return filter(factory.getTaskInterface().getTaskList(folderID, 0, -1, 0, Order.NO_ORDER, BASIC_COLUMNS));
+        return filter(caldavFactory.getTaskInterface().getTaskList(folderID, 0, -1, 0, Order.NO_ORDER, BASIC_COLUMNS));
     }
 
     @Override
@@ -214,15 +214,15 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     }
 
     private Collection<Task> getModifiedObjects(Date since) throws OXException {
-        return filter(factory.getTaskInterface().getModifiedTasksInFolder(folderID, BASIC_COLUMNS, since));
+        return filter(caldavFactory.getTaskInterface().getModifiedTasksInFolder(folderID, BASIC_COLUMNS, since));
     }
 
     private Collection<Task> getDeletedObjects(Date since) throws OXException {
-        return filter(factory.getTaskInterface().getDeletedTasksInFolder(folderID, BASIC_COLUMNS, since));
+        return filter(caldavFactory.getTaskInterface().getDeletedTasksInFolder(folderID, BASIC_COLUMNS, since));
     }
 
     public Task load(Task task) throws OXException {
-        return factory.getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
+        return caldavFactory.getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
     }
 
     private boolean isSupported(Task task) throws WebdavProtocolException {

@@ -68,7 +68,8 @@ import com.openexchange.session.Session;
  */
 public class Module implements PreferencesItemService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Module.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Module.class);
 
     /**
      * Default constructor.

@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-11-22 13:09+0100\n"
+"PO-Revision-Date: 2019-03-17 20:43+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
-"X-Generator: Poedit 2.2\n"
+"X-Generator: Poedit 2.2.1\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -251,6 +251,10 @@ msgid ""
 msgstr ""
 "Norādītais iCalendar datu avots nesatur derīgu informāciju un nevar tikt "
 "apstrādāts."
+
+#: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
+msgid "The given iCal file contains too many entities."
+msgstr "Norādītajā iCal failā ir pārāk daudz vienumu."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -1014,6 +1018,21 @@ msgstr ""
 "organizējis. Vislabāk būtu to ignorēt."
 
 #. *
+#. * The organizer of the appointment has changed. New organizer is: %1$s
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The organizer of the appointment has changed. New organizer is: %1$s"
+msgstr "Mītiņa organizators ir mainīts. Jaunais organizators ir: %1$s"
+
+#. *
+#. * The organizer of the appointment has changed. This operation is not allowed.
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+msgid ""
+"The organizer of the appointment has changed. This operation is not allowed."
+msgstr "Mītiņa organizators ir mainīts. Šī darbība nav atļauta."
+
+#. *
 #. * The event %s couldn't be deleted: %s
 #.
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
@@ -1217,6 +1236,46 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Iekšējs kalendārs"
 
+#. The requested page does not denote to a calendar.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
+msgid "The requested page does not denote to a calendar."
+msgstr "Pieprasītā lapa nenorāda uz kalendāru."
+
+#. You have no access to this calendar.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
+msgid "You have no access to this calendar."
+msgstr "Jums nav piekļuves šim kalendāram."
+
+#. The requested page was not found.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:66
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:63
+msgid "The requested page was not found."
+msgstr "Pieprasītā lapa netika atrasta."
+
+#. The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:68
+msgid ""
+"The remote SchedJoules service is unavailable at the moment. There is "
+"nothing we can do about it. Please try again later."
+msgstr ""
+"Attālais SchedJoules pakalpojums pašlaik nav pieejams. Lūdzu, mēģiniet "
+"vēlreiz vēlāk."
+
+#. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
+msgid ""
+"An internal server error occurred on SchedJoules side. There is nothing we "
+"can do about it."
+msgstr "Iekšēja servera kļūda SchedJoules pusē. Lūdzu mēģiniet vēlreiz vēlāk."
+
+#. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
+msgid ""
+"A remote server error occurred on SchedJoules side. There is nothing we can "
+"do about it."
+msgstr ""
+"Attālā servera kļūda radās SchedJoules pusē. Lūdzu mēģiniet vēlreiz vēlāk."
+
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:63
@@ -1333,10 +1392,14 @@ msgid "Organizer must also be an attendee."
 msgstr "Organizatoram ir jābūt arī dalībniekam."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+msgid "All appointments of a series must contain the same organizer."
+msgstr "Visiem mītiņiem sērijā ir jāsatur viens un tas pats organizators."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "Operāciju nevar pabeigt iztrūkstošu spēju dēļ."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
@@ -1344,7 +1407,7 @@ msgstr ""
 "Norādītā mape netiek atbalstīta. Lūdzu izvēlieties derīgu mapi un mēģiniet "
 "vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
@@ -1352,7 +1415,14 @@ msgstr ""
 "Operāciju nevar pabeigt vienlaicīgu izmaiņu veikšanas dēļ. Lūdzu jauniniet "
 "informāciju un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+msgid ""
+"The changes could not be applied because a newer version of the appointment "
+"already exists."
+msgstr ""
+"Izmaiņas nevar tikt piemērotas, jo sistēmā jau eksistē jaunāka tā versija."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
@@ -1360,18 +1430,18 @@ msgstr ""
 "Mītiņa ieraksts nevar tikt izveidots cita esoša konfliktējoša mītiņa ar tādu "
 "pat identifikatoru dēļ."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid "The appointment conflicts with one or more other appointments."
 msgstr "Mītiņš konfliktē ar vienu vai vairākiem citiem mītiņiem."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr ""
 "Lauks \"%1$s\" ir obligāts. Lūdzu norādiet derīgu vērtību un mēģiniet "
 "vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
@@ -1379,7 +1449,7 @@ msgstr ""
 "Beigu datums ir pirms sākuma datuma. Lūdzu izlabojiet mītiņa laikus un "
 "mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
@@ -1387,12 +1457,12 @@ msgstr ""
 "Mītiņi var tikt klasificēti kā privāti vai slepeni tikai lietotāja "
 "personīgajās mapēs."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr ""
 "Mītiņi, kuri ir saistīti ar resursiem, nevar tikt klasificēti kā slepeni."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
@@ -1400,11 +1470,11 @@ msgstr ""
 "Mītiņi, kuri ir klasificēti kā privāti vai slepeni, nevar tikt pārvietoti uz "
 "mapi ar norādīto tipu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "Mītiņa sēriju atsevišķie notikumi nevar tikt klasificēti dažādi."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
@@ -1412,21 +1482,21 @@ msgstr ""
 "Norādītie atkārtošanas noteikumi nav derīgi. Lūdzu veiciet labojumus un "
 "mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 "Norādītie atgādinājumu noteikumi nav derīgi. Lūdzu veiciet labojumus un "
 "mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr ""
 "Norādītā laika josla nav derīga. lūdzu veiciet labojumus un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
@@ -1434,7 +1504,7 @@ msgstr ""
 "Norādītā ģeogrāfiskā vieta nav derīga. Lūdzu norādiet derīgas koordinātes un "
 "mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
@@ -1442,7 +1512,7 @@ msgstr ""
 "Norādītie sākuma un beigu datumu tipi nav savietojami. Lūdzu veiciet "
 "labojumus un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
@@ -1450,7 +1520,7 @@ msgstr ""
 "Norādītie atkārtošanās noteikumi netiek atbalstīti. Lūdzu veiciet labojumus "
 "un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
@@ -1458,7 +1528,7 @@ msgstr ""
 "Norādītais notikums neietilpst mītiņa atkārtojumu sērijā. Lūdzu izvēlieties "
 "derīgu notikumu un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
@@ -1466,21 +1536,21 @@ msgstr ""
 "Mītiņa atkārtojumu sēriju nevar sadalīt norādītajās daļās. Lūdzu izvēlieties "
 "derīgu sadalījuma punktu un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "Mītiņu sērijas nevar tikt pārvietotas uz citu mapi."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr "Mītiņu sērijas notikumu pārvietošana uz citu mapi netiek atbalstīta."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "Kalendāra lietotājs \"%1$s\" nav pareizs."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
@@ -1489,7 +1559,7 @@ msgstr ""
 "vēlreiz."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1499,7 +1569,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "Lai veiktu meklēšanu ir nepieciešams uzrādīt %1$d vai vairāk simbolus."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1509,7 +1579,7 @@ msgstr ""
 "Simbols \"%1$s\" laukā \"%2$s\" nevar tikt saglabāts. Lūdzu izdzēsiet "
 "problemātiskos simbolus un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
@@ -1517,52 +1587,56 @@ msgstr ""
 "Ievadītie dati pārsniedz maksimālo ierobežojumu. Lūdzu saīsiniet \"%1$s\" "
 "ievadīto informāciju (limits: %2$d, pašlaik: %3$d) un mēģiniet vēlreiz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The maximum number of calendar subscriptions is exceeded."
 msgstr "Pārsniegts maksimālais kalendāra abonementu skaits."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "Norādītā vērtība nav derīga priekš \"%2$s\" un tā netika piemērota."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+msgid "The value for \"%1$s\" is invalid and cannot be applied."
+msgstr "The value for \"%1$s\" is invalid and cannot be applied."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr ""
 "Norādītā vērtība netiek atbalstīta priekš \"%2$s\" un tā netika piemērota."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "'%1$s' neeksistē vai arī nav iekšējs lietotājs."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "Authentication failed."
 msgstr "Autorizēšanas kļūda."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr "Nevar izveidot kontu. Problēmas norādītajā autorizēšanas informācijā."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "Konta '%1$s' kontekstā '%2$s' kvota ir pārsniegta."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The requested attachment was not found."
 msgstr "Prasītais pievienojums nav atrasts."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 "Pieprasījumam atbilst pārāk daudz mītiņu. Lūdzu izvēlieties īsāku laika "
 "intervālu."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
 msgid "The appointment contains too many participants."
 msgstr "Mītiņš satur pārāk daudz dalībnieku."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "The appointment contains too many reminders."
 msgstr "Mītiņš satur pārāk daudz atgādinājumu."
 
@@ -1662,10 +1736,13 @@ msgstr "E-pasts ir veiksmīgi nosūtīts"
 msgid "SMS successfully sent"
 msgstr "SMS ir veiksmīgi nosūtīts"
 
+#. *
+#. * To set up your device, click following link:
+#.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:69
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:71
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:74
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:79
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:84
 msgid "To set up your device, click following link: "
 msgstr "Lai iestatītu ierīci, noklikšķiniet uz sekojošas saites: "
 
@@ -2100,9 +2177,6 @@ msgstr "E-pasts 3"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:130
 #: com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
 msgid "URL"
 msgstr "URL"
 
@@ -2702,13 +2776,17 @@ msgstr "Fails ar nosaukumu \"%1$s\" jau eksistē iekš \"%2$s\"."
 msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
 msgstr "Directory ar nosaukumu \"%1$s\" jau eksistē iekš \"%2$s\"."
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
+msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
+msgstr ""
+"\"Push via long polling\" funkcionalitāte lietotājam \"%1$s\" kontekstā "
+"\"%1$s\" ir atspējota"
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
-#: com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 #: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "Izvēlieties esošu kontu"
@@ -4539,23 +4617,23 @@ msgid "The E-Mail address %1$s is invalid."
 msgstr "E-pasta adrese %1$s nav pareiza."
 
 #. Reorganizing of mails failed. Please try again later.
-#: com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
+#: com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:68
 msgid "Reorganizing of mails failed. Please try again later."
 msgstr "Kļūda pie pasta reorganizācijas. Lūdzu mēģiniet vēlāk vēlreiz."
 
 #. The user category %1$s does not exist.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:68
 msgid "The user category %1$s does not exist."
 msgstr "Lietotāja kategorija %1$s neeksistē."
 
 #. Invalid configuration: %1$s
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:71
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:74
 msgid "Invalid configuration: %1$s"
 msgstr "Nepareiza konfigurācija: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4563,12 +4641,12 @@ msgstr ""
 "vēlāk."
 
 #. You are not allowed to change the name of the category %1$s.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:80
 msgid "You are not allowed to change the name of the category %1$s."
 msgstr "Jums nav tiesību mainīt kategorijas %1$s nosaukumu."
 
 #. You are not allowed to enable or disable the category %1$s.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:83
 msgid "You are not allowed to enable or disable the category %1$s."
 msgstr "Jums nav tiesību iespējot vai atspējot kategoriju %1$s."
 
@@ -4694,6 +4772,55 @@ msgstr "Ziņa %1$s mapē %2$s nav atrasta."
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
 msgstr "Nepareizi norādīts OAuth konts."
+
+#. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
+msgid ""
+"An error has occurred on the remote Microsoft end-point. There is nothing we "
+"can do about it. Try again later."
+msgstr ""
+"Attālinātajā Microsoft beigu punktā ir reģistrēta kļūda. Lūdzu mēģiniet "
+"vēlāk vēlreiz."
+
+#. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
+msgid ""
+"Unable to retrieve the contact photo for contact with id '%1$s'. There is "
+"nothing we can do about it. Try again later."
+msgstr ""
+"Nevar iegūt kontaktpersonas ar ID '%1$s' fotoattēlu. Lūdzu mēģiniet vēlāk "
+"vēlreiz."
+
+#. The copying of file %1$s failed. There is nothing we can do about it. Try again later
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
+msgid ""
+"The copying of file %1$s failed. There is nothing we can do about it. Try "
+"again later."
+msgstr "Faila %1$s kopēšana neizdevās. Lūdzu mēģiniet vēlāk vēlreiz."
+
+#. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
+msgid ""
+"Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
+"do about it. Try again later."
+msgstr ""
+"Faila '%1$s ' augšupielāde mapē '%2$s ' neizdevās. Lūdzu mēģiniet vēlāk "
+"vēlreiz."
+
+#. The folder does not exist.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
+msgid "The folder does not exist."
+msgstr "Šāda mape nepastāv."
+
+#. A folder named '%1$s' already exists under the folder with name '%2$s
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:65
+msgid "A folder named '%1$s' already exists under the folder with name '%2$s"
+msgstr "Mape ar vārdu '%1$s' jau pastāv mapē ar vārdu '%2$s"
+
+#. You are not allowed to delete the root folder.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
+msgid "You are not allowed to delete the root folder."
+msgstr "Jums nav tiesību dzēst saknes mapi."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5027,6 +5154,13 @@ msgstr ""
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
 msgid "'%1$s' OAuth service is not enabled for you."
 msgstr "'%1$s' OAuth pakalpojums jums nav iespējots."
+
+#: com.openexchange.password.mechanism/src/com/openexchange/password/mechanism/exceptions/PasswordMechMessages.java:63
+msgid ""
+"No password mechanism available for identifier '%s'. Cannot handle password."
+msgstr ""
+"Identifikatoram '%s' paroles mehānisms nav pieejams. Parole nevar tikt "
+"apstrādāta."
 
 #. *
 #. * New password too short.
@@ -5546,87 +5680,6 @@ msgstr ""
 msgid "Could not load data via proxy."
 msgstr "Nevar ielādēt datus caur Proxy serveri."
 
-#. The operation is forbidden
-#: com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONErrorDisplayMessage.java:71
-msgid "The operation is forbidden"
-msgstr "Operācija ir aizliegta"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
-msgid "Site"
-msgstr "Vietne"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
-msgid "Apply a template (optional)"
-msgstr "Piemērot sagatavi (neobligāti)"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
-msgid "Add cipher code"
-msgstr "Pievienot šifra kodu"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:69
-msgid "Shared contacts"
-msgstr "Koplietojuma kontakti"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:71
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
-msgid "Shared files"
-msgstr "Koplietojuma faili"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
-msgid ""
-"Privacy:\n"
-"The data and any references contained in this webpage are shared with you "
-"under the assumption that the owner of the data was entitled to make them "
-"available to you. Neither %s, nor any of its subsidiaries or affiliates "
-"shall be liable for its publication or re-publication.\n"
-"Any unauthorized use or dissemination of this data is prohibited. If you "
-"intend to store, process, or pass on this data, please make sure that you "
-"have the right to do so.\n"
-"If you are one of the people listed or responsible for a resource listed on "
-"this page and you don't agree with the publication, please send an email "
-"containing the URL (the link) to this webpage to %s and the publisher of the "
-"data:\n"
-"Data published by %s on %s\n"
-msgstr ""
-"Privātums:\n"
-"Šajā lapā uzrādītie dati un atsauces tiek koplietotas ar pieņēmumu, ka šo "
-"datu īpašnieks ir piekritis atļaut jums piekļuvi pie šiem datiem. Ne Open-"
-"Xchange, ne arī jebkādas ar to saistītās trešās puses nav atbildīgas par šo "
-"datu publicēšanu vai reproducēšanu.\n"
-"Jebkāda neautorizēta šo datu lietošana vai izplatīšana ir aizliegta. Ja "
-"vēlaties saglabāt, apstrādāt vai arī pārsūtīt šos datus, lūdzu "
-"pārliecinieties ka jums ir tiesības to darīt.\n"
-"Ja jūs esat kāda no šajā lapā uzrādītajām vai par resursu atbildīgajām "
-"personām un jūs nepiekrītat publicēšanai, lūdzu nosūtiet e-pastu ar šīs "
-"lapas URL (saiti) uz %s un datu publicētājam:\n"
-"Datus publicēja %s %s\n"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
-msgid "the hoster"
-msgstr "nodrošinātājs"
-
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
-msgid "Publish Infostore document"
-msgstr "Publicēt infoglabātuves dokumentu"
-
-#. Cannot find the requested publication site.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
-msgid "Cannot find the requested publication site."
-msgstr "Nevar atrast prasīto publikāciju vietni."
-
-#. You do not have the appropriate permissions to perform the chosen action.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:66
-msgid ""
-"You do not have the appropriate permissions to perform the chosen action."
-msgstr "Jums nav tiesību veikt izvēlēto darbību."
-
-#. The published document has been deleted in the meantime and therefore is no longer available.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:69
-msgid ""
-"The published document has been deleted in the meantime and therefore is no "
-"longer available."
-msgstr "Publicētais dokuments ir jau izdzēsts un tāpēc vairs nav pieejams."
-
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
 msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
@@ -5782,6 +5835,29 @@ msgstr "Neparedzēta kļūda: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Nepareizs ID. Iztrūkstošs resursa identifikators."
 
+#. The remote '%1$s' service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:65
+msgid ""
+"The remote '%2$s' service is unavailable at the moment. There is nothing we "
+"can do about it. Please try again later."
+msgstr ""
+"Attālinātais pakalpojums '%2$s' pašlaik nav pieejams. Lūdzu mēģiniet vēlāk "
+"vēlreiz."
+
+#. An internal server error occurred on '%1$s' side. There is nothing we can do about it.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:67
+msgid ""
+"An internal server error occurred on '%2$s' side. There is nothing we can do "
+"about it."
+msgstr "Iekšēja servera kļūda '%2$s' pusē. Lūdzu mēģiniet vēlāk vēlreiz."
+
+#. A remote server error occurred on '%1$s' side. There is nothing we can do about it.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:69
+msgid ""
+"A remote server error occurred on '%2$s' side. There is nothing we can do "
+"about it."
+msgstr "Attālinātā servera kļūda '%2$s' pusē. Lūdzu mēģiniet vēlāk vēlreiz."
+
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -5893,6 +5969,11 @@ msgid ""
 "action\""
 msgstr ""
 "Nepareizi noformulēta polise. Polises ir jāformulē kā \"condition:action\""
+
+#. The policy '%s' you have specified is unknonw/unsupported.
+#: com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:65
+msgid "The policy '%s' you have specified is unknonw/unsupported."
+msgstr "Jūsu norādītā politika '%s' nav zināma vai netiek atbalstīta."
 
 #. Unable to convert task status "%1$s".
 #: com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:69
@@ -6635,6 +6716,11 @@ msgstr "Struktūra \"%1$s\" meklēšanas laikā ir ignorēta."
 msgid "Invalid number of properties for distribution list."
 msgstr "Nepareizs izplatīšanas saraksta parametru skaits."
 
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:145
+msgid ""
+"This operation is not allowed in this folder because it has a subscription."
+msgstr "Šī darbība šajā mapē nav atļauta, jo mape tiek abonēta."
+
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr "Konts %1$d nav atrasts."
@@ -6731,6 +6817,10 @@ msgstr "Mani faili"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
 msgstr "Drive"
+
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
+msgid "Shared files"
+msgstr "Koplietojuma faili"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -9488,6 +9578,40 @@ msgstr ""
 "Jūsu pasta %2$s transporta pakalpojumi ir atspējoti autorizēšanās kļūdu dēļ. "
 "Lūdzu veiciet atkārtotu konta %5$s autorizāciju."
 
+#. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
+#. which is only applicable in case a reply is generated, but in-compose message is not a reply
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
+msgid ""
+"The operation cannot be performed because composed message is not a reply"
+msgstr "Darbību nevar izpildīt jo sastādītais ziņojums nav atbilde"
+
+#. Found no such attachment %1$s in composition space %2$s
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:75
+msgid "No such attachment"
+msgstr "Šāda pievienojuma nav"
+
+#. Attachments must not be shared
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:78
+msgid "Attachments must not be shared"
+msgstr "Pievienojumus nevar koplietot"
+
+#. A user must not create any new composition spaces
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:81
+msgid ""
+"Maximum number of composition spaces is reached. Please terminate existing "
+"open spaces in order to open new ones."
+msgstr ""
+"Sasniegts maksimālais sastādīšanas apgabalu skaits. Lai atvērtu jaunus "
+"sastādīšanas apgabalus, aizveriet kādus no esošajiem."
+
+#. Missing key which is required to decrypt the content of a composition space
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
+msgid ""
+"Found no suitable key for composition space. Please re-compose your E-Mail."
+msgstr ""
+"Nav atrasta sastādīšanas apgabalam piemērota atslēga. Lūdzu komponējiet e-"
+"pastu vēlreiz."
+
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -11455,47 +11579,6 @@ msgstr "Jūsu pieprasītais abonements nav atrasts!"
 #: com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
 msgid "The operation is forbidden."
 msgstr "Operācija ir aizliegta."
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
-msgid "OXMF Contacts"
-msgstr "OXMF kontakti"
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
-msgid "OXMF Infostore"
-msgstr "OXMF infoglabātuve"
-
-#. A parsing error occurred: %1$s.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
-msgid "A parsing error occurred: %1$s."
-msgstr "Parsēšanas kļūda: %1$s."
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
-msgid "Provide well-formed HTML."
-msgstr "Nodrošiniet pareizi formatētu HTML."
-
-#. Can only post to external subscription sources.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "You can only post to external subscription sources."
-msgstr "Nosūtīt var tikai uz ārējas abonēšanas avotiem."
-
-#. Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:69
-msgid ""
-"Could not fetch site at %1$s. Please check the spelling or whether you can "
-"reach the site in your browser."
-msgstr ""
-"Nevar sasniegt vietni %1$s. Lūdzu pārbaudiet adresi un vai jūs varat tai "
-"pieslēgties ar savu web pārlūkprogrammu."
-
-#. The string cannot be parsed to a valid URL.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
-msgid "You provided an invalid URL."
-msgstr "Norādītais URL nav derīgs."
-
-#. No URL was provided.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-msgid "You provided no URL."
-msgstr "Nav norādīts URL."
 
 #: com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
@@ -13993,6 +14076,95 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The operation is forbidden"
+#~ msgstr "Operācija ir aizliegta"
+
+#~ msgid "Site"
+#~ msgstr "Vietne"
+
+#~ msgid "Apply a template (optional)"
+#~ msgstr "Piemērot sagatavi (neobligāti)"
+
+#~ msgid "Add cipher code"
+#~ msgstr "Pievienot šifra kodu"
+
+#~ msgid "Shared contacts"
+#~ msgstr "Koplietojuma kontakti"
+
+#~ msgid ""
+#~ "Privacy:\n"
+#~ "The data and any references contained in this webpage are shared with you "
+#~ "under the assumption that the owner of the data was entitled to make them "
+#~ "available to you. Neither %s, nor any of its subsidiaries or affiliates "
+#~ "shall be liable for its publication or re-publication.\n"
+#~ "Any unauthorized use or dissemination of this data is prohibited. If you "
+#~ "intend to store, process, or pass on this data, please make sure that you "
+#~ "have the right to do so.\n"
+#~ "If you are one of the people listed or responsible for a resource listed "
+#~ "on this page and you don't agree with the publication, please send an "
+#~ "email containing the URL (the link) to this webpage to %s and the "
+#~ "publisher of the data:\n"
+#~ "Data published by %s on %s\n"
+#~ msgstr ""
+#~ "Privātums:\n"
+#~ "Šajā lapā uzrādītie dati un atsauces tiek koplietotas ar pieņēmumu, ka šo "
+#~ "datu īpašnieks ir piekritis atļaut jums piekļuvi pie šiem datiem. Ne Open-"
+#~ "Xchange, ne arī jebkādas ar to saistītās trešās puses nav atbildīgas par "
+#~ "šo datu publicēšanu vai reproducēšanu.\n"
+#~ "Jebkāda neautorizēta šo datu lietošana vai izplatīšana ir aizliegta. Ja "
+#~ "vēlaties saglabāt, apstrādāt vai arī pārsūtīt šos datus, lūdzu "
+#~ "pārliecinieties ka jums ir tiesības to darīt.\n"
+#~ "Ja jūs esat kāda no šajā lapā uzrādītajām vai par resursu atbildīgajām "
+#~ "personām un jūs nepiekrītat publicēšanai, lūdzu nosūtiet e-pastu ar šīs "
+#~ "lapas URL (saiti) uz %s un datu publicētājam:\n"
+#~ "Datus publicēja %s %s\n"
+
+#~ msgid "the hoster"
+#~ msgstr "nodrošinātājs"
+
+#~ msgid "Publish Infostore document"
+#~ msgstr "Publicēt infoglabātuves dokumentu"
+
+#~ msgid "Cannot find the requested publication site."
+#~ msgstr "Nevar atrast prasīto publikāciju vietni."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to perform the chosen action."
+#~ msgstr "Jums nav tiesību veikt izvēlēto darbību."
+
+#~ msgid ""
+#~ "The published document has been deleted in the meantime and therefore is "
+#~ "no longer available."
+#~ msgstr "Publicētais dokuments ir jau izdzēsts un tāpēc vairs nav pieejams."
+
+#~ msgid "OXMF Contacts"
+#~ msgstr "OXMF kontakti"
+
+#~ msgid "OXMF Infostore"
+#~ msgstr "OXMF infoglabātuve"
+
+#~ msgid "A parsing error occurred: %1$s."
+#~ msgstr "Parsēšanas kļūda: %1$s."
+
+#~ msgid "Provide well-formed HTML."
+#~ msgstr "Nodrošiniet pareizi formatētu HTML."
+
+#~ msgid "You can only post to external subscription sources."
+#~ msgstr "Nosūtīt var tikai uz ārējas abonēšanas avotiem."
+
+#~ msgid ""
+#~ "Could not fetch site at %1$s. Please check the spelling or whether you "
+#~ "can reach the site in your browser."
+#~ msgstr ""
+#~ "Nevar sasniegt vietni %1$s. Lūdzu pārbaudiet adresi un vai jūs varat tai "
+#~ "pieslēgties ar savu web pārlūkprogrammu."
+
+#~ msgid "You provided an invalid URL."
+#~ msgstr "Norādītais URL nav derīgs."
+
+#~ msgid "You provided no URL."
+#~ msgstr "Nav norādīts URL."
 
 #~ msgid "???? %1$s"
 #~ msgstr "???? %1$s"

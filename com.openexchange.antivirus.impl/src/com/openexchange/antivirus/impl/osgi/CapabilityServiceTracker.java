@@ -58,7 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.antivirus.AntiVirusService;
-import com.openexchange.antivirus.impl.impl.AntiVirusCapabilityChecker;
+import com.openexchange.antivirus.impl.AntiVirusCapabilityChecker;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.osgi.Tools;

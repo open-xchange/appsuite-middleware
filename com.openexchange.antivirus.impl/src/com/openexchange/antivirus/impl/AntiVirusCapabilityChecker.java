@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,51 @@
  *
  */
 
-package com.openexchange.antivirus.impl.impl;
+package com.openexchange.antivirus.impl;
 
-import com.openexchange.antivirus.AntiVirusResult;
-import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
-import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
+import com.openexchange.antivirus.AntiVirusProperty;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link AntiVirusResultEvaluatorServiceImpl}
+ * {@link AntiVirusCapabilityChecker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public class AntiVirusResultEvaluatorServiceImpl implements AntiVirusResultEvaluatorService {
+public class AntiVirusCapabilityChecker implements CapabilityChecker {
+
+    public static final String CAPABILITY = "antivirus";
+    private final ServiceLookup services;
 
     /**
-     * Initialises a new {@link AntiVirusResultEvaluatorServiceImpl}.
+     * Initialises a new {@link AntiVirusCapabilityChecker}.
      */
-    public AntiVirusResultEvaluatorServiceImpl() {
+    public AntiVirusCapabilityChecker(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.antivirus.AntiVirusResultEvaluatorService#evaluate(com.openexchange.antivirus.AntiVirusResult)
+     * @see com.openexchange.capabilities.CapabilityChecker#isEnabled(java.lang.String, com.openexchange.session.Session)
      */
     @Override
-    public void evaluate(AntiVirusResult result, String filename) throws OXException {
-        if (result == null) {
-            throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create("The anti-virus result was 'null'.");
+    public boolean isEnabled(String capability, Session session) throws OXException {
+        if (false == CAPABILITY.equals(capability)) {
+            return true;
         }
-        if (null != result.getError()) {
-            throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create(result.getError(), "Error while scanning for viruses.");
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (serverSession.isAnonymous()) {
+            return false;
         }
-        Boolean isInfected = result.isInfected();
-        if (isInfected == null) {
-            throw AntiVirusServiceExceptionCodes.UNEXPECTED_ERROR.create("No scan was performed.");
-        }
-        if (result.isInfected()) {
-            throw AntiVirusServiceExceptionCodes.FILE_INFECTED.create(filename, result.getThreatName());
-        }
+        LeanConfigurationService lcService = services.getService(LeanConfigurationService.class);
+        return lcService.getBooleanProperty(session.getUserId(), session.getContextId(), AntiVirusProperty.enabled);
     }
 }

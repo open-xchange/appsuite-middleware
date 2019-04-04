@@ -93,7 +93,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
     /**
      * The object version. This is currently not used.
      */
-    private long version;
+    /* private long version; */
 
     /**
      * Max life seconds
@@ -194,7 +194,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
             /*
              * Cannot occur since we are cloneable
              */
-            throw new InternalError("Clone failed even though java.lang.Cloneable interface is implemented");
+            throw new InternalError("Clone failed even though java.lang.Cloneable interface is implemented", e);
         }
     }
 
@@ -222,7 +222,7 @@ public final class ElementAttributesImpl implements ElementAttributes, Cloneable
     public ElementAttributes copy() {
         try {
             return (ElementAttributes) clone();
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") final Exception e) {
             return new ElementAttributesImpl();
         }
     }

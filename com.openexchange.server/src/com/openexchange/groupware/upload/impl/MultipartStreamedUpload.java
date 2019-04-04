@@ -96,6 +96,8 @@ public class MultipartStreamedUpload implements StreamedUpload {
      */
     public static final class MissingStartingFormField extends RuntimeException {
 
+        private static final long serialVersionUID = -8890346843993928710L;
+
         private final FileItemStream item;
 
         MissingStartingFormField(FileItemStream item) {
@@ -351,7 +353,7 @@ public class MultipartStreamedUpload implements StreamedUpload {
                             ContentTypeParser parser = new ContentTypeParser(new StringReader(forcedMimeType));
                             parser.parseAll();
                             uploadFile.setContentType(new StringBuilder(parser.getType()).append('/').append(parser.getSubType()).toString());
-                        } catch (Exception e) {
+                        } catch (@SuppressWarnings("unused") Exception e) {
                             // Assume invalid value
                             uploadFile.setContentType(null == mimeType ? item.getContentType() : mimeType);
                         }

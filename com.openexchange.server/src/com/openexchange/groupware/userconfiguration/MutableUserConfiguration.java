@@ -288,11 +288,6 @@ public class MutableUserConfiguration extends UserConfiguration {
         }
     }
 
-    public static int getPermissionBits(Set<String> capabilities) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
     private static final long serialVersionUID = 1L;
 
 }

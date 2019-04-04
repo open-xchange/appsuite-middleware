@@ -180,7 +180,7 @@ public class Tools {
      * @param propertyName The extended property's name
      * @return The extended property, or <code>null</code> if not set
      */
-    private static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String propertyName) {
+    public static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String propertyName) {
         if (null != extendedProperties && 0 < extendedProperties.size()) {
             if (-1 != propertyName.indexOf('*')) {
                 Pattern pattern = Pattern.compile(Strings.wildcardToRegex(propertyName));

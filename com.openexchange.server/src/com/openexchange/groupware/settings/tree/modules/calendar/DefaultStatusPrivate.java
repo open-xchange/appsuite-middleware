@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.calendar;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -102,16 +103,17 @@ public class DefaultStatusPrivate implements PreferencesItemService {
 
             @Override
             public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
-                Integer value;
+                int value;
                 try {
-                    value = new Integer(String.valueOf(setting.getSingleValue()));
+                    Object singleValue = setting.getSingleValue();
+                    value = (singleValue instanceof Number) ? ((Number) singleValue).intValue() : Integer.parseInt(String.valueOf(singleValue));
                 } catch (final NumberFormatException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(e, setting.getSingleValue());
                 }
                 if (value < 0 || value > 3) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue());
                 }
-                ServerUserSetting.getInstance().setDefaultStatusPrivate(ctx.getContextId(), user.getId(), value);
+                ServerUserSetting.getInstance().setDefaultStatusPrivate(ctx.getContextId(), user.getId(), I(value));
             }
 
         };

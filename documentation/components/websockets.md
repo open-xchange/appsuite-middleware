@@ -1,5 +1,6 @@
 ---
 title: Web Sockets
+icon: fa-rocket
 ---
 
 # Web Sockets documentation
@@ -7,6 +8,8 @@ title: Web Sockets
 With Open-Xchange Middleware version 7.8.3 Web Socket connections are supported. A Web Socket connection is only allowed to be established for a fully authenticated session. Hence, a HTTP Upgrade request is required to pass all the validating and verifying steps as for regular HTTP requests in order to establish a Web Socket connection.
 
 Moreover, a Web Socket connection is cluster-wide registered. Thus a message created on cluster member A reaches possible open Web Sockets on cluster member B.
+
+For a comprehensive guide to setup up mail push, please see [here]({{ site.baseurl }}/middleware/components/mailpush/mailpush.html)
 
 ## Prerequisites
 

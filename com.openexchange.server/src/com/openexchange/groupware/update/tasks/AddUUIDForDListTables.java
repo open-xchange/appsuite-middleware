@@ -131,7 +131,7 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += NULL;
                 } else {
                     update += EQUALS;
-                    values.add(intfield01);
+                    values.add(Integer.valueOf(intfield01));
                 }
 
                 update += "AND intfield02";
@@ -140,7 +140,7 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += NULL;
                 } else {
                     update += EQUALS;
-                    values.add(intfield02);
+                    values.add(Integer.valueOf(intfield02));
                 }
 
                 update += "AND intfield03";
@@ -149,7 +149,7 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += NULL;
                 } else {
                     update += EQUALS;
-                    values.add(intfield03);
+                    values.add(Integer.valueOf(intfield03));
                 }
 
                 update += "AND intfield04";
@@ -158,7 +158,7 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += NULL;
                 } else {
                     update += EQUALS;
-                    values.add(intfield04);
+                    values.add(Integer.valueOf(intfield04));
                 }
 
                 update += "AND field01";
@@ -194,7 +194,7 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
                     update += NULL;
                 } else {
                     update += EQUALS;
-                    values.add(cid);
+                    values.add(Integer.valueOf(cid));
                 }
 
                 update += " LIMIT 1";

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
@@ -388,7 +389,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             cache.remove(key);
             cache.remove(keyWithoutExtended);
         } catch (RuntimeException e) {
-            LOG.warn("Failed to remove user configuration for context {} and user {} to cache.", ctx.getContextId(), userId, e);
+            LOG.warn("Failed to remove user configuration for context {} and user {} to cache.", I(ctx.getContextId()), I(userId), e);
         }
         UserPermissionBitsStorage.getInstance().removeUserPermissionBits(userId, ctx);
         /*
@@ -397,13 +398,13 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
-                cacheService.getCache("Capabilities").removeFromGroup(userId, String.valueOf(ctx.getContextId()));
+                cacheService.getCache("Capabilities").removeFromGroup(I(userId), String.valueOf(ctx.getContextId()));
             } catch (Exception e) {
                 LOG.warn("Error invalidating \"Capabilities\" cache for user {} in context {}: {}",
                     Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), e.getMessage(), e);
             }
             try {
-                cacheService.getCache("CapabilitiesUser").removeFromGroup(userId, String.valueOf(ctx.getContextId()));
+                cacheService.getCache("CapabilitiesUser").removeFromGroup(I(userId), String.valueOf(ctx.getContextId()));
             } catch (final Exception e) {
                 LOG.warn("Error invalidating \"CapabilitiesUser\" cache for user {} in context {}: {}",
                     Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), e.getMessage(), e);

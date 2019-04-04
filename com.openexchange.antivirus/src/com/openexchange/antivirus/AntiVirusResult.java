@@ -63,7 +63,7 @@ public interface AntiVirusResult extends Serializable {
     /**
      * Returns the Anti-Virus service id as returned from
      * the ICAP Server (if available).
-     * 
+     *
      * @return the Anti-Virus service id, or an empty string if none available
      */
     String getAntiVirusServiceId();
@@ -73,21 +73,21 @@ public interface AntiVirusResult extends Serializable {
      * This tag represents the service's current state and validates that
      * all previous ICAP responses are still considered fresh. If the ISTag is
      * changed then all previous responses are considered invalid.
-     * 
+     *
      * @return the ISTag of the Anti-Virus service never <code>null</code>.
      */
     String getISTag();
 
     /**
      * Returns the name of the found thread
-     * 
+     *
      * @return the name of the found thread
      */
     String getThreatName();
 
     /**
      * Returns whether the scan result yielded an infected status.
-     * 
+     *
      * @return <code>true</code> if an infection was detected; <code>false</code> if clean;
      *         <code>null</code> if scanning was not performed.
      */
@@ -95,31 +95,24 @@ public interface AntiVirusResult extends Serializable {
 
     /**
      * Returns the error that may have occurred during the anti-virus scanning process.
-     * 
+     *
      * @return the error that may have occurred during the anti-virus scanning process
      *         or <code>null</code> if no error occurred.
      */
     OXException getError();
 
     /**
-     * Returns the scan timestamp
-     * 
-     * @return The scan timestamp
+     * Returns the scan time stamp
+     *
+     * @return The scan time stamp
      */
     long getScanTimestamp();
-
-    /**
-     * Sets whether the stream was actually scanned.
-     * 
-     * @param scanned whether the stream was actually scanned
-     */
-    void setStreamScanned(boolean scanned);
 
     /**
      * Returns <code>true</code> if the stream was indeed scanned, <code>false</code>
      * otherwise. This also indicates implicitly whether the result is being served
      * from a cache.
-     * 
+     *
      * @return Returns <code>true</code> if the stream was indeed scanned, <code>false</code> otherwise
      */
     boolean isStreamScanned();

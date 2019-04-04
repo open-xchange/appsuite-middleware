@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -95,7 +96,7 @@ public final class AppointmentClearDelTablesTasks extends UpdateTaskAdapter {
 
             LOG.info("Clearing obsolete fields in 'del_dates'...");
             int cleared = clearDeletedAppointments(con);
-            LOG.info("Cleared {} rows in 'del_dates'.", cleared);
+            LOG.info("Cleared {} rows in 'del_dates'.", I(cleared));
 
             con.commit();
             rollback = 2;

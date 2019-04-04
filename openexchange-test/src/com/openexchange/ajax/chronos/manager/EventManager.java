@@ -510,6 +510,7 @@ public class EventManager extends AbstractManager {
             order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
         }
         EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, B(expand), B(extendedEntities), Boolean.FALSE);
+        lastTimeStamp = eventsResponse.getTimestamp().longValue();
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getCategories(), eventsResponse.getData());
     }
 

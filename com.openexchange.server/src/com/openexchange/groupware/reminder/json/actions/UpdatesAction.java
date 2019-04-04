@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.reminder.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -129,7 +130,7 @@ public final class UpdatesAction extends AbstractReminderAction {
                 deleteReminderSafe(session, reminder, session.getUserId(), reminderService);
             }
         }
-        if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(Types.APPOINTMENT)) {
+        if (req.getOptModules() == null || req.getOptModules().isEmpty() || req.getOptModules().contains(I(Types.APPOINTMENT))) {
             CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
             CalendarSession calendarSession = calendarService.init(session);
             calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
@@ -139,7 +140,7 @@ public final class UpdatesAction extends AbstractReminderAction {
             List<Integer> updatedAlarmIds = new ArrayList<>();
             for (Event eve : updatedEventsOfUser.getNewAndModifiedEvents()) {
                 for (Alarm alarm : eve.getAlarms()) {
-                    updatedAlarmIds.add(alarm.getId());
+                    updatedAlarmIds.add(I(alarm.getId()));
                 }
             }
             for (AlarmTrigger trigger : triggers) {

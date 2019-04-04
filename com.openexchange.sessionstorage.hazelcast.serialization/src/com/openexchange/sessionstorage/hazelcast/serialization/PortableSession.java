@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Set;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.slf4j.Logger;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
@@ -82,6 +83,11 @@ import com.openexchange.sessionstorage.StoredSession;
 public class PortableSession extends StoredSession implements CustomPortable, VersionedPortable {
 
     private static final long serialVersionUID = -2346327568417617677L;
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
+    }
 
     /**
      * BitSet of www-form-url safe characters.
@@ -270,32 +276,28 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
-            StringAppender names = null;
-            StringAppender values = null;
+            NameValueAppender nvps = null;
             for (String parameterName : remoteParameterNames) {
                 Object value = parameters.get(parameterName);
                 if (null != value) {
                     if (isSerializablePojo(value)) {
                         String sValue = value.toString();
-                        if (null == names) {
+                        if (null == nvps) {
                             int capacity = remoteParameterNames.size() << 4;
-                            names = new StringAppender(':', capacity);
-                            values = new StringAppender(':', capacity);
+                            nvps = new NameValueAppender(capacity);
                         }
-                        names.append(parameterName);
-                        values.append(getSafeValue(sValue));
+                        nvps.append(parameterName, getSafeValue(sValue));
                     } else {
-                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                        logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+                        LoggerHolder.LOG.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object: {}", parameterName, value.getClass().getName());
                     }
                 }
             }
-            if (null == names || null == values) {
+            if (null == nvps) {
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
             } else {
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, nvps.getNames());
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, nvps.getValues());
             }
         }
     }
@@ -354,11 +356,12 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                 List<String> names = parseColonString(sNames);
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
                 for (int i = 0, size = names.size(); i < size; i++) {
+                    String name = names.get(i);
                     try {
                         Object value = parseToSerializablePojo(decodeSafeValue(values.get(i)));
-                        parameters.put(names.get(i), value);
+                        parameters.put(name, value);
                     } catch (DecoderException e) {
-                        // Ignore
+                        LoggerHolder.LOG.warn("Failed to decode remote parameter for name {}.", name, e);
                     }
                 }
             }
@@ -409,14 +412,14 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         try {
             int i = Integer.parseInt(value, 10);
             return Integer.valueOf(i);
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore...
         }
 
         try {
             long l = Long.parseLong(value, 10);
             return Long.valueOf(l);
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore...
         }
 
@@ -439,6 +442,32 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
          */
 
         return value;
+    }
+
+    private static class NameValueAppender {
+
+        private final StringAppender names;
+        private final StringAppender values;
+
+        NameValueAppender(int initialCapacity) {
+            super();
+            names = new StringAppender(':', initialCapacity);
+            values = new StringAppender(':', initialCapacity);
+        }
+
+        NameValueAppender append(String name, String value) {
+            names.append(name);
+            values.append(value);
+            return this;
+        }
+
+        String getNames() {
+            return names.toString();
+        }
+
+        String getValues() {
+            return values.toString();
+        }
     }
 
 }

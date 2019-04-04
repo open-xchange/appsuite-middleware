@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -166,7 +167,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         appendix += "\n(With file attachments)";
                     }
                     message = content.toString() + appendix;
-                } catch (final Exception e) {
+                } catch (@SuppressWarnings("unused") final Exception e) {
                     message = "";
                 }
             } else {
@@ -207,7 +208,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             addr.setAddress(fromAddr);
             try {
                 addr.setPersonal(sender.getDisplayName(), "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
+            } catch (@SuppressWarnings("unused") final UnsupportedEncodingException e) {
                 // Cannot occur
             }
             mail.setFromAddr(addr.toString());
@@ -381,12 +382,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
          * Check if notification shall be dropped
          */
         if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == serverSession.getUserId() && !forceNotifyOthers) {
-            LOG.debug("Dropping notification for task {} ({}) since it indicates to discard its notification", title, newObj.getObjectID());
+            LOG.debug("Dropping notification for task {} ({}) since it indicates to discard its notification", title, I(newObj.getObjectID()));
             return;
         }
         if (newObj.getParticipants() == null) {
             if (oldObj == null || oldObj.getParticipants() == null) {
-                LOG.debug("Dropping notification for task {} ({}) since it contains NO participants", title, newObj.getObjectID());
+                LOG.debug("Dropping notification for task {} ({}) since it contains NO participants", title, I(newObj.getObjectID()));
                 return;
             }
             /*
@@ -466,7 +467,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         }
     }
 
-    private boolean onlyIrrelevantFieldsChanged(final Session session, final CalendarObject oldObj, final CalendarObject newObj, final State state) {
+    private boolean onlyIrrelevantFieldsChanged(@SuppressWarnings("unused") final Session session, final CalendarObject oldObj, final CalendarObject newObj, final State state) {
         if (oldObj == null || newObj == null) {
             return false;
         }
@@ -556,7 +557,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                          * Add to pool
                          */
                         NotificationPool.getInstance().put(new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
-                        LOG.debug("Task update (id = {}) notification added to pool for receiver {}", newObj.getObjectID(), p.email);
+                        LOG.debug("Task update (id = {}) notification added to pool for receiver {}", I(newObj.getObjectID()), p.email);
                     } else {
                         /*
                          * Compose message
@@ -569,7 +570,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         }
                         if (null != message) {
                             messages.add(message);
-                            LOG.debug("Task (id = {}) \"{}\" notification message generated for receiver {}", newObj.getObjectID(), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
+                            LOG.debug("Task (id = {}) \"{}\" notification message generated for receiver {}", I(newObj.getObjectID()), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
                         }
                     }
                 }
@@ -672,7 +673,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     private static final Pattern PATTERN_PREFIX_MODIFIED = Pattern.compile("(^|\r?\n)" + Pattern.quote(TemplateReplacement.PREFIX_MODIFIED));
 
-    private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+    private static MailMessage createParticipantMessage0(@SuppressWarnings("unused") final ServerSession session, @SuppressWarnings("unused") final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         if (Types.TASK != state.getModule()) {
             throw new UnsupportedOperationException();
         }
@@ -932,7 +933,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 }
                 try {
                     renderMap.put(new TaskStatusReplacement(status, percentComplete).setChanged(changed));
-                } catch (final IllegalArgumentException e) {
+                } catch (@SuppressWarnings("unused") final IllegalArgumentException e) {
                     renderMap.put(TaskStatusReplacement.emptyTaskStatusReplacement());
                 }
             }
@@ -1322,7 +1323,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             tz = TimeZone.getTimeZone(user.getTimeZone());
         } catch (final OXException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", I(session.getUserId()), I(session.getContextId()), e);
             l = Locale.getDefault();
             tz = TimeZone.getDefault();
         }
@@ -1396,7 +1397,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             l = user.getLocale();
         } catch (final OXException e) {
             // Should not happen
-            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
+            LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", I(session.getUserId()), I(session.getContextId()), e);
             l = Locale.getDefault();
         }
 
@@ -1649,11 +1650,11 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 final Date endDate = calendarObj.getEndDate();
                 if (endDate != null) {
                     if (Types.APPOINTMENT == module && endDate.getTime() < now) {
-                        LOG.debug("Ignoring notification(s) for single appointment object {} since its end date is in the past", calendarObj.getObjectID());
+                        LOG.debug("Ignoring notification(s) for single appointment object {} since its end date is in the past", I(calendarObj.getObjectID()));
                         return false;
                     }
                     if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
-                        LOG.debug("Ignoring notification(s) for single task object {} since its end date is in the past", calendarObj.getObjectID());
+                        LOG.debug("Ignoring notification(s) for single task object {} since its end date is in the past", I(calendarObj.getObjectID()));
                         return false;
                     }
                 }
@@ -1662,11 +1663,11 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final Date untilDate = calendarObj.getUntil();
             if (null != untilDate) {
                 if (Types.APPOINTMENT == module && untilDate.getTime() < now) {
-                    LOG.debug("Ignoring notification(s) for recurring appointment object {} since its until date is in the past", calendarObj.getObjectID());
+                    LOG.debug("Ignoring notification(s) for recurring appointment object {} since its until date is in the past", I(calendarObj.getObjectID()));
                     return false;
                 }
                 if (Types.TASK == module && !compare2Date(untilDate.getTime(), now)) {
-                    LOG.debug("Ignoring notification(s) for recurring task object {} since its until date is in the past", calendarObj.getObjectID());
+                    LOG.debug("Ignoring notification(s) for recurring task object {} since its until date is in the past", I(calendarObj.getObjectID()));
                     return false;
                 }
             }
@@ -1675,11 +1676,11 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     /**
-     * Compares if given time millis fit into the date denoted by specified date millis.
+     * Compares if given time milliseconds fit into the date denoted by specified date milliseconds.
      *
-     * @param date The date millis
-     * @param millis The time millis
-     * @return <code>true</code> if given time millis fit into the date denoted by specified date millis; otherwise <code>false</code>
+     * @param date The date milliseconds
+     * @param millis The time milliseconds
+     * @return <code>true</code> if given time milliseconds fit into the date denoted by specified date milliseconds; otherwise <code>false</code>
      */
     private static boolean compare2Date(final long date, final long millis) {
         return date >= (millis - (millis % Constants.MILLI_DAY));

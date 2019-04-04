@@ -93,6 +93,7 @@ public class QuotaDeleteListener implements DeleteListener {
         }
     }
 
+    @SuppressWarnings("unused")
     private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
         // Nothing to do
     }

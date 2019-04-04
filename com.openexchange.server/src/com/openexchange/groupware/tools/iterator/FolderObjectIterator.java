@@ -263,7 +263,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         FolderCacheManager manager;
         try {
             manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             manager = null;
         }
         cache = manager;
@@ -287,7 +287,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         FolderCacheManager manager;
         try {
             manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             manager = null;
         }
         cache = manager;
@@ -329,7 +329,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         FolderCacheManager manager;
         try {
             manager = FolderCacheManager.isInitialized() && FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null;
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             manager = null;
         }
         cache = manager;

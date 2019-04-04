@@ -161,17 +161,16 @@ public final class SessionHandler {
      * Initializes the {@link SessionHandler session handler}
      *
      * @param config The appropriate configuration
-     * @throws OXException 
      */
-    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) throws OXException {
+    public static synchronized void init(SessiondConfigInterface config, UserTypeSessiondConfigRegistry userConfigRegistry) {
         SessionHandler.config = config;
         SessionHandler.userConfigRegistry = userConfigRegistry;
         // @formatter:off
-        SessionData sessionData = new SessionData(  config.getNumberOfSessionContainers(), 
-                                                    config.getMaxSessions(), 
-                                                    config.getRandomTokenTimeout(), 
-                                                    config.getNumberOfLongTermSessionContainers(), 
-                                                    config.isAutoLogin() 
+        SessionData sessionData = new SessionData(  config.getNumberOfSessionContainers(),
+                                                    config.getMaxSessions(),
+                                                    config.getRandomTokenTimeout(),
+                                                    config.getNumberOfLongTermSessionContainers(),
+                                                    config.isAutoLogin()
                                                     );
         // @formatter:on
         SESSION_DATA_REF.set(sessionData);
@@ -291,9 +290,8 @@ public final class SessionHandler {
      *
      * @param userId The user ID
      * @param contextId The context ID
-     * @throws OXException If operation fails
      */
-    public static void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+    public static void removeUserSessionsGlobal(int userId, int contextId) {
         SessionHandler.removeRemoteUserSessions(userId, contextId);
         SessionHandler.removeUserSessions(userId, contextId);
     }
@@ -336,13 +334,13 @@ public final class SessionHandler {
                     } catch (TimeoutException e) {
                         // Wait time elapsed; enforce cancelation
                         future.cancel(true);
-                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), I(hzExecutionTimeout), e);
                     } catch (InterruptedException e) {
                         future.cancel(true);
-                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e);
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), I(hzExecutionTimeout), e);
                     } catch (ExecutionException e) {
                         future.cancel(true);
-                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), hzExecutionTimeout, e.getCause());
+                        LOG.error("Removing sessions for context ids {} on remote node {} took to longer than {} seconds and was aborted!", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), I(hzExecutionTimeout), e.getCause());
                     } catch (Exception e) {
                         LOG.error("Failed to issue remote session removal for contexts {} on remote node {}.", Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
                         throw SessionExceptionCodes.REMOTE_SESSION_REMOVAL_FAILED.create(Strings.concat(", ", contextIds), member.getSocketAddress().toString(), e.getCause());
@@ -356,16 +354,16 @@ public final class SessionHandler {
         }
     }
 
-    private static void removeRemoteUserSessions(int userId, int contextId) throws OXException {
-        LOG.debug("Trying to remove sessions for user {} in context {} from remote nodes", userId, contextId);
+    private static void removeRemoteUserSessions(int userId, int contextId) {
+        LOG.debug("Trying to remove sessions for user {} in context {} from remote nodes", I(userId), I(contextId));
         Map<Member, Integer> results = executeGlobalTask(new PortableUserSessionsCleaner(userId, contextId));
         for (Entry<Member, Integer> memberEntry : results.entrySet()) {
             Member member = memberEntry.getKey();
             Integer numOfRemovedSessions = memberEntry.getValue();
             if (numOfRemovedSessions == null) {
-                LOG.warn("No sessions removed for user {} in context {} on remote node {}.", userId, contextId, member.getSocketAddress().toString());
+                LOG.warn("No sessions removed for user {} in context {} on remote node {}.", I(userId), I(contextId), member.getSocketAddress().toString());
             } else {
-                LOG.info("Removed {} sessions for user {} in context {} on remote node {}", numOfRemovedSessions, userId, contextId, member.getSocketAddress().toString());
+                LOG.info("Removed {} sessions for user {} in context {} on remote node {}", numOfRemovedSessions, I(userId), I(contextId), member.getSocketAddress().toString());
             }
         }
     }
@@ -376,14 +374,14 @@ public final class SessionHandler {
      * @param filter The filter
      * @return The session IDs of all removed sessions
      */
-    public static List<String> removeRemoteSessions(SessionFilter filter) throws OXException {
+    public static List<String> removeRemoteSessions(SessionFilter filter) {
         LOG.debug("Trying to remove sessions from remote nodes by filter '{}'", filter);
         Map<Member, Collection<String>> results = executeGlobalTask(new PortableSessionFilterApplier(filter, Action.REMOVE));
         List<String> sessionIds = new ArrayList<String>();
         for (Entry<Member, Collection<String>> memberEntry : results.entrySet()) {
             Collection<String> memberSessionIds = memberEntry.getValue();
             if (memberSessionIds != null) {
-                LOG.debug("Removed {} sessions on node {} for filter '{}'", memberSessionIds.size(), memberEntry.getKey().getSocketAddress().toString(), filter);
+                LOG.debug("Removed {} sessions on node {} for filter '{}'", I(memberSessionIds.size()), memberEntry.getKey().getSocketAddress().toString(), filter);
                 sessionIds.addAll(memberSessionIds);
             }
         }
@@ -397,14 +395,14 @@ public final class SessionHandler {
      * @param filter The filter
      * @return The session IDs of all found sessions
      */
-    public static List<String> findRemoteSessions(SessionFilter filter) throws OXException {
+    public static List<String> findRemoteSessions(SessionFilter filter) {
         LOG.debug("Trying to find sessions on remote nodes by filter '{}'", filter);
         Map<Member, Collection<String>> results = executeGlobalTask(new PortableSessionFilterApplier(filter, Action.GET));
         List<String> sessionIds = new ArrayList<String>();
         for (Entry<Member, Collection<String>> memberEntry : results.entrySet()) {
             Collection<String> memberSessionIds = memberEntry.getValue();
             if (memberSessionIds != null) {
-                LOG.debug("Found {} sessions on node {} for filter '{}'", memberSessionIds.size(), memberEntry.getKey().getSocketAddress().toString(), filter);
+                LOG.debug("Found {} sessions on node {} for filter '{}'", I(memberSessionIds.size()), memberEntry.getKey().getSocketAddress().toString(), filter);
                 sessionIds.addAll(memberSessionIds);
             }
         }
@@ -572,7 +570,7 @@ public final class SessionHandler {
         /*
          * Continue...
          */
-        removeContextSessions(Collections.singleton(contextId));
+        removeContextSessions(Collections.singleton(I(contextId)));
     }
 
     /**
@@ -594,10 +592,10 @@ public final class SessionHandler {
 
         Set<Integer> processedContexts = new HashSet<Integer>(removeContextSessions.size());
         for (SessionControl control : removeContextSessions) {
-            processedContexts.add(control.getSession().getContextId());
+            processedContexts.add(I(control.getSession().getContextId()));
         }
 
-        LOG.info("Removed {} sessions for {} contexts", removeContextSessions.size(), processedContexts.size());
+        LOG.info("Removed {} sessions for {} contexts", I(removeContextSessions.size()), I(processedContexts.size()));
         return processedContexts;
     }
 
@@ -1419,11 +1417,16 @@ public final class SessionHandler {
             Session session = sessionControl.getSession();
             String oldIP = session.getLocalIp();
             if (!newIP.equals(oldIP)) {
-                LOG.info("Changing IP of session {} with authID: {} from {} to {}{}", session.getSessionID(), session.getAuthId(), oldIP, newIP, '.');
-                session.setLocalIp(newIP);
+                LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                applyNewIP(newIP, session);
             }
         }
         return sessionControl.getSession();
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void applyNewIP(final String newIP, Session session) {
+        session.setLocalIp(newIP);
     }
 
     static Session getSessionWithTokens(String clientToken, final String serverToken) throws OXException {
@@ -1698,19 +1701,19 @@ public final class SessionHandler {
         SessionData sessionData = SESSION_DATA_REF.get();
         return null == sessionData ? 0 : sessionData.countSessions();
     }
-    
+
     /**
      * Gets the total number of sessions
-     * 
+     *
      * @return The total number of sessions
      */
     public static int getMetricTotalSessions() {
         return getNumberOfActiveSessions();
     }
-    
+
     /**
      * Gets the number of active sessions (Sessions within the first two short-term containers).
-     *  
+     *
      * @return The number of active sessions
      */
     public static int getMetricActiveSessions() {
@@ -1721,10 +1724,10 @@ public final class SessionHandler {
         int[] shortTermSessionsPerContainer = sessionData.getShortTermSessionsPerContainer();
         return shortTermSessionsPerContainer.length < 2 ? 0 : shortTermSessionsPerContainer[0]+shortTermSessionsPerContainer[1];
     }
-    
+
     /**
      * Gets the number of sessions in the short-term container
-     * 
+     *
      * @return The number of sessions in the short-term container
      */
     public static int getMetricShortSessions() {
@@ -1734,10 +1737,10 @@ public final class SessionHandler {
         }
         return sessionData.getNumShortTerm();
     }
-    
+
     /**
      * Gets the number of sessions in the long-term container
-     * 
+     *
      * @return the number of sessions in the long-term container
      */
     public static int getMetricLongSessions() {
@@ -1747,8 +1750,8 @@ public final class SessionHandler {
         }
         return sessionData.getNumLongTerm();
     }
-    
-    
+
+
 
     public static int[] getNumberOfLongTermSessions() {
         SessionData sessionData = SESSION_DATA_REF.get();
@@ -2181,7 +2184,7 @@ public final class SessionHandler {
     private static <V> void submitAndIgnoreRejection(Task<V> task) {
         try {
             ThreadPools.getThreadPool().submit(task);
-        } catch (RejectedExecutionException e) {
+        } catch (@SuppressWarnings("unused") RejectedExecutionException e) {
             // Ignore
         }
     }
@@ -2190,7 +2193,7 @@ public final class SessionHandler {
         Future<V> f;
         try {
             f = ThreadPools.getThreadPool().submit(c);
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Failed to submit to thread pool
             return defaultValue;
         }
@@ -2198,16 +2201,16 @@ public final class SessionHandler {
         // Await task completion
         try {
             return f.get(timeout(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
             Thread.currentThread().interrupt();
             return defaultValue;
         } catch (ExecutionException e) {
             ThreadPools.launderThrowable(e, OXException.class);
             return defaultValue;
-        } catch (TimeoutException e) {
+        } catch (@SuppressWarnings("unused") TimeoutException e) {
             f.cancel(true);
             return defaultValue;
-        } catch (CancellationException e) {
+        } catch (@SuppressWarnings("unused") CancellationException e) {
             return defaultValue;
         }
     }

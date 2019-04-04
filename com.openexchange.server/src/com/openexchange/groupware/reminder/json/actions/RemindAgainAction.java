@@ -234,10 +234,10 @@ public final class RemindAgainAction extends AbstractReminderAction {
         ReminderObject reminder = new ReminderObject();
         reminder.setDate(time);
         reminder.setLastModified(event.getLastModified());
-        reminder.setFolder(Integer.valueOf(event.getFolderId()));
+        reminder.setFolder(Integer.parseInt(event.getFolderId()));
         reminder.setModule(Types.APPOINTMENT);
         reminder.setUser(calSession.getUserId());
-        reminder.setObjectId(Integer.valueOf(event.getId())); // AlarmTrigger don't have an id
+        reminder.setObjectId(Integer.parseInt(event.getId())); // AlarmTrigger don't have an id
         reminder.setTargetId(alarm.getId());
 
         if (CalendarUtils.isSeriesMaster(event)) {

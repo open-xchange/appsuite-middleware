@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -309,7 +310,7 @@ public final class NotificationPool {
                 logger.debug(
                     "Pooled {} (id = {}) notification message generated for receiver {}",
                     (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"),
-                    calendarObject.getObjectID(),
+                    I(calendarObject.getObjectID()),
                     p.email);
                 /*
                  * Send notification

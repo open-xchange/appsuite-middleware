@@ -291,7 +291,7 @@ public class EventResource extends DAVObjectResource<Event> {
             /*
              * add any extended properties & serialize ical
              */
-            EventPatches.Outgoing.applyExport(this, calendarExport);
+            EventPatches.Outgoing.applyExport(this, calendarExport, exportedEvents);
             inputStream = calendarExport.getClosingStream();
             return Streams.stream2bytes(inputStream);
         } catch (IOException e) {

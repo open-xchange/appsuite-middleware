@@ -141,7 +141,7 @@ public final class JCSCacheServiceInit {
     /**
      * The list of default auxiliary names.
      */
-    private final Set<String> auxiliaryNames;
+    /* private final Set<String> auxiliaryNames; */
 
     /**
      * The auxiliary properties.
@@ -179,7 +179,7 @@ public final class JCSCacheServiceInit {
     private JCSCacheServiceInit() {
         super();
         started = new AtomicBoolean();
-        auxiliaryNames = new HashSet<String>(4);
+        /* auxiliaryNames = new HashSet<String>(4); */
         cacheRegionTypes = new HashMap<String, String>();
     }
 

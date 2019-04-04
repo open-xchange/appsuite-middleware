@@ -223,27 +223,26 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
                 StampedCacheEvent first = q.peek();
                 if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
                     return null;
-                } else {
-                    first = q.poll();
+                }
+                first = q.poll();
 
-                    com.openexchange.caching.events.Condition eventCondition = first.optCondition();
-                    if (null != eventCondition) {
-                        int peeked = eventCondition.peekShouldDeliver();
-                        if (peeked < 0) {
-                            // Condition not yet available, reschedule and repeat
-                            first.forceReset();
-                            q.offer(first);
-                            continue;
-                        }
-
-                        if (peeked == 0) {
-                            // Discard... Event is not supposed to be propagated
-                            continue;
-                        }
+                com.openexchange.caching.events.Condition eventCondition = first.optCondition();
+                if (null != eventCondition) {
+                    int peeked = eventCondition.peekShouldDeliver();
+                    if (peeked < 0) {
+                        // Condition not yet available, reschedule and repeat
+                        first.forceReset();
+                        q.offer(first);
+                        continue;
                     }
 
-                    return first;
+                    if (peeked == 0) {
+                        // Discard... Event is not supposed to be propagated
+                        continue;
+                    }
                 }
+
+                return first;
             }
         } finally {
             lock.unlock();
@@ -330,9 +329,8 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
                 if (first == null) {
                     if (nanos <= 0) {
                         return null;
-                    } else {
-                        nanos = available.awaitNanos(nanos);
                     }
+                    nanos = available.awaitNanos(nanos);
                 } else {
                     long delay = first.getDelay(TimeUnit.NANOSECONDS);
                     if (delay <= 0) {
@@ -626,19 +624,24 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
      */
     @Override
     public Iterator<StampedCacheEvent> iterator() {
-        return new Itr(toArray());
+        return new Itr(toArray(), q, lock);
     }
 
     /**
      * Snapshot iterator that works off copy of underlying q array.
      */
-    private class Itr implements Iterator<StampedCacheEvent> {
+    private static class Itr implements Iterator<StampedCacheEvent> {
 
+        final ReentrantLock lock;
+        final PriorityQueue<StampedCacheEvent> q;
         final Object[] array; // Array of all elements
         int cursor; // index of next element to return;
         int lastRet; // index of last element, or -1 if no such
 
-        Itr(Object[] array) {
+        Itr(Object[] array, PriorityQueue<StampedCacheEvent> q, ReentrantLock lock) {
+            super();
+            this.q = q;
+            this.lock = lock;
             lastRet = -1;
             this.array = array;
         }
@@ -649,7 +652,6 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public StampedCacheEvent next() {
             if (cursor >= array.length) {
                 throw new NoSuchElementException();
@@ -669,7 +671,7 @@ public class CacheEventQueue extends AbstractQueue<StampedCacheEvent> implements
             // not just a .equals element.
             lock.lock();
             try {
-                for (Iterator it = q.iterator(); it.hasNext();) {
+                for (Iterator<StampedCacheEvent> it = q.iterator(); it.hasNext();) {
                     if (it.next() == x) {
                         it.remove();
                         return;
