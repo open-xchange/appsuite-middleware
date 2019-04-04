@@ -105,8 +105,7 @@ public class PortableIDToOXExceptionMapTest {
     }
 
     @After
-    public void tearDown()
- {
+    public void tearDown() {
         hzInstance1.shutdown();
         hzInstance2.shutdown();
     }
