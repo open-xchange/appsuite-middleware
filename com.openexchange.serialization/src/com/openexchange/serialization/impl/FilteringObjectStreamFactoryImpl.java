@@ -80,7 +80,7 @@ public class FilteringObjectStreamFactoryImpl implements FilteringObjectStreamFa
     }
 
     @Override
-    public FilteringObjectInputStream createFilteringStream(InputStream stream) throws IOException {
+    public FilteringObjectInputStream createFilteringStream(InputStream stream, Object context) throws IOException {
         ConfigParseResult configParseResult = configReference.get();
         if (configParseResult == null) {
             // Parse configuration on-the-fly
@@ -95,7 +95,7 @@ public class FilteringObjectStreamFactoryImpl implements FilteringObjectStreamFa
 
         SerializationFilteringConfig config = configParseResult.getConfig();
         if (null != config) {
-            return new FilteringObjectInputStream(stream, config);
+            return new FilteringObjectInputStream(stream, context, config);
         }
 
         // Configuration could not be successfully parsed

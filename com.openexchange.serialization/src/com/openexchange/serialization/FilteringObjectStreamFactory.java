@@ -67,9 +67,10 @@ public interface FilteringObjectStreamFactory {
      * Creates an filtering {@link ObjectInputStream} from the given stream, which denies deserialization of potentially harmful classes.
      *
      * @param stream The input stream to read from
+     * @param context A context object from which class loading has to be done
      * @return A {@link FilteringObjectInputStream}
      * @throws IOException If an I/O error occurs while reading from stream
      */
-    ObjectInputStream createFilteringStream(InputStream stream) throws IOException;
+    ObjectInputStream createFilteringStream(InputStream stream, Object context) throws IOException;
 
 }

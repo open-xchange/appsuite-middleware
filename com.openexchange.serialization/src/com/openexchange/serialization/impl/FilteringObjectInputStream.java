@@ -72,31 +72,34 @@ public class FilteringObjectInputStream extends ObjectInputStream {
     }
 
     private final SerializationFilteringConfig config;
+    private final ClassLoader contextLoader;
 
     /**
      * Initializes a new {@link FilteringObjectInputStream}.
      *
      * @param in The {@link InputStream}
-     * @throws IOException
+     * @param context A context object from which class loading has to be done
+     * @param config The configuration to use
+     * @throws IOException If an I/O error occurs
      */
-    FilteringObjectInputStream(InputStream in, SerializationFilteringConfig config) throws IOException {
+    FilteringObjectInputStream(InputStream in, Object context, SerializationFilteringConfig config) throws IOException {
         super(in);
+        this.contextLoader = context.getClass().getClassLoader();
         this.config = config;
     }
 
     @Override
     protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
-
         for (Pattern blackPattern : config.blacklist()) {
             Matcher blackMatcher = blackPattern.matcher(input.getName());
-
             if (blackMatcher.find()) {
                 LoggerHolder.LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), input.getName());
                 throw new InvalidClassException(input.getName(), "Class blocked from deserialization (blacklist)");
             }
         }
 
-        return super.resolveClass(input);
+        Class<?> clazz = contextLoader.loadClass(input.getName());
+        return null == clazz ? super.resolveClass(input) : clazz;
     }
 
 }

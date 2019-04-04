@@ -175,9 +175,9 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
      *             subclass are accessible
      * @throws OXException
      */
-    private static OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
+    private OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
-        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
+        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream, this)) {
             return OXException.class.cast(objectInputStream.readObject());
         }
     }

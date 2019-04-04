@@ -224,9 +224,9 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
      *             accessible
      * @throws OXException
      */
-    private static Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException, OXException {
+    private Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException, OXException {
         final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
-        try (ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream)) {
+        try (ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream, this)) {
             return Stanza.class.cast(objectInputStream.readObject());
         }
     }

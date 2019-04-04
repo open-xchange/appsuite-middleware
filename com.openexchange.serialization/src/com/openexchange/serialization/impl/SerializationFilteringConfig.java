@@ -105,7 +105,7 @@ public class SerializationFilteringConfig {
             try {
                 patterns.add(Pattern.compile(item.getTextContent()));
             } catch (PatternSyntaxException e) {
-                LOG.error("Unable to parse java deserialization filter config. Please check serialkiller.xml for errors.");
+                LOG.error("Unable to parse java deserialization filter config. Please check serialkiller.xml for errors.", e);
                 blacklist = Collections.unmodifiableList(Collections.emptyList());
                 return;
             }
@@ -116,7 +116,7 @@ public class SerializationFilteringConfig {
 
     /**
      * Gets the blacklist
-     * 
+     *
      * @return An {@link Iterable} of regex {@link Pattern}
      */
     Iterable<Pattern> blacklist() {
