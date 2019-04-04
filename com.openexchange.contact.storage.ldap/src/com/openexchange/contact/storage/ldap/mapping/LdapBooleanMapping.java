@@ -106,11 +106,10 @@ public abstract class LdapBooleanMapping extends LdapMapping<Boolean> {
 
     @Override
     public String encode(Boolean value, LdapIDResolver idResolver) throws OXException {
-        if (Boolean.TRUE.equals(value)) {
-            return null != this.match ? match : String.valueOf(true);
-        } else {
+        if (!value.booleanValue()) {
             throw new UnsupportedOperationException("unable to encode other values than TRUE");
         }
+        return null != this.match ? match : String.valueOf(true);
     }
 
 }

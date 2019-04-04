@@ -49,12 +49,12 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.naming.ldap.SortKey;
-import org.slf4j.Logger;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -91,8 +91,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class LdapContactStorage extends DefaultContactStorage {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LdapContactStorage.class);
-
     private static final ContactField[] DISTLISTMEMBER_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.OBJECT_ID, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME
     };
@@ -121,7 +119,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         return parse(config.getFolderID());
     }
 
-    public int getContextID() throws OXException {
+    public int getContextID() {
         return config.getContextID();
     }
 
@@ -213,10 +211,9 @@ public class LdapContactStorage extends DefaultContactStorage {
         if (null == mapper.opt(ContactField.BIRTHDAY)) {
             LOG.warn("No LDAP mapping for {}, unable to search contacts by birthday.", ContactField.BIRTHDAY);
             return getSearchIterator(null);
-        } else {
-            // use default implementation for now
-            return super.searchByBirthday(session, folderIDs, from, until, fields, sortOptions);
         }
+        // use default implementation for now
+        return super.searchByBirthday(session, folderIDs, from, until, fields, sortOptions);
     }
 
     @Override
@@ -224,10 +221,9 @@ public class LdapContactStorage extends DefaultContactStorage {
         if (null == mapper.opt(ContactField.ANNIVERSARY)) {
             LOG.warn("No LDAP mapping for {}, unable to search contacts by anniversary.", ContactField.ANNIVERSARY);
             return getSearchIterator(null);
-        } else {
-            // use default implementation for now
-            return super.searchByAnniversary(session, folderIDs, from, until, fields, sortOptions);
         }
+        // use default implementation for now
+        return super.searchByAnniversary(session, folderIDs, from, until, fields, sortOptions);
     }
 
     protected Contact doGet(Session session, String folderId, String id, ContactField[] fields) throws OXException {
@@ -235,20 +231,19 @@ public class LdapContactStorage extends DefaultContactStorage {
         try {
             searchIterator = doList(session, folderId, new String[] { id }, fields, SortOptions.EMPTY);
             if (false == searchIterator.hasNext()) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), session.getContextId());
-            } else {
-                return searchIterator.next();
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(parse(id)), I(session.getContextId()));
             }
+            return searchIterator.next();
         } finally {
             Tools.close(searchIterator);
         }
     }
 
-    protected SearchIterator<Contact> doAll(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    protected SearchIterator<Contact> doAll(Session session, @SuppressWarnings("unused") String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
         return getSearchIterator(search(session, fields, null, sortOptions, false));
     }
 
-    protected SearchIterator<Contact> doList(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    protected SearchIterator<Contact> doList(Session session, @SuppressWarnings("unused") String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
         CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
         for (String id : ids) {
             SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
@@ -259,14 +254,14 @@ public class LdapContactStorage extends DefaultContactStorage {
         return doSearch(session, orTerm, fields, sortOptions);
     }
 
-    protected SearchIterator<Contact> doDeleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    protected SearchIterator<Contact> doDeleted(Session session, @SuppressWarnings("unused") String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
         term.addOperand(new ConstantOperand<Date>(since));
         return getSearchIterator(search(session, term, fields, sortOptions, true));
     }
 
-    protected SearchIterator<Contact> doModified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
+    protected SearchIterator<Contact> doModified(Session session, @SuppressWarnings("unused") String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.GREATER_THAN);
         term.addOperand(new ContactFieldOperand(ContactField.LAST_MODIFIED));
         term.addOperand(new ConstantOperand<Date>(since));
@@ -309,9 +304,8 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
         if (null != sortKeys) {
             return search(session, fields, mapper, baseDN, filter, sortKeys, getMaxResults(sortOptions), deleted);
-        } else {
-            return sort(search(session, fields, mapper, baseDN, filter, null, getMaxResults(sortOptions), deleted), mapper, sortOptions);
         }
+        return sort(search(session, fields, mapper, baseDN, filter, null, getMaxResults(sortOptions), deleted), mapper, sortOptions);
     }
 
     protected int count(Session session, String baseDN, String filter) throws OXException {
@@ -351,9 +345,8 @@ public class LdapContactStorage extends DefaultContactStorage {
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && 0 < sortOptions.getLimit()) {
             if (0 < sortOptions.getRangeStart()) {
                 return sortOptions.getRangeStart() + sortOptions.getLimit();
-            } else {
-                return sortOptions.getLimit();
             }
+            return sortOptions.getLimit();
         }
         return -1;
     }
@@ -387,17 +380,17 @@ public class LdapContactStorage extends DefaultContactStorage {
     }
 
     private static DistributionListEntryObject[] filterInvalidMembers(DistributionListEntryObject[] members) {
-        if (null != members && 0 < members.length) {
-            List<DistributionListEntryObject> validMembers = new ArrayList<DistributionListEntryObject>(members.length);
-            for (DistributionListEntryObject member : members) {
-                if (isValid(member)) {
-                    validMembers.add(member);
-                }
-            }
-            return validMembers.toArray(new DistributionListEntryObject[validMembers.size()]);
-        } else {
+        if (null == members || 0 >= members.length) {
             return members;
         }
+
+        List<DistributionListEntryObject> validMembers = new ArrayList<DistributionListEntryObject>(members.length);
+        for (DistributionListEntryObject member : members) {
+            if (isValid(member)) {
+                validMembers.add(member);
+            }
+        }
+        return validMembers.toArray(new DistributionListEntryObject[validMembers.size()]);
     }
 
     /**
@@ -426,9 +419,8 @@ public class LdapContactStorage extends DefaultContactStorage {
                 toIndex = contacts.size();
             }
             return contacts.subList(fromIndex, toIndex);
-        } else {
-            return contacts;
         }
+        return contacts;
     }
 
     private List<Contact> createContacts(LdapExecutor executor, LdapIDResolver idResolver, LdapMapper mapper, List<LdapResult> results, ContactField[] fields) throws OXException {
@@ -559,7 +551,7 @@ public class LdapContactStorage extends DefaultContactStorage {
      */
     protected void checkContext(int contextID) throws OXException {
         if (this.config.getContextID() != contextID) {
-            throw LdapExceptionCodes.INVALID_CONTEXT.create(contextID);
+            throw LdapExceptionCodes.INVALID_CONTEXT.create(I(contextID));
         }
     }
 

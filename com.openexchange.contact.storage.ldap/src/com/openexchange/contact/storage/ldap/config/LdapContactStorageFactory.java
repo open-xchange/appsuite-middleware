@@ -84,10 +84,9 @@ public final class LdapContactStorageFactory {
         Properties properties = Tools.loadProperties(propertyFile);
         if (null != properties && properties.containsKey("com.openexchange.contact.storage.ldap.contextID")) {
             return create(properties);
-        } else {
-            LOG.debug("File {} contains no contact-storage-ldap settings, skipping.", propertyFile);
-            return null;
         }
+        LOG.debug("File {} contains no contact-storage-ldap settings, skipping.", propertyFile);
+        return null;
     }
 
     public static ContactStorage create(Properties properties) throws OXException {

@@ -173,7 +173,8 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
      */
     public String encodeForFilter(Object value, LdapIDResolver idResolver) throws OXException {
         try {
-            return encode((T)value, idResolver);
+            @SuppressWarnings("unchecked") T t = (T) value;
+            return encode(t, idResolver);
         } catch (ClassCastException e) {
             throw LdapExceptionCodes.ERROR.create(e, "Error encoding value for '" + this + "'");
         }
