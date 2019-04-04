@@ -193,7 +193,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File org2 = itm.getAction(id);
         org2.setVersion("2");
 
-        itm.updateAction(org2, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, org2.getLastModified());
+        itm.updateAction(org2, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, itm.getLastResponse().getTimestamp());
         checkResponse();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
