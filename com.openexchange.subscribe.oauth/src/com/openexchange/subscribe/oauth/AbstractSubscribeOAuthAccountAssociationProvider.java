@@ -106,7 +106,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
                     continue;
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Possible malfunctioning subscribe oauth account with id: {}, for user: {}, in context {}.", accountId, session.getUserId(), session.getContextId(), e);
+                LOGGER.debug("No association found between subscription {} and oauth account {} for user {} in context {}.", subscription.getId(), accountId, session.getUserId(), session.getContextId(), e);
                 continue;
             }
             if (null == associations) {
