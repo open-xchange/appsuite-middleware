@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.osgi.framework.BundleContext;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
@@ -63,6 +64,8 @@ import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.serialization.BundleClassResolver;
+import com.openexchange.serialization.ClassResolver;
 import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
@@ -176,8 +179,10 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
      * @throws OXException
      */
     private OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
-        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream, this)) {
+        BundleContext bundleContext = Services.getBundleContext();
+        ClassResolver bundleClassResolver = bundleContext == null ? null : new BundleClassResolver(bundleContext);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
+        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream, this, bundleClassResolver)) {
             return OXException.class.cast(objectInputStream.readObject());
         }
     }

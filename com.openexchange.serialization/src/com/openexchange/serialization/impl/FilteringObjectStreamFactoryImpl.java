@@ -57,6 +57,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.serialization.ClassResolver;
 import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
@@ -80,7 +81,7 @@ public class FilteringObjectStreamFactoryImpl implements FilteringObjectStreamFa
     }
 
     @Override
-    public FilteringObjectInputStream createFilteringStream(InputStream stream, Object context) throws IOException {
+    public FilteringObjectInputStream createFilteringStream(InputStream stream, Object optContext, ClassResolver optClassResolver) throws IOException {
         ConfigParseResult configParseResult = configReference.get();
         if (configParseResult == null) {
             // Parse configuration on-the-fly
@@ -95,7 +96,7 @@ public class FilteringObjectStreamFactoryImpl implements FilteringObjectStreamFa
 
         SerializationFilteringConfig config = configParseResult.getConfig();
         if (null != config) {
-            return new FilteringObjectInputStream(stream, context, config);
+            return new FilteringObjectInputStream(stream, optContext, optClassResolver, config);
         }
 
         // Configuration could not be successfully parsed

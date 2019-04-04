@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,31 +47,61 @@
  *
  */
 
-package com.openexchange.serialization;
+package com.openexchange.serialization.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.serialization.ClassResolver;
+
 
 /**
- * {@link FilteringObjectStreamFactory} is a factory for {@link FilteringObjectInputStream}s
+ * {@link ClassLoaderClassResolver}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-@SingletonService
-public interface FilteringObjectStreamFactory {
+public class ClassLoaderClassResolver implements ClassResolver {
+
+    private final ClassLoader classLoader;
 
     /**
-     * Creates an filtering {@link ObjectInputStream} from the given stream, which denies deserialization of potentially harmful classes.
+     * Initializes a new {@link ClassLoaderClassResolver}.
      *
-     * @param stream The input stream to read from
-     * @param context An optional context object from which class loading has to be done (typically the instance from which this method is called)
-     * @param optClassResolver The class resolver or <code>null</code>
-     * @return A {@link FilteringObjectInputStream}
-     * @throws IOException If an I/O error occurs while reading from stream
+     * @param classLoader The class loader to use
      */
-    ObjectInputStream createFilteringStream(InputStream stream, Object optContext, ClassResolver optClassResolver) throws IOException;
+    public ClassLoaderClassResolver(ClassLoader classLoader) {
+        super();
+        this.classLoader = classLoader;
+    }
+
+    @Override
+    public Class<?> resolveClass(String className) throws ClassNotFoundException {
+        return classLoader.loadClass(className);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * 1 + ((classLoader == null) ? 0 : classLoader.hashCode());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ClassLoaderClassResolver other = (ClassLoaderClassResolver) obj;
+        if (classLoader == null) {
+            if (other.classLoader != null) {
+                return false;
+            }
+        } else if (!classLoader.equals(other.classLoader)) {
+            return false;
+        }
+        return true;
+    }
 
 }

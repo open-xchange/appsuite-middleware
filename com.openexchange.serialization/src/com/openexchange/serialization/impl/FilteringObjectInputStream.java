@@ -59,6 +59,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
+import com.openexchange.serialization.ClassResolver;
 
 /**
  * {@link FilteringObjectInputStream} prevents invalid deserialization by using a blacklist
@@ -74,20 +75,27 @@ public class FilteringObjectInputStream extends ObjectInputStream {
     }
 
     private final SerializationFilteringConfig config;
-    private final Set<ClassLoader> classLoaders;
+    private final Set<ClassResolver> classResolvers;
 
     /**
      * Initializes a new {@link FilteringObjectInputStream}.
      *
      * @param in The {@link InputStream}
-     * @param context A context object from which class loading has to be done
+     * @param optContext An optional context object from which class loading has to be done
+     * @param optClassResolver The class resolver or <code>null</code>
      * @param config The configuration to use
      * @throws IOException If an I/O error occurs
      */
-    FilteringObjectInputStream(InputStream in, Object context, SerializationFilteringConfig config) throws IOException {
+    FilteringObjectInputStream(InputStream in, Object optContext, ClassResolver optClassResolver, SerializationFilteringConfig config) throws IOException {
         super(in);
-        classLoaders = new LinkedHashSet<ClassLoader>(8);
-        classLoaders.add(context.getClass().getClassLoader());
+        Set<ClassResolver> classResolvers = new LinkedHashSet<ClassResolver>(8);
+        if (null != optClassResolver) {
+            classResolvers.add(optClassResolver);
+        }
+        if (null != optContext) {
+            classResolvers.add(new ClassLoaderClassResolver(optContext.getClass().getClassLoader()));
+        }
+        this.classResolvers = classResolvers;
         this.config = config;
     }
 
@@ -103,11 +111,11 @@ public class FilteringObjectInputStream extends ObjectInputStream {
             }
         }
 
-        for (ClassLoader classLoader : classLoaders) {
+        for (ClassResolver classResolver : classResolvers) {
             try {
-                Class<?> clazz = classLoader.loadClass(name);
+                Class<?> clazz = classResolver.resolveClass(name);
                 if (clazz != null) {
-                    classLoaders.add(clazz.getClassLoader());
+                    classResolvers.add(new ClassLoaderClassResolver(clazz.getClassLoader()));
                     return clazz;
                 }
             } catch (@SuppressWarnings("unused") Exception e) {

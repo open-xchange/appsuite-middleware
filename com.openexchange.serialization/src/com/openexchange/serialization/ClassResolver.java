@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,29 +49,20 @@
 
 package com.openexchange.serialization;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import com.openexchange.osgi.annotation.SingletonService;
-
 /**
- * {@link FilteringObjectStreamFactory} is a factory for {@link FilteringObjectInputStream}s
+ * {@link ClassResolver} - Resolves a class name to a {@link Class} instance.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-@SingletonService
-public interface FilteringObjectStreamFactory {
+public interface ClassResolver {
 
     /**
-     * Creates an filtering {@link ObjectInputStream} from the given stream, which denies deserialization of potentially harmful classes.
+     * Resolves given class name to appropriate {@link Class} instance
      *
-     * @param stream The input stream to read from
-     * @param context An optional context object from which class loading has to be done (typically the instance from which this method is called)
-     * @param optClassResolver The class resolver or <code>null</code>
-     * @return A {@link FilteringObjectInputStream}
-     * @throws IOException If an I/O error occurs while reading from stream
+     * @param className The class name to resolve
+     * @return The resolved class
+     * @throws ClassNotFoundException If class cannot be returned
      */
-    ObjectInputStream createFilteringStream(InputStream stream, Object optContext, ClassResolver optClassResolver) throws IOException;
-
+    Class<?> resolveClass(String className) throws ClassNotFoundException;
 }

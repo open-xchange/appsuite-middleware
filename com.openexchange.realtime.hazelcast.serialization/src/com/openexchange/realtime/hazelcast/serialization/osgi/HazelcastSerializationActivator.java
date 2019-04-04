@@ -87,7 +87,7 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
+        Services.setBundleContext(context);
         Services.setServiceLookup(this);
 
         /*
@@ -170,8 +170,19 @@ public class HazelcastSerializationActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        Services.setBundleContext(null);
         Services.setServiceLookup(null);
         super.stopBundle();
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }
