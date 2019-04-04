@@ -54,6 +54,8 @@ import java.io.InputStream;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
@@ -72,7 +74,7 @@ public class FilteringObjectInputStream extends ObjectInputStream {
     }
 
     private final SerializationFilteringConfig config;
-    private final ClassLoader contextLoader;
+    private final Set<ClassLoader> classLoaders;
 
     /**
      * Initializes a new {@link FilteringObjectInputStream}.
@@ -84,22 +86,37 @@ public class FilteringObjectInputStream extends ObjectInputStream {
      */
     FilteringObjectInputStream(InputStream in, Object context, SerializationFilteringConfig config) throws IOException {
         super(in);
-        this.contextLoader = context.getClass().getClassLoader();
+        classLoaders = new LinkedHashSet<ClassLoader>(8);
+        classLoaders.add(context.getClass().getClassLoader());
         this.config = config;
     }
 
     @Override
     protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
+        String name = input.getName();
+
         for (Pattern blackPattern : config.blacklist()) {
-            Matcher blackMatcher = blackPattern.matcher(input.getName());
+            Matcher blackMatcher = blackPattern.matcher(name);
             if (blackMatcher.find()) {
-                LoggerHolder.LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), input.getName());
-                throw new InvalidClassException(input.getName(), "Class blocked from deserialization (blacklist)");
+                LoggerHolder.LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), name);
+                throw new InvalidClassException(name, "Class blocked from deserialization (blacklist)");
             }
         }
 
-        Class<?> clazz = contextLoader.loadClass(input.getName());
-        return null == clazz ? super.resolveClass(input) : clazz;
+        for (ClassLoader classLoader : classLoaders) {
+            try {
+                Class<?> clazz = classLoader.loadClass(name);
+                if (clazz != null) {
+                    classLoaders.add(clazz.getClassLoader());
+                    return clazz;
+                }
+            } catch (@SuppressWarnings("unused") Exception e) {
+                // Ignore
+            }
+        }
+
+        return super.resolveClass(input);
+
     }
 
 }
