@@ -289,13 +289,7 @@ public class CompositionSpaces {
             if (srcValue.startsWith("cid:")) {
                 String contentId = MimeMessageUtility.trimContentId(srcValue.substring(4));
                 Attachment attachment = contentId2InlineAttachments.get(contentId);
-                if (null == attachment) {
-                    // No such inline image... Yield a blank "src" attribute for current <img> tag
-                    LoggerHolder.LOG.warn("No such inline image found for Content-Id {}", contentId);
-                    int st = matcher.start(1);
-                    int end = matcher.end(1);
-                    matcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageTag.substring(end)));
-                } else {
+                if (null != attachment) {
                     ImageLocation imageLocation = new ImageLocation.Builder(getUnformattedString(attachment.getId())).optImageHost(HtmlProcessing.imageHost()).build();
                     String imageUrl = imageDataSource.generateUrl(imageLocation, session);
                     int st = matcher.start(1) - matcher.start();
