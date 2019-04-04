@@ -16,7 +16,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 27
+%define        ox_release 28
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -60,6 +60,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Mon Mar 25 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2019-04-01 (5179)
 * Tue Mar 12 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-03-11 (5148)
 * Mon Feb 18 2019 Thorben Betten <thorben.betten@open-xchange.com>
