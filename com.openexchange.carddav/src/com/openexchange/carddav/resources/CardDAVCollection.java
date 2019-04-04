@@ -113,7 +113,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
     /** A list of basic contact fields that are fetched when getting contacts from the storage */
     protected static final ContactField[] BASIC_FIELDS = {
         ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.UID,
-        ContactField.FILENAME, ContactField.FOLDER_ID, ContactField.VCARD_ID
+        ContactField.FILENAME, ContactField.FOLDER_ID, ContactField.VCARD_ID, ContactField.MARK_AS_DISTRIBUTIONLIST
     };
 
     protected final GroupwareCarddavFactory factory;
