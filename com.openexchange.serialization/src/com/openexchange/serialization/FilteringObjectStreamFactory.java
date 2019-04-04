@@ -50,24 +50,26 @@
 package com.openexchange.serialization;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link FilteringObjectStreamBlacklistProvider} is a provider for the blacklist that should be used for {@link FilteringObjectInputStream}s
+ * {@link FilteringObjectStreamFactory} is a factory for {@link FilteringObjectInputStream}s
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
 @SingletonService
-public interface FilteringObjectStreamBlacklistProvider {
+public interface FilteringObjectStreamFactory {
 
     /**
-     * Gets the blacklist.
+     * Creates an filtering {@link ObjectInputStream} from the given stream, which denies deserialization of potentially harmful classes.
      *
-     * @return An {@link Iterable} of regex {@link Pattern}
-     * @throws IOException If an I/O error occurs while providing blacklist
+     * @param stream The input stream to read from
+     * @return A {@link FilteringObjectInputStream}
+     * @throws IOException If an I/O error occurs while reading from stream
      */
-    Iterable<Pattern> blacklist() throws IOException;
+    ObjectInputStream createFilteringStream(InputStream stream) throws IOException;
 
 }

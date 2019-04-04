@@ -51,36 +51,36 @@ package com.openexchange.serialization.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Pattern;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
-import com.openexchange.serialization.FilteringObjectStreamBlacklistProvider;
+import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
- * The implementation for {@link FilteringObjectStreamBlacklistProvider}.
+ * The implementation for {@link FilteringObjectStreamFactory}.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-public class FilteringObjectStreamBlacklistProviderImpl implements FilteringObjectStreamBlacklistProvider, ForcedReloadable {
+public class FilteringObjectStreamFactoryImpl implements FilteringObjectStreamFactory, ForcedReloadable {
 
     private static final String FILENAME = "serialkiller.xml";
 
     private final AtomicReference<ConfigParseResult> configReference;
 
     /**
-     * Initializes a new {@link FilteringObjectStreamBlacklistProviderImpl}.
+     * Initializes a new {@link FilteringObjectStreamFactoryImpl}.
      */
-    public FilteringObjectStreamBlacklistProviderImpl() {
+    public FilteringObjectStreamFactoryImpl() {
         super();
         configReference = new AtomicReference<>(null);
     }
 
     @Override
-    public Iterable<Pattern> blacklist() throws IOException {
+    public FilteringObjectInputStream createFilteringStream(InputStream stream) throws IOException {
         ConfigParseResult configParseResult = configReference.get();
         if (configParseResult == null) {
             // Parse configuration on-the-fly
@@ -95,7 +95,7 @@ public class FilteringObjectStreamBlacklistProviderImpl implements FilteringObje
 
         SerializationFilteringConfig config = configParseResult.getConfig();
         if (null != config) {
-            return config.blacklist();
+            return new FilteringObjectInputStream(stream, config);
         }
 
         // Configuration could not be successfully parsed
