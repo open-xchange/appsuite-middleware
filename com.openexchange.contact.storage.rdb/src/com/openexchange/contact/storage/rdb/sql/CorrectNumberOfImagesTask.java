@@ -51,6 +51,7 @@ package com.openexchange.contact.storage.rdb.sql;
 
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -101,7 +102,7 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
             rollback = 2;
 
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CorrectNumberOfImagesTask.class);
-            logger.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
+            logger.info("Corrected number of images in prg_contacts, {} rows affected.", I(updated));
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {

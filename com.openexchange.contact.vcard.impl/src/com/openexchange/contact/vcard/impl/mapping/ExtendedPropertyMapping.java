@@ -73,7 +73,7 @@ public abstract class ExtendedPropertyMapping extends SimpleMapping<RawProperty>
      * @param propertyName The vCard property name
      * @param contactFields The corresponding contact fields
      */
-    protected ExtendedPropertyMapping(int field, String propertyName, ContactField...contactFields) {
+    protected ExtendedPropertyMapping(int field, String propertyName, @SuppressWarnings("unused") ContactField... contactFields) {
         super(field, RawProperty.class, propertyName);
         this.propertyName = propertyName;
     }

@@ -140,7 +140,7 @@ public final class Tools {
      * @param table The database table
      * @return The exception
      */
-    public static OXException getIncorrectStringException(Session session, Connection connection, IncorrectStringSQLException e, Contact contact, Table table) throws OXException {
+    public static OXException getIncorrectStringException(Session session, @SuppressWarnings("unused") Connection connection, IncorrectStringSQLException e, Contact contact, @SuppressWarnings("unused") Table table) throws OXException {
         /*
          * create problematic attributes
          */
@@ -356,9 +356,8 @@ public final class Tools {
      *
      * @param sortOptions the sort options
      * @return the LIMIT clause, or an empty String if not specified
-     * @throws OXException
      */
-    public static String getLimitClause(final SortOptions sortOptions) throws OXException {
+    public static String getLimitClause(final SortOptions sortOptions) {
         final StringBuilder stringBuilder = new StringBuilder();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             if (0 < sortOptions.getLimit()) {

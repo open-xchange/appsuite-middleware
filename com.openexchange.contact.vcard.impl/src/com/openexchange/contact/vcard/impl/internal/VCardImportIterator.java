@@ -189,7 +189,8 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * import vCard
          */
-        contact = mapper.importVCard(vCard, contact, parameters, warnings);
+        Contact contactToUse = contact;
+        contactToUse = mapper.importVCard(vCard, contactToUse, parameters, warnings);
         if (false == parameters.isSkipValidation()) {
             ValidationWarnings validationWarnings = vCard.validate(
                 null != vCard.getVersion() ? vCard.getVersion() : ezvcard.VCardVersion.valueOfByStr(parameters.getVersion().getVersion()));
@@ -220,7 +221,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * construct & return vCard import result
          */
-        return new DefaultVCardImport(contact, warnings, originalVCard);
+        return new DefaultVCardImport(contactToUse, warnings, originalVCard);
     }
 
     private VCard parseNext(List<OXException> warnings) throws OXException {

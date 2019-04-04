@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -137,15 +138,15 @@ public class Deduplicator {
              * delete contact-, image- and distribution list data
              */
             if (dryRun) {
-                LOG.info("Would delete {} duplicate contacts.", contactDataToDelete.size());
+                LOG.info("Would delete {} duplicate contacts.", I(contactDataToDelete.size()));
             } else {
-                LOG.info("Going to delete {} duplicate contacts.", contactDataToDelete.size());
+                LOG.info("Going to delete {} duplicate contacts.", I(contactDataToDelete.size()));
                 int contactDataDeleted = deleteContactData(connection, Table.CONTACTS, contextID, contactDataToDelete, DELETE_CHUNK_SIZE);
                 int imageDataDeleted = deleteContactData(connection, Table.IMAGES, contextID, imageDataToDelete, DELETE_CHUNK_SIZE);
                 int distListDataDeleted = deleteContactData(connection, Table.DISTLIST, contextID, distListDataToDelete, DELETE_CHUNK_SIZE);
-                LOG.info("Deleted {} records in table {}.", contactDataDeleted, Table.CONTACTS);
-                LOG.info("Deleted {} records in table {}.", imageDataDeleted, Table.IMAGES);
-                LOG.info("Deleted {} records in table {}.", distListDataDeleted, Table.DISTLIST);
+                LOG.info("Deleted {} records in table {}.", I(contactDataDeleted), Table.CONTACTS);
+                LOG.info("Deleted {} records in table {}.", I(imageDataDeleted), Table.IMAGES);
+                LOG.info("Deleted {} records in table {}.", I(distListDataDeleted), Table.DISTLIST);
             }
             if (rollback > 0) {
                 connection.commit();
@@ -209,7 +210,7 @@ public class Deduplicator {
                  */
                 Contact contact = Mappers.CONTACT.fromResultSet(resultSet, Fields.CONTACT_DATABASE_ARRAY);
                 if (0 < contact.getNumberOfAttachments()) {
-                    LOG.info("Unable to de-deduplicate contacts with attachments, skipping contact {}.", contact.getObjectID());
+                    LOG.info("Unable to de-deduplicate contacts with attachments, skipping contact {}.", I(contact.getObjectID()));
                     continue;
                 }
                 if (0 < contact.getNumberOfImages()) {

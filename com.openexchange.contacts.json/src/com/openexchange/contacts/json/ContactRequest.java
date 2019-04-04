@@ -79,6 +79,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
@@ -111,9 +112,8 @@ public class ContactRequest {
      *
      * @param request The request
      * @param session The session
-     * @throws OXException
      */
-    public ContactRequest(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public ContactRequest(final AJAXRequestData request, final ServerSession session) {
         super();
         this.request = request;
         this.session = session;
@@ -174,7 +174,7 @@ public class ContactRequest {
             int rightHandLimit = this.getRightHandLimit();
             if (0 < rightHandLimit) {
                 if (rightHandLimit < leftHandLimit) {
-                    throw OXJSONExceptionCodes.INVALID_VALUE.create(rightHandLimit, "right_hand_limit");
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(Autoboxing.valueOf(rightHandLimit), "right_hand_limit");
                 }
                 sortOptions.setLimit(rightHandLimit - leftHandLimit);
             }
@@ -300,7 +300,7 @@ public class ContactRequest {
          * determine mandatory fields
          */
     	ContactField[] fields;
-    	if (this.isInternalSort() || Arrays.contains(columnIDs, ContactMapper.getInstance().get(ContactField.SORT_NAME).getColumnID())) {
+    	if (this.isInternalSort() || Arrays.contains(columnIDs, ContactMapper.getInstance().get(ContactField.SORT_NAME).getColumnID().intValue())) {
     		fields = new ContactField[] {
     			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.MARK_AS_DISTRIBUTIONLIST,
 				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY,

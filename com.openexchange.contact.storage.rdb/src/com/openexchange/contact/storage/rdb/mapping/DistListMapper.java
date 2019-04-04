@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.EnumMap;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.internal.DistListMember;
@@ -91,7 +92,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public void set(DistListMember member, Integer value) {
-            	member.setParentContactID(value);
+            	member.setParentContactID(value.intValue());
             }
 
             @Override
@@ -101,7 +102,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public Integer get(DistListMember member) {
-                return member.getParentContactID();
+                return I(member.getParentContactID());
             }
 
 			@Override
@@ -114,7 +115,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public void set(DistListMember member, Integer value) {
-            	member.setEntryID(value);
+            	member.setEntryID(value.intValue());
             }
 
             @Override
@@ -124,7 +125,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public Integer get(DistListMember member) {
-                return member.getEntryID();
+                return I(member.getEntryID());
             }
 
 			@Override
@@ -137,7 +138,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public void set(DistListMember member, Integer value) {
-            	member.setEmailfield(value);
+            	member.setEmailfield(value.intValue());
             }
 
             @Override
@@ -147,7 +148,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public Integer get(DistListMember member) {
-                return member.getEmailfield();
+                return I(member.getEmailfield());
             }
 
 			@Override
@@ -160,7 +161,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public void set(DistListMember member, Integer value) {
-            	member.setFolderID(value);
+            	member.setFolderID(value.intValue());
             }
 
             @Override
@@ -170,7 +171,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public Integer get(DistListMember member) {
-                return member.getFolderID();
+                return I(member.getFolderID());
             }
 
 			@Override
@@ -275,7 +276,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public void set(DistListMember member, Integer value) {
-            	member.setContextID(value);
+            	member.setContextID(value.intValue());
             }
 
             @Override
@@ -285,7 +286,7 @@ public class DistListMapper extends DefaultDbMapper<DistListMember, DistListMemb
 
             @Override
             public Integer get(DistListMember member) {
-                return member.getContextID();
+                return I(member.getContextID());
             }
 
 			@Override
