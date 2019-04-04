@@ -268,7 +268,7 @@ public class ShareServlet extends AbstractShareServlet {
                 response.sendRedirect(migrationRedirectURL + request.getServletPath() + request.getPathInfo());
                 return;
             } catch (OXException ex) {
-                LOG.error("Cannot redirect. An error was encountered while getting the migration URL property: {}", e.getMessage(), e);
+                LOG.error("Cannot redirect. An error was encountered while getting the migration URL property.", ex);
                 LoginLocation location = new LoginLocation().status("internal_error").loginType(LoginType.MESSAGE).message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
                 LoginLocationRegistry.getInstance().putAndRedirect(location, response);
                 return;
