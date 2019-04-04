@@ -80,7 +80,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug48463Test.class,
     Bug54026Test.class,
     Bug58220Test.class,
-    Bug61859Test.class
+    Bug61859Test.class,
+    Bug61873Test.class
 }) // @formatter:on
 public final class CardDAVBugSuite {
 
