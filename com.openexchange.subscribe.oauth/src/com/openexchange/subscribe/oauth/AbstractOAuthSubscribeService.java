@@ -144,7 +144,7 @@ public abstract class AbstractOAuthSubscribeService extends AbstractSubscribeSer
             return;
         }
         Object accountId = subscription.getConfiguration().get("account");
-        if (accountId == null || accountId.toString().equals("nulll")) {
+        if (accountId == null || accountId.toString().equals("null")) {
             throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
         }
 
