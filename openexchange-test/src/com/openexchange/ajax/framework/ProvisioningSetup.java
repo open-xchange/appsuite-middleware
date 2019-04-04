@@ -62,7 +62,6 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -120,7 +119,7 @@ public class ProvisioningSetup {
                 initialized.compareAndSet(false, true);
                 LOG.info("Finished initialization for {} contexts.", TestContextPool.getAllTimeAvailableContexts().size());
             } else {
-                LOG.warn("Pool already initialized! Please do not try to remember users/pools multiple times as this will cause unexpected behavior within test execution.");
+                LOG.debug("Pool already initialized! Please do not try to remember users/pools multiple times as this will cause unexpected behavior within test execution.");
             }
         }
     }
