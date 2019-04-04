@@ -33,8 +33,8 @@ package net.fortuna.ical4j.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -218,7 +218,8 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
         if (tzUrl != null) {
             InputStream inputStream = null;
             try {
-                URLConnection connection = tzUrl.getUri().toURL().openConnection();
+                HttpURLConnection connection = (HttpURLConnection) tzUrl.getUri().toURL().openConnection();
+                connection.setInstanceFollowRedirects(true);
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 inputStream = connection.getInputStream();
