@@ -721,6 +721,9 @@ public class EventPatches {
                          * check for new delete exception dates for previous change exceptions
                          */
                         Event originalSeriesMaster = access.getEvent(getEventID(resource.getEvent()));
+                        if (isNullOrEmpty(originalSeriesMaster.getChangeExceptionDates())) {
+                            return null;
+                        }
                         for (RecurrenceId exceptionDate : originalSeriesMaster.getChangeExceptionDates()) {
                             if (deleteExceptionDates.contains(exceptionDate) && now.after(exceptionDate.getValue())) {
                                 Event originalChangeException = access.getEvent(
