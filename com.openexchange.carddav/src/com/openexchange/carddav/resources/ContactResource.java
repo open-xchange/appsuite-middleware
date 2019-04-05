@@ -386,8 +386,8 @@ public class ContactResource extends CommonResource<Contact> {
                     throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
                 }
                 vCardImport.getContact().setUid(uid);
-                vCardImport.getContact().setParentFolderID(parentFolderID);;
-                vCardImport.getContact().setContextId(contextID);;
+                vCardImport.getContact().setParentFolderID(parentFolderID);
+                vCardImport.getContact().setContextId(contextID);
                 vCardImport.getContact().setLastModified(lastModified);
                 vCardImport.getContact().setObjectID(objectID);
                 vCardImport.getContact().setVCardId(vCardID);

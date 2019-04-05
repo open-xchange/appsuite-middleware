@@ -125,6 +125,6 @@ public class PortableMultifactorToken extends AbstractCustomPortable {
         this.lifeTime = lifeTimeValue > 0 ? Optional.of(Duration.ofMillis(lifeTimeValue)) : Optional.empty();
 
         ByteArrayInputStream input = new ByteArrayInputStream(reader.readByteArray(FIELD_NAME_VALUE));
-        this.tokenValueData = new ObjectInputStream(input);;
+        this.tokenValueData = new ObjectInputStream(input);
     }
 }

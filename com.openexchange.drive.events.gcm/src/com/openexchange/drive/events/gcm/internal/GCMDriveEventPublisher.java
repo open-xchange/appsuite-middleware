@@ -162,7 +162,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
      */
     private void processResult(DriveSubscriptionStore subscriptionStore, int contextID, List<String> registrationIDs, MulticastResult multicastResult) {
         if (null == registrationIDs || null == multicastResult) {
-            LOG.warn("Unable to process empty results");;
+            LOG.warn("Unable to process empty results");
             return;
         }
         /*

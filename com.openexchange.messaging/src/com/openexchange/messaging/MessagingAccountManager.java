@@ -79,7 +79,7 @@ public interface MessagingAccountManager {
      * @param session The session providing needed user data
      * @throws OXException If update fails
      */
-    public void updateAccount(MessagingAccount account, Session session) throws OXException;;
+    public void updateAccount(MessagingAccount account, Session session) throws OXException;
 
     /**
      * Deletes an existing account.
@@ -97,7 +97,7 @@ public interface MessagingAccountManager {
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
      */
-    public List<MessagingAccount> getAccounts(Session session) throws OXException;;
+    public List<MessagingAccount> getAccounts(Session session) throws OXException;
 
     /**
      * Gets an existing messaging account.

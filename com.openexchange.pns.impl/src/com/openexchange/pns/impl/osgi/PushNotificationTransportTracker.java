@@ -75,7 +75,7 @@ public final class PushNotificationTransportTracker implements ServiceTrackerCus
      */
     public PushNotificationTransportTracker(BundleContext context) {
         super();
-        this.transportMap = new ConcurrentHashMap<>(4, 0.9F, 1);;
+        this.transportMap = new ConcurrentHashMap<>(4, 0.9F, 1);
         this.context = context;
     }
 

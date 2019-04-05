@@ -72,7 +72,7 @@ import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
 public class QRCodeGenerator {
 
     private static final String FORMAT_PNG = "PNG";
-    private final QRCodeWriter qrwrite = new QRCodeWriter();;
+    private final QRCodeWriter qrwrite = new QRCodeWriter();
 
     /**
      * Generates a QR code including the given string/URL

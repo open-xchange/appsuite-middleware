@@ -150,7 +150,7 @@ public interface EntityResolver {
      * @param groupID The identifier of the group to get the members for
      * @return The group members
      */
-    int[] getGroupMembers(int groupID) throws OXException;;
+    int[] getGroupMembers(int groupID) throws OXException;
 
     /**
      * Gets the default timezone configured for a specific user.
@@ -158,7 +158,7 @@ public interface EntityResolver {
      * @param userID The identifier of the user to get the timezone for
      * @return The timezone
      */
-    TimeZone getTimeZone(int userID) throws OXException;;
+    TimeZone getTimeZone(int userID) throws OXException;
 
     /**
      * Gets the locale configured for a specific user.

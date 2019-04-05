@@ -66,7 +66,7 @@ public class ShareAuthenticated implements GuestAuthenticated, SessionEnhancemen
 
     private final User user;
     private final Context context;
-    private final SessionEnhancement enhancement;;
+    private final SessionEnhancement enhancement;
 
     /**
      * Initializes a new {@link ShareAuthenticated}.

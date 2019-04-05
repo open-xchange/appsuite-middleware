@@ -77,7 +77,7 @@ public class MaintenanceReason implements Serializable{
 
     public MaintenanceReason () {
         super();
-        this.id = null;;
+        this.id = null;
         this.text = null;
     }
 

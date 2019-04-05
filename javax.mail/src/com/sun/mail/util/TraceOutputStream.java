@@ -69,7 +69,7 @@ public class TraceOutputStream extends FilterOutputStream {
     public TraceOutputStream(OutputStream out, MailLogger logger) {
 	super(out);
 	this.trace = logger.isLoggable(Level.FINEST);
-	this.traceOut = new LogOutputStream(logger);;
+	this.traceOut = new LogOutputStream(logger);
     }
 
     /**
