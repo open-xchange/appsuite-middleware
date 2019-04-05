@@ -86,7 +86,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testCreateSingleAlarm() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M"), folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M"), folderId), true);
         getAndAssertAlarms(expectedEventData, 1, folderId);
     }
 
@@ -96,7 +96,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
     @Test
     public void testAddSingleAlarm() throws Exception {
         // Create an event without an alarm
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testAddSingleAlarm", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testAddSingleAlarm", folderId), true);
         EventData actualEventData = getAndAssertAlarms(expectedEventData, 0, folderId);
 
         // Create the alarm as a delta for the event
@@ -118,7 +118,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testChangeAlarmTime() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M"), folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M"), folderId), true);
         EventData actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
         EventData updateData = new EventData();
@@ -140,7 +140,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testDifferentAlarmTypes() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testDifferentAlarmTypes", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testDifferentAlarmTypes", folderId), true);
         EventData actualEventData = getAndAssertAlarms(expectedEventData, 0, folderId);
 
         // Test display alarm
