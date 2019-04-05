@@ -510,7 +510,9 @@ public class EventManager extends AbstractManager {
             order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
         }
         EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, B(expand), B(extendedEntities), Boolean.FALSE);
-        lastTimeStamp = eventsResponse.getTimestamp().longValue();
+        if (eventsResponse.getTimestamp() != null) {
+            lastTimeStamp = eventsResponse.getTimestamp().longValue();
+        }
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getCategories(), eventsResponse.getData());
     }
 
@@ -819,8 +821,8 @@ public class EventManager extends AbstractManager {
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getCategories(), updateAttendee.getData());
         setLastTimeStamp(updateAttendee.getTimestamp());
     }
-    
-    
+
+
     /**
      * Updates the attendee status of the event with the specified identifier.
      *
