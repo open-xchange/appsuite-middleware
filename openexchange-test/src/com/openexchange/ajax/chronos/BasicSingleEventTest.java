@@ -105,7 +105,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSingle() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle", folderId), true);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
@@ -117,7 +117,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testDeleteSingle() throws Exception {
         EventData event = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testDeleteSingle", folderId);
         event.setFolder(folderId);
-        EventData expectedEventData = eventManager.createEvent(event);
+        EventData expectedEventData = eventManager.createEvent(event, true);
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
@@ -139,7 +139,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSingle() throws Exception {
-        EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testUpdateSingle", folderId));
+        EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testUpdateSingle", folderId), true);
         event.setEndDate(DateTimeUtil.incrementDateTimeData(event.getEndDate(), 5000));
 
         EventData updatedEvent = eventManager.updateEvent(event);
@@ -165,7 +165,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Date until = instance.getTime();
 
         // Create a single event
-        EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testGetEvent", folderId));
+        EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testGetEvent", folderId), true);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolder(folderId);
@@ -203,7 +203,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(10));
 
         EventData eventdata = EventFactory.createSingleEvent(defaultUserApi.getCalUser(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end), folderId);
-        EventData expectedEventData = eventManager.createEvent(eventdata);
+        EventData expectedEventData = eventManager.createEvent(eventdata, true);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
@@ -214,7 +214,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testExtendedEntities() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle", folderId), true);
         EventData actualEventData = eventManager.getRecurringEvent(folderId, expectedEventData.getId(), null, false, true);
         List<Attendee> attendees = actualEventData.getAttendees();
         Assert.assertEquals(1, attendees.size());
