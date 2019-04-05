@@ -26,6 +26,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
+Requires(post): patch
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
 Requires:      open-xchange-hazelcast
@@ -529,6 +530,39 @@ EOF
         ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
     fi
 
+    SCR=SCR-208
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/configdb.properties
+
+      declare -A dmap
+      dmap[3]="useUnicode=true"
+      dmap[4]="characterEncoding=UTF-8"
+      dmap[5]="autoReconnect=false"
+      dmap[6]="useServerPrepStmts=false"
+      dmap[7]="useTimezone=true"
+      dmap[8]="serverTimezone=UTC"
+      dmap[9]="connectTimeout=15000"
+      dmap[10]="socketTimeout=15000"
+
+      for x in {3..10}
+      do
+        default_val=${dmap[$x]}
+        for prop_type in readProperty writeProperty
+        do
+          prop=${prop_type}.${x}
+          curr_val=$(ox_read_property ${prop} ${pfile})
+          if [ -n "${curr_val}" ]
+          then
+            if [ "${default_val}" == "${curr_val}" ]
+            then
+              ox_remove_property ${prop} ${pfile}
+            fi
+          fi
+        done
+      done
+      ox_scr_done ${SCR}
+    }
+
     # SoftwareChange_Request-236
     PFILE=/opt/open-xchange/etc/cache.ccf
     NAMES=( jcs.region.CalendarCache jcs.region.CalendarCache.cacheattributes jcs.region.CalendarCache.cacheattributes.MaxObjects jcs.region.CalendarCache.cacheattributes.MemoryCacheName jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun jcs.region.CalendarCache.elementattributes jcs.region.CalendarCache.elementattributes.IsEternal jcs.region.CalendarCache.elementattributes.MaxLifeSeconds jcs.region.CalendarCache.elementattributes.IdleTime jcs.region.CalendarCache.elementattributes.IsSpool jcs.region.CalendarCache.elementattributes.IsRemote jcs.region.CalendarCache.elementattributes.IsLateral )
@@ -564,39 +598,6 @@ EOF
         ox_set_property ${scale_k} ${scale_v} ${pfile}
       fi
     fi
-
-    SCR=SCR-208
-    ox_scr_todo ${SCR} && {
-      pfile=/opt/open-xchange/etc/configdb.properties
-
-      declare -A dmap
-      dmap[3]="useUnicode=true"
-      dmap[4]="characterEncoding=UTF-8"
-      dmap[5]="autoReconnect=false"
-      dmap[6]="useServerPrepStmts=false"
-      dmap[7]="useTimezone=true"
-      dmap[8]="serverTimezone=UTC"
-      dmap[9]="connectTimeout=15000"
-      dmap[10]="socketTimeout=15000"
-
-      for x in {3..10}
-      do
-        default_val=${dmap[$x]}
-        for prop_type in readProperty writeProperty
-        do
-          prop=${prop_type}.${x}
-          curr_val=$(ox_read_property ${prop} ${pfile})
-          if [ -n "${curr_val}" ]
-          then
-            if [ "${default_val}" == "${curr_val}" ]
-            then
-              ox_remove_property ${prop} ${pfile}
-            fi
-          fi
-        done
-      done
-      ox_scr_done ${SCR}
-    }
 
     SCR=SCR-299
     ox_scr_todo ${SCR} && {
@@ -656,6 +657,43 @@ EOF
       fi
       ox_scr_done ${SCR}
     }
+
+    # SCR-426
+    if ! contains "Allow users to configure the showContactImage setting" /opt/open-xchange/etc/settings/ui.properties; then
+        cat <<EOF | (cd /opt/open-xchange/etc && patch -p3 -N -r -)
+diff --git a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
+index 3ce3af8146f..61ee86367b8 100644
+--- a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
++++ b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
+@@ -2,7 +2,7 @@
+ # Possible values: embedded and popups
+ ui/global/windows/mode/value=embedded
+
+-# All user to configure the latter
++# Allow users to configure the windows mode
+ # Possible values: true|false
+ ui/global/windows/mode/configurable=true
+
+@@ -10,7 +10,7 @@ ui/global/windows/mode/configurable=true
+ # Possible values: tabbased|simple
+ ui/global/toolbar/mode/value=tabbased
+
+-# All user to configure the latter
++# Allow users to configure the toolbar mode
+ # Possible values: true|false
+ ui/global/toolbar/mode/configurable=true
+
+@@ -18,7 +18,7 @@ ui/global/toolbar/mode/configurable=true
+ # Possible values: true|false
+ ui/mail/showContactImage/value = true
+
+-# All user to configure the latter
++# Allow users to configure the showContactImage setting
+ # Possible values: true|false
+ # Please configure the ui.yml accordingly.
+ ui/mail/showContactImage/configurable = true
+EOF
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
