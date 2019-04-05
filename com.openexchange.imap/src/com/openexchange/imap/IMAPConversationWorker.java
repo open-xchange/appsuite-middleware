@@ -68,7 +68,6 @@ import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.search.SearchException;
-import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -422,9 +421,8 @@ public final class IMAPConversationWorker {
 
                     if (false == sentMessages.isEmpty()) {
                         // Add to conversation if references or referenced-by
-                        final List<MailMessage> toMergeWith = ImmutableList.copyOf(sentMessages);
+                        Conversations.foldAndMergeWithList(conversations, sentMessages);
                         sentMessages = null;
-                        Conversations.foldAndMergeWithList(conversations, toMergeWith);
                     }
                 }
                 // Switch back folder
