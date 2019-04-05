@@ -21,7 +21,7 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Multi-factor authentication 
+Summary:       Multi-factor authentication
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
 
@@ -51,7 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
+/opt/open-xchange/sbin/deletemultifactordevice
+/opt/open-xchange/sbin/listmultifactordevice
 /opt/open-xchange/lib/com.openexchange.multifactor.clt.jar
 
 %changelog
