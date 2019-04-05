@@ -255,11 +255,11 @@ public class AdminParser extends CLIParser {
             final CLIOption retval = this.addStringOption(shortForm, longForm);
             this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, longFormParameterDescription, description));
             return retval;
-        } else {
-            final CLIOption retval = this.addBooleanOption(shortForm, longForm);
-            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, shortForm, longForm, description));
-            return retval;
         }
+
+        final CLIOption retval = this.addBooleanOption(shortForm, longForm);
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, shortForm, longForm, description));
+        return retval;
     }
 
     /**
@@ -289,11 +289,11 @@ public class AdminParser extends CLIParser {
             final CLIOption retval = this.addStringOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description));
             return retval;
-        } else {
-            final CLIOption retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
-            return retval;
         }
+
+        final CLIOption retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description));
+        return retval;
     }
 
     /**
@@ -310,11 +310,11 @@ public class AdminParser extends CLIParser {
             final CLIOption retval = this.addStringOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
             return retval;
-        } else {
-            final CLIOption retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
-            return retval;
         }
+
+        final CLIOption retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
+        return retval;
     }
 
     /**
@@ -331,11 +331,11 @@ public class AdminParser extends CLIParser {
             final CLIOption retval = this.addIntegerOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
             return retval;
-        } else {
-            final CLIOption retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
-            return retval;
         }
+
+        final CLIOption retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
+        return retval;
     }
 
     /**
@@ -347,7 +347,7 @@ public class AdminParser extends CLIParser {
      * @param extended
      * @return
      */
-    private final CLIOption addOption(final String longForm, final String description, final boolean needed, final boolean extended, final boolean hidden) {
+    private final CLIOption addOption(final String longForm, final String description, @SuppressWarnings("unused") final boolean needed, final boolean extended, final boolean hidden) {
         final CLIOption retval = this.addBooleanOption(longForm);
         this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended, hidden));
         return retval;
@@ -358,11 +358,11 @@ public class AdminParser extends CLIParser {
             final CLIOption retval = this.addSettableBooleanOption(longForm);
             this.optinfolist.add(new OptionInfo(convertBooleantoTriState(needed), retval, longForm, longFormParameterDescription, description, extended));
             return retval;
-        } else {
-            final CLIOption retval = this.addBooleanOption(longForm);
-            this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
-            return retval;
         }
+
+        final CLIOption retval = this.addBooleanOption(longForm);
+        this.optinfolist.add(new OptionInfo(NeededQuadState.notneeded, retval, longForm, description, extended));
+        return retval;
     }
 
     public final CLIOption addOption(final char shortForm, final String longForm, final String description, final NeededQuadState needed) {
@@ -384,10 +384,11 @@ public class AdminParser extends CLIParser {
 
     // As parse is declared final in CmdLineParser we cannot override it so we use another
     // function name here
-    public final void ownparse(String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
+    public final void ownparse(String[] arguments) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException {
         // First parse the whole args then get through the list an check is options that are needed
         // aren't set. By this we implement the missing feature of mandatory options
-        if(allowDynamic) {
+        String[] args = arguments;
+        if (allowDynamic) {
             args = extractDynamic(args);
         }
         parse(args);
@@ -630,11 +631,7 @@ public class AdminParser extends CLIParser {
     }
 
     private NeededQuadState convertBooleantoTriState(final boolean needed) {
-        if (needed) {
-            return NeededQuadState.needed;
-        } else {
-            return NeededQuadState.notneeded;
-        }
+        return needed ? NeededQuadState.needed : NeededQuadState.notneeded;
     }
 
     private void checkOptionUniqueness() {

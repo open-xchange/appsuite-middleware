@@ -279,7 +279,7 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
     protected final ResellerAdmin parseChangeOptions(final AdminParser parser) throws InvalidDataException {
         final ResellerAdmin adm = parseCreateOptions(parser);
         parseAndSetParentId(parser, adm);
-        
+
         return adm;
     }
 
@@ -335,27 +335,26 @@ public abstract class ResellerAbstraction extends ObjectNamingAbstraction {
                         }
                     }
                     return newset;
-                } else {
-                    return addres;
                 }
+                return addres;
             } else {
                 // edit restrictions
                 if (dbres == null || dbres.size() == 0) {
                     throw new OXResellerException(Code.NO_RESTRICTIONS_AVAILABLE_TO, "edit.");
                 }
-                for (final Restriction key : editRes) {
-                    if (dbres.contains(key)) {
+                if (editRes != null) {
+                    for (final Restriction key : editRes) {
+                        if (!dbres.contains(key)) {
+                            throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
+                        }
                         dbres.remove(key);
                         dbres.add(key);
-                    } else {
-                        throw new OXResellerException(Code.RESTRICTION_NOT_CONTAINED, key.getName());
                     }
                 }
                 return dbres;
             }
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**

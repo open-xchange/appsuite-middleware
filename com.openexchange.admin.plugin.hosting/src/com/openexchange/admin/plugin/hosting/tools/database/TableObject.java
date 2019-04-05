@@ -131,11 +131,7 @@ public class TableObject implements Comparable<String> {
 
     public boolean hasCrossReferences() {
         //System.out.println(this.name+"--> "+xreferencetables.size());
-        if (xreferencetables.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (xreferencetables.size() > 0);
     }
 
     public boolean hasCrossReference2Table(TableObject checkref) {
@@ -156,11 +152,7 @@ public class TableObject implements Comparable<String> {
 
     public boolean isReferencedByTables() {
         //System.out.println(this.name+"--> "+referencedby.size());
-        if (referencedby.size() > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return (referencedby.size() > 0);
     }
 
     public boolean isReferencedBy(final TableObject checkref) {

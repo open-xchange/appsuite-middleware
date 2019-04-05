@@ -50,7 +50,6 @@
 package com.openexchange.admin.plugin.hosting.schemamove.internal;
 
 import java.util.Map;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
 import com.openexchange.admin.plugin.hosting.schemamove.SchemaMoveService;
 import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
@@ -74,8 +73,6 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
 
     private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchemaMoveRemoteImpl.class);
 
-    private final BundleContext context;
-
     private final static String THE_SOURCE_SCHEMA_NAME_IS_NOT_GIVEN = "The source schema name is not given.";
 
     private final static String THE_TARGET_SCHEMA_NAME_IS_NOT_GIVEN = "The target schema name is not given.";
@@ -85,10 +82,9 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
     /**
      * Initializes a new {@link SchemaMoveRemoteImpl}.
      */
-    public SchemaMoveRemoteImpl(BundleContext context, SchemaMoveService schemaMoveService) {
+    public SchemaMoveRemoteImpl(SchemaMoveService schemaMoveService) {
         super();
         this.schemaMoveService = schemaMoveService;
-        this.context = context;
     }
 
     @Override
@@ -101,7 +97,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         schemaMoveService.disableSchema(schemaName);
     }
@@ -116,7 +112,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         return schemaMoveService.getDbAccessInfoForSchema(schemaName);
     }
@@ -129,7 +125,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         return schemaMoveService.getDbAccessInfoForCluster(clusterId);
     }
@@ -144,7 +140,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         schemaMoveService.enableSchema(schemaName);
     }
@@ -167,7 +163,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         schemaMoveService.restorePoolReferences(sourceSchema, targetSchema, targetClusterId);
     }
@@ -180,7 +176,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         return schemaMoveService.createSchema(targetClusterId);
     }
@@ -195,7 +191,7 @@ public class SchemaMoveRemoteImpl extends OXCommonImpl implements SchemaMoveRemo
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         schemaMoveService.invalidateContexts(schemaName, invalidateSession);
     }

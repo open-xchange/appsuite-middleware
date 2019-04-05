@@ -49,8 +49,8 @@
 
 package com.openexchange.admin.user.copy.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -76,13 +76,10 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
 
     private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXUserCopy.class);
 
-    private final BundleContext context;
-
     private final UserCopyService service;
 
-    public OXUserCopy(final BundleContext context, final UserCopyService service) throws StorageException {
+    public OXUserCopy(final UserCopyService service) {
         super();
-        this.context = context;
         this.service = service;
     }
 
@@ -96,7 +93,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             throw invalidDataException;
         }
 
-        new BasicAuthenticator(context).doAuthentication(auth);
+        BasicAuthenticator.createPluginAwareAuthenticator().doAuthentication(auth);
 
         try {
             contextcheck(src, "source");
@@ -150,7 +147,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
         try {
             Filestore2UserUtil.copyFilestore2UserEntry(srcContextId, srcUserId, dstContextId, newUserId, AdminDaemon.getCache());
         } catch (Exception e) {
-            LOG.info("Failed to copy filestore2User entry for user {} in context {} to user {} in context {}", user.getId(), src.getId(), newUserId, dest.getId());
+            LOG.info("Failed to copy filestore2User entry for user {} in context {} to user {} in context {}", user.getId(), src.getId(), I(newUserId), dest.getId());
         }
 
         LOG.info("User {} successfully copied to Context {} from Context {}", user.getId(), dest.getId(), src.getId());

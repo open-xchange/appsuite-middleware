@@ -52,10 +52,10 @@ package com.openexchange.admin.diff.result.domain;
 
 /**
  * {@link GeneralDiff}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
 public class GeneralDiff {
-
+    // Empty
 }

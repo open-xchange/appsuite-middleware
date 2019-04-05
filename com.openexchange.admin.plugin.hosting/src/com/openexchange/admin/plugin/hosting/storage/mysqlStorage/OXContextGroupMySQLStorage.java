@@ -86,11 +86,6 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface#deleteContextGroup(java.lang.String)
-     */
     @Override
     public void deleteContextGroup(String contextGroupId) throws StorageException, OXException {
         DatabaseService globalDBService = AdminServiceRegistry.getInstance().getService(DatabaseService.class);
@@ -208,27 +203,27 @@ public class OXContextGroupMySQLStorage implements OXContextGroupStorageInterfac
         }
     }
 
-    /**
-     * Retains all tables that have a 'gid' column or have cross references to other global db tables.
-     *
-     * @param tableObjects
-     */
-    private void retainRelevantTables(List<TableObject> tableObjects) {
-        List<TableObject> tmp = new ArrayList<TableObject>(tableObjects);
-        boolean hasGidColumn = false;
-        for (TableObject tableObject : tmp) {
-            for (TableColumnObject column : tableObject.getColumns()) {
-                if ("gid".equals(column.getName())) {
-                    hasGidColumn = true;
-                    break;
-                }
-            }
-            if (!hasGidColumn && !tableObject.hasCrossReferences()) {
-                tableObjects.remove(tableObject);
-            }
-            hasGidColumn = false;
-        }
-    }
+//    /**
+//     * Retains all tables that have a 'gid' column or have cross references to other global db tables.
+//     *
+//     * @param tableObjects
+//     */
+//    private void retainRelevantTables(List<TableObject> tableObjects) {
+//        List<TableObject> tmp = new ArrayList<TableObject>(tableObjects);
+//        boolean hasGidColumn = false;
+//        for (TableObject tableObject : tmp) {
+//            for (TableColumnObject column : tableObject.getColumns()) {
+//                if ("gid".equals(column.getName())) {
+//                    hasGidColumn = true;
+//                    break;
+//                }
+//            }
+//            if (!hasGidColumn && !tableObject.hasCrossReferences()) {
+//                tableObjects.remove(tableObject);
+//            }
+//            hasGidColumn = false;
+//        }
+//    }
 
     /**
      * Sort the specified tables according to their foreign key references.

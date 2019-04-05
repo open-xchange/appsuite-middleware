@@ -86,7 +86,7 @@ public class ConfigDiff {
     /**
      * Handles processing with files
      */
-    private FileHandler fileHandler = new FileHandler();
+    private final FileHandler fileHandler = new FileHandler();
 
     /**
      * Handlers that are registered for diff processing
@@ -100,6 +100,7 @@ public class ConfigDiff {
     public DiffResult run() {
         final DiffResult diffResult = new DiffResult();
 
+        final FileHandler fileHandler = this.fileHandler;
         ExecutorService executor = Executors.newFixedThreadPool(2);
         Future<Void> orgFuture = executor.submit(new Callable<Void>() {
 

@@ -116,7 +116,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected String hostname = "localhost";
     protected int port = DEFAULT_JMX_SERVER_PORT;
     protected int timeout = 15000;
-    private JMXConnector c = null;
+    JMXConnector c = null;
 
 
     protected AbstractJMXTools() {
@@ -268,13 +268,13 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected static String doOperationReturnString(MBeanServerConnection mbc, String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, InvalidDataException {
         Object opObject = doOperation(mbc, fullqualifiedoperationname);
-        if (null != opObject) {
-            StringBuilder retval = new StringBuilder();
-            retval.append(fullqualifiedoperationname).append(" = ");
-            return retval.append(opObject).append(LINE_SEPARATOR).toString();
-        } else {
+        if (null == opObject) {
             return "";
         }
+
+        StringBuilder retval = new StringBuilder();
+        retval.append(fullqualifiedoperationname).append(" = ");
+        return retval.append(opObject).append(LINE_SEPARATOR).toString();
     }
 
     protected static Object doOperation(MBeanServerConnection mbc, String fullqualifiedoperationname) throws MalformedObjectNameException, NullPointerException, IOException, InvalidDataException, InstanceNotFoundException, MBeanException, ReflectionException {
