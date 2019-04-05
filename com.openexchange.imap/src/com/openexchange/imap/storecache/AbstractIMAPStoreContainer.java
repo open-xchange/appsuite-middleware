@@ -51,6 +51,7 @@ package com.openexchange.imap.storecache;
 
 import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPClientParameters;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
@@ -100,7 +101,11 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         if (propagateClientIp) {
             imapStore.setPropagateClientIpAddress(session.getLocalIp());
         }
-        IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+        try {
+            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+        } catch (OXException e) {
+            throw new MessagingException(e.getMessage(), e);
+        }
         /*
          * ... and connect it
          */
