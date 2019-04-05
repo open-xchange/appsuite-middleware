@@ -360,6 +360,9 @@ public class ContactResource extends CommonResource<Contact> {
              * import vCard as new contact
              */
             vCardImport = vCardService.importVCard(inputStream, null, parameters);
+            if (null == vCardImport || null == vCardImport.getContact()) {
+                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
         } else {
             /*
              * import vCard and merge with existing contact, ensuring that some important properties don't change
@@ -379,6 +382,9 @@ public class ContactResource extends CommonResource<Contact> {
                 contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
                 contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
                 vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
+                if (null == vCardImport || null == vCardImport.getContact()) {
+                    throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
                 vCardImport.getContact().setUid(uid);
                 vCardImport.getContact().setParentFolderID(parentFolderID);;
                 vCardImport.getContact().setContextId(contextID);;
@@ -386,9 +392,6 @@ public class ContactResource extends CommonResource<Contact> {
                 vCardImport.getContact().setObjectID(objectID);
                 vCardImport.getContact().setVCardId(vCardID);
             }
-        }
-        if (null == vCardImport || null == vCardImport.getContact()) {
-            throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
