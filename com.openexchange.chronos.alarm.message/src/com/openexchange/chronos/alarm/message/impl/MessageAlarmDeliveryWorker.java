@@ -276,6 +276,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                 try {
                     UpdateStatus status = Updater.getInstance().getStatus(ctxId);
                     if (!status.isExecutedSuccessfully(MessageAlarmDeliveryWorkerUpdateTask.class.getName()) || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
+                        LOG.info("Unable to handle context {} because it is currently updating or MessageAlarmDeliveryWorkerUpdateTask hasn't run successfully yet.", iCtxId);
                         continue NextCtxId;
                     }
                 } catch (OXException e) {
@@ -307,7 +308,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
 
                     writeCon = dbservice.getForUpdateTask(ctxId);
                     writeCon.setAutoCommit(false);
-                    lockedTriggers = storage.getAndLockTriggers(writeCon, until.getTime(), overdueTime.getTime(), true);
+                    lockedTriggers = storage.getAndLockTriggers(writeCon, until.getTime(), overdueTime.getTime(), true, registry.getActions());
                     if (lockedTriggers.isEmpty()) {
                         successful = true;
                         if (Thread.interrupted()) {
