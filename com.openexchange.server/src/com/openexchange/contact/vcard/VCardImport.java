@@ -67,16 +67,9 @@ public interface VCardImport extends Closeable {
     /**
      * Gets the imported contact.
      *
-     * @return The imported contact, or <code>null</code> if there was an error and the vCard couldn't be imported
+     * @return The imported contact
      */
     Contact getContact();
-
-    /**
-     * Gets the error that prevented the vCard from being imported.
-     * 
-     * @return The error, or <code>null</code> if there is none
-     */
-    OXException getError();
 
     /**
      * Gets a list of parser- and conversion warnings.

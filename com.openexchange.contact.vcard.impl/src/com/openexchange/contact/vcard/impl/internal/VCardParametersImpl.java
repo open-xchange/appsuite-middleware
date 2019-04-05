@@ -81,7 +81,6 @@ public class VCardParametersImpl implements VCardParameters {
     private boolean removeAttachmentsFromKeptVCard;
     private Map<String, Object> parameters;
     private Set<String> propertyNames;
-    private boolean continueOnError;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -230,17 +229,6 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard) {
         this.removeAttachmentsFromKeptVCard = removeAttachmentsFromKeptVCard;
-        return this;
-    }
-
-    @Override
-    public boolean isContinueOnError() {
-        return continueOnError;
-    }
-
-    @Override
-    public VCardParameters setContinueOnError(boolean continueOnError) {
-        this.continueOnError = continueOnError;
         return this;
     }
 
