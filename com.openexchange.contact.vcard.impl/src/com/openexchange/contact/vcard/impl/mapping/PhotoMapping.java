@@ -203,8 +203,6 @@ public class PhotoMapping extends AbstractMapping {
                     imageData = doABCrop(imageData, clipRect, getFormatName(photo.getContentType()), parameters, warnings);
                 } catch (IOException e) {
                     addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-                } catch (OXException e) {
-                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
                 }
             }
         } else if (null != photo.getUrl()) {
@@ -340,7 +338,7 @@ public class PhotoMapping extends AbstractMapping {
      * @param parameters The vCard parameters
      * @return The clipping rectangle, or <code>null</code>, if not defined
      */
-    private static Rectangle extractClipRect(List<String> cropValues, VCardParameters parameters, List<OXException> warnings) {
+    private static Rectangle extractClipRect(List<String> cropValues, @SuppressWarnings("unused") VCardParameters parameters, List<OXException> warnings) {
         if (null != cropValues && 0 < cropValues.size()) {
             Pattern clipRectPattern = Pattern.compile("ABClipRect_1&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&");
             for (String value : cropValues) {
@@ -371,7 +369,7 @@ public class PhotoMapping extends AbstractMapping {
      * @param parameters Further options to use, or <code>null</code> to use to the default options
      * @return The cropped image
      */
-    private static byte[] doABCrop(byte[] imageBytes, Rectangle clipRect, String formatName, VCardParameters parameters, List<OXException> warnings) throws IOException, OXException {
+    private static byte[] doABCrop(byte[] imageBytes, Rectangle clipRect, String formatName, VCardParameters parameters, List<OXException> warnings) throws IOException {
         InputStream inputStream = null;
         try {
             /*

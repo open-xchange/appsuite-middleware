@@ -97,7 +97,7 @@ public class BirthdayMapping extends AbstractDateMapping<Birthday> {
 
     /**
      * Maps the years 1 (legacy OX implementation) and 1604 (the apple way) to 1604 and adds the "X-APPLE-OMIT-YEAR" parameter.
-     * 
+     *
      * @param adjustedDate
      * @param property
      * @return
@@ -105,13 +105,12 @@ public class BirthdayMapping extends AbstractDateMapping<Birthday> {
     private Date adjustForNoYear(Date adjustedDate, Birthday property) {
         Calendar calendar = GregorianCalendar.getInstance();
         calendar.setTime(adjustedDate);
-        if (calendar.get(Calendar.YEAR) == 1 || calendar.get(Calendar.YEAR) == 1604) {
-            property.addParameter(OMMIT_YEAR, "1604");
-            calendar.set(Calendar.YEAR, 1604);
-            return new Date(calendar.getTimeInMillis());
-        } else {
+        if (calendar.get(Calendar.YEAR) != 1 && calendar.get(Calendar.YEAR) != 1604) {
             return adjustedDate;
         }
+        property.addParameter(OMMIT_YEAR, "1604");
+        calendar.set(Calendar.YEAR, 1604);
+        return new Date(calendar.getTimeInMillis());
     }
 
 }

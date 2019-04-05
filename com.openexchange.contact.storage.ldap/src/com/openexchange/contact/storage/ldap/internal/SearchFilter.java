@@ -122,7 +122,7 @@ public class SearchFilter {
         }
     }
 
-    private static boolean matches(Contact contact, SingleSearchTerm term, Locale locale) throws OXException {
+    private static boolean matches(Contact contact, SingleSearchTerm term, Locale locale) {
         /*
          * get relevant mapping for term
          */
@@ -196,11 +196,14 @@ public class SearchFilter {
     private static int compare(Object o1, Object o2, Locale locale) {
         if (o1 == o2) {
             return 0;
-        } else if (null == o1 && null != o2) {
-            return -1;
-        } else if (null == o2) {
+        }
+        if (null == o1) {
+            return null != o2 ? -1 : 1;
+        }
+        if (null == o2) {
             return 1;
-        } else if (String.class.isInstance(o1) && String.class.isInstance(o2)) {
+        }
+        if ((o1 instanceof String) && (o2 instanceof String)) {
             String value1 = (String)o1;
             String value2 = (String)o2;
             if (value1.equals(value2) || matchesWildcard(value1.toLowerCase(), value2.toLowerCase(), locale)) {
@@ -210,11 +213,12 @@ public class SearchFilter {
             } else {
                 return Collators.getDefaultInstance(locale).compare(value1, value2);
             }
-        } else if (Comparable.class.isInstance(o1)) {
-            return ((Comparable)o1).compareTo(o2);
-        } else {
-            throw new UnsupportedOperationException("Don't know how to compare two values of class " + o1.getClass().getName());
         }
+        if (o1 instanceof Comparable) {
+            @SuppressWarnings("unchecked") Comparable<Object> comparable = (Comparable) o1;
+            return comparable.compareTo(o2);
+        }
+        throw new UnsupportedOperationException("Don't know how to compare two values of class " + o1.getClass().getName());
     }
 
     private static boolean matchesWildcard(String value, String wildcardPattern, Locale locale) {
@@ -227,50 +231,52 @@ public class SearchFilter {
         /*
          * based on http://www.java2s.com/Open-Source/Java/Development/jodd/jodd/util/Wildcard.java.htm
          */
+        int patternIdx = patternIndex;
+        int valueIdx = valueIndex;
         int patternLength = wildcardPattern.length();
         int valueLength = value.length();
         boolean nextIsNotWildcard = false;
         while (true) {
             // check if end of string and/or pattern occurred
-            if (valueIndex >= valueLength) {   // end of string still may have pending '*' in pattern
-                while (patternIndex < patternLength && '*' == wildcardPattern.charAt(patternIndex)) {
-                    patternIndex++;
+            if (valueIdx >= valueLength) {   // end of string still may have pending '*' in pattern
+                while (patternIdx < patternLength && '*' == wildcardPattern.charAt(patternIdx)) {
+                    patternIdx++;
                 }
-                return patternIndex >= patternLength;
+                return patternIdx >= patternLength;
             }
-            if (patternIndex >= patternLength) {         // end of pattern, but not end of the string
+            if (patternIdx >= patternLength) {         // end of pattern, but not end of the string
                 return false;
             }
-            char p = wildcardPattern.charAt(patternIndex);    // pattern char
+            char p = wildcardPattern.charAt(patternIdx);    // pattern char
 
             // perform logic
             if (nextIsNotWildcard == false) {
                 if (p == '\\') {
-                    patternIndex++;
+                    patternIdx++;
                     nextIsNotWildcard = true;
                     continue;
                 }
                 if (p == '?') {
-                    valueIndex++;
-                    patternIndex++;
+                    valueIdx++;
+                    patternIdx++;
                     continue;
                 }
                 if (p == '*') {
                     char pnext = 0;           // next pattern char
-                    if (patternIndex + 1 < patternLength) {
-                        pnext = wildcardPattern.charAt(patternIndex + 1);
+                    if (patternIdx + 1 < patternLength) {
+                        pnext = wildcardPattern.charAt(patternIdx + 1);
                     }
                     if (pnext == '*') {         // double '*' have the same effect as one '*'
-                        patternIndex++;
+                        patternIdx++;
                         continue;
                     }
                     int i;
-                    patternIndex++;
+                    patternIdx++;
 
                     // find recursively if there is any substring from the end of the
                     // line that matches the rest of the pattern !!!
-                    for (i = value.length(); i >= valueIndex; i--) {
-                        if (matchesWildcard(value, wildcardPattern, i, patternIndex) == true) {
+                    for (i = value.length(); i >= valueIdx; i--) {
+                        if (matchesWildcard(value, wildcardPattern, i, patternIdx) == true) {
                             return true;
                         }
                     }
@@ -280,12 +286,12 @@ public class SearchFilter {
                 nextIsNotWildcard = false;
             }
             // check if pattern char and string char are equals
-            if (p != value.charAt(valueIndex)) {
+            if (p != value.charAt(valueIdx)) {
                 return false;
             }
             // everything matches for now, continue
-            valueIndex++;
-            patternIndex++;
+            valueIdx++;
+            patternIdx++;
         }
     }
 

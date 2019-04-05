@@ -142,6 +142,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.groupware.AmountQuotas;
@@ -611,7 +612,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = null;
             }
 
-            LOG.info("Disabled {} contexts in schema '{}' with reason {}", numDisabled, schema, reason.getId());
+            LOG.info("Disabled {} contexts in schema '{}' with reason {}", Autoboxing.valueOf(numDisabled), schema, reason.getId());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
@@ -715,7 +716,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = con.prepareStatement(Databases.getIN("UPDATE context SET enabled = 1, reason_id = NULL WHERE enabled = 0 " + (reason == null ? "" : "AND reason_id = ? ") + "AND cid IN (", partition.size()));
                 int pos = 1;
                 if (reason != null) {
-                    stmt.setInt(pos++, reason.getId());
+                    stmt.setInt(pos++, reason.getId().intValue());
                 }
                 for (Integer contextId : partition) {
                     stmt.setInt(pos++, contextId.intValue());
@@ -725,7 +726,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = null;
             }
 
-            LOG.info("Enabled {} contexts in schema '{}' with reason {}", numEnabled, schema, reason == null ? "'all'" : reason.getId());
+            LOG.info("Enabled {} contexts in schema '{}' with reason {}", Autoboxing.valueOf(numEnabled), schema, reason == null ? "'all'" : reason.getId());
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
@@ -1206,7 +1207,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             DataSource<Integer> output = pnfService.create(cids);
             for (final Object f : filters.toArray()) {
-                output = output.addFilter((Filter<Integer, Integer>) f);
+                @SuppressWarnings("unchecked") Filter<Integer, Integer> filter = (Filter<Integer, Integer>) f;
+                output = output.addFilter(filter);
             }
             Set<Integer> filteredCids = new HashSet<Integer>(cids.size());
             try {
@@ -1442,7 +1444,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rs = stmt.executeQuery();
             List<Integer> contextIds = new LinkedList<Integer>();
             while (rs.next()) {
-                contextIds.add(rs.getInt(1));
+                contextIds.add(Autoboxing.valueOf(rs.getInt(1)));
             }
             return contextIds;
         } catch (final SQLException e) {
@@ -1878,7 +1880,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void lockWriteContextToPayloadDb(int contextId, Connection con) throws SQLException {
+    private void lockWriteContextToPayloadDb(@SuppressWarnings("unused") int contextId, Connection con) throws SQLException {
         if (null == con) {
             return;
         }
@@ -2211,7 +2213,39 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     // Deduced from https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-type-conversions.html
-    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder().put("BIT", Types.BIT).put("TINYINT", Types.TINYINT).put("BOOL", Types.BOOLEAN).put("BOOLEAN", Types.BOOLEAN).put("SMALLINT", Types.SMALLINT).put("MEDIUMINT", Types.INTEGER).put("INT", Types.INTEGER).put("INTEGERR", Types.INTEGER).put("BIGINT", Types.BIGINT).put("FLOAT", Types.FLOAT).put("DOUBLE", Types.DOUBLE).put("DECIMAL", Types.DECIMAL).put("DATE", Types.DATE).put("DATETIME", Types.TIMESTAMP).put("TIMESTAMP", Types.TIMESTAMP).put("TIME", Types.TIME).put("YEAR", Types.DATE).put("CHAR", Types.CHAR).put("VARCHAR", Types.VARCHAR).put("BINARY", Types.BINARY).put("VARBINARY", Types.VARBINARY).put("TINYBLOB", Types.BLOB).put("TINYTEXT", Types.VARCHAR).put("BLOB", Types.BLOB).put("TEXT", Types.VARCHAR).put("MEDIUMBLOB", Types.BLOB).put("MEDIUMTEXT", Types.VARCHAR).put("LONGBLOB", Types.BLOB).put("LONGTEXT", Types.VARCHAR).put("ENUM", Types.CHAR).put("SET", Types.CHAR).build();
+    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder()
+        .put("BIT", I(Types.BIT))
+        .put("TINYINT", I(Types.TINYINT))
+        .put("BOOL", I(Types.BOOLEAN))
+        .put("BOOLEAN", I(Types.BOOLEAN))
+        .put("SMALLINT", I(Types.SMALLINT))
+        .put("MEDIUMINT", I(Types.INTEGER))
+        .put("INT", I(Types.INTEGER))
+        .put("INTEGERR", I(Types.INTEGER))
+        .put("BIGINT", I(Types.BIGINT))
+        .put("FLOAT", I(Types.FLOAT))
+        .put("DOUBLE", I(Types.DOUBLE))
+        .put("DECIMAL", I(Types.DECIMAL))
+        .put("DATE", I(Types.DATE))
+        .put("DATETIME", I(Types.TIMESTAMP))
+        .put("TIMESTAMP", I(Types.TIMESTAMP))
+        .put("TIME", I(Types.TIME))
+        .put("YEAR", I(Types.DATE))
+        .put("CHAR", I(Types.CHAR))
+        .put("VARCHAR", I(Types.VARCHAR))
+        .put("BINARY", I(Types.BINARY))
+        .put("VARBINARY", I(Types.VARBINARY))
+        .put("TINYBLOB", I(Types.BLOB))
+        .put("TINYTEXT", I(Types.VARCHAR))
+        .put("BLOB", I(Types.BLOB))
+        .put("TEXT", I(Types.VARCHAR))
+        .put("MEDIUMBLOB", I(Types.BLOB))
+        .put("MEDIUMTEXT", I(Types.VARCHAR))
+        .put("LONGBLOB", I(Types.BLOB))
+        .put("LONGTEXT", I(Types.VARCHAR))
+        .put("ENUM", I(Types.CHAR))
+        .put("SET", I(Types.CHAR))
+        .build();
 
     private static List<TableObject> fetchTableObjects(String selectionCriteria, Connection ox_db_write_connection) throws SQLException {
         PreparedStatement stmt = null;
@@ -2248,7 +2282,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // add column to table
                 to.addColumn(tco);
             } while (rs.next());
-            LOG.debug("####### Found -> {} tables", tableObjects.size());
+            LOG.debug("####### Found -> {} tables", Autoboxing.valueOf(tableObjects.size()));
             return tableObjects;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
@@ -2529,7 +2563,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
-                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                    LOG.error("Error pushing connection to pool for context {}!", Autoboxing.valueOf(contextId), e);
                 }
             }
         }
@@ -2569,7 +2603,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
-                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                    LOG.error("Error pushing connection to pool for context {}!", Autoboxing.valueOf(contextId), e);
                 }
             }
         }
@@ -2608,7 +2642,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (final PoolException e) {
-                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                    LOG.error("Error pushing connection to pool for context {}!", Autoboxing.valueOf(contextId), e);
                 }
             }
         }
@@ -2621,11 +2655,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con = null;
         PreparedStatement stmt = null;
         int rollback = 0;
-        boolean autocommit = false;
         try {
             con = cache.getConnectionForContext(contextId);
             con.setAutoCommit(false); // BEGIN
-            autocommit = true;
             rollback = 1;
             // First drop
             if (null != capsToDrop && !capsToDrop.isEmpty()) {
@@ -2779,7 +2811,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 try {
                     cache.pushConnectionForContext(contextId, con);
                 } catch (final PoolException e) {
-                    LOG.error("Error pushing connection to pool for context {}!", contextId, e);
+                    LOG.error("Error pushing connection to pool for context {}!", Autoboxing.valueOf(contextId), e);
                 }
             }
         }
@@ -2971,14 +3003,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void changeQuotaForContext(long quota_max_temp, Context ctx, Connection configdb_con) throws SQLException {
-        if (quota_max_temp != -1) {
-            quota_max_temp = quota_max_temp << 20;
+        long qmt = quota_max_temp;
+        if (qmt != -1) {
+            qmt = qmt << 20;
         }
 
         PreparedStatement prep = null;
         try {
             prep = configdb_con.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
-            prep.setLong(1, quota_max_temp);
+            prep.setLong(1, qmt);
             prep.setInt(2, ctx.getId().intValue());
             prep.executeUpdate();
 
@@ -3179,7 +3212,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 readDbPoolId = rs.getInt(1);
                 writeDbPoolId = rs.getInt(2);
             } else {
-                LOG.error("The specified target cluster id '{}' has no database pool references", targetClusterId);
+                LOG.error("The specified target cluster id '{}' has no database pool references", Autoboxing.valueOf(targetClusterId));
                 throw new StorageException("The specified target cluster id '" + targetClusterId + "' has no database pool references");
             }
             stmt.close();
@@ -3721,7 +3754,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     this.schemaName = schemaName;
                 }
             }
-            ;
 
             Map<Integer, List<SchemaCount>> counts = new LinkedHashMap<Integer, List<SchemaCount>>(32, 0.9F);
             for (Integer poolId : poolIds) {

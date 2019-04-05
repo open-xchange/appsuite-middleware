@@ -2245,6 +2245,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 LOG.debug("Delete user {}({}) from contacts ...", user.getId(), ctx.getId());
                 int contactID = getContactIdByUserId(contextId, userId, write_ox_con);
+                stmt = write_ox_con.prepareStatement("INSERT INTO del_contacts (creating_date, created_from, changing_date, changed_from, fid, cid, intfield01, uid, filename) SELECT pc.creating_date, pc.created_from, ?, pc.changed_from, pc.fid, pc.cid, pc.intfield01, pc.uid, pc.filename FROM prg_contacts pc WHERE cid = ? AND intfield01 = ?");
+                stmt.setLong(1, System.currentTimeMillis());
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, contactID);
+                stmt.executeUpdate();
+                stmt.close();
                 stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts_image WHERE cid = ? AND intfield01 = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, contactID);
@@ -2253,6 +2259,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                stmt.close();
+
+                String eventId = FolderObject.SYSTEM_LDAP_FOLDER_ID + "-" + contactID;
+                stmt = write_ox_con.prepareStatement("DELETE FROM calendar_alarm WHERE cid = ? AND event = ?");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, eventId);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = write_ox_con.prepareStatement("DELETE FROM calendar_alarm_trigger WHERE cid = ? AND eventId = ?");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, eventId);
                 stmt.executeUpdate();
                 stmt.close();
 

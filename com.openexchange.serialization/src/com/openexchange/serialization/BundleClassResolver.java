@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,39 @@
  *
  */
 
-package com.openexchange.contact.vcard.storage.impl;
+package com.openexchange.serialization;
 
-import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.vcard.storage.VCardStorageFactory;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
- * {@link DefaultVCardStorageFactory}
+ * {@link BundleClassResolver} - Uses the bundle to resolve classes by name.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-public class DefaultVCardStorageFactory implements VCardStorageFactory {
+public class BundleClassResolver implements ClassResolver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultVCardStorageFactory.class);
+    private final Bundle bundle;
 
-    private final VCardStorageService vCardStorageService;
-
-    public DefaultVCardStorageFactory(VCardStorageService vCardStorageService) {
-        this.vCardStorageService = vCardStorageService;
+    /**
+     * Initializes a new {@link BundleClassResolver}.
+     */
+    public BundleClassResolver(BundleContext bundleContext) {
+        this(bundleContext.getBundle());
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link BundleClassResolver}.
      */
-    @Override
-    public VCardStorageService getVCardStorageService(ConfigViewFactory configViewFactory, int contextId) {
-        try {
-            for (String capability : this.vCardStorageService.neededCapabilities()) {
-                ConfigProperty<Boolean> filestoreCapability = configViewFactory.getView(-1, contextId).property(capability, boolean.class);
-                if (!filestoreCapability.get().booleanValue()) {
-                    LOG.info("Needed capability '{}' not available for context id {}. Unable to handle VCard for storage.", capability, I(contextId));
-                    return null;
-                }
-            }
-        } catch (OXException oxException) {
-            LOG.warn("Unable to return requested VCardStorageService implementation.", oxException);
-            return null;
-        }
-        return vCardStorageService;
+    public BundleClassResolver(Bundle bundle) {
+        super();
+        this.bundle = bundle;
     }
+
+    @Override
+    public Class<?> resolveClass(String className) throws ClassNotFoundException {
+        return bundle.loadClass(className);
+    }
+
 }

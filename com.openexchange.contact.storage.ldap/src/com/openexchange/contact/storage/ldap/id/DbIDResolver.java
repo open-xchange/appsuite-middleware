@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.id;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -149,12 +150,11 @@ public class DbIDResolver extends DefaultLdapIDResolver {
         Connection connection = databaseService.getReadOnly(contextID);
         try {
             ldapID = loadLdapID(connection, contextID, folderID, contactID);
-            if (null != ldapID) {
-                this.ldapIDs.put(Integer.valueOf(contactID), ldapID);
-                return ldapID;
-            } else {
-                throw LdapExceptionCodes.NO_MAPPED_LDAP_ID.create(contactID, folderID, contextID);
+            if (null == ldapID) {
+                throw LdapExceptionCodes.NO_MAPPED_LDAP_ID.create(I(contactID), I(folderID), I(contextID));
             }
+            this.ldapIDs.put(Integer.valueOf(contactID), ldapID);
+            return ldapID;
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {

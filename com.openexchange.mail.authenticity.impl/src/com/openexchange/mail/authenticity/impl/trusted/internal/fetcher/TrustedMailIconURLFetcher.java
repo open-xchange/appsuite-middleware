@@ -74,7 +74,6 @@ public class TrustedMailIconURLFetcher extends AbstractTrustedMailIconFetcher im
      */
     public TrustedMailIconURLFetcher() {
         super();
-        HttpURLConnection.setFollowRedirects(false);
     }
 
     /*
@@ -132,6 +131,7 @@ public class TrustedMailIconURLFetcher extends AbstractTrustedMailIconFetcher im
         connection.setConnectTimeout(CONNECTION_TIMEOUT);
         connection.setReadTimeout(READ_TIMEOUT);
         connection.setRequestMethod(httpMethod);
+        connection.setInstanceFollowRedirects(false);
         return connection;
     }
 }

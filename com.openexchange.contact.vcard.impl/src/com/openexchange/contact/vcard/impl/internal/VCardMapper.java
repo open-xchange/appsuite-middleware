@@ -386,17 +386,18 @@ public class VCardMapper {
      * @return The exported contact as vCard
      */
     public VCard exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
-        if (null == vCard) {
-            vCard = new VCard();
+        VCard vCardToUse = vCard;
+        if (null == vCardToUse) {
+            vCardToUse = new VCard();
         } else {
-            vCard = removeSkippedProperties(vCard, parameters);
+            vCardToUse = removeSkippedProperties(vCardToUse, parameters);
         }
         for (VCardMapping mapping : mappings) {
             if (false == skip(mapping, parameters)) {
-                mapping.exportContact(contact, vCard, parameters, warnings);
+                mapping.exportContact(contact, vCardToUse, parameters, warnings);
             }
         }
-        return vCard;
+        return vCardToUse;
     }
 
     /**
@@ -409,15 +410,16 @@ public class VCardMapper {
      * @return The imported vCard as contact
      */
     public Contact importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
-        if (null == contact) {
-            contact = new Contact();
+        Contact contactToUse = contact;
+        if (null == contactToUse) {
+            contactToUse = new Contact();
         }
         for (VCardMapping mapping : mappings) {
             if (false == skip(mapping, parameters)) {
-                mapping.importVCard(vCard, contact, parameters, warnings);
+                mapping.importVCard(vCard, contactToUse, parameters, warnings);
             }
         }
-        return contact;
+        return contactToUse;
     }
 
     /**

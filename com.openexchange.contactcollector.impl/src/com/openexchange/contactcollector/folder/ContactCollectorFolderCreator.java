@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector.folder;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -158,20 +159,20 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
             if (folderAccess.exists(folderId.intValue())) {
                 // Folder already exists
                 session.setParameter("__ccf#", folderId);
-                LOG.debug("Detected contact-collect folder {} for user {} in context {}", folderId, userId, contextId);
+                LOG.debug("Detected contact-collect folder {} for user {} in context {}", folderId, I(userId), I(contextId));
                 return true;
             }
         }
         if (!isContactCollectionEnabled(session) && (null != folderId)) {
             // Both - collect-on-mail-access and collect-on-mail-transport - disabled
-            LOG.debug("Considering contact-collect folder {} as existent as contact-collect feature NOT enabled for user {} in context {}", folderId, userId, contextId);
+            LOG.debug("Considering contact-collect folder {} as existent as contact-collect feature NOT enabled for user {} in context {}", folderId, I(userId), I(contextId));
             return true;
         }
         // Should collect, or not explicitly set, so create folder
         if (null == folderId) {
-            LOG.debug("Considering contact-collect folder as absent as contact-collect feature enabled for user {} in context {}", userId, contextId);
+            LOG.debug("Considering contact-collect folder as absent as contact-collect feature enabled for user {} in context {}", I(userId), I(contextId));
         } else {
-            LOG.debug("Considering contact-collect folder {} as absent as contact-collect feature enabled for user {} in context {}", folderId, userId, contextId);
+            LOG.debug("Considering contact-collect folder {} as absent as contact-collect feature enabled for user {} in context {}", folderId, I(userId), I(contextId));
         }
         return false;
     }

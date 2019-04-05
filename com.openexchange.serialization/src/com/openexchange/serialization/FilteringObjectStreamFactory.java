@@ -47,48 +47,31 @@
  *
  */
 
-package com.openexchange.contact.vcard.storage.impl;
+package com.openexchange.serialization;
 
-import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.vcard.storage.VCardStorageFactory;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.exception.OXException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link DefaultVCardStorageFactory}
+ * {@link FilteringObjectStreamFactory} is a factory for {@link FilteringObjectInputStream}s
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public class DefaultVCardStorageFactory implements VCardStorageFactory {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultVCardStorageFactory.class);
-
-    private final VCardStorageService vCardStorageService;
-
-    public DefaultVCardStorageFactory(VCardStorageService vCardStorageService) {
-        this.vCardStorageService = vCardStorageService;
-    }
+@SingletonService
+public interface FilteringObjectStreamFactory {
 
     /**
-     * {@inheritDoc}
+     * Creates an filtering {@link ObjectInputStream} from the given stream, which denies deserialization of potentially harmful classes.
+     *
+     * @param stream The input stream to read from
+     * @param context An optional context object from which class loading has to be done (typically the instance from which this method is called)
+     * @param optClassResolver The class resolver or <code>null</code>
+     * @return A {@link FilteringObjectInputStream}
+     * @throws IOException If an I/O error occurs while reading from stream
      */
-    @Override
-    public VCardStorageService getVCardStorageService(ConfigViewFactory configViewFactory, int contextId) {
-        try {
-            for (String capability : this.vCardStorageService.neededCapabilities()) {
-                ConfigProperty<Boolean> filestoreCapability = configViewFactory.getView(-1, contextId).property(capability, boolean.class);
-                if (!filestoreCapability.get().booleanValue()) {
-                    LOG.info("Needed capability '{}' not available for context id {}. Unable to handle VCard for storage.", capability, I(contextId));
-                    return null;
-                }
-            }
-        } catch (OXException oxException) {
-            LOG.warn("Unable to return requested VCardStorageService implementation.", oxException);
-            return null;
-        }
-        return vCardStorageService;
-    }
+    ObjectInputStream createFilteringStream(InputStream stream, Object optContext, ClassResolver optClassResolver) throws IOException;
+
 }

@@ -47,27 +47,43 @@
  *
  */
 
-package com.openexchange.serialization;
+package com.openexchange.groupware.alias.impl;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-import com.openexchange.osgi.annotation.SingletonService;
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteListener;
 
 /**
- * {@link FilteringObjectStreamBlacklistProvider} is a provider for the blacklist that should be used for {@link FilteringObjectInputStream}s
+ * {@link AliasCacheDeleteListener}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
  */
-@SingletonService
-public interface FilteringObjectStreamBlacklistProvider {
+public class AliasCacheDeleteListener implements DeleteListener {
+
+    private final CachingAliasStorage storage;
 
     /**
-     * Gets the blacklist.
-     *
-     * @return An {@link Iterable} of regex {@link Pattern}
-     * @throws IOException If an I/O error occurs while providing blacklist
+     * Initializes a new {@link AliasCacheDeleteListener}.
      */
-    Iterable<Pattern> blacklist() throws IOException;
+    public AliasCacheDeleteListener(CachingAliasStorage storage) {
+        this.storage = storage;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent, java.sql.Connection, java.sql.Connection)
+     */
+    @Override
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (event.getType() == DeleteEvent.TYPE_USER || event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            for (int userId : event.getUserIds()) {
+                storage.invalidateAliases(event.getContext().getContextId(), userId);
+            }
+            return;
+        }
+    }
 
 }

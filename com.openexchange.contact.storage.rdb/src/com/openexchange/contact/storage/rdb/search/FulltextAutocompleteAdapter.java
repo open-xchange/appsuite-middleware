@@ -192,7 +192,7 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
      * @param checkPatternLength <code>true</code> to check each pattern length against the configured restrictions, <code>false</code>, otherwise
      * @return The patterns
      */
-    static List<String> preparePatterns(List<String> tokens) throws OXException {
+    static List<String> preparePatterns(List<String> tokens) {
         List<String> resultingPatterns = new ArrayList<String>();
         for (String token : tokens) {
             if (Strings.isEmpty(token)) {

@@ -72,6 +72,7 @@ public final class ContinuationCacheElementEventHandler implements ElementEventH
         super();
     }
 
+    @SuppressWarnings("unchecked")
     private void doHandleElementEvent(final ElementEvent event) {
         final CacheElement cacheElem = (CacheElement) event.getSource();
         ((Cache<UUID, Continuation<?>>) cacheElem.getVal()).invalidateAll(); // Notification send to associated RemovalListener

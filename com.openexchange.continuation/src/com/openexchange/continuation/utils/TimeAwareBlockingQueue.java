@@ -97,7 +97,7 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
     private final AtomicInteger count = new AtomicInteger(0);
 
     /** Head of linked list */
-    private transient Node<E> head;
+    transient Node<E> head;
 
     /** Tail of linked list */
     private transient Node<E> last;
@@ -533,11 +533,7 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
         takeLock.lock();
         try {
             final Node<E> first = head.next;
-            if (first == null) {
-                return null;
-            } else {
-                return first.item;
-            }
+            return first == null ? null : first.item;
         } finally {
             takeLock.unlock();
         }
@@ -635,7 +631,7 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
      *
      * Note that <tt>toArray(new Object[0])</tt> is identical in function to <tt>toArray()</tt>.
      *
-     * @param a the array into which the elements of the queue are to be stored, if it is big enough; otherwise, a new array of the same
+     * @param array the array into which the elements of the queue are to be stored, if it is big enough; otherwise, a new array of the same
      *            runtime type is allocated for this purpose
      * @return an array containing all of the elements in this queue
      * @throws ArrayStoreException if the runtime type of the specified array is not a supertype of the runtime type of every element in
@@ -644,17 +640,20 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
      */
     // @SuppressWarnings("unchecked")
     @Override
-    public <T> T[] toArray(T[] a) {
+    public <T> T[] toArray(T[] array) {
         fullyLock();
         try {
+            T[] a = array;
             final int size = count.get();
             if (a.length < size) {
-                a = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+                @SuppressWarnings("unchecked") T[] newArray = (T[]) java.lang.reflect.Array.newInstance(a.getClass().getComponentType(), size);
+                a = newArray;
             }
 
             int k = 0;
             for (Node<E> p = head.next; p != null; p = p.next) {
-                a[k++] = (T) p.item;
+                @SuppressWarnings("unchecked") T item = (T) p.item;
+                a[k++] = item;
             }
             if (a.length > k) {
                 a[k] = null;
@@ -798,9 +797,10 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
          * Returns the next live successor of p, or null if no such. Unlike other traversal methods, iterators need to handle both: -
          * dequeued nodes (p.next == p) - (possibly multiple) interior removed nodes (p.item == null)
          */
-        private Node<E> nextNode(Node<E> p) {
+        private Node<E> nextNode(Node<E> parent) {
+            Node<E> p = parent;
             for (;;) {
-                final Node s = p.next;
+                final Node<E> s = p.next;
                 if (s == p) {
                     return head.next;
                 }
@@ -895,7 +895,7 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
         // Read in all elements and place in queue
         for (;;) {
             // @SuppressWarnings("unchecked")
-            final E item = (E) s.readObject();
+            @SuppressWarnings("unchecked") E item = (E) s.readObject();
             if (item == null) {
                 break;
             }

@@ -116,7 +116,7 @@ public class ColumnParser {
         int[] columnIDs = new int[splitted.length];
         try {
             for (int i = 0; i < splitted.length; i++) {
-                columnIDs[i] = Integer.valueOf(splitted[i]);
+                columnIDs[i] = Integer.parseInt(splitted[i]);
             }
         } catch (NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", commaSeparated);

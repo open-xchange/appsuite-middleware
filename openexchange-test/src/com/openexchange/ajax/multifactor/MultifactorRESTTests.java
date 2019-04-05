@@ -111,10 +111,15 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
         result.put(MultifactorProperties.PREFIX + "sms.enabled", Boolean.TRUE.toString());
         return result;
     }
-    
+
     @Override
     protected String getReloadables() {
         return "DemoAwareTokenCreationStrategy,MultifactorSMSProvider";
+    }
+
+    @Override
+    protected String getScope() {
+        return "context";
     }
 
     private Collection<MultifactorDevice> registerTestDevices(MultifactorApi api, int count) throws ApiException {

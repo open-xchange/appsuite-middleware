@@ -90,13 +90,13 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
      * @param mapper The vCard mapper to use
      * @param parameters The vCard parameters
      */
-    public VCardImportIterator(InputStream inputStream, VCardMapper mapper, VCardParameters parameters) throws OXException {
+    public VCardImportIterator(InputStream inputStream, VCardMapper mapper, VCardParameters parameters) {
         super();
         this.mapper = mapper;
         this.parameters = parameters;
         warnings = new ArrayList<OXException>();
         vCardStream = new VCardInputStream(inputStream, parameters.getMaxVCardSize());
-        if(parameters.isEnforceUtf8()) {
+        if (parameters.isEnforceUtf8()) {
             reader = new VCardReader(IOUtils.utf8Reader(vCardStream));
         } else {
             reader = new VCardReader(vCardStream);
@@ -172,14 +172,13 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         List<OXException> warnings = new ArrayList<OXException>();
         VCard vCard = null;
         try {
-            vCard = reader.readNext();
-        } catch (IOException e) {
-            if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
-                throw (OXException) e.getCause();
+            vCard = parseNext(warnings);
+        } catch (OXException e) {
+            if (parameters.isContinueOnError()) {
+                return new DefaultVCardImport(e, warnings);
             }
-            throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw e;
         }
-        warnings.addAll(VCardExceptionUtils.getParserWarnings(reader.getWarnings()));
         if (null == vCard) {
             /*
              * no vCard to import, so collect any warnings in parent iterator
@@ -190,7 +189,8 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * import vCard
          */
-        contact = mapper.importVCard(vCard, contact, parameters, warnings);
+        Contact contactToUse = contact;
+        contactToUse = mapper.importVCard(vCard, contactToUse, parameters, warnings);
         if (false == parameters.isSkipValidation()) {
             ValidationWarnings validationWarnings = vCard.validate(
                 null != vCard.getVersion() ? vCard.getVersion() : ezvcard.VCardVersion.valueOfByStr(parameters.getVersion().getVersion()));
@@ -204,7 +204,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
             originalVCard = new ThresholdFileHolder();
             ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
             try {
-                if(parameters.isEnforceUtf8()) {
+                if (parameters.isEnforceUtf8()) {
                     writerChain.go(IOUtils.utf8Writer(originalVCard.asOutputStream()));
                 } else {
                     writerChain.go(originalVCard.asOutputStream());
@@ -221,7 +221,21 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * construct & return vCard import result
          */
-        return new DefaultVCardImport(contact, warnings, originalVCard);
+        return new DefaultVCardImport(contactToUse, warnings, originalVCard);
+    }
+
+    private VCard parseNext(List<OXException> warnings) throws OXException {
+        try {
+            return reader.readNext();
+        } catch (IOException e) {
+            if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
+                throw (OXException) e.getCause();
+            }
+            throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            warnings.addAll(VCardExceptionUtils.getParserWarnings(reader.getWarnings()));
+            vCardStream.resetCurrentSize();
+        }
     }
 
 }

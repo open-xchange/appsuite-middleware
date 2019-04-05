@@ -50,6 +50,7 @@
 package com.openexchange.realtime.hazelcast.serialization.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -65,6 +66,26 @@ public final class Services {
      */
     private Services() {
         super();
+    }
+
+    private static final AtomicReference<BundleContext> BUNDLE_CONTEXT_REF = new AtomicReference<BundleContext>();
+
+    /**
+     * Sets the bundle context.
+     *
+     * @param bundleContext The bundle context or <code>null</code>
+     */
+    public static void setBundleContext(BundleContext bundleContext) {
+        BUNDLE_CONTEXT_REF.set(bundleContext);
+    }
+
+    /**
+     * Gets the bundle context.
+     *
+     * @return The bundle context or <code>null</code>
+     */
+    public static BundleContext getBundleContext() {
+        return BUNDLE_CONTEXT_REF.get();
     }
 
     private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();

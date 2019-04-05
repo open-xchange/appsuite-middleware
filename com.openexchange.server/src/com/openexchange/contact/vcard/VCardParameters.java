@@ -278,6 +278,21 @@ public interface VCardParameters {
     VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard);
 
     /**
+     * Gets a value indicating whether processing should continue after an error is encountered for one vCard or not.
+     *
+     * @return <code>true</code> to continue on error, <code>false</code>, otherwise
+     */
+    boolean isContinueOnError();
+
+    /**
+     * Sets a value indicating whether processing should continue after an error is encountered for one vCard or not.
+     *
+     * @param continueOnError <code>true</code> to continue on error, <code>false</code>, otherwise
+     * @return A self reference
+     */
+    VCardParameters setContinueOnError(boolean continueOnError);
+
+    /**
      * Gets the vCard property names to consider during import/export.
      *
      * @return The property names, or <code>null</code> if not set

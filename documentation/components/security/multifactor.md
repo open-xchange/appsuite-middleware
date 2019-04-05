@@ -65,13 +65,13 @@ U2F is supported in Google Chrome, as well as Firefox (though requires user chan
 In multifactor.properties, enable U2F
 
 ```properties
-com.openexchange.multifactor.U2F.enabled=true
+com.openexchange.multifactor.u2f.enabled=true
 ```
 
 Then, the domain that the user will be using must be specified.  This will be used with the requests to the U2F device, and must mach the website.  This configuration is config-cascade aware
 
 ```properties
- com.openexchange.multifactor.U2F.appId=https://yourdomain
+ com.openexchange.multifactor.u2f.appId=https://yourdomain
 ```
 
 

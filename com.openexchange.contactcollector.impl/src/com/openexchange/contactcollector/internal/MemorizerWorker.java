@@ -49,6 +49,7 @@
 
 package com.openexchange.contactcollector.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -533,7 +534,7 @@ public final class MemorizerWorker {
             try {
                 useCountService.incrementObjectUseCount(session, new IncrementArguments.Builder(objectId, folderId).build());
             } catch (Exception e) {
-                LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", objectId, folderId, session.getUserId(), session.getContextId(), e);
+                LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", I(objectId), I(folderId), I(session.getUserId()), I(session.getContextId()), e);
             }
         }
     }
@@ -555,7 +556,7 @@ public final class MemorizerWorker {
 
                 useCountService.incrementObjectUseCount(session, builder.build());
             } catch (Exception e) {
-                LOG.warn("Failed to batch increment use count for user {} in context {}", session.getUserId(), session.getContextId(), e);
+                LOG.warn("Failed to batch increment use count for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
             }
         }
     }

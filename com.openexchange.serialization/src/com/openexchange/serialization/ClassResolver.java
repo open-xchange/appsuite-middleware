@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,54 +49,20 @@
 
 package com.openexchange.serialization;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.slf4j.Logger;
-
 /**
- * {@link FilteringObjectInputStream} prevents invalid deserialization by using a blacklist
+ * {@link ClassResolver} - Resolves a class name to a {@link Class} instance.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class FilteringObjectInputStream extends ObjectInputStream {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FilteringObjectInputStream.class);
-    }
-
-    private final Iterable<Pattern> blacklist;
+public interface ClassResolver {
 
     /**
-     * Initializes a new {@link FilteringObjectInputStream}.
+     * Resolves given class name to appropriate {@link Class} instance
      *
-     * @param in The {@link InputStream}
-     * @param blacklist The blacklist
-     * @throws IOException
+     * @param className The class name to resolve
+     * @return The resolved class
+     * @throws ClassNotFoundException If class cannot be returned
      */
-    public FilteringObjectInputStream(InputStream in, Iterable<Pattern> blacklist) throws IOException {
-        super(in);
-        this.blacklist = blacklist;
-    }
-
-    @Override
-    protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
-        for (Pattern blackPattern : blacklist) {
-            Matcher blackMatcher = blackPattern.matcher(input.getName());
-
-            if (blackMatcher.find()) {
-                LoggerHolder.LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), input.getName());
-                throw new InvalidClassException(input.getName(), "Class blocked from deserialization (blacklist)");
-            }
-        }
-
-        return super.resolveClass(input);
-    }
-
+    Class<?> resolveClass(String className) throws ClassNotFoundException;
 }
