@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.message.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
@@ -145,7 +146,7 @@ public class Activator extends HousekeepingActivator {
         int period = leanConfig.getIntProperty(MessageAlarmConfig.PERIOD);
         int lookAhead = leanConfig.getIntProperty(MessageAlarmConfig.LOOK_AHEAD);
         if (lookAhead < period) {
-            LOG.warn("The {} value is smaller than the {} value. Falling back to {}.", MessageAlarmConfig.LOOK_AHEAD.getFQPropertyName(), MessageAlarmConfig.PERIOD.getFQPropertyName(), period);
+            LOG.warn("The {} value is smaller than the {} value. Falling back to {}.", MessageAlarmConfig.LOOK_AHEAD.getFQPropertyName(), MessageAlarmConfig.PERIOD.getFQPropertyName(), I(period));
             lookAhead = period;
         }
         int initialDelay = leanConfig.getIntProperty(MessageAlarmConfig.INITIAL_DELAY);
@@ -155,7 +156,7 @@ public class Activator extends HousekeepingActivator {
         }
         int overdueWaitTime = Math.abs(leanConfig.getIntProperty(MessageAlarmConfig.OVERDUE));
         if (workerCount > 1) {
-            LOG.warn("Using {} mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.", workerCount);
+            LOG.warn("Using {} mail alarm worker. Increasing the value above 1 should not be used in a production environment and only be used for testing purposes.", I(workerCount));
         }
 
         AlarmNotificationServiceRegistry registry = new AlarmNotificationServiceRegistry();

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.message.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -356,17 +357,17 @@ public class MessageAlarmDeliveryWorker implements Runnable {
 
     private void spawnDeliveryTaskForTriggers(Map<Pair<Integer, Integer>, List<AlarmTrigger>> lockedTriggers, Calendar currentUTCTime) throws OXException {
         for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : lockedTriggers.entrySet()) {
-            int cid = entry.getKey().getFirst();
-            int account = entry.getKey().getSecond();
+            int cid = entry.getKey().getFirst().intValue();
+            int account = entry.getKey().getSecond().intValue();
             Connection readOnly = null;
             try {
                 readOnly = dbservice.getReadOnly(cid);
                 CalendarStorage ctxStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(readOnly, readOnly), DBTransactionPolicy.NO_TRANSACTIONS);
                 for (AlarmTrigger trigger : entry.getValue()) {
                     try {
-                        Alarm alarm = ctxStorage.getAlarmStorage().loadAlarm(trigger.getAlarm());
+                        Alarm alarm = ctxStorage.getAlarmStorage().loadAlarm(trigger.getAlarm().intValue());
                         Calendar calTriggerTime = Calendar.getInstance(UTC);
-                        calTriggerTime.setTimeInMillis(trigger.getTime());
+                        calTriggerTime.setTimeInMillis(trigger.getTime().longValue());
                         Calendar now = Calendar.getInstance(UTC);
                         AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
                         if(alarmNotificationService == null) {
@@ -374,8 +375,8 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                             throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
                         }
 
-                        Integer shift = alarmNotificationService.getShift();
-                        long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift);
+                        Integer shift = I(alarmNotificationService.getShift());
+                        long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift.intValue());
                         if (delay < 0) {
                             delay = 0;
                         }
@@ -502,7 +503,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                         readOnly = false;
                         CalendarStorage calStorage = factory.create(ctxService.getContext(cid), account, optEntityResolver(cid), new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
                         for (AlarmTrigger trigger : triggers) {
-                            scheduleTaskForEvent(writeCon, calStorage, key(cid, account, trigger.getEventId(), trigger.getAlarm()), trigger);
+                            scheduleTaskForEvent(writeCon, calStorage, key(cid, account, trigger.getEventId(), trigger.getAlarm().intValue()), trigger);
                         }
                     }
                     writeCon.commit();
@@ -553,8 +554,8 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             // Schedule a task for all triggers before the next usual interval
             for (Entry<Pair<Integer, Integer>, List<AlarmTrigger>> entry : triggerMap.entrySet()) {
                 for (AlarmTrigger trigger : entry.getValue()) {
-                    Key key = key(cid, account, event.getId(), trigger.getAlarm());
-                    if (trigger.getTime() > cal.getTimeInMillis()) {
+                    Key key = key(cid, account, event.getId(), trigger.getAlarm().intValue());
+                    if (trigger.getTime().longValue() > cal.getTimeInMillis()) {
                         cancelTask(key);
                         continue;
                     }
@@ -570,7 +571,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
 
     void scheduleTaskForEvent(Connection writeCon, CalendarStorage storage, Key key, AlarmTrigger trigger) throws OXException {
         try {
-            Alarm alarm = storage.getAlarmStorage().loadAlarm(trigger.getAlarm());
+            Alarm alarm = storage.getAlarmStorage().loadAlarm(trigger.getAlarm().intValue());
             scheduleTask(writeCon, key, alarm, trigger);
         } catch (UnsupportedOperationException e) {
             LOG.error("Can't handle message alarms as long as the legacy storage is used.");
@@ -590,18 +591,18 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         boolean processingSet = false;
         try {
             Calendar calTriggerTime = Calendar.getInstance(UTC);
-            calTriggerTime.setTimeInMillis(trigger.getTime());
+            calTriggerTime.setTimeInMillis(trigger.getTime().longValue());
             Calendar now = Calendar.getInstance(UTC);
 
-            storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), Collections.singletonList(trigger)), now.getTimeInMillis());
+            storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(I(key.getCid()), I(key.getAccount())), Collections.singletonList(trigger)), Long.valueOf(now.getTimeInMillis()));
             processingSet = true;
             AlarmNotificationService alarmNotificationService = registry.getService(alarm.getAction());
             if(alarmNotificationService == null) {
                 LOG.error("Missing required AlarmNotificationService for alarm action \"{}\"", alarm.getAction().getValue());
                 throw ServiceExceptionCode.absentService(AlarmNotificationService.class);
             }
-            Integer shift = alarmNotificationService.getShift();
-            long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift);
+            Integer shift = I(alarmNotificationService.getShift());
+            long delay = (calTriggerTime.getTimeInMillis() - now.getTimeInMillis()) - (shift == null ? 0 : shift.intValue());
             if (delay < 0) {
                 delay = 0;
             }
@@ -614,7 +615,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             if (processingSet) {
                 try {
                     // If the error is thrown after the processed value is successfully set then set it back to 0 so the next task can pick it up
-                    storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(key.getCid(), key.getAccount()), Collections.singletonList(trigger)), 0l);
+                    storage.setProcessingStatus(con, Collections.singletonMap(new Pair<>(I(key.getCid()), I(key.getAccount())), Collections.singletonList(trigger)), Long.valueOf(0l));
                 } catch (OXException e1) {
                     // Can be ignored. The trigger is picked up once the trigger time is overdue.
                 }
@@ -648,8 +649,8 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                 for (Entry<Key, ScheduledTimerTask> entry : cidEntry.getValue()) {
                     Key key = entry.getKey();
                     AlarmTrigger trigger = new AlarmTrigger();
-                    trigger.setAlarm(key.getId());
-                    Pair<Integer, Integer> pair = new Pair<Integer, Integer>(key.getCid(), key.getAccount());
+                    trigger.setAlarm(I(key.getId()));
+                    Pair<Integer, Integer> pair = new Pair<Integer, Integer>(I(key.getCid()), I(key.getAccount()));
                     List<AlarmTrigger> list = triggers.get(pair);
                     if (list == null) {
                         list = new ArrayList<>();
@@ -658,9 +659,9 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                     list.add(trigger);
                     LOG.trace("Try to reset the processed status of the alarm trigger for {}", key);
                 }
-                con = dbservice.getWritable(cidEntry.getKey());
+                con = dbservice.getWritable(cidEntry.getKey().intValue());
                 if (storage != null && con != null) {
-                    storage.setProcessingStatus(con, triggers, 0l);
+                    storage.setProcessingStatus(con, triggers, Long.valueOf(0l));
                     LOG.trace("Successfully resetted the processed stati for context {}.", cidEntry.getKey());
                 }
             } catch (OXException e1) {
@@ -683,10 +684,10 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         for (Entry<Key, ScheduledTimerTask> entry : scheduledTasks.entrySet()) {
             Key key = entry.getKey();
             entry.getValue().cancel();
-            List<Entry<Key, ScheduledTimerTask>> list = entries.get(key.getCid());
+            List<Entry<Key, ScheduledTimerTask>> list = entries.get(I(key.getCid()));
             if (list == null) {
                 list = new ArrayList<>();
-                entries.put(key.getCid(), list);
+                entries.put(I(key.getCid()), list);
             }
             list.add(entry);
             LOG.trace("Canceled message alarm delivery task for {}", key);
