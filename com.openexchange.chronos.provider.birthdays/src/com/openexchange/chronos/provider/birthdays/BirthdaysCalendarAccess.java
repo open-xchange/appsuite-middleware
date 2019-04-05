@@ -62,6 +62,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -149,6 +150,8 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.INTERNAL_USERID, ContactField.UID, ContactField.BIRTHDAY,
         ContactField.LAST_MODIFIED, ContactField.DEPARTMENT, ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.EMAIL1
     };
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class);
 
     private final ServerSession session;
     private final ServiceLookup services;
@@ -252,7 +255,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             Contact contact = contacts.get(eventID.getObjectID());
             if (null == contact) {
                 // log not found event, but include null in resulting list to preserve order
-                org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug("Requested event \"{}\" not found, skipping.", eventID);
+                LOG.debug("Requested event \"{}\" not found, skipping.", eventID);
                 events.add(null);
             } else if (null != eventID.getRecurrenceID()) {
                 events.add(postProcess(eventConverter.getOccurrence(contact, eventID.getRecurrenceID())));
@@ -281,7 +284,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     @Override
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
         Date until = parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        return getAlarmHelper().getAlarmTriggers(until, actions);
+        return removeInaccessible(getAlarmHelper().getAlarmTriggers(until, actions));
     }
 
     @Override
@@ -404,7 +407,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 int[] decodedId = eventConverter.decodeEventId(eventId.getObjectID());
                 com.openexchange.tools.arrays.Collections.put(idsPerFolderId, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
             } catch (IllegalArgumentException e) {
-                org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug("Skipping invalid event id {}", eventId, e);
+                LOG.debug("Skipping invalid event id {}", eventId, e);
             }
         }
         /*
@@ -419,8 +422,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 while (searchIterator.hasNext()) {
                     Contact contact = searchIterator.next();
                     if (null == contact.getBirthday()) {
-                        org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug(
-                            "Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
+                        LOG.debug("Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
                         continue;
                     }
                     contactsById.put(eventConverter.getEventId(contact), contact);
@@ -488,8 +490,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 if (null == contact.getBirthday()) {
-                    org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug(
-                        "Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
+                    LOG.debug("Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
                     continue;
                 }
                 contacts.add(contact);
@@ -498,6 +499,46 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             SearchIterators.close(searchIterator);
         }
         return contacts;
+    }
+
+    /**
+     * Removes those alarm triggers from the supplied collection where the targeted birthday event no longer exists, to ensure that the
+     * triggers are still valid.
+     * <p/>
+     * In case an inaccessible birthday event is referenced, the corresponding trigger, and any configured alarms for that birthday event
+     * are cleaned up implicitly.
+     * 
+     * @param alarmTriggers The alarm triggers to remove inaccessible ones from
+     * @return The passed collection, with the inaccessible triggers removed
+     */
+    private List<AlarmTrigger> removeInaccessible(List<AlarmTrigger> alarmTriggers) {
+        if (null == alarmTriggers || alarmTriggers.isEmpty()) {
+            return alarmTriggers;
+        }
+        List<EventID> eventIds = new ArrayList<EventID>(alarmTriggers.size());
+        for (AlarmTrigger alarmTrigger : alarmTriggers) {
+            eventIds.add(new EventID(alarmTrigger.getFolder(), alarmTrigger.getEventId()));
+        }
+        Set<String> accessibleEventIds;
+        try {
+            accessibleEventIds = getBirthdayContacts(eventIds).keySet();
+        } catch (OXException e) {
+            LOG.warn("Error checking for inaccessible alarm triggers", e);
+            return alarmTriggers;
+        }
+        for (Iterator<AlarmTrigger> iterator = alarmTriggers.iterator(); iterator.hasNext();) {
+            String eventId = iterator.next().getEventId();
+            try {
+                if (false == accessibleEventIds.contains(eventId)) {
+                    getAlarmHelper().deleteAlarms(eventId);
+                    iterator.remove();
+                    LOG.info("Removed inaccessible alarm for event {} in account {}.", eventId, account);
+                }
+            } catch (OXException e) {
+                LOG.warn("Error removing inaccessible alarm for event {} in account {}", eventId, account);
+            }
+        }
+        return alarmTriggers;
     }
 
     private AlarmHelper getAlarmHelper() {
