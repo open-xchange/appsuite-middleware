@@ -91,7 +91,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     @Test
     public void testCreateSeries() throws Exception {
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testCreateSeries", 3, folderId);
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
@@ -102,7 +102,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
     @Test
     public void testDeleteCompleteSeries() throws Exception {
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser().intValue(), "testDeleteCompleteSeries", 3, folderId);
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
@@ -309,7 +309,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         instance.add(Calendar.DAY_OF_MONTH, 1);
         toCreate.setStartDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis()));
         toCreate.setEndDate(DateTimeUtil.getDateTime(null, instance.getTimeInMillis() + 5000));
-        EventData expectedEventData = eventManager.createEvent(toCreate);
+        EventData expectedEventData = eventManager.createEvent(toCreate, true);
 
         // Get series master
         EventData actualEventData = eventManager.getEvent(folderId, expectedEventData.getId());

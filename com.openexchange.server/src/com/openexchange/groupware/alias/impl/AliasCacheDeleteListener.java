@@ -71,16 +71,17 @@ public class AliasCacheDeleteListener implements DeleteListener {
         this.storage = storage;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent, java.sql.Connection, java.sql.Connection)
-     */
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (event.getType() == DeleteEvent.TYPE_USER || event.getType() == DeleteEvent.TYPE_CONTEXT) {
-            for (int userId : event.getUserIds()) {
-                storage.invalidateAliases(event.getContext().getContextId(), userId);
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            storage.invalidateAliases(event.getContext().getContextId(), event.getId());
+            return;
+        }
+        if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            if (event.getUserIds() != null) {
+                for (int userId : event.getUserIds()) {
+                    storage.invalidateAliases(event.getContext().getContextId(), userId);
+                }
             }
             return;
         }

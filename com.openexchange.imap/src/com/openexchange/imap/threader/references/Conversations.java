@@ -281,8 +281,8 @@ public final class Conversations {
                         for (int j = 0; j < len; j++) {
                             if (r[j] instanceof FetchResponse) {
                                 final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), examineHasAttachmentUserFlags);
-                                final String references = message.getFirstHeader(sReferences);
-                                if (null == references) {
+                                if (null == message.getFirstHeader(sReferences)) {
+                                    // No "References" header
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);
                                     if (null != inReplyTo) {
                                         message.setHeader(sReferences, inReplyTo);

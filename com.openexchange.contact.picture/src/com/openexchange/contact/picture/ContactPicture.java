@@ -54,7 +54,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.java.Strings;
 
 /**
- * 
+ *
  * {@link ContactPicture}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a> Original 'Picture' class (c.o.halo)
@@ -66,7 +66,7 @@ public class ContactPicture {
 
     public static final Date UNMODIFIED = new Date(0);
 
-    public static final ContactPicture NOT_FOUND = new ContactPicture("NOT_FOUND", null, UNMODIFIED);;
+    public static final ContactPicture NOT_FOUND = new ContactPicture("NOT_FOUND", null, UNMODIFIED);
 
     private final String eTag;
 
@@ -107,7 +107,7 @@ public class ContactPicture {
 
     /**
      * Get the time the picture was last modified
-     * 
+     *
      * @return The {@link Date} the picture was last modified or {@value #UNMODIFIED}
      */
     public Date getLastModified() {

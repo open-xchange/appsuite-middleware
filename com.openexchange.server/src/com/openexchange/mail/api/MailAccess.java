@@ -825,7 +825,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                         oAuthAccount = null;
                     }
                     if (null != oAuthAccount) {
-                        throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName());
+                        throw MailExceptionCode.MAIL_ACCESS_DISABLED_OAUTH.create(mailConfig.getServer(), mailConfig.getLogin(), I(session.getUserId()), I(session.getContextId()), oAuthAccount.getDisplayName(), oAuthAccount.getId());
                     }
                 }
             }

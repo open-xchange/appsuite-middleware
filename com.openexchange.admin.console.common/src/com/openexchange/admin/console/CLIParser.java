@@ -274,7 +274,7 @@ public class CLIParser {
 
     /**
      * Returns true if the CLIParser contains the specified option; false otherwise
-     * 
+     *
      * @param o The option
      * @return Returns true if the CLIParser contains the specified option; false otherwise
      */
@@ -424,7 +424,7 @@ public class CLIParser {
 
             final StringBuilder sb = new StringBuilder(16).append(OPT_START);
 
-            for (@SuppressWarnings("unchecked") final Iterator<Option> iter = cliCommandLine.iterator(); iter.hasNext();) {
+            for (final Iterator<Option> iter = cliCommandLine.iterator(); iter.hasNext();) {
                 final Option parsedOption = iter.next();
                 final String parsedLongOpt = parsedOption.getLongOpt();
 

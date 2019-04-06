@@ -69,7 +69,7 @@
 //import com.openexchange.groupware.userconfiguration.UserConfiguration;
 //import com.openexchange.jsieve.SieveHandler;
 //import com.openexchange.jsieve.commands.TestCommand;
-//import com.openexchange.exception.OXException;;
+//import com.openexchange.exception.OXException;
 //import com.openexchange.exception.OXException;.Code;
 //import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 //import com.openexchange.session.Session;

@@ -1,12 +1,12 @@
 opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/autoconfig.properties
-opt/open-xchange/etc/dbconnector.yaml
 opt/open-xchange/etc/cache.ccf
 opt/open-xchange/etc/cache.properties
 opt/open-xchange/etc/configdb.properties
 opt/open-xchange/etc/contactcollector.properties
 opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/contextSets/quota.yml
+opt/open-xchange/etc/dbconnector.yaml
 opt/open-xchange/etc/download.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
@@ -38,8 +38,8 @@ opt/open-xchange/etc/ldap.properties
 opt/open-xchange/etc/logback.xml
 opt/open-xchange/etc/login.properties
 opt/open-xchange/etc/mailcache.ccf
-opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-compose.properties
+opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
 opt/open-xchange/etc/mailresolver.properties
 opt/open-xchange/etc/management.properties
@@ -62,6 +62,7 @@ opt/open-xchange/etc/requestwatcher.properties
 opt/open-xchange/etc/rmi.properties
 opt/open-xchange/etc/secret.properties
 opt/open-xchange/etc/secrets
+opt/open-xchange/etc/serialkiller.xml
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessiond.properties
 opt/open-xchange/etc/settings/participant-blacklist.properties

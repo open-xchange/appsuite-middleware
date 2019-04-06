@@ -50,13 +50,13 @@
 package com.openexchange.ajax.folder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.ClearRequest;
@@ -199,8 +199,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         // Fetch information about the leaf folder
         FolderObject leaf = tree.get(tree.size() - 1);
         GetResponse response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, leaf.getObjectID()));
-        JSONObject data = (JSONObject) response.getData();
-        long timestamp = data.getLong("last_modified");
+        Date timestamp = response.getTimestamp();
         leaf.setPermissions(response.getFolder().getPermissions());
 
         // User to share the folder with
@@ -208,7 +207,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
 
         // Make second user an admin
         leaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
-        leaf.setLastModified(new Date(timestamp));
+        leaf.setLastModified(timestamp);
         getClient().execute(new UpdateRequest(EnumAPI.OUTLOOK, leaf));
 
         // Create a folder under leaf
@@ -217,42 +216,44 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         // Fetch permissions of the newly created folder
         response = client2.execute(new GetRequest(EnumAPI.OUTLOOK, lol, new int[] { 5, 306 }));
         FolderObject leafOfLeaf = response.getFolder();
-        timestamp = ((JSONObject) response.getData()).getLong("last_modified");
+        timestamp = response.getTimestamp();
 
         // Apply administrative permissions to the leaf of leaf folder.
         leafOfLeaf.removePermissions();
         leafOfLeaf.addPermission(Create.ocl(client2.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
-        leafOfLeaf.setLastModified(new Date(timestamp));
+        leafOfLeaf.setLastModified(timestamp);
         client2.execute(new UpdateRequest(EnumAPI.OUTLOOK, leafOfLeaf));
 
         // Try to apply permissions to the rootNodeOfSubTree and cascade (should fail and roll-back)
         response = getClient().execute(new GetRequest(EnumAPI.OUTLOOK, rootNodeIdOfSubTree, new int[] { 5, 306 }));
         FolderObject rootNode = response.getFolder();
-        timestamp = ((JSONObject) response.getData()).getLong("last_modified");
+        timestamp = response.getTimestamp();
 
         AJAXClient client3 = new AJAXClient(testContext.acquireUser());
         rootNode.addPermission(Create.ocl(client3.getValues().getUserId(), false, false, OCLPermission.READ_FOLDER, OCLPermission.READ_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
-        rootNode.setLastModified(new Date(timestamp));
+        rootNode.setLastModified(timestamp);
         UpdateRequest setCascadePermissions = new UpdateRequest(EnumAPI.OUTLOOK, rootNode, false).setCascadePermissions(true);
-        getClient().execute(setCascadePermissions);
+        InsertResponse cascadeResponse = getClient().execute(setCascadePermissions);
 
         int owner = getClient().getValues().getUserId();
-        int guest = client2.getValues().getUserId();
-        int doe = client3.getValues().getUserId();
+        int user2 = client2.getValues().getUserId();
+        int user3 = client3.getValues().getUserId();
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner, doe }, new int[] { guest }, getClient());
-        assertPermissions(leaf, new int[] { owner, guest }, new int[] { doe }, getClient());
-        assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
+        assertPermissions(rootNode, new int[] { owner, user3 }, new int[] { user2 }, getClient());
+        assertPermissions(leaf, new int[] { owner, user2 }, new int[] { user3 }, getClient());
+        assertPermissions(leafOfLeaf, new int[] { user2 }, new int[] { owner, user3 }, client2);
 
         // Ignore warnings and apply permissions to the rootNodeOfSubTree again (should succeed)
         setCascadePermissions.setIgnoreWarnings(true);
-        getClient().execute(setCascadePermissions);
+        rootNode.setLastModified(cascadeResponse.getTimestamp());
+        cascadeResponse = getClient().execute(setCascadePermissions);
+        assertFalse(cascadeResponse.getErrorMessage(), cascadeResponse.hasError());
 
         // Assert permissions
-        assertPermissions(rootNode, new int[] { owner }, new int[] { guest, doe }, getClient());
-        assertPermissions(leaf, new int[] { owner, doe }, new int[] { guest }, getClient());
-        assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
+        assertPermissions(rootNode, new int[] { owner, user3 }, new int[] { user2 }, getClient());
+        assertPermissions(leaf, new int[] { owner, user3 }, new int[] { user2 }, getClient());
+        assertPermissions(leafOfLeaf, new int[] { user2 }, new int[] { owner, user3 }, client2);
     }
 
     /**

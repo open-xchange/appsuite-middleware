@@ -281,11 +281,7 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
      */
     @Deprecated
     public boolean removeExtension(final OXResourceExtensionInterface o) {
-        if (null == getAllExtensionsAsHash().remove(o.getClass().getName())) {
-            return false;
-        } else {
-            return true;
-        }
+        return (null != getAllExtensionsAsHash().remove(o.getClass().getName()));
     }
 
     /**
@@ -307,9 +303,6 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
-     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();

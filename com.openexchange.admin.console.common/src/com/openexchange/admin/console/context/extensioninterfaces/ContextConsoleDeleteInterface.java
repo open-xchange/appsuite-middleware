@@ -63,5 +63,5 @@ package com.openexchange.admin.console.context.extensioninterfaces;
  *
  */
 public interface ContextConsoleDeleteInterface extends ContextConsoleCommonInterface {
-
+    // Empty
 }

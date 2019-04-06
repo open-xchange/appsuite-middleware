@@ -67,7 +67,6 @@ import com.openexchange.java.Streams;
 public class DefaultVCardImport implements VCardImport {
 
     private final Contact contact;
-    private final OXException error;
     private final List<OXException> warnings;
     private final ThresholdFileHolder vCardHolder;
 
@@ -79,31 +78,8 @@ public class DefaultVCardImport implements VCardImport {
      * @param vCardHolder A file holder storing the original vCard, or <code>null</code> if not available
      */
     public DefaultVCardImport(Contact contact, List<OXException> warnings, ThresholdFileHolder vCardHolder) {
-        this(contact, null, warnings, vCardHolder);
-    }
-
-    /**
-     * Initializes a new {@link DefaultVCardImport}.
-     *
-     * @param contact The error
-     * @param warnings A list of parser- and conversion warnings
-     */
-    public DefaultVCardImport(OXException error, List<OXException> warnings) {
-        this(null, error, warnings, null);
-    }
-
-    /**
-     * Initializes a new {@link DefaultVCardImport}.
-     *
-     * @param contact The imported contact
-     * @param error The error
-     * @param warnings A list of parser- and conversion warnings
-     * @param vCardHolder A file holder storing the original vCard, or <code>null</code> if not available
-     */
-    private DefaultVCardImport(Contact contact, OXException error, List<OXException> warnings, ThresholdFileHolder vCardHolder) {
         super();
         this.contact = contact;
-        this.error = error;
         this.warnings = warnings;
         this.vCardHolder = vCardHolder;
     }
@@ -111,11 +87,6 @@ public class DefaultVCardImport implements VCardImport {
     @Override
     public Contact getContact() {
         return contact;
-    }
-
-    @Override
-    public OXException getError() {
-        return error;
     }
 
     @Override

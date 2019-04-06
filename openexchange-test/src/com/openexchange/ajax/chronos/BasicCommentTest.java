@@ -124,7 +124,7 @@ public class BasicCommentTest extends AbstractChronosTest {
 
         setAttendees();
 
-        eventData = eventManager.createEvent(eventData);
+        eventData = eventManager.createEvent(eventData, true);
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
         body.setComment(UPDATE);
@@ -142,7 +142,7 @@ public class BasicCommentTest extends AbstractChronosTest {
 
         setAttendees();
 
-        eventData = eventManager.createEvent(eventData);
+        eventData = eventManager.createEvent(eventData, true);
 
         // Update with attachment
         eventManager.updateEventWithAttachmentAndNotification(eventData, assetManager.getRandomAsset(AssetType.pdf), UPDATE);
@@ -157,7 +157,7 @@ public class BasicCommentTest extends AbstractChronosTest {
 
         setAttendees();
 
-        eventData = eventManager.createEvent(eventData);
+        eventData = eventManager.createEvent(eventData, true);
 
         DeleteBody body = new DeleteBody();
         body.setComment(DELETE);

@@ -161,7 +161,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         printServerException(e, parser);
     }
 
-    protected final void printNotBoundResponse(final Integer id, final Integer ctxid, final NotBoundException nbe){
+    protected final void printNotBoundResponse(@SuppressWarnings("unused") final Integer id, @SuppressWarnings("unused") final Integer ctxid, final NotBoundException nbe){
         System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
 

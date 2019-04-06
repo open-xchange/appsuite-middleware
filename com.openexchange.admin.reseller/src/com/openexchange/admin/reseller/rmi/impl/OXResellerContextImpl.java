@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.reseller.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -313,7 +314,7 @@ public class OXResellerContextImpl implements OXContextPluginInterfaceExtended {
         }
 
         try {
-            final MaintenanceReason reason = new MaintenanceReason(42);
+            final MaintenanceReason reason = new MaintenanceReason(I(42));
             final OXContextStorageInterface oxctx = OXContextStorageInterface.getInstance();
             final ResellerAdmin adm = oxresell.getData(new ResellerAdmin[]{new ResellerAdmin(auth.getLogin())})[0];
             oxctx.disableAll(reason, "context2subadmin", "WHERE context2subadmin.cid=context.cid AND context2subadmin.sid=" + adm.getId());

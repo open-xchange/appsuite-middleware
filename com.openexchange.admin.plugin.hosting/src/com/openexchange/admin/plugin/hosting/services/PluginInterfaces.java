@@ -143,7 +143,7 @@ public final class PluginInterfaces {
     /**
      * Initializes a new {@link PluginInterfaces}.
      */
-    private PluginInterfaces(final Builder builder) {
+    PluginInterfaces(final Builder builder) {
         super();
         this.basicAuthenticatorPlugins = null == builder.basicAuthenticatorPlugins ? ServiceListings.<BasicAuthenticatorPluginInterface> emptyList() : builder.basicAuthenticatorPlugins;
         this.contextPlugins = null == builder.contextPlugins ? ServiceListings.<OXContextPluginInterface> emptyList() : builder.contextPlugins;

@@ -61,11 +61,7 @@ public class OXResellerTools {
     }
 
     public static boolean isTrue(final String val) {
-        if( val.toLowerCase().equals("true") ) {
-            return true;
-        } else {
-            return false;
-        }
+        return ( val.toLowerCase().equals("true") );
     }
 
     public static HashSet<Restriction> array2HashSet(final Restriction[] rarr) {
@@ -102,9 +98,8 @@ public class OXResellerTools {
             final Restriction restriction = validRestrictions.get(rname);
             if (null == restriction) {
                 throw new InvalidDataException("No restriction named " + rname + " found in database");
-            } else {
-                r.setId(restriction.getId());
             }
+            r.setId(restriction.getId());
         }
     }
 

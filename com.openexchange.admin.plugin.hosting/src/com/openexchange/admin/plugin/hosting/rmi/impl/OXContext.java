@@ -581,7 +581,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         disable(ctx, reason, auth);
     }
 
-    private void disable(final Context ctx, final MaintenanceReason reason, final Credentials credentials) throws InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, OXContextException {
+    private void disable(final Context ctx, final MaintenanceReason reason, final Credentials credentials) throws InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(ctx, reason);
@@ -798,7 +798,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         // Clear context cache
         // CACHE
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        ;
         if (null != cacheService) {
             try {
                 final Cache cache = cacheService.getCache("Context");
@@ -992,7 +991,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         LOGGER.debug(db.toString());
         try {
-            if (!tool.existsDatabase(db.getId())) {
+            if (!tool.existsDatabase(db.getId().intValue())) {
                 throw new NoSuchDatabaseException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
@@ -1614,7 +1613,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
      * @return null if no extensions available, contexts filled with extensions otherwise
      * @throws StorageException
      */
-    private List<Context> callGetDataPlugins(final List<Context> ctxs, final Credentials auth, final OXContextStorageInterface oxcox) throws StorageException {
+    private List<Context> callGetDataPlugins(final List<Context> ctxs, final Credentials auth, @SuppressWarnings("unused") final OXContextStorageInterface oxcox) throws StorageException {
         List<OXCommonExtension> retval = null;
         boolean extensionsFound = false;
 

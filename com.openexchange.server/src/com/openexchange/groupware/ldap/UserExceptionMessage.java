@@ -99,7 +99,7 @@ public class UserExceptionMessage implements LocalizableStrings {
     public final static String PERMISSION_DISPLAY = "No permission to modify resources in context \"%1$s\"";
 
     // No permission to access resources in context %1$s
-    public static final String PERMISSION_ACCESS_DISPLAY = "No permission to access resources in context \"%1$s\"";;
+    public static final String PERMISSION_ACCESS_DISPLAY = "No permission to access resources in context \"%1$s\"";
 
     /**
      * Missing or unknown password mechanism %1$s

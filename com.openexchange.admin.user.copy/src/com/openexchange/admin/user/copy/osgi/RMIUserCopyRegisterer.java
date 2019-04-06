@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.user.copy.rmi.impl.OXUserCopy;
 import com.openexchange.user.copy.UserCopyService;
 
@@ -79,12 +78,10 @@ public class RMIUserCopyRegisterer implements ServiceTrackerCustomizer<UserCopyS
     @Override
     public UserCopyService addingService(final ServiceReference<UserCopyService> reference) {
         final UserCopyService service = context.getService(reference);
-        try {
-            final OXUserCopy userCopy = new OXUserCopy(context, service);
+        {
+            final OXUserCopy userCopy = new OXUserCopy(service);
             registration = context.registerService(Remote.class, userCopy, null);
             LOG.info("RMI Interface for usercopy bundle bound to RMI registry");
-        } catch (final StorageException e) {
-            LOG.error("", e);
         }
         return service;
     }

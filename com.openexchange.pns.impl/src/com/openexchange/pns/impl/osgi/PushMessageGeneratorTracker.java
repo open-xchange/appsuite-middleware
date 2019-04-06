@@ -75,7 +75,7 @@ public final class PushMessageGeneratorTracker implements ServiceTrackerCustomiz
      */
     public PushMessageGeneratorTracker(BundleContext context) {
         super();
-        this.generators = new ConcurrentHashMap<>(4, 0.9F, 1);;
+        this.generators = new ConcurrentHashMap<>(4, 0.9F, 1);
         this.context = context;
     }
 

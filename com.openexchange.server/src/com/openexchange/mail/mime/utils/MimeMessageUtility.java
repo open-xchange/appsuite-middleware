@@ -1715,7 +1715,7 @@ public final class MimeMessageUtility {
      * <pre>
      * final String quotedPersonal = quotePersonal(&quot;Doe, Jane&quot;);
      *
-     * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
+     * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;
      * System.out.println(buildAddr);
      * // Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
      *

@@ -56,5 +56,5 @@ import com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInter
  *
  */
 public abstract class OXResellerSQLStorage extends OXResellerStorageInterface {
-
+    // Empty
 }

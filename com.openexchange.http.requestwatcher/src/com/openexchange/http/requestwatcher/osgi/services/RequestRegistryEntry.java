@@ -82,7 +82,7 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
         super();
         this.number = number;
         this.thread = thread;
-        this.propertyMap = null == propertyMap ? Collections.<String, String> emptyMap() : propertyMap;;
+        this.propertyMap = null == propertyMap ? Collections.<String, String> emptyMap() : propertyMap;
         this.request = request;
         this.response = response;
         this.birthTime = System.currentTimeMillis();

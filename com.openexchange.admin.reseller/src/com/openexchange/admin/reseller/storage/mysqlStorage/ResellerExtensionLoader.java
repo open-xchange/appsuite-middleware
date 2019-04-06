@@ -141,7 +141,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
                         int rid = rs.getInt(3);
                         if( rid > 0 ) {
                             final Restriction res = new Restriction();
-                            res.setId(rid);
+                            res.setId(I(rid));
                             res.setValue(rs.getString(4));
                             res.setName(rs.getString(5));
                             restrictions.add(res);

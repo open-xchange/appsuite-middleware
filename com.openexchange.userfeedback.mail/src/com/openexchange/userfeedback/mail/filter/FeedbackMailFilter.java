@@ -88,7 +88,7 @@ public class FeedbackMailFilter implements FeedbackFilter {
         super();
         this.ctxGroup = ctxGroup == null ? DEFAULT_CONTEXT_GROUP : ctxGroup;
         this.recipients = recipients == null ? new HashMap<String, String>(0) : recipients;
-        this.pgpKeys = pgpKeys == null ? new HashMap<String, String>(0) : pgpKeys;;
+        this.pgpKeys = pgpKeys == null ? new HashMap<String, String>(0) : pgpKeys;
         this.subject = subject == null ? String.format(DEFAULT_SUBJECT, getTimerangeString()) : subject;
         this.body = body == null ? DEFAULT_BODY : body;
         this.start = start == 0 ? Long.MIN_VALUE : start;

@@ -72,7 +72,7 @@ public class JSONToDurationConverterTest {
 
     @Before
     public void setUp() throws Exception {
-        jsonToDurationConverter = new JSONToDurationConverter();;
+        jsonToDurationConverter = new JSONToDurationConverter();
         simpleConverter = new SimpleConverterSim();
     }
 

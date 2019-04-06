@@ -118,7 +118,7 @@ public final class URIParser {
         } else {
             // Try to parse
             try {
-                new URI(input);
+                @SuppressWarnings("unused") URI uri = new URI(input);
                 return true;
             } catch (final URISyntaxException e) {
                 return false;
@@ -134,7 +134,7 @@ public final class URIParser {
             return false;
         }
         try {
-            new URI(matcher.group(1), null, matcher.group(2), port, null, null, null);
+            @SuppressWarnings("unused") URI uri = new URI(matcher.group(1), null, matcher.group(2), port, null, null, null);
             return true;
         } catch (final URISyntaxException e) {
             return false;

@@ -55,6 +55,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -236,8 +237,9 @@ public enum IMAPClientParameters {
      *
      * @param imapStore The IMAP store to connect to
      * @param session The associated Groupware session
+     * @throws OXException
      */
-    public static void setDefaultClientParameters(IMAPStore imapStore, Session session) {
+    public static void setDefaultClientParameters(IMAPStore imapStore, Session session) throws OXException {
         // Set generator
         imapStore.setExternalIdGenerator(new Generator(session));
 
@@ -246,7 +248,7 @@ public enum IMAPClientParameters {
         String localIp = session.getLocalIp();
         clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), Strings.isEmpty(localIp) ? LOCAL_HOST : localIp);
         clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
-        clientParams.put(IMAPClientParameters.VERSION.getParamName(), Services.getService(VersionService.class).getVersionString());
+        clientParams.put(IMAPClientParameters.VERSION.getParamName(), Services.getServiceSafe(VersionService.class).getVersionString());
         imapStore.setClientParameters(clientParams);
     }
 

@@ -60,5 +60,5 @@ import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextStorage
  *
  */
 public abstract class OXContextSQLStorage extends OXContextStorageInterface {
-
+    // Empty
 }

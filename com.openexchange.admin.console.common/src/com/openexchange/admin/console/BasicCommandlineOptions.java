@@ -463,7 +463,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final void setInServerOption(final AdminParser admp, final NeededQuadState needed) {
-        this.inServerOption = setLongOpt(admp, OPT_NAME_IN_SERVER_LONG, "Whether check should be limited to the registered server this provisioning node is running in", false, false);
+        this.inServerOption = setLongOpt(admp, OPT_NAME_IN_SERVER_LONG, "Whether check should be limited to the registered server this provisioning node is running in", false, NeededQuadState.needed == needed ? true : false);
     }
 
     // ------------------------------------------------------------------------------------- //

@@ -1043,7 +1043,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         if (MailAccount.DEFAULT_ID == accountId) {
-            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+            try {
+                IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+            } catch (OXException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
         }
         /*
          * ... and connect it

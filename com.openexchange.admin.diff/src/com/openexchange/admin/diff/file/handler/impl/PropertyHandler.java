@@ -191,9 +191,10 @@ public class PropertyHandler extends AbstractFileHandler {
      */
     protected String obscure(String key, String propertyValue) {
         if (key.toLowerCase().matches(KEY_REGEX.toLowerCase())) {
-            propertyValue = OBSCURED_PROPERTY;
-        } else if (criticalProperties.contains(key)) {
-            propertyValue = OBSCURED_PROPERTY;
+            return OBSCURED_PROPERTY;
+        }
+        if (criticalProperties.contains(key)) {
+            return OBSCURED_PROPERTY;
         }
         return propertyValue;
     }
