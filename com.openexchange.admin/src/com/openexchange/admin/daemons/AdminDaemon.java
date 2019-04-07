@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.daemons;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -291,7 +292,7 @@ public class AdminDaemon implements AdminDaemonService {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), event.getType());
+                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), I(event.getType()));
             }
         };
         context.addBundleListener(bl);
@@ -414,14 +415,14 @@ public class AdminDaemon implements AdminDaemonService {
      */
     @Deprecated
     public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName, final BundleContext context, final Class<? extends S> clazz) {
-        for (final Bundle bundle : bundlelist) {
+        for (Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                ServiceReference<?>[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
+                    for (ServiceReference<?> servicereference : servicereferences) {
+                        Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
-                            final Object obj = context.getService(servicereference);
+                            Object obj = context.getService(servicereference);
                             if (null == obj) {
                                 LOG.error("Missing service {} in bundle {}", serviceName, bundleSymbolicName);
                             }
@@ -449,12 +450,12 @@ public class AdminDaemon implements AdminDaemonService {
      */
     @Deprecated
     public static final void ungetService(final String bundleSymbolicName, final String serviceName, final BundleContext context) {
-        for (final Bundle bundle : bundlelist) {
+        for (Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                ServiceReference<?>[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
+                    for (ServiceReference<?> servicereference : servicereferences) {
+                        Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
                             context.ungetService(servicereference);
                         }
@@ -463,4 +464,5 @@ public class AdminDaemon implements AdminDaemonService {
             }
         }
     }
+
 }

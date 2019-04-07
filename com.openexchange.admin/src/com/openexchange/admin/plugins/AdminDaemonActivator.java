@@ -54,5 +54,5 @@ package com.openexchange.admin.plugins;
  *
  */
 public interface AdminDaemonActivator {
-
+    // Empty
 }

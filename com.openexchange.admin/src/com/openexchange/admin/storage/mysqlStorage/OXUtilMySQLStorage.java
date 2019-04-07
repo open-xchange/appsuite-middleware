@@ -1167,7 +1167,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     if (newCount != readDBSchemaCounter(schema, con)) {
                         // Schema in-use in the meantime
                         if (schemaSpecified) {
-                            throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+                            throw new StorageException("Schema \"" + schema.getScheme() + "\" of database " + schema.getId() + " is in use");
                         }
                         dbIter.remove();
                     }
@@ -2917,7 +2917,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     this.name = name;
                 }
             }
-            ;
 
             List<FidAndName> fids = new LinkedList<>();
             do {
@@ -3120,7 +3119,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private void loadFilestoreUsageFor(Filestore fs, boolean loadRealUsage, FilestoreUsage contextFilestoreUsage, FilestoreUsage userFilestoreUsage, Connection configdbCon) throws StorageException {
         int id = fs.getId().intValue();
-        FilestoreUsage usrCounts = null == userFilestoreUsage ? getUserUsage(id, loadRealUsage, configdbCon) : userFilestoreUsage;
+        FilestoreUsage usrCounts = null == userFilestoreUsage ? getUserUsage(id, loadRealUsage) : userFilestoreUsage;
         FilestoreUsage ctxCounts = null == contextFilestoreUsage ? getContextUsage(id, loadRealUsage, configdbCon) : contextFilestoreUsage;
         fs.setUsed(L(toMB(ctxCounts.usage + usrCounts.usage)));
         fs.setCurrentContexts(I(ctxCounts.entityCount + usrCounts.entityCount));
@@ -3696,11 +3695,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @param filestoreId the unique identifier of the file storage.
      * @param loadRealUsage <code>true</code> to load the file storage usage from every context in it. BEWARE! This is a slow operation.
      * @param pools Available database pools
-     * @param readConfigdbCon a read only connection
      * @return The {@link FilestoreUsage} object for the file storage.
      * @throws StorageException if some problem occurs loading the information.
      */
-    private FilestoreUsage getUserUsage(final int filestoreId, boolean loadRealUsage, Connection readConfigdbCon) throws StorageException {
+    private FilestoreUsage getUserUsage(final int filestoreId, boolean loadRealUsage) throws StorageException {
         final AdminCacheExtended cache = this.cache;
         if (false == loadRealUsage) {
             int numUsers = Filestore2UserUtil.getUserCountFor(filestoreId, cache);
@@ -4068,6 +4066,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    /*-
+     *
     private List<DatabaseHandle> removeFull(List<DatabaseHandle> list) {
         List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>(list.size());
         for (DatabaseHandle db : list) {
@@ -4116,6 +4116,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             closeSQLStuff(rs, stmt);
         }
     }
+     *
+     */
 
     /**
      * Creates a new database schema.

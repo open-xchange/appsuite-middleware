@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.utils;
 
 import static com.openexchange.database.DBPoolingExceptionCodes.NOT_RESOLVED_SERVER;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -755,6 +756,8 @@ public class Filestore2UserUtil {
         }
     }
 
+    /*-
+     *
     private static List<Integer> getRegisteredServersIDs(Connection con) throws StorageException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -777,6 +780,8 @@ public class Filestore2UserUtil {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
+     *
+     */
 
     private static List<SchemaInfo> getAllNonEmptySchemas(Connection con) throws OXException {
         // Determine all DB schemas that are currently in use
@@ -871,11 +876,11 @@ public class Filestore2UserUtil {
                             }
 
                             if (doThrow) {
-                                LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database {}", schema.getSchema(), schema.getPoolId(), e);
+                                LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database {}", schema.getSchema(), I(schema.getPoolId()), e);
                                 throw new StorageException(e);
                             }
                         } catch (SQLException e) {
-                            LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database 1}", schema.getSchema(), schema.getPoolId(), e);
+                            LOG.error("Failed to determine user-associated file storages for schema \"{}\" in database 1}", schema.getSchema(), I(schema.getPoolId()), e);
                             throw new StorageException(e);
                         } finally {
                             Databases.closeSQLStuff(result, stmt);

@@ -326,13 +326,9 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         preDoCopy();
 
         Throwable thrown = null;
-        boolean successful = false;
         try {
             // Do the copy
             doCopy(new URI(srcFilestore.getUrl()), new URI(dstFilestore.getUrl()));
-
-            // Successfully performed
-            successful = true;
         } catch (URISyntaxException e) {
             thrown = e; throw new StorageException(e.getMessage(), e);
         } catch (RuntimeException e) {
@@ -566,6 +562,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      *
      * @throws StorageException If pre-copy operations fails
      */
+    @SuppressWarnings("unused")
     protected void preDoCopy() throws StorageException {
         // Initially empty
     }
@@ -575,7 +572,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      *
      * @param thrown The {@link Throwable} instance in case an error occurred; otherwise <code>null</code>
      */
-    protected void postDoCopy(Throwable thrown) {
+    protected void postDoCopy(@SuppressWarnings("unused") Throwable thrown) {
         // Initially empty
     }
 

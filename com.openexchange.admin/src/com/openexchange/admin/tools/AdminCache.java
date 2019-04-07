@@ -57,7 +57,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.DriverManager;
@@ -332,7 +331,7 @@ public class AdminCache {
                         throw new OXGenericException("Invalid access combinations found in config file!");
                     }
                     try {
-                        meth.invoke(us, true);
+                        meth.invoke(us, Boolean.TRUE);
                     } catch (IllegalArgumentException e) {
                         log.error("Illegal argument passed to method!", e);
                     } catch (IllegalAccessException e) {
@@ -685,13 +684,13 @@ public class AdminCache {
         String context_auth_disabled = this.prop.getProp("CONTEXT_AUTHENTICATION_DISABLED", "false"); // fallback is auth
 
         masterAuthenticationDisabled = Boolean.parseBoolean(master_auth_disabled);
-        log.debug("MasterAuthentication mechanism disabled: {}", masterAuthenticationDisabled);
+        log.debug("MasterAuthentication mechanism disabled: {}", Boolean.valueOf(masterAuthenticationDisabled));
 
         contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
-        log.debug("ContextAuthentication mechanism disabled: {}", contextAuthenticationDisabled);
+        log.debug("ContextAuthentication mechanism disabled: {}", Boolean.valueOf(contextAuthenticationDisabled));
 
         allowMasterOverride = Boolean.parseBoolean(this.prop.getProp("MASTER_ACCOUNT_OVERRIDE", "false"));
-        log.debug("Master override: {}", allowMasterOverride);
+        log.debug("Master override: {}", Boolean.valueOf(allowMasterOverride));
     }
 
     private void readAndSetMasterCredentials(ConfigurationService service) throws OXGenericException {
@@ -895,22 +894,22 @@ public class AdminCache {
         return allowMasterOverride;
     }
 
-    /**
-     * {@link Encrypter} - Password encrypter interface
-     *
-     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
-     * @since v7.10.0
-     */
-    private interface Encrypter {
-
-        /**
-         * Encrypts the specified password and returns it
-         *
-         * @param password The password to encrypt
-         * @return The encrypted password
-         * @throws UnsupportedEncodingException
-         * @throws NoSuchAlgorithmException
-         */
-        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
-    }
+//    /**
+//     * {@link Encrypter} - Password encrypter interface
+//     *
+//     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+//     * @since v7.10.0
+//     */
+//    private interface Encrypter {
+//
+//        /**
+//         * Encrypts the specified password and returns it
+//         *
+//         * @param password The password to encrypt
+//         * @return The encrypted password
+//         * @throws UnsupportedEncodingException
+//         * @throws NoSuchAlgorithmException
+//         */
+//        String encrypt(String password) throws UnsupportedEncodingException, NoSuchAlgorithmException;
+//    }
 }

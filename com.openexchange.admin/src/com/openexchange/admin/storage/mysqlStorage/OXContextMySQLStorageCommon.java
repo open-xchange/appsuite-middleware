@@ -54,6 +54,7 @@ import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -72,7 +73,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -97,7 +97,7 @@ public class OXContextMySQLStorageCommon {
 
     private final Map<String, StartNumberProvider> startValues;
     private final AdminCache cache;
-    private final PropertyHandler prop;
+    final PropertyHandler prop;
 
     private static interface StartNumberProvider {
 
@@ -152,7 +152,7 @@ public class OXContextMySQLStorageCommon {
     public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException, StorageException {
         Connection oxdb_read = null;
         PreparedStatement prep = null;
-        final int context_id = ctx.getId();
+        final int context_id = ctx.getId().intValue();
 
         try {
 
@@ -174,19 +174,19 @@ public class OXContextMySQLStorageCommon {
                     cs.setName(name);
                 }
 
-                cs.setEnabled(rs.getBoolean(2)); // enabled
+                cs.setEnabled(Boolean.valueOf(rs.getBoolean(2))); // enabled
                 final int reason_id = rs.getInt(3); //reason
                 // CONTEXT STATE INFOS #
                 if (-1 != reason_id) {
-                    cs.setMaintenanceReason(new MaintenanceReason(reason_id));
+                    cs.setMaintenanceReason(new MaintenanceReason(I(reason_id)));
                 }
-                cs.setFilestoreId(rs.getInt(4)); // filestore_id
+                cs.setFilestoreId(I(rs.getInt(4))); // filestore_id
                 cs.setFilestore_name(rs.getString(5)); //filestorename
                 long quota_max = rs.getLong(6); //quota max
                 if (quota_max != -1) {
                     quota_max = quota_max >> 20;
                     // set quota max also in context setup object
-                    cs.setMaxQuota(quota_max);
+                    cs.setMaxQuota(L(quota_max));
                 }
                 final int write_pool = rs.getInt(7); // write_pool_id
                 final int read_pool = rs.getInt(8); //read_pool_id
@@ -233,12 +233,12 @@ public class OXContextMySQLStorageCommon {
             prep.close();
             quota_used = quota_used >> 20;
             // set used quota in context setup
-            cs.setUsedQuota(quota_used);
+            cs.setUsedQuota(L(quota_used));
 
-            cs.setAverage_size(average_size);
+            cs.setAverage_size(L(average_size));
 
             // context id
-            cs.setId(context_id);
+            cs.setId(I(context_id));
             loadDynamicAttributes(oxdb_read, cs);
             return cs;
         } finally {
@@ -274,10 +274,10 @@ public class OXContextMySQLStorageCommon {
         return name.indexOf('/') >= 0;
     }
 
-    private void loadDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException, PoolException, StorageException {
+    private void loadDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException, StorageException {
         ResultSet rs = null;
         PreparedStatement stmtuserattributes = null;
-        final int contextId = ctx.getId();
+        final int contextId = ctx.getId().intValue();
         try {
             stmtuserattributes = oxCon.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmtuserattributes.setInt(1, contextId);
@@ -488,9 +488,8 @@ public class OXContextMySQLStorageCommon {
      * @param db The database associated with the context
      * @throws StorageException If a general storage error occurs
      * @throws ContextExistsException If there is already a context with the same context identifier
-     * @throws InvalidDataException If there is already a context with the same name
      */
-    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException, ContextExistsException, InvalidDataException {
+    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException, ContextExistsException {
         // dbid is the id in db_pool of database engine to use for next context
 
         // if read id -1 (not set by client ) or 0 (there is no read db for this
@@ -553,7 +552,7 @@ public class OXContextMySQLStorageCommon {
                 configCon.commit();
             }
         } catch (final SQLException e) {
-            log.error("SQL Error removing/rollback entries from configdb for context {}", contextId, e);
+            log.error("SQL Error removing/rollback entries from configdb for context {}", I(contextId), e);
         }
     }
 
@@ -626,9 +625,8 @@ public class OXContextMySQLStorageCommon {
      * @param configdbCon A connection to the configdb
      * @throws StorageException If a general SQL error occurs
      * @throws ContextExistsException If there is already a context with the same context identifier
-     * @throws InvalidDataException If there is already a context with the same name
      */
-    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException, ContextExistsException, InvalidDataException {
+    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException, ContextExistsException {
         String name;
         if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
             name = ctx.getName();

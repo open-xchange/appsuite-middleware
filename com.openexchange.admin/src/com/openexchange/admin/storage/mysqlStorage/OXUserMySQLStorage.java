@@ -496,7 +496,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (null != cacheService) {
                     try {
                         final Cache jcs = cacheService.getCache("UserConfiguration");
-                        CacheKey key = jcs.newCacheKey(ctx.getId(), user.getId().toString(), String.valueOf(false));
+                        CacheKey key = jcs.newCacheKey(ctx.getId().intValue(), user.getId().toString(), String.valueOf(false));
                         jcs.remove(key);
                     } catch (final OXException e) {
                         LOG.error("", e);
@@ -721,7 +721,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         // Invalidate alias cache
         UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-        aliasStorage.invalidateAliases(ctx.getId(), userId);
+        aliasStorage.invalidateAliases(ctx.getId().intValue(), userId);
 
         CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
@@ -1346,10 +1346,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } else {
             isAllowed = getConfigViewValue(0, contextId, "com.openexchange.mail.remoteContentPerDefault", null);
         }
+
+        int flegs = flags;
         if (null != isAllowed && isAllowed.booleanValue()) {
-            flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
+            flegs |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
         }
-        return flags;
+        return flegs;
     }
 
     /**
@@ -1440,7 +1442,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         {
             Boolean check = getConfigViewValue(userId, ctx.getId().intValue(), "com.openexchange.mail.useStaticDefaultFolders", Boolean.FALSE);
 
-            if (check != null && check) {
+            if (check != null && check.booleanValue()) {
                 String lang = user.getLanguage().toUpperCase();
                 // Drafts
                 String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang, "Drafts");
@@ -2806,7 +2808,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             String query = sb.toString();
             stmt = read_ox_con.prepareStatement(query);
-            stmt.setInt(1, context.getId());
+            stmt.setInt(1, context.getId().intValue());
             stmt.setString(2, "%" + aliasDomain);
 
             rs = stmt.executeQuery();
@@ -2841,7 +2843,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setString(1, pair.getSecond());
                 stmt.setLong(2, now);
                 stmt.setInt(3, contextId);
-                stmt.setInt(4, pair.getFirst());
+                stmt.setInt(4, pair.getFirst().intValue());
                 stmt.addBatch();
                 cache.removeFolderObject(pair.getFirst().intValue(), ContextStorage.getStorageContext(contextId));
             }
@@ -2891,7 +2893,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         translatedName = nb.advance().toString();
                     }
                 }
-                result.add(new Pair<>(folderId, translatedName));
+                result.add(new Pair<>(I(folderId), translatedName));
             }
             return result;
         } finally {

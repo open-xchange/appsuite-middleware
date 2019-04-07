@@ -78,8 +78,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         super();
     }
 
-    protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, InvalidDataException {
-
+    protected void createchecks(final Context ctx, final User admin_user, @SuppressWarnings("unused") final OXToolStorageInterface tool) throws StorageException, InvalidDataException {
         try {
             Boolean ret = null;
 
@@ -93,7 +92,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 }
             }
 
-            if (ret == null || (ret != null && ret.booleanValue())) {
+            if (ret == null || ret.booleanValue()) {
                 if (!ctx.mandatoryCreateMembersSet()) {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
                 }
@@ -188,7 +187,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
     /**
      * Check if plugins are loaded
-     * 
+     *
      * @return <code>true</code> if a plugin is loaded
      */
     protected boolean isAnyPluginLoaded() {
