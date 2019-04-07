@@ -139,7 +139,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ATTACHMENTS} when processing the events.
-     * 
+     *
      * @param eventIdsWithAttachment A set holding the identifiers of those events where at least one attachment stored
      * @return A self reference
      */
@@ -150,7 +150,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#ALARMS} when processing the events.
-     * 
+     *
      * @param alarmTriggersPerEventId A set holding the identifiers of those events where at least one alarm trigger is stored for the user
      * @return A self reference
      */
@@ -161,7 +161,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding additional hints to assign the {@link EventFlag#SCHEDULED} when processing the events.
-     * 
+     *
      * @param attendeeCountsPerEventId The number of attendees, mapped to the identifiers of the corresponding events
      * @return A self reference
      */
@@ -172,7 +172,7 @@ public class EventPostProcessor {
 
     /**
      * Sets a map holding essential information about the calendar user attendee when processing the events.
-     * 
+     *
      * @param userAttendeePerEventId The calendar user attendees, mapped to the identifiers of the corresponding events
      * @return A self reference
      */
@@ -324,7 +324,7 @@ public class EventPostProcessor {
 
     /**
      * Gets the first event of the previously processed events.
-     * 
+     *
      * @return The first event, or <code>null</code> if there is none
      */
     public Event getFirstEvent() throws OXException {
@@ -345,13 +345,14 @@ public class EventPostProcessor {
     }
 
     private boolean doProcess(Event event, CalendarFolder folder) throws OXException {
-        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
+        Event ev3nt = event;
+        if (Classification.PRIVATE.equals(ev3nt.getClassification()) && isClassifiedFor(ev3nt, session.getUserId())) {
             /*
              * excluded if classified as private for the session user
              */
             return false;
         }
-        Attendee attendee = find(event.getAttendees(), folder.getCalendarUserId());
+        Attendee attendee = find(ev3nt.getAttendees(), folder.getCalendarUserId());
         if (null != attendee && attendee.isHidden()) {
             /*
              * excluded if marked as hidden for the calendar user
@@ -359,22 +360,22 @@ public class EventPostProcessor {
             //TODO: public folder?
             return false;
         }
-        if (isSeriesMaster(event)) {
-            knownRecurrenceData.put(event.getSeriesId(), new DefaultRecurrenceData(event));
+        if (isSeriesMaster(ev3nt)) {
+            knownRecurrenceData.put(ev3nt.getSeriesId(), new DefaultRecurrenceData(ev3nt));
         }
-        event.setFolderId(folder.getId());
+        ev3nt.setFolderId(folder.getId());
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
-            event.setFlags(getFlags(event, folder));
+            ev3nt.setFlags(getFlags(ev3nt, folder));
         }
-        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
-        event = anonymizeIfNeeded(session, event);
-        if (isSeriesMaster(event)) {
+        maximumTimestamp = Math.max(maximumTimestamp, ev3nt.getTimestamp());
+        ev3nt = anonymizeIfNeeded(session, ev3nt);
+        if (isSeriesMaster(ev3nt)) {
             if (isResolveOccurrences(session)) {
                 /*
                  * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
                  */
-                return events.addAll(resolveOccurrences(event));
-            } else if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+                return events.addAll(resolveOccurrences(ev3nt));
+            } else if (false == session.getRecurrenceService().iterateEventOccurrences(ev3nt, getFrom(session), getUntil(session)).hasNext()) {
                 /*
                  * exclude series master event if there are no occurrences in requested range
                  */
@@ -383,43 +384,44 @@ public class EventPostProcessor {
             /*
              * apply 'userized' exception dates to series master as requested
              */
-            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
+            if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) ||
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
-                return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
+                return events.add(applyExceptionDates(storage, ev3nt, folder.getCalendarUserId()));
             }
-            return events.add(event);
+            return events.add(ev3nt);
         }
-        if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+        if (null != ev3nt.getStartDate() && false == isInRange(ev3nt, getFrom(session), getUntil(session), getTimeZone(session))) {
             /*
              * excluded if not in requested range
              */
             return false;
         }
-        return events.add(event);
+        return events.add(ev3nt);
     }
 
     private boolean doProcessTombstone(Event event, String folderId) throws OXException {
-        if (Classification.PRIVATE.equals(event.getClassification()) && isClassifiedFor(event, session.getUserId())) {
+        Event ev3nt = event;
+        if (Classification.PRIVATE.equals(ev3nt.getClassification()) && isClassifiedFor(ev3nt, session.getUserId())) {
             /*
              * excluded if classified as private for the session user
              */
             return false;
         }
-        event.setFolderId(folderId);
-        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
-        event = anonymizeIfNeeded(session, event);
-        if (isSeriesMaster(event) && false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+        ev3nt.setFolderId(folderId);
+        maximumTimestamp = Math.max(maximumTimestamp, ev3nt.getTimestamp());
+        ev3nt = anonymizeIfNeeded(session, ev3nt);
+        if (isSeriesMaster(ev3nt) && false == session.getRecurrenceService().iterateEventOccurrences(ev3nt, getFrom(session), getUntil(session)).hasNext()) {
             /*
              * exclude series master event if there are no occurrences in requested range
              */
             return false;
-        } else if (null != event.getStartDate() && false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+        } else if (null != ev3nt.getStartDate() && false == isInRange(ev3nt, getFrom(session), getUntil(session), getTimeZone(session))) {
             /*
              * excluded if not in requested range
              */
             return false;
         }
-        return events.add(event);
+        return events.add(ev3nt);
     }
 
     protected EnumSet<EventFlag> getFlags(Event event, CalendarFolder folder) throws OXException {
@@ -499,7 +501,7 @@ public class EventPostProcessor {
 
     /**
      * Injects essential information about the calendar user attendee prior processing the event, in case it is available.
-     * 
+     *
      * @param event The event to enrich with essential information about the calendar user attendee
      * @return The event, enriched with data about the calendar user attendee if available
      */

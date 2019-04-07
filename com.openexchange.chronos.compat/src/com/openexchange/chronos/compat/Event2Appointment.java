@@ -140,16 +140,14 @@ public class Event2Appointment {
         if (CalendarUserType.GROUP.equals(cuType)) {
             if (internal) {
                 return 2; // com.openexchange.groupware.container.Participant.GROUP
-            } else {
-                return 6; // com.openexchange.groupware.container.Participant.EXTERNAL_GROUP
             }
+            return 6; // com.openexchange.groupware.container.Participant.EXTERNAL_GROUP
         }
         if (CalendarUserType.INDIVIDUAL.equals(cuType)) {
             if (internal) {
                 return 1; // com.openexchange.groupware.container.Participant.USER
-            } else {
-                return 5; // com.openexchange.groupware.container.Participant.EXTERNAL_USER
             }
+            return 5; // com.openexchange.groupware.container.Participant.EXTERNAL_USER
         }
         if (CalendarUserType.ROOM.equals(cuType) || CalendarUserType.RESOURCE.equals(cuType)) {
             return 3; // com.openexchange.groupware.container.Participant.RESOURCE
@@ -411,11 +409,7 @@ public class Event2Appointment {
      * @throws NumberFormatException
      */
     public static Integer asInteger(String id, boolean zeroForNull) {
-        if (null == id) {
-            return zeroForNull ? Integer.valueOf(0) : null;
-        } else {
-            return Integer.valueOf(id);
-        }
+        return null == id ? zeroForNull ? Integer.valueOf(0) : null : Integer.valueOf(id);
     }
 
     /**

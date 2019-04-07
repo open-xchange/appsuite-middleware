@@ -43,22 +43,22 @@ import net.fortuna.ical4j.util.ParameterValidator;
 
 /**
  * This property is a non-standard property for iCal Server/Calendar Server
- * 
+ *
  * @see <a href="http://svn.calendarserver.org/repository/calendarserver/CalendarServer/trunk/doc/Extensions/caldav-privatecomments.txt">caldav-privatecomments.txt</a>
- * 
+ *
  * @author probert
  *
  */
 public class CalendarServerAttendeeComment extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
-  
+
   public static final String PROPERTY_NAME = "X-CALENDARSERVER-ATTENDEE-COMMENT";
-  
+
   private String value;
 
   public static final PropertyFactory FACTORY = new Factory();
-    
+
   public CalendarServerAttendeeComment(PropertyFactory factory) {
     super(PROPERTY_NAME, factory);
   }
@@ -103,6 +103,10 @@ public class CalendarServerAttendeeComment extends Property implements Escapable
   private static class Factory implements PropertyFactory {
 
     private static final long serialVersionUID = 2099427445505899578L;
+
+    Factory() {
+        super();
+    }
 
     @Override
     public Property createProperty(String name) {

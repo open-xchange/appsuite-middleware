@@ -47,11 +47,11 @@ public class WrCalDesc extends Property {
     private static final long serialVersionUID = 4925485073475375164L;
 
     public static final String PROPERTY_NAME = "X-WR-CALDESC";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -105,10 +105,16 @@ public class WrCalDesc extends Property {
 
         private static final long serialVersionUID = -7990613145503686965L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new WrCalDesc(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             WrCalDesc property = new WrCalDesc(parameters, this, value);
             return property;

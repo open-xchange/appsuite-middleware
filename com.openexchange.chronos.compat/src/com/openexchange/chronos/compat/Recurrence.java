@@ -106,7 +106,7 @@ public class Recurrence {
      */
     public static String getRecurrenceRule(SeriesPattern pattern, TimeZone timeZone, boolean fulltime) throws OXException {
         try {
-            switch (pattern.getType()) {
+            switch (pattern.getType().intValue()) {
                 case 1:
                     return daily(pattern, fulltime, timeZone);
                 case 2:
@@ -279,11 +279,11 @@ public class Recurrence {
         RecurrenceRule recur = getRecurBuilder(Freq.MONTHLY, pattern, fulltime, timeZone);
         if (SeriesPattern.MONTHLY_2 == pattern.getType()) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
-            int weekNo = pattern.getDayOfMonth();
+            int weekNo = pattern.getDayOfMonth().intValue();
             if (5 == weekNo) {
                 weekNo = -1;
             }
-            recur.setByPart(Part.BYSETPOS, weekNo);
+            recur.setByPart(Part.BYSETPOS, I(weekNo));
         } else if (SeriesPattern.MONTHLY_1.equals(pattern.getType())) {
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
         } else {
@@ -297,11 +297,11 @@ public class Recurrence {
         if (SeriesPattern.YEARLY_2 == pattern.getType()) {
             recur.setByDayPart(getByDayPart(pattern.getDaysOfWeek()));
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
-            int weekNo = pattern.getDayOfMonth();
+            int weekNo = pattern.getDayOfMonth().intValue();
             if (5 == weekNo) {
                 weekNo = -1;
             }
-            recur.setByPart(Part.BYSETPOS, weekNo);
+            recur.setByPart(Part.BYSETPOS, I(weekNo));
         } else if (SeriesPattern.YEARLY_1.equals(pattern.getType())) {
             recur.setByPart(Part.BYMONTH, pattern.getMonth());
             recur.setByPart(Part.BYMONTHDAY, pattern.getDayOfMonth());
@@ -326,9 +326,9 @@ public class Recurrence {
 
     private static RecurrenceRule getRecurBuilder(Freq frequency, SeriesPattern pattern, boolean fulltime, TimeZone timeZone) {
         RecurrenceRule recur = new RecurrenceRule(frequency);
-        recur.setInterval(pattern.getInterval());
+        recur.setInterval(pattern.getInterval().intValue());
         if (pattern.getOccurrences() != null) {
-            recur.setCount(pattern.getOccurrences());
+            recur.setCount(pattern.getOccurrences().intValue());
         } else if (pattern.getSeriesEnd() != null) {
             recur.setUntil(getUntil(pattern, fulltime, timeZone));
         }
@@ -353,7 +353,7 @@ public class Recurrence {
         }
 
         if (fulltime) {
-            return new DateTime(pattern.getSeriesEnd()).toAllDay();
+            return new DateTime(pattern.getSeriesEnd().longValue()).toAllDay();
         }
 
         /*
@@ -440,7 +440,7 @@ public class Recurrence {
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
         DateTime dateTime = recurrenceData.getSeriesStart();
         for (int i = 0; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); dateTime = iterator.next().getValue(), i++) {
-            ;
+            // Nothing
         }
         return initCalendar(TimeZones.UTC, dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth()).getTime();
     }

@@ -281,14 +281,15 @@ public class Appointment2Event {
         if (null == recurrenceDatePositions) {
             return null;
         }
-        if (1 < recurrenceDatePositions.size()) {
-            List<Date> dateList = new ArrayList<Date>(recurrenceDatePositions);
+        Collection<Date> recDatePositions = recurrenceDatePositions;
+        if (1 < recDatePositions.size()) {
+            List<Date> dateList = new ArrayList<Date>(recDatePositions);
             Collections.sort(dateList);
-            recurrenceDatePositions = dateList;
+            recDatePositions = dateList;
         }
         SortedSet<RecurrenceId> recurrenceIDs = new TreeSet<RecurrenceId>();
         RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
-        nextPosition: for (Date recurrenceDatePosition : recurrenceDatePositions) {
+        nextPosition: for (Date recurrenceDatePosition : recDatePositions) {
             while (iterator.hasNext()) {
                 DateTime next = iterator.next().getValue();
                 long nextDatePosition = truncateTime(initCalendar(TimeZones.UTC, next.getTimestamp())).getTimeInMillis();

@@ -47,11 +47,11 @@ public class WrCalName extends Property {
     private static final long serialVersionUID = 3529181417508181637L;
 
     public static final String PROPERTY_NAME = "X-WR-CALNAME";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -100,15 +100,21 @@ public class WrCalName extends Property {
     public boolean isCalendarProperty() {
         return true;
     }
-    
+
     private static class Factory implements PropertyFactory {
 
         private static final long serialVersionUID = -202687610325706085L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new WrCalName(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             WrCalName property = new WrCalName(parameters, this, value);
             return property;

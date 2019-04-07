@@ -379,32 +379,33 @@ public class AlarmUtils extends CalendarUtils {
         if (0 == duration) {
             return "P0D";
         }
+        long dur = duration;
         StringBuilder stringBuilder = new StringBuilder();
-        if (0 > duration) {
+        if (0 > dur) {
             stringBuilder.append('-');
-            duration = duration * -1;
+            dur = dur * -1;
         }
         stringBuilder.append('P');
-        long days = unit.toDays(duration);
+        long days = unit.toDays(dur);
         if (0 < days) {
             stringBuilder.append(days).append('D');
-            duration -= unit.convert(days, TimeUnit.DAYS);
+            dur -= unit.convert(days, TimeUnit.DAYS);
         }
-        if (0 == duration) {
+        if (0 == dur) {
             return stringBuilder.toString();
         }
         stringBuilder.append('T');
-        long hours = unit.toHours(duration);
+        long hours = unit.toHours(dur);
         if (0 < hours) {
             stringBuilder.append(hours).append('H');
-            duration -= unit.convert(hours, TimeUnit.HOURS);
+            dur -= unit.convert(hours, TimeUnit.HOURS);
         }
-        long minutes = unit.toMinutes(duration);
+        long minutes = unit.toMinutes(dur);
         if (0 < minutes) {
             stringBuilder.append(minutes).append('M');
-            duration -= unit.convert(minutes, TimeUnit.MINUTES);
+            dur -= unit.convert(minutes, TimeUnit.MINUTES);
         }
-        long seconds = unit.toSeconds(duration);
+        long seconds = unit.toSeconds(dur);
         if (0 < seconds) {
             stringBuilder.append(seconds).append('S');
         }
@@ -476,10 +477,11 @@ public class AlarmUtils extends CalendarUtils {
      * @return The next trigger time, or <code>null</code> if there is none
      */
     public static Date getNextTriggerTime(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
-        if (null == startDate) {
-            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
+        Date stDate = startDate;
+        if (null == stDate) {
+            stDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
         }
-        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, stDate, null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
 
@@ -487,7 +489,7 @@ public class AlarmUtils extends CalendarUtils {
             if (null == triggerTime) {
                 return null;
             }
-            if(triggerTime.getTime() < startDate.getTime()) {
+            if(triggerTime.getTime() < stDate.getTime()) {
                 continue;
             }
             if (null == alarm.getAcknowledged() || alarm.getAcknowledged().before(triggerTime)) {
@@ -513,13 +515,14 @@ public class AlarmUtils extends CalendarUtils {
      * @return The event occurrence, or <code>null</code> if there is no next trigger time
      */
     public static Event getNextTriggerEvent(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
-        if (null == startDate) {
-            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
+        Date stDate = startDate;
+        if (null == stDate) {
+            stDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
         }
-        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, stDate, null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
-            if (occurrence.getStartDate().getTimestamp() < startDate.getTime()) {
+            if (occurrence.getStartDate().getTimestamp() < stDate.getTime()) {
                 continue;
             }
             Date triggerTime = getTriggerTime(alarm.getTrigger(), occurrence, timeZone);
@@ -550,11 +553,11 @@ public class AlarmUtils extends CalendarUtils {
      * @param trigger1 The first trigger to compare
      * @param trigger2 The second trigger to compare
      * @param event The event the trigger's alarms are associated with
-     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @param timeZone The time zone to consider if the event has <i>floating</i> dates
      * @return <code>0</code> if trigger1 is equal to trigger2, a value less than <code>0</code> if trigger1 is <i>before</i> trigger2,
      *         and a value greater than <code>0</code> if trigger1 is <i>after</i> trigger2.
      */
-    public static int compare(Trigger trigger1, Trigger trigger2, Event event, TimeZone timeZone) {
+    public static int compare(Trigger trigger1, @SuppressWarnings("unused") Trigger trigger2, Event event, TimeZone timeZone) {
         Date triggerTime1 = getTriggerTime(trigger1, event, timeZone);
         Date triggerTime2 = getTriggerTime(trigger1, event, timeZone);
         if (null == triggerTime1) {

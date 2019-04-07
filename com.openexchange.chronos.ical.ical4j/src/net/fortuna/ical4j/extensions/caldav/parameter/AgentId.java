@@ -37,9 +37,9 @@ import net.fortuna.ical4j.util.Strings;
 
 /**
  * Defines a AGENT-ID parameter
- * 
+ *
  * @see <a href="http://tools.ietf.org/html/draft-daboo-valarm-extensions-04">draft-daboo-valarm-extensions-04</a>
- * 
+ *
  * @author probert
  */
 public class AgentId extends Parameter {
@@ -48,7 +48,7 @@ public class AgentId extends Parameter {
 
     public static final String PARAMETER_NAME = "AGENT-ID";
 
-    private String value;
+    private final String value;
 
     /**
      * @param aValue a string representation of a participation role
@@ -61,6 +61,7 @@ public class AgentId extends Parameter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final String getValue() {
         return value;
     }

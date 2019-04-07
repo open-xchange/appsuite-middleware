@@ -89,7 +89,7 @@ public class XMicrosoftAllDayEventMapping extends AbstractICalMapping<VEvent, Ev
     @Override
     public void importICal(VEvent component, Event object, ICalParameters parameters, List<OXException> warnings) {
         Property property = component.getProperty(AllDayEvent.PROPERTY_NAME);
-        if (null != property && Boolean.valueOf(property.getValue()) && isNotIgnored(parameters, AllDayEvent.PROPERTY_NAME) &&
+        if (null != property && Boolean.parseBoolean(property.getValue()) && isNotIgnored(parameters, AllDayEvent.PROPERTY_NAME) &&
             ParserTools.isDateOrMidnight(component.getStartDate()) && ParserTools.isDateOrMidnight(component.getEndDate())) {
             if (null != object.getStartDate() && false == object.getStartDate().isAllDay()) {
                 object.setStartDate(object.getStartDate().toAllDay());

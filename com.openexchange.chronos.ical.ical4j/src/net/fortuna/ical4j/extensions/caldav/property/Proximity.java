@@ -40,26 +40,26 @@ import net.fortuna.ical4j.model.ValidationException;
 
 /**
  * New property as defined in a RFC draft
- * 
+ *
  * @see <a href="http://tools.ietf.org/html/draft-daboo-valarm-extensions-04">draft-daboo-valarm-extensions-04</a>
- * 
+ *
  * @author probert
  *
  */
 public class Proximity extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
-  
+
   public static final String PROPERTY_NAME = "PROXIMITY";
-  
+
   private String value;
 
   public static final PropertyFactory FACTORY = new Factory();
-  
+
   public static final Proximity ARRIVE = new ImmutableProximity("ARRIVE", null);
-  
+
   public static final Proximity DEPART = new ImmutableProximity("DEPART", null);
-    
+
   public Proximity(PropertyFactory factory) {
     super(PROPERTY_NAME, factory);
   }
@@ -81,26 +81,27 @@ public class Proximity extends Property implements Escapable {
 
   @Override
   public void validate() throws ValidationException {
+      // Nothing
   }
 
   @Override
   public String getValue() {
     return value;
   }
-  
+
   private static final class ImmutableProximity extends Proximity {
     private static final long serialVersionUID = -2054338254L;
 
     private ImmutableProximity(String value) {
       super(new ParameterList(true), value);
     }
-    
+
     @Override
     public void setValue(String aValue) {
       throw new UnsupportedOperationException("Cannot modify constant instances");
     }
-    
-    ImmutableProximity(String s, ImmutableProximity immutableclazz) {
+
+    ImmutableProximity(String s, @SuppressWarnings("unused") ImmutableProximity immutableclazz) {
       this(s);
     }
   }
@@ -108,6 +109,10 @@ public class Proximity extends Property implements Escapable {
   private static class Factory implements PropertyFactory {
 
     private static final long serialVersionUID = 2099427445505899578L;
+
+    Factory() {
+        super();
+    }
 
     @Override
     public Property createProperty(String name) {

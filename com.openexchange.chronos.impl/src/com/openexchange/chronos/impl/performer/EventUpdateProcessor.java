@@ -234,14 +234,14 @@ public class EventUpdateProcessor implements EventUpdate {
 
     @Override
     public String toString() {
-        return "EventUpdateProcessor [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates + 
+        return "EventUpdateProcessor [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates +
             ", attachmentUpdates=" + attachmentUpdates + ", exceptionUpdates=" + exceptionUpdates + "]";
     }
 
     /**
      * Adjusts any change- and delete exceptions of a recurring event along with the update of the series master, in case the original
      * event represents no <i>attendee scheduling resource</i>.
-     * 
+     *
      * <p/>
      * In particular, the following changes are applied for the changed event and -exceptions:
      * <ul>
@@ -360,7 +360,7 @@ public class EventUpdateProcessor implements EventUpdate {
                 /*
                  * deny different values for change exceptions
                  */
-                if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                if (isSeriesException(originalEvent) && (null == originalSeriesMaster ||
                     false == EventMapper.getInstance().get(EventField.ATTENDEE_PRIVILEGES).equals(originalSeriesMaster, updatedEvent))) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), updatedField);
                 }
@@ -379,7 +379,7 @@ public class EventUpdateProcessor implements EventUpdate {
                     /*
                      * deny different values for change exceptions
                      */
-                    if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
+                    if (isSeriesException(originalEvent) && (null == originalSeriesMaster ||
                         false == EventMapper.getInstance().get(EventField.CLASSIFICATION).equals(originalSeriesMaster, updatedEvent))) {
                         throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                             String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
@@ -602,7 +602,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
-     * @see com.openexchange.chronos.impl.performer.AbstractUpdatePerformer 
+     * @see com.openexchange.chronos.impl.performer.AbstractUpdatePerformer
      */
     private static boolean needsSequenceNumberIncrement(Event originalEvent, Event updatedEvent) throws OXException {
         EventField[] relevantFields = new EventField[] {
@@ -747,13 +747,14 @@ public class EventUpdateProcessor implements EventUpdate {
                 seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
             }
         }
-        if (false == isNullOrEmpty(changeExceptions)) {
-            List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
+        List<Event> ch4ngeExceptions = changeExceptions;
+        if (false == isNullOrEmpty(ch4ngeExceptions)) {
+            List<Event> newChangeExceptions = new ArrayList<Event>(ch4ngeExceptions);
             if (newChangeExceptions.removeIf(event -> false == possibleExceptionDates.contains(event.getRecurrenceId()))) {
-                changeExceptions = newChangeExceptions;
+                ch4ngeExceptions = newChangeExceptions;
             }
         }
-        return changeExceptions;
+        return ch4ngeExceptions;
     }
 
     /**
@@ -765,11 +766,12 @@ public class EventUpdateProcessor implements EventUpdate {
      * @return The resulting list of (possibly adjusted) change exceptions
      */
     private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) {
+        List<Event> ch4ngeExceptions = changeExceptions;
         if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
-            if (false == isNullOrEmpty(changeExceptions)) {
-                List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
+            if (false == isNullOrEmpty(ch4ngeExceptions)) {
+                List<Event> newChangeExceptions = new ArrayList<Event>(ch4ngeExceptions);
                 if (newChangeExceptions.removeIf(event -> seriesMaster.getDeleteExceptionDates().contains(event.getRecurrenceId()))) {
-                    changeExceptions = newChangeExceptions;
+                    ch4ngeExceptions = newChangeExceptions;
                 }
             }
             if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
@@ -779,14 +781,14 @@ public class EventUpdateProcessor implements EventUpdate {
                 }
             }
         }
-        return changeExceptions;
+        return ch4ngeExceptions;
     }
-    
+
     /**
      * Removes any <i>redundant</i> change exception events in case there are multiple defined for the same recurrence identifier so that
      * the series' consistency is guaranteed. In such a case, only the 'first' one is preserved in the list of change exception events.
      * Also, the series master event's list of change exception dates is updated accordingly.
-     * 
+     *
      * @param seriesMaster The series master event
      * @param changeExceptions The change exception events
      * @return The resulting list of (possibly adjusted) change exceptions
@@ -797,7 +799,7 @@ public class EventUpdateProcessor implements EventUpdate {
              * ensure series master's change exception dates is empty, too
              */
             if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
-                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.", 
+                LOG.warn("Inconsistent list of change exception dates in series master {}, correcting to {}.",
                     seriesMaster.getChangeExceptionDates(), Collections.emptyList());
                 seriesMaster.setChangeExceptionDates(null);
             }

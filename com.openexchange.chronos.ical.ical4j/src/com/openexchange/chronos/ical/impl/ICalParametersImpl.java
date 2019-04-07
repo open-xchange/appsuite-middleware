@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.chronos.ical.ICalParameters;
@@ -68,11 +69,11 @@ public class ICalParametersImpl implements ICalParameters {
     /**
      * {@link TimeZoneRegistry}
      * <p/>
-     * Holds a reference to the underlying timezone registry.
+     * Holds a reference to the underlying time zone registry.
      */
     public static final String TIMEZONE_REGISTRY = TimeZoneRegistry.class.getName();
 
-    /** The default timezone registry to use */
+    /** The default time zone registry to use */
     private static final TimeZoneRegistry DEFAULT_TIMEZONE_REGISTRY = new TimeZoneRegistryImpl("zoneinfo-outlook/");
 
     private final Map<String, Object> parameters;
@@ -90,7 +91,7 @@ public class ICalParametersImpl implements ICalParameters {
         set(TIMEZONE_REGISTRY, DEFAULT_TIMEZONE_REGISTRY);
         ConfigurationService configService = Services.optService(ConfigurationService.class);
         if (null != configService) {
-            set(IMPORT_LIMIT, configService.getIntProperty("com.openexchange.import.ical.limit", -1));
+            set(IMPORT_LIMIT, I(configService.getIntProperty("com.openexchange.import.ical.limit", -1)));
         }
     }
 

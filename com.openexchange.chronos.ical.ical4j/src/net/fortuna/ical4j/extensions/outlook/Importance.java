@@ -47,11 +47,11 @@ public class Importance extends Property {
     private static final long serialVersionUID = 3044453382694356302L;
 
     public static final String PROPERTY_NAME = "X-MICROSOFT-CDO-IMPORTANCE";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -95,10 +95,18 @@ public class Importance extends Property {
 
     private static class Factory implements PropertyFactory {
 
+        private static final long serialVersionUID = 5688527531345391938L;
+
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new Importance(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             Importance property = new Importance(parameters, this, value);
             return property;

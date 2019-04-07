@@ -45,13 +45,13 @@ public class ItemType extends Property {
     private static final long serialVersionUID = 359692381730081304L;
 
     public static final String PROPERTY_NAME = "X-GWITEM-TYPE";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     public static final ItemType APPOINTMENT = new ItemType(new ParameterList(true), FACTORY, "APPOINTMENT");
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -97,10 +97,16 @@ public class ItemType extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new ItemType(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             ItemType property = null;
             if (APPOINTMENT.getValue().equals(value)) {

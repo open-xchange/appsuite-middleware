@@ -85,7 +85,7 @@ import net.fortuna.ical4j.model.component.VTimeZone;
  * @since v7.10.0
  */
 public class ICalUtilitiesImpl implements ICalUtilities {
-    
+
     private final static Logger LOGGER = LoggerFactory.getLogger(ICalUtilitiesImpl.class);
 
     private final ICalMapper mapper;
@@ -112,8 +112,8 @@ public class ICalUtilitiesImpl implements ICalUtilities {
 
     @Override
     public List<Alarm> importAlarms(InputStream inputStream, ICalParameters parameters) throws OXException {
-        parameters = getParametersOrDefault(parameters);
-        return ICalUtils.importAlarms(parseVAlarmComponents(inputStream, parameters), mapper, parameters);
+        ICalParameters params = getParametersOrDefault(parameters);
+        return ICalUtils.importAlarms(parseVAlarmComponents(inputStream, params), mapper, params);
     }
 
     @Override
@@ -232,20 +232,20 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         if (null == data || 0 == data.size()) {
             return null;
         }
-        parameters = getParametersOrDefault(parameters);
+        ICalParameters params = getParametersOrDefault(parameters);
         ComponentList components = new ComponentList();
         ArrayList<OXException> warnings = new ArrayList<OXException>();
         for (T d : data) {
-            Component component = exporter.export(d, parameters, warnings);
+            Component component = exporter.export(d, params, warnings);
             if (null != component) {
-                ICalUtils.removeProperties(component, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
+                ICalUtils.removeProperties(component, params.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
                 components.add(component);
             }
         }
         logWarning(warnings);
         return components;
     }
-    
+
     private void logWarning(List<OXException> warnings) {
         for (OXException e : warnings) {
             LOGGER.trace("", e);

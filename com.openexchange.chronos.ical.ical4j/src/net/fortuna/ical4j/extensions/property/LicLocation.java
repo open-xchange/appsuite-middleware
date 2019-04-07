@@ -47,11 +47,11 @@ public class LicLocation extends Property {
     private static final long serialVersionUID = -9063118211308272499L;
 
     public static final String PROPERTY_NAME = "X-LIC-LOCATION";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -95,10 +95,18 @@ public class LicLocation extends Property {
 
     private static class Factory implements PropertyFactory {
 
+        private static final long serialVersionUID = 2795628931502672070L;
+
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new LicLocation(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             LicLocation property = new LicLocation(parameters, this, value);
             return property;
