@@ -49,6 +49,8 @@
 
 package com.openexchange.guest.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -273,7 +275,7 @@ public class RdbGuestStorage extends GuestStorage {
 
             while (result.next()) {
                 long guestId = result.getLong(1);
-                guestIds.add(guestId);
+                guestIds.add(L(guestId));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -299,11 +301,11 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setLong(1, guestId);
             statement.setInt(2, contextId);
             statement.setInt(3, userId);
-            long affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
                 String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
-                LOG.error("There have been {} changes for removing a guest assignment but there should only be 1. Executed SQL: {}", affectedRows, sql);
+                LOG.error("There have been {} changes for removing a guest assignment but there should only be 1. Executed SQL: {}", I(affectedRows), sql);
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -326,11 +328,11 @@ public class RdbGuestStorage extends GuestStorage {
         try {
             statement = connection.prepareStatement(DELETE_GUEST);
             statement.setLong(1, guestId);
-            long affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
 
             if (affectedRows > 1) {
                 String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
-                LOG.error("There have been {} guests removed but there should max be 1. Executed SQL: {}", affectedRows, sql);
+                LOG.error("There have been {} guests removed but there should max be 1. Executed SQL: {}", I(affectedRows), sql);
                 throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Long.toString(affectedRows), statement.toString());
             }
         } catch (final SQLException e) {
@@ -382,7 +384,7 @@ public class RdbGuestStorage extends GuestStorage {
 
             while (result.next()) {
                 long guestId = result.getLong(1);
-                guestIdsAssigmentsRemovedFor.add(guestId);
+                guestIdsAssigmentsRemovedFor.add(L(guestId));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -609,7 +611,7 @@ public class RdbGuestStorage extends GuestStorage {
 
             if (affectedRows != 1) {
                 String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
-                LOG.error("There have been {} changes for updating the guest user. Executed SQL: {}", affectedRows, sql);
+                LOG.error("There have been {} changes for updating the guest user. Executed SQL: {}", I(affectedRows), sql);
                 throw GuestExceptionCodes.SQL_ERROR.create("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
             }
         } catch (final SQLException e) {
