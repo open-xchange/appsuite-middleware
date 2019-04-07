@@ -194,14 +194,16 @@ public class BasicTypesStringParser implements StringParser {
             return null;
         }
         if (t == String.class) {
-            return (T) s;
+            @SuppressWarnings("unchecked") T val = (T) s;
+            return val;
         }
 
         Parser<?> parser = parsers.get(t);
         if (null == parser) {
             return null;
         }
-        return (T) parser.parse(s);
+        @SuppressWarnings("unchecked") T parsed = (T) parser.parse(s);
+        return parsed;
     }
 
 }

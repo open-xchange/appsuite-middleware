@@ -64,5 +64,6 @@ public interface StatusKnowing extends HttpServletResponse {
      *
      * @return The status code
      */
+    @Override
     int getStatus();
 }

@@ -89,9 +89,11 @@ public class DateStringParser implements StringParser {
         }
         final Long parsed = subParser.parse(s, Long.class);
         if(parsed != null) {
-            return (T) new Date(parsed.longValue());
+            @SuppressWarnings("unchecked") T date = (T) new Date(parsed.longValue());
+            return date;
         }
-        return (T) parseDate(s);
+        @SuppressWarnings("unchecked") T parsedDate = (T) parseDate(s);
+        return parsedDate;
     }
 
     // Plucked from HCalendarParser

@@ -85,6 +85,7 @@ public class CountingOnlyInputStream extends FilterInputStream {
      * @return The new number of counted bytes so far
      * @throws IOException If an I/O error should be advertised
      */
+    @SuppressWarnings("unused")
     protected long add(int consumed) throws IOException {
         return count.addAndGet(consumed);
     }

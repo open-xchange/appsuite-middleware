@@ -74,6 +74,7 @@ public class CombinedSearchIterator<T> implements SearchIterator<T> {
      *
      * @param iterators The instances of {@link SearchIterator}
      */
+    @SafeVarargs
     public CombinedSearchIterator(final SearchIterator<T>... iterators) {
         super();
         this.iterators = iterators;

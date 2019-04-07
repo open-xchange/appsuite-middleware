@@ -50,6 +50,7 @@
 
 package com.openexchange.google.api.client;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
@@ -144,33 +145,34 @@ public class GoogleApiClients {
     /**
      * Check if the OAuth token of the specified {@link OAuthAccount} was expired and re-acquire if necessary
      *
-     * @param session The groupware {@link Session}
-     * @param reacquireIfExpired perform the requisition check
-     * @param oauthAccount The {@link OAuthAccount}
+     * @param session The session
+     * @param reacquireIfExpired Whether to perform the requisition check
+     * @param oauthAccount The OAuth account
      * @return The {@link OAuthAccount} with the (renewed) token
-     * @throws OXException if an error is occurred
+     * @throws OXException If an error is occurred
      */
     public static OAuthAccount reacquireIfExpired(final Session session, final boolean reacquireIfExpired, OAuthAccount oauthAccount) throws OXException {
         if (!reacquireIfExpired) {
             return oauthAccount;
         }
+        OAuthAccount account = oauthAccount;
         try {
             // Create Scribe Google OAuth service
             final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-            serviceBuilder.apiKey(oauthAccount.getMetaData().getAPIKey(session)).apiSecret(oauthAccount.getMetaData().getAPISecret(session));
+            serviceBuilder.apiKey(account.getMetaData().getAPIKey(session)).apiSecret(account.getMetaData().getAPISecret(session));
             Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
             // Check expiry
-            int expiry = scribeOAuthService.getExpiry(oauthAccount.getToken());
+            int expiry = scribeOAuthService.getExpiry(account.getToken());
             if (expiry < REFRESH_THRESHOLD) {
                 // Less than 1 minute to live -> refresh token!
                 ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                oauthAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, oauthAccount), new ExponentialBackOffRetryPolicy());
+                account = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, account), new ExponentialBackOffRetryPolicy());
             }
         } catch (org.scribe.exceptions.OAuthException e) {
-            throw OAuthUtil.handleScribeOAuthException(e, oauthAccount, session);
+            throw OAuthUtil.handleScribeOAuthException(e, account, session);
         }
-        return oauthAccount;
+        return account;
     }
 
     /**
@@ -313,7 +315,7 @@ public class GoogleApiClients {
     /**
      * Handles the specified {@link OAuthException} for the specified {@link OAuthAccount} and the
      * specified {@link Session} and returns an appropriate {@link OXException}.
-     * 
+     *
      * @param e The exception to handle
      * @param googleAccount the {@link OAuthAccount}
      * @param session The groupware session
@@ -334,7 +336,7 @@ public class GoogleApiClients {
         }
         if (exMessage.contains("invalid_grant") || exMessage.contains("deleted_client")) {
             if (null != googleAccount) {
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, googleAccount.getDisplayName(), googleAccount.getId(), session.getUserId(), session.getContextId());
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, googleAccount.getDisplayName(), I(googleAccount.getId()), I(session.getUserId()), I(session.getContextId()));
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
@@ -344,14 +346,14 @@ public class GoogleApiClients {
             return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
         }
         if (errorDescription.contains("Missing required parameter: refresh_token")) {
-             return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(googleAccount.getDisplayName(), googleAccount.getId());
+             return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(googleAccount.getDisplayName(), I(googleAccount.getId()));
         }
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
     }
 
     /**
      * Parses the specified key from from the specified message
-     * 
+     *
      * @param message The message from which to parse the error code
      * @return The error code, or <code>null</code> if none can be parsed
      */
@@ -407,14 +409,15 @@ public class GoogleApiClients {
         if (null == session) {
             return null;
         }
+        OAuthAccount googleAccount = googleOAuthAccount;
         try {
             // Initialize transport
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
 
-            googleOAuthAccount = reacquireIfExpired(session, true, googleOAuthAccount);
+            googleAccount = reacquireIfExpired(session, true, googleAccount);
 
             // Build credentials
-            return new GoogleCredential.Builder().setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session)).setJsonFactory(JSON_FACTORY).setTransport(transport).build().setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());
+            return new GoogleCredential.Builder().setClientSecrets(googleAccount.getMetaData().getAPIKey(session), googleAccount.getMetaData().getAPISecret(session)).setJsonFactory(JSON_FACTORY).setTransport(transport).build().setRefreshToken(googleAccount.getSecret()).setAccessToken(googleAccount.getToken());
         } catch (GeneralSecurityException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
