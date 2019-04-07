@@ -49,6 +49,7 @@
 
 package com.openexchange.geolocation.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +78,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
     /**
      * Initialises a new {@link GeoLocationServiceImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public GeoLocationServiceImpl(ServiceLookup services) {
@@ -87,7 +88,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
      */
     @Override
@@ -97,7 +98,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, double, double, int)
      */
     @Override
@@ -107,7 +108,7 @@ public class GeoLocationServiceImpl implements GeoLocationService {
 
     /**
      * Retrieves the appropriate GeoLocationStorageService (if any) from the registry
-     * 
+     *
      * @param contextId The context identifier
      * @return The {@link GeoLocationStorageService}
      * @throws OXException if the configured storage provider is unknown or if there are no storage providers registered.
@@ -118,12 +119,12 @@ public class GeoLocationServiceImpl implements GeoLocationService {
         if (Strings.isEmpty(property)) {
             List<GeoLocationStorageService> availableServices = GeoLocationStorageServiceRegistry.getInstance().getAvailableServiceProviders();
             if (availableServices.isEmpty()) {
-                OXException e = GeoLocationExceptionCodes.STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED.create(GeoLocationProperty.PROVIDER.getFQPropertyName(), contextId);
+                OXException e = GeoLocationExceptionCodes.STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED.create(GeoLocationProperty.PROVIDER.getFQPropertyName(), I(contextId));
                 LOGGER.warn("{}", e.getMessage());
                 throw e;
             }
             GeoLocationStorageService service = availableServices.get(0);
-            LOGGER.debug("The property '{}' is empty! The geo location storage service provider '{}' was selected for context with id '{}'", GeoLocationProperty.PROVIDER.getFQPropertyName(), service.getProviderId(), contextId);
+            LOGGER.debug("The property '{}' is empty! The geo location storage service provider '{}' was selected for context with id '{}'", GeoLocationProperty.PROVIDER.getFQPropertyName(), service.getProviderId(), I(contextId));
             return service;
         }
         try {

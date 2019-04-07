@@ -61,10 +61,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class UWAWidgetServlet extends MultipleAdapterServletNew {
 
-    public static AJAXActionServiceFactory FACTORY = null;
+    private static final long serialVersionUID = -2458190504187758799L;
 
-    public UWAWidgetServlet() {
-        super(FACTORY);
+    /**
+     * Initializes a new {@link UWAWidgetServlet}.
+     *
+     * @param factory The factory to use
+     */
+    public UWAWidgetServlet(AJAXActionServiceFactory factory) {
+        super(factory);
     }
 
     @Override

@@ -62,7 +62,7 @@ public enum GeoLocationProperty implements Property {
      * Defines the provider to use for the GeoLocationServices.
      * Default is empty.
      */
-    PROVIDER("provider", "");
+    PROVIDER("provider", ""),
     ;
 
     private static final String PREFIX = "com.openexchange.geolocation.";
@@ -72,7 +72,7 @@ public enum GeoLocationProperty implements Property {
 
     /**
      * Initialises a new {@link ICAPClientProperty}.
-     * 
+     *
      * @param defaultValue The default value
      */
     private GeoLocationProperty(String suffix, Object defaultValue) {
@@ -82,7 +82,7 @@ public enum GeoLocationProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
     @Override
@@ -92,7 +92,7 @@ public enum GeoLocationProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getDefaultValue()
      */
     @Override
