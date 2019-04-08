@@ -111,12 +111,12 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
     private static final Logger LOG = LoggerFactory.getLogger(SAMLBackendRegistry.class);
 
     private final ConcurrentList<SAMLBackend> backends;
-    private LoginConfigurationLookup loginConfigurationLookup;
-    private ServiceLookup services;
-    private HzStateManagement hzStateManagement;
-    private OpenSAML openSAML;
-    private ConcurrentHashMap<SAMLBackend, Stack<String>> backendServlets;
-    private ConcurrentHashMap<SAMLBackend, Stack<ServiceRegistration<?>>> backendServiceRegistrations;
+    private final LoginConfigurationLookup loginConfigurationLookup;
+    private final ServiceLookup services;
+    private final HzStateManagement hzStateManagement;
+    private final OpenSAML openSAML;
+    private final ConcurrentHashMap<SAMLBackend, Stack<String>> backendServlets;
+    private final ConcurrentHashMap<SAMLBackend, Stack<ServiceRegistration<?>>> backendServiceRegistrations;
 
     /**
      * Initializes a new {@link SAMLBackendRegistry}.
@@ -285,17 +285,17 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                     return;
                 }
                 if (Strings.isEmpty(samlBackend.getPath())) {
-                    serverConfig.put("samlSingleLogout", true);
+                    serverConfig.put("samlSingleLogout", Boolean.TRUE);
                     return;
                 }
                 Set<String> hosts = config.getHosts();
                 if (hosts.contains("all")) {
-                    serverConfig.put("samlSingleLogout", true);
+                    serverConfig.put("samlSingleLogout", Boolean.TRUE);
                     return;
                 }
                 for (String hostIdentifer: hosts) {
                     if (Strings.isNotEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
-                        serverConfig.put("samlSingleLogout", true);
+                        serverConfig.put("samlSingleLogout", Boolean.TRUE);
                         return;
                     }
                 }
@@ -346,7 +346,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for SAML Backend");
+            LOG.error("Error while removing path for SAML Backend", e);
         }
         Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(samlBackend);
         try {
@@ -356,7 +356,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for SAML Backend");
+            LOG.error("Error while removing path for SAML Backend", e);
         }
         context.ungetService(reference);
     }
@@ -374,7 +374,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Error while removing path for SAML Backend");
+                LOG.error("Error while removing path for SAML Backend", e);
             }
             Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(samlBackend);
             try {
@@ -384,7 +384,7 @@ public final class SAMLBackendRegistry extends ServiceTracker<SAMLBackend, SAMLB
                     }
                 }
             } catch (Exception e) {
-                LOG.error("Error while removing path for SAML Backend");
+                LOG.error("Error while removing path for SAML Backend", e);
             }
         }
     }

@@ -204,7 +204,7 @@ public final class OpenSAML {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T unmarshall(Class<T> clazz, String xml) throws XMLParserException, UnmarshallingException, ClassCastException {
+    public <T> T unmarshall(@SuppressWarnings("unused") Class<T> clazz, String xml) throws XMLParserException, UnmarshallingException, ClassCastException {
         Document doc = getParserPool().parse(new StringReader(xml));
         Element element = doc.getDocumentElement();
         return (T) getUnmarshallerFactory().getUnmarshaller(element).unmarshall(element);

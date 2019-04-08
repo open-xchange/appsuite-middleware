@@ -105,14 +105,13 @@ public class UCSSamlBackend extends AbstractSAMLBackend {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param leanConfig
-     * @param uCSSamlConfiguration 
+     * @param uCSSamlConfiguration
      *
      * @param configService The service to use
-     * @throws OXException If initialization fails
      */
-    public UCSSamlBackend(UCSLookup ucsLookup, LeanConfigurationService leanConfig, UserService userService, ContextService contextService, UCSSamlConfiguration uCSSamlConfiguration) throws OXException {
+    public UCSSamlBackend(UCSLookup ucsLookup, LeanConfigurationService leanConfig, UserService userService, ContextService contextService, UCSSamlConfiguration uCSSamlConfiguration) {
         super();
         this.ucsLookup = ucsLookup;
         this.leanConfig = leanConfig;

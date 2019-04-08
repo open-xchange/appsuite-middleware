@@ -70,7 +70,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * @since v7.6.1
  */
 public class DefaultExceptionHandler implements ExceptionHandler {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
     @Override
@@ -114,11 +114,12 @@ public class DefaultExceptionHandler implements ExceptionHandler {
         try {
             httpResponse.getWriter().write(response);
         } catch (IOException e) {
+            LOGGER.trace("I/O error", e);
             try {
                 httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (IOException | IllegalStateException e1) {
+            } catch (IOException | IllegalStateException x) {
                 // nothing to do here
-                LOGGER.trace("Unable to send response", e1);
+                LOGGER.trace("Unable to send response", x);
             }
         } catch (IllegalStateException e) {
             // response already commited
