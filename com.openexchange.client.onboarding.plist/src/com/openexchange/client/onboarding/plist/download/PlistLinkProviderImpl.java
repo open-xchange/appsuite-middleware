@@ -84,73 +84,54 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
     }
 
     /**
-     * Retrieves the users sms-link-secret or creates one if none is available.
+     * Retrieves the user's SMS-link-secret or creates one if none is available.
      *
-     * @param userId
-     * @param contextId
-     * @return
-     * @throws OXException
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The SMS-link-secret
+     * @throws OXException If SMS-link-secret cannot be returned
      */
     private String getOrCreateSecret(int userId, int contextId) throws OXException {
-        String secret = getSecret(userId, contextId);
+        UserService userService = services.getService(UserService.class);
+        Context context = userService.getContext(contextId);
+
+        String secret = null;
+        try {
+            secret = userService.getUserAttribute(USER_SECRET_ATTRIBUTE, userId, context);
+        } catch (OXException ex) {
+            //do nothing
+        }
         if (secret != null) {
             return secret;
         }
 
         secret = new UID().toString();
-        UserService userService = services.getService(UserService.class);
-        Context con = userService.getContext(contextId);
-        userService.setUserAttribute(USER_SECRET_ATTRIBUTE, secret, userId, con);
+        userService.setUserAttribute(USER_SECRET_ATTRIBUTE, secret, userId, context);
         return secret;
     }
 
-    /**
-     * Retrieves the users sms-link-secret.
-     *
-     * @param userId
-     * @param contextId
-     * @return
-     * @throws OXException
-     */
-    private String getSecret(int userId, int contextId) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        Context con = userService.getContext(contextId);
-        String secret = null;
-        try {
-            secret = userService.getUserAttribute(USER_SECRET_ATTRIBUTE, userId, con);
-        } catch (OXException ex) {
-            //do nothing
-        }
-        return secret;
-    }
-
-    String toHash(int userId, int contextId, String scenario, String device) throws OXException {
+    private String toHash(int userId, int contextId, String scenario, String device) throws OXException {
         try {
             String secret = getOrCreateSecret(userId, contextId);
             String challenge = userId + contextId + device + scenario + secret;
-            MessageDigest md;
 
-            md = MessageDigest.getInstance("SHA-1");
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] challengeBytes = challenge.getBytes("UTF-8");
+            md.update(challengeBytes, 0, challengeBytes.length);
 
-            byte[] sha1hash = new byte[40];
-            md.update(challenge.getBytes("UTF-8"), 0, challenge.length());
-            sha1hash = md.digest();
+            byte[] sha1hash = md.digest();
             return convertToHex(sha1hash);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static String convertToHex(byte[] data)
-    {
-        StringBuffer buf = new StringBuffer();
-
-        for (int i = 0; i < data.length; i++)
-        {
+    private static String convertToHex(byte[] data) {
+        StringBuffer buf = new StringBuffer(data.length << 1);
+        for (int i = 0; i < data.length; i++) {
             int halfbyte = (data[i] >>> 4) & 0x0F;
             int two_halfs = 0;
-            do
-            {
+            do {
                 if ((0 <= halfbyte) && (halfbyte <= 9)) {
                     buf.append((char) ('0' + halfbyte));
                 } else {
