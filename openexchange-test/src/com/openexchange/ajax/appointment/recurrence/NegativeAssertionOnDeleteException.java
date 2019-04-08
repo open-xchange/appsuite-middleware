@@ -66,7 +66,8 @@ public class NegativeAssertionOnDeleteException extends AbstractNegativeAssertio
 
     @Override
     public void check(Appointment startWith, Changes changes, OXException expectedError) {
-        int recurrencePosition = (Integer) changes.get(Appointment.RECURRENCE_POSITION);
+        Integer recurrencePosition = (Integer) changes.get(Appointment.RECURRENCE_POSITION);
+        assertNotNull("Missing recurrence position", recurrencePosition);
         Appointment copy = startWith.clone();
         if (!startWith.containsObjectID()) {
             manager.insert(copy);
@@ -78,7 +79,7 @@ public class NegativeAssertionOnDeleteException extends AbstractNegativeAssertio
         update.setLastModified(copy.getLastModified());
         changes.update(update);
 
-        manager.createDeleteException(copy, recurrencePosition);
+        manager.createDeleteException(copy, recurrencePosition.intValue());
         assertTrue("Expected error " + expectedError + " but got nothing", manager.hasLastException());
         OXException actual = (OXException) manager.getLastException();
         assertTrue("Actual error" + actual + " should match expected error " + expectedError, expectedError.similarTo(actual));

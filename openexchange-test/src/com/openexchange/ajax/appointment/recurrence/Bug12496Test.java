@@ -89,9 +89,7 @@ public final class Bug12496Test extends AbstractAJAXSession {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -104,9 +102,7 @@ public final class Bug12496Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

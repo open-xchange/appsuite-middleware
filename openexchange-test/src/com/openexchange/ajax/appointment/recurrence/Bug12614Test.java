@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -109,9 +108,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -129,6 +126,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         secretaryCreatesException();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -151,7 +149,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         assertFalse("Secretary is not able to delete a change exception in a " + "shared folder: " + cause, response.hasError());
     }
 
-    private void bossSharesPrivateFolder() throws OXException, IOException, SAXException, JSONException {
+    private void bossSharesPrivateFolder() throws OXException, IOException, JSONException {
         sharedFolder = new FolderObject(boss.getValues().getPrivateAppointmentFolder());
         sharedFolder.setModule(FolderObject.CALENDAR);
         final com.openexchange.ajax.folder.actions.GetRequest request = new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, sharedFolder.getObjectID(), new int[] { FolderObject.LAST_MODIFIED });
@@ -165,7 +163,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         sharedFolder.setLastModified(response2.getTimestamp());
     }
 
-    private void secretaryCreatesSeries() throws OXException, IOException, SAXException, JSONException {
+    private void secretaryCreatesSeries() throws OXException, IOException, JSONException {
         series = new Appointment();
         series.setParentFolderID(sharedFolder.getObjectID());
         series.setTitle("test for bug 12614");
@@ -185,7 +183,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         series.setLastModified(response.getTimestamp());
     }
 
-    private void secretaryCreatesException() throws OXException, IOException, SAXException, JSONException, OXException {
+    private void secretaryCreatesException() throws OXException, IOException, JSONException, OXException {
         final int recurrence_position = 2;
         final GetRequest request = new GetRequest(sharedFolder.getObjectID(), series.getObjectID(), recurrence_position);
         final GetResponse response = secretary.execute(request);
@@ -208,14 +206,14 @@ public final class Bug12614Test extends AbstractAJAXSession {
         exception.setObjectID(response2.getId());
     }
 
-    private void secretaryDeletesSeries() throws OXException, IOException, SAXException, JSONException {
+    private void secretaryDeletesSeries() throws OXException, IOException, JSONException {
         final GetRequest request = new GetRequest(series.getParentFolderID(), series.getObjectID());
         final GetResponse response = secretary.execute(request);
         final DeleteRequest request2 = new DeleteRequest(series.getObjectID(), series.getParentFolderID(), response.getTimestamp());
         secretary.execute(request2);
     }
 
-    private void bossUnsharesPrivateFolder() throws OXException, IOException, SAXException, JSONException {
+    private void bossUnsharesPrivateFolder() throws OXException, IOException, JSONException {
         final OCLPermission perm1 = Create.ocl(boss.getValues().getUserId(), false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
         sharedFolder.setPermissionsAsArray(new OCLPermission[] { perm1 });
         final com.openexchange.ajax.folder.actions.UpdateRequest request = new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder);

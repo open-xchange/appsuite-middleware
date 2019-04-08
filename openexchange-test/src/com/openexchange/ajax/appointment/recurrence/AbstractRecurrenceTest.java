@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import org.json.JSONException;
 import org.junit.Before;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -26,6 +25,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 
     protected final static int[] _fields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.RECURRENCE_POSITION, Appointment.TIMEZONE};
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -53,7 +53,7 @@ public class AbstractRecurrenceTest extends AppointmentTest {
         OXTestToolkit.assertEqualsAndNotNull("end date is not equals at position: " + expectedPosition, addOffsetToDate(expectedEndDate, timeZone), addOffsetToDate(occurrence.getEndDate(), timeZone));
     }
 
-    public static Date addOffsetToDate(final Date value, final TimeZone timeZone) throws JSONException {
+    public static Date addOffsetToDate(final Date value, final TimeZone timeZone) {
         final int offset = timeZone.getOffset(value.getTime());
         return new Date(value.getTime() + offset);
     }
