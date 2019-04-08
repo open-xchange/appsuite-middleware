@@ -310,7 +310,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @Override
     public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
-        final List<Setter> list = setterFrom(arguments);
+        final List<Setter> list = setterFrom(arguments, accountId);
         if (list.isEmpty()) {
             return;
         }
@@ -870,6 +870,10 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
             }
 
+            if (Strings.isEmpty(account.getSecret())) {
+                LOG.debug("The account {} of user in context has an empty secret", accountId, session.getUserId(), session.getContextId());
+            }
+
             account.setMetaData(registry.getService(rs.getString(4), userId, contextId));
             String scopes = rs.getString(5);
             OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
@@ -1014,11 +1018,12 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     /**
      *
      * @param arguments
+     * @param accountId // FIXME: remove when TEMP is removed
      * @return
      * @throws OXException
      */
     @SuppressWarnings("unchecked")
-    private List<Setter> setterFrom(final Map<String, Object> arguments) throws OXException {
+    private List<Setter> setterFrom(final Map<String, Object> arguments, int accountId) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -1059,6 +1064,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, sToken);
                     stmt.setString(pos + 1, secret);
+                    if (Strings.isEmpty(secret)) {
+                        LOG.debug("Setting empty OAuth secret for account '{}' of user '{}' in context '{}'", accountId, session.getUserId(), session.getContextId());
+                    }
                     return pos + 2;
                 }
 
