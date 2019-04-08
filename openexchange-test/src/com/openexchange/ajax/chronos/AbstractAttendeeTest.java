@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     public List<Attendee> addAdditionalAttendee(EventData expectedEventData) {
         ArrayList<Attendee> atts = new ArrayList<>(2);
         atts.addAll(expectedEventData.getAttendees());
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser().intValue());
+        Attendee attendee2 = AttendeeFactory.createIndividual(I(user2.getCalUser().intValue()));
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         return atts;

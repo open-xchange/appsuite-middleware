@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -92,7 +93,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         if (attendees == null) {
-            singleEvent.setAttendees(Collections.singletonList(AttendeeFactory.createIndividual(apiClient.getUserId().intValue())));
+            singleEvent.setAttendees(Collections.singletonList(AttendeeFactory.createIndividual(I(apiClient.getUserId().intValue()))));
         } else {
             singleEvent.setAttendees(attendees);
         }

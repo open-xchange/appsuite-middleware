@@ -115,7 +115,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
      * @return an {@link Attendee}
      * @throws ApiException If creating fails
      */
-    protected Attendee createAttendee(int userId) throws ApiException {
+    protected Attendee createAttendee(Integer userId) throws ApiException {
         Attendee attendee = AttendeeFactory.createAttendee(userId, CuTypeEnum.INDIVIDUAL);
 
         UserData userData = getUserInformation(userId);
@@ -134,7 +134,7 @@ public class AbstractExtendedChronosTest extends AbstractChronosTest {
      * @return The {@link UserData} for the suer
      * @throws ApiException
      */
-    protected UserData getUserInformation(int userId) throws ApiException {
+    protected UserData getUserInformation(Integer userId) throws ApiException {
         com.openexchange.testing.httpclient.modules.UserApi api = new com.openexchange.testing.httpclient.modules.UserApi(getApiClient());
         UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
         return userResponse.getData();

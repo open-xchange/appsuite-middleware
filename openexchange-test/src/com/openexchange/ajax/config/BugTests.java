@@ -52,6 +52,7 @@ package com.openexchange.ajax.config;
 import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
@@ -93,14 +94,14 @@ public class BugTests extends AbstractAJAXSession {
     public void testBug6462() throws Throwable {
         for (Tree tree : new Tree[] { Tree.CalendarNotification, Tree.TaskNotification }) {
             boolean origValue = getClient().execute(new GetRequest(tree)).getBoolean();
-            for (final boolean test : new boolean[] { true, false }) {
-                getClient().execute(new SetRequest(tree, Boolean.toString(test)));
+            for (final Boolean test : new Boolean[] { Boolean.TRUE, Boolean.FALSE}) {
+                getClient().execute(new SetRequest(tree, test.toString()));
                 boolean testValue = getClient().execute(new GetRequest(tree)).getBoolean();
-                assertEquals("Setting calendar/task notification failed.", test, testValue);
+                assertEquals("Setting calendar/task notification failed.", test, B(testValue));
             }
             getClient().execute(new SetRequest(tree, B(origValue)));
             boolean testValue = getClient().execute(new GetRequest(tree)).getBoolean();
-            assertEquals("Restoring original value failed.", origValue, testValue);
+            assertTrue("Restoring original value failed.", origValue == testValue);
         }
     }
 

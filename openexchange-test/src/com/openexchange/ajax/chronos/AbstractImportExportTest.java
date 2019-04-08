@@ -118,7 +118,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
 
     protected String importICalFile(String fileName) throws Exception {
         Asset asset = assetManager.getAsset(AssetType.ics, fileName);
-        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
     }
 
     protected void createContactWithBirthdayEvent(String session) throws Exception {

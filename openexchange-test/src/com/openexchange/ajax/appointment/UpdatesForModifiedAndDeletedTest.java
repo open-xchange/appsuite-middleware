@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
-import com.openexchange.ajax.framework.AbstractUpdatesRequest.Ignore;
 import com.openexchange.groupware.container.Appointment;
 
 /**
@@ -89,24 +89,24 @@ public class UpdatesForModifiedAndDeletedTest extends AbstractAppointmentTest {
         List<Appointment> updatedAppointments = new ArrayList<Appointment>(2);
         List<Integer> expectUpdatedAppointmentIds = new ArrayList<Integer>(2);
         updatedAppointments.add(newAppointments.get(0));
-        expectUpdatedAppointmentIds.add(newAppointments.get(0).getObjectID());
+        expectUpdatedAppointmentIds.add(I(newAppointments.get(0).getObjectID()));
         updatedAppointments.add(newAppointments.get(1));
-        expectUpdatedAppointmentIds.add(newAppointments.get(1).getObjectID());
+        expectUpdatedAppointmentIds.add(I(newAppointments.get(1).getObjectID()));
         updateAppointments(updatedAppointments);
 
         // delete 2
         List<Appointment> deletedAppointments = new ArrayList<Appointment>(2);
         List<Integer> expectDeletedAppointmentIds = new ArrayList<Integer>(2);
         deletedAppointments.add(newAppointments.get(2));
-        expectDeletedAppointmentIds.add(newAppointments.get(2).getObjectID());
+        expectDeletedAppointmentIds.add(I(newAppointments.get(2).getObjectID()));
         deletedAppointments.add(newAppointments.get(3));
-        expectDeletedAppointmentIds.add(newAppointments.get(3).getObjectID());
+        expectDeletedAppointmentIds.add(I(newAppointments.get(3).getObjectID()));
         deleteAppointments(deletedAppointments);
 
         // check modified with timestamp from last 
         Date lastModified = newAppointments.get(numberOfAppointments - 1).getLastModified();
         int[] cols = new int[] { Appointment.OBJECT_ID, Appointment.TITLE };
-        AppointmentUpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified, Ignore.NONE);
+        AppointmentUpdatesResponse modifiedAppointmentsResponse = listModifiedAppointments(appointmentFolderId, cols, lastModified);
         assertTrue(modifiedAppointmentsResponse.getNewOrModifiedIds().containsAll(expectUpdatedAppointmentIds));
         assertTrue(modifiedAppointmentsResponse.getDeletedIds().containsAll(expectDeletedAppointmentIds));
 

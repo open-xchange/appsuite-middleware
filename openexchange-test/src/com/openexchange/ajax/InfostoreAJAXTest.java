@@ -97,7 +97,7 @@ public class InfostoreAJAXTest extends AbstractAJAXSession {
         return ftm.insertFolderOnServer(folder).getObjectID();
     }
 
-    public File createFile(int folderId, String fileName) throws Exception {
+    public File createFile(int folderId, String fileName) {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(folderId));
         file.setTitle(fileName);

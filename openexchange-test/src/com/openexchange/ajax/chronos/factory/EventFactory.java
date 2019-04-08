@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.factory;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -109,7 +110,7 @@ public final class EventFactory {
      * @return The {@link EventData}
      */
     public static EventData createSingleEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, String folderId) {
-        Attendee attendee = AttendeeFactory.createIndividual(userId);
+        Attendee attendee = AttendeeFactory.createIndividual(I(userId));
 
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
