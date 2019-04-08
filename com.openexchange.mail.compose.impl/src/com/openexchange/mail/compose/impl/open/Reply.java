@@ -336,7 +336,7 @@ public class Reply extends AbstractOpener {
                 filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
             }
             if (!filteredAddrs.isEmpty()) {
-                state.message.setCc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
+                state.message.addCc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
             }
             /*
              * Filter recipients from 'Bcc' field
@@ -347,7 +347,7 @@ public class Reply extends AbstractOpener {
                 filteredAddrs.addAll(filter(filter, parseAddressList(unfold(hdrVal), true)));
             }
             if (!filteredAddrs.isEmpty()) {
-                state.message.setBcc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
+                state.message.addBcc(toAddresses(filteredAddrs.toArray(new InternetAddress[filteredAddrs.size()])));
             }
         } else {
             /*

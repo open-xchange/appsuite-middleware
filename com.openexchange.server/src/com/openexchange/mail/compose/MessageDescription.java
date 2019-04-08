@@ -152,6 +152,17 @@ public class MessageDescription {
         return this;
     }
 
+    public MessageDescription addTo(List<Address> to) {
+        if (this.to == null) {
+            return setTo(to);
+        }
+
+        if (to != null) {
+            this.to.addAll(to);
+        }
+        return this;
+    }
+
     public boolean containsTo() {
         return bTo;
     }
@@ -171,6 +182,17 @@ public class MessageDescription {
         return this;
     }
 
+    public MessageDescription addCc(List<Address> cc) {
+        if (this.cc == null) {
+            return setCc(cc);
+        }
+
+        if (cc != null) {
+            this.cc.addAll(cc);
+        }
+        return this;
+    }
+
     public boolean containsCc() {
         return bCc;
     }
@@ -187,6 +209,17 @@ public class MessageDescription {
     public MessageDescription setBcc(List<Address> bcc) {
         this.bcc = bcc;
         bBcc = true;
+        return this;
+    }
+
+    public MessageDescription addBcc(List<Address> bcc) {
+        if (this.bcc == null) {
+            return setBcc(bcc);
+        }
+
+        if (bcc != null) {
+            this.bcc.addAll(bcc);
+        }
         return this;
     }
 
