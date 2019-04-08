@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
@@ -166,12 +168,11 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     }
 
     /**
-     * Keeps track of the specified {@link EventId} for the specified user
+     * Keeps track of the specified {@link EventId}
      *
-     * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    protected void rememberEventId(UserApi userApi, EventId eventId) {
+    protected void rememberEventId(EventId eventId) {
         if (eventIds == null) {
             eventIds = new HashSet<>();
         }
@@ -202,16 +203,16 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
         FolderPermission perm = new FolderPermission();
-        perm.setEntity(entity);
-        perm.setGroup(false);
-        perm.setBits(403710016);
+        perm.setEntity(I(entity));
+        perm.setGroup(Boolean.FALSE);
+        perm.setBits(I(403710016));
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule(EVENT_MODULE);
-        folderData.setSubscribed(true);
+        folderData.setSubscribed(Boolean.TRUE);
         folderData.setTitle("chronos_test_" + new UID().toString());
         folderData.setPermissions(permissions);
 
@@ -299,7 +300,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             return (String) privateList.get(0).get(0);
         }
         for (ArrayList<?> folder : privateList) {
-            if ((Boolean) folder.get(1)) {
+            if (folder.get(1) != null && ((Boolean) folder.get(1)).booleanValue()) {
                 return (String) folder.get(0);
             }
         }
@@ -424,5 +425,14 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             }
         });
         return matchingEvents;
+    }
+    
+    /**
+     * Returns the id of the calendar user of the default user api
+     *
+     * @return The id of the calendar user
+     */
+    protected int getCalendaruser() {
+        return i(defaultUserApi.getCalUser());
     }
 }

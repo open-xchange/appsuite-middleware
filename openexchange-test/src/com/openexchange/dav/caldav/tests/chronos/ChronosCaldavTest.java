@@ -90,7 +90,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date twoWeeks = instance.getTime();
         String rangeStart = DateTimeUtil.formatZuluDate(yesterday);
         String rangeEnd = DateTimeUtil.formatZuluDate(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true, false);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
         for (EventData event : allEventResponse.getData()) {
@@ -100,7 +100,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
                     eventId.setFolder(event.getFolder());
                     eventId.setId(event.getId());
                     eventId.setRecurrenceId(event.getRecurrenceId());
-                    rememberEventId(defaultUserApi, eventId);
+                    rememberEventId(eventId);
                 }
                 return event;
 //                return defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
@@ -127,7 +127,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date twoWeeks = instance.getTime();
         String rangeStart = DateTimeUtil.formatZuluDate(yesterday);
         String rangeEnd = DateTimeUtil.formatZuluDate(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true, false);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
         List<EventData> result = new ArrayList<>();

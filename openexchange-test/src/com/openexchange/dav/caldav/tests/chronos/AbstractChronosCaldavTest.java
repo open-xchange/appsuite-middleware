@@ -127,6 +127,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
 
     protected static final int TIMEOUT = 10000;
 
+    @SuppressWarnings("hiding")
     private String folderId;
 
     @Parameter(value = 0)
@@ -337,7 +338,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
         EventId eventId = new EventId();
         eventId.setFolder(getDefaultFolderID());
         eventId.setId(id);
-        rememberEventId(defaultUserApi, eventId);
+        rememberEventId(eventId);
     }
     
     private String getCaldavFolder(){
