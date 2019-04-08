@@ -50,6 +50,7 @@
 package com.openexchange.client.onboarding.plist.download;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.rmi.server.UID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -77,7 +78,7 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
     ServiceLookup services;
     private static final String USER_SECRET_ATTRIBUTE = "user_sms_link_secret";
     private static final String SERVLET_PATH = "plist";
-    private static final String SLASH = "/";
+    private static final char SLASH = '/';
 
     public PlistLinkProviderImpl(ServiceLookup services) {
         this.services = services;
@@ -110,7 +111,7 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
         return secret;
     }
 
-    private String toHash(int userId, int contextId, String scenario, String device) throws OXException {
+    private char[] toHash(int userId, int contextId, String scenario, String device) throws OXException {
         try {
             String secret = getOrCreateSecret(userId, contextId);
             String challenge = userId + contextId + device + scenario + secret;
@@ -120,42 +121,51 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
             md.update(challengeBytes, 0, challengeBytes.length);
 
             byte[] sha1hash = md.digest();
-            return convertToHex(sha1hash);
+            return Strings.asHexChars(sha1hash);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static String convertToHex(byte[] data) {
-        StringBuffer buf = new StringBuffer(data.length << 1);
-        for (int i = 0; i < data.length; i++) {
-            int halfbyte = (data[i] >>> 4) & 0x0F;
-            int two_halfs = 0;
-            do {
-                if ((0 <= halfbyte) && (halfbyte <= 9)) {
-                    buf.append((char) ('0' + halfbyte));
-                } else {
-                    buf.append((char) ('a' + (halfbyte - 10)));
-                }
-                halfbyte = data[i] & 0x0F;
-            } while (two_halfs++ < 1);
+    private static byte[] toAsciiBytes(String s) {
+        int size = s.length();
+        byte[] bytes = new byte[size];
+        for (int i = size; i-- > 0;) {
+            bytes[i] = (byte) s.charAt(i);
         }
-        return buf.toString();
+        return bytes;
     }
 
     @Override
     public String getLink(HostData hostData, int userId, int contextId, String scenario, String device) throws OXException {
-        String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
-        BaseEncoding encoder = BaseEncoding.base64().omitPadding();
-        StringBuilder url = new StringBuilder();
+        StringBuilder url;
+        {
+            String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
+            url = new StringBuilder(serverUrl).append(getServletPrefix()).append(SERVLET_PATH);
+        }
 
-        String userString = new String(encoder.encode(String.valueOf(userId).getBytes()));
-        String contextString = new String(encoder.encode(String.valueOf(contextId).getBytes()));
-        String scenarioString = new String(encoder.encode(scenario.getBytes()));
-        String deviceString = new String(encoder.encode(device.getBytes()));
-        String challenge = toHash(userId, contextId, scenario, device);
-        url.append(serverUrl).append(getServletPrefix()).append(SERVLET_PATH);
-        url.append(SLASH).append(userString).append(SLASH).append(contextString).append(SLASH).append(deviceString).append(SLASH).append(scenarioString).append(SLASH).append(challenge);
+        BaseEncoding encoder = BaseEncoding.base64().omitPadding();
+        {
+            String userString = new String(encoder.encode(toAsciiBytes(Integer.toString(userId))));
+            url.append(SLASH).append(userString);
+        }
+        {
+            String contextString = new String(encoder.encode(toAsciiBytes(Integer.toString(contextId))));
+            url.append(SLASH).append(contextString);
+        }
+        {
+            String deviceString = new String(encoder.encode(device.getBytes(StandardCharsets.UTF_8)));
+            url.append(SLASH).append(deviceString);
+        }
+        {
+            String scenarioString = new String(encoder.encode(scenario.getBytes(StandardCharsets.UTF_8)));
+            url.append(SLASH).append(scenarioString);
+        }
+        {
+            char[] challenge = toHash(userId, contextId, scenario, device);
+            url.append(SLASH).append(challenge);
+        }
+
         return url.toString();
     }
 
@@ -193,17 +203,26 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
 
     private String getServletPrefix() {
         DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-
-        return prefixService.getPrefix();
+        return prefixService == null ? DispatcherPrefixService.DEFAULT_PREFIX : prefixService.getPrefix();
     }
 
     @Override
     public boolean validateChallenge(int userId, int contextId, String scenario, String device, String challenge) throws OXException {
-        String hash = toHash(userId, contextId, scenario, device);
-        return hash.contentEquals(challenge);
+        char[] hash = toHash(userId, contextId, scenario, device);
+
+        int n = hash.length;
+        if (n != challenge.length()) {
+            return false;
+        }
+
+        int i = 0;
+        while (n-- != 0) {
+            if (hash[i] != challenge.charAt(i)) {
+                return false;
+            }
+            i++;
+        }
+        return true;
     }
 
 }
