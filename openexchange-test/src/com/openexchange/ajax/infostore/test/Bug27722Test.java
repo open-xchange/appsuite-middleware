@@ -51,6 +51,7 @@ package com.openexchange.ajax.infostore.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -137,6 +138,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
          * execute hard delete request
          */
         itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp(), Boolean.TRUE);
+        assertNull(itm.getLastResponse().getErrorMessage());
         long duration = itm.getLastResponse().getRequestDuration();
         assertTrue("hard deletion took " + duration + "ms, which is too long", 50 * DELETED_ITEMS > duration); // allow 50ms per hard-deleted item
         /*
