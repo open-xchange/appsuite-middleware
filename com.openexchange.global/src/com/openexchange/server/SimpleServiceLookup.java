@@ -73,7 +73,7 @@ public class SimpleServiceLookup implements ServiceLookup {
 
     @Override
     public <S> S getService(Class<? extends S> clazz) {
-        S service = (S) services.get(clazz);
+        S service = getOptionalService(clazz);
         if (null == service) {
             throw new IllegalStateException("Missing service " + clazz.getName());
         }
@@ -82,7 +82,8 @@ public class SimpleServiceLookup implements ServiceLookup {
 
     @Override
     public <S> S getOptionalService(Class<? extends S> clazz) {
-        return (S) services.get(clazz);
+        @SuppressWarnings("unchecked") S service = (S) services.get(clazz);
+        return service;
     }
 
     /**
@@ -102,7 +103,8 @@ public class SimpleServiceLookup implements ServiceLookup {
      * @return The removed service implementation or <code>null</code> if there was no such service
      */
     public <S> S remove(Class<? extends S> clazz) {
-        return (S) services.remove(clazz);
+        @SuppressWarnings("unchecked") S removedService = (S) services.remove(clazz);
+        return removedService;
     }
 
 

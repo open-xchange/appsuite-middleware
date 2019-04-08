@@ -64,13 +64,13 @@ public class ConsoleSpinner {
     private final String optionalSuffix;
 
     /**
-     * Initialises a new {@link ConsoleSpinner}.
+     * Initializes a new {@link ConsoleSpinner}.
      */
     public ConsoleSpinner(String optionalPrefix, String optionalSuffix) {
         super();
         this.optionalPrefix = Strings.isEmpty(optionalPrefix) ? "" : optionalPrefix;
         this.optionalSuffix = Strings.isEmpty(optionalSuffix) ? "" : optionalSuffix;
-        animationThread = new Thread(new SpinnerAnimation(), "spinnerThread");
+        animationThread = new Thread(new SpinnerAnimation(this.optionalPrefix, this.optionalSuffix), "spinnerThread");
     }
 
     /**
@@ -82,27 +82,27 @@ public class ConsoleSpinner {
 
     /**
      * Stops the spinning and sets an optional status.
-     * 
+     *
      */
     public void stop(String status) {
         System.out.print("\r" + optionalPrefix + "[ " + status + " ]" + optionalSuffix + "\n");
         animationThread.interrupt();
     }
 
-    private final class SpinnerAnimation implements Runnable {
+    private static class SpinnerAnimation implements Runnable {
+
+        private final String optionalPrefix;
+        private final String optionalSuffix;
 
         /**
          * Initialises a new {@link ConsoleSpinner.SpinnerAnimation}.
          */
-        public SpinnerAnimation() {
+        public SpinnerAnimation(String optionalPrefix, String optionalSuffix) {
             super();
+            this.optionalPrefix = optionalPrefix;
+            this.optionalSuffix = optionalSuffix;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Runnable#run()
-         */
         @Override
         public void run() {
             try {
@@ -132,4 +132,5 @@ public class ConsoleSpinner {
             }
         }
     }
+
 }

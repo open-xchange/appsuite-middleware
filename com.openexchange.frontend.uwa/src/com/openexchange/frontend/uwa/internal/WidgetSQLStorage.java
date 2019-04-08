@@ -71,10 +71,7 @@ public class WidgetSQLStorage extends UserScopedStorage<UWAWidget> {
 
         @Override
         public Object handle(Attribute<UWAWidget> attr, Object... args) {
-            if(attr == UWAWidget.Field.ID) {
-                return Integer.parseInt((String)args[0]);
-            }
-            return null;
+            return attr == UWAWidget.Field.ID ? Integer.valueOf((String) args[0]) : null;
         }
 
     };

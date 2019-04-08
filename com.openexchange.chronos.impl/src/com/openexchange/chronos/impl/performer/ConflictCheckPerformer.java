@@ -517,13 +517,14 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
     }
 
     private List<EventConflict> sortAndTrim(List<EventConflict> conflicts) {
-        if (null != conflicts && 1 < conflicts.size()) {
-            Collections.sort(conflicts, HARD_CONFLICTS_FIRST_COMPARATOR);
-            if (maxConflicts < conflicts.size()) {
-                conflicts = conflicts.subList(0, maxConflicts);
+        List<EventConflict> c0nflicts = conflicts;
+        if (null != c0nflicts && 1 < c0nflicts.size()) {
+            Collections.sort(c0nflicts, HARD_CONFLICTS_FIRST_COMPARATOR);
+            if (maxConflicts < c0nflicts.size()) {
+                c0nflicts = c0nflicts.subList(0, maxConflicts);
             }
         }
-        return conflicts;
+        return c0nflicts;
     }
 
     /**

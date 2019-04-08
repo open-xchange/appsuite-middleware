@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -234,32 +235,37 @@ public class AdminActivator extends HousekeepingActivator {
         log.info("Build: {}", getServiceSafe(VersionService.class).getVersionString());
         log.info("Admindaemon successfully started.");
 
-        // The listener which is called if a new plugin is registered
-        final ServiceListener sl = new ServiceListener() {
-            @Override
-            public void serviceChanged(final ServiceEvent ev) {
-                log.info("Service: {}, {}", ev.getServiceReference().getBundle().getSymbolicName(), ev.getType());
-                switch (ev.getType()) {
-                    case ServiceEvent.REGISTERED:
-                    log.info("{} registered service", ev.getServiceReference().getBundle().getSymbolicName());
-                        break;
-                    default:
-                        break;
+        // The listener, which is called if a new plugin is registered
+        {
+            ServiceListener sl = new ServiceListener() {
+                @Override
+                public void serviceChanged(ServiceEvent ev) {
+                    String symbolicName = ev.getServiceReference().getBundle().getSymbolicName();
+                    log.info("Service: {}, {}", symbolicName, I(ev.getType()));
+                    switch (ev.getType()) {
+                        case ServiceEvent.REGISTERED:
+                            log.info("{} registered service", symbolicName);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            };
+            String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
+            try {
+                context.addServiceListener(sl, filter);
+            } catch (InvalidSyntaxException e) {
+                log.warn("Filed adding service listener", e);
             }
-        };
-        final String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
-        try {
-            context.addServiceListener(sl, filter);
-        } catch (final InvalidSyntaxException e) {
-            e.printStackTrace();
         }
 
         // UserServiceInterceptor Bridge
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put("name", "OXUser");
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
-        registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
+        {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("name", "OXUser");
+            props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
+            registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
+        }
 
         //Register CreateTableServices
         registerService(CreateTableService.class, new CreateSequencesTables());

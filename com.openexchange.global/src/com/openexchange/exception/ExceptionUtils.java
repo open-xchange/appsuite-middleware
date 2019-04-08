@@ -260,6 +260,7 @@ public class ExceptionUtils {
      * @param classes The exception classes
      * @return <code>true</code> if any of specified exception (classes) occurs in exception chain; otherwise <code>false</code>
      */
+    @SafeVarargs
     public static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
         if (null == e || null == classes || 0 == classes.length) {
             return false;
@@ -310,7 +311,8 @@ public class ExceptionUtils {
         }
 
         if (clazz.isInstance(e)) {
-            return (E) e;
+            @SuppressWarnings("unchecked") E exc = (E) e;
+            return exc;
         }
 
         Throwable next = e.getCause();

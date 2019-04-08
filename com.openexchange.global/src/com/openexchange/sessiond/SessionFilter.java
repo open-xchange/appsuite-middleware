@@ -408,7 +408,7 @@ public class SessionFilter {
 
         private final Matcher matcher;
 
-        private Not(Matcher matcher) {
+        Not(Matcher matcher) {
             super();
             this.matcher = matcher;
         }
@@ -426,7 +426,7 @@ public class SessionFilter {
 
         private final boolean and;
 
-        private Junction(boolean and, List<Matcher> matchers) {
+        Junction(boolean and, List<Matcher> matchers) {
             super();
             this.and = and;
             this.matchers = matchers;
@@ -440,17 +440,15 @@ public class SessionFilter {
                         return false;
                     }
                 }
-
                 return true;
-            } else {
-                for (Matcher matcher : matchers) {
-                    if (matcher.matches(matchee)) {
-                        return true;
-                    }
-                }
-
-                return false;
             }
+
+            for (Matcher matcher : matchers) {
+                if (matcher.matches(matchee)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
     }
@@ -458,27 +456,25 @@ public class SessionFilter {
     static final class Simple implements Matcher {
 
         private final String attr;
-
         private final String value;
-
         private final FilterType type;
 
-        private Simple(String attr, String value, FilterType type) {
+        Simple(String attr, String value, FilterType type) {
             super();
             this.attr = attr;
             this.value = value;
             this.type = type;
         }
 
-        public String getAttr() {
+        String getAttr() {
             return attr;
         }
 
-        public String getValue() {
+        String getValue() {
             return value;
         }
 
-        public FilterType getType() {
+        FilterType getType() {
             return type;
         }
 

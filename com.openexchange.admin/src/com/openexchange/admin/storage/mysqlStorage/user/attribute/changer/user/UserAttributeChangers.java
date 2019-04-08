@@ -50,6 +50,8 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -76,7 +78,7 @@ import com.openexchange.tools.net.URIParser;
  */
 public class UserAttributeChangers extends AbstractUserAttributeChangers {
 
-    private final AdminCache adminCache;
+    final AdminCache adminCache;
     private static final String TABLE = "user";
 
     /**
@@ -87,11 +89,6 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
         this.adminCache = adminCache;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
-     */
     @Override
     protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
@@ -148,7 +145,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     return false;
                 }
                 int lastChange = passwordExpired.booleanValue() ? 0 : -1;
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, lastChange), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, I(lastChange)), connection);
             }
         });
         c.put(UserAttribute.IMAP_SERVER, new AbstractUserAttributeChanger() {
@@ -240,7 +237,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     quota_max_temp = quota_max_temp << 20;
                 }
 
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.QUOTA, quota_max_temp), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.QUOTA, L(quota_max_temp)), connection);
             }
         });
         return Collections.unmodifiableMap(c);

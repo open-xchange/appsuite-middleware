@@ -67,11 +67,9 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
  */
 public class UWAJSONActivator extends AbstractSessionServletActivator {
 
-    private static final Class[] CLASSES = new Class[] { UWAWidgetServiceFactory.class, HttpService.class, ConfigViewFactory.class };
-
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return CLASSES;
+        return new Class<?>[] { UWAWidgetServiceFactory.class, HttpService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -82,9 +80,7 @@ public class UWAJSONActivator extends AbstractSessionServletActivator {
 
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(actions, "uwaWidgets"));
 
-        UWAWidgetServlet.FACTORY = actions;
-
-        registerSessionServlet("/ajax/uwaWidgets", new UWAWidgetServlet());
+        registerSessionServlet("/ajax/uwaWidgets", new UWAWidgetServlet(actions));
 
         registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
     }

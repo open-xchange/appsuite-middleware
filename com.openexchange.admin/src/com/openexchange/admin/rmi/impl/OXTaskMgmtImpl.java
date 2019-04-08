@@ -67,7 +67,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
 
     private final AdminCache cache;
 
-    public OXTaskMgmtImpl() throws StorageException {
+    public OXTaskMgmtImpl() {
         super();
         this.cache = ClientAdminThread.cache;
     }
@@ -143,10 +143,10 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             doAuth(cred, ctx);
             if (cache.isMasterAdmin(cred)) {
                 return TaskManager.getInstance().getJobList();
-            } else {
-                contextcheck(ctx);
-                return TaskManager.getInstance().getJobList(ctx.getId());
             }
+
+            contextcheck(ctx);
+            return TaskManager.getInstance().getJobList(ctx.getId());
         } catch (final InvalidCredentialsException e) {
             log.error("", e);
             throw e;
@@ -165,10 +165,10 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             doAuth(cred, ctx);
             if (cache.isMasterAdmin(cred)) {
                 return getTaskResults(id, null);
-            } else {
-                contextcheck(ctx);
-                return getTaskResults(id, ctx.getId());
             }
+
+            contextcheck(ctx);
+            return getTaskResults(id, ctx.getId());
         } catch (final InvalidCredentialsException e) {
             log.error("", e);
             throw e;

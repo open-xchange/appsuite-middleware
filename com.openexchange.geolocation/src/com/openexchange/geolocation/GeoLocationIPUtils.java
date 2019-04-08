@@ -49,6 +49,7 @@
 
 package com.openexchange.geolocation;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.openexchange.exception.OXException;
@@ -77,7 +78,7 @@ public final class GeoLocationIPUtils {
 
     /**
      * Converts the specified IPv4 address to its integer representation
-     * 
+     *
      * @param ipAddress The IPv4 address to convert
      * @return The number representation of the IPv4 address
      * @throws OXException if the specified IPv4 address is invalid
@@ -90,7 +91,7 @@ public final class GeoLocationIPUtils {
 
     /**
      * Converts the specified integer to an IP address
-     * 
+     *
      * @param ipAddress The integer version of the IP address
      * @return The IP address as a string
      * @throws OXException if the specified integer did not yield a valid IPv4 address
@@ -100,7 +101,7 @@ public final class GeoLocationIPUtils {
         long p2 = (ipAddress / O2) % O3;
         long p3 = (ipAddress / O3) % O3;
         long p4 = ipAddress % O3;
-        String ipStr = Strings.concat(".", p1, p2, p3, p4);
+        String ipStr = Strings.concat(".", L(p1), L(p2), L(p3), L(p4));
         validate(ipStr);
         return ipStr;
     }

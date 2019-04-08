@@ -47,11 +47,11 @@ public class WrTimezone extends Property {
     private static final long serialVersionUID = 7248705823074186148L;
 
     public static final String PROPERTY_NAME = "X-WR-TIMEZONE";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -105,10 +105,16 @@ public class WrTimezone extends Property {
 
         private static final long serialVersionUID = 3538377735326578201L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new WrTimezone(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             WrTimezone property = new WrTimezone(parameters, this, value);
             return property;

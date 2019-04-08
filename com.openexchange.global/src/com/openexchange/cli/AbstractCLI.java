@@ -59,13 +59,13 @@ import org.apache.commons.cli.ParseException;
 
 /**
  * {@link AbstractCLI} - The basic super class for command-line tools.
- * 
+ *
  * @param <R> - The return type
  * @param <C> - The execution context type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractCLI<R, C> {
-    
+
     /** Defines the extended width of the help screen */
     public static final int EXTENDED_WIDTH = 120;
 
@@ -140,7 +140,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Check if help output is requested
-     * 
+     *
      * @param args The command line arguments
      */
     protected void helpRequested(String[] args) {
@@ -197,6 +197,7 @@ public abstract class AbstractCLI<R, C> {
      * @param cmd The command line
      * @param options The associated options
      */
+    @SuppressWarnings("unused")
     protected void checkOptions(CommandLine cmd, Options options) {
         checkOptions(cmd);
     }
@@ -265,14 +266,14 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Returns the execution context {@link C}
-     * 
+     *
      * @return the execution context {@link C} C
      */
     protected abstract C getContext();
 
     /**
      * Returns the command line tool's header
-     * 
+     *
      * @return the command line tool's header
      */
     protected String getHeader() {
@@ -283,7 +284,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Prepends two new lines for the footer
-     * 
+     *
      * @return The footer with two new lines prepended
      */
     private String formatFooter() {
@@ -382,7 +383,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Creates a switch {@link Option} with no arguments
-     * 
+     *
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param description The description of the {@link Option}
@@ -395,7 +396,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Creates an {@link Option} with arguments
-     * 
+     *
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param argumentName The argument's name
@@ -409,7 +410,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Creates an {@link Option} with arguments
-     * 
+     *
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param argumentName The argument's name
@@ -424,7 +425,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Create an {@link Option}
-     * 
+     *
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param hasArgs boolean flag to indicate whether or not the option has arguments
@@ -437,7 +438,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Create an {@link Option}
-     * 
+     *
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param argName The argument's name
@@ -451,7 +452,7 @@ public abstract class AbstractCLI<R, C> {
 
     /**
      * Create an {@link Option}
-     * 
+     *
      * @param shortName The short name of the {@link Option}
      * @param longName The long name of the {@link Option}
      * @param argName The argument's name

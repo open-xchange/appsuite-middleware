@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.filestore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -98,7 +99,7 @@ public class FilestoreUserAttributeChangers extends AbstractUserAttributeChanger
             public boolean changeAttribute(int userId, int contextId, User userData, Connection connection) throws SQLException {
                 Integer filestoreOwner = userData.getFilestoreOwner();
                 int ownerId = (filestoreOwner != null && -1 != filestoreOwner.intValue()) ? filestoreOwner.intValue() : 0;
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(FilestoreAttribute.OWNER, ownerId), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(FilestoreAttribute.OWNER, I(ownerId)), connection);
             }
         });
 

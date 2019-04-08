@@ -87,9 +87,8 @@ public abstract class ComparedPermissions<P, GP extends P> {
      *
      * @param newPermissions The new permissions or <code>null</code>
      * @param originalPermissions The original permissions or <code>null</code>
-     * @throws OXException
      */
-    protected ComparedPermissions(P[] newPermissions, P[] originalPermissions) throws OXException {
+    protected ComparedPermissions(P[] newPermissions, P[] originalPermissions) {
         this(newPermissions == null ? null : Arrays.asList(newPermissions), originalPermissions == null ? null : Arrays.asList(originalPermissions));
     }
 
@@ -98,9 +97,8 @@ public abstract class ComparedPermissions<P, GP extends P> {
      *
      * @param newPermissions The new permissions or <code>null</code>
      * @param originalPermissions The original permissions or <code>null</code>
-     * @throws OXException
      */
-    protected ComparedPermissions(Collection<P> newPermissions, Collection<P> originalPermissions) throws OXException {
+    protected ComparedPermissions(Collection<P> newPermissions, Collection<P> originalPermissions) {
         super();
         this.newPermissions = newPermissions;
         this.originalPermissions = originalPermissions;

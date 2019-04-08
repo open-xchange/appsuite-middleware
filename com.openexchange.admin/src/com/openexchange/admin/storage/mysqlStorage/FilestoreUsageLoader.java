@@ -95,7 +95,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
     public Context[] filter(Collection<Context> contexts) throws PipesAndFiltersException {
         Map<PoolIdTuple, Map<String, Map<Integer, Context>>> poolMap = new HashMap<PoolIdTuple, Map<String, Map<Integer, Context>>>();
         for (Context context : contexts) {
-            PoolIdTuple tuple = new PoolIdTuple(context.getWriteDatabase().getId(), context.getReadDatabase().getId());
+            PoolIdTuple tuple = new PoolIdTuple(context.getWriteDatabase().getId().intValue(), context.getReadDatabase().getId().intValue());
             Map<String, Map<Integer, Context>> schemaMap = poolMap.get(tuple);
             if (null == schemaMap) {
                 schemaMap = new HashMap<String, Map<Integer, Context>>();

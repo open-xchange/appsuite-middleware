@@ -154,15 +154,16 @@ public class SearchUtils {
         if ((null == pattern || 0 == pattern.length()) && (append || prepend)) {
             return "*";
         }
-        if (null != pattern) {
-            if (prepend && '*' != pattern.charAt(0)) {
-                pattern = "*" + pattern;
+        String pat = pattern;
+        if (null != pat) {
+            if (prepend && '*' != pat.charAt(0)) {
+                pat = "*" + pat;
             }
-            if (append && '*' != pattern.charAt(pattern.length() - 1)) {
-                pattern = pattern + "*";
+            if (append && '*' != pat.charAt(pat.length() - 1)) {
+                pat = pat + "*";
             }
         }
-        return pattern;
+        return pat;
     }
 
 }

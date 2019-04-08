@@ -104,17 +104,18 @@ public class GetPerformer extends AbstractGetPerformer {
      * @throws OXException if an error is occurred
      */
     public Map<Attendee, Availability> performForAttendees(List<Attendee> attendees, Date from, Date until) throws OXException {
+        List<Attendee> attends = attendees;
         // Prepare the attendees
-        attendees = getSession().getEntityResolver().prepare(attendees);
+        attends = getSession().getEntityResolver().prepare(attends);
         // Filter the external ones
-        attendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-        if (attendees.size() == 0) {
+        attends = CalendarUtils.filter(attends, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
+        if (attends.size() == 0) {
             return java.util.Collections.emptyMap();
         }
 
         // Create a reverse lookup index
         Map<Integer, Attendee> reverseLookup = new HashMap<>();
-        for (Attendee a : attendees) {
+        for (Attendee a : attends) {
             reverseLookup.put(I(a.getEntity()), a);
         }
         return loadAvailability(reverseLookup, from, until);
@@ -187,7 +188,7 @@ public class GetPerformer extends AbstractGetPerformer {
      * @return A {@link Map} of {@link Availability} blocks for the specified users in the specified interval
      * @throws OXException if an error is occurred
      */
-    private <T extends CalendarUser> Map<T, Availability> loadAvailability(Map<Integer, T> reverseLookup, Date from, Date until) throws OXException {
+    private <T extends CalendarUser> Map<T, Availability> loadAvailability(Map<Integer, T> reverseLookup, @SuppressWarnings("unused") Date from, @SuppressWarnings("unused") Date until) throws OXException {
         List<Available> available = getStorage().loadAvailable(new ArrayList<>(reverseLookup.keySet()));
         Map<T, List<Available>> map = new HashMap<>();
         for (Available a : available) {

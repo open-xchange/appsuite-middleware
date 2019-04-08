@@ -47,11 +47,11 @@ public class MessageId extends Property {
     private static final long serialVersionUID = -7910360817210293089L;
 
     public static final String PROPERTY_NAME = "X-GWMESSAGEID";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -97,10 +97,16 @@ public class MessageId extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new MessageId(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             MessageId property = new MessageId(parameters, this, value);
             return property;

@@ -49,6 +49,8 @@
 
 package com.openexchange.geolocation;
 
+import static com.openexchange.java.Autoboxing.D;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -78,7 +80,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /**
      * Initialises a new {@link AbstractGeoLocationSQLStorage}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param providerId The provider identifier
      */
@@ -90,7 +92,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#getGeoInformation(com.openexchange.session.Session, long)
      */
     @Override
@@ -100,7 +102,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.AbstractGeoLocationSQLStorage#getGeoInformation(com.openexchange.session.Session, double, double, int)
      */
     @Override
@@ -110,7 +112,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.geolocation.GeoLocationStorageService#getProviderId()
      */
     @Override
@@ -120,13 +122,13 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /**
      * <p>Returns the appropriate query for looking up a location by an IP address.</p>
-     * 
+     *
      * <p>The query is schema-specific. The parametrised value of the query should be
      * a <code>long</code> representation of an IP address with which the {@link GeoInformation}
      * of a location will be retrieved (if any) from the specific storage for the underlying
      * GeoService provider.
      * </p>
-     * 
+     *
      * @return The query
      * @see {@link com.openexchange.geolocation.ip2location.SQLStatements#SELECT_BY_IP_ADDRESS}
      * @see {@link com.openexchange.geolocation.maxmind.SQLStatements#SELECT_BY_IP_ADDRESS}
@@ -135,7 +137,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /**
      * <p>Returns the appropriate query for looking up a location by GPS coordinates.</p>
-     * 
+     *
      * <p>The query is schema-specific. The parametrised values of the query should be in the
      * following order:
      * <ul>
@@ -144,22 +146,22 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
      * <li>a <code>double</code> for the latitude (yes again)</li>
      * <li>an <code>int</code> for the radius</li>
      * </ul>
-     * 
+     *
      * With this query the {@link GeoInformation} of an approximated location (the nearest in the
      * specified coordinates) will be retrieved (if any) from the specific storage of the underlying
      * GeoService provider.
      * </p>
-     * 
+     *
      * @return The query
      * @see {@link com.openexchange.geolocation.ip2location.SQLStatements#SELECT_BY_GPS_COORDINATES}
      * @see {@link com.openexchange.geolocation.maxmind.SQLStatements#SELECT_BY_GPS_COORDINATES}
-     * 
+     *
      */
     protected abstract String getSelectByGPSCoordinatesQuery();
 
     /**
      * Retrieves the {@link GeoInformation} for the specified ipAddress
-     * 
+     *
      * @param contextId The context identifier
      * @param ipAddress The ipAddress
      * @return The found {@link GeoInformation} or <code>null</code> if no location could be determined.
@@ -190,7 +192,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
     /**
      * Retrieves the {@link GeoInformation} of the location which is closest to the point of origin (latitude/longitude) and within
      * the specified radius
-     * 
+     *
      * @param contextId The context identifier
      * @param latitude The latitude
      * @param longitude The longitude
@@ -214,7 +216,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
             stmt.setInt(parameterIndex++, 1); //return the first result
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                LOGGER.debug("No locations could be found from point {},{} within a radius of '{}'.", latitude, longitude, radius);
+                LOGGER.debug("No locations could be found from point {},{} within a radius of '{}'.", D(latitude), D(longitude), I(radius));
                 return null;
             }
             return parseResultSet(rs);
@@ -228,7 +230,7 @@ public abstract class AbstractGeoLocationSQLStorage implements GeoLocationStorag
 
     /**
      * Parses the specified {@link ResultSet} to a {@link GeoInformation}
-     * 
+     *
      * @param resultSet The {@link ResultSet} to parse
      * @return The parsed {@link GeoInformation}
      * @throws SQLException if an SQL error is occurred

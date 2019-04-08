@@ -37,9 +37,9 @@ import net.fortuna.ical4j.util.Strings;
 
 /**
  * Defines a X-CALENDARSERVER-ATTENDEE-REF parameter
- * 
+ *
  * @see <a href="http://svn.calendarserver.org/repository/calendarserver/CalendarServer/trunk/doc/Extensions/caldav-privatecomments.txt">caldav-privatecomments.txt</a>
- * 
+ *
  * @author probert
  */
 public class CalendarServerAttendeeRef extends Parameter {
@@ -48,7 +48,7 @@ public class CalendarServerAttendeeRef extends Parameter {
 
     public static final String PARAMETER_NAME = "X-CALENDARSERVER-ATTENDEE-REF";
 
-    private String value;
+    private final String value;
 
     /**
      * @param aValue a string representation of a participation role
@@ -61,6 +61,7 @@ public class CalendarServerAttendeeRef extends Parameter {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final String getValue() {
         return value;
     }

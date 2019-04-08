@@ -908,24 +908,24 @@ public class CalendarUtils {
             // VEVENT has the DTEND property? Y
             // (start < DTEND AND end > DTSTART)
             return start < dtEnd && end > dtStart;
-        } else {
-            // VEVENT has the DTEND property? N
-            if (false == event.getStartDate().isAllDay()) {
-                // DTSTART property is a DATE-TIME value? Y
-                // (start <= DTSTART AND end > DTSTART)
-                return start <= dtStart && end > dtStart;
-            } else {
-                // DTSTART property is a DATE-TIME value? N
-                // (start < DTSTART+P1D AND end > DTSTART)
-                if (end > dtStart) {
-                    Calendar calendar = initCalendar(timeZone, dtStart);
-                    calendar.add(Calendar.DATE, 1);
-                    return start < calendar.getTimeInMillis();
-                } else {
-                    return false;
-                }
-            }
         }
+
+        // VEVENT has the DTEND property? N
+        if (false == event.getStartDate().isAllDay()) {
+            // DTSTART property is a DATE-TIME value? Y
+            // (start <= DTSTART AND end > DTSTART)
+            return start <= dtStart && end > dtStart;
+        }
+
+        // DTSTART property is a DATE-TIME value? N
+        // (start < DTSTART+P1D AND end > DTSTART)
+        if (end > dtStart) {
+            Calendar calendar = initCalendar(timeZone, dtStart);
+            calendar.add(Calendar.DATE, 1);
+            return start < calendar.getTimeInMillis();
+        }
+
+        return false;
     }
 
     /**
@@ -971,7 +971,7 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether the supplied event has <i>all-day</i> character or not, i.e. its start- and endtime do not contain
+     * Gets a value indicating whether the supplied event has <i>all-day</i> character or not, i.e. its start- and end time do not contain
      * a time of day or not. This implicitly implies that the event is also <i>floating</i>.
      *
      * @param event The event to check
@@ -982,11 +982,11 @@ public class CalendarUtils {
     }
 
     /**
-     * Compares the supplied objects for order, from the perspective of the given timezone for <i>floating</i> dates.
+     * Compares the supplied objects for order, from the perspective of the given time zone for <i>floating</i> dates.
      *
      * @param dateTime1 The first date-time to compare
      * @param dateTime2 The second date-time to compare
-     * @param timeZone The timezone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
+     * @param timeZone The time zone to consider for <i>floating</i> dates, i.e. the actual 'perspective' of the comparison, or
      *            <code>null</code> to fall back to UTC
      * @return A negative integer, zero, or a positive integer as the first argument is less than, equal to, or greater than the second.
      */
@@ -1003,11 +1003,11 @@ public class CalendarUtils {
     }
 
     /**
-     * Calculates the duration between the supplied dates or date-times, from the perspective of the given timezone for <i>floating</i>
+     * Calculates the duration between the supplied dates or date-times, from the perspective of the given time zone for <i>floating</i>
      * dates.
      * <p/>
      * If one of the supplied dates is <i>floating</i>, and the other one is not (i.e. it represents a <i>date with local time
-     * timezone</i>), the difference is determined by transferring the floating date into this local timezone first.
+     * time zone</i>), the difference is determined by transferring the floating date into this local time zone first.
      *
      * @param dateTime1 The first date-time
      * @param dateTime2 The second date-time
@@ -1019,13 +1019,13 @@ public class CalendarUtils {
             if (dateTime1.before(dateTime2)) {
                 Duration ONE_DAY_MORE = new Duration(1, 1, 0);
                 for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_MORE), days++) {
-                    ;
+                    // Nothing
                 }
             }
             if (dateTime1.after(dateTime2)) {
                 Duration ONE_DAY_LESS = new Duration(-1, 1, 0);
                 for (DateTime current = dateTime1; false == current.equals(dateTime2); current = current.addDuration(ONE_DAY_LESS), days--) {
-                    ;
+                    // Nothing
                 }
             }
             return new Duration(days >= 0 ? 1 : -1, Math.abs(days), 0);
@@ -1075,13 +1075,13 @@ public class CalendarUtils {
             if (originalSeriesStart.before(updatedSeriesStart)) {
                 Duration ONE_DAY_MORE = new Duration(1, 1, 0);
                 for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_MORE), value = value.addDuration(ONE_DAY_MORE)) {
-                    ;
+                    // Nothing
                 }
             }
             if (originalSeriesStart.after(updatedSeriesStart)) {
                 Duration ONE_DAY_LESS = new Duration(-1, 1, 0);
                 for (DateTime current = originalSeriesStart; false == current.equals(updatedSeriesStart); current = current.addDuration(ONE_DAY_LESS), value = value.addDuration(ONE_DAY_LESS)) {
-                    ;
+                    // Nothing
                 }
             }
             return new DefaultRecurrenceId(value);
@@ -1387,27 +1387,28 @@ public class CalendarUtils {
         if (Strings.isEmpty(value)) {
             return value;
         }
+        String val = value;
         URI uri = null;
         try {
-            uri = new URI(value);
+            uri = new URI(val);
         } catch (URISyntaxException e) {
-            getLogger(CalendarUtils.class).debug("Error interpreting \"{}\" as URI, assuming \"mailto:\" protocol as fallback.", value, e);
+            getLogger(CalendarUtils.class).debug("Error interpreting \"{}\" as URI, assuming \"mailto:\" protocol as fallback.", val, e);
             try {
-                uri = new URI("mailto", value, null);
+                uri = new URI("mailto", val, null);
             } catch (URISyntaxException e2) {
-                getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", interpreting directly as fallback.", value, e2);
+                getLogger(CalendarUtils.class).debug("Error constructing \"mailto:\" URI for \"{}\", interpreting directly as fallback.", val, e2);
             }
         }
         /*
          * prefer scheme-specific part from "mailto:"-URI if possible
          */
         if (null != uri && "mailto".equalsIgnoreCase(uri.getScheme())) {
-            value = uri.getSchemeSpecificPart();
+            val = uri.getSchemeSpecificPart();
         }
         /*
          * decode any punycoded names, too
          */
-        return IDNA.toIDN(value);
+        return IDNA.toIDN(val);
     }
 
     /**
@@ -1469,10 +1470,10 @@ public class CalendarUtils {
      * @param recurrenceService A reference to the recurrence service
      * @param seriesMaster The series master event to check
      * @param now The date to consider as <i>now</i> in the comparison
-     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @param timeZone The time zone to consider if the event has <i>floating</i> dates
      * @return <code>true</code> if the event series is in the past, <code>false</code>, otherwise
      */
-    public static boolean isInPast(RecurrenceService recurrenceService, Event seriesMaster, Date now, TimeZone timeZone) throws OXException {
+    public static boolean isInPast(RecurrenceService recurrenceService, Event seriesMaster, Date now, @SuppressWarnings("unused") TimeZone timeZone) throws OXException {
         RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), null);
         return false == recurrenceService.iterateRecurrenceIds(recurrenceData, now, null).hasNext();
     }
@@ -1695,7 +1696,7 @@ public class CalendarUtils {
 
     /**
      * Gets a value indicating whether a specific attendee privilege is set in an event or not.
-     * 
+     *
      * @param event The event to check
      * @param privilege The privilege to check
      * @return <code>true</code> if the privilege is set, <code>false</code>, otherwise
@@ -1769,13 +1770,14 @@ public class CalendarUtils {
      * @return The adjusted extended properties container, or a new extended properties instance as needed
      */
     public static ExtendedProperties addExtendedProperty(ExtendedProperties extendedProperties, ExtendedProperty extendedProperty, boolean removeExisting) {
-        if (null == extendedProperties) {
-            extendedProperties = new ExtendedProperties();
+        ExtendedProperties extProperties = extendedProperties;
+        if (null == extProperties) {
+            extProperties = new ExtendedProperties();
         } else if (removeExisting) {
-            extendedProperties.removeAll(extendedProperty.getName());
+            extProperties.removeAll(extendedProperty.getName());
         }
-        extendedProperties.add(extendedProperty);
-        return extendedProperties;
+        extProperties.add(extendedProperty);
+        return extProperties;
     }
 
     /**
@@ -1905,7 +1907,7 @@ public class CalendarUtils {
      * @param updatedAttendees The updated attendees
      * @return The collection update
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) {
         return getAttendeeUpdates(originalAttendees, updatedAttendees, true, (AttendeeField[]) null);
     }
 
@@ -1917,9 +1919,8 @@ public class CalendarUtils {
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences between updated items
      * @return The collection update
-     * @throws OXException In case mapping fails
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) {
         return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
 
             @Override
@@ -1940,7 +1941,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) {
         return getEventUpdates(originalEvents, updatedEvents, true, (EventField[]) null, fieldsToMatch);
     }
 
@@ -1957,7 +1958,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) {
         return new AbstractEventUpdates(originalEvents, updatedEvents, considerUnset, ignoredFields) {
 
             @Override
@@ -2232,7 +2233,7 @@ public class CalendarUtils {
      * @param event The event to get the flags for
      * @param calendarUser The identifier of the calendar user to get flags for
      * @param user The identifier of the current user, in case he is different from the calendar user
-     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise 
+     * @param publicFolder <code>true</code> to apply special handling for group scheduled events in <i>public</i> folder, <code>false</code>, otherwise
      * @return The event flags
      */
     public static EnumSet<EventFlag> getFlags(Event event, int calendarUser, int user, boolean publicFolder) {

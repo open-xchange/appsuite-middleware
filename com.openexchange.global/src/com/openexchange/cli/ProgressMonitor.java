@@ -71,12 +71,12 @@ public class ProgressMonitor {
 
     /**
      * Updates the progress bar
-     * 
+     *
      * @param updateLabel the update label
      * @param progressPercentage The progress percentage ranging from 0 to 1
      */
     public void update(String updateLabel, double progressPercentage) {
-        System.out.print("\r " + label + " " + String.format("%.2f", progressPercentage * 100) + "% [");
+        System.out.print("\r " + label + " " + String.format("%.2f", Double.valueOf(progressPercentage * 100)) + "% [");
         int i = 0;
         for (; i <= (int) (progressPercentage * width) - 1; i++) {
             System.out.print("=");

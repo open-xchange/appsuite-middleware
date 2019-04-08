@@ -53,5 +53,5 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 
 
 public class ClientAdminThreadExtended extends ClientAdminThread {
-    public static AdminCacheExtended      cache       = null;
+    public static AdminCacheExtended      autocontextidCache       = null;
 }

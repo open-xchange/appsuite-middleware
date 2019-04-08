@@ -88,10 +88,10 @@ public abstract class AbstractAttributeChanger {
         Map<Class<?>, Setter> s = new HashMap<>();
         s.put(Byte.class, (stmt, x, parameterIndex) -> stmt.setBytes(parameterIndex, (byte[]) x));
         s.put(String.class, (stmt, x, parameterIndex) -> stmt.setString(parameterIndex, (String) x));
-        s.put(Boolean.class, (stmt, x, parameterIndex) -> stmt.setBoolean(parameterIndex, (Boolean) x));
-        s.put(Integer.class, (stmt, x, parameterIndex) -> stmt.setInt(parameterIndex, (Integer) x));
-        s.put(Long.class, (stmt, x, parameterIndex) -> stmt.setLong(parameterIndex, (Long) x));
-        s.put(Date.class, (stmt, x, parameterIndex) -> stmt.setTimestamp(parameterIndex, new Timestamp((long) x)));
+        s.put(Boolean.class, (stmt, x, parameterIndex) -> stmt.setBoolean(parameterIndex, ((Boolean) x).booleanValue()));
+        s.put(Integer.class, (stmt, x, parameterIndex) -> stmt.setInt(parameterIndex, ((Integer) x).intValue()));
+        s.put(Long.class, (stmt, x, parameterIndex) -> stmt.setLong(parameterIndex, ((Long) x).longValue()));
+        s.put(Date.class, (stmt, x, parameterIndex) -> stmt.setTimestamp(parameterIndex, new Timestamp(((Long) x).longValue())));
 
         Map<Class<?>, Unsetter> u = new HashMap<>();
         u.put(Byte.class, (stmt, parameterIndex) -> stmt.setNull(parameterIndex, Types.BINARY));
@@ -107,7 +107,7 @@ public abstract class AbstractAttributeChanger {
 
     /**
      * Sets the specified {@link Attribute}s
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param attributes The {@link Attribute}s to set
@@ -146,7 +146,7 @@ public abstract class AbstractAttributeChanger {
 
     /**
      * Resets the specified attributes to their default values
-     * 
+     *
      * @param userId The user identifier
      * @param contextId the context identifier
      * @param table the table
@@ -171,7 +171,7 @@ public abstract class AbstractAttributeChanger {
 
     /**
      * Un-sets the specified {@link Attribute}s
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param attributes The {@link Attribute}s to un-set
@@ -207,23 +207,24 @@ public abstract class AbstractAttributeChanger {
     /**
      * Appends the context and user identifiers (in that order) to the specified {@link PreparedStatement} in the positions
      * indicated by the parameter index.
-     * 
+     *
      * @param contextId the context identifier
      * @param userId The user identifier
      * @param stmt The {@link PreparedStatement}
      * @param parameterIndex The position at which the user and context identifiers will be set
-     * 
+     *
      * @throws SQLException if an SQL error is occurred
      */
     protected int appendContextUser(int contextId, int userId, PreparedStatement stmt, int parameterIndex) throws SQLException {
-        stmt.setInt(parameterIndex++, contextId);
-        stmt.setInt(parameterIndex++, userId);
-        return parameterIndex;
+        int index = parameterIndex;
+        stmt.setInt(index++, contextId);
+        stmt.setInt(index++, userId);
+        return index;
     }
 
     /**
      * Prepares the specified {@link Attribute}s for an SQL statement
-     * 
+     *
      * @param attributes The {@link Attribute}s to prepare
      * @return A string with the prepared {@link Attribute}s
      */
@@ -238,7 +239,7 @@ public abstract class AbstractAttributeChanger {
 
     /**
      * Fills the specified {@link PreparedStatement} with the specified user id, context id and value for the specified {@link Attribute}
-     * 
+     *
      * @param stmt The {@link PreparedStatement} to fill
      * @param setter The value {@link Setter}
      * @param userId The user identifier
@@ -251,7 +252,7 @@ public abstract class AbstractAttributeChanger {
 
     /**
      * Fills the specified {@link PreparedStatement} with the specified user id, context id and value for the specified {@link Attribute}
-     * 
+     *
      * @param stmt The {@link PreparedStatement} to fill
      * @param unsetter The value {@link Unsetter}
      * @param userId The user identifier
@@ -262,7 +263,7 @@ public abstract class AbstractAttributeChanger {
 
     /**
      * Creates a new {@link PreparedStatement} for the specified {@link Attribute}s
-     * 
+     *
      * @param attributes the {@link Attribute}s
      * @param connection The {@link Connection}
      * @return The {@link PreparedStatement}
@@ -273,7 +274,7 @@ public abstract class AbstractAttributeChanger {
     /**
      * Creates a new {@link PreparedStatement} for the specified {@link Attribute}s to set them
      * to their 'DEFAULT' values
-     * 
+     *
      * @param attribute the {@link Attribute}
      * @param connection The {@link Connection}
      * @return The {@link PreparedStatement}
@@ -290,7 +291,7 @@ public abstract class AbstractAttributeChanger {
 
         /**
          * Sets the specified value to the specified {@link PreparedStatement} at the specified position
-         * 
+         *
          * @param stmt The {@link PreparedStatement}
          * @param value The value to set
          * @param parameterIndex The position at which the value will be set
@@ -306,7 +307,7 @@ public abstract class AbstractAttributeChanger {
 
         /**
          * Un-sets the value from the specified {@link PreparedStatement} and the specified position
-         * 
+         *
          * @param stmt The {@link PreparedStatement}
          * @param parameterIndex The position at which the value will be un-set
          * @throws SQLException if an SQL error is occurred

@@ -49,6 +49,7 @@
 
 package com.openexchange.server;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -95,7 +96,7 @@ public abstract class ServiceHolder<S> {
                     for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
                         final ServiceProxy proxy = proxyIter.next();
                         if (proxy.isExceeded()) {
-                            LOG.error("Forced unget: Found non-ungetted service after {}msec that was acquired at:\n{}", serviceUsageTimeout, printStackTrace(proxy.trace));
+                            LOG.error("Forced unget: Found non-ungetted service after {}msec that was acquired at:\n{}", I(serviceUsageTimeout), printStackTrace(proxy.trace));
                             proxy.proxyService = null;
                             proxy.delegate = null;
                             proxy.propagateForcedUnget();
@@ -170,9 +171,6 @@ public abstract class ServiceHolder<S> {
             return (System.currentTimeMillis() - creationTime) > serviceUsageTimeout;
         }
 
-        public StackTraceElement[] getTrace() {
-            return trace;
-        }
     }
 
     /**

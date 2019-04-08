@@ -164,7 +164,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param updatedAttendee The updated {@link Attendee}
      * @return <code>true</code> if conflict checks should take place, <code>false</code>, otherwise
      */
-    private boolean needsConflictCheck(Event originalEvent, Attendee originalAttendee, Attendee updatedAttendee) {
+    private boolean needsConflictCheck(@SuppressWarnings("unused") Event originalEvent, Attendee originalAttendee, Attendee updatedAttendee) {
         ParticipationStatus originalPartStat = null != originalAttendee.getPartStat() ? originalAttendee.getPartStat() : ParticipationStatus.NEEDS_ACTION;
         ParticipationStatus updatedPartStat = null != updatedAttendee.getPartStat() ? updatedAttendee.getPartStat() : ParticipationStatus.NEEDS_ACTION;
         if (originalPartStat.equals(ParticipationStatus.ACCEPTED)) {
@@ -222,14 +222,15 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceId) throws OXException {
+        RecurrenceId recId = recurrenceId;
         if (isSeriesMaster(originalEvent)) {
             Event originalSeriesMaster = originalEvent;
-            recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
-            if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
+            recId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recId);
+            if (contains(originalEvent.getChangeExceptionDates(), recId)) {
                 /*
                  * update for existing change exception
                  */
-                Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
+                Event originalExceptionEvent = loadExceptionData(originalEvent, recId);
                 Attendee originalExceptionAttendee = Check.attendeeExists(originalExceptionEvent, attendee);
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
@@ -237,7 +238,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
                  */
                 Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
-                Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+                Event newExceptionEvent = prepareException(originalSeriesMaster, recId);
                 Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
                 Check.quotaNotExceeded(storage, session);
                 storage.getEventStorage().insertEvent(newExceptionEvent);
@@ -260,7 +261,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  * add change exception date to series master & track results
                  */
                 resultTracker.rememberOriginalEvent(originalSeriesMaster);
-                addChangeExceptionDate(originalSeriesMaster, recurrenceId, false);
+                addChangeExceptionDate(originalSeriesMaster, recId, false);
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
                 /*
@@ -280,7 +281,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recId));
         }
     }
 

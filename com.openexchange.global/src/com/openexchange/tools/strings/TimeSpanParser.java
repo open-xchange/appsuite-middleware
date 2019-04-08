@@ -173,9 +173,11 @@ public class TimeSpanParser  implements StringParser {
         }
 
         if (t == Long.class || t == long.class) {
-            return (T) Long.valueOf(timespan);
+            @SuppressWarnings("unchecked") T lng = (T) Long.valueOf(timespan);
+            return lng;
         } else if (t == Date.class) {
-            return (T) new Date(timespan);
+            @SuppressWarnings("unchecked") T date = (T) new Date(timespan);
+            return date;
         }
         return null;
     }

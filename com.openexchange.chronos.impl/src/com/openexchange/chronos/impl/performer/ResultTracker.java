@@ -499,27 +499,28 @@ public class ResultTracker {
      * @see Utils#anonymizeIfNeeded
      */
     private Event userize(Event event, int forUser, boolean applyExceptionDates) throws OXException {
-        if (applyExceptionDates && isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, forUser);
+        Event ev3nt = event;
+        if (applyExceptionDates && isSeriesMaster(ev3nt)) {
+            ev3nt = applyExceptionDates(storage, ev3nt, forUser);
         }
-        final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
-        final String folderView = getFolderView(event, forUser);
-        EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, forUser, session.getUserId());
+        final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(ev3nt, forUser);
+        final String folderView = getFolderView(ev3nt, forUser);
+        EnumSet<EventFlag> flags = CalendarUtils.getFlags(ev3nt, forUser, session.getUserId());
         if (null != alarms && 0 < alarms.size()) {
             flags.add(EventFlag.ALARMS);
         }
-        if (isSeriesException(event)) {
-            RecurrenceData recurrenceData = optRecurrenceData(event);
+        if (isSeriesException(ev3nt)) {
+            RecurrenceData recurrenceData = optRecurrenceData(ev3nt);
             if (null != recurrenceData) {
-                if (isLastOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                if (isLastOccurrence(ev3nt.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
                     flags.add(EventFlag.LAST_OCCURRENCE);
                 }
-                if (isFirstOccurrence(event.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
+                if (isFirstOccurrence(ev3nt.getRecurrenceId(), recurrenceData, session.getRecurrenceService())) {
                     flags.add(EventFlag.FIRST_OCCURRENCE);
                 }
             }
         }
-        event = new DelegatingEvent(event) {
+        ev3nt = new DelegatingEvent(ev3nt) {
 
             @Override
             public String getFolderId() {
@@ -552,7 +553,7 @@ public class ResultTracker {
             }
 
         };
-        return anonymizeIfNeeded(session, event);
+        return anonymizeIfNeeded(session, ev3nt);
     }
 
     private RecurrenceData optRecurrenceData(Event event) throws OXException {

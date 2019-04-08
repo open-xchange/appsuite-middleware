@@ -195,7 +195,8 @@ public final class StaticSignalStartedService implements SignalStartedService {
         }
 
         try {
-            return (V) stateInfo.get(info);
+            @SuppressWarnings("unchecked") V v = (V) stateInfo.get(info);
+            return v;
         } catch (ClassCastException e) {
             return null;
         }

@@ -45,11 +45,11 @@ public class UpdateSubject extends Property {
     private static final long serialVersionUID = -615091328274504900L;
 
     public static final String PROPERTY_NAME = "X-LOTUS-UPDATE-SUBJECT";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -79,6 +79,7 @@ public class UpdateSubject extends Property {
      */
     @Override
     public void validate() throws ValidationException {
+        // Nothing
     }
 
     /**
@@ -93,10 +94,16 @@ public class UpdateSubject extends Property {
 
         private static final long serialVersionUID = 2326651749315407915L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new UpdateSubject(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             UpdateSubject property = new UpdateSubject(parameters, this, value);
             return property;

@@ -222,7 +222,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
     /**
      * Loads the recurrence identifiers of all stored change exception events for a specific event series from the storage.
-     * 
+     *
      * @param seriesId The identifier of the series to load the exception dates for
      * @return The recurrence identifiers of the change exception events, or an empty set if there are none
      */
@@ -490,6 +490,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         if (null == alarmsByUserId || 0 == alarmsByUserId.size()) {
             return Collections.emptyMap();
         }
+        Event evnt = event;
         Map<Integer, List<Alarm>> newAlarmsByUserId = new HashMap<Integer, List<Alarm>>(alarmsByUserId.size());
         for (Entry<Integer, List<Alarm>> entry : alarmsByUserId.entrySet()) {
             List<Alarm> newAlarms = new ArrayList<Alarm>(entry.getValue().size());
@@ -504,9 +505,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
                 newAlarms.add(newAlarm);
             }
-            String folderView = getFolderView(event, i(entry.getKey()));
-            if (false == folderView.equals(event.getFolderId())) {
-                event = new DelegatingEvent(event) {
+            String folderView = getFolderView(evnt, i(entry.getKey()));
+            if (false == folderView.equals(evnt.getFolderId())) {
+                evnt = new DelegatingEvent(evnt) {
 
                     @Override
                     public String getFolderId() {
@@ -519,7 +520,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
                     }
                 };
             }
-            storage.getAlarmStorage().insertAlarms(event, i(entry.getKey()), newAlarms);
+            storage.getAlarmStorage().insertAlarms(evnt, i(entry.getKey()), newAlarms);
             newAlarmsByUserId.put(entry.getKey(), newAlarms);
         }
         return newAlarmsByUserId;
@@ -765,7 +766,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireOrganizerSchedulingResource(originalEvent, assumeExternalOrganizerUpdate);
         }
     }
-    
+
     /**
      * Checks that data of a specific attendee of an event can be deleted by the current session's user under the perspective of the
      * current folder.
@@ -968,19 +969,19 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         /*
          * check general write permissions for attendee
-         */        
+         */
         Attendee originalAttendee = attendeeUpdate.getOriginal();
         requireWritePermissions(originalEvent, originalAttendee, assumeExternalOrganizerUpdate);
         /*
          * deny setting the participation status to a value other than NEEDS-ACTION for other attendees: RFC 6638, section 3.2.1
          */
-        if (false == matches(originalAttendee, calendarUserId) && 
+        if (false == matches(originalAttendee, calendarUserId) &&
             false == assumeExternalOrganizerUpdate && attendeeUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT) &&
             false == ParticipationStatus.NEEDS_ACTION.matches(attendeeUpdate.getUpdate().getPartStat())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.PARTSTAT);
         }
     }
-    
+
     /**
      * Checks that data of one or more attendees of an event can be updated by the current session's user under the perspective of the
      * current folder.
@@ -1026,7 +1027,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * </ul>
      * <p/>
      * Note: Even if attendees are allowed to modify the event, deletion is out of scope.
-     * 
+     *
      * @param originalEvent The original event to check
      * @return <code>true</code> if a deletion would lead to a removal of the event, <code>false</code>, otherwise
      */

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.net.URI;
@@ -436,14 +437,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(user_id, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", I(user_id), ctx.getId(), executionError.getCause());
                     }
                 }
             });
 
             // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "moveuserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " to another filestore " + dstFilestore.getId(), ctx.getId().intValue());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -569,14 +570,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
                     }
                 }
             });
 
             // Schedule task
             oxuser.disableUser(userId, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "movefromuserfilestoretomaster", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to master filestore " + destFilestore.getId(), ctx.getId().intValue());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -720,14 +721,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
                     }
                 }
             });
 
             // Schedule task
             oxuser.disableUser(userId, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId());
+            return TaskManager.getInstance().addJob(fsdm, "movefrommastertouserfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from master to individual filestore " + destFilestore.getId(), ctx.getId().intValue());
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -754,7 +755,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromContextToUserFilestore(ctx, user, dstFilestore, maxQuota, credentials, false);
     }
 
-    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(user);
@@ -852,7 +853,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(user_id, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", I(user_id), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -861,7 +862,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             if (false == inline) {
                 // Schedule task
-                return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+                return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId().intValue());
             }
 
             // Execute with current thread
@@ -910,7 +911,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return moveFromUserToContextFilestore(ctx, user, credentials, false);
     }
 
-    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
             doNullCheck(user);
@@ -1016,7 +1017,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An execution error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", I(userId), ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -1025,7 +1026,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             if (false == inline) {
                 // Schedule task
-                return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
+                return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId().intValue());
             }
 
             // Execute with current thread
@@ -1214,8 +1215,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     // (Synchronous) Move from context to individual user file storage
                     try {
                         moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, auth, true);
-                    } catch (RemoteException e) {
-                        throw new StorageException(e);
                     } catch (NoSuchFilestoreException e) {
                         throw new StorageException(e);
                     }
@@ -1688,7 +1687,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                 }
                                 try {
 
-                                    oxu.delete(ctx, usr, -1);
+                                    oxu.delete(ctx, usr, I(-1));
                                 } catch (final StorageException e1) {
                                     LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
@@ -1706,7 +1705,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     }
                                 }
                                 try {
-                                    oxu.delete(ctx, usr, -1);
+                                    oxu.delete(ctx, usr, I(-1));
                                 } catch (final StorageException e1) {
                                     LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
@@ -1726,7 +1725,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             }
                         }
                         try {
-                            oxu.delete(ctx, usr, -1);
+                            oxu.delete(ctx, usr, I(-1));
                         } catch (final StorageException e1) {
                             LOGGER.error("Error doing rollback for creating user in database", e1);
                         }
@@ -1739,7 +1738,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // The mail account cache caches resolved imap logins or primary addresses. Creating or changing a user needs the invalidation of
         // that cached data.
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        ;
         if (null != cacheService) {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
@@ -1765,7 +1763,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             ConfigView view;
             try {
                 view = viewFactory.getView(usr.getId().intValue(), ctx.getId().intValue());
-                Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, true);
+                Boolean check = view.opt("com.openexchange.imap.initWithSpecialUse", Boolean.class, Boolean.TRUE);
                 if (check != null && check.booleanValue()) {
                     ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
                     prop.set(Boolean.TRUE);
@@ -1828,7 +1826,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Set<Integer> dubCheck = new HashSet<Integer>();
             List<User> filestoreOwners = new java.util.LinkedList<User>();
             for (final User user : users) {
-                if (destUser != null && user.getId() == destUser.intValue()) {
+                if (destUser != null && user.getId().intValue() == destUser.intValue()) {
                     throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
                 }
                 if (false == dubCheck.add(user.getId())) {
@@ -1941,7 +1939,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         // JCS
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        ;
         if (null != cacheService) {
             try {
                 final Cache usercCache = cacheService.getCache("User");
@@ -2330,9 +2327,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         checkContextAndSchema(context);
         if (null == filestore_id || filestore_id.intValue() <= 0) {
             return oxu.listUsersWithOwnFilestore(context, null);
-        } else {
-            return oxu.listUsersWithOwnFilestore(context, filestore_id);
         }
+        return oxu.listUsersWithOwnFilestore(context, filestore_id);
     }
 
     @Override
@@ -2601,7 +2597,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         final int addBits = getPermissionBits(addAccess);
         final int removeBits = getPermissionBits(removeAccess);
-        LOGGER.debug("Adding {} removing {} to filter {}", addBits, removeBits, filter);
+        LOGGER.debug("Adding {} removing {} to filter {}", I(addBits), I(removeBits), filter);
 
         try {
             tool.changeAccessCombination(permissionBits, addBits, removeBits);
@@ -2853,7 +2849,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 LOGGER.warn("CapabilityService absent. Unable to retrieve user configuration.");
                 return capabilitiesSource;
             }
-            capabilitiesSource = capabilityService.getCapabilitiesSource(user_id, ctx.getId());
+            capabilitiesSource = capabilityService.getCapabilitiesSource(user_id, ctx.getId().intValue());
 
         } catch (final StorageException e) {
             LOGGER.error("", e);
@@ -2889,7 +2885,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             contextcheck(context);
             UserAliasStorage uas = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
 
-            List<Integer> ids = uas.getUserIdsByAliasDomain(context.getId(), aliasDomain);
+            List<Integer> ids = uas.getUserIdsByAliasDomain(context.getId().intValue(), aliasDomain);
 
             ArrayList<User> users = new ArrayList<User>(ids.size());
             for (int id : ids) {

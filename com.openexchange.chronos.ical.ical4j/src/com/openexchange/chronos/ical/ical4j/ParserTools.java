@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.ical.ical4j;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -132,7 +133,7 @@ public final class ParserTools {
         return value.getDate() instanceof DateTime;
     }
 
-    public static boolean inDefaultTimeZone(final DateProperty dateProperty, final TimeZone timeZone) {
+    public static boolean inDefaultTimeZone(final DateProperty dateProperty, @SuppressWarnings("unused") final TimeZone timeZone) {
         if (dateProperty.getParameter("TZID") != null) {
             return false;
         }
@@ -179,7 +180,7 @@ public final class ParserTools {
         return inTimeZone.getTime();
     }
 
-    public static Date toDate(final DateProperty dateProperty, final TimeZone tz) {
+    public static Date toDate(final DateProperty dateProperty, @SuppressWarnings("unused") final TimeZone tz) {
         return new Date(dateProperty.getDate().getTime());
     }
 
@@ -248,19 +249,19 @@ public final class ParserTools {
     	int highestNumberOccurrences = 0;
     	for(TimeZone cand: candidates2){
     		int offset = cand.getRawOffset();
-    		if(!occurrences.containsKey(offset)) {
-                occurrences.put(offset, 0);
+    		if(!occurrences.containsKey(I(offset))) {
+                occurrences.put(I(offset), I(0));
             }
-    		int numOccurrences = ((Integer)occurrences.get(offset))+1;
-    		occurrences.put(offset, numOccurrences);
+    		int numOccurrences = ((Integer)occurrences.get(I(offset))).intValue()+1;
+    		occurrences.put(I(offset), I(numOccurrences));
     		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences;
     	}
     	//select the most often occurring ones and take the one with the shortest name (probably a generic name)
-    	Integer mostCommonOffset = (Integer) occurrences.getKey(highestNumberOccurrences);
+    	Integer mostCommonOffset = (Integer) occurrences.getKey(I(highestNumberOccurrences));
     	int maxlength = Integer.MAX_VALUE;
     	TimeZone candidate = null;
     	for(TimeZone cand: candidates2){
-    		if(cand.getRawOffset() == mostCommonOffset){
+    		if(cand.getRawOffset() == mostCommonOffset.intValue()){
     			int l2 = cand.getID().length();
     			if(l2 < maxlength){
     				candidate = cand;

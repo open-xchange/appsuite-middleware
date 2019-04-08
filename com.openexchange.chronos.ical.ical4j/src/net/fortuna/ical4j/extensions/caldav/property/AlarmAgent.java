@@ -41,31 +41,31 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.util.ParameterValidator;
 
 /**
- * ALARM-AGENT is a proposed (RFC draft) property for iCalendar 
- * 
+ * ALARM-AGENT is a proposed (RFC draft) property for iCalendar
+ *
  * @see <a href="http://tools.ietf.org/html/draft-daboo-valarm-extensions-04">draft-daboo-valarm-extensions-04</a>
- * 
+ *
  * @author probert
  *
  */
 public class AlarmAgent extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
-  
+
   public static final String PROPERTY_NAME = "ALARM-AGENT";
-  
+
   private String value;
 
   public static final PropertyFactory FACTORY = new Factory();
-  
+
   public static final AlarmAgent SERVER = new ImmutableAlarmAgent("SERVER", null);
-  
+
   public static final AlarmAgent CLIENT = new ImmutableAlarmAgent("CLIENT", null);
-  
+
   public static final AlarmAgent BOTH = new ImmutableAlarmAgent("BOTH", null);
 
   public static final AlarmAgent NONE = new ImmutableAlarmAgent("NONE", null);
-  
+
   public AlarmAgent(PropertyFactory factory) {
     super(PROPERTY_NAME, factory);
   }
@@ -99,20 +99,20 @@ public class AlarmAgent extends Property implements Escapable {
   public String getValue() {
     return value;
   }
-  
+
   private static final class ImmutableAlarmAgent extends AlarmAgent {
     private static final long serialVersionUID = -2054338254L;
 
     private ImmutableAlarmAgent(String value) {
       super(new ParameterList(true), value);
     }
-    
+
     @Override
     public void setValue(String aValue) {
       throw new UnsupportedOperationException("Cannot modify constant instances");
     }
-    
-    ImmutableAlarmAgent(String s, ImmutableAlarmAgent immutableclazz) {
+
+    ImmutableAlarmAgent(String s, @SuppressWarnings("unused") ImmutableAlarmAgent immutableclazz) {
       this(s);
     }
   }
@@ -120,6 +120,10 @@ public class AlarmAgent extends Property implements Escapable {
   private static class Factory implements PropertyFactory {
 
     private static final long serialVersionUID = 2099427445505899578L;
+
+    Factory() {
+        super();
+    }
 
     @Override
     public Property createProperty(String name) {

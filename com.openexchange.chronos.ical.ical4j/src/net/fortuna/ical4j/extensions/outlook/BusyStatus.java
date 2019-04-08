@@ -45,13 +45,13 @@ public class BusyStatus extends Property {
     private static final long serialVersionUID = -3514682572599864426L;
 
     public static final String PROPERTY_NAME = "X-MICROSOFT-CDO-BUSYSTATUS";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     public static final BusyStatus BUSY = new BusyStatus(new ParameterList(true), FACTORY, "BUSY");
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -94,13 +94,19 @@ public class BusyStatus extends Property {
     }
 
     private static class Factory implements PropertyFactory {
-        
+
         private static final long serialVersionUID = 596282786680252116L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new BusyStatus(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             BusyStatus property = null;
             if (BUSY.getValue().equals(value)) {

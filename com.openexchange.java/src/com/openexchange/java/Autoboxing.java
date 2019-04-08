@@ -136,6 +136,24 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for {@link Double#valueOf(double)} that uses cached instances.
+     * @param d double value to be converted to a Double object.
+     * @return Double object.
+     */
+    public static Double D(final double d) {
+        return Double.valueOf(d);
+    }
+
+    /**
+     * Short method name for {@link Double#doubleValue()}.
+     * @param b {@link Double} object to be converted to a double value.
+     * @return double value.
+     */
+    public static double b(final Double d) {
+        return d.doubleValue();
+    }
+
+    /**
      * Converts an int-array into an Integer-array.
      * @param intArray int[] to be converted to Integer[]
      * @return Integer[]
@@ -329,7 +347,7 @@ public final class Autoboxing {
      * @return A {@code Boolean} instance representing {@code b}
      */
     public static Boolean valueOf(boolean b) {
-        return Boolean.valueOf(b);
+        return (b ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**

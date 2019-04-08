@@ -114,7 +114,8 @@ public final class GroupAJAXRequest {
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
-        return (V) request.getData();
+        @SuppressWarnings("unchecked") V retval = (V) request.getData();
+        return retval;
     }
 
     /**

@@ -181,6 +181,7 @@ public final class Arrays {
         return retval;
     }
 
+    @SafeVarargs
     public static <T> T[] remove(T[] removeFrom, T... toRemove) {
         List<T> tmp = new ArrayList<T>();
         for (T copy : removeFrom) {
@@ -194,6 +195,7 @@ public final class Arrays {
         return retval;
     }
 
+    @SafeVarargs
     public static <T> T[] add(T[] toExtend, T... other) {
         if (other == null) {
             return toExtend;

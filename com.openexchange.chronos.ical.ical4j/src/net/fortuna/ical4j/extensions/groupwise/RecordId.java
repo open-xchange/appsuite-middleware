@@ -47,11 +47,11 @@ public class RecordId extends Property {
     private static final long serialVersionUID = -3377034395408250616L;
 
     public static final String PROPERTY_NAME = "X-RECORDID";
-    
+
     public static final PropertyFactory FACTORY = new Factory();
-    
+
     private String value;
-    
+
     /**
      * @param factory
      */
@@ -97,10 +97,16 @@ public class RecordId extends Property {
 
         private static final long serialVersionUID = 1L;
 
+        Factory() {
+            super();
+        }
+
+        @Override
         public Property createProperty(String name) {
             return new RecordId(this);
         }
-        
+
+        @Override
         public Property createProperty(String name, ParameterList parameters, String value) {
             RecordId property = new RecordId(parameters, this, value);
             return property;

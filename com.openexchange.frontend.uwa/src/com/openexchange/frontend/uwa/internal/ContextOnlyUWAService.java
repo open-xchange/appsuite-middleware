@@ -67,13 +67,12 @@ import com.openexchange.modules.model.Attribute;
  */
 public class ContextOnlyUWAService implements UWAWidgetService {
 
-    private final DatabaseService dbService;
     private final IDGeneratorService idGenerator;
     private final UserWidgetSQLStorage contextWidgets;
     private final int ctxId;
 
-    public ContextOnlyUWAService(final DatabaseService dbService, final IDGeneratorService idGenerator, final int ctxId) {
-        this.dbService = dbService;
+    public ContextOnlyUWAService(DatabaseService dbService, IDGeneratorService idGenerator, int ctxId) {
+        super();
         this.idGenerator = idGenerator;
         this.contextWidgets = new UserWidgetSQLStorage(UWAWidget.METADATA, dbService, 0, ctxId);
         this.ctxId = ctxId;

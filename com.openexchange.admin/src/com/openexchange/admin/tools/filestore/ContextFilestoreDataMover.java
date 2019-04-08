@@ -51,6 +51,7 @@ package com.openexchange.admin.tools.filestore;
 
 import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -274,7 +275,7 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
 
         runSafely(finalTask);
 
-        LOGGER.info("Successfully moved files of context {}", contextId);
+        LOGGER.info("Successfully moved files of context {}", I(contextId));
     }
 
 }

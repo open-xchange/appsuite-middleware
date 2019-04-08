@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.leaseConnectionForContext;
 import static com.openexchange.admin.storage.mysqlStorage.AdminMySQLStorageUtil.releaseWriteContextConnectionAfterReading;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -90,21 +91,11 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
         cache = ClientAdminThread.cache;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.interfaces.OXAuthStorageInterface#authenticate(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public boolean authenticate(final Credentials authdata) {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.interfaces.OXAuthStorageInterface#authenticate(com.openexchange.admin.rmi.dataobjects.Credentials, com.openexchange.admin.rmi.dataobjects.Context)
-     */
     @Override
     public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
         if (!validCredentials(authdata)) {
@@ -118,11 +109,6 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
         return authenticate(authdata, ctx, SELECT_CONTEXT_ADMIN, true);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.interfaces.OXAuthStorageInterface#authenticateUser(com.openexchange.admin.rmi.dataobjects.Credentials, com.openexchange.admin.rmi.dataobjects.Context)
-     */
     @Override
     public boolean authenticateUser(final Credentials authdata, final Context ctx) throws StorageException {
         if (!validCredentials(authdata)) {
@@ -136,7 +122,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
     /**
      * Checks if the specified {@link Credentials} object holds information about the context administrator
      * of the specified {@link Context}
-     * 
+     *
      * @param credentials The {@link Credentials} object
      * @param context The {@link Context}
      * @return <code>true</code> if the {@link Credentials} do hold information about the context administrator;
@@ -160,7 +146,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
      * <li>Whether the login and/or the password are <code>null</code>
      * </ul>
      * In case one of the above is <code>null</code>, <code>false</code> will be returned; <code>true</code>otherwise
-     * 
+     *
      * @param credentials The {@link Credentials} object to check
      * @return In case the provided {@link Credentials}, and/or the username and/or the password are <code>null</code>
      *         then <code>false</code> will be returned; <code>true</code>otherwise
@@ -180,7 +166,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
     /**
      * Performs the authentication
-     * 
+     *
      * @param credentials the {@link Credentials}
      * @param context The {@link Context}
      * @param query The SQL query to perform
@@ -189,7 +175,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
      * @throws StorageException If a storage error is occurred
      */
     private boolean authenticate(Credentials credentials, Context context, String query, boolean isAdmin) throws StorageException {
-        int contextId = context.getId();
+        int contextId = context.getId().intValue();
 
         Connection connection = null;
         PreparedStatement prep = null;
@@ -202,7 +188,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
             rs = prep.executeQuery();
             if (!rs.next()) {
-                log.debug("{} \"{}\" not found in context \"{}\"!", isAdmin ? "Admin user" : "User", credentials.getLogin(), contextId);
+                log.debug("{} \"{}\" not found in context \"{}\"!", isAdmin ? "Admin user" : "User", credentials.getLogin(), I(contextId));
                 return false;
             }
             String encryptedPassword = rs.getString("userPassword");
