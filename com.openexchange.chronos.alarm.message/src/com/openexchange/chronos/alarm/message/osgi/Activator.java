@@ -59,16 +59,17 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.alarm.message.AlarmNotificationService;
-import com.openexchange.chronos.alarm.message.impl.MessageAlarmConfigTreeItem;
 import com.openexchange.chronos.alarm.message.impl.AlarmNotificationServiceRegistry;
 import com.openexchange.chronos.alarm.message.impl.MessageAlarmCalendarHandler;
 import com.openexchange.chronos.alarm.message.impl.MessageAlarmConfig;
+import com.openexchange.chronos.alarm.message.impl.MessageAlarmConfigTreeItem;
 import com.openexchange.chronos.alarm.message.impl.MessageAlarmDeliveryWorker;
 import com.openexchange.chronos.alarm.message.impl.MessageAlarmDeliveryWorkerUpdateTask;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.cluster.timer.ClusterTimerService;
@@ -111,7 +112,8 @@ public class Activator extends HousekeepingActivator {
         return new Class<?>[] { ContextService.class, DatabaseService.class, TimerService.class, CalendarStorageFactory.class, CalendarUtilities.class,
             LeanConfigurationService.class, UserService.class, ServerConfigService.class, NotificationMailFactory.class, TranslatorFactory.class,
             ConfigurationService.class, ClusterTimerService.class, AdministrativeAlarmTriggerStorage.class, TemplateService.class,
-            ResourceService.class, HtmlService.class, CalendarProviderRegistry.class, AdministrativeCalendarAccountService.class, RateLimiterFactory.class};
+            ResourceService.class, HtmlService.class, CalendarProviderRegistry.class, AdministrativeCalendarAccountService.class, RateLimiterFactory.class,
+            RecurrenceService.class};
     }
 
     @Override
@@ -141,6 +143,7 @@ public class Activator extends HousekeepingActivator {
         CalendarProviderRegistry calendarProviderRegistry = Tools.requireService(CalendarProviderRegistry.class, this);
         AdministrativeCalendarAccountService administrativeCalendarAccountService = Tools.requireService(AdministrativeCalendarAccountService.class, this);
         RateLimiterFactory rateLimitFactory = Tools.requireService(RateLimiterFactory.class, this);
+        RecurrenceService recurrenceService = Tools.requireService(RecurrenceService.class, this);
 
 
         int period = leanConfig.getIntProperty(MessageAlarmConfig.PERIOD);
@@ -177,7 +180,8 @@ public class Activator extends HousekeepingActivator {
                                                  .setAdministrativeCalendarAccountService(administrativeCalendarAccountService)
                                                  .setLookAhead(lookAhead)
                                                  .setOverdueWaitTime(overdueWaitTime)
-                                                 .setRateLimitFactory(rateLimitFactory).build();
+                                                 .setRateLimitFactory(rateLimitFactory)
+                                                 .setRecurrenceService(recurrenceService).build();
             ScheduledTimerTask scheduledTimerTask = clusterTimerService.scheduleAtFixedRate(CLUSTER_ID, worker, initialDelay, period, TimeUnit.MINUTES);
             scheduledTasks.put(scheduledTimerTask, worker);
             if (!registeredCalendarHandler) {
