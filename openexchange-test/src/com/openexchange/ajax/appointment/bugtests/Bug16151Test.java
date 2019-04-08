@@ -78,7 +78,6 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class Bug16151Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private AJAXClient client2;
     private Appointment appointment;
     private TimeZone timeZone2;
@@ -87,10 +86,10 @@ public class Bug16151Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         client2 = new AJAXClient(testContext.acquireUser());
         timeZone2 = client2.getValues().getTimeZone();
         // client2 shares folder
@@ -109,6 +108,7 @@ public class Bug16151Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

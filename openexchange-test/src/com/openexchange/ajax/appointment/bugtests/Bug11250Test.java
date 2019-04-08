@@ -16,10 +16,7 @@ import com.openexchange.test.FolderTestManager;
 
 public class Bug11250Test extends AppointmentTest {
 
-    private final static int[] _appointmentFields = { DataObject.OBJECT_ID, CalendarObject.TITLE,
-    };
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug11250Test.class);
+    private final static int[] _appointmentFields = { DataObject.OBJECT_ID, CalendarObject.TITLE };
 
     @Test
     public void testBug11250() throws Exception {

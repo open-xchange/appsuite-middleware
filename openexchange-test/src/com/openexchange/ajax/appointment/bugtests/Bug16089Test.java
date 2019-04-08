@@ -18,7 +18,6 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -32,7 +31,6 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     private FolderTestManager manager;
 
-    private AJAXClient client;
 
     FolderObject folderObject1;
 
@@ -47,10 +45,10 @@ public class Bug16089Test extends AbstractAJAXSession {
 
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         manager = new FolderTestManager(getClient());
         timezone = getClient().getValues().getTimeZone();
         cal = Calendar.getInstance(timezone);
@@ -86,8 +84,8 @@ public class Bug16089Test extends AbstractAJAXSession {
                 ConfirmableParticipant[] confirmations = testApp.getConfirmations();
                 for (ConfirmableParticipant c : confirmations) {
                     if (c.getIdentifier() == getClient().getValues().getUserId()) {
-                        int ctx = getContextID(getClient());
-                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, getClient().getValues().getUserId());
+                        int ctx = getContextID();
+                        int publicConfig = ServerUserSetting.getInstance().getDefaultStatusPublic(ctx, getClient().getValues().getUserId()).intValue();
                         assertEquals("Confirm status isn't equal with user setting.", c.getConfirm(), publicConfig);
                     }
                 }
@@ -99,7 +97,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         }
     }
 
-    private int getContextID(AJAXClient client) throws IOException, SAXException {
+    private int getContextID() throws IOException, SAXException {
         String url = "http://" + getClient().getHostname() + "/ajax/config/context_id?session=" + getClient().getSession().getId();
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = getClient().getSession().getConversation().getResponse(request);
@@ -108,6 +106,7 @@ public class Bug16089Test extends AbstractAJAXSession {
         return Integer.parseInt(sub);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

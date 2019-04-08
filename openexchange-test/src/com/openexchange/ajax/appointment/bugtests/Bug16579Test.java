@@ -85,6 +85,7 @@ public class Bug16579Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -133,6 +134,7 @@ public class Bug16579Test extends AbstractAJAXSession {
         assertEquals("Wrong amount of occurrences", 3, count);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

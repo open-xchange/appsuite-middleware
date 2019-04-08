@@ -79,6 +79,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
 
     private FolderObject testFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -96,7 +97,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreate() throws Exception {
+    public void testCreate() {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
@@ -107,7 +108,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testRemove() throws Exception {
+    public void testRemove() {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
@@ -165,7 +166,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testUpdates() throws Exception {
+    public void testUpdates() {
         Appointment appointment = generateAppointment();
         appointment.setIgnoreConflicts(true);
 
@@ -191,7 +192,7 @@ public class CalendarTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testGetAllInFolder() throws Exception {
+    public void testGetAllInFolder() {
         Appointment appointment = new Appointment();
         appointment.setParentFolderID(testFolder.getObjectID());
         appointment.setTitle(this.getClass().getCanonicalName());

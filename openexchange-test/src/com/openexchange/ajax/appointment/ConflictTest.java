@@ -124,7 +124,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 9:00
      */
     @Test
-    public void testConflict2() throws Exception {
+    public void testConflict2() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict2");
         appointmentObj.setStartDate(new Date(startTime));
@@ -161,7 +161,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 11:00
      */
     @Test
-    public void testConflict3() throws Exception {
+    public void testConflict3() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict3");
         appointmentObj.setStartDate(new Date(startTime));
@@ -198,7 +198,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 10:00
      */
     @Test
-    public void testConflict4() throws Exception {
+    public void testConflict4() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict4");
         appointmentObj.setStartDate(new Date(startTime));
@@ -235,7 +235,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 10:00
      */
     @Test
-    public void testConflict5() throws Exception {
+    public void testConflict5() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict5");
         appointmentObj.setStartDate(new Date(startTime));
@@ -271,7 +271,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 9:30
      */
     @Test
-    public void testConflict6() throws Exception {
+    public void testConflict6() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict6");
         appointmentObj.setStartDate(new Date(startTime));
@@ -308,7 +308,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 11:00
      */
     @Test
-    public void testConflict7() throws Exception {
+    public void testConflict7() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testConflict7");
         appointmentObj.setStartDate(new Date(startTime));
@@ -345,7 +345,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 8:00
      */
     @Test
-    public void testNonConflict1() throws Exception {
+    public void testNonConflict1() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testNonConflict1");
         appointmentObj.setStartDate(new Date(startTime));
@@ -353,7 +353,7 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = catm.insert(appointmentObj).getObjectID();
+        catm.insert(appointmentObj).getObjectID();
 
         Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict7", new Date(startTime - 3600000), new Date(endTime - 7200000));
         conflictObj.setIgnoreConflicts(false);
@@ -373,7 +373,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 11:00
      */
     @Test
-    public void testNonConflict2() throws Exception {
+    public void testNonConflict2() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testNonConflict2");
         appointmentObj.setStartDate(new Date(startTime));
@@ -381,7 +381,7 @@ public class ConflictTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = catm.insert(appointmentObj).getObjectID();
+        catm.insert(appointmentObj).getObjectID();
 
         Appointment conflictObj = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testNonConflict2", new Date(startTime + 7200000), new Date(endTime + 3600000));
         conflictObj.setIgnoreConflicts(false);
@@ -401,7 +401,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: 10:00
      */
     @Test
-    public void testFullTimeConflict1() throws Exception {
+    public void testFullTimeConflict1() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testFullTimeConflict1");
         appointmentObj.setStartDate(new Date(startTime));
@@ -439,7 +439,7 @@ public class ConflictTest extends AppointmentTest {
      * Conflict End: +24 Std
      */
     @Test
-    public void testFullTimeConflict2() throws Exception {
+    public void testFullTimeConflict2() {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testFullTimeConflict2");
         appointmentObj.setStartDate(new Date(startTime));

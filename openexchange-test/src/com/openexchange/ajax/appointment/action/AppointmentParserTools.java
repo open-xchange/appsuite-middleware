@@ -27,7 +27,7 @@ public class AppointmentParserTools {
             JSONObject conflict = conflicts.getJSONObject(i);
             ConflictObject conflictObject = new ConflictObject();
             if (conflict.has("participants")) {
-                parseConflictParticipants(conflict.getJSONArray("participants"), conflictObject);
+                parseConflictParticipants(conflict.getJSONArray("participants"));
             }
             if (conflict.has("title")) {
                 conflictObject.setTitle(conflict.getString("title"));
@@ -52,7 +52,7 @@ public class AppointmentParserTools {
         response.setConflicts(conflictObjects);
     }
 
-    private static void parseConflictParticipants(JSONArray participants, ConflictObject conflictObject) throws JSONException {
+    private static void parseConflictParticipants(JSONArray participants) throws JSONException {
         List<Participant> participantObjects = new ArrayList<Participant>();
         for (int i = 0; i < participants.length(); i++) {
             Participant participantObject = new Participant();

@@ -75,6 +75,7 @@ public class Bug32385Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -102,7 +103,7 @@ public class Bug32385Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug32385() throws Exception {
+    public void testBug32385() {
         List<Appointment> newappointments = catm.newappointments(D("01.05.2014 00:00", TimeZone.getTimeZone("UTC")), D("02.05.2014 00:00", TimeZone.getTimeZone("UTC")), 999, new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID });
 
         int count = 0;

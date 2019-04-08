@@ -247,6 +247,7 @@ public class Bug12842Test extends AbstractAJAXSession {
             switch (type) {
                 case CalendarObject.YEARLY:
                     appointment.setMonth(calendar.get(Calendar.MONTH));
+                    break;
                 case CalendarObject.MONTHLY:
                     appointment.setDayInMonth(calendar.get(Calendar.DAY_OF_MONTH));
                     break;
@@ -254,6 +255,7 @@ public class Bug12842Test extends AbstractAJAXSession {
                     appointment.setDays((int) Math.pow(2, (calendar.get(Calendar.DAY_OF_WEEK) - 1))); // Transforming
                     // java.util.Calendar.DAY_OF_WEEK to
                     // com.openexchange.groupware.container.CalendarObject.days
+                    break;
                 case CalendarObject.DAILY:
                     break;
                 default:

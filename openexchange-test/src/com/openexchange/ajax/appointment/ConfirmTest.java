@@ -46,10 +46,8 @@ public class ConfirmTest extends AppointmentTest {
 
         Appointment appointmentObj = createAppointmentObject("testConfirm");
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
-        participants[0] = new UserParticipant();
-        participants[0].setIdentifier(userId);
-        participants[1] = new UserParticipant();
-        participants[1].setIdentifier(secondUserId);
+        participants[0] = new UserParticipant(userId);
+        participants[1] = new UserParticipant(secondUserId);
         appointmentObj.setParticipants(participants);
         appointmentObj.setIgnoreConflicts(true);
 

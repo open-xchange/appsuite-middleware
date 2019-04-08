@@ -14,8 +14,6 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class FreeBusyTest extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FreeBusyTest.class);
-
     @Test
     public void testUserParticipant() throws Exception {
         final Appointment appointmentObj = new Appointment();
@@ -57,7 +55,6 @@ public class FreeBusyTest extends AppointmentTest {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        final long newStartTime = c.getTimeInMillis();
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testFullTimeUserParticipant");
         appointmentObj.setStartDate(new Date(startTime));

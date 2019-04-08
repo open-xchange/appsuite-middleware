@@ -102,7 +102,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         Object[][] objects = allResponse.getArray();
         int count = 0;
         for (Object[] object : objects) {
-            if ((Integer) object[0] == appointment.getObjectID()) {
+            if (((Integer) object[0]).intValue() == appointment.getObjectID()) {
                 count++;
             }
         }
@@ -116,6 +116,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         assertEquals("Wrong occurrences value", 5, sequenceApp.getOccurrence());
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -166,6 +167,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         endSearch = new Date(1249257600000L); // 03.08.2009 00:00:00
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

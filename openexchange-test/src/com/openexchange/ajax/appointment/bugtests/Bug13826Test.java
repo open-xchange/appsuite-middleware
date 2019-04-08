@@ -92,6 +92,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -149,6 +150,7 @@ public class Bug13826Test extends AbstractAJAXSession {
         setCurrentValues(loadedAppointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

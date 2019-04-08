@@ -92,12 +92,14 @@ public final class Bug11865Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         Init.startServer();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
