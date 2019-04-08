@@ -132,7 +132,7 @@ public final class SendTest extends AbstractMailTest {
          */
         final SendResponse response = Executor.execute(getSession(), new SendRequest(mailObject_25kb));
         assertNull(response.getErrorMessage(), response.getErrorMessage());
-        assertNotNull(response.getFolderAndID());
+        assertNotNull("Response should contain a folder and a id but only contained: " + response.getData(), response.getFolderAndID());
         assertTrue("No mail in the sent folder", response.getFolderAndID().length > 0);
         /*
          * Clean everything
@@ -205,8 +205,8 @@ public final class SendTest extends AbstractMailTest {
             assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
 
             pos += s.length();
-            assertEquals("Missing \\uD83D unicode", (int) '\uD83D', (int) content.charAt(pos++));
-            assertEquals("Missing \\uDCA9 unicode", (int) '\uDCA9', (int) content.charAt(pos++));
+            assertEquals("Missing \\uD83D unicode", '\uD83D', content.charAt(pos++));
+            assertEquals("Missing \\uDCA9 unicode", '\uDCA9', content.charAt(pos++));
         }
         /*
          * Clean everything
