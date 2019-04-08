@@ -103,13 +103,23 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @param until The upper limit
      * @param actions The actions to retrieve
      * @param expected The expected amount of alarm objects
+     * @param filter The event id to filter for
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected) throws ApiException {
+    AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected, String filter) throws ApiException {
         AlarmTriggerData triggers = eventManager.getAlarmTrigger(until, actions);
-        assertEquals(expected, triggers.size());
-        return triggers;
+        AlarmTriggerData result = triggers;
+        if(filter != null) {
+            result = new AlarmTriggerData();
+            for(AlarmTrigger trigger: triggers) {
+                if(trigger.getEventId().equals(filter)) {
+                    result.add(trigger);
+                }
+            }
+        }
+        assertEquals(expected, result.size());
+        return result;
     }
 
     /**

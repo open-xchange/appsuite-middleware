@@ -100,7 +100,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Test alarm/until action with different time-slots
         // 1. Get alarms within the next hour
-        AlarmTriggerData andCheckAlarmTrigger = getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0); // No triggers
+        AlarmTriggerData andCheckAlarmTrigger = getAndCheckAlarmTrigger(currentTime + TimeUnit.HOURS.toMillis(1), null, 0, event.getId()); // No triggers
         Assert.assertFalse(containsAlarm(andCheckAlarmTrigger, folderId, null, event.getId()));
 
         // 2. Get alarms within the next two days
@@ -116,7 +116,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         assertNotNull("Unable to find alarm trigger", alarmTrigger);
         assertTrue(alarmTrigger.getEventId().equals(event.getId()));
         // 3. Get only mail alarms within the next two days
-        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0); // No triggers
+        triggers = getAndCheckAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2), "MAIL", 0, event.getId()); // No triggers
         Assert.assertFalse(containsAlarm(triggers, folderId, alarmTrigger.getAlarmId(), alarmTrigger.getEventId()));
 
     }
@@ -354,7 +354,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             from.setTimeInMillis(cal.getTimeInMillis());
             from.add(Calendar.DAY_OF_MONTH, -5);
 
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
+            AlarmTriggerData triggers = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1, event.getId());
             Calendar instance = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
             instance.setTime(cal.getTime());
             instance.add(Calendar.DAY_OF_MONTH, -3);
@@ -366,7 +366,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
             // change timezone
             changeTimezone(TimeZone.getTimeZone("America/New_York"));
 
-            AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1);
+            AlarmTriggerData triggers2 = getAndCheckAlarmTrigger(from.getTimeInMillis() + TimeUnit.DAYS.toMillis(10), null, 1, event.getId());
             AlarmTrigger trigger2 = findTrigger(event.getId(), triggers2);
             Date parse = DateTimeUtil.parseZuluDateTime(trigger2.getTime());
             assertNotEquals(triggerTime, parse.getTime());
