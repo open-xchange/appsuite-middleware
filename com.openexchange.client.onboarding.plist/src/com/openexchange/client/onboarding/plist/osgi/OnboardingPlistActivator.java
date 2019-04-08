@@ -91,7 +91,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
 
         // Track services needed for SMS transport
@@ -116,15 +116,15 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        HttpService httpService = getService(HttpService.class);
-        if (httpService != null) {
-            if (downloadServletAlias != null) {
+    protected synchronized void stopBundle() throws Exception {
+        if (downloadServletAlias != null) {
+            HttpService httpService = getService(HttpService.class);
+            if (httpService != null) {
                 httpService.unregister(downloadServletAlias);
             }
         }
-        super.stopBundle();
         removeService(PListSigner.class);
+        super.stopBundle();
         Services.setServiceLookup(null);
     }
 

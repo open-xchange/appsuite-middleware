@@ -58,6 +58,7 @@ import com.google.common.io.BaseEncoding;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.download.DownloadParameters;
+import com.openexchange.client.onboarding.plist.servlet.PListDownloadServlet;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -75,12 +76,14 @@ import com.openexchange.user.UserService;
  */
 public class PlistLinkProviderImpl implements DownloadLinkProvider {
 
-    ServiceLookup services;
     private static final String USER_SECRET_ATTRIBUTE = "user_sms_link_secret";
-    private static final String SERVLET_PATH = "plist";
+    private static final String SERVLET_PATH = PListDownloadServlet.SERVLET_PATH;
     private static final char SLASH = '/';
 
+    private final ServiceLookup services;
+
     public PlistLinkProviderImpl(ServiceLookup services) {
+        super();
         this.services = services;
     }
 
