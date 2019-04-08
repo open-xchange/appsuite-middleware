@@ -70,6 +70,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.Header;
+import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
@@ -821,7 +822,8 @@ public final class SessionUtility {
         if (null == userAgent) {
             return false;
         }
-        return ServerServiceRegistry.getServize(UserAgentParser.class).matches(userAgent, UserAgentFamily.IE, 11);
+        BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
+        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
