@@ -373,7 +373,7 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
         try {
             in = new FileInputStream(image);
             byte[] imageBytes = ByteStreams.toByteArray(in);
-            return new FooterImage(mimeType, "footer_image." + MimeType2ExtMap.getFileExtension(mimeType), imageBytes);
+            return new FooterImage(mimeType, imageBytes);
         } catch (IOException e) {
             LOG.warn("Could not load and convert footer image {} from path {}.", imageName, templatesPath, e);
             return null;
@@ -390,17 +390,14 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
 
         private final String contentType;
 
-        private final String fileName;
-
         private final byte[] data;
 
         private String cid;
 
 
-        private FooterImage(String contentType, String fileName, byte[] data) {
+        FooterImage(String contentType, byte[] data) {
             super();
             this.contentType = contentType;
-            this.fileName = fileName;
             this.data = data;
         }
 
@@ -439,15 +436,6 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
          */
         public String getB64Data() {
             return BaseEncoding.base64().encode(data);
-        }
-
-        /**
-         * Gets a sane file name including the correct file extension for the image.
-         *
-         * @return The file name, e.g. <code>footer_logo.png</code>
-         */
-        public String getFileName() {
-            return fileName;
         }
 
         void setContentId(String cid) {
