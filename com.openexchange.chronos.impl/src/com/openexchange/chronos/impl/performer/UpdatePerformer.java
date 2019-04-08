@@ -76,11 +76,13 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.UnmodifiableEvent;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -241,7 +243,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * add change exception date to series master & track results
              */
             resultTracker.rememberOriginalEvent(originalSeriesMaster);
-            addChangeExceptionDate(originalSeriesMaster, recurrenceId, true);
+            addChangeExceptionDate(originalSeriesMaster, recurrenceId, CalendarUtils.isInternal(originalSeriesMaster.getOrganizer(), CalendarUserType.INDIVIDUAL));
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
             /*
