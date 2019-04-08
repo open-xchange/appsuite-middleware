@@ -240,13 +240,12 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      */
     private void addEventExceptions(List<Event> events, List<InternalImportResult> results, InternalImportResult result) {
         if (1 < events.size()) {
-            InternalImportResult r3sult = result;
-            EventID masterEventID = r3sult.getImportResult().getId();
-            long clientTimestamp = r3sult.getImportResult().getTimestamp();
+            EventID masterEventID = result.getImportResult().getId();
+            long clientTimestamp = result.getImportResult().getTimestamp();
             for (int i = 1; i < events.size(); i++) {
-                r3sult = createEventException(masterEventID, events.get(i), clientTimestamp);
-                results.add(r3sult);
-                clientTimestamp = r3sult.getImportResult().getTimestamp();
+                result = createEventException(masterEventID, events.get(i), clientTimestamp);
+                results.add(result);
+                clientTimestamp = result.getImportResult().getTimestamp();
             }
         }
     }

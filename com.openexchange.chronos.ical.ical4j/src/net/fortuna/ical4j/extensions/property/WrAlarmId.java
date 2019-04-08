@@ -45,11 +45,11 @@ public class WrAlarmId extends Property {
     private static final long serialVersionUID = 2182103734645261668L;
 
     public static final String PROPERTY_NAME = "X-WR-ALARMID";
-
+    
     public static final PropertyFactory FACTORY = new Factory();
-
+    
     private String value;
-
+    
     /**
      * @param factory
      */
@@ -79,7 +79,6 @@ public class WrAlarmId extends Property {
      */
     @Override
     public void validate() throws ValidationException {
-        // Nothing
     }
 
     /**
@@ -94,16 +93,10 @@ public class WrAlarmId extends Property {
 
         private static final long serialVersionUID = 2099427445505899578L;
 
-        Factory() {
-            super();
-        }
-
-        @Override
         public Property createProperty(String name) {
             return new WrAlarmId(this);
         }
-
-        @Override
+        
         public Property createProperty(String name, ParameterList parameters, String value) {
             WrAlarmId property = new WrAlarmId(parameters, this, value);
             return property;

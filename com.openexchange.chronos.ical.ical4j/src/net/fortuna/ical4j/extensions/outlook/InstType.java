@@ -47,11 +47,11 @@ public class InstType extends Property {
     private static final long serialVersionUID = -3495027929173808410L;
 
     public static final String PROPERTY_NAME = "X-MICROSOFT-CDO-INSTTYPE";
-
+    
     public static final PropertyFactory FACTORY = new Factory();
-
+    
     private String value;
-
+    
     /**
      * @param factory
      */
@@ -97,16 +97,10 @@ public class InstType extends Property {
 
         private static final long serialVersionUID = 1L;
 
-        Factory() {
-            super();
-        }
-
-        @Override
         public Property createProperty(String name) {
             return new InstType(this);
         }
-
-        @Override
+        
         public Property createProperty(String name, ParameterList parameters, String value) {
             InstType property = new InstType(parameters, this, value);
             return property;

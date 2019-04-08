@@ -169,22 +169,21 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original exception event, or the targeted series master event
      */
     private void deleteRecurrence(Event originalEvent, RecurrenceId recurrenceId) throws OXException {
-        RecurrenceId recId = recurrenceId;
         if (deleteRemovesEvent(originalEvent)) {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
             requireDeletePermissions(originalEvent);
             if (isSeriesMaster(originalEvent)) {
-                recId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recId);
-                if (null != recId.getRange()) {
+                recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
+                if (null != recurrenceId.getRange()) {
                     /*
                      * delete "this and future" recurrences; adjust recurrence rule to have a fixed UNTIL one second or day prior the targeted occurrence
                      */
-                    Check.recurrenceRangeMatches(recId, RecurrenceRange.THISANDFUTURE);
+                    Check.recurrenceRangeMatches(recurrenceId, RecurrenceRange.THISANDFUTURE);
                     Event eventUpdate = EventMapper.getInstance().copy(originalEvent, null, EventField.ID, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE);
                     RecurrenceRule rule = initRecurrenceRule(originalEvent.getRecurrenceRule());
-                    DateTime until = recId.getValue().addDuration(recId.getValue().isAllDay() ? new Duration(-1, 1, 0) : new Duration(-1, 0, 1));
+                    DateTime until = recurrenceId.getValue().addDuration(recurrenceId.getValue().isAllDay() ? new Duration(-1, 1, 0) : new Duration(-1, 0, 1));
                     rule.setUntil(until);
                     eventUpdate.setRecurrenceRule(rule.toString());
                     /*
@@ -210,7 +209,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     Event updatedEvent = loadEventData(originalEvent.getId());
                     updateAlarmTrigger(originalEvent, updatedEvent);
                     resultTracker.trackUpdate(originalEvent, updatedEvent);
-                } else if (contains(originalEvent.getChangeExceptionDates(), recId)) {
+                } else if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                     /*
                      * deletion of existing change exception
                      */
@@ -218,12 +217,12 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     // TODO: not supported in old stack (attempt fails with APP-0011), so throwing exception as expected by test for now
                     // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
-                        new Exception("Deletion of existing change exception not supported"), recId, new DefaultRecurrenceData(originalEvent));
+                        new Exception("Deletion of existing change exception not supported"), recurrenceId, new DefaultRecurrenceData(originalEvent));
                 } else {
                     /*
                      * creation of new delete exception
                      */
-                    addDeleteExceptionDate(originalEvent, recId);
+                    addDeleteExceptionDate(originalEvent, recurrenceId);
                 }
                 return;
             } else if (isSeriesException(originalEvent)) {
@@ -236,7 +235,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recId));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
         }
         Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
         if (null != userAttendee) {
@@ -245,8 +244,8 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              */
             requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesMaster(originalEvent)) {
-                recId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recId);
-                if (contains(originalEvent.getChangeExceptionDates(), recId)) {
+                recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
+                if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                     /*
                      * deletion of existing change exception
                      */
@@ -254,14 +253,14 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     // TODO: not supported in old stack (attempt fails with APP-0011), so throwing exception as expected by test for now
                     // com.openexchange.ajax.appointment.recurrence.TestsForCreatingChangeExceptions.testShouldFailIfTryingToCreateADeleteExceptionOnTopOfAChangeException())
                     throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(
-                        new Exception("Deletion of existing change exception not supported"), recId, originalEvent.getRecurrenceRule());
-                } else if (null != recId.getRange()) {
+                        new Exception("Deletion of existing change exception not supported"), recurrenceId, originalEvent.getRecurrenceRule());
+                } else if (null != recurrenceId.getRange()) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), originalEvent.getRecurrenceRule());
                 } else {
                     /*
                      * creation of new delete exception
                      */
-                    deleteFromRecurrence(originalEvent, recId, userAttendee);
+                    deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
                 }
                 return;
             } else if (isSeriesException(originalEvent)) {
@@ -274,7 +273,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * unsupported, otherwise
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recId));
+            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
         }
         /*
          * no delete permissions, otherwise

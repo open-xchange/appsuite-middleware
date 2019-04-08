@@ -108,9 +108,10 @@ public class DtEndMapping extends ICalDateTimeMapping<VEvent, Event> {
                     // If "DTSTART" is a DATE-TIME, then the event's duration is zero (see: RFC 5545, 3.6.1 Event Component)
                     //                    duration = new Duration(new Dur(0, 0, 0, 0));
                     return dtStart;
+                } else {
+                    // If "DTSTART" is a DATE, then the event's duration is one day (see: RFC 5545, 3.6.1 Event Component)
+                    duration = new Duration(new Dur(1, 0, 0, 0));
                 }
-                // If "DTSTART" is a DATE, then the event's duration is one day (see: RFC 5545, 3.6.1 Event Component)
-                duration = new Duration(new Dur(1, 0, 0, 0));
             }
             dtEnd = new DtEnd(Dates.getInstance(duration.getDuration().getTime(dtStart.getDate()), (Value) dtStart.getParameter(Parameter.VALUE)));
             if (dtStart.isUtc()) {

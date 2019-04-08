@@ -48,9 +48,9 @@ public class CalStart extends UtcProperty {
     private static final long serialVersionUID = -1823078836099613956L;
 
     public static final String PROPERTY_NAME = "X-CALSTART";
-
+    
     public static final PropertyFactory FACTORY = new Factory();
-
+    
     /**
      * @param factory
      */
@@ -61,7 +61,7 @@ public class CalStart extends UtcProperty {
     /**
      * @param aList
      * @param factory
-     * @throws ParseException
+     * @throws ParseException 
      */
     public CalStart(ParameterList aList, PropertyFactory factory, String value) throws ParseException {
         super(PROPERTY_NAME, aList, factory);
@@ -86,19 +86,13 @@ public class CalStart extends UtcProperty {
     }
 
     private static class Factory implements PropertyFactory {
-
+        
         private static final long serialVersionUID = 596282786680252116L;
 
-        Factory() {
-            super();
-        }
-
-        @Override
         public Property createProperty(String name) {
             return new CalStart(this);
         }
-
-        @Override
+        
         public Property createProperty(String name, ParameterList parameters, String value) throws ParseException {
             CalStart property = new CalStart(parameters, this, value);
             return property;

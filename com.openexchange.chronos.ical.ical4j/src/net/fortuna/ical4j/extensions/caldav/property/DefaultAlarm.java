@@ -40,26 +40,26 @@ import net.fortuna.ical4j.model.ValidationException;
 
 /**
  * New property as defined in a RFC draft
- *
+ * 
  * @see <a href="http://tools.ietf.org/html/draft-daboo-valarm-extensions-04">draft-daboo-valarm-extensions-04</a>
- *
+ * 
  * @author probert
  *
  */
 public class DefaultAlarm extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
-
+  
   public static final String PROPERTY_NAME = "DEFAULT-ALARM";
-
+  
   private String value;
 
   public static final PropertyFactory FACTORY = new Factory();
-
+  
   public static final DefaultAlarm TRUE = new ImmutableDefaultAlarm("TRUE", null);
-
+  
   public static final DefaultAlarm FALSE = new ImmutableDefaultAlarm("FALSE", null);
-
+    
   public DefaultAlarm(PropertyFactory factory) {
     super(PROPERTY_NAME, factory);
   }
@@ -81,27 +81,26 @@ public class DefaultAlarm extends Property implements Escapable {
 
   @Override
   public void validate() throws ValidationException {
-      // Nothing
   }
 
   @Override
   public String getValue() {
     return value;
   }
-
+  
   private static final class ImmutableDefaultAlarm extends DefaultAlarm {
     private static final long serialVersionUID = -2054338254L;
 
     private ImmutableDefaultAlarm(String value) {
       super(new ParameterList(true), value);
     }
-
+    
     @Override
     public void setValue(String aValue) {
       throw new UnsupportedOperationException("Cannot modify constant instances");
     }
-
-    ImmutableDefaultAlarm(String s, @SuppressWarnings("unused") ImmutableDefaultAlarm immutableclazz) {
+    
+    ImmutableDefaultAlarm(String s, ImmutableDefaultAlarm immutableclazz) {
       this(s);
     }
   }
@@ -109,10 +108,6 @@ public class DefaultAlarm extends Property implements Escapable {
   private static class Factory implements PropertyFactory {
 
     private static final long serialVersionUID = 2099427445505899578L;
-
-    Factory() {
-        super();
-    }
 
     @Override
     public Property createProperty(String name) {

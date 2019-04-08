@@ -67,21 +67,21 @@ public class SMSAlarmConfig {
      * With this property the admin can configure the average time needed by the sms system to send out the sms.
      * This way the sms should usually be send out on time and not a few seconds late.
      */
-    public static final Property SMS_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", Integer.valueOf(0));
+    public static final Property SMS_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
 
     /**
      * Enabled or disables sms alarms.
      */
-    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", Boolean.FALSE);
+    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", false);
 
     /**
      * The amount of sms allowed to be sent in a given timeframe (see {@link #SMS_LIMIT_TIME_FRAME})
      */
-    public static final Property SMS_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", Integer.valueOf(50));
+    public static final Property SMS_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", 50);
 
     /**
      * The timeframe in milliseconds used for the amount limit (see {@link #SMS_LIMIT_AMOUNT}
      */
-    public static final Property SMS_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", Long.valueOf(60000l));
+    public static final Property SMS_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", 60000l);
 
 }

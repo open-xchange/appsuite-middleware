@@ -112,15 +112,14 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
          * load original event data & alarms
          */
         Event originalEvent = loadEventData(objectId);
-        RecurrenceId recId = recurrenceId;
         List<Event> exceptions = null;
-        if (null != recId) {
+        if (null != recurrenceId) {
             if (isSeriesMaster(originalEvent)) {
-                recId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recId);
-                Event originalExceptionEvent = loadExceptionData(originalEvent, recId);
+                recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
+                Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
                 originalEvent = originalExceptionEvent;
             } else if (false == isSeriesException(originalEvent)) {
-                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(objectId, recId);
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(objectId, recurrenceId);
             }
         } else {
             if (isSeriesMaster(originalEvent)) {
@@ -147,7 +146,7 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
                     updateAlarms(entry.getKey(), calendarUserId, entry.getKey().getAlarms(), entry.getValue());
                 }
             }
-
+            
             touch(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, loadEventData(originalEvent.getId()));
         }
