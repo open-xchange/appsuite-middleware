@@ -71,6 +71,7 @@ public class CopyTest extends AbstractContactTest {
         compareObject(firstContact, secondContact, false);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

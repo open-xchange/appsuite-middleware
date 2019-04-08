@@ -90,7 +90,7 @@ public class DistListTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testCreateWithContactWithoutEMail() throws OXException {
+    public void testCreateWithContactWithoutEMail() {
         /*
          * create contact
          */

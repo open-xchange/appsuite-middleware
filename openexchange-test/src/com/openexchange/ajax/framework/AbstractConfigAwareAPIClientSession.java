@@ -161,4 +161,13 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
     protected String getReloadables() {
         return null;
     }
+    
+    /**
+     * Gets the default user id
+     *
+     * @return The user id
+     */
+    protected int getUserId() {
+        return apiClient.getUserId().intValue();
+    }
 }

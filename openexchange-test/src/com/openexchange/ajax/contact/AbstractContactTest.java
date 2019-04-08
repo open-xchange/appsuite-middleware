@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -116,8 +117,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
     public static final byte[] image = { -119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1, 0, 0, 0, 1, 1, 3, 0, 0, 0, 37, -37, 86, -54, 0, 0, 0, 6, 80, 76, 84, 69, -1, -1, -1, -1, -1, -1, 85, 124, -11, 108, 0, 0, 0, 1, 116, 82, 78, 83, 0, 64, -26, -40, 102, 0, 0, 0, 1, 98, 75, 71, 68, 0, -120, 5, 29, 72, 0, 0, 0, 9, 112, 72, 89, 115, 0, 0, 11, 18, 0, 0, 11, 18, 1, -46, -35, 126, -4, 0, 0, 0, 10, 73, 68, 65, 84, 120, -38, 99, 96, 0, 0, 0, 2, 0, 1, -27, 39, -34, -4, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126 };
 
-    protected final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.ANNIVERSARY, Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES, Contact.BUSINESS_CATEGORY, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.COLOR_LABEL, Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER, Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.INFO, Contact.INSTANT_MESSENGER1, Contact.INSTANT_MESSENGER2, Contact.IMAGE1, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME, Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02, Contact.USERFIELD03, Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08, Contact.USERFIELD09, Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14, Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20, Contact.DEFAULT_ADDRESS, Contact.UID
-    };
+    protected final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.CATEGORIES, Contact.GIVEN_NAME, Contact.SUR_NAME, Contact.ANNIVERSARY, Contact.ASSISTANT_NAME, Contact.BIRTHDAY, Contact.BRANCHES, Contact.BUSINESS_CATEGORY, Contact.CELLULAR_TELEPHONE1, Contact.CELLULAR_TELEPHONE2, Contact.CITY_BUSINESS, Contact.CITY_HOME, Contact.CITY_OTHER, Contact.COLOR_LABEL, Contact.COMMERCIAL_REGISTER, Contact.COMPANY, Contact.COUNTRY_BUSINESS, Contact.COUNTRY_HOME, Contact.COUNTRY_OTHER, Contact.DEPARTMENT, Contact.DISPLAY_NAME, Contact.DISTRIBUTIONLIST, Contact.EMAIL1, Contact.EMAIL2, Contact.EMAIL3, Contact.EMPLOYEE_TYPE, Contact.FAX_BUSINESS, Contact.FAX_HOME, Contact.FAX_OTHER, Contact.INFO, Contact.INSTANT_MESSENGER1, Contact.INSTANT_MESSENGER2, Contact.IMAGE1, Contact.MANAGER_NAME, Contact.MARITAL_STATUS, Contact.MIDDLE_NAME, Contact.NICKNAME, Contact.NOTE, Contact.NUMBER_OF_CHILDREN, Contact.NUMBER_OF_EMPLOYEE, Contact.POSITION, Contact.POSTAL_CODE_BUSINESS, Contact.POSTAL_CODE_HOME, Contact.POSTAL_CODE_OTHER, Contact.PRIVATE_FLAG, Contact.PROFESSION, Contact.ROOM_NUMBER, Contact.SALES_VOLUME, Contact.SPOUSE_NAME, Contact.STATE_BUSINESS, Contact.STATE_HOME, Contact.STATE_OTHER, Contact.STREET_BUSINESS, Contact.STREET_HOME, Contact.STREET_OTHER, Contact.SUFFIX, Contact.TAX_ID, Contact.TELEPHONE_ASSISTANT, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2, Contact.TELEPHONE_CALLBACK, Contact.TELEPHONE_CAR, Contact.TELEPHONE_COMPANY, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.TELEPHONE_IP, Contact.TELEPHONE_ISDN, Contact.TELEPHONE_OTHER, Contact.TELEPHONE_PAGER, Contact.TELEPHONE_PRIMARY, Contact.TELEPHONE_RADIO, Contact.TELEPHONE_TELEX, Contact.TELEPHONE_TTYTDD, Contact.TITLE, Contact.URL, Contact.USERFIELD01, Contact.USERFIELD02, Contact.USERFIELD03, Contact.USERFIELD04, Contact.USERFIELD05, Contact.USERFIELD06, Contact.USERFIELD07, Contact.USERFIELD08, Contact.USERFIELD09, Contact.USERFIELD10, Contact.USERFIELD11, Contact.USERFIELD12, Contact.USERFIELD13, Contact.USERFIELD14, Contact.USERFIELD15, Contact.USERFIELD16, Contact.USERFIELD17, Contact.USERFIELD18, Contact.USERFIELD19, Contact.USERFIELD20, Contact.DEFAULT_ADDRESS, Contact.UID };
 
     protected int contactFolderId = -1;
 
@@ -170,7 +170,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
     protected void compareObject(final Contact contactObj1, final Contact contactObj2, boolean compareUID) throws Exception {
         assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
         assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
-        assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
+        assertTrue("private flag is not equals", contactObj1.getPrivateFlag() == contactObj2.getPrivateFlag());
         OXTestToolkit.assertEqualsAndNotNull("categories is not equals", contactObj1.getCategories(), contactObj2.getCategories());
         OXTestToolkit.assertEqualsAndNotNull("given name is not equals", contactObj1.getGivenName(), contactObj2.getGivenName());
         OXTestToolkit.assertEqualsAndNotNull("surname is not equals", contactObj1.getSurName(), contactObj2.getSurName());
@@ -263,21 +263,19 @@ public class AbstractContactTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("userfield18 is not equals", contactObj1.getUserField18(), contactObj2.getUserField18());
         OXTestToolkit.assertEqualsAndNotNull("userfield19 is not equals", contactObj1.getUserField19(), contactObj2.getUserField19());
         OXTestToolkit.assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
-        OXTestToolkit.assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
-        OXTestToolkit.assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
+        assertTrue("number of attachments is not equals", contactObj1.getNumberOfAttachments() == contactObj2.getNumberOfAttachments());
+        assertTrue("default address is not equals", contactObj1.getDefaultAddress() == contactObj2.getDefaultAddress());
         if (compareUID) {
             OXTestToolkit.assertEqualsAndNotNull("uid is not equals", contactObj1.getUid(), contactObj2.getUid());
         }
 
-        //        OXTestToolkit.assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
         OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
     }
 
-    protected Contact createContactObject(final String displayname) {
+    protected Contact createContactObject() {
         final Contact contactObj = new Contact();
         contactObj.setSurName("Meier");
         contactObj.setGivenName("Herbert");
-        //contactObj.setDisplayName(displayname);
         contactObj.setStreetBusiness("Franz-Meier Weg 17");
         contactObj.setCityBusiness("Test Stadt");
         contactObj.setStateBusiness("NRW");
@@ -391,7 +389,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
 
         contactObj.setParentFolderID(contactFolderId);
 
-        final Contact link1 = createContactObject("link1");
+        final Contact link1 = createContactObject();
         final int linkId1 = insertContact(link1);
         link1.setObjectID(linkId1);
 
@@ -522,7 +520,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             if (null != inputStream) {
                 try {
                     inputStream.close();
-                } catch (final Exception e) {
+                } catch (@SuppressWarnings("unused") final Exception e) {
                     // Ignore
                 }
             }
@@ -549,7 +547,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             if (null != inputStream) {
                 try {
                     inputStream.close();
-                } catch (final Exception e) {
+                } catch (@SuppressWarnings("unused") final Exception e) {
                     // Ignore
                 }
             }
@@ -1103,7 +1101,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
                 break;
             case Contact.DISTRIBUTIONLIST:
                 if (!jsonArray.isNull(pos)) {
-                    contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
+                    contactObj.setDistributionList(parseDistributionList(jsonArray.getJSONArray(pos)));
                 }
                 break;
             case Contact.USE_COUNT:
@@ -1122,7 +1120,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         }
     }
 
-    private DistributionListEntryObject[] parseDistributionList(final Contact contactObj, final JSONArray jsonArray) throws Exception {
+    private DistributionListEntryObject[] parseDistributionList(final JSONArray jsonArray) throws Exception {
         final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jsonArray.length()];
         for (int a = 0; a < jsonArray.length(); a++) {
             final JSONObject entry = jsonArray.getJSONObject(a);
@@ -1147,7 +1145,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return distributionlist;
     }
 
-    private HashSet<?> distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
+    private HashSet<?> distributionlist2String(final DistributionListEntryObject[] distributionListEntry) {
         if (distributionListEntry == null) {
             return null;
         }
@@ -1161,7 +1159,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return hs;
     }
 
-    private String entry2String(final DistributionListEntryObject entry) throws Exception {
+    private String entry2String(final DistributionListEntryObject entry) {
         final StringBuffer sb = new StringBuffer();
         sb.append("ID" + entry.getEntryID());
         sb.append("D" + entry.getDisplayname());

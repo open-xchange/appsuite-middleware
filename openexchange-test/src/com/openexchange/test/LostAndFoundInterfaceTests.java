@@ -74,7 +74,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.contact.Bug19984Test.class,
     com.openexchange.ajax.contact.GetTest.class,
     com.openexchange.ajax.contact.ManagedSearchTests.class,
-    com.openexchange.ajax.contact.TermSearchTest.class,
     com.openexchange.ajax.conversion.Bug20758Test.class,
     com.openexchange.ajax.conversion.ICalMailPartImportTest.class,
     com.openexchange.ajax.conversion.IMipImportTest.class,

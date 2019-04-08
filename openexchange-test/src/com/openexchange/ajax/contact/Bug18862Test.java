@@ -69,7 +69,7 @@ public class Bug18862Test extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testUploadTooLargeImage() throws Exception {
+    public void testUploadTooLargeImage() {
         final Contact contact = super.generateContact();
         contact.setImage1(new byte[IMAGE_SIZE]);
         contact.setImageContentType("image/jpg");

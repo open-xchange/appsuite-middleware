@@ -13,6 +13,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
     protected static final String YOMI_FIRST_NAME = "\u660e\u65e5\u9999";
     private Contact contact;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -42,7 +43,7 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
     @Test
     public void testFindWithContactSearchObject() {
         ContactSearchObject search = new ContactSearchObject();
-        search.setFolder(folderID);
+        search.addFolder(folderID);
         String b = YOMI_LAST_NAME;
         search.setGivenName(b);
         search.setSurname(b);

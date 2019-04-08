@@ -74,7 +74,7 @@ import com.openexchange.tools.arrays.Arrays;
 public class AllTest extends AbstractManagedContactTest {
 
     @Test
-    public void testAll() throws Exception {
+    public void testAll() {
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID };
         Contact[] contacts = cotm.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
         assertNotNull("got no contacts", contacts);
@@ -83,7 +83,7 @@ public class AllTest extends AbstractManagedContactTest {
 
     // Node 2652    @Test
     @Test
-    public void testLastModifiedUTC() throws Exception {
+    public void testLastModifiedUTC() {
         cotm.newAction(generateContact("testLastModifiedUTC1"), generateContact("testLastModifiedUTC2"), generateContact("testLastModifiedUTC3"));
         int columnIDs[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
         Contact[] contacts = cotm.allAction(folderID, columnIDs);
@@ -109,10 +109,10 @@ public class AllTest extends AbstractManagedContactTest {
         Contact[] allContactsDefault = cotm.allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs);
         assertNotNull("got no contacts", allContactsDefault);
         assertTrue("got no contacts", 0 < allContactsDefault.length);
-        Contact[] allContactsWithAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, true);
+        Contact[] allContactsWithAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, Boolean.TRUE);
         assertNotNull("got no contacts", allContactsWithAdmin);
         assertTrue("got no contacts", 0 < allContactsWithAdmin.length);
-        Contact[] allContactsWithoutAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, false);
+        Contact[] allContactsWithoutAdmin = allAction(FolderObject.SYSTEM_LDAP_FOLDER_ID, columnIDs, Boolean.FALSE);
         assertNotNull("got no contacts", allContactsWithoutAdmin);
         assertTrue("got no contacts", 0 < allContactsWithoutAdmin.length);
         /*
@@ -182,7 +182,7 @@ public class AllTest extends AbstractManagedContactTest {
         @Override
         public Parameter[] getParameters() {
             Parameter[] params = super.getParameters();
-            return null != admin ? Arrays.add(params, new Parameter("admin", admin)) : params;
+            return null != admin ? Arrays.add(params, new Parameter("admin", admin.booleanValue())) : params;
         }
 
     }

@@ -59,6 +59,7 @@ public class Bug13915FileAsViaJSON extends AbstractManagedContactTest {
 
     private Contact contact;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -64,6 +64,12 @@ import com.openexchange.groupware.container.Contact;
  */
 public class EmptyEmailTest extends AbstractContactTest {
 
+    private static final String GIVEN_NAME = "Hans";
+    private static final String SUR_NAME = "Schmidt";
+    private static final String EMAIL1 = "email1@open-xchange.com";
+    private static final String EMAIL2 = "email2@open-xchange.com";
+    private static final String EMAIL3 = "email3@open-xchange.com";
+    
     /**
      * {@link EmptyEmailUpdateRequest} - Private inner class that let's us set empty emails during updates. Workaround needed because
      * DataWriter will always replace empty Strings with null which results in the field not being set in the JSONObject
@@ -173,9 +179,9 @@ public class EmptyEmailTest extends AbstractContactTest {
      */
     @Test
     public void testNewNull() throws Exception {
-        final Contact contactObj = createContactObject("Schmidt, Hans");
-        contactObj.setGivenName("Hans");
-        contactObj.setSurName("Schmidt");
+        final Contact contactObj = createContactObject();
+        contactObj.setGivenName(GIVEN_NAME);
+        contactObj.setSurName(SUR_NAME);
         insertContact(contactObj, null, null, null);
     }
 
@@ -186,9 +192,9 @@ public class EmptyEmailTest extends AbstractContactTest {
      */
     @Test
     public void testNewEmpty() throws Exception {
-        final Contact contactObj = createContactObject("Schmidt, Hans");
-        contactObj.setGivenName("Hans");
-        contactObj.setSurName("Schmidt");
+        final Contact contactObj = createContactObject();
+        contactObj.setGivenName(GIVEN_NAME);
+        contactObj.setSurName(SUR_NAME);
         insertContact(contactObj, "", "", "");
     }
 
@@ -199,9 +205,9 @@ public class EmptyEmailTest extends AbstractContactTest {
      */
     @Test
     public void testNewSpacy() throws Exception {
-        final Contact contactObj = createContactObject("Schmidt, Hans");
-        contactObj.setGivenName("Hans");
-        contactObj.setSurName("Schmidt");
+        final Contact contactObj = createContactObject();
+        contactObj.setGivenName(GIVEN_NAME);
+        contactObj.setSurName(SUR_NAME);
         insertContact(contactObj, "   ", "   ", "   ");
     }
 
@@ -212,12 +218,12 @@ public class EmptyEmailTest extends AbstractContactTest {
      */
     @Test
     public void testUpdateNull() throws Exception {
-        final Contact contactObj = createContactObject("Schmidt, Hans");
-        contactObj.setGivenName("Hans");
-        contactObj.setSurName("Schmidt");
-        contactObj.setEmail1("email1@open-xchange.com");
-        contactObj.setEmail2("email2@open-xchange.com");
-        contactObj.setEmail3("email3@open-xchange.com");
+        final Contact contactObj = createContactObject();
+        contactObj.setGivenName(GIVEN_NAME);
+        contactObj.setSurName(SUR_NAME);
+        contactObj.setEmail1(EMAIL1);
+        contactObj.setEmail2(EMAIL2);
+        contactObj.setEmail3(EMAIL3);
         int id = insertContact(contactObj);
         Contact loadedContact = loadContact(id, contactFolderId);
         updateContact(loadedContact, contactFolderId, null, null, null);
@@ -230,12 +236,12 @@ public class EmptyEmailTest extends AbstractContactTest {
      */
     @Test
     public void testUpdateEmpty() throws Exception {
-        final Contact contactObj = createContactObject("Schmidt, Hans");
-        contactObj.setGivenName("Hans");
-        contactObj.setSurName("Schmidt");
-        contactObj.setEmail1("email1@open-xchange.com");
-        contactObj.setEmail2("email2@open-xchange.com");
-        contactObj.setEmail3("email3@open-xchange.com");
+        final Contact contactObj = createContactObject();
+        contactObj.setGivenName(GIVEN_NAME);
+        contactObj.setSurName(SUR_NAME);
+        contactObj.setEmail1(EMAIL1);
+        contactObj.setEmail2(EMAIL2);
+        contactObj.setEmail3(EMAIL3);
         int id = insertContact(contactObj);
         Contact loadedContact = loadContact(id, contactFolderId);
         updateContact(loadedContact, contactFolderId, "", "", "");
@@ -248,12 +254,12 @@ public class EmptyEmailTest extends AbstractContactTest {
      */
     @Test
     public void testUpdateSpacy() throws Exception {
-        final Contact contactObj = createContactObject("Schmidt, Hans");
-        contactObj.setGivenName("Hans");
-        contactObj.setSurName("Schmidt");
-        contactObj.setEmail1("email1@open-xchange.com");
-        contactObj.setEmail2("email2@open-xchange.com");
-        contactObj.setEmail3("email3@open-xchange.com");
+        final Contact contactObj = createContactObject();
+        contactObj.setGivenName(GIVEN_NAME);
+        contactObj.setSurName(SUR_NAME);
+        contactObj.setEmail1(EMAIL1);
+        contactObj.setEmail2(EMAIL2);
+        contactObj.setEmail3(EMAIL3);
         int id = insertContact(contactObj);
         Contact loadedContact = loadContact(id, contactFolderId);
         updateContact(loadedContact, contactFolderId, "   ", "   ", "   ");
