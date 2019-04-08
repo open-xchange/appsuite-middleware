@@ -53,7 +53,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
- * {@link BundleClassResolver} - Uses the bundle to resolve classes by name.
+ * {@link BundleClassResolver} - Uses an OSGi bundle to resolve classes by name.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
@@ -64,6 +64,8 @@ public class BundleClassResolver implements ClassResolver {
 
     /**
      * Initializes a new {@link BundleClassResolver}.
+     *
+     * @param bundleContext The bundle context providing the associated bundle
      */
     public BundleClassResolver(BundleContext bundleContext) {
         this(bundleContext.getBundle());
@@ -71,6 +73,8 @@ public class BundleClassResolver implements ClassResolver {
 
     /**
      * Initializes a new {@link BundleClassResolver}.
+     *
+     * @param bundle The bundle to use to load a class (using bundle's class loader)
      */
     public BundleClassResolver(Bundle bundle) {
         super();
