@@ -109,6 +109,7 @@ public class BasicMailTest extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -573,6 +574,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         assertEquals("Wrong date conversion", origReceivedDate, foundReceivedDate);
     }
 
+    @Override
     protected List<ActiveFacet> prepareFacets() throws OXException, IOException, JSONException {
         return prepareFacets(testFolder.getFullName());
     }

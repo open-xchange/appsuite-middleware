@@ -118,6 +118,7 @@ public class BasicDriveTest extends AbstractFindTest {
     private static final String SEARCH = "BasicDriveTest";
     private static final String SUBFOLDER_SEARCH = "jpg";
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -205,7 +206,9 @@ public class BasicDriveTest extends AbstractFindTest {
         assertTrue("Nothing found in file size test", result.getSize() > 0);
         for (Document d : result.getDocuments()) {
             PropDocument file = (PropDocument) d;
-            assertTrue("File is too small", (Integer) file.getProps().get("file_size") >= 1024 * 1024);
+            Integer fileSize = (Integer) file.getProps().get("file_size");
+            assertNotNull("Missing property file_size", fileSize);
+            assertTrue("File is too small", fileSize.intValue() >= 1024 * 1024);
         }
     }
 
@@ -445,7 +448,7 @@ public class BasicDriveTest extends AbstractFindTest {
         facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getID(), Filter.NO_FILTER));
         List<PropDocument> documents = query(getClient(), facets);
         assertEquals("Wrong number of documents", 1, documents.size());
-        assertEquals("Wrong document", deletedDocument.getTitle(), (String) documents.get(0).getProps().get("title"));
+        assertEquals("Wrong document", deletedDocument.getTitle(), documents.get(0).getProps().get("title"));
 
         facets.clear();
         facets.add(ACCOUNT_FACET);
