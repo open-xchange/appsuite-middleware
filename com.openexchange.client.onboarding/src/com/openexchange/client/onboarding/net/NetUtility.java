@@ -128,7 +128,7 @@ public class NetUtility {
             try {
                 port = Integer.parseInt(hostName.substring(pos + 1));
             } catch (Exception e) {
-                throw new IllegalArgumentException("Unparseable port number in : " + hostNameString);
+                throw new IllegalArgumentException("Unparseable port number in : " + hostNameString, e);
             }
             hostName = hostName.substring(0, pos);
         }
