@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -124,10 +125,10 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     }
 
     private static ExecutorService executorService;
-    private static Random random;
+    static Random random;
 
     @BeforeClass
-    public static void beforeClass() throws Exception {
+    public static void beforeClass() {
         Config config = new Config();
         DynamicPortableFactoryImpl dynamicPortableFactory = new DynamicPortableFactoryImpl();
         dynamicPortableFactory.register(new PortableIDFactory());
@@ -359,7 +360,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
                     Thread.sleep(random.nextInt(500));
                     testResource.getPresence().setMessage(String.valueOf(j));
                     set(testID, testResource);
-                    return j;
+                    return I(j);
                 }
             }
             );
