@@ -249,7 +249,7 @@ public class TimeoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Re
 
                     inputStream = httpConnection.getInputStream();
                     return getSyndFeedFromStream(inputStream, connection);
-                } catch (java.io.IOException e) {
+                } catch (@SuppressWarnings("unused") java.io.IOException e) {
                     handleErrorCodes(((HttpURLConnection) connection).getResponseCode());
                 } finally {
                     Streams.close(inputStream);

@@ -140,7 +140,7 @@ public class DependencyResolver {
 				if (in != null) {
 					try {
 						in.close();
-					} catch (IOException e) {
+					} catch (@SuppressWarnings("unused") IOException e) {
 						// IGNORE
 					}
 				}

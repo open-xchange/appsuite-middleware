@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -104,7 +105,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
         if (!isEnabled(session)) {
-            LOG.debug("Fast-crypt token not enabled for user {} in context {}", session.getUserId(), session.getContextId());
+            LOG.debug("Fast-crypt token not enabled for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
             return null;
         }
 
@@ -138,7 +139,7 @@ public class FastSecretInconsistencyDetector implements SecretInconsistencyDetec
 
             return property.get().booleanValue();
         } catch (OXException e) {
-            LOG.error("Failed to checked if fast-crypt token is enabled for user {} in context {}", session.getUserId(), session.getContextId(), e);
+            LOG.error("Failed to checked if fast-crypt token is enabled for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
             return def;
         }
     }

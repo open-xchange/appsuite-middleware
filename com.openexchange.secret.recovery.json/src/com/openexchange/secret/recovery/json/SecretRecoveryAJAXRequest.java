@@ -99,7 +99,7 @@ public final class SecretRecoveryAJAXRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -109,7 +109,9 @@ public final class SecretRecoveryAJAXRequest {
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
-        return (V) request.getData();
+        @SuppressWarnings("unchecked")
+        V retval = (V) request.getData();
+        return retval;
     }
 
     public Date getDate(final String name) throws OXException {
@@ -120,7 +122,7 @@ public final class SecretRecoveryAJAXRequest {
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -132,7 +134,7 @@ public final class SecretRecoveryAJAXRequest {
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -159,7 +161,7 @@ public final class SecretRecoveryAJAXRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -186,7 +188,7 @@ public final class SecretRecoveryAJAXRequest {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
             }
         }
         return ret;
