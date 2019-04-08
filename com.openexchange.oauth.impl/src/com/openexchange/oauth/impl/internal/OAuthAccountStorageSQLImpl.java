@@ -871,7 +871,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             }
 
             if (Strings.isEmpty(account.getSecret())) {
-                LOG.debug("The account {} of user in context has an empty secret", accountId, session.getUserId(), session.getContextId());
+                LOG.debug("The account {} of user {} in context {} has an empty secret", accountId, session.getUserId(), session.getContextId());
             }
 
             account.setMetaData(registry.getService(rs.getString(4), userId, contextId));
