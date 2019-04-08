@@ -110,8 +110,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertTrue(flags.contains(FlagsEnum.SERIES));
             assertFalse(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
         /*
          * check series-related flags for each occurrence in 'get' response
@@ -123,8 +123,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertTrue(flags.contains(FlagsEnum.SERIES));
             assertFalse(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
     }
 
@@ -174,8 +174,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertFalse(flags.contains(FlagsEnum.SERIES));
             assertTrue(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
         /*
          * check series-related flags for each occurrence in 'get' response
@@ -187,8 +187,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertFalse(flags.contains(FlagsEnum.SERIES));
             assertTrue(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
     }
 

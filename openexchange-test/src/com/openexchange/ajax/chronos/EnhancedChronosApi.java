@@ -126,13 +126,10 @@ public class EnhancedChronosApi extends ChronosApi {
 
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "session", session));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "folder", folder));
-        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", Boolean.TRUE)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "ignore_conflicts", ignoreConflicts));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
-
-        if (json0 != null) {
-            localVarFormParams.put("json_0", json0);
-        }
+        localVarFormParams.put("json_0", json0);
 
         int index = 0;
         for (File file : files) {
@@ -215,18 +212,13 @@ public class EnhancedChronosApi extends ChronosApi {
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "session", session));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "folder", folder));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "id", id));
-        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", true)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
+        localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "plainJson", Boolean.TRUE)); //Set this parameter explicitly to 'true' to return a regular json object instead of text/html
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "recurrenceId", recurrenceId));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "ignore_conflicts", ignoreConflicts));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "sendInternalNotifications", sendInternalNotifications));
         localVarQueryParams.addAll(enhancedApiClient.parameterToPairs("", "timestamp", timestamp));
-
-        if (json0 != null) {
-            localVarFormParams.put("json_0", json0);
-        }
-        if (file0 != null) {
-            localVarFormParams.put("file_0", file0);
-        }
+        localVarFormParams.put("json_0", json0);
+        localVarFormParams.put("file_0", file0);
 
         final String[] localVarAccepts = { "application/json" };
         final String localVarAccept = enhancedApiClient.selectHeaderAccept(localVarAccepts);

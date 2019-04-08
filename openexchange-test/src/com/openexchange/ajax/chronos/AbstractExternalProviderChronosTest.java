@@ -150,22 +150,6 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     }
 
     /**
-     * Mocks an external provider request with the specified URI, response content/payload, status code and response headers
-     * 
-     * @param uri The URI of the external source
-     * @param responseContent The response content/payload
-     * @param httpStatus The response status code
-     * @param responseHeaders the response headers
-     * @param delay The simulated delay/response time
-     * @throws OXException if an error is occurred
-     * @throws IOException if an I/O error is occurred
-     * @throws JSONException if a JSON error is occurred
-     */
-    protected void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
-        mock(MockRequestMethod.GET, uri, responseContent, httpStatus, responseHeaders, 0);
-    }
-
-    /**
      * Mocks an external provider request with the specified URI, response content/payload,
      * status code, response headers and simulated response time
      * 
@@ -200,7 +184,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    protected FolderData createFolder(String folderName, String module, JSONObject config, JSONObject extendedProperties) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
+    protected FolderData createFolder(String folderName, String module, JSONObject config, JSONObject extendedProperties) throws ApiException, ChronosApiException, JsonParseException, JsonMappingException, IOException {
         String folderId = folderManager.createFolder(module, providerId, folderName, config, new JSONObject());
         assertNotNull("No folder identifier returned", folderId);
         return assertFolderData(folderManager.getFolder(folderId), folderName, config, extendedProperties);
