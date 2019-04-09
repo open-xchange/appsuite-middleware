@@ -255,7 +255,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         return location;
     }
 
-    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache) throws OXException {
+    private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache) {
         String ipAddress = s.getLocalIp();
         try {
             InetAddress address = InetAddress.getByName(ipAddress);
@@ -270,7 +270,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
                 }
                 return SessionManagementStrings.INTRANET_LOCATION;
             }
-        } catch (UnknownHostException e) {
+        } catch (@SuppressWarnings("unused") UnknownHostException e) {
             // ignore and try geolocation service
         }
 

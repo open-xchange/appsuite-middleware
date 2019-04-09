@@ -126,7 +126,7 @@ public class DefaultManagedSession implements ManagedSession {
 
             try {
                 return Long.parseLong(oNumber.toString());
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 // Cannot be parsed to a long value
                 return 0L;
             }
