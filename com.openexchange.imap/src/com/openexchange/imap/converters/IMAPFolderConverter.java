@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.converters;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -466,7 +468,7 @@ public final class IMAPFolderConverter {
                 } else {
                     mailFolder.setSupportsUserFlags(false);
                 }
-                LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, System.currentTimeMillis() - st);
+                LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, L(System.currentTimeMillis() - st));
                 return mailFolder;
             }
         } catch (final MessagingException e) {
@@ -648,7 +650,7 @@ public final class IMAPFolderConverter {
                     userPermAdded = true;
                     final Rights aclRights = acl.getRights();
                     if (!ownRights.equals(aclRights)) {
-                        LOG.debug("Detected different rights for MYRIGHTS ({}) and GETACL ({}) for user {} in context {}. Preferring GETACL rights as user''s own-rights.", ownRights, aclRights, session.getUserId(), session.getContextId());
+                        LOG.debug("Detected different rights for MYRIGHTS ({}) and GETACL ({}) for user {} in context {}. Preferring GETACL rights as user''s own-rights.", ownRights, aclRights, I(session.getUserId()), I(session.getContextId()));
                         final MailPermission ownPermission = mailFolder.getOwnPermission();
                         if (ownPermission instanceof ACLPermission) {
                             ((ACLPermission) ownPermission).parseRights(aclRights, imapConfig);
