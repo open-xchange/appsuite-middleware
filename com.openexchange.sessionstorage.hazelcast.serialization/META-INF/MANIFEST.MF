@@ -28,6 +28,7 @@ Import-Package: com.hazelcast.config,
  org.apache.commons.lang,
  org.apache.commons.lang.exception,
  org.apache.commons.logging,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
