@@ -84,15 +84,15 @@ public class UCSSamlExceptionHandler implements ExceptionHandler {
 
     @Override
     public void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendRedirect(httpRequest, httpResponse, exception, redirectUri);
+        sendRedirect(httpResponse, exception, redirectUri);
     }
 
     @Override
     public void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendRedirect(httpRequest, httpResponse, exception, failureLogoutRedirectUrl);
+        sendRedirect(httpResponse, exception, failureLogoutRedirectUrl);
     }
 
-    private void sendRedirect(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception, String redirectUri) {
+    private void sendRedirect(HttpServletResponse httpResponse, OXException exception, String redirectUri) {
         Tools.disableCaching(httpResponse);
         try {
             httpResponse.sendRedirect(redirectUri);

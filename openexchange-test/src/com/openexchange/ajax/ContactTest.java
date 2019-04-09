@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -84,6 +85,7 @@ public class ContactTest extends AbstractAJAXSession {
     protected int userId = 0;
 
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -119,7 +121,7 @@ public class ContactTest extends AbstractAJAXSession {
     protected void compareObject(final Contact contactObj1, final Contact contactObj2) throws Exception {
         assertEquals("id is not equals", contactObj1.getObjectID(), contactObj2.getObjectID());
         assertEquals("folder id is not equals", contactObj1.getParentFolderID(), contactObj2.getParentFolderID());
-        assertEquals("private flag is not equals", contactObj1.getPrivateFlag(), contactObj2.getPrivateFlag());
+        assertTrue("private flag is not equals", contactObj1.getPrivateFlag() == contactObj2.getPrivateFlag());
         OXTestToolkit.assertEqualsAndNotNull("categories is not equals", contactObj1.getCategories(), contactObj2.getCategories());
         OXTestToolkit.assertEqualsAndNotNull("given name is not equals", contactObj1.getGivenName(), contactObj2.getGivenName());
         OXTestToolkit.assertEqualsAndNotNull("surname is not equals", contactObj1.getSurName(), contactObj2.getSurName());
@@ -212,13 +214,13 @@ public class ContactTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("userfield18 is not equals", contactObj1.getUserField18(), contactObj2.getUserField18());
         OXTestToolkit.assertEqualsAndNotNull("userfield19 is not equals", contactObj1.getUserField19(), contactObj2.getUserField19());
         OXTestToolkit.assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
-        OXTestToolkit.assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
-        OXTestToolkit.assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
+        assertEquals("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
+        assertEquals("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
 
         OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
     }
 
-    protected Contact createContactObject(final String displayname) {
+    protected Contact createContactObject(@SuppressWarnings("unused") final String displayname) {
         final Contact contactObj = new Contact();
         contactObj.setSurName("Meier");
         contactObj.setGivenName("Herbert");
@@ -901,7 +903,7 @@ public class ContactTest extends AbstractAJAXSession {
                 break;
             case Contact.DISTRIBUTIONLIST:
                 if (!jsonArray.isNull(pos)) {
-                    contactObj.setDistributionList(parseDistributionList(contactObj, jsonArray.getJSONArray(pos)));
+                    contactObj.setDistributionList(parseDistributionList(jsonArray.getJSONArray(pos)));
                 }
                 break;
             case Contact.USE_COUNT:
@@ -915,7 +917,7 @@ public class ContactTest extends AbstractAJAXSession {
         }
     }
 
-    private static DistributionListEntryObject[] parseDistributionList(final Contact contactObj, final JSONArray jsonArray) throws Exception {
+    private static DistributionListEntryObject[] parseDistributionList(final JSONArray jsonArray) throws Exception {
         final DistributionListEntryObject[] distributionlist = new DistributionListEntryObject[jsonArray.length()];
         for (int a = 0; a < jsonArray.length(); a++) {
             final JSONObject entry = jsonArray.getJSONObject(a);
@@ -940,7 +942,7 @@ public class ContactTest extends AbstractAJAXSession {
         return distributionlist;
     }
 
-    private HashSet<String> distributionlist2String(final DistributionListEntryObject[] distributionListEntry) throws Exception {
+    private HashSet<String> distributionlist2String(final DistributionListEntryObject[] distributionListEntry) {
         if (distributionListEntry == null) {
             return null;
         }
@@ -954,7 +956,7 @@ public class ContactTest extends AbstractAJAXSession {
         return hs;
     }
 
-    private String entry2String(final DistributionListEntryObject entry) throws Exception {
+    private String entry2String(final DistributionListEntryObject entry) {
         final StringBuffer sb = new StringBuffer();
         sb.append("ID" + entry.getEntryID());
         sb.append("D" + entry.getDisplayname());

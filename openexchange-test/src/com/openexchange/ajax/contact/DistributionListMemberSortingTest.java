@@ -92,7 +92,7 @@ public class DistributionListMemberSortingTest extends AbstractApiClientContactT
         
         contactObj = new ContactData();
         contactObj.setDisplayName("DistributionList");
-        contactObj.setMarkAsDistributionlist(true);
+        contactObj.setMarkAsDistributionlist(Boolean.TRUE);
         List<DistributionListMember> members = new ArrayList<>();
         members.add(getMemberFromContact(contact1));
         members.add(getMemberFromContact(contact2));

@@ -49,13 +49,12 @@
 
 package com.openexchange.ajax.find;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -84,7 +83,6 @@ import com.openexchange.find.facet.FilterBuilder;
 import com.openexchange.find.facet.Option;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.i18n.I18nServiceRegistry;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.test.FolderTestManager;
 
 /**
@@ -111,6 +109,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -120,6 +119,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         i18nServiceRegistry = mock(I18nServiceRegistry.class);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -140,6 +140,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets) throws Exception {
         QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier());
         QueryResponse queryResponse = getClient().execute(queryRequest);
+        assertNull(queryResponse.getErrorMessage());
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
         List<Document> documents = result.getDocuments();

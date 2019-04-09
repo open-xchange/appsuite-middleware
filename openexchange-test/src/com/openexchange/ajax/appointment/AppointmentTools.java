@@ -75,11 +75,11 @@ public final class AppointmentTools extends ParticipantTools {
         assertEqualsAndNotNull("location is not equals", appointmentObj1.getLocation(), appointmentObj2.getLocation());
         assertEquals("shown_as is not equals", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
         assertEquals("folder id is not equals", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
-        assertEquals("private flag is not equals", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
-        assertEquals("full time is not equals", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
+        assertTrue("private flag is not equals", appointmentObj1.getPrivateFlag() == appointmentObj2.getPrivateFlag());
+        assertTrue("full time is not equals", appointmentObj1.getFullTime() == appointmentObj2.getFullTime());
         assertEquals("label is not equals", appointmentObj1.getLabel(), appointmentObj2.getLabel());
         assertEquals("alarm is not equals", appointmentObj1.getAlarm(), appointmentObj2.getAlarm());
-        assertEquals("alarm flag is not equals", appointmentObj1.getAlarmFlag(), appointmentObj2.getAlarmFlag());
+        assertTrue("alarm flag is not equals", appointmentObj1.getAlarmFlag() == appointmentObj2.getAlarmFlag());
         assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(), appointmentObj2.getRecurrenceType());
         assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2.getInterval());
         assertEquals("days", appointmentObj1.getDays(), appointmentObj2.getDays());

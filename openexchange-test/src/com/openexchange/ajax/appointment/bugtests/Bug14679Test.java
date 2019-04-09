@@ -30,6 +30,7 @@ public class Bug14679Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -74,7 +75,7 @@ public class Bug14679Test extends AbstractAJAXSession {
         Object[][] objects = allResponse.getArray();
         int count = 0;
         for (Object[] object : objects) {
-            if ((Integer) object[0] == appointment.getObjectID()) {
+            if (((Integer) object[0]).intValue() == appointment.getObjectID()) {
                 count++;
             }
         }
@@ -82,6 +83,7 @@ public class Bug14679Test extends AbstractAJAXSession {
         assertEquals("Wrong amount of occurrences.", 5, count);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.BodyParser;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveService;
@@ -89,7 +90,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class,
+        return new Class<?>[] { DriveService.class, DriveEventService.class, LeanConfigurationService.class,
             ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class,
             ShareNotificationService.class, DatabaseService.class, ShareService.class
         };

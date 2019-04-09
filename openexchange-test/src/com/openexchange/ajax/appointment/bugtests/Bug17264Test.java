@@ -98,6 +98,7 @@ public class Bug17264Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -127,35 +128,28 @@ public class Bug17264Test extends AbstractAJAXSession {
         InsertRequest insertRequest = new InsertRequest(appointment, clientA.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientA.execute(insertRequest);
         insertResponse.fillObject(appointment);
-        checkAlarm(30, 0);
-
-        //        appointment.setAlarm(45);
-        //        appointment.setParentFolderID(clientA.getValues().getPrivateAppointmentFolder());
-        //        UpdateRequest updateRequest = new UpdateRequest(appointment, clientA.getValues().getTimeZone());
-        //        UpdateResponse updateResponse = clientA.execute(updateRequest);
-        //        updateResponse.fillObject(appointment);
-        //        checkAlarm(45, 0);
+        checkAlarm(30);
 
         appointment.setAlarm(60);
         appointment.setParentFolderID(folder.getObjectID());
         UpdateRequest updateRequest = new UpdateRequest(appointment, clientA.getValues().getTimeZone());
         UpdateResponse updateResponse = clientA.execute(updateRequest);
         updateResponse.fillObject(appointment);
-        checkAlarm(60, 0);
+        checkAlarm(60);
 
         appointment.setAlarm(120);
         appointment.setParentFolderID(folder.getObjectID());
         updateRequest = new UpdateRequest(appointment, clientB.getValues().getTimeZone());
         updateResponse = clientB.execute(updateRequest);
         updateResponse.fillObject(appointment);
-        checkAlarm(120, 0);
+        checkAlarm(120);
 
         appointment.setAlarm(5);
         appointment.setParentFolderID(clientB.getValues().getPrivateAppointmentFolder());
         updateRequest = new UpdateRequest(appointment, clientB.getValues().getTimeZone());
         updateResponse = clientB.execute(updateRequest);
         updateResponse.fillObject(appointment);
-        checkAlarm(120, 5);
+        checkAlarm(120);
     }
 
     @Test
@@ -166,23 +160,24 @@ public class Bug17264Test extends AbstractAJAXSession {
         InsertRequest insertRequest = new InsertRequest(appointment, clientB.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = clientB.execute(insertRequest);
         insertResponse.fillObject(appointment);
-        checkAlarm(240, 0);
+        checkAlarm(240);
     }
 
-    private void checkAlarm(int alarmA, int alarmB) throws Exception {
+    private void checkAlarm(int alarmA) throws Exception {
         //checkAlarm(clientA, clientA.getValues().getPrivateAppointmentFolder(), alarmA);
-        checkAlarm(clientA, folder.getObjectID(), alarmA);
+        checkAlarm(folder.getObjectID(), alarmA);
         //checkAlarm(clientB, clientB.getValues().getPrivateAppointmentFolder(), alarmB);
-        checkAlarm(clientB, folder.getObjectID(), alarmA);
+        checkAlarm(folder.getObjectID(), alarmA);
     }
 
-    private void checkAlarm(AJAXClient client, int folderId, int alarm) throws Exception {
+    private void checkAlarm(int folderId, int alarm) throws Exception {
         GetRequest getRequest = new GetRequest(folderId, appointment.getObjectID());
         GetResponse getResponse = clientA.execute(getRequest);
         Appointment app = getResponse.getAppointment(clientA.getValues().getTimeZone());
         assertEquals("Wrong alarm value", alarm, app.getAlarm());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

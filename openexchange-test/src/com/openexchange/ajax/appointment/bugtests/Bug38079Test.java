@@ -81,6 +81,7 @@ public class Bug38079Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -297,6 +298,7 @@ public class Bug38079Test extends AbstractAJAXSession {
         assertEquals("Wrong end for month " + (month + 1), D("16." + (month + 1) + "." + year + " 09:00", tz), loadedAppointment.getEndDate());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

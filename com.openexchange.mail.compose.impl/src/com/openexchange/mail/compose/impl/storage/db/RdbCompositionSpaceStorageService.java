@@ -105,7 +105,7 @@ public class RdbCompositionSpaceStorageService extends AbstractCompositionSpaceS
     private void updateSafe(CompositionSpaceContainer ucs, CompositionSpaceDbStorage dbStorage) {
         try {
             dbStorage.updateCompositionSpace(ucs, false);
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore...
         }
     }

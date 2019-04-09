@@ -17,6 +17,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     private static final String BOB_MAIL2 = "bob@thebuilder.invalid";
     private static final String BOB_DEPARTMENT = "Department_" + new UID().toString();
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -58,7 +59,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     @Test
     public void testGuiLikeSearch() {
         ContactSearchObject search = new ContactSearchObject();
-        search.setFolder(folderID);
+        search.addFolder(folderID);
         String b = BOB_LASTNAME;
         search.setGivenName(b);
         search.setSurname(b);
@@ -76,7 +77,7 @@ public class ContactSearchTests extends AbstractManagedContactTest {
     @Test
     public void testExactMatch() {
         ContactSearchObject search = new ContactSearchObject();
-        search.setFolder(folderID);
+        search.addFolder(folderID);
         search.setOrSearch(true);
         search.setEmail1(ALICE_MAIL1);
         search.setEmail2(ALICE_MAIL1);

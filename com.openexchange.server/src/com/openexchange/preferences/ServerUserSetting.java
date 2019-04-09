@@ -75,29 +75,6 @@ public class ServerUserSetting {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServerUserSetting.class);
 
-    private static final Attribute<Boolean> CONTACT_COLLECT_ENABLED = new Attribute<Boolean>() {
-
-        @Override
-        public Boolean getAttribute(final ResultSet rs) throws SQLException {
-            return Boolean.valueOf(rs.getBoolean(getColumnName()));
-        }
-
-        @Override
-        public String getColumnName() {
-            return "contact_collect_enabled";
-        }
-
-        @Override
-        public void setAttribute(final PreparedStatement pstmt, final Boolean value) throws SQLException {
-            if (null == value) {
-                pstmt.setNull(1, Types.BOOLEAN);
-            } else {
-                pstmt.setBoolean(1, value.booleanValue());
-            }
-        }
-
-    };
-
     private static final Attribute<Integer> CONTACT_COLLECT_FOLDER = new Attribute<Integer>() {
 
         @Override

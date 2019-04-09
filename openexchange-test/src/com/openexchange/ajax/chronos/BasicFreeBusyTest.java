@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -84,15 +85,15 @@ import com.openexchange.testing.httpclient.models.FreeBusyTime;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicFreeBusyTest extends AbstractChronosTest {
 
+    @SuppressWarnings("hiding")
     private String folderId;
     private UserApi user2;
 
-    @SuppressWarnings("unchecked")
     private EventData createSingleEvent(String summary, long startDate, long endDate, List<Attendee> attendees) {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         if (attendees == null) {
-            singleEvent.setAttendees(Collections.singletonList(AttendeeFactory.createIndividual(this.apiClient.getUserId())));
+            singleEvent.setAttendees(Collections.singletonList(AttendeeFactory.createIndividual(I(apiClient.getUserId().intValue()))));
         } else {
             singleEvent.setAttendees(attendees);
         }
@@ -106,7 +107,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
+        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), getCalendaruser());
 
         // prepare second user
         user2 = new UserApi(generateApiClient(testUser2), generateEnhancedClient(testUser2), testUser2, false);
@@ -125,7 +126,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         EventData createEvent = createEvent("dayThree", day3, day3 + TimeUnit.HOURS.toMillis(1));
         createEvent("dayFive", day5, day5 + TimeUnit.HOURS.toMillis(1));
 
-        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(defaultUserApi.getCalUser()), createEvent.getId(), true);
+        ChronosFreeBusyResponse freeBusy = chronosApi.freebusy(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(day1).getValue(), DateTimeUtil.getZuluDateTime(nextWeek).getValue(), createAttendeesBody(getCalendaruser()), createEvent.getId(), Boolean.TRUE);
 
         assertEquals(freeBusy.getError(), null, freeBusy.getErrorDesc());
         assertNotNull(freeBusy.getData());
@@ -153,30 +154,30 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
                 Attendee att = new Attendee();
                 att.setCuType(CuTypeEnum.INDIVIDUAL);
                 if (user.containsId()) {
-                    att.setEntity(user.getUserId());
+                    att.setEntity(Integer.valueOf(user.getUserId()));
                 }
                 attendees.add(att);
             }
         }
         // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), false, false, false, null, null, null, false, null);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
         assertNull(createEvent.getErrorDesc(), createEvent.getError());
         assertNotNull(createEvent.getData());
         EventData event = createEvent.getData().getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolder(folderId);
-        rememberEventId(defaultUserApi, eventId);
-        setLastTimestamp(createEvent.getTimestamp());
+        rememberEventId(eventId);
+        setLastTimestamp(createEvent.getTimestamp().longValue());
         return event;
     }
 
     private FreeBusyBody createAttendeesBody(int... attendees) {
         FreeBusyBody b = new FreeBusyBody();
-        for (Integer i : attendees) {
+        for (int i : attendees) {
             Attendee attendee = new Attendee();
             attendee.setCuType(CuTypeEnum.INDIVIDUAL);
-            attendee.setEntity(i);
+            attendee.setEntity(Integer.valueOf(i));
             b.addAttendeesItem(attendee);
         }
         return b;

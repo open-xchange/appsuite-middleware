@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.alarm.sms;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -109,7 +108,7 @@ public class SMSNotificationService implements AlarmNotificationService {
         User user = userService.getUser(userId, contextId);
         String phoneNumber = getPhoneNumber(alarm, user.getLocale());
         if(phoneNumber == null) {
-            LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", I(userId), I(contextId));
+            LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
             return;
         }
         serviceLookup.getServiceSafe(SMSServiceSPI.class).sendMessage(new String[] { phoneNumber }, generateSMS(event, user), userId, contextId);

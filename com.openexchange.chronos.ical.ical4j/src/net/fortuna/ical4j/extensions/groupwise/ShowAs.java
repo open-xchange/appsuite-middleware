@@ -45,13 +45,13 @@ public class ShowAs extends Property {
     private static final long serialVersionUID = 1777126874405580074L;
 
     public static final String PROPERTY_NAME = "X-GWSHOW-AS";
-
+    
     public static final PropertyFactory FACTORY = new Factory();
-
+    
     public static final ShowAs BUSY = new ShowAs(new ParameterList(true), FACTORY, "BUSY");
-
+    
     private String value;
-
+    
     /**
      * @param factory
      */
@@ -97,16 +97,10 @@ public class ShowAs extends Property {
 
         private static final long serialVersionUID = 1L;
 
-        Factory() {
-            super();
-        }
-
-        @Override
         public Property createProperty(String name) {
             return new ShowAs(this);
         }
-
-        @Override
+        
         public Property createProperty(String name, ParameterList parameters, String value) {
             ShowAs property = null;
             if (BUSY.getValue().equals(value)) {

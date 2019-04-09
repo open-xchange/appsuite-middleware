@@ -57,7 +57,6 @@ import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.groupware.container.Contact;
@@ -70,7 +69,6 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug15317Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private TimeZone tz;
     private Contact userContact;
     private int contactId;
@@ -79,10 +77,10 @@ public class Bug15317Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         tz = getClient().getValues().getTimeZone();
         contactId = getClient().execute(new com.openexchange.ajax.config.actions.GetRequest(Tree.ContactID)).getInteger();
         GetResponse response = getClient().execute(new GetRequest(FolderObject.SYSTEM_LDAP_FOLDER_ID, contactId, tz));

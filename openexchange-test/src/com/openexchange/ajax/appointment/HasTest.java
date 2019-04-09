@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import java.util.Calendar;
 import java.util.Date;
@@ -73,6 +74,7 @@ public class HasTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,7 +112,7 @@ public class HasTest extends AbstractAJAXSession {
             final HasResponse hasR = getClient().execute(new HasRequest(start, end, tz));
             final boolean[] hasAppointments = hasR.getValues();
             assertEquals("Length of array of action has is wrong.", hasInterval, hasAppointments.length);
-            assertEquals("Inserted appointment not found in action has response.", hasAppointments[posInArray], true);
+            assertEquals("Inserted appointment not found in action has response.", B(hasAppointments[posInArray]), Boolean.TRUE);
         } finally {
             getClient().execute(new DeleteRequest(appointment));
         }
@@ -147,7 +149,7 @@ public class HasTest extends AbstractAJAXSession {
             final HasResponse hasR = getClient().execute(new HasRequest(start, end, tz));
             final boolean[] hasAppointments = hasR.getValues();
             assertEquals("Length of array of action has is wrong.", hasInterval, hasAppointments.length);
-            assertEquals("Inserted appointment not found in action has response.", hasAppointments[posInArray], true);
+            assertEquals("Inserted appointment not found in action has response.", B(hasAppointments[posInArray]), Boolean.TRUE);
         } finally {
             getClient().execute(new DeleteRequest(appointment));
         }

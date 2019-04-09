@@ -185,7 +185,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testMoveFolder() throws IOException, SAXException, JSONException, OXException {
+    public void testMoveFolder() throws IOException, JSONException, OXException {
         int parent01 = -1;
         int parent02 = -1;
         int moveFuid = -1;
@@ -257,7 +257,7 @@ public class FolderTest extends AbstractAJAXSession {
     // Node 2652
 
     @Test
-    public void testLastModifiedUTCInUpdates() throws JSONException, OXException, IOException, SAXException {
+    public void testLastModifiedUTCInUpdates() throws JSONException, OXException, IOException {
         // List known folder
         final UpdatesRequest updatesRequest = new UpdatesRequest(EnumAPI.OX_OLD, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
         final FolderUpdatesResponse response = Executor.execute(getClient(), updatesRequest);

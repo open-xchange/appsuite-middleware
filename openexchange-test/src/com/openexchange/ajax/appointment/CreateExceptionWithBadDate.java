@@ -69,6 +69,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     private Appointment series;
     private Appointment exception;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -92,7 +93,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     }
 
     @Test
-    public void testExcplicitWrongEndDate() throws Exception {
+    public void testExcplicitWrongEndDate() {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         exception.setEndDate(TimeTools.D("03.08.2016 09:00"));
         catm.update(exception);
@@ -102,7 +103,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     }
 
     @Test
-    public void testImplicitWrongEndDate() throws Exception {
+    public void testImplicitWrongEndDate() {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         catm.update(exception);
         assertTrue("Expected error.", catm.getLastResponse().hasError());
@@ -111,7 +112,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     }
 
     @Test
-    public void testExcplicitWrongStartDate() throws Exception {
+    public void testExcplicitWrongStartDate() {
         exception.setStartDate(TimeTools.D("03.08.2016 11:00"));
         exception.setEndDate(TimeTools.D("03.08.2016 07:00"));
         catm.update(exception);
@@ -121,7 +122,7 @@ public class CreateExceptionWithBadDate extends AbstractAJAXSession {
     }
 
     @Test
-    public void testImplicitWrongStartDate() throws Exception {
+    public void testImplicitWrongStartDate() {
         exception.setEndDate(TimeTools.D("03.08.2016 07:00"));
         catm.update(exception);
         assertTrue("Expected error.", catm.getLastResponse().hasError());

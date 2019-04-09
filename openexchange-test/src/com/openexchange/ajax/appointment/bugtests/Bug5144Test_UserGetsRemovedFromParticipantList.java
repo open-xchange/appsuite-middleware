@@ -71,7 +71,6 @@ public class Bug5144Test_UserGetsRemovedFromParticipantList extends ManagedAppoi
     @Test
     public void testIt() throws Exception {
         int uid1 = getClient().getValues().getUserId();
-        int uid2 = getClient2().getValues().getUserId();
 
         UserParticipant other = new UserParticipant(getClient2().getValues().getUserId());
         assertTrue(other.getIdentifier() > 0);

@@ -77,6 +77,7 @@ public class Bug19109Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -120,7 +121,7 @@ public class Bug19109Test extends AbstractAJAXSession {
         boolean found = false;
         Object[][] objects = allResponse.getArray();
         for (Object[] object : objects) {
-            if ((Integer) object[0] == appointment.getObjectID()) {
+            if (((Integer) object[0]).intValue() == appointment.getObjectID()) {
                 found = true;
             }
         }

@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
@@ -86,6 +85,7 @@ public class Bug13942Test extends AbstractAJAXSession {
 
     private AJAXClient clientB, clientC;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -117,6 +117,7 @@ public class Bug13942Test extends AbstractAJAXSession {
         updateAppointment.setAlarm(30);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -145,14 +146,14 @@ public class Bug13942Test extends AbstractAJAXSession {
 
     }
 
-    private AJAXClient getClientB() throws OXException, OXException, IOException, SAXException, JSONException {
+    private AJAXClient getClientB() throws OXException, OXException, IOException, JSONException {
         if (clientB == null) {
             clientB = new AJAXClient(testContext.acquireUser());
         }
         return clientB;
     }
 
-    private AJAXClient getClientC() throws OXException, OXException, IOException, SAXException, JSONException {
+    private AJAXClient getClientC() throws OXException, OXException, IOException, JSONException {
         if (clientC == null) {
             clientC = new AJAXClient(testContext.acquireUser());
         }

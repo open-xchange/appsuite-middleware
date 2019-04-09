@@ -56,7 +56,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.openexchange.serialization.ClassResolver;
@@ -103,9 +102,8 @@ public class FilteringObjectInputStream extends ObjectInputStream {
     protected Class<?> resolveClass(final ObjectStreamClass input) throws IOException, ClassNotFoundException {
         String name = input.getName();
 
-        for (Pattern blackPattern : config.blacklist()) {
-            Matcher blackMatcher = blackPattern.matcher(name);
-            if (blackMatcher.find()) {
+        for (Pattern blackPattern : config.getBlacklist()) {
+            if (blackPattern.matcher(name).find()) {
                 LoggerHolder.LOG.error("Blocked by blacklist '{}'. Match found for '{}'", blackPattern.pattern(), name);
                 throw new InvalidClassException(name, "Class blocked from deserialization (blacklist)");
             }

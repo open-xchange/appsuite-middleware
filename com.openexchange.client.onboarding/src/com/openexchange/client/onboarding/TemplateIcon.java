@@ -107,7 +107,7 @@ public class TemplateIcon implements Icon {
         try {
             return Streams.stream2bytes(new FileInputStream(file));
         } catch (java.io.FileNotFoundException e) {
-            LOG.debug("Icon image {} does not exist.", file.getPath());
+            LOG.debug("Icon image {} does not exist.", file.getPath(), e);
             return new byte[0];
         } catch (IOException e) {
             LOG.debug("Could not load icon image {}.", file.getPath(), e);

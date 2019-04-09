@@ -79,6 +79,7 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -129,6 +130,7 @@ public class DeleteMultipleContactsTest extends AbstractContactTest {
         needCleanup = false;
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +126,7 @@ public abstract class AbstractOAuthAccessTokenRequest {
         try {
             OAuthConfiguration oAuthConfiguration = SAMLOAuthConfig.getConfig(userId, contextId, configViewFactory);
             if (oAuthConfiguration == null) {
-                throw SAMLOAuthExceptionCodes.OAUTH_NOT_CONFIGURED.create(userId, contextId);
+                throw SAMLOAuthExceptionCodes.OAUTH_NOT_CONFIGURED.create(I(userId), I(contextId));
             }
 
             // Initialize POST request
@@ -157,28 +158,25 @@ public abstract class AbstractOAuthAccessTokenRequest {
                 String responseStr = EntityUtils.toString(entity, Charsets.UTF_8);
                 if (responseStr != null) {
                     JSONObject jsonResponse = new JSONObject(responseStr);
-                    if(jsonResponse.has(ERROR)){
-                        if(jsonResponse.getString(ERROR).equals(INVALID_GRANT)){
-                            if(jsonResponse.has(ERROR_DESCRIPTION)) {
-                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Invalid grant error: "+jsonResponse.getString(ERROR_DESCRIPTION));
-                            } else {
-                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Invalid grant error.");
+                    if (jsonResponse.has(ERROR)) {
+                        if (jsonResponse.getString(ERROR).equals(INVALID_GRANT)) {
+                            if (jsonResponse.has(ERROR_DESCRIPTION)) {
+                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Invalid grant error: " + jsonResponse.getString(ERROR_DESCRIPTION));
                             }
-                        } else {
-                            if(jsonResponse.has(ERROR_DESCRIPTION)) {
-                                OXException e = SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(jsonResponse.getString(ERROR)+" error: "+jsonResponse.getString(ERROR_DESCRIPTION));
-                                throw e;
-                            } else {
-                                throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(jsonResponse.getString(ERROR)+" error for user {} in context {}.", userId, contextId);
-                            }
+                            throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Invalid grant error.");
                         }
+                        if (jsonResponse.has(ERROR_DESCRIPTION)) {
+                            OXException e = SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(jsonResponse.getString(ERROR) + " error: " + jsonResponse.getString(ERROR_DESCRIPTION));
+                            throw e;
+                        }
+                        throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create(jsonResponse.getString(ERROR) + " error for user {} in context {}.", I(userId), I(contextId));
                     }
                     String accessToken = jsonResponse.optString(ACCESS_TOKEN, null);
                     if (null == accessToken) {
                         throw SAMLOAuthExceptionCodes.NO_ACCESS_TOKEN.create("Token response doesn't contain the access token.");
                     }
 
-                    String refreshToken = jsonResponse.has(REFRESH_TOKEN) ? jsonResponse.getString(REFRESH_TOKEN):null;
+                    String refreshToken = jsonResponse.has(REFRESH_TOKEN) ? jsonResponse.getString(REFRESH_TOKEN) : null;
                     int expires = jsonResponse.has(EXPIRE) ? jsonResponse.getInt(EXPIRE) : -1;
                     String tokenType = jsonResponse.has(TOKEN_TYPE) ? jsonResponse.getString(TOKEN_TYPE) : null;
                     return new OAuthAccessToken(accessToken, refreshToken, tokenType, expires);

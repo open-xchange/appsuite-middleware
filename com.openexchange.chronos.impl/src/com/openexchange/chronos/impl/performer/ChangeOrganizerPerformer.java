@@ -272,7 +272,7 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
      * @param lastModified The date to set the {@link Event#getLastModified()} to
      * @throws OXException If updating fails
      */
-    private void updateExceptions(@SuppressWarnings("unused") Event originalEvent, Event updatedEvent, Organizer organizer) throws OXException {
+    private void updateExceptions(Event originalEvent, Event updatedEvent, Organizer organizer) throws OXException {
         for (Event e : loadExceptionData(updatedEvent)) {
             storage.getEventStorage().updateEvent(prepareChanges(e, organizer));
             insertOrganizerAsAttendee(e, organizer);

@@ -56,6 +56,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AbstractEventUpdates}
@@ -79,7 +80,7 @@ public abstract class AbstractEventUpdates extends AbstractSimpleCollectionUpdat
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public AbstractEventUpdates(List<Event> originalItems, List<Event> newItems, boolean considerUnset, EventField[] ignoredFields) {
+    public AbstractEventUpdates(List<Event> originalItems, List<Event> newItems, boolean considerUnset, EventField[] ignoredFields) throws OXException {
         super(originalItems, newItems);
         if (null != originalItems && null != newItems) {
             updatedItems = new ArrayList<EventUpdate>();

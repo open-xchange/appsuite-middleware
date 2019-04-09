@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -118,8 +117,6 @@ public class Bug15903Test extends CalendarTestManagerTest {
                 secondUserUserInInitialAppointment = true;
             }
         }
-        for (ConfirmableParticipant participant : reload.getConfirmations()) {
-        }
 
         assertTrue("First User should be Participant in the initial appointment", firstUserParticipantInInitialAppointment);
         assertTrue("Second should be Participant in the initial appointment", secondUserParticipantInInitialAppointment);
@@ -161,8 +158,6 @@ public class Bug15903Test extends CalendarTestManagerTest {
                 secondUserUserInUpdatedAppointment = true;
             }
         }
-        for (ConfirmableParticipant participant : reloadAgain.getConfirmations()) {
-        }
 
         assertTrue("First User should still be Participant in the updated appointment", firstUserParticipantInUpdatedAppointment);
         assertFalse("Second should not be Participant in the updated appointment", secondUserParticipantInUpdatedAppointment);
@@ -173,7 +168,7 @@ public class Bug15903Test extends CalendarTestManagerTest {
         boolean gotException = false;
         try {
             appForSeconduser = catm2.get(client2.getValues().getPrivateAppointmentFolder(), appointment.getObjectID());
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             gotException = true;
         }
 

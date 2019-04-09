@@ -62,8 +62,6 @@ import com.openexchange.groupware.container.Appointment;
 
 public class SearchTest extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchTest.class);
-
     @Test
     public void testSimpleSearch() throws Exception {
         final Appointment appointmentObj = new Appointment();
@@ -74,7 +72,7 @@ public class SearchTest extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int objectId = catm.insert(appointmentObj).getObjectID();
+        catm.insert(appointmentObj).getObjectID();
         
         final Appointment[] appointmentArray = catm.searchAppointment("testSimpleSearch" + date, appointmentFolderId, new Date(), new Date(), APPOINTMENT_FIELDS);
         assertTrue("appointment array size is 0", appointmentArray.length > 0);
@@ -89,7 +87,7 @@ public class SearchTest extends AppointmentTest {
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60 * 60 * 1000));
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = catm.insert(appointmentObj).getObjectID();
+        catm.insert(appointmentObj).getObjectID();
         final SearchRequest searchRequest = new SearchRequest("testShowLastModifiedUTC", appointmentFolderId, cols, true);
         final SearchResponse response = Executor.execute(getClient(), searchRequest);
         final JSONArray arr = (JSONArray) response.getResponse().getData();

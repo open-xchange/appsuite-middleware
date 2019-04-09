@@ -69,7 +69,6 @@ import com.openexchange.test.pool.TestUser;
  */
 public final class Bug21619Test extends AbstractAJAXSession {
 
-    @SuppressWarnings("hiding")
     private AJAXClient client;
     private String origValue;
     private final ValueWriter[] writers = new ValueWriter[2];
@@ -79,6 +78,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -89,6 +89,7 @@ public final class Bug21619Test extends AbstractAJAXSession {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

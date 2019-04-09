@@ -64,7 +64,6 @@ import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
@@ -76,7 +75,6 @@ import com.openexchange.session.Session;
  */
 public class GenericAppOnboardingProvider implements OnboardingProvider {
 
-    private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
     private final EnumSet<OnboardingType> supportedTypes;
@@ -85,9 +83,8 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
     /**
      * Initializes a new {@link GenericAppOnboardingProvider}.
      */
-    public GenericAppOnboardingProvider(ServiceLookup services) {
+    public GenericAppOnboardingProvider() {
         super();
-        this.services = services;
         identifier = BuiltInProvider.GENERIC_APP.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
         supportedTypes = EnumSet.of(OnboardingType.LINK);

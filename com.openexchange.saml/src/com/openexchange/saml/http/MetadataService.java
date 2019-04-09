@@ -115,11 +115,9 @@ public class MetadataService extends SAMLServlet {
                         synchronized (lock) {
                             out.write("<br>");
                         }
-                    }
-                    catch (InterruptedIOException x) {
+                    } catch (@SuppressWarnings("unused") InterruptedIOException x) {
                         Thread.currentThread().interrupt();
-                    }
-                    catch (IOException x) {
+                    } catch (@SuppressWarnings("unused") IOException x) {
                         setError();
                     }
                 }

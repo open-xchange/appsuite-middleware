@@ -216,7 +216,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         if (null != updatedRule.getCount()) {
             DefaultRecurrenceData detachedRecurrenceData = new DefaultRecurrenceData(detachedSeriesMaster.getRecurrenceRule(), originalEvent.getStartDate(), null);
             for (iterator = session.getRecurrenceService().iterateRecurrenceIds(detachedRecurrenceData); iterator.hasNext(); iterator.next()) {
-                // Nothing
+                ;
             }
             updatedRule.setCount(i(updatedRule.getCount()) - iterator.getPosition());
             updatedSeriesMaster.setRecurrenceRule(updatedRule.toString());

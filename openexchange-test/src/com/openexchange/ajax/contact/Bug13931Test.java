@@ -87,6 +87,7 @@ public class Bug13931Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -133,6 +134,7 @@ public class Bug13931Test extends AbstractAJAXSession {
         assertEquals("Wrong order", bbb.getObjectID(), jsonArray.getJSONArray(3).getInt(0));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

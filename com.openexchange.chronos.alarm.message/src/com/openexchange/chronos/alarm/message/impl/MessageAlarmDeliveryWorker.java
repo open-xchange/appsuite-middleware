@@ -75,6 +75,7 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -123,6 +124,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
         private RateLimiterFactory rateLimitFactory;
+        private RecurrenceService recurrenceService;
         private int lookAhead;
         private int overdueWaitTime;
 
@@ -185,7 +187,12 @@ public class MessageAlarmDeliveryWorker implements Runnable {
             this.rateLimitFactory = rateLimitFactory;
             return this;
         }
-
+        
+        public Builder setRecurrenceService(RecurrenceService recurrenceService) {
+            this.recurrenceService = recurrenceService;
+            return this;
+        }
+        
         public MessageAlarmDeliveryWorker build() {
             return new MessageAlarmDeliveryWorker( storage,
                                                 calendarStorageFactory,
@@ -197,6 +204,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                                 calendarProviderRegistry,
                                                 administrativeCalendarAccountService,
                                                 rateLimitFactory,
+                                                recurrenceService,
                                                 lookAhead,
                                                 overdueWaitTime);
         }
@@ -217,9 +225,11 @@ public class MessageAlarmDeliveryWorker implements Runnable {
     private final AlarmNotificationServiceRegistry registry;
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
+    private final RecurrenceService recurrenceService;
     private final RateLimiterFactory rateLimitFactory;
     private final int lookAhead;
     private final int overdueWaitTime;
+    
 
     /**
      * Initializes a new {@link MessageAlarmDeliveryWorker}.
@@ -233,6 +243,8 @@ public class MessageAlarmDeliveryWorker implements Runnable {
      * @param registry The {@link AlarmNotificationServiceRegistry} used to send the notification
      * @param calProviderRegistry The {@link CalendarProviderRegistry}
      * @param administrativeCalendarAccountService The {@link AdministrativeCalendarAccountService}
+     * @param rateLimitFactory The {@link RateLimiterFactory}
+     * @param recurrenceService The {@link RecurrenceService}
      * @param lookAhead The time value in minutes the worker is looking ahead.
      * @param overdueWaitTime The time in minutes to wait until an old trigger is picked up.
      */
@@ -246,6 +258,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                     CalendarProviderRegistry calProviderRegistry,
                                     AdministrativeCalendarAccountService administrativeCalendarAccountService,
                                     RateLimiterFactory rateLimitFactory,
+                                    RecurrenceService recurrenceService,
                                     int lookAhead,
                                     int overdueWaitTime) {
         this.storage = storage;
@@ -260,6 +273,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
         this.calendarProviderRegistry = calProviderRegistry;
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
         this.rateLimitFactory = rateLimitFactory;
+        this.recurrenceService = recurrenceService;
 
     }
 
@@ -407,7 +421,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
      * @param alarm The {@link Alarm}
      * @param trigger The {@link AlarmTrigger}
      * @param processed The processed value
-     * @param alarmNotificationService
+     * @param alarmNotificationService The {@link AlarmNotificationService}
      * @return The task
      * @throws OXException If the context couldn't be loaded or if no {@link AlarmNotificationService} is registered for the {@link AlarmAction} of the alarm
      */
@@ -420,6 +434,7 @@ public class MessageAlarmDeliveryWorker implements Runnable {
                                          .setCalUtil(calUtil)
                                          .setCalendarProviderRegistry(calendarProviderRegistry)
                                          .setAdministrativeCalendarAccountService(administrativeCalendarAccountService)
+                                         .setRecurrenceService(recurrenceService)
                                          .setCtx(ctxService.getContext(cid))
                                          .setAccount(account)
                                          .setAlarm(alarm)

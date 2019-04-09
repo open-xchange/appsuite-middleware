@@ -94,7 +94,7 @@ public class SingleLogoutService extends SAMLServlet {
         handleRequest(httpRequest, httpResponse, Binding.HTTP_POST);
     }
 
-    private void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws ServletException, IOException {
+    private void handleRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException {
         switch (getRequestType(httpRequest)) {
             case SAML_REQUEST:
                 provider.handleLogoutRequest(httpRequest, httpResponse, binding);
@@ -115,7 +115,6 @@ public class SingleLogoutService extends SAMLServlet {
     }
 
     private Type getRequestType(HttpServletRequest httpRequest) {
-        @SuppressWarnings("unchecked")
         Enumeration<String> params = httpRequest.getParameterNames();
         while (params.hasMoreElements()) {
             String param = params.nextElement();

@@ -47,11 +47,11 @@ public class AutodateKey extends Property {
     private static final long serialVersionUID = -4722251591472186896L;
 
     public static final String PROPERTY_NAME = "X-GWAUTODATE-KEY";
-
+    
     public static final PropertyFactory FACTORY = new Factory();
-
+    
     private String value;
-
+    
     /**
      * @param factory
      */
@@ -97,16 +97,10 @@ public class AutodateKey extends Property {
 
         private static final long serialVersionUID = 1L;
 
-        Factory() {
-            super();
-        }
-
-        @Override
         public Property createProperty(String name) {
             return new AutodateKey(this);
         }
-
-        @Override
+        
         public Property createProperty(String name, ParameterList parameters, String value) {
             AutodateKey property = new AutodateKey(parameters, this, value);
             return property;

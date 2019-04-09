@@ -87,7 +87,7 @@ public class LegacyStorageAlarmTriggerTest extends AbstractAlarmTriggerTest {
     @Test
     public void testTimeShiftOfEventSeries() throws Exception {
         // Create an event series with a alarm
-        EventData eventSeries = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testTimeShiftOfEventSeries", 4, folderId);
+        EventData eventSeries = EventFactory.createSeriesEvent(getCalendaruser(), "testTimeShiftOfEventSeries", 4, folderId);
         eventSeries.setStartDate(DateTimeUtil.incrementDateTimeData(eventSeries.getStartDate(), TimeUnit.DAYS.toMillis(1)));
         eventSeries.setEndDate(DateTimeUtil.incrementDateTimeData(eventSeries.getEndDate(), TimeUnit.DAYS.toMillis(1)));
         eventSeries.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT60M")));

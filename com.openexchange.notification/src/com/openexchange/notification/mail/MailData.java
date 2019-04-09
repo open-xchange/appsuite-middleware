@@ -68,18 +68,18 @@ import com.openexchange.templating.TemplateService;
  */
 public class MailData {
 
-    private InternetAddress sender;
-    private InternetAddress recipient;
-    private String subject;
-    private String templateName;
-    private Map<String, Object> templateVars;
-    private NotificationMailConfig mailConfig;
-    private Context context;
-    private String textContent;
-    private User sendingUser;
-    private final Map<String, String> mailHeaders = new LinkedHashMap<>();
+    InternetAddress sender;
+    InternetAddress recipient;
+    String subject;
+    String templateName;
+    Map<String, Object> templateVars;
+    NotificationMailConfig mailConfig;
+    Context context;
+    String textContent;
+    User sendingUser;
+    final Map<String, String> mailHeaders = new LinkedHashMap<>();
 
-    private MailData() {
+    MailData() {
         super();
     }
 
@@ -97,7 +97,7 @@ public class MailData {
 
         private final MailData data;
 
-        private Builder() {
+        Builder() {
             super();
             this.data = new MailData();
         }

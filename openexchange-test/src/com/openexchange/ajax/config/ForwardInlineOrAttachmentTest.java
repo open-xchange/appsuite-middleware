@@ -92,7 +92,7 @@ public class ForwardInlineOrAttachmentTest extends AbstractAJAXSession {
      * @throws OXException 
      */
     @Test
-    public void testForwardParameter() throws OXException, IOException, SAXException, JSONException {
+    public void testForwardParameter() throws OXException, IOException, JSONException {
         GetRequest getRequest = new GetRequest(PATH);
         GetResponse repsonse = getClient().execute(getRequest);
         for (final String testString : new String[] { INLINE, ATTACHMENT, repsonse.getData().toString() }) {

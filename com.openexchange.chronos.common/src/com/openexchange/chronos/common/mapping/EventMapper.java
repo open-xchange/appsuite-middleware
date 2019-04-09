@@ -64,6 +64,7 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
@@ -128,25 +129,24 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
      * @return The destination event
      */
     public Event copy(Event from, Event to, boolean considerUnset, EventField... fields) throws OXException {
-        Event t0 = to;
-        if (null == t0) {
-            t0 = new Event();
+        if (null == to) {
+            to = new Event();
         }
         if (null == fields) {
             for (Mapping<? extends Object, Event> mapping : getMappings().values()) {
                 if (considerUnset || mapping.isSet(from)) {
-                    mapping.copy(from, t0);
+                    mapping.copy(from, to);
                 }
             }
         } else {
             for (EventField field : fields) {
                 Mapping<? extends Object, Event> mapping = get(field);
                 if (considerUnset || mapping.isSet(from)) {
-                    mapping.copy(from, t0);
+                    mapping.copy(from, to);
                 }
             }
         }
-        return t0;
+        return to;
     }
 
     /**
@@ -1051,12 +1051,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public boolean equals(Event event1, Event event2) {
-                // try {
-                return CalendarUtils.getAttendeeUpdates(event1.getAttendees(), event2.getAttendees()).isEmpty();
-                // } catch (OXException e) {
-                //    LoggerFactory.getLogger(EventMapper.class).warn("Unable to compare attendees from event with id {} and id {}.", event1.getId(), event2.getId(), e);
-                // }
-                // return false;
+                try {
+                    return CalendarUtils.getAttendeeUpdates(event1.getAttendees(), event2.getAttendees()).isEmpty();
+                } catch (OXException e) {
+                    LoggerFactory.getLogger(EventMapper.class).warn("Unable to compare attendees from event with id {} and id {}.", event1.getId(), event2.getId(), e);
+                }
+                return false;
             }
 
             @Override

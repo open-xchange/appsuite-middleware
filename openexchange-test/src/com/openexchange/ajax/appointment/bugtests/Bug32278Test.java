@@ -68,6 +68,7 @@ public class Bug32278Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -85,7 +86,7 @@ public class Bug32278Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug() throws Exception {
+    public void testBug() {
         catm.insert(appointment);
         appointment.setRecurrenceType(Appointment.NO_RECURRENCE);
         appointment.removeInterval();

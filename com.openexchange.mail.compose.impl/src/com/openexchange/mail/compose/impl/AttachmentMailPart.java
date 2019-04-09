@@ -104,7 +104,7 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
         String preparedFileName = attachment.getName();
         try {
             setContentType(prepareContentType(attachment.getMimeType(), preparedFileName));
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             // Retry with guess by file name
             setContentType(MimeType2ExtMap.getContentType(preparedFileName));
         }
@@ -116,7 +116,7 @@ public class AttachmentMailPart extends MailPart implements ComposedMailPart {
                     in = attachment.getData();
                     contentType.setCharsetParameter(CharsetDetector.detectCharset(in));
                     setContentType(contentType);
-                } catch (Exception e) {
+                } catch (@SuppressWarnings("unused") Exception e) {
                     // Ignore
                 } finally {
                     Streams.close(in);

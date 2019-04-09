@@ -281,7 +281,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     protected Attendee createAttendee(TestUser convertee, ApiClient converteeClient) {
-        Attendee attendee = AttendeeFactory.createAttendee(converteeClient.getUserId().intValue(), CuTypeEnum.INDIVIDUAL);
+        Attendee attendee = AttendeeFactory.createAttendee(converteeClient.getUserId(), CuTypeEnum.INDIVIDUAL);
 
         attendee.cn(convertee.getUser());
         attendee.comment("Comment for user " + convertee.getUser());

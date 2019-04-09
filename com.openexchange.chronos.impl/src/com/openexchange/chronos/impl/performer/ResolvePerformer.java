@@ -335,21 +335,21 @@ public class ResolvePerformer extends AbstractQueryPerformer {
     }
 
     private EventsResult getResult(CalendarFolder folder, List<Event> events) {
-        List<Event> ev3nts = sortSeriesMasterFirst(events);
-        if (null == ev3nts || ev3nts.isEmpty()) {
+        events = sortSeriesMasterFirst(events);
+        if (null == events || events.isEmpty()) {
             return null;
         }
-        for (Iterator<Event> iterator = ev3nts.iterator(); iterator.hasNext();) {
+        for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
             Event event = iterator.next();
             if (false == Utils.isInFolder(event, folder) || false == Utils.isVisible(folder, event)) {
                 iterator.remove();
             }
         }
-        if (ev3nts.isEmpty()) {
+        if (events.isEmpty()) {
             return null;
         }
         try {
-            return postProcessor().process(ev3nts, folder).getEventsResult();
+            return postProcessor().process(events, folder).getEventsResult();
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }

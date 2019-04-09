@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
@@ -85,11 +86,12 @@ public class Bug51918Test extends AbstractAJAXSession {
     public static List<Object[]> data() {
         List<Object[]> retval = new ArrayList<Object[]>();
         for (int i = 0; i <= 23; i++) {
-            retval.add(new Object[] { i });
+            retval.add(new Object[] { I(i) });
         }
         return retval;
     }
 
+    @SuppressWarnings("null")
     @Test
     public void testEveryHour() throws Exception {
         Appointment app = new Appointment();

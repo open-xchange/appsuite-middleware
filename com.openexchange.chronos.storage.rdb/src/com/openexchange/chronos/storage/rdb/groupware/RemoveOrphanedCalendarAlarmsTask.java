@@ -66,11 +66,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 
 /**
  * {@link RemoveOrphanedCalendarAlarmsTask}
- * 
+ *
  * Removes calendar alarms and triggers from the database of birthday events from deleted users.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -142,7 +143,7 @@ public class RemoveOrphanedCalendarAlarmsTask extends UpdateTaskAdapter {
         try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(selectSQL)) {
             while (rs.next()) {
                 String eventId = rs.getString(eventColumn);
-                String[] split = eventId.split("-");
+                String[] split = Strings.splitBy(eventId, '-', false);
                 if (split.length != 2) {
                     continue;
                 }

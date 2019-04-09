@@ -67,7 +67,7 @@ public final class AttendeeFactory {
      * @param cuType the {@link CuTypeEnum}
      * @return The new {@link Attendee}
      */
-    public static Attendee createAttendee(int userId, CuTypeEnum cuType) {
+    public static Attendee createAttendee(Integer userId, CuTypeEnum cuType) {
         Attendee attendee = new Attendee();
         attendee.entity(userId);
         attendee.cuType(cuType);
@@ -81,7 +81,7 @@ public final class AttendeeFactory {
      * @param userId The user identifier
      * @return The new {@link Attendee}
      */
-    public static Attendee createIndividual(int userId) {
+    public static Attendee createIndividual(Integer userId) {
         return createAttendee(userId, CuTypeEnum.INDIVIDUAL);
     }
 

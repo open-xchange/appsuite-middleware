@@ -48,9 +48,9 @@ public class OriginalStart extends DateProperty {
     private static final long serialVersionUID = -2369374600955575062L;
 
     public static final String PROPERTY_NAME = "X-MS-OLK-ORIGINALSTART";
-
+    
     public static final PropertyFactory FACTORY = new Factory();
-
+    
     /**
      * @param factory
      */
@@ -61,7 +61,7 @@ public class OriginalStart extends DateProperty {
     /**
      * @param aList
      * @param factory
-     * @throws ParseException
+     * @throws ParseException 
      */
     public OriginalStart(ParameterList aList, PropertyFactory factory, String value) throws ParseException {
         super(PROPERTY_NAME, aList, factory);
@@ -78,19 +78,13 @@ public class OriginalStart extends DateProperty {
     }
 
     private static class Factory implements PropertyFactory {
-
+        
         private static final long serialVersionUID = 596282786680252116L;
 
-        Factory() {
-            super();
-        }
-
-        @Override
         public Property createProperty(String name) {
             return new OriginalStart(this);
         }
-
-        @Override
+        
         public Property createProperty(String name, ParameterList parameters, String value) throws ParseException {
             OriginalStart property = new OriginalStart(parameters, this, value);
             return property;

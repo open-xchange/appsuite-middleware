@@ -73,6 +73,7 @@ public class CreatedByTest extends AbstractAJAXSession {
 
     private Appointment appointment;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();        
@@ -99,6 +100,7 @@ public class CreatedByTest extends AbstractAJAXSession {
         assertEquals("Wrong created by", getClient().getValues().getUserId(), loadAppointment.getCreatedBy());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

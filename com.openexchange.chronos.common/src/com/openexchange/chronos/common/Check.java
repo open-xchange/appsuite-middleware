@@ -354,7 +354,6 @@ public class Check {
      * @return The passed available, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    @SuppressWarnings("unused")
     private static Available availableIsValid(RecurrenceService recurrenceService, Available available) throws OXException {
         //TODO
         return available;

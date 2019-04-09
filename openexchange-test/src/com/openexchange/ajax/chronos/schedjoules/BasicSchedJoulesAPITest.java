@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.schedjoules;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -150,7 +151,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesPageNotFoundResponse.json");
         mock("http://example.com/pages/1138", assetManager.readAssetString(asset), HttpStatus.SC_NOT_FOUND, RESPONSE_HEADERS);
 
-        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), 1138, null, null);
+        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), I(1138), null, null);
         assertNotNull("There was no error returned", response.getError());
         assertEquals("The exception code does not match", "SCHEDJOULES-API-0012", response.getCode());
     }
@@ -217,7 +218,7 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesSearchResponse.json");
         mock("http://example.com/pages/search?q=" + URLEncoder.encode(query, "UTF-8") + "&nr_results=" + numberOfResults + "&locale=" + language, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
 
-        SearchResponse response = chronosApi.search(defaultUserApi.getSession(), query, language, numberOfResults);
+        SearchResponse response = chronosApi.search(defaultUserApi.getSession(), query, language, I(numberOfResults));
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
 

@@ -72,8 +72,7 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
 
     private static interface InstanceCreator extends Serializable {
 
-        public SingleSearchTerm newInstance();
-
+        SingleSearchTerm newInstance();
     }
 
     /**
@@ -84,6 +83,9 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Equals comparison
          */
     	EQUALS("=", 2, "=", OperationPosition.BETWEEN, "%s=%s", new InstanceCreator() {
+
+            private static final long serialVersionUID = -7337346107116884060L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new EqualsTerm();
@@ -93,6 +95,9 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Less-than comparison
          */
         LESS_THAN("<", 2, "<", OperationPosition.BETWEEN, "&(%1$s<=%2$s)(!(%1$s=%2$s))", new InstanceCreator() {
+
+            private static final long serialVersionUID = 3045641432242061311L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new LessThanTerm();
@@ -102,6 +107,9 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Greater-than comparison
          */
         GREATER_THAN(">", 2, ">", OperationPosition.BETWEEN, "&(%1$s>=%2$s)(!(%1$s=%2$s))", new InstanceCreator() {
+
+            private static final long serialVersionUID = 8960232001776390636L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new GreaterThanTerm();
@@ -111,6 +119,9 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Not-equal comparison
          */
         NOT_EQUALS("<>", 2, "<>", OperationPosition.BETWEEN, "!(%s=%s)", new InstanceCreator() {
+
+            private static final long serialVersionUID = 2354286763646087233L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new NotEqualTerm();
@@ -120,6 +131,9 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Greater-than or equal comparison
          */
         GREATER_OR_EQUAL(">=", 2, ">=", OperationPosition.BETWEEN, "%s>=%s", new InstanceCreator() {
+
+            private static final long serialVersionUID = 1820374998914432375L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new GreaterOrEqualTerm();
@@ -129,6 +143,9 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * Less-than or equal comparison
          */
         LESS_OR_EQUAL("<=", 2, "<=", OperationPosition.BETWEEN, "%s<=%s", new InstanceCreator() {
+
+            private static final long serialVersionUID = 5173216283440032636L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new LessOrEqualTerm();
@@ -138,11 +155,14 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
          * is null check
          */
         ISNULL("isNull", 1, "IS NULL", OperationPosition.AFTER, "!(%s=*)", new InstanceCreator() {
+
+            private static final long serialVersionUID = 1341911248645665193L;
+
             @Override
             public SingleSearchTerm newInstance() {
                 return new IsNullTerm();
             }
-      })
+        })
         ;
 
         private final String str;

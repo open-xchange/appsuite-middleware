@@ -84,6 +84,7 @@ public class AllAliasTest extends AppointmentTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,6 +102,7 @@ public class AllAliasTest extends AppointmentTest {
         insertResponse.fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -144,15 +144,15 @@ public class Resend extends AbstractOpener {
         {
             InternetAddress[] recipients = originalMail.getTo();
             if (null != recipients && recipients.length > 0) {
-                state.message.setTo(toAddresses(recipients));
+                state.message.addTo(toAddresses(recipients));
             }
             recipients = originalMail.getCc();
             if (null != recipients && recipients.length > 0) {
-                state.message.setCc(toAddresses(recipients));
+                state.message.addCc(toAddresses(recipients));
             }
             recipients = originalMail.getBcc();
             if (null != recipients && recipients.length > 0) {
-                state.message.setBcc(toAddresses(recipients));
+                state.message.addBcc(toAddresses(recipients));
             }
         }
 

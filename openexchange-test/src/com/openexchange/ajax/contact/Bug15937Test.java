@@ -59,7 +59,6 @@ import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 
@@ -70,17 +69,16 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug15937Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private Contact contact;
 
     public Bug15937Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         contact = new Contact();
         contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
         contact.setDisplayName("Test for bug 15937");
@@ -90,6 +88,7 @@ public class Bug15937Test extends AbstractAJAXSession {
         response.fillObject(contact);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

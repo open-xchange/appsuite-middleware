@@ -60,7 +60,6 @@ import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.resource.ResourceTools;
 import com.openexchange.calendar.ConflictTools;
@@ -75,7 +74,6 @@ import com.openexchange.groupware.container.ResourceParticipant;
  */
 public class Bug15585Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private Appointment appointment;
     private Appointment appointment2;
     private TimeZone timeZone;
@@ -84,10 +82,10 @@ public class Bug15585Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
@@ -104,6 +102,7 @@ public class Bug15585Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

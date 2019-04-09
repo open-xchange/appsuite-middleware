@@ -1,7 +1,6 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
-import java.util.Date;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.groupware.container.Appointment;
@@ -10,8 +9,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.FolderTestManager;
 
 public class Bug9089Test extends AppointmentTest {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug9089Test.class);
 
     /**
      * Creates a normal appointment in a public folder and then try to modify the private flag.
@@ -37,14 +34,12 @@ public class Bug9089Test extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
 
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        Appointment loadAppointment = catm.get(newFolderId, objectId);
-        Date modified = loadAppointment.getLastModified();
+        catm.get(newFolderId, objectId);
 
         appointmentObj.setPrivateFlag(true);
 
         catm.update(newFolderId, appointmentObj);
 
-        loadAppointment = catm.get(newFolderId, objectId);
-        modified = loadAppointment.getLastModified();
+        catm.get(newFolderId, objectId);
     }
 }

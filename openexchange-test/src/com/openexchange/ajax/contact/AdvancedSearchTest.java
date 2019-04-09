@@ -25,6 +25,7 @@ public class AdvancedSearchTest extends AbstractManagedContactTest {
 
     private static final String BOB_LASTNAME = "Rather complicated last name with timestamp (" + new Date().getTime() + ") that does not appear in other folders";
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

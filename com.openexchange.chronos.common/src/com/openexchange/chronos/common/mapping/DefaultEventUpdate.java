@@ -63,6 +63,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultEventUpdate}
@@ -174,7 +175,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
          *
          * @return The new event update instance
          */
-        public EventUpdate build() {
+        public EventUpdate build() throws OXException {
             return new DefaultEventUpdate(originalEvent, updatedEvent, ignoredEventFields, ignoredAttendeeFields, considerUnset, ignoreDefaults);
         }
     }
@@ -191,7 +192,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences
      */
-    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) {
+    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
         this(originalEvent, updatedEvent, ignoredFields, null, considerUnset, false);
     }
 
@@ -204,7 +205,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param ignoredAttendeeFields The {@link AttendeeField}s to ignore when determining the differences
      * @param ignoredFields Fields to ignore when determining the differences
      */
-    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, Set<AttendeeField> ignoredAttendeeFields, EventField... ignoredFields) {
+    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, Set<AttendeeField> ignoredAttendeeFields, EventField... ignoredFields) throws OXException {
         this(originalEvent, updatedEvent, ignoredFields, null != ignoredAttendeeFields ? ignoredAttendeeFields.toArray(new AttendeeField[ignoredAttendeeFields.size()]) : null, considerUnset, false);
     }
 
@@ -218,7 +219,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param ignoreDefaults <code>true</code> to also consider default values of enumerated properties for not <i>set</i> fields of the update, <code>false</code>, otherwise
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      */
-    protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) {
+    protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) throws OXException {
         super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults, ignoredEventFields));
         alarmUpdates = AlarmUtils.getAlarmUpdates(
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);

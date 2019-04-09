@@ -72,14 +72,12 @@ public class TestServletTest {
 
     private final String PUTSTRING = "A P\u00dcT String with Umlaut";
 
-    private final String QUERYSTRING = "?";
-
     @Test
     public void testGetMethod() throws Exception {
         WebConversation conversation = new WebConversation();
         WebRequest request = new GetMethodWebRequest(URL);
         WebResponse response = conversation.getResponse(request);
-        HTMLElement[] paragraphs = response.getElementsByTagName("p");
+        response.getElementsByTagName("p");
     }
 
     @Test
@@ -105,9 +103,7 @@ public class TestServletTest {
         for (int i = 0; i < 31; i++) {
             request.setParameter("param" + i, "value" + i);
         }
-        WebResponse response = conversation.getResponse(request);
-        int responseCode = response.getResponseCode();
-        // System.out.println(responseCode);
+        conversation.getResponse(request);
     }
 
 }

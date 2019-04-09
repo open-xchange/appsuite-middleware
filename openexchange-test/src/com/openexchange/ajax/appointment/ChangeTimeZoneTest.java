@@ -70,6 +70,7 @@ public class ChangeTimeZoneTest extends AbstractAJAXSession {
     private final TimeZone UTC = TimeZone.getTimeZone("UTC");
     private Appointment app;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -153,7 +153,7 @@ public class SAMLLoginTools {
      * @param loginConfiguration The login configuration
      * @throws {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
-    public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, LoginConfiguration loginConfiguration) throws OXException {
+    public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, @SuppressWarnings("unused") LoginConfiguration loginConfiguration) throws OXException {
         // IP check
         SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
 

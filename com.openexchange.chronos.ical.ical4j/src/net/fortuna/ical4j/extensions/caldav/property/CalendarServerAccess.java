@@ -40,30 +40,30 @@ import net.fortuna.ical4j.model.ValidationException;
 
 /**
  * This property is a non-standard property for iCal Server/Calendar Server
- *
+ * 
  * @see <a href="http://svn.calendarserver.org/repository/calendarserver/CalendarServer/trunk/doc/Extensions/caldav-privateevents.txt">caldav-privateevents.txt</a>
- *
+ * 
  * @author probert
  *
  */
 public class CalendarServerAccess extends Property implements Escapable {
 
   private static final long serialVersionUID = 2182103734645261668L;
-
+  
   public static final String PROPERTY_NAME = "X-CALENDARSERVER-ACCESS";
-
+  
   private String value;
 
   public static final PropertyFactory FACTORY = new Factory();
-
+  
   public static final CalendarServerAccess PUBLIC = new ImmutableCalendarServerAccess("PUBLIC", null);
-
+  
   public static final CalendarServerAccess PRIVATE = new ImmutableCalendarServerAccess("PRIVATE", null);
-
+  
   public static final CalendarServerAccess CONFIDENTIAL = new ImmutableCalendarServerAccess("CONFIDENTIAL", null);
 
   public static final CalendarServerAccess RESTRICTED = new ImmutableCalendarServerAccess("RESTRICTED", null);
-
+  
   public CalendarServerAccess(PropertyFactory factory) {
     super(PROPERTY_NAME, factory);
   }
@@ -85,27 +85,26 @@ public class CalendarServerAccess extends Property implements Escapable {
 
   @Override
   public void validate() throws ValidationException {
-      // Nothing
   }
 
   @Override
   public String getValue() {
     return value;
   }
-
+  
   private static final class ImmutableCalendarServerAccess extends CalendarServerAccess {
     private static final long serialVersionUID = -2054338254L;
 
     private ImmutableCalendarServerAccess(String value) {
       super(new ParameterList(true), value);
     }
-
+    
     @Override
     public void setValue(String aValue) {
       throw new UnsupportedOperationException("Cannot modify constant instances");
     }
-
-    ImmutableCalendarServerAccess(String s, @SuppressWarnings("unused") ImmutableCalendarServerAccess immutableclazz) {
+    
+    ImmutableCalendarServerAccess(String s, ImmutableCalendarServerAccess immutableclazz) {
       this(s);
     }
   }
@@ -113,10 +112,6 @@ public class CalendarServerAccess extends Property implements Escapable {
   private static class Factory implements PropertyFactory {
 
     private static final long serialVersionUID = 2099427445505899578L;
-
-    Factory() {
-        super();
-    }
 
     @Override
     public Property createProperty(String name) {

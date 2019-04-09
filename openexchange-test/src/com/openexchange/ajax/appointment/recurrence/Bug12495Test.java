@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
@@ -72,7 +71,7 @@ public class Bug12495Test extends AbstractAJAXSession {
      *
      */
     @Test
-    public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws OXException, IOException, SAXException, JSONException, OXException, OXException {
+    public void testShouldNotLoseRecurrenceDatePositionWhenOtherUserDeletesOneOccurrence() throws OXException, IOException, JSONException, OXException, OXException {
         //setup
         AJAXClient client1 = getClient();
         AJAXClient client2 = new AJAXClient(testContext.acquireUser());

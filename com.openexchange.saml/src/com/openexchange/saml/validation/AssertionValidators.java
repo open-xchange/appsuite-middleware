@@ -68,7 +68,8 @@ import com.openexchange.saml.tools.SignatureHelper;
  */
 public class AssertionValidators {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AssertionValidators.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(AssertionValidators.class);
 
     /**
      * Verifies the signature of the given assertion against the given validation credential.

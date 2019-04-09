@@ -96,6 +96,7 @@ public class Bug35355Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -168,6 +169,7 @@ public class Bug35355Test extends AbstractAJAXSession {
         assertFalse("No conflict expected.", catm.getLastResponse().hasConflicts());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

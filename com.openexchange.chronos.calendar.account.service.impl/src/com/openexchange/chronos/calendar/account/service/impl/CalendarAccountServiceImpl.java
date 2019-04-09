@@ -236,10 +236,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
          */
         CalendarAccount storedAccount = initAccountStorage(session.getContextId(), parameters).loadAccount(session.getUserId(), id);
         if (null == storedAccount) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(id));
+            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
         }
         if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
         }
         CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
         if (null != calendarProvider && AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
@@ -258,10 +258,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 protected Void call(CalendarStorage storage) throws OXException {
                     CalendarAccount account = storage.getAccountStorage().loadAccount(session.getUserId(), id);
                     if (null == account) {
-                        throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(id));
+                        throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
                     }
                     if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
-                        throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), L(clientTimestamp), L(account.getLastModified().getTime()));
+                        throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, account.getLastModified().getTime());
                     }
                     storage.getAccountStorage().deleteAccount(session.getUserId(), id, clientTimestamp);
                     return null;
@@ -304,7 +304,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 }
             }
             if (null == storedAccounts[i]) {
-                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(ids[i]));
+                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(ids[i]);
             }
         }
         return Arrays.asList(storedAccounts);
@@ -331,7 +331,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                         JSONObject internalConfig = calendarProvider.autoConfigureAccount(session, userConfig, parameters);
                         CalendarAccount account = insertAccount(storage.getAccountStorage(), calendarProvider.getId(), session.getUserId(), internalConfig, userConfig, maxAccounts);
                         if (account == null) {
-                            LOG.warn("Failed to auto-provision account for user '{}' in context '{}'", I(session.getUserId()), I(session.getContextId()));
+                            LOG.warn("Failed to auto-provision account for user '{}' in context '{}'", session.getUserId(), session.getContextId());
                             continue;
                         }
                         calendarProvider.onAccountCreated(session, account, parameters);

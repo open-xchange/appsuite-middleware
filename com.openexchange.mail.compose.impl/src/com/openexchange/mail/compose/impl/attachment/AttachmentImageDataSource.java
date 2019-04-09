@@ -216,7 +216,7 @@ public class AttachmentImageDataSource implements ImageDataSource {
 
             String mimeType = fileType.getMimeType();
             return Strings.isEmpty(mimeType) ? unknownContentType : new ContentType(mimeType);
-        } catch (OXException e) {
+        } catch (@SuppressWarnings("unused") OXException e) {
             // Parsing MIME type failed
             return unknownContentType;
         }

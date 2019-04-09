@@ -53,6 +53,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link UpdateResultImpl}
@@ -68,7 +69,7 @@ public class UpdateResultImpl extends DefaultEventUpdate implements UpdateResult
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      */
-    public UpdateResultImpl(Event originalEvent, Event updatedEvent) {
+    public UpdateResultImpl(Event originalEvent, Event updatedEvent) throws OXException {
         super(originalEvent, updatedEvent, true, (EventField[]) null);
     }
 

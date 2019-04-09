@@ -82,6 +82,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,6 +111,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         insertResponse.fillObject(contact2);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

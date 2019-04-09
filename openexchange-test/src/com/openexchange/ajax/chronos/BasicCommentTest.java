@@ -217,8 +217,8 @@ public class BasicCommentTest extends AbstractChronosTest {
     }
 
     private void setAttendees() throws ApiException, OXException, IOException, JSONException {
-        Attendee organizer = createAttendee(getClient().getValues().getUserId());
-        Attendee attendee = createAttendee(getClient2().getValues().getUserId());
+        Attendee organizer = createAttendee(I(getClient().getValues().getUserId()));
+        Attendee attendee = createAttendee(I(getClient2().getValues().getUserId()));
         LinkedList<Attendee> attendees = new LinkedList<>();
         attendees.add(organizer);
         attendees.add(attendee);
@@ -226,7 +226,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         setOrganizer(organizer);
     }
 
-    protected Attendee createAttendee(int userId) throws ApiException {
+    protected Attendee createAttendee(Integer userId) throws ApiException {
         Attendee attendee = AttendeeFactory.createAttendee(userId, CuTypeEnum.INDIVIDUAL);
 
         UserData userData = getUserInformation(userId);
@@ -247,7 +247,7 @@ public class BasicCommentTest extends AbstractChronosTest {
         eventData.setCalendarUser(c);
     }
 
-    private UserData getUserInformation(int userId) throws ApiException {
+    private UserData getUserInformation(Integer userId) throws ApiException {
         UserApi api = new UserApi(getApiClient());
         UserResponse userResponse = api.getUser(getApiClient().getSession(), String.valueOf(userId));
         return userResponse.getData();

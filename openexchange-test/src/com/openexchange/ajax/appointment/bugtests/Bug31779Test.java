@@ -81,6 +81,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -144,6 +145,7 @@ public class Bug31779Test extends AbstractAJAXSession {
         assertEquals("Wrong changer.", getClient2().getValues().getUserId(), loadedException.getModifiedBy());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -92,6 +92,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -130,6 +131,7 @@ public class ConfirmOthers extends AbstractAJAXSession {
         response.fillObject(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
@@ -31,12 +32,12 @@ public class UpdatesTest extends AbstractContactTest {
 
         // update 2
         Contact[] expectUpdatedContacts = { newContacts[0], newContacts[1] };
-        Integer[] expectUpdatedContactIds = { newContacts[0].getObjectID(), newContacts[1].getObjectID() };
+        Integer[] expectUpdatedContactIds = { I(newContacts[0].getObjectID()), I(newContacts[1].getObjectID()) };
         updateContacts(expectUpdatedContacts);
 
         // delete 2
         Contact[] expectDeletedContacts = { newContacts[2], newContacts[3] };
-        Integer[] expectDeletedContactIds = { newContacts[2].getObjectID(), newContacts[3].getObjectID() };
+        Integer[] expectDeletedContactIds = { I(newContacts[2].getObjectID()), I(newContacts[3].getObjectID()) };
         deleteContacts(expectDeletedContacts);
 
         // check modified with timestamp from getAll
@@ -49,7 +50,7 @@ public class UpdatesTest extends AbstractContactTest {
         List<Contact> contactsToDelete = new ArrayList<Contact>(numberofcontacts - expectDeletedContacts.length);
         for (int i = 0; i < newContacts.length; i++) {
             List<Integer> deletedIds = Arrays.asList(expectDeletedContactIds);
-            if (!deletedIds.contains(newContacts[i].getObjectID())) {
+            if (!deletedIds.contains(I(newContacts[i].getObjectID()))) {
                 contactsToDelete.add(newContacts[i]);
             }
         }
@@ -71,7 +72,7 @@ public class UpdatesTest extends AbstractContactTest {
     public void testLastModifiedUTC() throws Exception {
         final int cols[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
 
-        final Contact contactObj = createContactObject("testLastModifiedUTC");
+        final Contact contactObj = createContactObject();
         final int objectId = insertContact(contactObj);
         try {
             final UpdatesRequest updatesRequest = new UpdatesRequest(contactFolderId, cols, -1, null, new Date(0));
@@ -89,7 +90,7 @@ public class UpdatesTest extends AbstractContactTest {
         } finally {
             try {
                 deleteContact(objectId, contactFolderId, true);
-            } catch (final Exception e) {
+            } catch (@SuppressWarnings("unused") final Exception e) {
                 // ignore
             }
         }

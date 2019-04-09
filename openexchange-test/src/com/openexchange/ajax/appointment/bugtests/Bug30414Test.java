@@ -71,6 +71,7 @@ public class Bug30414Test extends AbstractAJAXSession {
     private Appointment single;
     private int nextYear;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -97,7 +98,7 @@ public class Bug30414Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug30414() throws Exception {
+    public void testBug30414() {
         Appointment exception2 = catm.createIdentifyingCopy(series);
         exception2.setStartDate(D("02.02." + nextYear + " 08:00"));
         exception2.setEndDate(D("02.02." + nextYear + " 09:00"));

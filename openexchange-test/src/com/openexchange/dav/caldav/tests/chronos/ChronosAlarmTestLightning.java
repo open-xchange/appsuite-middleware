@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.tests.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -1161,7 +1162,7 @@ public class ChronosAlarmTestLightning extends ChronosCaldavTest {
         assertEquals(5, occurences.size());
         EventData exception = occurences.get(1);
         List<Attendee> attendees = exception.getAttendees();
-        attendees.add(AttendeeFactory.createAttendee(getClient2().getValues().getUserId(), CuTypeEnum.INDIVIDUAL));
+        attendees.add(AttendeeFactory.createAttendee(I(getClient2().getValues().getUserId()), CuTypeEnum.INDIVIDUAL));
         eventManager.updateOccurenceEvent(exception, exception.getRecurrenceId(), true);
         
         // 3. Create alarm as second user

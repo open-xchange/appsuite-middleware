@@ -56,7 +56,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -77,6 +76,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -93,7 +93,7 @@ public class DeleteExceptionTimestampTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws OXException, IOException, SAXException, JSONException {
+    public void testTimestampShouldBeDifferentAfterCreatingDeleteException() throws OXException, IOException, JSONException {
         Date oldTimestamp = appointment.getLastModified();
 
         DeleteRequest deleteRequest = new DeleteRequest(appointment.getObjectID(), appointment.getParentFolderID(), 3, oldTimestamp, true);

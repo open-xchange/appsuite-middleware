@@ -249,22 +249,21 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
          * prepare & filter internal attendees for lookup
          */
         Check.hasFreeBusy(ServerSessionAdapter.valueOf(session.getSession()));
-        List<Attendee> att3ndees = attendees;
-        att3ndees = session.getEntityResolver().prepare(att3ndees);
-        att3ndees = filter(att3ndees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
-        if (0 == att3ndees.size()) {
+        attendees = session.getEntityResolver().prepare(attendees);
+        attendees = filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL, CalendarUserType.RESOURCE, CalendarUserType.GROUP);
+        if (0 == attendees.size()) {
             return Collections.emptyMap();
         }
         /*
          * search (potentially) overlapping events for the attendees
          */
-        Map<Attendee, List<Event>> eventsPerAttendee = new HashMap<Attendee, List<Event>>(att3ndees.size());
-        for (Attendee attendee : att3ndees) {
+        Map<Attendee, List<Event>> eventsPerAttendee = new HashMap<Attendee, List<Event>>(attendees.size());
+        for (Attendee attendee : attendees) {
             eventsPerAttendee.put(attendee, new ArrayList<Event>());
         }
         SearchOptions searchOptions = new SearchOptions(session).setRange(from, until);
         EventField[] fields = getFields(FREEBUSY_FIELDS, EventField.ORGANIZER, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID);
-        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(att3ndees, true, searchOptions, fields);
+        List<Event> eventsInPeriod = storage.getEventStorage().searchOverlappingEvents(attendees, true, searchOptions, fields);
         if (0 == eventsInPeriod.size()) {
             return eventsPerAttendee;
         }
@@ -276,7 +275,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
             if (false == considerForFreeBusy(eventInPeriod)) {
                 continue; // exclude events classified as 'private' (but keep 'confidential' ones)
             }
-            for (Attendee attendee : att3ndees) {
+            for (Attendee attendee : attendees) {
                 String folderID;
                 if (isGroupScheduled(eventInPeriod)) {
                     /*
@@ -670,13 +669,13 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @return The resulting event representing the free/busy slot
      */
     private Event getResultingEvent(Event event, String folderID) throws OXException {
-        if (null == folderID) {
+        if (null != folderID) {
+            Event resultingEvent = EventMapper.getInstance().copy(event, new Event(), FREEBUSY_FIELDS);
+            resultingEvent.setFolderId(folderID);
+            return anonymizeIfNeeded(session, resultingEvent);
+        } else {
             return EventMapper.getInstance().copy(event, new Event(), RESTRICTED_FREEBUSY_FIELDS);
         }
-
-        Event resultingEvent = EventMapper.getInstance().copy(event, new Event(), FREEBUSY_FIELDS);
-        resultingEvent.setFolderId(folderID);
-        return anonymizeIfNeeded(session, resultingEvent);
     }
 
     /**

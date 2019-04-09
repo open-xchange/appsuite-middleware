@@ -12,36 +12,6 @@ import com.openexchange.saml.SAMLConfig;
  */
 public class UCSSamlConfigImpl implements SAMLConfig {
 
-    private final String providerName;
-
-    private final String entityID;
-
-    private final String acsURL;
-
-    private final Binding logoutResponseBinding;
-
-    private final String idpAuthnURL;
-
-    private final String idpEntityID;
-
-    private final String idpLogoutURL;
-
-    private final String slsURL;
-
-    private final boolean supportSingleLogout;
-
-    private final boolean enableMetadataService;
-
-    private final String logoutResponseTemplate;
-
-    private final boolean autoLoginEnabled;
-
-    private final boolean allowUnsolicitedResponses;
-
-    private final boolean sessionIndexAutoLoginEnabled;
-
-    private final Set<String> hosts;
-
     public static class Builder {
 
         private String providerName;
@@ -136,26 +106,48 @@ public class UCSSamlConfigImpl implements SAMLConfig {
         }
 
         public UCSSamlConfigImpl build() {
-            return new UCSSamlConfigImpl(this);
+            return new UCSSamlConfigImpl(providerName, entityID, acsURL, logoutResponseBinding, idpAuthnURL, idpEntityID, idpLogoutURL, slsURL, supportSingleLogout, enableMetadataService, logoutResponseTemplate, autoLoginEnabled, allowUnsolicitedResponses, sessionIndexAutoLoginEnabled, hosts);
         }
     }
 
-    private UCSSamlConfigImpl(Builder builder) {
-        this.providerName = builder.providerName;
-        this.entityID = builder.entityID;
-        this.acsURL = builder.acsURL;
-        this.logoutResponseBinding = builder.logoutResponseBinding;
-        this.idpAuthnURL = builder.idpAuthnURL;
-        this.idpEntityID = builder.idpEntityID;
-        this.idpLogoutURL = builder.idpLogoutURL;
-        this.slsURL = builder.slsURL;
-        this.supportSingleLogout = builder.supportSingleLogout;
-        this.enableMetadataService = builder.enableMetadataService;
-        this.logoutResponseTemplate = builder.logoutResponseTemplate;
-        this.autoLoginEnabled = builder.autoLoginEnabled;
-        this.allowUnsolicitedResponses = builder.allowUnsolicitedResponses;
-        this.sessionIndexAutoLoginEnabled = builder.sessionIndexAutoLoginEnabled;
-        this.hosts = builder.hosts;
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final String providerName;
+    private final String entityID;
+    private final String acsURL;
+    private final Binding logoutResponseBinding;
+    private final String idpAuthnURL;
+    private final String idpEntityID;
+    private final String idpLogoutURL;
+    private final String slsURL;
+    private final boolean supportSingleLogout;
+    private final boolean enableMetadataService;
+    private final String logoutResponseTemplate;
+    private final boolean autoLoginEnabled;
+    private final boolean allowUnsolicitedResponses;
+    private final boolean sessionIndexAutoLoginEnabled;
+    private final Set<String> hosts;
+
+    /**
+     * Initializes a new {@link UCSSamlConfigImpl}.
+     */
+    UCSSamlConfigImpl(String providerName, String entityID, String acsURL, Binding logoutResponseBinding, String idpAuthnURL, String idpEntityID, String idpLogoutURL, String slsURL, boolean supportSingleLogout, boolean enableMetadataService, String logoutResponseTemplate, boolean autoLoginEnabled, boolean allowUnsolicitedResponses, boolean sessionIndexAutoLoginEnabled, Set<String> hosts) {
+        super();
+        this.providerName = providerName;
+        this.entityID = entityID;
+        this.acsURL = acsURL;
+        this.logoutResponseBinding = logoutResponseBinding;
+        this.idpAuthnURL = idpAuthnURL;
+        this.idpEntityID = idpEntityID;
+        this.idpLogoutURL = idpLogoutURL;
+        this.slsURL = slsURL;
+        this.supportSingleLogout = supportSingleLogout;
+        this.enableMetadataService = enableMetadataService;
+        this.logoutResponseTemplate = logoutResponseTemplate;
+        this.autoLoginEnabled = autoLoginEnabled;
+        this.allowUnsolicitedResponses = allowUnsolicitedResponses;
+        this.sessionIndexAutoLoginEnabled = sessionIndexAutoLoginEnabled;
+        this.hosts = hosts;
     }
 
     @Override

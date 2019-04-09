@@ -53,12 +53,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -87,6 +85,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     private Contact referencedContact1;
     private Contact referencedContact2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -115,6 +114,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
         referencedContact2 = cotm2.newAction(referencedContact2);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -144,7 +144,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testPrivatizeReferencedContactFromSharedFolder() throws OXException, IOException, JSONException {
+    public void testPrivatizeReferencedContactFromSharedFolder() throws OXException {
         /*
          * create distribution list as user 1
          */
@@ -177,7 +177,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testUnPrivatizeReferencedContactFromSharedFolder() throws OXException, IOException, JSONException {
+    public void testUnPrivatizeReferencedContactFromSharedFolder() throws OXException {
         /*
          * create distribution list as user 1
          */
@@ -224,7 +224,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testRemovePermissionsForReferencedContact() throws OXException, IOException, JSONException {
+    public void testRemovePermissionsForReferencedContact() throws OXException {
         /*
          * create distribution list as user 1
          */
@@ -262,7 +262,7 @@ public class DistListPermissionsTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testGrantPermissionsForReferencedContact() throws OXException, IOException, JSONException {
+    public void testGrantPermissionsForReferencedContact() throws OXException {
         /*
          * create distribution list as user 1
          */

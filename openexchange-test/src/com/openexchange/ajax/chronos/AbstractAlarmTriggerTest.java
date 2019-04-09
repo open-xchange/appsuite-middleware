@@ -62,7 +62,6 @@ import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
-import com.openexchange.testing.httpclient.modules.ChronosApi;
 
 /**
  * {@link AbstractAlarmTriggerTest}
@@ -104,13 +103,23 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @param until The upper limit
      * @param actions The actions to retrieve
      * @param expected The expected amount of alarm objects
+     * @param filter The event id to filter for
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected) throws ApiException {
+    AlarmTriggerData getAndCheckAlarmTrigger(long until, String actions, int expected, String filter) throws ApiException {
         AlarmTriggerData triggers = eventManager.getAlarmTrigger(until, actions);
-        assertEquals(expected, triggers.size());
-        return triggers;
+        AlarmTriggerData result = triggers;
+        if(filter != null) {
+            result = new AlarmTriggerData();
+            for(AlarmTrigger trigger: triggers) {
+                if(trigger.getEventId().equals(filter)) {
+                    result.add(trigger);
+                }
+            }
+        }
+        assertEquals(expected, result.size());
+        return result;
     }
 
     /**
@@ -118,12 +127,10 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      *
      * @param until The upper limit of the request
      * @param min The minimum amount of expected alarm trigger objects
-     * @param api The api client to use
-     * @param session The session of the user
      * @return The {@link AlarmTriggerData}
      * @throws ApiException
      */
-    AlarmTriggerData getAndCheckAlarmTrigger(long until, int min, ChronosApi api, String session) throws ApiException {
+    AlarmTriggerData getAndCheckAlarmTrigger(long until, int min) throws ApiException {
         AlarmTriggerData triggers = eventManager.getAlarmTrigger(until);
         assertTrue(min <= triggers.size());
         return triggers;
@@ -138,7 +145,7 @@ public abstract class AbstractAlarmTriggerTest extends AbstractAlarmTest {
      * @throws ApiException
      */
     AlarmTriggerData getAndCheckAlarmTrigger(int min) throws ApiException {
-        return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), min, defaultUserApi.getChronosApi(), defaultUserApi.getSession());
+        return getAndCheckAlarmTrigger(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(2), min);
     }
 
     /**
