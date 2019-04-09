@@ -63,11 +63,10 @@ public interface Entity2ACLArgs {
 	/**
 	 * Provides necessary arguments needed by {@link Entity2ACL} implementation.
 	 *
-	 * @param imapServer
-	 *            The current IMAP server
+	 * @param imapServer The current IMAP server
 	 * @return An array of {@link Object}
 	 * @throws OXException If an error occurs
 	 */
-	public Object[] getArguments(IMAPServer imapServer) throws OXException;
+	Object[] getArguments(IMAPServer imapServer) throws OXException;
 
 }
