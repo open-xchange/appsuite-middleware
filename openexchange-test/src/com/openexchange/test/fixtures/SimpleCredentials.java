@@ -157,7 +157,7 @@ public class SimpleCredentials implements Cloneable {
             } else {
                 privateInfostoreFolderId = "";
             }
-        } catch (JSONException e) {
+        } catch (@SuppressWarnings("unused") JSONException e) {
             // do nothing
         }
     }
@@ -206,6 +206,7 @@ public class SimpleCredentials implements Cloneable {
         return hasActiveSync;
     }
 
+    @Deprecated
     public boolean hasOXUpdater() {
         if (!hasOXUpdaterSet) {
             hasOXUpdater = getConfig().getBool(Tree.OXUpdater);

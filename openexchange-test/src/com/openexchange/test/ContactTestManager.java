@@ -208,6 +208,7 @@ public class ContactTestManager implements TestManager {
      * Warning: objectID is being set, too. You might want to change
      * that for all but the most basic tests.
      */
+    @SuppressWarnings("unused")
     public static Contact generateFullContact(final int folderID) {
         final Contact contact = new Contact();
         for (final int field : Contact.ALL_COLUMNS) {
@@ -368,7 +369,7 @@ public class ContactTestManager implements TestManager {
             setFailOnError(false);
             deleteAction(contact);
             if (getLastResponse().hasError()) {
-                org.slf4j.LoggerFactory.getLogger(ContactTestManager.class).warn("Unable to delete the contact with id {} (context {}) in folder '{}': {}", contact.getObjectID(), contact.getContextId(), contact.getParentFolderID(), getLastResponse().getException().getMessage());
+                org.slf4j.LoggerFactory.getLogger(ContactTestManager.class).warn("Unable to delete the contact with id {} (context {}) in folder '{}': {}", I(contact.getObjectID()), I(contact.getContextId()), I(contact.getParentFolderID()), getLastResponse().getException().getMessage());
             }
 
             setFailOnError(old);
@@ -439,17 +440,6 @@ public class ContactTestManager implements TestManager {
         return allContacts.toArray(new Contact[] {});
     }
 
-    /**
-     * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
-     */
-    public Contact[] searchAction(final String pattern, final int folderId) {
-        return searchAction(pattern, folderId, Contact.ALL_COLUMNS);
-    }
-
-    public Contact[] searchAction(final String pattern, final int folderId, final int... columns) {
-        return searchAction(pattern, folderId, -1, null, null, Contact.ALL_COLUMNS);
-    }
-
     public Contact[] searchAction(final String pattern, final int folderId, final int orderBy, final Order order, final String collation, final int... columns) {
         List<Contact> allContacts = new LinkedList<Contact>();
         final String orderDir = order == null ? "ASC" : order.equals(Order.ASCENDING) ? "ASC" : "DESC";
@@ -505,7 +495,7 @@ public class ContactTestManager implements TestManager {
     /**
      * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
-    public Contact[] searchAction(final String pattern, final int folderId, final boolean initialSearch) {
+    public Contact[] searchAction(final String pattern, final int folderId) {
         List<Contact> allContacts = new LinkedList<Contact>();
         final SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
         try {
@@ -599,7 +589,7 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    public List<Contact> transform(final JSONArray data) throws JSONException, OXException, IOException {
+    public List<Contact> transform(final JSONArray data) throws JSONException, OXException {
         return transform(data, Contact.ALL_COLUMNS);
     }
 

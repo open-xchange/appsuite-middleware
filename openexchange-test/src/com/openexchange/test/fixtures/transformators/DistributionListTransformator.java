@@ -104,7 +104,7 @@ public class DistributionListTransformator implements Transformator {
         } else if ("contacts".equals(fixtureName)) {
             return getContactDistributionListEntry(fixtureName, fixtureEntry);
         } else if ("custom".equals(fixtureName)) {
-            return getCustomDistributionListEntry(fixtureName, fixtureEntry);
+            return getCustomDistributionListEntry(fixtureEntry);
         } else {
             throw OXException.general("Unable to convert " + fixtureName + ":" + fixtureEntry + " into a distribution list entry.");
         }
@@ -136,15 +136,14 @@ public class DistributionListTransformator implements Transformator {
         //		return new DistributionListEntryObject(user.getDisplayName(), user.getEmail1(), DistributionListEntryObject.INDEPENDENT);
     }
 
-    private DistributionListEntryObject getCustomDistributionListEntry(final String fixtureName, final String fixtureEntry) throws OXException {
+    private DistributionListEntryObject getCustomDistributionListEntry(final String fixtureEntry) throws OXException {
         InternetAddress address = null;
         try {
             final InternetAddress[] addresses = InternetAddress.parse(fixtureEntry);
             if (null == addresses || 1 > addresses.length || null == addresses[0]) {
                 throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry);
-            } else {
-                address = addresses[0];
             }
+            address = addresses[0];
         } catch (final AddressException e) {
             throw OXException.general("unable to parse custom distributionlist entry from " + fixtureEntry + ": " + e.getMessage());
         }

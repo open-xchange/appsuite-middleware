@@ -416,7 +416,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putICalUpdate(ICalResource iCalResource) throws Exception {
+    public int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;
         try {
             put = new PutMethod(getBaseUri() + iCalResource.getHref());

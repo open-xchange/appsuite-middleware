@@ -83,6 +83,7 @@ public class Bug48856Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -90,6 +91,7 @@ public class Bug48856Test extends CalDAVTest {
         manager2.setFailOnError(true);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

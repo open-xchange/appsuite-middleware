@@ -462,7 +462,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         return (String) value;
     }
 
-    protected static String extractChildTextContent(DavPropertyName propertyName, Element element) {
+    public static String extractChildTextContent(DavPropertyName propertyName, Element element) {
         NodeList nodes = element.getElementsByTagNameNS(propertyName.getNamespace().getURI(), propertyName.getName());
         assertNotNull("no child elements found by property name", nodes);
         assertEquals("0 or more than one child nodes found for property", 1, nodes.getLength());

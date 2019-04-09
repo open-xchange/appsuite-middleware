@@ -76,8 +76,7 @@ public class Bug31453Test extends CalDAVTest {
     private FolderObject publicFolder = null;
     private String publicFolderID = null;
 
-    private static final String[] DUMMY_ALARM_INDICATORS = new String[] { "TRIGGER;VALUE=DATE-TIME:19760401T005545Z", "X-APPLE-LOCAL-DEFAULT-ALARM:TRUE", "X-APPLE-DEFAULT-ALARM:TRUE" };
-
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -197,7 +197,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putVCard(String uid, String vCard) throws Exception {
+    public int putVCard(String uid, String vCard) throws Exception {
         return putVCard(uid, vCard, "Contacts");
     }
 

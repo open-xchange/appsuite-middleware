@@ -64,7 +64,6 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 public class JChronicDateTransformator implements Transformator {
 
     private static final Pattern parenthesesRegex = Pattern.compile("(\\{|\\[|\\(.+\\)|\\]|\\})");
-    private static final String fallbackPattern = "dd.MM.yy HH:mm";
     private final FixtureLoader fixtureLoader;
 
     public JChronicDateTransformator(FixtureLoader fixtureLoader) {
@@ -96,7 +95,7 @@ public class JChronicDateTransformator implements Transformator {
                 }
             }
             if (null == timeZone) {
-                throw OXException.general("unable to parse user / timezone from '" + match.toString() + "'.");
+                throw OXException.general("unable to parse user / timezone from '" + (match == null ? null : match.toString()) + "'.");
             }
             value = matcher.replaceFirst("").trim();
         }

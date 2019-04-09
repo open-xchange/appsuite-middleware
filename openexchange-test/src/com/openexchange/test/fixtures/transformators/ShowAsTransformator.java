@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
@@ -57,13 +58,13 @@ public class ShowAsTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if ("RESERVED".equalsIgnoreCase(value)) {
-            return Appointment.RESERVED;
+            return I(Appointment.RESERVED);
         } else if ("TEMPORARY".equalsIgnoreCase(value)) {
-            return Appointment.TEMPORARY;
+            return I(Appointment.TEMPORARY);
         } else if ("ABSENT".equalsIgnoreCase(value)) {
-            return Appointment.ABSENT;
+            return I(Appointment.ABSENT);
         } else if ("FREE".equalsIgnoreCase(value)) {
-            return Appointment.FREE;
+            return I(Appointment.FREE);
         } else {
             throw OXException.general("Don't know how to show appointments as : " + value);
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.math.BigDecimal;
 import com.openexchange.exception.OXException;
 
@@ -60,7 +61,7 @@ public class BigDecimalTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if (value == null) {
-            return 0;
+            return L(0);
         }
         try {
             return new BigDecimal(value);

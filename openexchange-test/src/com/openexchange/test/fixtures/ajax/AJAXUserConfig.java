@@ -31,17 +31,17 @@ public class AJAXUserConfig implements TestUserConfig {
 
     @Override
     public boolean getBool(Tree tree) {
-        return (Boolean) get(tree);
+        return ((Boolean) get(tree)).booleanValue();
     }
 
     @Override
     public int getInt(Tree tree) {
-        return (Integer) get(tree);
+        return ((Integer) get(tree)).intValue();
     }
 
     @Override
     public long getLong(Tree tree) {
-        return (Long) get(tree);
+        return ((Long) get(tree)).longValue();
     }
 
     @Override

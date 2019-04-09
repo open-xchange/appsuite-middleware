@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.userfeedback;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -135,7 +136,7 @@ public class ExportTest extends AbstractUserFeedbackTest {
         try {
             userfeedbackApi.exportRAW("unknown", type, new Long(0), new Long(0));
             fail();
-        } catch (ApiException e) {
+        } catch (@SuppressWarnings("unused") ApiException e) {
             assertEquals(404, getRestClient().getStatusCode());
         }
     }
@@ -145,7 +146,7 @@ public class ExportTest extends AbstractUserFeedbackTest {
         try {
             userfeedbackApi.exportRAW("default", "schalke-rating", new Long(0), new Long(0));
             fail();
-        } catch (ApiException e) {
+        } catch (@SuppressWarnings("unused") ApiException e) {
             assertEquals(404, getRestClient().getStatusCode());
         }
     }
@@ -186,7 +187,7 @@ public class ExportTest extends AbstractUserFeedbackTest {
         try {
             DateTime now = DateTime.now(DateTimeZone.UTC);
 
-            String export = userfeedbackApi.exportRAW("default", type, now.getMillis(), new Long(0));
+            String export = userfeedbackApi.exportRAW("default", type, L(now.getMillis()), L(0));
             JSONArray jsonExport = new JSONArray(export);
 
             assertEquals(0, jsonExport.length());
@@ -202,7 +203,7 @@ public class ExportTest extends AbstractUserFeedbackTest {
 
         storeFeedbacks(3);
 
-        String export = userfeedbackApi.exportRAW("default", type, new Long(0), now.getMillis());
+        String export = userfeedbackApi.exportRAW("default", type, new Long(0), L(now.getMillis()));
         JSONArray jsonExport = new JSONArray(export);
 
         assertEquals(0, jsonExport.length());
@@ -220,11 +221,11 @@ public class ExportTest extends AbstractUserFeedbackTest {
         Thread.sleep(2000);
         storeFeedbacks(3);
 
-        String export = userfeedbackApi.exportRAW("default", type, second.getMillis(), third.getMillis());
+        String export = userfeedbackApi.exportRAW("default", type, L(second.getMillis()), L(third.getMillis()));
         JSONArray jsonExport = new JSONArray(export);
         assertEquals(3, jsonExport.length());
 
-        String export2 = userfeedbackApi.exportRAW("default", type, 0L, 0L);
+        String export2 = userfeedbackApi.exportRAW("default", type, L(0), L(0));
         JSONArray jsonExport2 = new JSONArray(export2);
         assertEquals(9, jsonExport2.length());
     }

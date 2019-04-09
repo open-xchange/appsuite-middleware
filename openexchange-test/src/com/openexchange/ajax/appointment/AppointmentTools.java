@@ -62,12 +62,11 @@ public final class AppointmentTools extends ParticipantTools {
 
     /**
      * Compares the specified objects
-     * 
+     *
      * @param appointmentObj1 The expected {@link Appointment}
      * @param appointmentObj2 The actual {@link Appointment}
-     * @throws Exception if an error is occurred
      */
-    public static void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) throws Exception {
+    public static void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) {
         assertEquals("id is not equals", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
         assertEqualsAndNotNull("title is not equals", appointmentObj1.getTitle(), appointmentObj2.getTitle());
         assertEqualsAndNotNull("start is not equals", appointmentObj1.getStartDate(), appointmentObj2.getStartDate());

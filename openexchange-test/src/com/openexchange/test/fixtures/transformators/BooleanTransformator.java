@@ -56,9 +56,9 @@ public class BooleanTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if ("TRUE".equalsIgnoreCase(value)) {
-            return true;
+            return Boolean.TRUE;
         } else if ("FALSE".equalsIgnoreCase(value)) {
-            return false;
+            return Boolean.FALSE;
         } else {
             throw OXException.general("Can not convert '" + value + "' into an boolean");
         }

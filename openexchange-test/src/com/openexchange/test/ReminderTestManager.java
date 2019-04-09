@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,6 +102,7 @@ public class ReminderTestManager implements TestManager {
         this.timezone = timezone;
     }
 
+    @SuppressWarnings("unused")
     public ReminderTestManager(AJAXClient client) {
         this.setClient(client);
 
@@ -179,7 +181,7 @@ public class ReminderTestManager implements TestManager {
         for (ReminderObject reminder : new ArrayList<ReminderObject>(createdEntities)) {
             delete(reminder);
             if (getLastResponse().hasError()) {
-                org.slf4j.LoggerFactory.getLogger(ReminderTestManager.class).warn("Unable to delete the reminder with id {} in folder '{}': {}", reminder.getObjectId(), reminder.getFolder(), getLastResponse().getException().getMessage());
+                org.slf4j.LoggerFactory.getLogger(ReminderTestManager.class).warn("Unable to delete the reminder with id {} in folder '{}': {}", I(reminder.getObjectId()), I(reminder.getFolder()), getLastResponse().getException().getMessage());
             }
 
         }
@@ -224,7 +226,7 @@ public class ReminderTestManager implements TestManager {
             ReminderObject object = new ReminderObject();
             final JSONObject jsonReminder = jsonArray.getJSONObject(a);
 
-            long longId = DataParser.parseLong(jsonReminder, ReminderFields.ID);
+            long longId = DataParser.parseLong(jsonReminder, ReminderFields.ID).longValue();
             if (longId > Integer.MAX_VALUE) {
                 int alarmId = (int) (longId >> 32);
                 object.setObjectId(alarmId);

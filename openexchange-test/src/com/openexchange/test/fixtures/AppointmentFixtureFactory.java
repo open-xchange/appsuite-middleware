@@ -81,8 +81,8 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment> {
     }
 
     @Override
-    public Fixtures<Appointment> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new AppointmentFixtures(fixtureName, entries, fixtureLoader, groupResolver);
+    public Fixtures<Appointment> createFixture(final Map<String, Map<String, String>> entries) {
+        return new AppointmentFixtures(entries, fixtureLoader, groupResolver);
     }
 
     private class AppointmentFixtures extends DefaultFixtures<Appointment> implements Fixtures<Appointment> {
@@ -91,9 +91,10 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment> {
 
         private final Map<String, Fixture<Appointment>> appointments = new HashMap<String, Fixture<Appointment>>();
 
+        @SuppressWarnings("hiding")
         private final GroupResolver groupResolver;
 
-        public AppointmentFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
+        public AppointmentFixtures(final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
             super(Appointment.class, entries, fixtureLoader);
             this.entries = entries;
             this.groupResolver = groupResolver;
