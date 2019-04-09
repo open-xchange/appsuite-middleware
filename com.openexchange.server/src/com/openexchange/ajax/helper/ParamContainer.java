@@ -97,7 +97,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(Long.parseLong(tmp));
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -113,7 +113,7 @@ public abstract class ParamContainer {
                 try {
                     intArray[a] = Integer.parseInt(sa[a]);
                 } catch (final NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
                 }
             }
             return intArray;
@@ -128,7 +128,7 @@ public abstract class ParamContainer {
             try {
                 return Integer.parseInt(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -141,7 +141,7 @@ public abstract class ParamContainer {
             try {
                 return Long.parseLong(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -163,7 +163,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(Long.parseLong(tmp));
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -184,7 +184,7 @@ public abstract class ParamContainer {
                 try {
                     intArray[a] = Integer.parseInt(sa[a]);
                 } catch (final NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
                 }
             }
             return intArray;
@@ -199,7 +199,7 @@ public abstract class ParamContainer {
             try {
                 return Integer.parseInt(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -212,7 +212,7 @@ public abstract class ParamContainer {
             try {
                 return Long.parseLong(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -260,7 +260,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(Long.parseLong(tmp));
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -276,7 +276,7 @@ public abstract class ParamContainer {
                 try {
                     intArray[a] = Integer.parseInt(sa[a]);
                 } catch (final NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
                 }
             }
             return intArray;
@@ -291,7 +291,7 @@ public abstract class ParamContainer {
             try {
                 return Long.parseLong(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -304,7 +304,7 @@ public abstract class ParamContainer {
             try {
                 return Integer.parseInt(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -326,7 +326,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(Long.parseLong(tmp));
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -347,7 +347,7 @@ public abstract class ParamContainer {
                 try {
                     intArray[a] = Integer.parseInt(sa[a]);
                 } catch (final NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
                 }
             }
             return intArray;
@@ -362,7 +362,7 @@ public abstract class ParamContainer {
             try {
                 return Integer.parseInt(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -375,7 +375,7 @@ public abstract class ParamContainer {
             try {
                 return Long.parseLong(tmp);
             } catch (final NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(tmp, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, tmp, paramName);
             }
         }
 
@@ -415,7 +415,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(jo.getLong(paramName));
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -428,14 +428,14 @@ public abstract class ParamContainer {
             try {
                 tmp = SPLIT.split(jo.getString(paramName), 0);
             } catch (final JSONException e1) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e1, jo.opt(paramName), paramName);
             }
             final int[] intArray = new int[tmp.length];
             for (int i = 0; i < tmp.length; i++) {
                 try {
                     intArray[i] = Integer.parseInt(tmp[i]);
                 } catch (final NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
                 }
             }
             return intArray;
@@ -449,7 +449,7 @@ public abstract class ParamContainer {
             try {
                 return jo.getInt(paramName);
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -461,7 +461,7 @@ public abstract class ParamContainer {
             try {
                 return jo.getLong(paramName);
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -473,7 +473,7 @@ public abstract class ParamContainer {
             try {
                 return jo.getString(paramName);
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -485,7 +485,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(jo.getLong(paramName));
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -503,14 +503,14 @@ public abstract class ParamContainer {
             try {
                 tmp = SPLIT.split(jo.getString(paramName), 0);
             } catch (final JSONException e1) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e1, jo.opt(paramName), paramName);
             }
             final int[] intArray = new int[tmp.length];
             for (int i = 0; i < tmp.length; i++) {
                 try {
                     intArray[i] = Integer.parseInt(tmp[i]);
                 } catch (final NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
                 }
             }
             return intArray;
@@ -524,7 +524,7 @@ public abstract class ParamContainer {
             try {
                 return jo.getInt(paramName);
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -536,7 +536,7 @@ public abstract class ParamContainer {
             try {
                 return jo.getLong(paramName);
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -548,7 +548,7 @@ public abstract class ParamContainer {
             try {
                 return jo.getString(paramName);
             } catch (final JSONException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(jo.opt(paramName), paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, jo.opt(paramName), paramName);
             }
         }
 
@@ -582,7 +582,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
             }
         }
 
@@ -596,7 +596,7 @@ public abstract class ParamContainer {
                 try {
                     intArray[i] = Integer.parseInt(tmp[i]);
                 } catch (NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
                 }
             }
             return intArray;
@@ -609,7 +609,7 @@ public abstract class ParamContainer {
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
             }
         }
 
@@ -620,7 +620,7 @@ public abstract class ParamContainer {
             try {
                 return Long.parseLong(value);
             } catch (NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
             }
         }
 
@@ -639,7 +639,7 @@ public abstract class ParamContainer {
             try {
                 return new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
             }
         }
 
@@ -661,7 +661,7 @@ public abstract class ParamContainer {
                 try {
                     intArray[i] = Integer.parseInt(tmp[i]);
                 } catch (NumberFormatException e) {
-                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
                 }
             }
             return intArray;
@@ -677,7 +677,7 @@ public abstract class ParamContainer {
             try {
                 return Integer.parseInt(value);
             } catch (NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
             }
         }
 
@@ -691,7 +691,7 @@ public abstract class ParamContainer {
             try {
                 return Long.parseLong(value);
             } catch (NumberFormatException e) {
-                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(e, value, paramName);
             }
         }
 
