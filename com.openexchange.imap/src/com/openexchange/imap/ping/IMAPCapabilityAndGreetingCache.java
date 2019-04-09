@@ -428,7 +428,7 @@ public final class IMAPCapabilityAndGreetingCache {
                 if (null != s) {
                     try {
                         s.close();
-                    } catch (Exception e) {
+                    } catch (@SuppressWarnings("unused") Exception e) {
                         // ignore
                     }
                 }

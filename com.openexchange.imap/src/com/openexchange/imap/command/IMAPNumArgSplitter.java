@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Message;
@@ -400,7 +401,7 @@ public final class IMAPNumArgSplitter {
             }
             if (endPos <= offset) {
                 final int p = numArg.indexOf(',', offset);
-                LOG.warn("Token does not fit into given max size of {} bytes: {}", maxLen, numArg.substring(offset, p));
+                LOG.warn("Token does not fit into given max size of {} bytes: {}", I(maxLen), numArg.substring(offset, p));
                 offset = p + 1;
             } else {
                 tmp.add(numArg.substring(offset, endPos));

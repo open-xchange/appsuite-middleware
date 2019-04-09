@@ -95,7 +95,7 @@ public class IgnoreDeletedPreferencesItem implements PreferencesItemService, Con
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 IMAPProperties props = IMAPProperties.getInstance();
-                setting.setSingleValue(props.isIgnoreDeletedMails(user.getId(), ctx.getContextId()));
+                setting.setSingleValue((props.isIgnoreDeletedMails(user.getId(), ctx.getContextId()) ? Boolean.TRUE : Boolean.FALSE));
             }
         };
     }

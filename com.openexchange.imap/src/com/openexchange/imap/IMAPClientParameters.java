@@ -147,7 +147,7 @@ public enum IMAPClientParameters {
             md.update(SERVER_ID); // Node-unique salt
 
             return asHex(md.digest(), 8);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (@SuppressWarnings("unused") NoSuchAlgorithmException e) {
             // Ignore
         }
 
@@ -200,7 +200,7 @@ public enum IMAPClientParameters {
      * @param imapStore The IMAP store
      * @return The session information
      */
-    public static String generateSessionInformation(Session session, IMAPStore imapStore) {
+    public static String generateSessionInformation(Session session, @SuppressWarnings("unused") IMAPStore imapStore) {
         return generateSessionInformation(session);
     }
 
@@ -226,7 +226,7 @@ public enum IMAPClientParameters {
         String fbHost;
         try {
             fbHost = InetAddress.getLocalHost().getHostAddress();
-        } catch (final UnknownHostException e) {
+        } catch (@SuppressWarnings("unused") final UnknownHostException e) {
             fbHost = "127.0.0.1";
         }
         LOCAL_HOST = fbHost;

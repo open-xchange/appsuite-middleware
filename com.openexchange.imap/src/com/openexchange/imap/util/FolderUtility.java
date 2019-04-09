@@ -73,10 +73,6 @@ import com.sun.mail.imap.protocol.ListInfo;
  */
 public final class FolderUtility {
 
-    private static final int MAX_CAPACITY_DEFAULT_ACCOUNT = 128;
-
-    private static final int MAX_CAPACITY_PER_ACCOUNT = 16;
-
     /**
      * No instance
      */
@@ -157,7 +153,7 @@ public final class FolderUtility {
         try {
             f.open(IMAPFolder.READ_ONLY);
             return true;
-        } catch (FolderNotFoundException e) {
+        } catch (@SuppressWarnings("unused") FolderNotFoundException e) {
             // Apparently no such folder exists, hence cannot be opened
             return false;
         } catch (MessagingException e) {

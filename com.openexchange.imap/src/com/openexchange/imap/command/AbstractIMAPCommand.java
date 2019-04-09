@@ -208,6 +208,7 @@ public abstract class AbstractIMAPCommand<T> {
      * @param The argument index
      * @return The debug info
      */
+    @SuppressWarnings("unused")
     protected String getDebugInfo(final int argsIndex) {
         return null;
     }

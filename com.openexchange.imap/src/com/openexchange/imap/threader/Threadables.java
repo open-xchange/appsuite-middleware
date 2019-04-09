@@ -140,6 +140,7 @@ public final class Threadables {
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 useCommonsNetThreader = null;

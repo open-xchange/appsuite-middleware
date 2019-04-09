@@ -121,6 +121,8 @@ final class ACLExtensionAutoDetector {
         return new RFC2086ACLExtension();
     }
 
+    /*-
+     *
     private static boolean containsRFC4314Character(final String rightsCapability) {
         final int fromIndex = rightsCapability.indexOf('=');
         boolean found = false;
@@ -129,5 +131,7 @@ final class ACLExtensionAutoDetector {
         }
         return found;
     }
+     *
+     */
 
 }

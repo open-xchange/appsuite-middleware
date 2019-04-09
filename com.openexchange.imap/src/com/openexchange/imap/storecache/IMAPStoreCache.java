@@ -130,6 +130,7 @@ public final class IMAPStoreCache {
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 SHRINKER_MILLIS.set(configService.getIntProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", 3) * 1000);
@@ -235,7 +236,7 @@ public final class IMAPStoreCache {
         return containerType.getStoreClass();
     }
 
-    private void reinit(boolean withInitialDelay) {
+    void reinit(boolean withInitialDelay) {
         TimerService timer = Services.getService(TimerService.class);
 
         ScheduledTimerTask timerTask = this.timerTask;
@@ -318,7 +319,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(int accountId, String server, int port, String login, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws OXException {
+    private IMAPStoreContainer getContainer(int accountId, String server, int port, String login, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         /*
          * Check for a cached one
          */
@@ -442,7 +443,7 @@ public final class IMAPStoreCache {
         if (null != imapStore) {
             try {
                 imapStore.close();
-            } catch (final Exception e) {
+            } catch (@SuppressWarnings("unused") final Exception e) {
                 // Ignore
             }
         }

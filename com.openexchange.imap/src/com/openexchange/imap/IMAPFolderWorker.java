@@ -137,6 +137,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 failFastTimeout = null;
