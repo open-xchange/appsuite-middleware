@@ -122,7 +122,7 @@ public class ServerConfigImpl implements ServerConfig {
                 retVal = languagesList;
             }
         } catch (ClassCastException cce) {
-            LOG.warn("Invalid language mapping found in ServerConfig. Expected List but got {}", foundLanguages.getClass());
+            LOG.warn("Invalid language mapping found in ServerConfig. Expected List but got {}", foundLanguages.getClass(), cce);
         }
         return retVal;
     }

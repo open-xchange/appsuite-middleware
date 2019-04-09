@@ -79,7 +79,7 @@ public class ForcedHttpsValue implements ComputedServerConfigValueService {
         if (!serverConfig.containsKey("forceHTTPS")) {
             final ConfigurationService service = services.getService(ConfigurationService.class);
             final boolean forceHttps = service.getBoolProperty("com.openexchange.forceHTTPS", false);
-            serverConfig.put("forceHTTPS", forceHttps);
+            serverConfig.put("forceHTTPS", Boolean.valueOf(forceHttps));
         }
     }
 
