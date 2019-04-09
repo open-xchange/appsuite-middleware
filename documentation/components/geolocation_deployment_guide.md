@@ -169,12 +169,14 @@ Enables the country code IP checker. Upon session validation of every request if
 There are different metrics captured during the operation of the Country Code IP Checker Service. Two graphs are generated over a 5 minute interval, plotting the amount of accepted and denied IP changes. Each graph plots different metrics regarding the reason of accepted/denied IP changes.
 
 The "Accepted IP Changes" graph plots the total amount of:
+
  * Accepted IP changes
  * Accepted IP changes due to a private IPv4 change
  * Accepted IP changes due to white listed IPs
  * Accepted IP changes that don't fall under any of the previous categories
 
 The "Denied IP Changes" graph plots the total amount of:
+
  * Denied IP changes
  * Denied IP changes due to country change
  * Denied IP changes due to an exception
