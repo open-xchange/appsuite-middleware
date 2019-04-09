@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -12,7 +13,6 @@ import java.io.InputStream;
 import java.util.Date;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -104,7 +104,7 @@ public class UpdateTest extends InfostoreAJAXTest {
     }
 
     @Test
-    public void testUploadEmptyFile() throws IOException, JSONException, SAXException, OXException {
+    public void testUploadEmptyFile() throws IOException, JSONException, OXException {
         final File emptyFile = File.createTempFile("infostore-new-test", ".txt");
 
         final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
@@ -202,7 +202,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
         checkResponse();
 
-        VersionsTest.assureVersions(new Integer[] { 1, 2, 3, 4 }, itm.getLastResponse(), 2);
+        VersionsTest.assureVersions(new Integer[] { I(1), I(2), I(3), I(4) }, itm.getLastResponse(), I(2));
     }
 
     private void checkResponse() {

@@ -100,6 +100,7 @@ public class IMipImportTest extends AbstractConversionTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -116,6 +117,7 @@ public class IMipImportTest extends AbstractConversionTest {
         sequenceId2 = getSequenceIdForMail(client2, mailFolderAndMailID2);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -132,8 +134,8 @@ public class IMipImportTest extends AbstractConversionTest {
 
         assertEquals("Wrong amount of appointments", 1, folderIdFirst.length);
 
-        folder = Integer.valueOf(folderIdFirst[0][0]);
-        objectId = Integer.valueOf(folderIdFirst[0][1]);
+        folder = Integer.valueOf(folderIdFirst[0][0]).intValue();
+        objectId = Integer.valueOf(folderIdFirst[0][1]).intValue();
 
         GetRequest getRequest = new GetRequest(folder, objectId);
         GetResponse getResponse = getClient().execute(getRequest);
@@ -169,8 +171,7 @@ public class IMipImportTest extends AbstractConversionTest {
         JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
         jsonHandler.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder())).put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())).put(new JSONObject().put("com.openexchange.groupware.calendar.confirmstatus", confirm)).put(new JSONObject().put("com.openexchange.groupware.calendar.confirmmessage", message)));
         jsonBody.put("datahandler", jsonHandler);
-        ConvertResponse convertResponse = (ConvertResponse) Executor.execute(c.getSession(), new ConvertRequest(jsonBody, true));
-
+        ConvertResponse convertResponse = Executor.execute(c.getSession(), new ConvertRequest(jsonBody, true));
         return convertResponse.getFoldersAndIDs();
     }
 

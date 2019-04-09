@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
@@ -77,20 +76,20 @@ public final class Tools {
         super();
     }
 
-    public static CSVImportResponse importCSV(final AJAXClient client, final CSVImportRequest request) throws OXException, IOException, SAXException, JSONException {
+    public static CSVImportResponse importCSV(final AJAXClient client, final CSVImportRequest request) throws OXException, IOException, JSONException {
         return Executor.execute(client, request);
     }
 
-    public static ICalImportResponse importICal(final AJAXClient client, final ICalImportRequest request) throws OXException, IOException, SAXException, JSONException {
+    public static ICalImportResponse importICal(final AJAXClient client, final ICalImportRequest request) throws OXException, IOException, JSONException {
         return Executor.execute(client, request);
     }
 
-    public static VCardImportResponse importVCard(final AJAXClient client, final VCardImportRequest request) throws OXException, IOException, SAXException, JSONException {
+    public static VCardImportResponse importVCard(final AJAXClient client, final VCardImportRequest request) throws OXException, IOException, JSONException {
         return Executor.execute(client, request);
     }
 
-    public static OutlookCSVImportResponse importOutlookCSV(final AJAXClient client, final OutlookCSVImportRequest request) throws OXException, IOException, SAXException, JSONException {
-        return (OutlookCSVImportResponse) Executor.execute(client, request);
+    public static OutlookCSVImportResponse importOutlookCSV(final AJAXClient client, final OutlookCSVImportRequest request) throws OXException, IOException, JSONException {
+        return Executor.execute(client, request);
     }
 
 }

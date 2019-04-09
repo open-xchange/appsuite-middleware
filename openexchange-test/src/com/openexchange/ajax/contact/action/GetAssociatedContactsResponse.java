@@ -51,7 +51,6 @@ package com.openexchange.ajax.contact.action;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,11 +62,8 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class GetAssociatedContactsResponse extends AbstractAJAXResponse {
 
-    private final TimeZone timeZone;
-
-    protected GetAssociatedContactsResponse(Response response, TimeZone tz) {
+    protected GetAssociatedContactsResponse(Response response) {
         super(response);
-        timeZone = tz;
     }
 
     public List<UUID> getUUIDs() throws JSONException {

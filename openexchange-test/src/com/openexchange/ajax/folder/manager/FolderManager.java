@@ -72,7 +72,7 @@ public class FolderManager {
 
     private final FolderApi folderApi;
     private final List<String> foldersToDelete = new ArrayList<>();
-    private long lastTimestamp;
+    private Long lastTimestamp;
     private final String tree;
 
     /**
@@ -82,7 +82,7 @@ public class FolderManager {
         super();
         this.tree = tree;
         this.folderApi = api;
-        this.lastTimestamp = 0l;
+        this.lastTimestamp = Long.valueOf(0l);
     }
 
     public String createFolder(String parent, String name, String module) throws ApiException {
@@ -110,7 +110,7 @@ public class FolderManager {
     }
 
     public void cleanUp() throws ApiException {
-        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, true, false, false, null);
+        folderApi.getFoldersApi().deleteFolders(folderApi.getSession(), foldersToDelete, tree, lastTimestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
     }
 
     /**
@@ -128,14 +128,15 @@ public class FolderManager {
     }
 
     /**
-     * @return
-     * @throws ApiException
+     * Gets the given folder
      *
+     * @return {@link FolderData}
+     * @throws ApiException
      */
     public FolderData getFolder(String id) throws ApiException {
         FolderResponse folderResponse = folderApi.getFoldersApi().getFolder(getSession(), id, tree, null, null);
         checkResponse(folderResponse.getError(), folderResponse.getErrorDesc(), folderResponse.getData());
-        if (folderResponse.getTimestamp() != null && folderResponse.getTimestamp() > lastTimestamp) {
+        if (folderResponse.getTimestamp() != null && lastTimestamp != null && folderResponse.getTimestamp().longValue() > lastTimestamp.longValue()) {
             lastTimestamp = folderResponse.getTimestamp();
         }
         return folderResponse.getData();
@@ -149,7 +150,7 @@ public class FolderManager {
         folder.setFolderId(newParent);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, Long.valueOf(lastTimestamp), tree, null, Boolean.TRUE, null);
+        FolderUpdateResponse updateFolder = folderApi.getFoldersApi().updateFolder(getSession(), folderId, body, Boolean.FALSE, lastTimestamp, tree, null, Boolean.TRUE, null);
         checkResponse(updateFolder.getError(), updateFolder.getErrorDesc(), updateFolder.getData());
         lastTimestamp = updateFolder.getTimestamp();
     }

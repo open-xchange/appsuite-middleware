@@ -6,7 +6,6 @@ import org.junit.Test;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20715Test_UidIsNotcaseSensitive extends ManagedAppointmentTest {
 
@@ -24,8 +23,6 @@ public class Bug20715Test_UidIsNotcaseSensitive extends ManagedAppointmentTest {
 
         ICalImportRequest importRequest = new ICalImportRequest(folder.getObjectID(), ical);
         ICalImportResponse importResponse = getClient().execute(importRequest);
-
-        ImportResult[] imports = importResponse.getImports();
         assertFalse(importResponse.hasError());
     }
 

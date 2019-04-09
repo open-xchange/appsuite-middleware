@@ -12,7 +12,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
@@ -54,6 +53,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         return catm.get(jsonObject.getInt(AppointmentFields.FOLDER_ID), jsonObject.getInt(AppointmentFields.ID));
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -117,7 +117,7 @@ public class Bug17392Test extends ManagedAppointmentTest {
         roundtrip("Europe/Berlin");
     }
 
-    private void verifyTimezoneDoesNotGetLost(String tzid) throws OXException, IOException, SAXException, JSONException {
+    private void verifyTimezoneDoesNotGetLost(String tzid) throws OXException, IOException, JSONException {
         Appointment app = new Appointment();
         app.setTimezone(tzid);
         app.setTitle("Appointment to be exported - this better contain a TZID!");

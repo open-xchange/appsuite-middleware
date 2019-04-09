@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.find.contacts;
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -92,7 +94,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoCompleteShowDepartmentsTest.class);
 
     private static final int AMOUNT_OF_TEST_USERS = 3;
-    private static final int RESULTS_LIMIT = 6;
+    private static final Integer RESULTS_LIMIT = I(6);
     private static final String CONTACTS_JSLOB = "io.ox/contacts";
     private static final String SHOW_DEPARTMENT_JSLOB = "showDepartment";
     private static final String CONTACTS_MODULE = "contacts";
@@ -166,7 +168,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
     private void prepareUser(TestUser testUser, String department) throws ApiException {
         ApiClient client = clients.get(testUser.getUser());
         UserApi userApi = new UserApi(client);
-        CommonResponse response = userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(department));
+        CommonResponse response = userApi.updateUser(client.getSession(), client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(department));
         assertNull(response.getErrorDesc(), response.getError());
     }
 
@@ -179,7 +181,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         for (String key : randomUsers) {
             ApiClient client = clients.get(key);
             UserApi userApi = new UserApi(client);
-            userApi.updateUser(client.getSession(), Integer.toString(client.getUserId()), System.currentTimeMillis(), createUpdateBody(""));
+            userApi.updateUser(client.getSession(), client.getUserId().toString(), L(System.currentTimeMillis()), createUpdateBody(""));
         }
         super.tearDown();
     }
@@ -194,7 +196,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
         FindApi findApi = new FindApi(apiClient);
 
         FindOptionsData options = new FindOptionsData();
-        options.setAdmin(false);
+        options.setAdmin(Boolean.FALSE);
         options.setTimezone("UTC");
 
         FindAutoCompleteBody body = new FindAutoCompleteBody();
@@ -238,7 +240,7 @@ public class AutoCompleteShowDepartmentsTest extends AbstractConfigAwareAPIClien
 
         JSONObject tree = (JSONObject) JSONCoercion.coerceToJSON(obj);
         assertTrue("The '" + SHOW_DEPARTMENT_JSLOB + "' slob is missing from the tree", tree.hasAndNotNull(SHOW_DEPARTMENT_JSLOB));
-        assertTrue("The '" + SHOW_DEPARTMENT_JSLOB + "' slob is set to 'false'.", Boolean.valueOf(tree.get(SHOW_DEPARTMENT_JSLOB).toString()));
+        assertTrue("The '" + SHOW_DEPARTMENT_JSLOB + "' slob is set to 'false'.", Boolean.valueOf(tree.get(SHOW_DEPARTMENT_JSLOB).toString()).booleanValue());
     }
 
     /**

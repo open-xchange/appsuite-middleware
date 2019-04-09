@@ -41,6 +41,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -48,6 +49,7 @@ public abstract class AbstractMailFindTest extends AbstractFindTest {
         contactManager = new ContactTestManager(getClient());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

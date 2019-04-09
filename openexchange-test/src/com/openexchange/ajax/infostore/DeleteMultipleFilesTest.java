@@ -62,7 +62,6 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
@@ -78,13 +77,12 @@ import com.openexchange.file.storage.File;
  */
 public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
-    private AJAXClient client;
     private List<String> itemIds;
     private List<String> folderIds;
 
     /**
      * Initializes a new {@link DeleteMultipleFilesTest}.
-     * 
+     *
      * @param name
      */
     public DeleteMultipleFilesTest() {
@@ -92,10 +90,10 @@ public class DeleteMultipleFilesTest extends InfostoreAJAXTest {
 
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         itemIds = new ArrayList<String>();
         folderIds = new ArrayList<String>();
         java.io.File f1 = java.io.File.createTempFile("file1", "txt");

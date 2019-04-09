@@ -63,8 +63,8 @@ import com.openexchange.drive.DriveShareTarget;
  */
 public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> {
 
-    private boolean failOnError;
-    private DriveShareTarget target;
+    private final boolean failOnError;
+    private final DriveShareTarget target;
 
     public DeleteLinkRequest(Integer root, DriveShareTarget target) {
         this(root, target, true);
@@ -83,8 +83,7 @@ public class DeleteLinkRequest extends AbstractDriveRequest<DeleteLinkResponse> 
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink"), new Parameter("root", root)
-        };
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteLink"), new Parameter("root", root.intValue()) };
     }
 
     @Override

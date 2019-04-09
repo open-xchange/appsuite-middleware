@@ -84,6 +84,7 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 
     private Contact contact;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -109,7 +110,7 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 
         Contact actual = cotm.getAction(jsonObject.getInt("folder_id"), jsonObject.getInt("id"));
 
-        Set<ContactField> excluded = new HashSet<ContactField>() {
+        @SuppressWarnings("serial") Set<ContactField> excluded = new HashSet<ContactField>() {
 
             {
                 add(ContactField.FOLDER_ID);

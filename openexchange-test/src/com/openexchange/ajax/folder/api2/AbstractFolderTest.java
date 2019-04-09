@@ -246,7 +246,7 @@ public class AbstractFolderTest extends AbstractAJAXSession {
     public void deleteFolders(boolean hardDelete, FolderObject... folders) {
         DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, folders);
         if (hardDelete) {
-            deleteRequest.setHardDelete(hardDelete);
+            deleteRequest.setHardDelete(Boolean.valueOf(hardDelete));
         }
         CommonDeleteResponse deleteResponse = client.executeSafe(deleteRequest);
         JSONArray failures = (JSONArray) deleteResponse.getData();

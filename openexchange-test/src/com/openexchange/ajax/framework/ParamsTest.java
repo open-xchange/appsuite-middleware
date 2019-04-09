@@ -64,7 +64,7 @@ public class ParamsTest {
     protected Params defaultParams;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         defaultParams = new Params();
         defaultParams.add("key1", "value1");
         defaultParams.add(new Parameter("key2", "value2"));

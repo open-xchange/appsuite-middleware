@@ -57,7 +57,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.groupware.importexport.ImportResult;
 
 /**
@@ -76,7 +78,7 @@ public final class ImportExportParser {
     public static final ImportResult parse(final String data) throws JSONException {
         final Response response = ResponseParser.parse(data);
         final ImportResult retval;
-        final JSONObject json = response.getJSON();
+        final JSONObject json = ResponseWriter.getJSON(response);
         final String id = json.optString(CommonFields.ID);
         final String folderId = json.optString(CommonFields.FOLDER_ID);
         final long lastModified = json.optLong(CommonFields.LAST_MODIFIED);
@@ -93,13 +95,23 @@ public final class ImportExportParser {
 
         if (warnings != null) {
             for (int i = 0, size = warnings.length(); i < size; i++) {
-                String message = warnings.getJSONObject(i).getString("error");
-                ConversionWarning warning = new ConversionWarning(-1, message);
+                String code = warnings.getJSONObject(i).getString("code");
+                int number = Integer.valueOf(code.substring(code.indexOf("-"), code.length())).intValue();
+                ConversionWarning warning = new ConversionWarning(i, getCode(number));
                 conversionWarnings.add(warning);
             }
             retval.addWarnings(conversionWarnings);
         }
 
         return retval;
+    }
+
+    private static Code getCode(int number) {
+        for (Code code : Code.values()) {
+            if (code.getNumber() == number) {
+                return code;
+            }
+        }
+        return null;
     }
 }

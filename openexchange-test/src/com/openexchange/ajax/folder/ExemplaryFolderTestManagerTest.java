@@ -51,7 +51,7 @@ package com.openexchange.ajax.folder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import java.util.Date;
+import java.util.Calendar;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -73,6 +73,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -109,7 +110,7 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreatedFoldersAreReturnedByGetRequest() throws Exception {
+    public void testCreatedFoldersAreReturnedByGetRequest() {
         final FolderObject fo = ftm.getFolderFromServer(folderObject1.getObjectID());
         assertEquals("The folder was not returned.", fo.getFolderName(), folderObject1.getFolderName());
     }
@@ -133,12 +134,12 @@ public class ExemplaryFolderTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreatedFoldersAppearAsUpdatedSinceYesterday() throws Exception {
+    public void testCreatedFoldersAppearAsUpdatedSinceYesterday() {
         boolean found1 = false;
         boolean found2 = false;
-        final Date date = new Date();
-        date.setDate(date.getDate() - 1);
-        final FolderObject[] allFolders = ftm.getUpdatedFoldersOnServer(date);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        final FolderObject[] allFolders = ftm.getUpdatedFoldersOnServer(cal.getTime());
         for (int i = 0; i < allFolders.length; i++) {
             final FolderObject co = allFolders[i];
             if (co.getObjectID() == folderObject1.getObjectID()) {

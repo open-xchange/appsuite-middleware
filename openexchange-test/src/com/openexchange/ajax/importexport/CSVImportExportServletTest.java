@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -66,7 +67,7 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 
 /**
  * Tests the CSV imports and exports (rewritten from webdav + servlet to test cotm).
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
@@ -85,7 +86,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
         for (int i = 0; i < headers.size(); i++) {
             field = ContactField.getByDisplayName(headers.get(i));
             if (field != null) {
-                result.put(field, i);
+                result.put(field, I(i));
             }
         }
         return result;
@@ -101,9 +102,9 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
         Map<ContactField, Integer> positions = getPositions(actual);
 
         for (int i = 1; i <= 2; i++) {
-            assertEquals("Mismatch of given name in row #" + i, expected.get(i).get(0), actual.get(i).get(positions.get(ContactField.GIVEN_NAME)));
-            assertEquals("Mismatch of email 1 in row #" + i, expected.get(i).get(1), actual.get(i).get(positions.get(ContactField.EMAIL1)));
-            assertEquals("Mismatch of display name in row #" + i, expected.get(i).get(2), actual.get(i).get(positions.get(ContactField.DISPLAY_NAME)));
+            assertEquals("Mismatch of given name in row #" + i, expected.get(i).get(0), actual.get(i).get(positions.get(ContactField.GIVEN_NAME).intValue()));
+            assertEquals("Mismatch of email 1 in row #" + i, expected.get(i).get(1), actual.get(i).get(positions.get(ContactField.EMAIL1).intValue()));
+            assertEquals("Mismatch of display name in row #" + i, expected.get(i).get(2), actual.get(i).get(positions.get(ContactField.DISPLAY_NAME).intValue()));
         }
     }
 
@@ -125,7 +126,7 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest {
     public void notestDoubleImport() throws Exception {
         getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
         getClient().execute(new CSVImportRequest(folderID, new ByteArrayInputStream(CSV.getBytes())));
-        CSVExportResponse exportResponse = getClient().execute(new CSVExportRequest(folderID));
+        getClient().execute(new CSVExportRequest(folderID));
 
         CSVParser parser = new CSVParser();
         List<List<String>> expected = parser.parse(CSV);

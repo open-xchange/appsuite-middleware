@@ -57,13 +57,9 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileFieldHandler;
 import com.openexchange.file.storage.json.FileMetadataFieldParser;
-import com.openexchange.file.storage.json.JsonFieldHandler;
 import com.openexchange.file.storage.meta.FileFieldSet;
 
 /**
@@ -115,21 +111,5 @@ public class VersionsParser extends AbstractAJAXParser<VersionsResponse> {
             }
         }
         return versionsResponse;
-    }
-
-    private static FileFieldHandler getJsonHandler(final File file, final JsonFieldHandler fieldHandler) {
-        return new AbstractFileFieldHandler() {
-
-            @Override
-            public Object handle(Field field, Object... args) {
-                JSONObject jsonObject = get(0, JSONObject.class, args);
-                try {
-                    jsonObject.put(field.getName(), fieldHandler.handle(field, file));
-                } catch (JSONException e) {
-                    org.slf4j.LoggerFactory.getLogger(VersionsParser.class);
-                }
-                return jsonObject;
-            }
-        };
     }
 }

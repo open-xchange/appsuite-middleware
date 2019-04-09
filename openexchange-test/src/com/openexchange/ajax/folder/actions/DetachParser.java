@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
@@ -78,18 +79,19 @@ public class DetachParser extends AbstractAJAXParser<DetachResponse> {
             if(!json.has("error")) {
                 assertNotNull(json.opt(ResponseFields.TIMESTAMP)); // FIXME!
             }
-        } catch (final JSONException x) {
-            final Response res = Response.parse(json.toString());
+        } catch (@SuppressWarnings("unused") final JSONException x) {
+            final Response res = ResponseParser.parse(json.toString());
             if(res.hasError()) {
                 return new DetachResponse(response, null);
             }
         }
+        assertNotNull(arr);
         final int[] notDeleted = new int[arr.length()];
 
         for(int i = 0; i < arr.length(); i++) {
             notDeleted[i] = arr.getInt(i);
         }
-        
+
         return new DetachResponse(response, notDeleted);
     }
 }

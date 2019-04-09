@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.folder;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
@@ -126,16 +128,16 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
 
     protected int createNewUserWithQuota(User user) throws Exception {
         UserModuleAccess userModuleAccess = new UserModuleAccess();
-        context = new Context(getClient().getValues().getContextId());
+        context = new Context(I(getClient().getValues().getContextId()));
         Integer userId = iface.create(context, user, userModuleAccess, credentials).getId();
         user.setId(userId);
-        return userId;
+        return userId.intValue();
     }
 
     protected void deleteUser() throws Exception {
         if (testUserId > 0) {
             User user = new User(testUserId);
-            iface.delete(new Context(getClient().getValues().getContextId()), user, null, credentials);
+            iface.delete(new Context(I(getClient().getValues().getContextId())), user, null, credentials);
         }
     }
 
@@ -207,7 +209,7 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
         oxuser.setPassword("secret");
         oxuser.setImapServer("dovecot.devel.open-xchange.com");
         oxuser.setImapLogin(random + "@" + random);
-        oxuser.setMaxQuota(100L);
+        oxuser.setMaxQuota(L(100));
         return oxuser;
     }
 

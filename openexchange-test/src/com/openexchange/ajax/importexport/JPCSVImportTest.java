@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.rmi.server.UID;
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
         super.setUp();
         this.importApi = new ImportApi(getApiClient());
         foldersApi = new FoldersApi(getApiClient());
-        folderId = createAndRememberNewFolder(foldersApi, getDefaultFolder(getSessionId()), getApiClient().getUserId());
+        folderId = createAndRememberNewFolder(foldersApi, getDefaultFolder(getSessionId()), getApiClient().getUserId().intValue());
         contactsApi = new ContactsApi(getApiClient());
     }
 
@@ -118,16 +119,15 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
      */
     protected String createAndRememberNewFolder(FoldersApi api, String parent, int entity) throws ApiException {
         FolderPermission perm = new FolderPermission();
-        perm.setEntity(entity);
-        perm.setGroup(false);
-        perm.setBits(403710016);
-
+        perm.setEntity(I(entity));
+        perm.setGroup(Boolean.FALSE);
+        perm.setBits(I(403710016));
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule("contacts");
-        folderData.setSubscribed(true);
+        folderData.setSubscribed(Boolean.TRUE);
         folderData.setTitle(this.getClass().getSimpleName() + new UID().toString());
         folderData.setPermissions(permissions);
 
@@ -175,7 +175,7 @@ public class JPCSVImportTest extends AbstractConfigAwareAPIClientSession {
             return (String) privateList.get(0).get(0);
         }
         for (ArrayList<?> folder : privateList) {
-            if ((Boolean) folder.get(1)) {
+            if (((Boolean) folder.get(1)).booleanValue()) {
                 return (String) folder.get(0);
             }
         }

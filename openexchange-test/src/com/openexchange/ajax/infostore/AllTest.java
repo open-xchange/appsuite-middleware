@@ -26,8 +26,6 @@ public class AllTest extends InfostoreAJAXTest {
 
     @Test
     public void testBasic() throws Exception {
-        List<com.openexchange.file.storage.File> all = itm.getAll(folderId);
-
         final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
         final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));
 

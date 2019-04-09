@@ -51,7 +51,6 @@ package com.openexchange.ajax.importexport;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -122,7 +121,8 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         + "URL:www.example.invalid\n"
         + "X-SHOESIZE:6.0\n"
         + "END:VCARD\n";
-    
+
+    @SuppressWarnings("serial")
     public Map<String, String> VCARD_ELEMENTS = new HashMap<String, String>(){{
         //put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
         put("FN", "Prinz\\, Tobias");
@@ -133,7 +133,8 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         put("EMAIL", "tobias.prinz@open-xchange.com");
         put("X-SHOESIZE", "9.5");
     }};
-    
+
+    @SuppressWarnings("serial")
     public Map<String, String> VCARD_ELEMENTS_2 = new HashMap<String, String>(){{
         //put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
         put("FN", "Mustermann\\, Max");
@@ -145,7 +146,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         put("X-SHOESIZE", "6.0");
     }};
 
-    public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
+    public String getUrl(final String servlet, final int folderId, final Format format) {
         final StringBuilder bob = new StringBuilder("http://");
         bob.append(getClient().getHostname());
         bob.append("/ajax/");
@@ -157,7 +158,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         return bob.toString();
     }
 
-    public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException {
+    public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) {
         final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 
         addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber() + "," + ContactField.EMAIL1.getNumber() + "," + ContactField.DISPLAY_NAME.getNumber());
@@ -184,7 +185,7 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
 
         final OCLPermission[] permission = new OCLPermission[] { FolderTestManager.createPermission(getClient().getValues().getPrivateAppointmentFolder(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),};
         folderObj.setPermissionsAsArray(permission);
-        
+
         return ftm.insertFolderOnServer(folderObj).getObjectID();
     }
 
@@ -197,16 +198,16 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXSessio
         ftm.deleteFolderOnServer(folderId, new Date(cal.getTimeInMillis()));
     }
 
-    public static void assertEquals(final String message, final List l1, final List l2) {
+    public static void assertEquals(final String message, final List<?> l1, final List<?> l2) {
         if (l1.size() != l2.size()) {
             fail(message);
         }
-        final Set s = new HashSet(l1);
+        final Set<?> s = new HashSet<>(l1);
         for (final Object o : l2) {
             assertTrue(message, s.remove(o));
         }
     }
-    
+
     public static JSONObject extractFromCallback(final String html) throws JSONException {
         return new JSONObject(AbstractUploadParser.extractFromCallback(html));
     }

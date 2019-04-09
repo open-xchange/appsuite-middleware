@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -77,7 +78,7 @@ public class UpdatesTest extends AbstractFolderTest {
 
     /**
      * Initializes a new {@link UpdatesTest}.
-     * 
+     *
      * @param name
      */
     public UpdatesTest() {
@@ -158,18 +159,18 @@ public class UpdatesTest extends AbstractFolderTest {
         List<FolderObject> updatedFolders = new ArrayList<FolderObject>(2);
         List<Integer> expectUpdatedFolderIds = new ArrayList<Integer>(2);
         updatedFolders.add(newFolders.get(0));
-        expectUpdatedFolderIds.add(newFolders.get(0).getObjectID());
+        expectUpdatedFolderIds.add(I(newFolders.get(0).getObjectID()));
         updatedFolders.add(newFolders.get(1));
-        expectUpdatedFolderIds.add(newFolders.get(1).getObjectID());
+        expectUpdatedFolderIds.add(I(newFolders.get(1).getObjectID()));
         updateFolders(updatedFolders);
 
         // delete 2
         List<FolderObject> deletedFolders = new ArrayList<FolderObject>(2);
         List<Integer> expectDeletedFolderIds = new ArrayList<Integer>(2);
         deletedFolders.add(newFolders.get(2));
-        expectDeletedFolderIds.add(newFolders.get(2).getObjectID());
+        expectDeletedFolderIds.add(I(newFolders.get(2).getObjectID()));
         deletedFolders.add(newFolders.get(3));
-        expectDeletedFolderIds.add(newFolders.get(3).getObjectID());
+        expectDeletedFolderIds.add(I(newFolders.get(3).getObjectID()));
         deleteFolders(deletedFolders);
 
         // check modified with timestamp from last

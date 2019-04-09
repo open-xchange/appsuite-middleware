@@ -83,6 +83,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
 
     private FolderObject createdSharedFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -127,6 +128,7 @@ public class VisibleFoldersTest extends AbstractAJAXSession {
 
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

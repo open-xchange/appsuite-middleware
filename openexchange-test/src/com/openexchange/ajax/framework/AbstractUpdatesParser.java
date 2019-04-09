@@ -54,7 +54,7 @@ package com.openexchange.ajax.framework;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractUpdatesParser<T extends AbstractColumnsResponse, V> extends AbstractColumnsParser<T> {
+public abstract class AbstractUpdatesParser<T extends AbstractColumnsResponse> extends AbstractColumnsParser<T> {
 
     protected AbstractUpdatesParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);

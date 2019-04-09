@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.FolderFields;
@@ -82,12 +83,12 @@ public class UpdateRequest extends InsertRequest {
     }
 
     public UpdateRequest setCascadePermissions(boolean cascade) {
-        this.cascade = cascade;
+        this.cascade = B(cascade);
         return this;
     }
 
     public UpdateRequest setIgnoreWarnings(boolean ignoreWarnings) {
-        this.ignoreWarnings = ignoreWarnings;
+        this.ignoreWarnings = B(ignoreWarnings);
         return this;
     }
 
@@ -110,10 +111,10 @@ public class UpdateRequest extends InsertRequest {
             params.add(new Parameter("permissions", "inherit"));
         }
         if (cascade != null) {
-            params.add(new Parameter("cascadePermissions", cascade));
+            params.add(new Parameter("cascadePermissions", cascade.booleanValue()));
         }
         if (ignoreWarnings != null) {
-            params.add(new Parameter("ignoreWarnings", ignoreWarnings));
+            params.add(new Parameter("ignoreWarnings", ignoreWarnings.booleanValue()));
         }
     }
 }

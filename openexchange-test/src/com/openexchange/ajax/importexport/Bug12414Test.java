@@ -56,7 +56,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -67,7 +66,7 @@ import com.openexchange.tools.RandomString;
 
 /**
  * Checks if truncation information is properly handled by importer.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12414Test extends AbstractAJAXSession {
@@ -79,6 +78,7 @@ public final class Bug12414Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -87,7 +87,7 @@ public final class Bug12414Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testTruncation() throws OXException, IOException, SAXException, JSONException {
+    public void testTruncation() throws OXException, IOException, JSONException {
         final VCardImportRequest request = new VCardImportRequest(folderId, new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)), false);
         final VCardImportResponse importR = client.execute(request);
         assertEquals("Missing import response.", 1, importR.size());

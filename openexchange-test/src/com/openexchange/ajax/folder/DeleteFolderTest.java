@@ -81,13 +81,14 @@ public class DeleteFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link DeleteFolderTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public DeleteFolderTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -103,6 +104,7 @@ public class DeleteFolderTest extends AbstractAJAXSession {
         testFolder.setLastModified(getClient2().execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
