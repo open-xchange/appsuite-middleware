@@ -77,6 +77,7 @@ public class Bug40821Test extends AbstractAJAXSession {
     private AJAXClient clientToLogin;
     private String language;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -89,6 +90,7 @@ public class Bug40821Test extends AbstractAJAXSession {
         language = getResponse.getString();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

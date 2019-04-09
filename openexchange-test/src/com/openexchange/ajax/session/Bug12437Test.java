@@ -87,7 +87,7 @@ public final class Bug12437Test {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         client.getSession().getConversation().clearContents();
     }
 

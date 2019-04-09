@@ -59,6 +59,7 @@ import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
  * {@link RedeemRequest}
@@ -123,7 +124,7 @@ public class RedeemRequest implements AJAXRequest<RedeemResponse> {
         protected RedeemResponse createResponse(Response response) throws JSONException {
             if (!response.hasError()) {
                 Map<String, String> properties = new HashMap<String, String>();
-                JSONObject data = response.getJSON();
+                JSONObject data = ResponseWriter.getJSON(response);
                 for (String key : data.keySet()) {
                     properties.put(key, data.getString(key));
                 }

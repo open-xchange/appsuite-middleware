@@ -72,7 +72,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link Bug37927Test}
- * 
+ *
  * Task all request does not support sorting by column 317 and 316
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -92,6 +92,7 @@ public class Bug37927Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -100,6 +101,7 @@ public class Bug37927Test extends AbstractAJAXSession {
         tasksToDelete = new ArrayList<Task>();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

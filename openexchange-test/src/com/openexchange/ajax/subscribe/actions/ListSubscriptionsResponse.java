@@ -50,7 +50,6 @@
 package com.openexchange.ajax.subscribe.actions;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 
 /**
@@ -63,7 +62,7 @@ public class ListSubscriptionsResponse extends AbstractSubscriptionResponse {
         super(response);
     }
 
-    public JSONArray getList() throws JSONException {
+    public JSONArray getList() {
         return (JSONArray) getData();
     }
 

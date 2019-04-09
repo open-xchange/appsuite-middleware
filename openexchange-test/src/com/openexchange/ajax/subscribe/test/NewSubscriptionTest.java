@@ -55,7 +55,6 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
@@ -73,7 +72,7 @@ import com.openexchange.subscribe.Subscription;
 public class NewSubscriptionTest extends AbstractSubscriptionTest {
 
     @Test
-    public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldSurviveBasicOXMFSubscriptionCreation() throws OXException, IOException, JSONException {
         //setup
         FolderObject folder = ftm.generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);

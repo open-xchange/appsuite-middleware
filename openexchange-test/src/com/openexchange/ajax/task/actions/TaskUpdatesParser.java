@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.l;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,12 +73,9 @@ public class TaskUpdatesParser extends CommonUpdatesParser<TaskUpdatesResponse> 
 
     private final int[] columns;
 
-    private final TimeZone timeZone;
-
-    protected TaskUpdatesParser(boolean failOnError, int[] columns, TimeZone timeZone) {
+    protected TaskUpdatesParser(boolean failOnError, int[] columns) {
         super(failOnError, columns);
         this.columns = columns;
-        this.timeZone = timeZone;
     }
 
     @Override

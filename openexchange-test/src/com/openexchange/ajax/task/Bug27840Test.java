@@ -82,6 +82,7 @@ public final class Bug27840Test extends AbstractTaskTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -93,6 +94,7 @@ public final class Bug27840Test extends AbstractTaskTest {
         task.setActualCosts(new BigDecimal("-9999999999.99"));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

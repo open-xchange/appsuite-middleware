@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -82,16 +83,18 @@ public class LoginScreenTest extends ShareTest {
     private FolderObject folder;
 
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), getClient().getValues().getPrivateInfostoreFolder());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
-            deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
+            deleteFoldersSilently(getClient(), Collections.singletonList(I(folder.getObjectID())));
         } finally {
             super.tearDown();
         }

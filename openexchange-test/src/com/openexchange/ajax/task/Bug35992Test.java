@@ -82,6 +82,7 @@ public final class Bug35992Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -95,6 +96,7 @@ public final class Bug35992Test extends AbstractAJAXSession {
         task.addParticipant(participant);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
