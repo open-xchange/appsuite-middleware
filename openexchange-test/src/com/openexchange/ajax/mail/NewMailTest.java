@@ -54,7 +54,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
@@ -75,6 +74,7 @@ public class NewMailTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -82,7 +82,7 @@ public class NewMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testTransportNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException {
+    public void testTransportNewRFC822MailWithoutFrom() throws OXException, IOException, JSONException {
         // System.out.println(values.getDraftsFolder());
 
         final NewMailRequest newMailRequest = new NewMailRequest(null, EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);
@@ -93,7 +93,7 @@ public class NewMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testAppendNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException {
+    public void testAppendNewRFC822MailWithoutFrom() throws OXException, IOException, JSONException {
         // System.out.println(values.getDraftsFolder());
 
         final NewMailRequest newMailRequest = new NewMailRequest(values.getDraftsFolder(), EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);

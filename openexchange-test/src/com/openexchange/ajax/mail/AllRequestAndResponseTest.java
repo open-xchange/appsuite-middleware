@@ -26,6 +26,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
     protected String folder;
     String mailObject_25kb;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -37,6 +38,7 @@ public class AllRequestAndResponseTest extends AbstractMailTest {
         clearFolder(folder);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

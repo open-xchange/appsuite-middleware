@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import javax.mail.internet.InternetAddress;
@@ -74,6 +75,7 @@ public final class AllTest extends AbstractMailTest {
 
     String mailObject_25kb;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -90,6 +92,7 @@ public final class AllTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -192,7 +195,7 @@ public final class AllTest extends AbstractMailTest {
             assertEquals("From is not equal", new InternetAddress(getSendAddress()), mailMessage.getFrom()[0]);
             assertEquals("Subject is not equal", "Invitation for launch", mailMessage.getSubject());
             assertEquals("Folder is not equal", getInboxFolder(), mailMessage.getFolder());
-            assertEquals("hasAttachment is not equal", false, mailMessage.hasAttachment());
+            assertFalse("hasAttachment is not equal", mailMessage.hasAttachment());
             assertEquals("To is not equal", new InternetAddress(getSendAddress()), mailMessage.getTo()[0]);
         }
     }

@@ -105,7 +105,7 @@ public class TryAddVersionTest extends AbstractInfostoreTest {
             if (ids != null) {
                 for (String id : ids) {
                     DeleteInfostoreRequest req = new DeleteInfostoreRequest(id, String.valueOf(getClient().getValues().getPrivateInfostoreFolder()), new Date());
-                    req.setHardDelete(true);
+                    req.setHardDelete(Boolean.TRUE);
                     getClient().execute(req);
                 }
             }

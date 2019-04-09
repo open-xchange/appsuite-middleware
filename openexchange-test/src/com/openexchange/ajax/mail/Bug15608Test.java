@@ -57,7 +57,6 @@ import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -77,7 +76,6 @@ public class Bug15608Test extends AbstractAJAXSession {
 
     private static final int ORIG_FLAGS = 32;
     private static final int[] ATTRIBUTES = { ID.getField(), FLAGS.getField() };
-    private AJAXClient client;
     private TimeZone timeZone;
     private String folder;
     private String address;
@@ -87,10 +85,10 @@ public class Bug15608Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         timeZone = getClient().getValues().getTimeZone();
         folder = getClient().getValues().getInboxFolder();
         address = getClient().getValues().getSendAddress();
@@ -104,6 +102,7 @@ public class Bug15608Test extends AbstractAJAXSession {
         ids = response.getIds();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

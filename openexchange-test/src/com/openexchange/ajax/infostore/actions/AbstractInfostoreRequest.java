@@ -89,15 +89,15 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
         return NO_HEADER;
     }
 
-    public JSONObject writeJSON(File data) throws JSONException {
+    public JSONObject writeJSON(File data) {
         return convertToJSON(data, null);
     }
 
-    public JSONObject writeJSON(File data, Field[] fields) throws JSONException {
+    public JSONObject writeJSON(File data, Field[] fields) {
         return convertToJSON(data, fields);
     }
 
-    public static JSONObject convertToJSON(File data, Field[] fields) throws JSONException {
+    public static JSONObject convertToJSON(File data, Field[] fields) {
         FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
         if (fields == null) {
             return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);

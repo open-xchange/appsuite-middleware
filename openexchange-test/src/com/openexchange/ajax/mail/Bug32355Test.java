@@ -88,12 +88,14 @@ public class Bug32355Test extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

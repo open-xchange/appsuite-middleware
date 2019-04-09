@@ -64,7 +64,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ZipDocumentsRequest extends AbstractInfostoreRequest {
+public final class ZipDocumentsRequest extends AbstractInfostoreRequest<ZipDocumentsResponse> {
 
     class ZipDocumentsParser extends AbstractAJAXParser<ZipDocumentsResponse> {
 
@@ -132,7 +132,7 @@ public final class ZipDocumentsRequest extends AbstractInfostoreRequest {
     }
 
     @Override
-    public AbstractAJAXParser<?> getParser() {
+    public AbstractAJAXParser<ZipDocumentsResponse> getParser() {
         return new ZipDocumentsParser(failOnError);
     }
 

@@ -54,7 +54,6 @@ import static org.junit.Assert.fail;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.mail.actions.ListRequest;
 
@@ -65,8 +64,6 @@ import com.openexchange.ajax.mail.actions.ListRequest;
  */
 public class ListAliasTest extends AbstractMailTest {
 
-    private AJAXClient client;
-
     /**
      * Initializes a new {@link ListAliasTest}.
      *
@@ -76,10 +73,10 @@ public class ListAliasTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
     }
 
     @Test

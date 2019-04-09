@@ -73,13 +73,14 @@ public class Bug29437Test extends AbstractMailTest {
 
     /**
      * Initializes a new {@link Bug29437Test}.
-     * 
+     *
      * @param name
      */
     public Bug29437Test() {
         super();
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         ImportMailRequest importReq = new ImportMailRequest("INBOX", 0, Charset.forName("UTF-8"), TEST_MAIL);
@@ -87,6 +88,7 @@ public class Bug29437Test extends AbstractMailTest {
         folderAndId = importResp.getIds();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

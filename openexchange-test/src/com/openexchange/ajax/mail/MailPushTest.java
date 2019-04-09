@@ -64,6 +64,7 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.actions.MailReferenceResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequestWithUploads;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.test.pool.TestUser;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -76,11 +77,9 @@ import io.socket.emitter.Emitter;
  */
 public class MailPushTest extends AbstractMailTest {
 
-    private AJAXClient client2;
-
     /**
      * Initializes a new {@link MailPushTest}.
-     * 
+     *
      * @param name
      */
     public MailPushTest() {
@@ -102,13 +101,14 @@ public class MailPushTest extends AbstractMailTest {
         final AtomicReference<Exception> ref = new AtomicReference<>();
 
         // Task for sending a new mail
+        TestUser user = testContext.acquireUser();
         Runnable sendMail = new Runnable() {
 
             @Override
             public void run() {
                 AJAXClient client2 = null;
                 try {
-                    client2 = new AJAXClient(testContext.acquireUser());
+                    client2 = new AJAXClient(user);
 
                     String eml = "    Date: Tue, 1 Jul 2014 17:37:28 +0200 (CEST)\n" + "    From: from foo <from@example.tld>\n" + "    Reply-To: rto foo <bar@example.tld>\n" + "    To: to bar <to@example.tld>\n" + "    Cc: cc bar <cc@example.tld>\n" + "    Bcc: bcc bar <bcc@example.tld>\n" + "    Message-ID: <11140339.1095068.1404229048881.JavaMail.www@wwinf8905>\n" + "    Subject: plain text\n" + "    MIME-Version: 1.0\n" + "    Content-Type: text/plain; charset=UTF-8\n" + "    Content-Transfer-Encoding: 7bit\n" + "\n" + "    plain text\n" + "\n" + "    A test signature";
 
@@ -182,6 +182,7 @@ public class MailPushTest extends AbstractMailTest {
             assertTrue("Missing \"folder\" field in JSON data of \"ox:mail:new\" event", jArg.hasAndNotNull("folder"));
             assertEquals("Unexpected folder identifier", "default0/INBOX", jArg.getString("folder"));
         } finally {
+            testContext.backUser(user);
             socket.close();
         }
     }

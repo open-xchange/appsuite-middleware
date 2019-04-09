@@ -82,13 +82,14 @@ public class Bug29865Test extends AbstractMailTest {
 
     /**
      * Initializes a new {@link Bug29865Test}.
-     * 
+     *
      * @param name
      */
     public Bug29865Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

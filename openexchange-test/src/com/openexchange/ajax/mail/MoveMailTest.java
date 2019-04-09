@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
@@ -65,7 +64,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MoveMailTest}
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class MoveMailTest extends AbstractMailTest {
@@ -76,12 +75,14 @@ public class MoveMailTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -94,7 +95,7 @@ public class MoveMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testShouldMoveFromSentToDrafts() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldMoveFromSentToDrafts() throws OXException, IOException, JSONException {
         final String eml = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Message-ID: <1508703313.17483.1353357411049>\n" + "Subject: Move a mail\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + "\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Move from sent to drafts\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" + " <head>\n" + "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + " \n" + "  <div>\n" + "   Move from sent to drafts\n" + "  </div>\n" + " \n" + "</body></html>\n" + "------=_Part_17482_1388684087.1353357411002--\n";
 
         getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
@@ -117,7 +118,7 @@ public class MoveMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testShouldNotMoveToNonExistentFolder() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldNotMoveToNonExistentFolder() throws OXException, IOException, JSONException {
         final String eml = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Message-ID: <1508703313.17483.1353357411049>\n" + "Subject: Move a mail\n" + "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n" + "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + "\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "Move from sent to drafts\n" + "------=_Part_17482_1388684087.1353357411002\n" + "MIME-Version: 1.0\n" + "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n" + "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" + " <head>\n" + "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + " \n" + "  <div>\n" + "   Move from sent to drafts\n" + "  </div>\n" + " \n" + "</body></html>\n" + "------=_Part_17482_1388684087.1353357411002--\n";
 
         getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));
@@ -138,7 +139,7 @@ public class MoveMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testShouldNotTryToMoveToSameFolder() throws Exception {        
+    public void testShouldNotTryToMoveToSameFolder() throws Exception {
         //Send mail to myself
         final String eml = ("Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: #ADDR#\n" + "To: #ADDR#\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.").replaceAll("#ADDR#", getSendAddress());
         NewMailResponse newMailResponse = getClient().execute(new NewMailRequest(getInboxFolder(), eml, -1, true));

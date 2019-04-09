@@ -55,7 +55,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -73,7 +72,6 @@ import com.openexchange.java.Charsets;
 public class Bug16087Test extends AbstractAJAXSession {
 
     private static final int[] ATTRIBUTES = { ID.getField(), FLAGS.getField() };
-    private AJAXClient client;
     private String folder;
     private String address;
     private String[] ids;
@@ -82,10 +80,10 @@ public class Bug16087Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         folder = getClient().getValues().getInboxFolder();
         address = getClient().getValues().getSendAddress();
         final String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
@@ -94,6 +92,7 @@ public class Bug16087Test extends AbstractAJAXSession {
         ids = response.getIds()[0];
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
