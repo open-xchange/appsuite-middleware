@@ -336,6 +336,13 @@ public class EventPostProcessor {
     }
 
     /**
+     * Clears the collection of precessed events.
+     */
+    public void clear() {
+        events.clear();
+    }
+
+    /**
      * Gets the maximum timestamp of the processed events.
      *
      * @return The maximum timestamp, or <code>0</code> if none were processed

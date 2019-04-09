@@ -49,11 +49,18 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Arrays.remove;
 import java.util.List;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -137,6 +144,72 @@ public abstract class AbstractQueryPerformer {
      */
     protected EventPostProcessor postProcessor() {
         return new EventPostProcessor(session, storage, getSelfProtection());
+    }
+
+    /**
+     * Initializes a new event post processor, implicitly supplying further data for the calendar user attendee and event flags as needed.
+     * <p/>
+     * <b>Note:</b> Should only be used if different fields were used before when querying the event storage.   
+     * 
+     * @param eventIds The identifiers of the events being processed
+     * @param calendarUserId The identifier of the underlying calendar user
+     * @param requestedFields The fields as requested by the client
+     * @param queriedFields The fields loaded from the storage
+     * @return The event post processor, enriched with further data as needed
+     * @see {@link AbstractQueryPerformer#getFieldsForStorage(EventField[])}
+     */
+    protected EventPostProcessor postProcessor(String[] eventIds, int calendarUserId, EventField[] requestedFields, EventField[] queriedFields) throws OXException {
+        EventPostProcessor postProcessor = postProcessor();
+        /*
+         * always supply essential data for actual calendar user attendee, unless already requested explicitly
+         */
+        if (false == contains(queriedFields, EventField.ATTENDEES)) {
+            Attendee attendee = new Attendee();
+            attendee.setEntity(calendarUserId);
+            AttendeeField[] fields = {
+                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, AttendeeField.PARTSTAT, AttendeeField.HIDDEN
+            };
+            postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
+        }
+        /*
+         * supply info for event flag generation as needed
+         */
+        if (contains(requestedFields, EventField.FLAGS)) {
+            if (false == contains(queriedFields, EventFlag.ATTACHMENTS)) {
+                postProcessor.setAttachmentsFlagInfo(storage.getAttachmentStorage().hasAttachments(eventIds));
+            }
+            if (false == contains(queriedFields, EventFlag.ALARMS)) {
+                postProcessor.setAlarmsFlagInfo(storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds));
+            }
+            if (false == contains(queriedFields, EventField.ATTENDEES)) {
+                postProcessor.setScheduledFlagInfo(storage.getAttendeeStorage().loadAttendeeCounts(eventIds, null));
+            }
+        }
+        return postProcessor;
+    }
+    
+    /**
+     * Gets the event fields to pass down to the storage in case a subsequent <i>post-processing</i> of the events
+     * will take place, based on the supplied calendar parameters.
+     * <p/>
+     * <b>Note:</b> Only in case the resulting events are <i>post-processed</i>, and information for event flag generation will be
+     * fetched separately, a different set of fields may be queried from the storage.
+     * 
+     * @param requestedFields The event fields as requested from the client
+     * @return The event fields to hand down to the storage when querying event data
+     */
+    protected static EventField[] getFieldsForStorage(EventField[] requestedFields) {
+        if (null == requestedFields || contains(requestedFields, EventField.ATTENDEES) || false == contains(requestedFields, EventField.FLAGS)) {
+            /*
+             * all attendees, or no event flags requested, no special handling needed
+             */
+            return getFields(requestedFields);
+        }
+        /*
+         * event flags are requested, but not all attendees; temporary remove flags field to supply info for event flag generation
+         * afterwards, also ensure to include further fields relevant for event flag generation
+         */
+        return getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
     }
 
 }

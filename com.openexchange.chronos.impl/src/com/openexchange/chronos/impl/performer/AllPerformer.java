@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -62,19 +61,15 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.arrays.Arrays.contains;
-import static com.openexchange.tools.arrays.Arrays.remove;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
@@ -247,45 +242,6 @@ public class AllPerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Initializes a new event post processor, implicitly supplying further data for the calendar user attendee and event flags as needed.
-     * 
-     * @param eventIds The identifiers of the events being processed
-     * @param calendarUserId The identifier of the underlying calendar user
-     * @param requestedFields The fields as requested by the client
-     * @param queriedFields The fields loaded from the storage
-     * @return The event post processor, enriched with further data as needed
-     */
-    private EventPostProcessor postProcessor(String[] eventIds, int calendarUserId, EventField[] requestedFields, EventField[] queriedFields) throws OXException {
-        EventPostProcessor postProcessor = super.postProcessor();
-        /*
-         * always supply essential data for actual calendar user attendee, unless already requested explicitly
-         */
-        if (false == contains(queriedFields, EventField.ATTENDEES)) {
-            Attendee attendee = new Attendee();
-            attendee.setEntity(calendarUserId);
-            AttendeeField[] fields = {
-                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, AttendeeField.PARTSTAT, AttendeeField.HIDDEN
-            };
-            postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
-        }
-        /*
-         * supply info for event flag generation as needed
-         */
-        if (contains(requestedFields, EventField.FLAGS)) {
-            if (false == contains(queriedFields, EventFlag.ATTACHMENTS)) {
-                postProcessor.setAttachmentsFlagInfo(storage.getAttachmentStorage().hasAttachments(eventIds));
-            }
-            if (false == contains(queriedFields, EventFlag.ALARMS)) {
-                postProcessor.setAlarmsFlagInfo(storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds));
-            }
-            if (false == contains(queriedFields, EventField.ATTENDEES)) {
-                postProcessor.setScheduledFlagInfo(storage.getAttendeeStorage().loadAttendeeCounts(eventIds, null));
-            }
-        }
-        return postProcessor;
-    }
-
-    /**
      * Gets all events the current session user attends.
      *
      * @param partStats The participation status to include, or <code>null</code> to include all events independently of the user
@@ -409,30 +365,6 @@ public class AllPerformer extends AbstractQueryPerformer {
             .set(CalendarParameters.PARAMETER_ORDER, null)
             .set(CalendarParameters.PARAMETER_ORDER_BY, null))
         ;
-    }
-
-    /**
-     * Gets the event fields to pass down to the storage in case a subsequent <i>post-processing</i> of the events
-     * will take place, based on the supplied calendar parameters.
-     * <p/>
-     * In case the resulting events are <i>post-processed</i>, and information for event flag generation will be fetched separately, a
-     * different set of fields should be queried from the storage.
-     * 
-     * @param requestedFields The event fields as requested from the client
-     * @return The event fields to hand down to the storage when querying event data
-     */
-    private static EventField[] getFieldsForStorage(EventField[] requestedFields) {
-        if (null == requestedFields || contains(requestedFields, EventField.ATTENDEES) || false == contains(requestedFields, EventField.FLAGS)) {
-            /*
-             * all attendees, or no event flags requested, no special handling needed
-             */
-            return getFields(requestedFields);
-        }
-        /*
-         * event flags are requested, but not all attendees; temporary remove flags field to supply info for event flag generation
-         * afterwards, also ensure to include further fields relevant for event flag generation
-         */
-        return getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
     }
 
 }
