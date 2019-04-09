@@ -66,12 +66,14 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.logging.LogLevelService;
+import com.openexchange.logging.LogConfigurationService;
 import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.internal.LogLevelServiceImpl;
 import com.openexchange.logging.internal.LogbackConfigurationRMIServiceImpl;
+import com.openexchange.logging.internal.LogbackLogConfigurationService;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -107,6 +109,7 @@ public class Activator implements BundleActivator, Reloadable {
     private ServiceRegistration<Reloadable> reloadable;
     private ServiceRegistration<LogLevelService> logLevelService;
     private LogbackConfigurationRMIServiceImpl logbackConfigurationRMIService;
+    private LogbackLogConfigurationService logbackConfigService;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -149,14 +152,17 @@ public class Activator implements BundleActivator, Reloadable {
         rankingAwareTurboFilterList.addTurboFilter(new ParamsCheckingTurboFilter());
 
         // Register services
-        final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
+        final IncludeStackTraceServiceImpl stackTraceService = new IncludeStackTraceServiceImpl();
         registerLogstashAppenderMBean(context);
-        registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
-        registerIncludeStackTraceService(serviceImpl, context);
+        registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, stackTraceService);
+        registerIncludeStackTraceService(stackTraceService, context);
         reloadable = context.registerService(Reloadable.class, this, null);
 
+        logbackConfigService = new LogbackLogConfigurationService(loggerContext, rankingAwareTurboFilterList, stackTraceService);
+        context.registerService(LogConfigurationService.class, logbackConfigService, null);
+
         // Register RMI logback config service
-        logbackConfigurationRMIService = new LogbackConfigurationRMIServiceImpl(loggerContext, rankingAwareTurboFilterList, serviceImpl);
+        logbackConfigurationRMIService = new LogbackConfigurationRMIServiceImpl(logbackConfigService);
         context.registerService(Remote.class, logbackConfigurationRMIService, null);
 
         logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
@@ -202,8 +208,8 @@ public class Activator implements BundleActivator, Reloadable {
             logLevelService.unregister();
             logLevelService = null;
         }
-        if (logbackConfigurationRMIService != null) {
-            logbackConfigurationRMIService.dispose();
+        if (logbackConfigService != null) {
+            logbackConfigService.dispose();
         }
     }
 

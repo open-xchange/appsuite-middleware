@@ -123,7 +123,6 @@ public class MailFilterActivator extends HousekeepingActivator {
                 dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
                 registerService(EventHandler.class, eventHandler, dict);
             }
-
             registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
             registerService(MailFilterService.class, new MailFilterServiceImpl(this));
             registerTestCommandRegistry();

@@ -70,9 +70,7 @@ import ch.qos.logback.core.spi.FilterReply;
 public class ExtendedMDCFilter extends TurboFilter {
 
     private final Set<String> whitelist;
-
     private final Set<Tuple> tuples;
-
     private final Map<String, Level> levels;
 
     /**
@@ -156,6 +154,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override

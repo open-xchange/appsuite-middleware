@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.ssl;
 
+import java.io.FilterInputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,6 +61,7 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.HostnameVerifier;
@@ -67,6 +70,10 @@ import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+import org.slf4j.Logger;
+import com.openexchange.logging.Constants;
+import com.openexchange.monitoring.sockets.SocketLoggerUtil;
+import com.openexchange.net.osgi.NetSSLActivator;
 import com.openexchange.net.utils.Strings;
 
 /**
@@ -164,11 +171,6 @@ public class DelegatingSSLSocket extends SSLSocket {
     }
 
     @Override
-    public OutputStream getOutputStream() throws IOException {
-        return delegate.getOutputStream();
-    }
-
-    @Override
     public SSLParameters getSSLParameters() {
         return delegate.getSSLParameters();
     }
@@ -216,11 +218,6 @@ public class DelegatingSSLSocket extends SSLSocket {
     @Override
     public SSLSession getHandshakeSession() {
         return delegate.getHandshakeSession();
-    }
-
-    @Override
-    public InputStream getInputStream() throws IOException {
-        return delegate.getInputStream();
     }
 
     @Override
@@ -413,6 +410,16 @@ public class DelegatingSSLSocket extends SSLSocket {
         delegate.setWantClientAuth(want);
     }
 
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        return new LoggingOutputStream(delegate.getOutputStream());
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        return new LoggingInputStream(delegate.getInputStream());
+    }
+
     private static final MessageMatcher MATCHER_TRUST_ANCHORS_ERROR = new EqualsMatcher("the trustAnchors parameter must be non-empty", true);
     private static final MessageMatcher MATCHER_INCORRECT_SHUTDOWN_ERROR = new EqualsMatcher("ssl peer shut down incorrectly", true);
     private static final MessageMatcher MATCHER_HANDSHAKE_FAILURE_ERROR = new ContainsMatcher("handshake_failure", false);
@@ -435,9 +442,11 @@ public class DelegatingSSLSocket extends SSLSocket {
             throw e;
         } catch (SSLException e) {
             if (matchesException(e, java.security.InvalidAlgorithmParameterException.class, MATCHER_TRUST_ANCHORS_ERROR)) {
+                //@formatter:off
                 throw new javax.net.ssl.SSLException("The JVM cannot find the truststore required for SSL, or it does not contain the required certificates."
                     + " Please check JVM's truststore configuration; e.g. specified via \"javax.net.ssl.trustStore\" JVM argument (if \"com.openexchange.net.ssl.default.truststore.enabled\" is true)"
                     + " or \"com.openexchange.net.ssl.custom.truststore.path\" property (if \"com.openexchange.net.ssl.custom.truststore.enabled\" is true)", e);
+                //@formatter:on
             }
 
             // See http://stackoverflow.com/a/6353956
@@ -447,8 +456,10 @@ public class DelegatingSSLSocket extends SSLSocket {
                 SocketAddress endpoint = this.endpoint;
                 String endpointInfo = null == endpoint ? "" : (" \"" + endpoint + "\"");
                 Set<String> protocols = new LinkedHashSet<String>(Arrays.asList(getEnabledProtocols()));
+                //@formatter:off
                 throw new javax.net.ssl.SSLException("The remote end-point" + endpointInfo + " closed connection during handshake unexpectedly. Most likey because the end-point expects a protocol,"
                     + " that is not enabled/available for the JVM. Enabled protocols are: " + protocols + ". You may want to let supported protocols/cipher suite be determined by using https://www.ssllabs.com/ssltest/index.html", e);
+                //@formatter:on
             }
 
             if (MATCHER_HANDSHAKE_FAILURE_ERROR.matches(e.getMessage())) {
@@ -457,8 +468,10 @@ public class DelegatingSSLSocket extends SSLSocket {
                 String endpointInfo = null == endpoint ? "" : (" \"" + endpoint + "\"");
                 Set<String> protocols = new LinkedHashSet<String>(Arrays.asList(getEnabledProtocols()));
                 // Set<String> ciperSuites = new LinkedHashSet<String>(Arrays.asList(getEnabledCipherSuites()));
+                //@formatter:off
                 throw new javax.net.ssl.SSLException("The SSL hand-shake with remote end-point" + endpointInfo + " failed. Most likey because the end-point expects a protocol or cipher suite,"
                     + " that is not enabled/available for the JVM. Enabled protocols are: " + protocols + ". You may want to let supported protocols/cipher suite be determined by using https://www.ssllabs.com/ssltest/index.html", e);
+                //@formatter:on
             }
 
             throw e;
@@ -513,4 +526,63 @@ public class DelegatingSSLSocket extends SSLSocket {
         }
     }
 
+    /**
+     * {@link LoggingOutputStream} - Logs output traffic
+     */
+    private static class LoggingOutputStream extends FilterOutputStream {
+
+        /**
+         * Initialises a new {@link LoggingOutputStream}.
+         *
+         * @param out the output stream
+         */
+        public LoggingOutputStream(OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            out.write(b, off, len);
+            Optional<Logger> logger = SocketLoggerUtil.getLoggerForSSLSocket(NetSSLActivator.getServiceLookup());
+            logger.ifPresent((l) -> l.trace(Constants.DROP_MDC_MARKER, SocketLoggerUtil.prepareForLogging(b, off, len)));
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            out.write(b);
+            Optional<Logger> logger = SocketLoggerUtil.getLoggerForSSLSocket(NetSSLActivator.getServiceLookup());
+            logger.ifPresent((l) -> l.trace(Constants.DROP_MDC_MARKER, new String(new char[] { (char) b })));
+        }
+    }
+
+    /**
+     * {@link LoggingInputStream} - Logs input traffic
+     */
+    private static class LoggingInputStream extends FilterInputStream {
+
+        /**
+         * Initialises a new {@link LoggingInputStream}.
+         *
+         * @param in the input stream
+         */
+        protected LoggingInputStream(InputStream in) {
+            super(in);
+        }
+
+        @Override
+        public int read() throws IOException {
+            int result = in.read();
+            Optional<Logger> logger = SocketLoggerUtil.getLoggerForSSLSocket(NetSSLActivator.getServiceLookup());
+            logger.ifPresent((l) -> l.trace(Constants.DROP_MDC_MARKER, new String(new char[] { (char) result })));
+            return result;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int length = in.read(b, off, len);
+            Optional<Logger> logger = SocketLoggerUtil.getLoggerForSSLSocket(NetSSLActivator.getServiceLookup());
+            logger.ifPresent((l) -> l.trace(Constants.DROP_MDC_MARKER, SocketLoggerUtil.prepareForLogging(b, off, len)));
+            return length;
+        }
+    }
 }

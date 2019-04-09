@@ -63,6 +63,8 @@ import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.lock.LockService;
 import com.openexchange.management.ManagementService;
+import com.openexchange.monitoring.osgi.SocketLoggerBlackListServiceTracker;
+import com.openexchange.monitoring.sockets.SocketLoggerRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -99,6 +101,7 @@ public class Activator extends HousekeepingActivator {
         track(TimerService.class, new TimerServiceCustomizer(context));
         track(CacheService.class, new CacheServiceCustomizer(context));
         track(LockService.class, new LockServiceTracker(context));
+        track(SocketLoggerRegistryService.class, new SocketLoggerBlackListServiceTracker("com.openexchange.database", context));
         openTrackers();
 
         registerService(Reloadable.class, GenericReloadable.getInstance(), null);

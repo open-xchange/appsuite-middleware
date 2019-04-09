@@ -51,6 +51,9 @@ package com.openexchange.monitoring.sockets;
 
 import java.io.IOException;
 import java.net.Socket;
+import com.openexchange.monitoring.sockets.failure.ConnectFailure;
+import com.openexchange.monitoring.sockets.failure.IOFailure;
+import com.openexchange.monitoring.sockets.failure.TimeoutFailure;
 
 /**
  * {@link SocketMonitor} - Receives call-backs whenever bytes are read from / written to socket.

@@ -52,6 +52,8 @@ package com.openexchange.icap.osgi;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.icap.ICAPClientFactoryService;
 import com.openexchange.icap.impl.ICAPClientFactoryServiceImpl;
+import com.openexchange.monitoring.osgi.SocketLoggerBlackListServiceTracker;
+import com.openexchange.monitoring.sockets.SocketLoggerRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -87,6 +89,8 @@ public class ICAPClientActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ICAPClientFactoryService.class, new ICAPClientFactoryServiceImpl(this));
+        track(SocketLoggerRegistryService.class, new SocketLoggerBlackListServiceTracker("com.openexchange.icap", context));
+        openTrackers();
     }
 
     /*

@@ -73,5 +73,4 @@ public interface SocketMonitoringService {
      * @param monitor The monitor to remove
      */
     void remove(SocketMonitor monitor);
-
 }

@@ -64,9 +64,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.lang.ArrayUtils;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.logging.LogResponse;
+import com.openexchange.logging.MessageType;
 import com.openexchange.logging.rmi.LogbackConfigurationRMIService;
-import com.openexchange.logging.rmi.LogbackRemoteResponse;
-import com.openexchange.logging.rmi.LogbackRemoteResponse.MessageType;
 import ch.qos.logback.classic.Level;
 
 /**
@@ -253,7 +253,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         }
     }
 
-    static void printResponse(LogbackRemoteResponse response) {
+    private static void printResponse(LogResponse response) {
         if (response == null) {
             return;
         }
@@ -344,7 +344,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
             @Override
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
                 int contextId = getIntValue(commandLine.getOptionValue("c"));
-                LogbackRemoteResponse response = null;
+                LogResponse response = null;
                 if (commandLine.hasOption('a')) {
                     response = logbackConfigService.filterContext(contextId, getLoggerMap(commandLine.getOptionValues('l')));
                 } else if (commandLine.hasOption('d')) {
@@ -361,7 +361,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
                 int contextId = getIntValue(commandLine.getOptionValue("c"));
                 int userId = getIntValue(commandLine.getOptionValue("u"));
-                LogbackRemoteResponse response = null;
+                LogResponse response = null;
                 if (commandLine.hasOption('a')) {
                     response = logbackConfigService.filterUser(contextId, userId, getLoggerMap(commandLine.getOptionValues('l')));
                 } else if (commandLine.hasOption('d')) {
@@ -377,7 +377,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
             @Override
             void executeWith(CommandLine commandLine, LogbackConfigurationRMIService logbackConfigService) throws RemoteException {
                 String sessionId = commandLine.getOptionValue('e');
-                LogbackRemoteResponse response = null;
+                LogResponse response = null;
                 if (commandLine.hasOption('a')) {
                     response = logbackConfigService.filterSession(sessionId, getLoggerMap(commandLine.getOptionValues('l')));
                 } else if (commandLine.hasOption('d')) {

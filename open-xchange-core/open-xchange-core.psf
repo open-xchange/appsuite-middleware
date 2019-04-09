@@ -167,6 +167,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.modules.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.monitoring"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.monitoring.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net.ssl"/>
@@ -291,3 +292,4 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pluginsloaded.mbean"/>
 </provider>
 </psf>
+

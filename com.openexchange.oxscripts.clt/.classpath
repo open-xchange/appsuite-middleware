@@ -24,5 +24,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-codec-1.12.jar"/>
 	<classpathentry kind="src" path="/com.openexchange.contact.storage.rdb"/>
+	<classpathentry kind="src" path="/com.openexchange.monitoring"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
