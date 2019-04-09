@@ -69,6 +69,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class MailAccountValidateTest extends AbstractMailAccountTest {
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

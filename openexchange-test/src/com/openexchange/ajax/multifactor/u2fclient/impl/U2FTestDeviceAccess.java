@@ -105,8 +105,8 @@ public class U2FTestDeviceAccess implements U2FDeviceAccess {
         "268832cb836bcd30dfa0220631b1459f09e6330055722c8d89b7f48883b9089b88d60d1d9795902" +
         "b30410df";
 
-    private int keySize;
-    private HashMap<String, U2FKeyPair> keyStore = new HashMap<String, U2FKeyPair>();
+    private final int keySize;
+    private final HashMap<String, U2FKeyPair> keyStore = new HashMap<String, U2FKeyPair>();
 
     /**
      * Initializes a new {@link U2FTestDeviceAccess}.
@@ -138,7 +138,7 @@ public class U2FTestDeviceAccess implements U2FDeviceAccess {
         return fac.generatePrivate(keySpec);
     }
 
-    private X509Certificate parseCertificate(String vertHexData) throws CertificateException {
+    private X509Certificate parseCertificate() throws CertificateException {
         byte[] certData = U2FEncodings.decodeHex(EXAMPLE_CERT_HEX);
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         return (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(certData));
@@ -163,14 +163,10 @@ public class U2FTestDeviceAccess implements U2FDeviceAccess {
     }
 
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.multifactor.u2fclient.U2FDeviceAccess#getCertificate()
-     */
     @Override
     public AttestationCertificate getCertificate() throws U2FClientException {
         try {
-            return new AttestationCertificate(parsePrivateKey(EXAMPLE_CERT_PRIVATE_KEY_HEX),
-                parseCertificate(EXAMPLE_CERT_HEX));
+            return new AttestationCertificate(parsePrivateKey(EXAMPLE_CERT_PRIVATE_KEY_HEX), parseCertificate());
         } catch (CertificateException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new U2FClientException(e.getMessage(), e);
         }
@@ -190,9 +186,6 @@ public class U2FTestDeviceAccess implements U2FDeviceAccess {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.multifactor.u2fclient.U2FKeyFactory#encodePublicKey(com.openexchange.ajax.multifactor.u2fclient.U2FKeyFactory.U2FKeyPair)
-     */
     @Override
     public byte[] encodePublicKey(U2FKeyPair key) throws U2FClientException {
         BCECPublicKey publicKey = (BCECPublicKey) key.getKeyPair().getPublic();
@@ -200,19 +193,14 @@ public class U2FTestDeviceAccess implements U2FDeviceAccess {
 
         try {
             bos.write(0x04);
-            //bos.write(publicKey.getQ().getX().getEncoded());
-            //bos.write(publicKey.getQ().getY().getEncoded());           
             bos.write(publicKey.getQ().getXCoord().getEncoded());
-            bos.write(publicKey.getQ().getYCoord().getEncoded());           
+            bos.write(publicKey.getQ().getYCoord().getEncoded());
         } catch (IOException e) {
             throw new U2FClientException(e.getMessage(), e);
         }
         return bos.toByteArray();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajax.multifactor.u2fclient.U2FKeyFactory#get(byte[])
-     */
     @Override
     public U2FKeyPair getKeyPair(byte[] keyHandle) {
         String base64KeyHandle = U2FEncodings.encodeBase64Url(keyHandle);

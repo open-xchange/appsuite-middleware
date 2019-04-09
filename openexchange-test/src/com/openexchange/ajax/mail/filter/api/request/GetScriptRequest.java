@@ -63,7 +63,8 @@ import com.openexchange.ajax.mail.filter.api.response.GetScriptResponse;
  */
 public class GetScriptRequest extends AbstractMailFilterRequest<GetScriptResponse> {
 
-    private boolean failOnError = true;
+    @SuppressWarnings("hiding")
+    private final boolean failOnError = true;
 
     /**
      * Initialises a new {@link GetScriptRequest}.
@@ -74,7 +75,7 @@ public class GetScriptRequest extends AbstractMailFilterRequest<GetScriptRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -84,7 +85,7 @@ public class GetScriptRequest extends AbstractMailFilterRequest<GetScriptRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -94,7 +95,7 @@ public class GetScriptRequest extends AbstractMailFilterRequest<GetScriptRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -104,7 +105,7 @@ public class GetScriptRequest extends AbstractMailFilterRequest<GetScriptRespons
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override

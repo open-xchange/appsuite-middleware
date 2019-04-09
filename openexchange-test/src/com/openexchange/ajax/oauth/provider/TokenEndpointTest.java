@@ -161,9 +161,7 @@ public class TokenEndpointTest extends EndpointTest {
         assertTrue(contentType.startsWith("application/json"));
         JSONObject jError = new JSONObject(responseBody);
         String errorCode = "invalid_request";
-        if (errorCode != null) {
-            assertEquals(errorCode, jError.getString("error"));
-        }
+        assertEquals(errorCode, jError.getString("error"));
 
         // 2. set invalid value
         requestParams = new LinkedList<>(necessaryParams);
@@ -185,9 +183,7 @@ public class TokenEndpointTest extends EndpointTest {
         assertNotNull(contentType);
         assertTrue(contentType.startsWith("application/json"));
         jError = new JSONObject(responseBody);
-        if (errorCode != null) {
-            assertEquals(errorCode, jError.getString("error"));
-        }
+        assertEquals(errorCode, jError.getString("error"));
     }
 
     private void testRedeemRefreshTokenWithMissingAndInvalidParam(String param) throws Exception {
@@ -219,9 +215,7 @@ public class TokenEndpointTest extends EndpointTest {
         assertTrue(contentType.startsWith("application/json"));
         JSONObject jError = new JSONObject(responseBody);
         String errorCode = "invalid_request";
-        if (errorCode != null) {
-            assertEquals(errorCode, jError.getString("error"));
-        }
+        assertEquals(errorCode, jError.getString("error"));
 
         // 2. set invalid value
         requestParams = new LinkedList<>(necessaryParams);
@@ -243,9 +237,7 @@ public class TokenEndpointTest extends EndpointTest {
         assertNotNull(contentType);
         assertTrue(contentType.startsWith("application/json"));
         jError = new JSONObject(responseBody);
-        if (errorCode != null) {
-            assertEquals(errorCode, jError.getString("error"));
-        }
+        assertEquals(errorCode, jError.getString("error"));
     }
 
 }

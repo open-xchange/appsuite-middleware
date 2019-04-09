@@ -84,7 +84,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAPIClientSession {
         attribute.setName("user_sms_link_secret");
         attribute.setValue(UID);
 
-        UserAttributionResponse response = userApi.setUserAttribute(getApiClient().getSession(), String.valueOf(getApiClient().getUserId()), attribute, false);
+        UserAttributionResponse response = userApi.setUserAttribute(getApiClient().getSession(), String.valueOf(getApiClient().getUserId()), attribute, Boolean.FALSE);
         assertNull(response.getErrorDesc(), response.getError());
 
         onboardingApi = new ClientonboardingApi(getApiClient());

@@ -62,7 +62,6 @@ import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.image.ImageRequest;
 import com.openexchange.ajax.image.ImageResponse;
 import com.openexchange.contacts.json.ContactActionFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
@@ -74,7 +73,7 @@ import com.openexchange.oauth.provider.resourceserver.scope.Scope;
  */
 public class ReadContactTest extends AbstractOAuthTest {
 
-    public ReadContactTest() throws OXException {
+    public ReadContactTest() {
         super(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE));
     }
 

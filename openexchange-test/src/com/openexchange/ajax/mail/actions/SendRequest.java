@@ -77,12 +77,6 @@ public class SendRequest implements AJAXRequest<SendResponse> {
 
     private final List<InputStream> uploads;
 
-    /*
-     * Mail object settings
-     */
-
-    private String recipientTo;
-
     private final boolean failOnError;
 
     private final String mimeType;

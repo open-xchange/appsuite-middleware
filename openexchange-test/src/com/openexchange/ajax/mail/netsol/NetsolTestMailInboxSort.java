@@ -79,6 +79,7 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
         super();
     }
 
+    @SuppressWarnings("hiding")
     protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
 
     @Test

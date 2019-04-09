@@ -82,16 +82,16 @@ public class UpdatesTest extends ReminderTest {
         appointmentObj.setIgnoreConflicts(true);
 
         final int targetId = catm.insert(appointmentObj).getObjectID();
-        
+
         List<ReminderObject> reminderObj = remTm.updates(new Date(System.currentTimeMillis() - 5000));
-       
+
         ReminderObject selected = null;
         for (ReminderObject current : reminderObj) {
             if (current.getTargetId() == targetId) {
                 selected = current;
             }
         }
-
+        assertNotNull(selected);
         assertTrue("reminder not found in response", (selected.getTargetId() > -1));
 
         assertTrue("object id not found", selected.getObjectId() > 0);

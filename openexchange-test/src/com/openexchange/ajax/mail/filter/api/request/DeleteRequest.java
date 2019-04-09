@@ -67,6 +67,7 @@ public class DeleteRequest extends AbstractMailFilterRequest<DeleteResponse> {
 
     private final int ruleId;
 
+    @SuppressWarnings("hiding")
     private boolean failOnError = true;
 
     /**
@@ -78,7 +79,7 @@ public class DeleteRequest extends AbstractMailFilterRequest<DeleteResponse> {
 
     /**
      * Initialises a new {@link DeleteRequest}.
-     * 
+     *
      * @param ruleId The rule identifier
      * @param failOnError
      */
@@ -90,9 +91,10 @@ public class DeleteRequest extends AbstractMailFilterRequest<DeleteResponse> {
 
     /**
      * Sets the fail on error flag
-     * 
+     *
      * @param failOnError
      */
+    @Override
     public void setFailOnError(final boolean failOnError) {
         this.failOnError = failOnError;
     }

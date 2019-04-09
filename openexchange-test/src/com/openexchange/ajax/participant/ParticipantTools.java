@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
@@ -75,10 +74,10 @@ import com.openexchange.test.AbstractAssertTool;
  */
 public class ParticipantTools extends AbstractAssertTool {
 
-    public static List<Participant> getParticipants(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
+    public static List<Participant> getParticipants(final AJAXClient client) throws OXException, IOException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern("*");
-        search.setFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, SearchRequest.DEFAULT_COLUMNS);
         final SearchResponse response = client.execute(request);
         final List<Participant> participants = new ArrayList<Participant>();
@@ -105,11 +104,11 @@ public class ParticipantTools extends AbstractAssertTool {
         return participants;
     }
 
-    public static Participant getSomeParticipant(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
+    public static Participant getSomeParticipant(AJAXClient client) throws OXException, IOException, JSONException {
         return getParticipants(client, 1, client.getValues().getUserId()).get(0);
     }
 
-    public static List<Participant> getParticipants(final AJAXClient client, final int count, final int creatorId) throws OXException, IOException, SAXException, JSONException {
+    public static List<Participant> getParticipants(final AJAXClient client, final int count, final int creatorId) throws OXException, IOException, JSONException {
         List<Participant> participants = getParticipants(client);
         if (-1 != creatorId) {
             removeParticipant(participants, creatorId);
@@ -155,12 +154,11 @@ public class ParticipantTools extends AbstractAssertTool {
 
     /**
      * Converts the specified {@link Participant}'s array to a {@link Set} of strings
-     * 
+     *
      * @param participant The {@link Participant}'s array to convert
      * @return A {@link Set} with the string representation of the specified {@link Participant}'s array
-     * @throws Exception if an error is occurred
      */
-    protected static Set<String> participants2String(final Participant[] participant) throws Exception {
+    protected static Set<String> participants2String(final Participant[] participant) {
         if (participant == null) {
             return null;
         }
@@ -176,12 +174,11 @@ public class ParticipantTools extends AbstractAssertTool {
 
     /**
      * Converts the specified {@link Participant} object to string
-     * 
+     *
      * @param p The {@link Participant} to convert
      * @return The string version of the {@link Participant} (Type and identifier)
-     * @throws Exception if an error is occurred
      */
-    protected static String participant2String(final Participant p) throws Exception {
+    protected static String participant2String(final Participant p) {
         final StringBuffer sb = new StringBuffer();
         sb.append("T" + p.getType());
         sb.append("ID" + p.getIdentifier());
@@ -191,12 +188,11 @@ public class ParticipantTools extends AbstractAssertTool {
 
     /**
      * Converts the specified {@link UserParticipant}'s array to a {@link Set} of strings
-     * 
+     *
      * @param users The {@link UserParticipant}'s array
      * @return A {@link Set} with the string representation of the specified {@link UserParticipant}'s array
-     * @throws Exception if an error is occurred
      */
-    protected static Set<String> users2String(final UserParticipant[] users) throws Exception {
+    protected static Set<String> users2String(final UserParticipant[] users) {
         if (users == null) {
             return null;
         }
@@ -212,12 +208,11 @@ public class ParticipantTools extends AbstractAssertTool {
 
     /**
      * Converts the specified {@link UserParticipant} object to string
-     * 
+     *
      * @param user The {@link UserParticipant} to convert
      * @return The string version of the {@link UserParticipant}
-     * @throws Exception if an error is occurred
      */
-    protected static String user2String(final UserParticipant user) throws Exception {
+    protected static String user2String(final UserParticipant user) {
         final StringBuffer sb = new StringBuffer();
         sb.append("ID" + user.getIdentifier());
         sb.append("C" + user.getConfirm());

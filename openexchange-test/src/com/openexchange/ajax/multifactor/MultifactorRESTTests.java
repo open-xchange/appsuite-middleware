@@ -96,11 +96,11 @@ public class MultifactorRESTTests extends AbstractMultifactorTest {
     private MultifactorDevice registerTestDevice(MultifactorApi api) throws ApiException {
         final String randomDeviceName = "My test device " + UUID.randomUUID().toString();
         final String randomPhoneNumber = "+49" + new Random().nextInt(9999999);
-        final boolean isBackupDevice = false;
+        final Boolean isBackupDevice = Boolean.FALSE;
         final MultifactorStartRegistrationResponseData response = startRegistration(api, testProviderName, randomDeviceName, randomPhoneNumber, isBackupDevice);
         MultifactorDevice newDevice = finishRegistration(api, testProviderName, response.getDeviceId(), testSMSToken, null, null);
         assertThat("The new device must have the correct name", newDevice.getName(), is(randomDeviceName));
-        assertThat("The new device must have the correct 'backup' state", newDevice.getBackup(), is(B(isBackupDevice)));
+        assertThat("The new device must have the correct 'backup' state", newDevice.getBackup(), is(isBackupDevice));
         return newDevice;
     }
 

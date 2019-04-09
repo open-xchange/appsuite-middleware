@@ -72,7 +72,7 @@ public class AllResponse extends AbstractAJAXResponse {
         super(response);
     }
 
-    public Rule[] getRules() throws JSONException {
+    public Rule[] getRules() {
         final List<Rule> rules = new ArrayList<Rule>();
         final JSONArray jsonArray = (JSONArray) getData();
         for (int a = 0; a < jsonArray.length(); a++) {

@@ -85,7 +85,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
             /*
              * Get private folders
              */
-            final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("1"));
+            final NetsolFolderResponse response = Executor.execute(getSession(), new NetsolFolderRequest("1"));
             assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
             assertTrue("Duration corrupt", response.getRequestDuration() > 0);
             requestTracker.addDuration(response.getRequestDuration());
@@ -96,7 +96,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
             /*
              * Get first level folders
              */
-            final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default"));
+            final NetsolFolderResponse response = Executor.execute(getSession(), new NetsolFolderRequest("default"));
             assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
             assertTrue("Duration corrupt", response.getRequestDuration() > 0);
             requestTracker.addDuration(response.getRequestDuration());
@@ -107,7 +107,7 @@ public final class NetsolTestViewFolders extends AbstractNetsolTest {
             /*
              * Get INBOX subfolders
              */
-            final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default.INBOX"));
+            final NetsolFolderResponse response = Executor.execute(getSession(), new NetsolFolderRequest("default.INBOX"));
             assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
             assertTrue("Duration corrupt", response.getRequestDuration() > 0);
             requestTracker.addDuration(response.getRequestDuration());

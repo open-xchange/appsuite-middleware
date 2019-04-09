@@ -83,7 +83,7 @@ public class MailFilterWriter extends DataWriter {
 
     /**
      * Writes the specified {@link Rule} to the specified {@link JSONObject}
-     * 
+     *
      * @param rule The {@link Rule} to write
      * @param jsonObject The {@link JSONObject} to write it to
      * @throws JSONException if a JSON error occurs
@@ -118,12 +118,11 @@ public class MailFilterWriter extends DataWriter {
 
     /**
      * Writes the specified flags array as a {@link JSONArray}
-     * 
+     *
      * @param flags The flags array
      * @return a {@link JSONArray}
-     * @throws JSONException if a JSON error occurs
      */
-    private JSONArray getFlagsAsJSON(String[] flags) throws JSONException {
+    private JSONArray getFlagsAsJSON(String[] flags) {
         if (flags != null) {
             final JSONArray jsonArray = new JSONArray();
             for (int a = 0; a < flags.length; a++) {
@@ -138,7 +137,7 @@ public class MailFilterWriter extends DataWriter {
     /**
      * Writes the specified {@link Action}s as a {@link JSONArray}. If the actions array is null
      * an empty {@link JSONArray} is returned.
-     * 
+     *
      * @param actions The array with the {@link Action}s to write
      * @return A {@link JSONArray} with the {@link Action}s as {@link JSONObject}s; or an empty array
      * @throws JSONException if a JSON error occurs
@@ -163,7 +162,7 @@ public class MailFilterWriter extends DataWriter {
 
     /**
      * Writes the specified {@link AbstractTest} as a {@link JSONObject}
-     * 
+     *
      * @param abstractTest The {@link AbstractTest}
      * @return A {@link JSONObject}
      * @throws JSONException if a JSON error occurs

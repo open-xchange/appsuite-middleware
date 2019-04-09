@@ -47,38 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.mail.filter.api.dao.action;
+package com.openexchange.ajax.mail.netsol.actions;
 
-import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
-import com.openexchange.ajax.mail.filter.api.dao.action.argument.StopActionArgument;
+import org.json.JSONArray;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link Stop}
+ * {@link NetsolClearResponse}
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.2
  */
-public class Stop extends AbstractAction implements Action<StopActionArgument> {
+public class NetsolClearResponse extends AbstractAJAXResponse {
+
+    public NetsolClearResponse(final Response response) {
+        super(response);
+    }
 
     /**
-     * Initialises a new {@link Stop}.
+     * @return JSON array containing failed
      */
-    public Stop() {
-        super(ActionCommand.stop);
+    public JSONArray getFailed() {
+        return (JSONArray) getData();
     }
 
-    @Override
-    public void setArgument(StopActionArgument argument, Object value) {
-        throw new UnsupportedOperationException("The '" + ActionCommand.stop + "' action can not have any arguments");
-    }
-
-    @Override
-    public Object getArgument(StopActionArgument argument) {
-        throw new UnsupportedOperationException("The '" + ActionCommand.stop + "' action does not have any arguments");
-    }
-
-    @Override
-    public ActionCommand getActionCommand() {
-        return ActionCommand.stop;
-    }
 }

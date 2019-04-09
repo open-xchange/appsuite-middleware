@@ -61,7 +61,7 @@ import com.openexchange.ajax.mail.actions.AbstractMailRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class NetsolFolderRequest extends AbstractMailRequest {
+public final class NetsolFolderRequest extends AbstractMailRequest<NetsolFolderResponse> {
 
     final static class NetsolFolderParser extends AbstractAJAXParser<NetsolFolderResponse> {
 

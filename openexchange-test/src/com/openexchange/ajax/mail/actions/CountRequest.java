@@ -87,7 +87,7 @@ public class CountRequest extends AbstractMailRequest<CountResponse> {
     }
 
     @Override
-    public AbstractAJAXParser getParser() {
+    public AbstractAJAXParser<CountResponse> getParser() {
         return new AbstractAJAXParser<CountResponse>(false) {
 
             @Override

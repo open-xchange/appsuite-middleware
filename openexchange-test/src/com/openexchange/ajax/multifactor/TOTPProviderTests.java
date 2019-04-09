@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.multifactor;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
@@ -122,7 +123,7 @@ public class TOTPProviderTests extends AbstractMultifactorProviderTest {
         Pattern urlPattern = Pattern.compile(TOTP_URL_REGEX);
         Matcher matcher = urlPattern.matcher(challenge.getUrl());
         assertThat(String.format("Provided TOTP URL must be in the correct format (%s), but was: %s ", TOTP_URL_REGEX, challenge.getUrl()),
-            matcher.matches(), is(true));
+            B(matcher.matches()), is(Boolean.TRUE));
 
         //Chat that some QR-Barcode data was returned
         assertThat(challenge.getBase64Image(), not(isEmptyOrNullString()));

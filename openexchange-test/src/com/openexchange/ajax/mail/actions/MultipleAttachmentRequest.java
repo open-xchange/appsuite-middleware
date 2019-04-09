@@ -61,7 +61,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class MultipleAttachmentRequest extends AbstractMailRequest {
+public final class MultipleAttachmentRequest extends AbstractMailRequest<MultipleAttachmentResponse> {
 
     class MultipleAttachmentParser extends AbstractAJAXParser<MultipleAttachmentResponse> {
 
@@ -100,43 +100,23 @@ public final class MultipleAttachmentRequest extends AbstractMailRequest {
         failOnError = true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-     */
     @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-     */
     @Override
     public Method getMethod() {
         return Method.GET;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-     */
     @Override
     public Parameter[] getParameters() {
         return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_ZIP_MATTACH), new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId), new Parameter(AJAXServlet.PARAMETER_ID, id), new Parameter(Mail.PARAMETER_MAILATTCHMENT, sequenceIds) };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-     */
     @Override
-    public AbstractAJAXParser<?> getParser() {
+    public AbstractAJAXParser<MultipleAttachmentResponse> getParser() {
         return new MultipleAttachmentParser(failOnError);
     }
 

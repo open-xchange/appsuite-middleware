@@ -134,13 +134,13 @@ public class ConversationResponse extends AbstractAJAXResponse {
                         handleInnerArrays((List<List<String>>) messageMap.get(key), message, "from");
                         break;
                     case ACCOUNT_ID:
-                        message.setAccountId((int) messageMap.get(key));
+                        message.setAccountId(((Integer) messageMap.get(key)).intValue());
                         break;
                     case ACCOUNT_NAME:
                         message.setAccountName(strValue);
                         break;
                     case COLOR_LABEL:
-                        message.setColorLabel((int) messageMap.get(key));
+                        message.setColorLabel(((Integer) messageMap.get(key)).intValue());
                         break;
                     case DELETED:
                         message.setFlag(MailMessage.FLAG_DELETED, true);
@@ -149,7 +149,7 @@ public class ConversationResponse extends AbstractAJAXResponse {
                         //ignore
                         break;
                     case FLAGS:
-                        message.setFlags((int) messageMap.get(key));
+                        message.setFlags(((Integer) messageMap.get(key)).intValue());
                         break;
                     case FOLDER:
                         message.setFolder(strValue);
@@ -175,28 +175,28 @@ public class ConversationResponse extends AbstractAJAXResponse {
                         message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
                         break;
                     case PRIORITY:
-                        message.setPriority((int) messageMap.get(key));
+                        message.setPriority(((Integer) messageMap.get(key)).intValue());
                         break;
                     case RECEIVED_DATE:
-                        message.setReceivedDate(new Date((long) messageMap.get(key)));
+                        message.setReceivedDate(new Date(((Long) messageMap.get(key)).longValue()));
                         break;
                     case SENT_DATE:
-                        message.setSentDate(new Date((long) messageMap.get(key)));
+                        message.setSentDate(new Date(((Long) messageMap.get(key)).longValue()));
                         break;
                     case SIZE:
-                        message.setSize((int) messageMap.get(key));
+                        message.setSize(((Integer) messageMap.get(key)).intValue());
                         break;
                     case SUBJECT:
                         message.setSubject(strValue);
                         break;
                     case THREAD_LEVEL:
-                        message.setThreadLevel((int) messageMap.get(key));
+                        message.setThreadLevel(((Integer) messageMap.get(key)).intValue());
                         break;
                     case TOTAL:
                         // ignore
                         break;
                     case UNREAD:
-                        message.setUnreadMessages((int) messageMap.get(key));
+                        message.setUnreadMessages(((Integer) messageMap.get(key)).intValue());
                         break;
                     case ATTACHMENT:
                         // skip attachments for test classes

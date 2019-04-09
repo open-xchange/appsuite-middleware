@@ -55,9 +55,7 @@ import org.junit.Test;
 import com.openexchange.ajax.oauth.provider.actions.AllRequest;
 import com.openexchange.ajax.oauth.provider.actions.AllResponse;
 import com.openexchange.ajax.oauth.provider.actions.RevokeRequest;
-import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
@@ -71,16 +69,13 @@ public class JSONApiTest extends AbstractOAuthTest {
 
     /**
      * Initializes a new {@link JSONApiTest}.
-     * 
-     * @throws OXException
      */
-    public JSONApiTest() throws OXException {
+    public JSONApiTest() {
         super(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE)); // scope for first grant
     }
 
     @Test
     public void testAllAndRevoke() throws Exception {
-        new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE));
         AllResponse allResponse = getClient().execute(new AllRequest());
         List<GrantView> grantViews = allResponse.getGrantViews();
         GrantView expected = null;
