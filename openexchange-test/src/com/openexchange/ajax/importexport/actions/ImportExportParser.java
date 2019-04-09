@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.parser.ResponseParser;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.groupware.importexport.ImportResult;
@@ -78,7 +77,7 @@ public final class ImportExportParser {
     public static final ImportResult parse(final String data) throws JSONException {
         final Response response = ResponseParser.parse(data);
         final ImportResult retval;
-        final JSONObject json = ResponseWriter.getJSON(response);
+        final JSONObject json = new JSONObject(data);
         final String id = json.optString(CommonFields.ID);
         final String folderId = json.optString(CommonFields.FOLDER_ID);
         final long lastModified = json.optLong(CommonFields.LAST_MODIFIED);
