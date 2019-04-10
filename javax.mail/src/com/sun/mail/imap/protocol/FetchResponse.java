@@ -354,6 +354,10 @@ public class FetchResponse extends IMAPResponse {
 	    if (match(SNIPPET.name))
 	    return new SNIPPET(this);
         break;
+	case 'P': case 'p':
+        if (match(PREVIEW.name))
+        return new PREVIEW(this);
+        break;
 	default: 
 	    break;
 	}

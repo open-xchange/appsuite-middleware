@@ -197,13 +197,9 @@ public final class Conversation {
 
     private Conversation getMain() {
         Conversation main = this.main;
-        if (main != null) {
-            return main;
-        } else {
-            return this;
-        }
+        return main != null ? main : this;
     }
-    
+
     /**
      * Checks if this conversation references OR is referenced by given message
      *

@@ -129,6 +129,11 @@ public class IMAPCapabilities extends MailCapabilities {
      */
     public static final String CAP_TEXT_PREVIEW = "SNIPPET=FUZZY";
 
+    /**
+     * TEXT PREVIEW: <code>"PREVIEW=FUZZY"</code>
+     */
+    public static final String CAP_TEXT_PREVIEW_NEW = "PREVIEW=FUZZY";
+
     /*-
      * IMAP bit constants
      */

@@ -478,6 +478,62 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     } // End of class SnippetFetchProfileItem
 
     /**
+     * A fetch profile item for fetching text previews.
+     * <p>
+     * This inner class extends the <code>FetchProfile.Item</code>
+     * class to add new FetchProfile item types, specific to IMAPFolders.
+     *
+     * @see FetchProfile
+     */
+    public static class PreviewFetchProfileItem extends FetchProfile.Item {
+
+        /**
+         * This is the fuzzy PREVIEW item for a message's text preview.
+         */
+        public static final PreviewFetchProfileItem PREVIEW = new PreviewFetchProfileItem("FUZZY");
+        
+        /**
+         * This is the lazy fuzzy PREVIEW item for a message's text preview.
+         */
+        public static final PreviewFetchProfileItem PREVIEW_LAZY = new PreviewFetchProfileItem("LAZY=FUZZY");
+
+        private final String algorithmName;
+
+        /**
+         * Initializes a new {@link SnippetFetchProfileItem}.
+         * 
+         * @param algorithName The algorithm name; e.g. <code>"FUZZY"</code>
+         */
+        protected PreviewFetchProfileItem(String algorithmName) {
+            super("PREVIEW");
+            checkAlgorithmName(algorithmName);
+            this.algorithmName = Utility.toUpperCase(algorithmName);
+        }
+
+        /**
+         * Checks specified algorithm name
+         *
+         * @param algoritmhName The algorithm name to check
+         * @throws IllegalArgumentException If algorithm name is invalid
+         */
+        protected void checkAlgorithmName(String algorithmName) {
+            if (null == algorithmName) {
+                throw new IllegalArgumentException("The algorithm name must not be null.");
+            }
+        }
+
+        /**
+         * Gets the algorithm name; e.g. <code>"FUZZY"</code> or <code>"LAZY=FUZZY"</code>
+         *
+         * @return The algorithm name
+         */
+        public String getAlgoritmhName() {
+            return algorithmName;
+        }
+
+    } // End of class SnippetFetchProfileItem
+
+    /**
      * Constructor used to create a possibly non-existent folder.
      *
      * @param fullName	fullname of this folder
