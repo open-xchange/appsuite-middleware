@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
@@ -123,19 +122,26 @@ public class ListPerformer extends AbstractQueryPerformer {
     }
 
     private List<Event> readEventsInFolder(CalendarFolder folder, List<EventID> eventIDs) throws OXException {
-        Set<String> objectIDs = new HashSet<String>(eventIDs.size());
-        for (EventID eventID : eventIDs) {
-            if (folder.getId().equals(eventID.getFolderID())) {
-                objectIDs.add(eventID.getObjectID());
+        String[] objectIds;
+        {
+            Set<String> idsInFolder = new HashSet<String>(eventIDs.size());
+            for (EventID eventID : eventIDs) {
+                if (folder.getId().equals(eventID.getFolderID())) {
+                    idsInFolder.add(eventID.getObjectID());
+                }
             }
+            objectIds = idsInFolder.toArray(new String[idsInFolder.size()]);
+        }
+        if (0 == objectIds.length) {
+            return Collections.emptyList();
         }
         /*
          * get events with reduced fields & load additional event data for post processor dynamically
          */
         EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         EventField[] fields = getFieldsForStorage(requestedFields);
-        List<Event> events = loadEventsInFolder(folder, objectIDs.toArray(new String[objectIDs.size()]), fields);
-        EventPostProcessor postProcessor = postProcessor(getObjectIDs(events), folder.getCalendarUserId(), requestedFields, fields);
+        List<Event> events = loadEventsInFolder(folder, objectIds, fields);
+        EventPostProcessor postProcessor = postProcessor(objectIds, folder.getCalendarUserId(), requestedFields, fields);
         /*
          * generate resulting events
          */
