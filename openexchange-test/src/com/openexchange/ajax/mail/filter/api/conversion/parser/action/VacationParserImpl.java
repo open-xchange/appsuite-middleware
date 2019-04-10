@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.parser.action;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,7 +74,7 @@ public class VacationParserImpl implements ActionParser {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
      */
     @Override
@@ -81,7 +82,7 @@ public class VacationParserImpl implements ActionParser {
         Vacation vacation = new Vacation();
 
         int days = jsonObject.getInt(VacationActionArgument.days.name());
-        vacation.setArgument(VacationActionArgument.days, days);
+        vacation.setArgument(VacationActionArgument.days, I(days));
 
         JSONArray jsonAddressArray = jsonObject.optJSONArray(VacationActionArgument.addresses.name());
         String[] addresses;

@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class AttachmentTestManager implements TestManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentTestManager.class);
 
-    private List<AttachmentMetadata> createdEntities = new ArrayList<AttachmentMetadata>();
+    private final List<AttachmentMetadata> createdEntities = new ArrayList<AttachmentMetadata>();
 
     private AJAXClient client;
 
@@ -95,6 +96,7 @@ public class AttachmentTestManager implements TestManager {
 
     private Exception lastException;
 
+    @SuppressWarnings("unused")
     public AttachmentTestManager(AJAXClient client) {
         this.setClient(client);
 
@@ -178,7 +180,7 @@ public class AttachmentTestManager implements TestManager {
             try {
                 detach(attachment, new int[] { attachment.getId() });
                 if (getLastResponse().hasError()) {
-                    org.slf4j.LoggerFactory.getLogger(AttachmentTestManager.class).warn("Unable to delete the attachment with id {}, attachedId {} in folder {} with name '{}': {}", attachment.getId(), attachment.getAttachedId(), attachment.getFolderId(), attachment.getFilename(), getLastResponse().getException().getMessage());
+                    org.slf4j.LoggerFactory.getLogger(AttachmentTestManager.class).warn("Unable to delete the attachment with id {}, attachedId {} in folder {} with name '{}': {}", I(attachment.getId()), I(attachment.getAttachedId()), I(attachment.getFolderId()), attachment.getFilename(), getLastResponse().getException().getMessage());
                 }
 
             } catch (OXException | IOException | JSONException e) {
@@ -202,7 +204,7 @@ public class AttachmentTestManager implements TestManager {
         DetachRequest detachRequest = new DetachRequest(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), versions);
         DetachResponse response = client.execute(detachRequest);
         extractInfo(response);
-        
+
         createdEntities.remove(attachment);
     }
     public void list(int folderId, int objectId, int moduleId, int[] attachmentIds, int[] columns) throws OXException, IOException, JSONException {

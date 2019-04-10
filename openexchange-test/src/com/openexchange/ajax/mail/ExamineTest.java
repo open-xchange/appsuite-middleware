@@ -78,6 +78,7 @@ public class ExamineTest extends AbstractMailTest {
 
     FolderObject subFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -86,6 +87,7 @@ public class ExamineTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

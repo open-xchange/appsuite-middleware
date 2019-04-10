@@ -50,7 +50,6 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractUpdatesRequest;
 import com.openexchange.groupware.search.Order;
 
@@ -63,43 +62,26 @@ public final class UpdatesRequest extends AbstractUpdatesRequest<TaskUpdatesResp
 
     private final int[] columns;
 
-    private TimeZone timeZone = TimeZone.getTimeZone("UTC");
-
     public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified) {
         this(folderId, columns, sort, order, lastModified, Ignore.DELETED);
     }
 
     public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, boolean failOnError) {
-        this(folderId, columns, sort, order, lastModified, Ignore.DELETED, failOnError, null);
+        this(folderId, columns, sort, order, lastModified, Ignore.DELETED, failOnError);
     }
 
     public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, Ignore ignore) {
-        this(folderId, columns, sort, order, lastModified, ignore, true, null);
+        this(folderId, columns, sort, order, lastModified, ignore, true);
     }
 
-    public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, TimeZone timeZone) {
-        this(folderId, columns, sort, order, lastModified, Ignore.DELETED, true, timeZone);
-    }
-
-    public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, boolean failOnError, TimeZone timeZone) {
-        this(folderId, columns, sort, order, lastModified, Ignore.DELETED, failOnError, timeZone);
-    }
-
-    public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, Ignore ignore, TimeZone timeZone) {
-        this(folderId, columns, sort, order, lastModified, ignore, true, timeZone);
-    }
-
-    public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, Ignore ignore, boolean failOnError, TimeZone timeZone) {
+    public UpdatesRequest(int folderId, int[] columns, int sort, Order order, Date lastModified, Ignore ignore, boolean failOnError) {
         super(AbstractTaskRequest.TASKS_URL, folderId, columns, sort, order, lastModified, ignore, failOnError);
         this.columns = columns;
         this.failOnError = failOnError;
-        if (timeZone != null) {
-            this.timeZone = timeZone;
-        }
     }
 
     @Override
     public TaskUpdatesParser getParser() {
-        return new TaskUpdatesParser(failOnError, columns, timeZone);
+        return new TaskUpdatesParser(failOnError, columns);
     }
 }

@@ -50,6 +50,7 @@
 package com.openexchange.imap.threadsort;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -202,22 +203,6 @@ public final class ThreadSortUtil {
                 recSeqNumsAsMap(childs, m, initialCapacity);
             }
         }
-    }
-
-    private static final char DIGIT_START = '\u0030';
-
-    private static final char DIGIT_END = '\u0039';
-
-    /**
-     * Determines if the specified character is a ISO-LATIN-1 digit.
-     * <p>
-     * '\u0030' through '\u0039', ISO-LATIN-1 digits ('0' through '9');
-     *
-     * @param c The character to check for a digit
-     * @return <code>true</code> if character is a ISO-LATIN-1 digit; otherwise <code>false</code>
-     */
-    private static boolean isDigit(final char c) {
-        return c >= DIGIT_START && c <= DIGIT_END;
     }
 
     // private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
@@ -516,7 +501,7 @@ public final class ThreadSortUtil {
             final int mailLevel = mail.getThreadLevel();
             if (mailLevel > level) {
                 if (mailLevel != level + 1) {
-                    LOG.warn("Unexpected thread level! Expected={}, Actual={}", (level + 1), mailLevel);
+                    LOG.warn("Unexpected thread level! Expected={}, Actual={}", I(level + 1), I(mailLevel));
                 }
                 final ThreadSortMailMessage parent = newList.get(newList.size() - 1);
                 final List<ThreadSortMailMessage> sublist = new ArrayList<ThreadSortMailMessage>();

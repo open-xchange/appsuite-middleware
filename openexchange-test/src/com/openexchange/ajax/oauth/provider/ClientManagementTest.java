@@ -255,21 +255,7 @@ public class ClientManagementTest {
         clientManagement.updateClient(client.getId(), clientData, credentials);
     }
 
-    private static void compare(ClientDto client1, ClientDto client2) throws Exception {
-        assertEquals(client1.getId(), client2.getId());
-        assertEquals(client1.getName(), client2.getName());
-        assertEquals(client1.getContactAddress(), client2.getContactAddress());
-        assertEquals(client1.getDescription(), client2.getDescription());
-        assertEquals(client1.getWebsite(), client2.getWebsite());
-        assertEquals(client1.getDefaultScope(), client2.getDefaultScope());
-        assertEquals(new HashSet<>(client1.getRedirectURIs()), new HashSet<>(client2.getRedirectURIs()));
-        assertArrayEquals(client1.getIcon().getData(), client2.getIcon().getData());
-        assertEquals(client1.getRegistrationDate(), client2.getRegistrationDate());
-        assertEquals(client1.getSecret(), client2.getSecret());
-        assertEquals(client1.isEnabled(), client2.isEnabled());
-    }
-
-    private static void compare(ClientDataDto clientData, ClientDto client) throws Exception {
+    private static void compare(ClientDataDto clientData, ClientDto client) {
         assertNotNull(client.getId());
         assertEquals(clientData.getName(), client.getName());
         assertEquals(clientData.getContactAddress(), client.getContactAddress());
@@ -287,7 +273,7 @@ public class ClientManagementTest {
 
         private final String invalidValue;
 
-        private CMEMatcher(String invalidValue) {
+        CMEMatcher(String invalidValue) {
             super();
             this.invalidValue = invalidValue;
         }

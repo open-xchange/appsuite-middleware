@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.oauth.provider;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -87,7 +88,7 @@ import com.openexchange.test.pool.TestUser;
  */
 public class OAuthClient extends AJAXClient {
 
-    public OAuthClient(TestUser user, String clientId, String clientSecret, String redirectURI, Scope scope) throws Exception {
+    public OAuthClient(TestUser user, String clientId, String clientSecret, String redirectURI, Scope scope) {
         super(new OAuthSession(user, clientId, clientSecret, redirectURI, scope), false);
     }
 
@@ -224,10 +225,10 @@ public class OAuthClient extends AJAXClient {
 
         boolean isPossibleOAuthError(HttpResponse resp) {
             Set<Integer> codes = new HashSet<>();
-            codes.add(HttpStatus.SC_BAD_REQUEST);
-            codes.add(HttpStatus.SC_FORBIDDEN);
-            codes.add(HttpStatus.SC_UNAUTHORIZED);
-            return codes.contains(resp.getStatusLine().getStatusCode());
+            codes.add(I(HttpStatus.SC_BAD_REQUEST));
+            codes.add(I(HttpStatus.SC_FORBIDDEN));
+            codes.add(I(HttpStatus.SC_UNAUTHORIZED));
+            return codes.contains(I(resp.getStatusLine().getStatusCode()));
         }
 
     }

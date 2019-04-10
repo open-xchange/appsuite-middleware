@@ -370,7 +370,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                 for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
                     // Count bytes
                     count += len;
-                    if ((null == tempFile) && (count > inMemoryThreshold)) {
+                    if ((null == tempFile) && (count > inMemoryThreshold) && baos != null) {
                         // Stream to file because threshold is exceeded
                         tempFile = TmpFileFileHolder.newTempFile(autoManaged);
                         this.tempFile = tempFile;
@@ -431,8 +431,8 @@ public final class ThresholdFileHolder implements IFileHolder {
             try {
                 digestStream = new DigestInputStream(new FileInputStream(tempFile), MessageDigest.getInstance("MD5"));
                 byte[] buf = new byte[8192];
-                for (int read; (read = digestStream.read(buf, 0, 8192)) > 0;) {
-                    ;
+                while (digestStream.read(buf, 0, 8192) > 0) {
+                    // Nothing
                 }
                 byte[] digest = digestStream.getMessageDigest().digest();
                 return jonelo.jacksum.util.Service.format(digest);
@@ -486,7 +486,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         super.finalize();
         try {
             close();
-        } catch (final Exception ignore) {
+        } catch (@SuppressWarnings("unused") Exception ignore) {
             // Ignore
         }
     }

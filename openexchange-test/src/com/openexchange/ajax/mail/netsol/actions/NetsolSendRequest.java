@@ -78,11 +78,6 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 
     private final String uploadFilename;
 
-    /*
-     * Mail object settings
-     */
-    private String recipientTo;
-
     /**
      * Initializes a new {@link NetsolSendRequest}
      *

@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,10 +61,10 @@ public class IntegerTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if (null == value) {
-            return 0;
+            return I(0);
         }
         try {
-            return Integer.parseInt(value);
+            return Integer.valueOf(value);
         } catch (NumberFormatException x) {
             throw new OXException(x);
         }

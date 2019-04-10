@@ -275,10 +275,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && false == deleteRemovesEvent(originalEvent)) {
+        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && 
+            false == hasExternalOrganizer(originalEvent) && false == deleteRemovesEvent(originalEvent)) {
             if (updateDeleteExceptions(originalEvent, eventData)) {
                 originalEvent = loadEventData(originalEvent.getId());
             }
+            /*
+             * consider as handled, so ignore delete exception dates later on
+             */
             ignoredFields = null != ignoredFields ? Arrays.add(ignoredFields, EventField.DELETE_EXCEPTION_DATES) : new EventField[] { EventField.DELETE_EXCEPTION_DATES };
         }
         /*
@@ -380,7 +384,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      */
     private boolean assumeExternalOrganizerUpdate(Event originalEvent, Event updatedEvent) {
         if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
-            originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
+            Objects.equals(originalEvent.getUid(), updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
             return true;
         }
         return false;

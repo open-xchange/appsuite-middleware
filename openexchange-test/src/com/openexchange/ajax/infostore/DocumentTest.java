@@ -19,6 +19,7 @@ public class DocumentTest extends InfostoreAJAXTest {
     protected File upload;
     protected String id;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

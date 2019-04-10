@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.json.JSONException;
-import com.openexchange.ajax.smtptest.actions.SMTPInitResponse;
 import com.openexchange.ajax.smtptest.actions.StartSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.StopSMTPRequest;
 import com.openexchange.exception.OXException;
@@ -108,8 +107,7 @@ public class SmtpMockSetup {
         try {
             AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true, client.getValues().getContextId(), noReplyAddress);
-
-            SMTPInitResponse response = client.execute(request);
+            client.execute(request);
             LOG.info("Started SMTP Mock for user {} and set no-reply address to {}.", user.getLogin(), noReplyAddress);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
@@ -120,7 +118,7 @@ public class SmtpMockSetup {
         try {
             AJAXClient client = new AJAXClient(user);
             StartSMTPRequest request = new StartSMTPRequest(true); //FIXME: maybe we have to set noreplyadress also here?
-            SMTPInitResponse response = client.execute(request);
+            client.execute(request);
             LOG.info("Started SMTP Mock for user {}.", user.getLogin());
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
@@ -151,7 +149,7 @@ public class SmtpMockSetup {
         try {
             AJAXClient client = new AJAXClient(user);
             StopSMTPRequest request = new StopSMTPRequest(true);
-            SMTPInitResponse response = client.execute(request);
+            client.execute(request);
         } catch (OXException | IOException | JSONException e) {
             LOG.error("", e);
         }

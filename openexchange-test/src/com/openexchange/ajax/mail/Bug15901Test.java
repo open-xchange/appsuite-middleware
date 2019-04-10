@@ -58,7 +58,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AttachmentRequest;
@@ -78,8 +77,6 @@ import com.openexchange.mail.MailListField;
  */
 public class Bug15901Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     private String folder;
 
     private String address;
@@ -90,10 +87,10 @@ public class Bug15901Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         folder = getClient().getValues().getInboxFolder();
         address = getClient().getValues().getSendAddress();
         final String testmail = TestMails.replaceAddresses(TestMails.DDDTDL_MAIL, address);
@@ -104,6 +101,7 @@ public class Bug15901Test extends AbstractAJAXSession {
         ids = response.getIds();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

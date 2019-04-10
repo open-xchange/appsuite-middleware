@@ -67,31 +67,16 @@ public class Stop extends AbstractAction implements Action<StopActionArgument> {
         super(ActionCommand.stop);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
-     */
-    @SuppressWarnings("unused")
+    @Override
     public void setArgument(StopActionArgument argument, Object value) {
         throw new UnsupportedOperationException("The '" + ActionCommand.stop + "' action can not have any arguments");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
-     */
-    @SuppressWarnings("unused")
+    @Override
     public Object getArgument(StopActionArgument argument) {
         throw new UnsupportedOperationException("The '" + ActionCommand.stop + "' action does not have any arguments");
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
-     */
     @Override
     public ActionCommand getActionCommand() {
         return ActionCommand.stop;

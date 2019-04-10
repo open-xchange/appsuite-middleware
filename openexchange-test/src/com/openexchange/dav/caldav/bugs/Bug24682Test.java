@@ -86,6 +86,7 @@ public class Bug24682Test extends CalDAVTest {
 
     CalendarTestManager userA, userB, userC, userD;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,6 +111,7 @@ public class Bug24682Test extends CalDAVTest {
         FolderTools.shareFolder(userC.getClient(), EnumAPI.OX_NEW, userC.getPrivateFolder(), userB.getClient().getValues().getUserId(), OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

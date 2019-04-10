@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 
@@ -63,7 +64,7 @@ public class EMailFlagsTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if (null == value || 1 > value.length()) {
-            return 0;
+            return I(0);
         }
         int flags = 0;
         final String[] splitted = value.split(",");
@@ -72,7 +73,7 @@ public class EMailFlagsTransformator implements Transformator {
                 flags |= getFlag(flag.trim());
             }
         }
-        return flags;
+        return I(flags);
     }
 
     private int getFlag(final String flag) {

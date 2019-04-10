@@ -49,6 +49,8 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.I;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -96,12 +98,12 @@ import com.openexchange.java.ConcurrentLinkedList;
 public class TaskTestManager implements TestManager {
 
     protected List<Task> createdEntities;
-    
+
     protected List<Task> createdEntities2;
 
     private AJAXClient client;
-    
-    private AJAXClient client2;    
+
+    private AJAXClient client2;
 
     protected TimeZone timezone;
 
@@ -113,6 +115,7 @@ public class TaskTestManager implements TestManager {
 
     private Throwable lastException;
 
+    @SuppressWarnings("unused")
     public TaskTestManager(AJAXClient client) {
         setFailOnError(true);
         this.setClient(client);
@@ -160,6 +163,7 @@ public class TaskTestManager implements TestManager {
         } catch (Exception e) {
             doHandleExeption(e, "UpdateRequest for task ID " + taskToUpdate.getObjectID());
         }
+        assertNotNull(response);
         taskToUpdate.setLastModified(response.getTimestamp());
         for (CalendarObject co : createdEntities) {
             if (taskToUpdate.getObjectID() == co.getObjectID()) {
@@ -347,12 +351,13 @@ public class TaskTestManager implements TestManager {
      * @return
      * @throws JSONException
      */
+    @SuppressWarnings("unchecked")
     protected static Task transformArrayToTask(JSONArray taskAsArray, int[] columns) throws JSONException {
         Task resultingTask = new Task();
 
         for (int i = 0; i < columns.length; i++) {
             int column = columns[i];
-            Mapper attributeMapping = Mapping.getMapping(column);
+            @SuppressWarnings("rawtypes") Mapper attributeMapping = Mapping.getMapping(column);
             if (taskAsArray.isNull(i) || attributeMapping == null || taskAsArray.get(i) == null) {
                 continue;
             }
@@ -377,7 +382,7 @@ public class TaskTestManager implements TestManager {
         for (Task task : objects) {
             deleteTaskOnServer(task, false);
             if (getLastResponse().hasError()) {
-                org.slf4j.LoggerFactory.getLogger(TaskTestManager.class).warn("Unable to delete the task with id {} in folder {} with name '{}': {}", task.getObjectID(), task.getParentFolderID(), task.getTitle(), getLastResponse().getException().getMessage());
+                org.slf4j.LoggerFactory.getLogger(TaskTestManager.class).warn("Unable to delete the task with id {} in folder {} with name '{}': {}", I(task.getObjectID()), I(task.getParentFolderID()), task.getTitle(), getLastResponse().getException().getMessage());
             }
 
         }
@@ -413,7 +418,7 @@ public class TaskTestManager implements TestManager {
     /**
      * Constructs a new TestTask with the given title and time zone, parent folder created by and modified by already initialized
      */
-    public TestTask newTask(String title) throws OXException, IOException, SAXException, JSONException {
+    public TestTask newTask(String title) throws OXException, IOException, JSONException {
         TestTask task = new TestTask();
         task.setTitle(title);
 
@@ -429,7 +434,7 @@ public class TaskTestManager implements TestManager {
     /**
      * Constructs a new TestTask with the given title and time zone, parent folder created by and modified by already initialized
      */
-    public TestTask newTask(String title, int parentFolder) throws OXException, IOException, SAXException, JSONException {
+    public TestTask newTask(String title, int parentFolder) throws OXException, IOException, JSONException {
         TestTask task = new TestTask();
         task.setTitle(title);
 
@@ -511,19 +516,19 @@ public class TaskTestManager implements TestManager {
     public boolean hasLastException() {
         return this.lastException != null;
     }
-    
+
     public void addEntities(final Task task){
         this.createdEntities.add(task);
-    }    
-    
+    }
+
     public AJAXClient getClient2() {
         return client2;
     }
 
     public void setClient2(AJAXClient client2) {
         this.client2 = client2;
-    }    
-    
+    }
+
     public void addEntities2(final Task task){
         this.createdEntities2.add(task);
     }

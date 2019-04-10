@@ -85,16 +85,19 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     protected static final int[] virtualFolders = { FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
+    @SuppressWarnings("hiding")
     private FolderTestManager ftm;
     private FolderObject testFolder;
     private File knowledgeDoc;
     private File urlDoc;
+    @SuppressWarnings("hiding")
     private InfostoreTestManager itm;
 
     public UpdatesTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -117,6 +120,7 @@ public class UpdatesTest extends AbstractAJAXSession {
         itm.newAction(urlDoc);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

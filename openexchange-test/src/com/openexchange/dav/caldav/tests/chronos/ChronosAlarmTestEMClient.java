@@ -198,7 +198,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
          * verify event on server
          */
         EventData event = verifyEvent(uid, false, "-PT15M");
-        Date date = new Date(event.getAlarms().get(0).getAcknowledged());
+        assertNotNull(event.getAlarms().get(0).getAcknowledged());
+        Date date = new Date(event.getAlarms().get(0).getAcknowledged().longValue());
         assertEquals("alarm trigger acknowledge wrong", "99991231T235859Z", formatAsUTC(date));
         /*
          * verify event on client
@@ -988,7 +989,8 @@ public class ChronosAlarmTestEMClient extends ChronosCaldavTest {
         assertTrue("Unacknowledged ALARM in iCal found", null == vAlarm || "99991231T235859Z".equals(vAlarm.getPropertyValue("ACKNOWLEDGED")));
 
         EventData exception = verifyEventException(event.getSeriesId(), 1, getPair(iCalResource.getVEvents().get(1).getVAlarm().getUID(), "-PT15M"));
-        Date date = new Date(exception.getAlarms().get(0).getAcknowledged());
+        assertNotNull(exception.getAlarms().get(0).getAcknowledged());
+        Date date = new Date(exception.getAlarms().get(0).getAcknowledged().longValue());
         assertEquals("alarm trigger acknowledge wrong", "99991231T235859Z", formatAsUTC(date));
     }
 

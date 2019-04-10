@@ -63,14 +63,12 @@ import com.openexchange.ajax.framework.Header;
 public class MailAccountListRequest implements AJAXRequest<MailAccountListResponse> {
 
     private final boolean failOnError;
-    private final int[] ids;
     private final int[] cols;
     private final String columns;
     private final JSONArray idArray;
 
     public MailAccountListRequest(boolean failOnError, int[] ids, int[] cols) {
         this.failOnError = failOnError;
-        this.ids = ids;
         this.cols = cols;
 
         StringBuilder bob = new StringBuilder();

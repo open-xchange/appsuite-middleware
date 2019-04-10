@@ -310,6 +310,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 final ConcurrentMap<String, Integer> m = maxCountCache;
@@ -524,7 +525,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null == tmp) {
             try {
                 return (IMAPConfig) getMailConfig();
-            } catch (final OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 // Cannot occur
                 return null;
             }
@@ -663,7 +664,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                             warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
                         }
                     }
-                } catch (final MessagingException e) {
+                } catch (@SuppressWarnings("unused") MessagingException e) {
                     // Ignore
                 }
             } catch (final AuthenticationFailedException e) {
@@ -823,6 +824,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapStore = connectIMAPStore(maxCount);
             } catch (final AuthenticationFailedException e) {
                 if (accountId != MailAccount.DEFAULT_ID) {
+                    int accountId = this.accountId;
+                    Session session = this.session;
                     AbstractTask<Void> task = new AbstractTask<Void>() {
 
                         @Override
@@ -898,7 +901,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                             try {
                                 dummy.myRights();
                                 nb = Boolean.TRUE;
-                            } catch (MessagingException e) {
+                            } catch (@SuppressWarnings("unused") MessagingException e) {
                                 // MessagingException - If the server doesn't support the ACL extension
                                 nb = Boolean.FALSE;
                             }
@@ -960,7 +963,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             while ((tmp = mailAccessCache.removeMailAccess(session, accountId)) != null) {
                 tmp.close(false);
             }
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore
         }
     }
@@ -1058,7 +1061,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (null != capabilities) {
                     preAuthStartTlsCap[0] = capabilities.containsKey("STARTTLS");
                 }
-            } catch (Exception e) {
+            } catch (@SuppressWarnings("unused") Exception e) {
                 // Ignore
             }
         }
@@ -1537,7 +1540,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 i += b;
             }
             return (i < 0) ? -i : i;
-        } catch (NoSuchAlgorithmException e) {
+        } catch (@SuppressWarnings("unused") NoSuchAlgorithmException e) {
             // Ignore
         }
         return 0;
@@ -1550,38 +1553,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return imapStore.toString();
         }
         return "[not connected]";
-    }
-
-    private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
-
-    private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final StringBuilder sb) {
-        if (null == trace) {
-            return;
-        }
-        final int length = (MAX_STACK_TRACE_ELEMENTS <= trace.length) ? MAX_STACK_TRACE_ELEMENTS : trace.length;
-        for (int i = 0; i < length; i++) {
-            final StackTraceElement ste = trace[i];
-            final String className = ste.getClassName();
-            if (null != className) {
-                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(lineSeparator);
-            }
-        }
     }
 
     private static void closeSafely(final IMAPStore imapStore) {

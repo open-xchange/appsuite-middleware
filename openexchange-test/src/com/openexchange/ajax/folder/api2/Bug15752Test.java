@@ -83,6 +83,7 @@ public class Bug15752Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -106,6 +107,7 @@ public class Bug15752Test extends AbstractAJAXSession {
         mailIds = new String[] { uResp.getFolder(), uResp.getID() };
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

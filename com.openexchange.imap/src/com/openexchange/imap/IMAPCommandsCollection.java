@@ -50,6 +50,8 @@
 package com.openexchange.imap;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
@@ -1641,7 +1643,8 @@ public final class IMAPCommandsCollection {
             LOG.error("", e);
         }
 
-        new ExtendedIMAPFolder(folder, separator).triggerNotifyFolderListeners(FolderEvent.RENAMED);
+        @SuppressWarnings("resource") ExtendedIMAPFolder tmp = new ExtendedIMAPFolder(folder, separator);
+        tmp.triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
 
     public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {
@@ -2394,7 +2397,7 @@ public final class IMAPCommandsCollection {
                             while ((num = ir.readAtomString()) != null) {
                                 try {
                                     tmp.add(Integer.parseInt(num));
-                                } catch (final NumberFormatException e) {
+                                } catch (@SuppressWarnings("unused") NumberFormatException e) {
                                     continue;
                                 }
                             }
@@ -3083,7 +3086,7 @@ public final class IMAPCommandsCollection {
                         p.handleResult(response);
                     }
                 }
-                LOG.debug("{}: IMAP resolve fetch >>>UID FETCH ... (UID)<<< for {} messages took {}msec", imapFolder.getFullName(), uids.length, (System.currentTimeMillis() - start));
+                LOG.debug("{}: IMAP resolve fetch >>>UID FETCH ... (UID)<<< for {} messages took {}msec", imapFolder.getFullName(), I(uids.length), L(System.currentTimeMillis() - start));
                 return uid2seqNum;
             }
         }));
@@ -3347,7 +3350,7 @@ public final class IMAPCommandsCollection {
                             return null;
                         }
                         return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName(), false);
-                    } catch (final Exception e) {
+                    } catch (@SuppressWarnings("unused") Exception e) {
                         // Ignore
                     }
                 }
@@ -3540,7 +3543,7 @@ public final class IMAPCommandsCollection {
                             return null;
                         }
                         return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName(), false);
-                    } catch (final Exception e) {
+                    } catch (@SuppressWarnings("unused") Exception e) {
                         // Ignore
                     }
                 }
@@ -3757,8 +3760,7 @@ public final class IMAPCommandsCollection {
 
     private static final String COMMAND_FETCH_OXMARK_RFC = "FETCH 1:* (UID RFC822.HEADER.LINES (" + MessageHeaders.HDR_X_OX_MARKER + "))";
 
-    private static final String COMMAND_FETCH_OXMARK_REV1 =
-        "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
+    private static final String COMMAND_FETCH_OXMARK_REV1 = "FETCH 1:* (UID BODY.PEEK[HEADER.FIELDS (" + MessageHeaders.HDR_X_OX_MARKER + ")])";
 
     private static interface HeaderString {
 
@@ -3818,12 +3820,15 @@ public final class IMAPCommandsCollection {
         if (imapFolder.getMessageCount() <= 0) {
             return new long[0];
         }
+
+        String cmdRev1 = COMMAND_FETCH_OXMARK_REV1;
+        String cmdRfc = COMMAND_FETCH_OXMARK_RFC;
         return ((long[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 boolean isREV1 = p.isREV1();
-                String command = isREV1 ? COMMAND_FETCH_OXMARK_REV1 : COMMAND_FETCH_OXMARK_RFC;
+                String command = isREV1 ? cmdRev1 : cmdRfc;
                 Response[] r = performCommand(p, command);
                 Response response = r[r.length - 1];
                 try {
@@ -3980,17 +3985,17 @@ public final class IMAPCommandsCollection {
      * @param fullName The folder full name
      * @return Prepared full name ready for being used in raw IMAP commands
      */
-    public static String prepareStringArgument(final String fullName) {
+    public static String prepareStringArgument(String fullName) {
         /*
          * Ensure to have only ASCII characters
          */
-        final String lfolder = BASE64MailboxEncoder.encode(fullName);
+        String lfolder = BASE64MailboxEncoder.encode(fullName);
         /*
          * Determine if quoting (and escaping) has to be done
          */
-        final boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find() || "NIL".equalsIgnoreCase(lfolder);
-        final boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
-        final StringBuilder sb = new StringBuilder(lfolder.length() + 8);
+        boolean quote = PATTERN_QUOTE_ARG.matcher(lfolder).find() || "NIL".equalsIgnoreCase(lfolder);
+        boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
+        StringBuilder sb = new StringBuilder(lfolder.length() + 8);
         if (escape) {
             sb.append(lfolder.replaceAll(REPLPAT_BACKSLASH, REPLACEMENT_BACKSLASH).replaceAll(REPLPAT_QUOTE, REPLACEMENT_QUOTE));
         } else {
@@ -4016,8 +4021,8 @@ public final class IMAPCommandsCollection {
      * @param itemName The item name to generate appropriate error message on absence
      * @return The item associated with given class in specified <i>FETCH</i> response.
      */
-    protected static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName) throws ProtocolException {
-        final I retval = getItemOf(clazz, fetchResponse);
+    protected static <I extends Item> I getItemOf(Class<? extends I> clazz, FetchResponse fetchResponse, String itemName) throws ProtocolException {
+        I retval = getItemOf(clazz, fetchResponse);
         if (null == retval) {
             throw missingFetchItem(itemName);
         }
@@ -4033,10 +4038,10 @@ public final class IMAPCommandsCollection {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    public static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
-        final int len = fetchResponse.getItemCount();
+    public static <I extends Item> I getItemOf(Class<? extends I> clazz, FetchResponse fetchResponse) {
+        int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
-            final Item item = fetchResponse.getItem(i);
+            Item item = fetchResponse.getItem(i);
             if (clazz.isInstance(item)) {
                 return clazz.cast(item);
             }
@@ -4051,9 +4056,8 @@ public final class IMAPCommandsCollection {
      * @param itemName The item name; e.g. <code>UID</code>, <code>FLAGS</code>, etc.
      * @return A new protocol exception with appropriate message.
      */
-    protected static ProtocolException missingFetchItem(final String itemName) {
-        return new ProtocolException(
-            new StringBuilder(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
+    protected static ProtocolException missingFetchItem(String itemName) {
+        return new ProtocolException(new StringBuilder(48).append("Missing ").append(itemName).append(" item in FETCH response.").toString());
     }
 
     /**
@@ -4063,8 +4067,8 @@ public final class IMAPCommandsCollection {
      * @param causeMessage An optional individual error message; leave to <code>null</code> to pass specified exception's message
      * @return A new protocol exception wrapping specified exception.
      */
-    protected static ProtocolException wrapException(final Exception e, final String causeMessage) {
-        final ProtocolException pe = new ProtocolException(causeMessage == null ? e.getMessage() : causeMessage);
+    protected static ProtocolException wrapException(Exception e, String causeMessage) {
+        ProtocolException pe = new ProtocolException(causeMessage == null ? e.getMessage() : causeMessage);
         pe.initCause(e);
         return pe;
     }
@@ -4075,15 +4079,15 @@ public final class IMAPCommandsCollection {
      * @param r The response(s)
      * @param protocol The IMAP protocol
      */
-    public static void notifyResponseHandlers(final Response[] r, final IMAPProtocol protocol) {
-        final Response[] rs = new Response[1];
+    public static void notifyResponseHandlers(Response[] r, IMAPProtocol protocol) {
+        Response[] rs = new Response[1];
         for (int i = 0; i < r.length; i++) {
-            final Response response = r[i];
+            Response response = r[i];
             if (null != response) {
                 rs[0] = response;
                 try {
                     protocol.notifyResponseHandlers(rs);
-                } catch (final java.lang.ArrayIndexOutOfBoundsException e) {
+                } catch (@SuppressWarnings("unused") java.lang.ArrayIndexOutOfBoundsException e) {
                     // Ignore
                 }
             }

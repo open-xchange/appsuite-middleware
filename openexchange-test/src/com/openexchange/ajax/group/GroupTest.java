@@ -51,7 +51,6 @@ package com.openexchange.ajax.group;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.group.actions.SearchRequest;
 import com.openexchange.ajax.group.actions.SearchResponse;
@@ -67,7 +66,7 @@ public class GroupTest {
         super();
     }
 
-    public static final Group[] searchGroup(AJAXClient client, final String pattern) throws OXException, IOException, SAXException, JSONException, OXException {
+    public static final Group[] searchGroup(AJAXClient client, final String pattern) throws OXException, IOException, JSONException, OXException {
         final SearchRequest request = new SearchRequest(pattern);
         final SearchResponse response = client.execute(request);
         return response.getGroups();

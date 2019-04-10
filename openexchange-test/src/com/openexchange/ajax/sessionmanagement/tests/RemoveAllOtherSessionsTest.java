@@ -65,9 +65,6 @@ import com.openexchange.testing.httpclient.models.SessionManagementData;
  */
 public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
 
-    // Blacklist is set in cook books
-    private static final String BLACKLISTED_CLIENT = "randomClientForTesting";
-
     @Test
     public void testRemoveAllOtherSessions() throws Exception {
         String sessionId = apiClient.getSession();

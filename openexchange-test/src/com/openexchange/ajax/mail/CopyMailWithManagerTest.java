@@ -55,7 +55,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.exception.OXException;
 
@@ -72,6 +71,7 @@ public class CopyMailWithManagerTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -82,7 +82,7 @@ public class CopyMailWithManagerTest extends AbstractMailTest {
     }
 
     @Test
-    public void testShouldCopyFromSendToDrafts() throws OXException, JSONException, IOException, SAXException {
+    public void testShouldCopyFromSendToDrafts() throws OXException, JSONException, IOException {
         MailTestManager manager = new MailTestManager(getClient(), false);
         String destination = values.getDraftsFolder();
 

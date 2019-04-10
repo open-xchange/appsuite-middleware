@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.Header;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ConvertRequest implements AJAXRequest {
+public final class ConvertRequest implements AJAXRequest<ConvertResponse> {
 
     private final JSONObject jsonBody;
 

@@ -51,6 +51,7 @@ package com.openexchange.ajax.contact.action;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import java.util.Calendar;
 import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,7 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * This contains some examples of tests created for ContactTestManager
- * 
+ *
  * @author <a href="mailto:karsten.will@open-xchange.org">Karsten Will</a>
  */
 public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
@@ -73,6 +74,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -99,13 +101,13 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreatedContactsAreReturnedByGetRequest() throws Exception {
+    public void testCreatedContactsAreReturnedByGetRequest() {
         Contact co = cotm.getAction(contactObject1.getParentFolderID(), contactObject1.getObjectID());
         assertEquals("The contact was not returned.", co.getDisplayName(), contactObject1.getDisplayName());
     }
 
     @Test
-    public void testCreatedContactsAppearInAllRequestForSameFolder() throws Exception {
+    public void testCreatedContactsAppearInAllRequestForSameFolder() {
         boolean found1 = false;
         boolean found2 = false;
         Contact[] allContacts = cotm.allAction(folder.getObjectID());
@@ -123,7 +125,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreatedContactsAppearInListRequest() throws Exception {
+    public void testCreatedContactsAppearInListRequest() {
         boolean found1 = false;
         boolean found2 = false;
         int[] firstContact = new int[] { contactObject1.getParentFolderID(), contactObject1.getObjectID() };
@@ -143,7 +145,7 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreatedContactsAppearInSearchRequestOverAllFolders() throws Exception {
+    public void testCreatedContactsAppearInSearchRequestOverAllFolders() {
         boolean found1 = false;
         boolean found2 = false;
         // folderId "-1" means searching in all folders
@@ -167,12 +169,12 @@ public class ExemplaryContactTestManagerTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCreatedContactsAppearAsUpdatedSinceYesterday() throws Exception {
+    public void testCreatedContactsAppearAsUpdatedSinceYesterday() {
         boolean found1 = false;
         boolean found2 = false;
-        Date date = new Date();
-        date.setDate(date.getDate() - 1);
-        Contact[] allContacts = cotm.updatesAction(folder.getObjectID(), date);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Contact[] allContacts = cotm.updatesAction(folder.getObjectID(), cal.getTime());
         for (int i = 0; i < allContacts.length; i++) {
             Contact co = allContacts[i];
             if (co.getObjectID() == contactObject1.getObjectID()) {

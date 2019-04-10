@@ -59,7 +59,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountAllResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
@@ -89,6 +88,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
         super();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -101,7 +101,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
     }
 
     @Test
-    public void testLifeCycle() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testLifeCycle() throws OXException, IOException, JSONException, OXException {
 
         createMailAccount();
         readByGet();

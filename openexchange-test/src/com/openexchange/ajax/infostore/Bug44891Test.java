@@ -75,13 +75,14 @@ public class Bug44891Test extends AbstractInfostoreTest {
 
     /**
      * Initializes a new {@link Bug44891Test}.
-     * 
+     *
      * @param name
      */
     public Bug44891Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -91,6 +92,7 @@ public class Bug44891Test extends AbstractInfostoreTest {
         resp.fillObject(folder);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -226,7 +226,13 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         // Check if next trigger is at correct time
         long currentTime = System.currentTimeMillis();
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // No triggers
-        AlarmTrigger alarmTrigger = triggers.get(0);
+        AlarmTrigger alarmTrigger = null;
+        for (AlarmTrigger t : triggers) {
+            if (t.getEventId().equals(event.getId())) {
+                alarmTrigger = t;
+            }
+        }
+        assertNotNull("Missing trigger", alarmTrigger);
         if (currentTime < (cal.getTimeInMillis() - TimeUnit.MINUTES.toMillis(15) + TimeUnit.DAYS.toMillis(1))) {
             // The next trigger is today
             cal.add(Calendar.DAY_OF_MONTH, 1);
@@ -396,7 +402,13 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
 
         // Get alarms within the next two days
         AlarmTriggerData triggers = getAndCheckAlarmTrigger(1); // one trigger
-        AlarmTrigger alarmTrigger = triggers.get(0);
+        AlarmTrigger alarmTrigger = null;
+        for (AlarmTrigger t : triggers) {
+            if (t.getEventId().equals(event.getId())) {
+                alarmTrigger = t;
+            }
+        }
+        assertNotNull("Missing trigger", alarmTrigger);
         checkAlarmTime(alarmTrigger, event.getId(), cal.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
     }
 

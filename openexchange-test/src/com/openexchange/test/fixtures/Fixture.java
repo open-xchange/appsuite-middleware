@@ -64,7 +64,7 @@ public class Fixture<T> {
     private final String[] fields;
     private final Map<String, String> attributes;
 
-    public Fixture(final T entry, final String[] fields, Map attributes) {
+    public Fixture(final T entry, final String[] fields, Map<String, String> attributes) {
         this.entry = entry;
         this.fields = fields;
         this.attributes = attributes;
@@ -94,7 +94,7 @@ public class Fixture<T> {
                 if (comp != null && comp.compare(v1, v2) != 0) {
                     return false;
                 }
-                if (comp == null && !v1.equals(v2)) {
+                if (v1 == null || comp == null && !v1.equals(v2)) {
                     return false;
                 }
 
@@ -108,7 +108,7 @@ public class Fixture<T> {
         return true;
     }
 
-    private Method getMethod(final String field, final Class<?> klass) throws OXException {
+    private Method getMethod(final String field, final Class<?> klass) {
         for (Method m : klass.getMethods()) {
             if (m.getName().equalsIgnoreCase(IntrospectionTools.getterName(field)) && m.getParameterTypes().length == 0) {
                 return m;
@@ -123,7 +123,7 @@ public class Fixture<T> {
     }
 
     // Override me!
-    public Comparator<Object> getComparator(final String field) {
+    public Comparator<Object> getComparator(@SuppressWarnings("unused") final String field) {
         return null;
     }
 

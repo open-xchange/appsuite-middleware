@@ -49,16 +49,12 @@
 
 package com.openexchange.ajax.subscribe.test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
-import org.xml.sax.SAXException;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 
@@ -87,14 +83,14 @@ public abstract class AbstractSubscriptionTest extends AbstractPubSubTest {
     }
 
     @Override
-    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws OXException, IOException, SAXException, JSONException {
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) {
         Subscription sub = generateOXMFSubscription(formDescription);
         sub.setFolderId(folderID);
         return sub;
     }
 
     @Override
-    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws OXException, IOException, SAXException, JSONException {
+    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) {
         Subscription subscription = new Subscription();
 
         subscription.setDisplayName("mySubscription");

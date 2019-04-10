@@ -102,6 +102,7 @@ public class SetRequest extends AbstractJSlobRequest<SetResponse> {
         return value;
     }
 
+    @Override
     public AbstractAJAXParser<? extends SetResponse> getParser() {
         return new SetParser(failOnError);
     }

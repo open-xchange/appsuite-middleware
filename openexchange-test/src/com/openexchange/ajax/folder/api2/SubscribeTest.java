@@ -89,6 +89,7 @@ public class SubscribeTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -103,6 +104,7 @@ public class SubscribeTest extends AbstractAJAXSession {
         iResp.fillObject(testFolder);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

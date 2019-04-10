@@ -83,6 +83,7 @@ public final class Bug17225Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,9 +99,9 @@ public final class Bug17225Test extends AbstractAJAXSession {
         folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION), Create.ocl(client2.getValues().getUserId(), false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS) });
         InsertResponse updateR = client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
         folder.setLastModified(updateR.getTimestamp());
-        //		client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

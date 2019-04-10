@@ -66,6 +66,6 @@ public class UserIdTransformator extends CredentialsTransformator {
 
     @Override
     public Object transform(final String value) throws OXException {
-        return ((SimpleCredentials) super.transform(value)).getUserId();
+        return Integer.valueOf(((SimpleCredentials) super.transform(value)).getUserId());
     }
 }

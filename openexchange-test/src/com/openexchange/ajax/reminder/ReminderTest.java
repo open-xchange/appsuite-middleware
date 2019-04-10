@@ -58,7 +58,7 @@ public abstract class ReminderTest extends AbstractAJAXSession {
 
     public static void compareReminder(final ReminderObject reminderObj1, final ReminderObject reminderObj2) throws Exception {
         assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
-        OXTestToolkit.assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
+        assertEquals("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
         OXTestToolkit.assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
     }
 }

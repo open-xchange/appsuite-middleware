@@ -71,10 +71,12 @@ public class ParallelParameterized extends Parameterized {
 
             private final ExecutorService service = Executors.newFixedThreadPool(20);
 
+            @Override
             public void schedule(Runnable childStatement) {
                 service.submit(childStatement);
             }
 
+            @Override
             public void finished() {
                 try {
                     service.shutdown();

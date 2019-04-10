@@ -72,8 +72,8 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
     }
 
     @Override
-    public Fixtures<Document> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        DocumentFixtures documentFixtures = new DocumentFixtures(fixtureName, entries, datapath, fixtureLoader);
+    public Fixtures<Document> createFixture(final Map<String, Map<String, String>> entries) {
+        DocumentFixtures documentFixtures = new DocumentFixtures(entries, datapath, fixtureLoader);
         if (seleniumDataPath != null) {
             documentFixtures.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
         }
@@ -89,11 +89,14 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
 
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Document>> knownDocuments = new HashMap<String, Fixture<Document>>();
+        @SuppressWarnings("hiding")
         private final File datapath;
+        @SuppressWarnings("hiding")
         private String seleniumDataPath;
+        @SuppressWarnings("hiding")
         private String seleniumSeparator;
 
-        public DocumentFixtures(final String fixtureName, final Map<String, Map<String, String>> values, File datapath, FixtureLoader fixtureLoader) {
+        public DocumentFixtures(final Map<String, Map<String, String>> values, File datapath, FixtureLoader fixtureLoader) {
             super(Document.class, values, fixtureLoader);
             this.entries = values;
             this.datapath = datapath;

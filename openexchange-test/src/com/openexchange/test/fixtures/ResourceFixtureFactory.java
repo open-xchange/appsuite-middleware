@@ -67,8 +67,8 @@ public class ResourceFixtureFactory implements FixtureFactory<Resource> {
     }
 
     @Override
-    public Fixtures<Resource> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new ResourceFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<Resource> createFixture(final Map<String, Map<String, String>> entries) {
+        return new ResourceFixtures(entries, fixtureLoader);
     }
 
     private class ResourceFixtures extends DefaultFixtures<Resource> implements Fixtures<Resource> {
@@ -76,7 +76,7 @@ public class ResourceFixtureFactory implements FixtureFactory<Resource> {
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Resource>> resourceMap = new HashMap<String, Fixture<Resource>>();
 
-        public ResourceFixtures(final String fixtureName, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+        public ResourceFixtures(final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
             super(Resource.class, values, fixtureLoader);
             this.entries = values;
         }

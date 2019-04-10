@@ -155,7 +155,7 @@ public final class LoginConfiguration {
         try {
             CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
             if (null == capabilityService) {
-                LOGGER.warn("Missing capability service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
+                LOGGER.warn("Missing capability service. Unable to reliably check auto-login capability for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, Boolean.valueOf(sessiondAutoLogin), ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName());
             } else {
                 Session ses = null == optSession ? ThreadLocalSessionHolder.getInstance().getSessionObject() : optSession;
                 if (null == ses) {
@@ -165,7 +165,7 @@ public final class LoginConfiguration {
             }
         } catch (OXException e) {
             // fallback to default
-            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, sessiondAutoLogin, ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
+            LOGGER.warn("Failed to retrieve server configuration for host {}. Using default '{}' as fall-back for auto-login (as configured through \"{}\" property", hostName, Boolean.valueOf(sessiondAutoLogin), ConfigurationProperty.SESSIOND_AUTOLOGIN.getPropertyName(), e);
         }
         return sessiondAutoLogin;
     }

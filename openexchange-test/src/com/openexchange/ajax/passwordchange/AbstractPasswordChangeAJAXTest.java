@@ -52,7 +52,6 @@ package com.openexchange.ajax.passwordchange;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 
@@ -82,12 +81,10 @@ public abstract class AbstractPasswordChangeAJAXTest extends AbstractAJAXSession
      *             If an AJAX error occurs
      * @throws IOException
      *             If an I/O error occurs
-     * @throws SAXException
-     *             If a SAX error occurs
      * @throws JSONException
      *             If a JSON error occurs
      */
-    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
         return getClient().getValues().getTimeZone();
     }
 

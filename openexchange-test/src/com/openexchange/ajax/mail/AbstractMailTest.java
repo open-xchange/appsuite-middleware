@@ -54,7 +54,6 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -123,7 +122,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     public static final String MAIL_SUBJECT = "The mail subject";
 
-    protected final JSONObject createSelfAddressed25KBMailObject(final String subject) throws OXException, JSONException, IOException, SAXException {
+    protected final JSONObject createSelfAddressed25KBMailObject(final String subject) throws OXException, JSONException, IOException {
         return createEMail(getSendAddress(), subject, MailContentType.ALTERNATIVE.toString(), LARGE_MAIL_TEXT_BODY);
     }
 
@@ -151,7 +150,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 
     }
 
-    protected final JSONObject createSelfAddressed25KBMailObject() throws OXException, JSONException, IOException, SAXException {
+    protected final JSONObject createSelfAddressed25KBMailObject() throws OXException, JSONException, IOException {
         return createSelfAddressed25KBMailObject(MAIL_SUBJECT);
     }
 

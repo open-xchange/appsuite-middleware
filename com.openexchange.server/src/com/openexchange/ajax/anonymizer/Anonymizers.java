@@ -166,6 +166,7 @@ public final class Anonymizers {
      *
      * @return The empty anonymizer
      */
+    @SuppressWarnings("unchecked")
     public static <E> AnonymizerService<E> emptyAnonymizerFor() {
         return (AnonymizerService<E>) EMPTY_ANONYMIZER;
     }

@@ -100,7 +100,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSendSimpleMail() throws IOException, SAXException, Exception {
+    public void testSendSimpleMail() throws IOException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -122,7 +122,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSendMailWithMultipleAttachment() throws IOException, SAXException, JSONException, Exception {
+    public void testSendMailWithMultipleAttachment() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -143,7 +143,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testForwardMail() throws IOException, SAXException, JSONException, Exception {
+    public void testForwardMail() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -170,7 +170,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSendForwardMailWithAttachments() throws IOException, SAXException, JSONException, Exception {
+    public void testSendForwardMailWithAttachments() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());

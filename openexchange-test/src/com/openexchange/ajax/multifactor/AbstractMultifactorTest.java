@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.multifactor;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
@@ -197,7 +198,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      */
     protected MultifactorProvider requireProvider(String name) throws ApiException {
         Optional<MultifactorProvider> provider = getProvider(name);
-        assertThat(provider.isPresent(), is(true));
+        assertThat(B(provider.isPresent()), is(Boolean.TRUE));
         return provider.get();
     }
 
@@ -258,8 +259,8 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
     protected MultifactorStartRegistrationResponseData startRegistration(String providerName) throws ApiException {
         final String phoneNumber = null;
         final String deviceName = null;
-        final boolean backupDevice = false;
-        return startRegistration(providerName, deviceName, phoneNumber,backupDevice);
+        final Boolean backupDevice = Boolean.FALSE;
+        return startRegistration(providerName, deviceName, phoneNumber, backupDevice);
     }
 
     /**
@@ -272,7 +273,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @return The response data
      * @throws ApiException
      */
-    protected MultifactorStartRegistrationResponseData startRegistration(String providerName, String deviceName, String phoneNumber, boolean backup) throws ApiException {
+    protected MultifactorStartRegistrationResponseData startRegistration(String providerName, String deviceName, String phoneNumber, Boolean backup) throws ApiException {
         return startRegistration(multifactorApi, providerName, deviceName, phoneNumber, backup);
     }
 
@@ -287,7 +288,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
      * @return The response data
      * @throws ApiException
      */
-    protected MultifactorStartRegistrationResponseData startRegistration(MultifactorApi api, String providerName, String deviceName, String phoneNumber, boolean backup) throws ApiException {
+    protected MultifactorStartRegistrationResponseData startRegistration(MultifactorApi api, String providerName, String deviceName, String phoneNumber, Boolean backup) throws ApiException {
 
         final MultifactorDevice deviceData = new MultifactorDevice();
         deviceData.setProviderName(providerName);
@@ -354,7 +355,7 @@ public class AbstractMultifactorTest extends AbstractConfigAwareAPIClientSession
         List<String> deletedDeviceIds = checkResponse(resp.getError(), resp.getErrorDesc(), resp.getData());
 
         //ensure it's gone
-        assertThat(deletedDeviceIds.isEmpty(), is(false));
+        assertThat(B(deletedDeviceIds.isEmpty()), is(Boolean.FALSE));
         Optional<MultifactorDevice> device = getDevice(deviceId);
         assertThat(device, is(Optional.empty()));
 

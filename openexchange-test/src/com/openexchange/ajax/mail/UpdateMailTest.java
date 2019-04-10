@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Date;
@@ -61,7 +62,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -91,6 +91,7 @@ public class UpdateMailTest extends AbstractMailTest {
 
     private UserValues values;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -100,6 +101,7 @@ public class UpdateMailTest extends AbstractMailTest {
         clearFolder(getTrashFolder());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -112,7 +114,7 @@ public class UpdateMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testShouldBeAbleToAddFlags() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldBeAbleToAddFlags() throws OXException, IOException, JSONException {
         final String eml = "Message-Id: <4A002517.4650.0059.1@foobar.com>\n" + "Date: Tue, 05 May 2009 11:37:58 -0500\n" + "From: " + getSendAddress() + "\n" + "To: " + getSendAddress() + "\n" + "Subject: Invitation for launch\n" + "Mime-Version: 1.0\n" + "Content-Type: text/plain; charset=\"UTF-8\"\n" + "Content-Transfer-Encoding: 8bit\n" + "\n" + "This is a MIME message. If you are reading this text, you may want to \n" + "consider changing to a mail reader or gateway that understands how to \n" + "properly handle MIME multipart messages.";
         NewMailRequest newMailRequest = new NewMailRequest(values.getInboxFolder(), eml, -1, true);
         NewMailResponse newMailResponse = getClient().execute(newMailRequest);
@@ -124,6 +126,7 @@ public class UpdateMailTest extends AbstractMailTest {
         updateRequest.setFlags(additionalFlag);
         updateRequest.updateFlags();
         UpdateMailResponse updateResponse = getClient().execute(updateRequest);
+        assertNull(updateResponse.getErrorMessage());
 
         TestMail updatedMail = getMail(folder, id);
         assertTrue("Flag should have been changed, but are: " + Integer.toBinaryString(updatedMail.getFlags()), (updatedMail.getFlags() & additionalFlag) == additionalFlag);
@@ -138,7 +141,7 @@ public class UpdateMailTest extends AbstractMailTest {
     }
 
     @Test
-    public void testShouldBeAbleToAddFlags2AllMessages() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldBeAbleToAddFlags2AllMessages() throws OXException, IOException, JSONException {
         String newId = null;
         try {
             /*
@@ -302,7 +305,7 @@ public class UpdateMailTest extends AbstractMailTest {
         }
     }
 
-    public void notestShouldBeAbleToAddFlagsByMessageId() throws OXException, IOException, SAXException, JSONException {
+    public void notestShouldBeAbleToAddFlagsByMessageId() throws OXException, IOException, JSONException {
         final String mail = values.getSendAddress();
         sendMail(createEMail(mail, "Update test for adding and removing a flag by message id", "ALTERNATE", "Just a little bit").toString());
         final TestMail myMail = new TestMail(getFirstMailInFolder(values.getInboxFolder()));
@@ -334,7 +337,7 @@ public class UpdateMailTest extends AbstractMailTest {
         assertTrue("Flag should have been changed back again", (updatedMail.getFlags() & additionalFlag) == 0);
     }
 
-    public void notestShouldBeAbleToSetColors() throws OXException, IOException, SAXException, JSONException {
+    public void notestShouldBeAbleToSetColors() throws OXException, IOException, JSONException {
         final String mail = values.getSendAddress();
         sendMail(createEMail(mail, "Update test for changing colors", "ALTERNATE", "Just a little bit").toString());
         final TestMail myMail = new TestMail(getFirstMailInFolder(values.getInboxFolder()));

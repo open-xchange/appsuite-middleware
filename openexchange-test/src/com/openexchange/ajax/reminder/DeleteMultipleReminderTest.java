@@ -80,13 +80,14 @@ public class DeleteMultipleReminderTest extends ReminderTest {
 
     /**
      * Initializes a new {@link DeleteMultipleReminderTest}.
-     * 
+     *
      * @param name
      */
     public DeleteMultipleReminderTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -125,14 +126,13 @@ public class DeleteMultipleReminderTest extends ReminderTest {
         client.execute(delReq);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
             appointment.setLastModified(new Date(Long.MAX_VALUE));
             com.openexchange.ajax.appointment.action.DeleteRequest aDelReq = new com.openexchange.ajax.appointment.action.DeleteRequest(appointment);
             client.execute(aDelReq);
-
-            com.openexchange.ajax.task.actions.DeleteRequest tDelReq = new com.openexchange.ajax.task.actions.DeleteRequest(task);
         } finally {
             super.tearDown();
         }

@@ -66,7 +66,6 @@ import com.openexchange.java.Charsets;
 public final class Bug19696Test extends AbstractMailTest {
 
     private String folder;
-    private String address;
     private String[] ids;
 
     /**
@@ -78,17 +77,18 @@ public final class Bug19696Test extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         folder = getClient().getValues().getInboxFolder();
-        address = getClient().getValues().getSendAddress();
         final String mail = TestMails.BUG_19696_MAIL;
         final ImportMailRequest request = new ImportMailRequest(folder, 0, Charsets.UTF_8, mail);
         final ImportMailResponse response = getClient().execute(request);
         ids = response.getIds()[0];
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

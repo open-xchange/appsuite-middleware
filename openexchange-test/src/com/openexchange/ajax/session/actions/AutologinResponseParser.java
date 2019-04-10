@@ -54,6 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
  * {@link AutologinResponseParser}
@@ -75,7 +76,7 @@ public class AutologinResponseParser extends AbstractAJAXParser<AutologinRespons
     @Override
     protected AutologinResponse createResponse(Response response) throws JSONException {
         AutologinResponse autologinResponse = new AutologinResponse(response);
-        JSONObject json = response.getJSON();
+        JSONObject json = ResponseWriter.getJSON(response);
         if (response.hasError()) {
             response.setData(null);
         } else {

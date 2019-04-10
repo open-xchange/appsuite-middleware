@@ -79,7 +79,7 @@ public class RestoreTest extends InfostoreApiClientTest {
         InfoItemListElement toDelete = new InfoItemListElement();
         toDelete.setFolder(folderId);
         toDelete.setId(id);
-        deleteInfoItems(Collections.singletonList(toDelete), false);
+        deleteInfoItems(Collections.singletonList(toDelete), Boolean.FALSE);
 
 
         // restore it
@@ -106,10 +106,10 @@ public class RestoreTest extends InfostoreApiClientTest {
         InfoItemListElement toDelete = new InfoItemListElement();
         toDelete.setFolder(folderId);
         toDelete.setId(id);
-        deleteInfoItems(Collections.singletonList(toDelete), false);
+        deleteInfoItems(Collections.singletonList(toDelete), Boolean.FALSE);
 
         // Delete folder
-        deleteFolder(folderId, true);
+        deleteFolder(folderId, Boolean.TRUE);
 
         // restore it
         toDelete.setFolder(String.valueOf(getClient().getValues().getInfostoreTrashFolder()));

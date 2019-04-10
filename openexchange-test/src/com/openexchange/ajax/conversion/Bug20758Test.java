@@ -99,6 +99,7 @@ package com.openexchange.ajax.conversion;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -134,6 +135,7 @@ public class Bug20758Test extends AbstractConversionTest {
     private String ical1;
     private String ical2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -158,22 +160,22 @@ public class Bug20758Test extends AbstractConversionTest {
     public void testWithoutTimeZone() throws Exception {
         JSONObject jsonObject = internal(mailFolderAndMailID1, sequenceId1, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
-        assertEquals("Wrong start date", 1321367400000L, jsonObject.get("start_date")); //15.11.2011 14:30
+        assertEquals("Wrong start date", L(1321367400000L), jsonObject.get("start_date")); //15.11.2011 14:30
 
         jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
-        assertEquals("Wrong start date", 1322829000000L, jsonObject.get("start_date")); //02.12.2011 12:30
+        assertEquals("Wrong start date", L(1322829000000L), jsonObject.get("start_date")); //02.12.2011 12:30
     }
 
     @Test
     public void testWithTimeZone() throws Exception {
         JSONObject jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.timezone", "UTC")));
         assertEquals("Wrong timezone", "America/New_York", jsonObject.get("timezone"));
-        assertEquals("Wrong start date", 1321345800000L, jsonObject.get("start_date")); //15.11.2011 08:30
+        assertEquals("Wrong start date", L(1321345800000L), jsonObject.get("start_date")); //15.11.2011 08:30
 
         jsonObject = internal(mailFolderAndMailID2, sequenceId2, new JSONArray());
         assertEquals("Wrong timezone", "Europe/Berlin", jsonObject.get("timezone"));
-        assertEquals("Wrong start date", 1322807400000L, jsonObject.get("start_date")); //02.12.2011 06:30
+        assertEquals("Wrong start date", L(1322807400000L), jsonObject.get("start_date")); //02.12.2011 06:30
     }
 
     private JSONObject internal(String[] mail, Object sequenceId, JSONArray args) throws Exception {
@@ -184,7 +186,7 @@ public class Bug20758Test extends AbstractConversionTest {
         JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical.json");
         jsonHandler.put("args", args);
         jsonBody.put("datahandler", jsonHandler);
-        ConvertResponse convertResponse = (ConvertResponse) Executor.execute(client1.getSession(), new ConvertRequest(jsonBody, true));
+        ConvertResponse convertResponse = Executor.execute(client1.getSession(), new ConvertRequest(jsonBody, true));
         return ((JSONArray) convertResponse.getData()).getJSONObject(0);
     }
 

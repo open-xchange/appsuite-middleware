@@ -65,13 +65,13 @@ import com.openexchange.xing.util.JSONCoercion;
  */
 public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> {
 
-    private boolean failOnError;
-    private DriveShareTarget target;
-    private Long expiry;
-    private String password;
-    private Map<String, Object> meta;
+    private final boolean failOnError;
+    private final DriveShareTarget target;
+    private final Long expiry;
+    private final String password;
+    private final Map<String, Object> meta;
 
-    public UpdateLinkRequest(Integer root, DriveShareTarget target, Long timestamp) {
+    public UpdateLinkRequest(Integer root, DriveShareTarget target) {
         this(root, target, null, null, null, true);
     }
 
@@ -91,7 +91,7 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"), new Parameter("root", root)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"), new Parameter("root", root.intValue())
         };
     }
 

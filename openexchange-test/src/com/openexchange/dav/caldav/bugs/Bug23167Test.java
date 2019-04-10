@@ -130,6 +130,7 @@ public class Bug23167Test extends CalDAVTest {
                 assertEquals("SUMMARY wrong", appointment.getTitle(), vEvent.getSummary());
             }
         }
+        assertNotNull(vEventException);
         /*
          * update exception on client
          */

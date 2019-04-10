@@ -82,7 +82,7 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, contactId));
         String body = array.toString();
 
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, Boolean.TRUE, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("One vCard expected!", 1, result.length);
@@ -101,7 +101,7 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, distlistId));
         String body = array.toString();
 
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, Boolean.TRUE, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("One vCard expected!", 1, result.length);
@@ -127,7 +127,7 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(folderID, thirdId));
         String body = array.toString();
 
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, Boolean.TRUE, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("Three vCard expected!", 3, result.length);
@@ -172,7 +172,7 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
         array.put(addRequestIds(secondFolderID, fourthId));
         String body = array.toString();
 
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, Boolean.TRUE, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("Four vCards expected!", 4, result.length);
@@ -189,7 +189,7 @@ public class VCardSingleAndBatchExportTest extends AbstractManagedContactTest {
 
         String body = array.toString();
 
-        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, true, true, body));
+        VCardExportResponse vcardExportResponse = getClient().execute(new VCardExportRequest(-1, Boolean.TRUE, true, body));
         String vcard = (String) vcardExportResponse.getData();
         String[] result = vcard.split("END:VCARD\\r?\\nBEGIN:VCARD");
         assertEquals("One vCards expected!", 1, result.length);

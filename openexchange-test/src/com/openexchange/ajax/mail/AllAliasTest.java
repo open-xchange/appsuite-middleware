@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import org.json.JSONArray;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
 import com.openexchange.groupware.search.Order;
@@ -76,7 +75,6 @@ public class AllAliasTest extends AbstractMailTest {
 
     @Test
     public void testAllAlias() throws Exception {
-        final AJAXClient client = getClient();
         final AllRequest allAliasRequest = new AllRequest(getClient().getValues().getInboxFolder(), "all", 0, Order.ASCENDING, true);
         final AllResponse allAliasResponse = getClient().execute(allAliasRequest);
         final Object[][] aliasMails = allAliasResponse.getArray();

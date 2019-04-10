@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.multifactor;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -82,8 +83,8 @@ import com.openexchange.testing.httpclient.modules.UserMeApi;
  */
 public abstract class AbstractMultifactorProviderTest extends AbstractMultifactorTest {
 
-    protected int contextId;
-    protected int userId;
+    protected Integer contextId;
+    protected Integer userId;
 
     //----------------------------------------------------------------------------------------------
     //Template methods
@@ -223,7 +224,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         super.setUp();
         ConfigApi configApi = new ConfigApi(apiClient);
         ConfigResponse configResponse = configApi.getConfigNode("/context_id", apiClient.getSession());
-        this.contextId = (int) super.checkResponse(configResponse.getError(), configResponse.getErrorDesc(), configResponse.getData());
+        this.contextId = (Integer) super.checkResponse(configResponse.getError(), configResponse.getErrorDesc(), configResponse.getData());
         this.userId = MultifactorApi().getApiClient().getUserId();
     }
 
@@ -243,8 +244,8 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
     @Test
     public void testBackupProviderFlags() throws Exception {
        MultifactorProvider requireProvider = requireProvider(getProviderName());
-       assertThat(requireProvider.getBackupProvider(), is(isBackupProvider()));
-       assertThat(requireProvider.getBackupOnlyProvider(), is(isBackupOnlyProvider()));
+        assertThat(requireProvider.getBackupProvider(), is(B(isBackupProvider())));
+        assertThat(requireProvider.getBackupOnlyProvider(), is(B(isBackupOnlyProvider())));
     }
 
     @Test
@@ -338,7 +339,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(authResponse.getErrorDesc(), is(nullValue()));
 
         //Autologin again
-        LoginResponse autologin = loginApi.autologin(true, null, null, null);
+        LoginResponse autologin = loginApi.autologin(Boolean.TRUE, null, null, null);
         assertThat(autologin.getErrorDesc(), is(nullValue()));
 
         //After autologin is must be allowed to perform almost all API actions without re-authenticating
@@ -377,7 +378,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Autologin again
         //This should clear the requirement for "recent authentication" because no device is left
-        LoginResponse autologin = loginApi.autologin(true, null, null, null);
+        LoginResponse autologin = loginApi.autologin(Boolean.TRUE, null, null, null);
         assertThat(autologin.getErrorDesc(), is(nullValue()));
 
         //Thus registering new device should be successful

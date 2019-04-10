@@ -135,8 +135,9 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         VCard("VCARD", "vcard.vcf", Format.VCARD),
         OUTLOOK_CSV("OUTLOOK_CSV", "contacts.csv", Format.OUTLOOK_CSV);
 
-        private final String name, fileName;
-        private final Format format;
+        private final String name;
+        final String fileName;
+        final Format format;
 
         private Action(final String name, final String fileName, final Format format) {
             this.name = name;

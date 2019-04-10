@@ -15,6 +15,7 @@ public class Bug36522Test extends AbstractMailFindTest {
 
     private Contact contact;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

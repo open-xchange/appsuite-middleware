@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.HashMap;
 import org.json.JSONArray;
@@ -89,7 +90,7 @@ public class AJAXContactFinder implements ContactFinder {
                     ContactField field = ContactField.getByValue(column);
                     field.doSwitch(setter, contact, row.get(index));
                 }
-                globalAddressBook.put(contact.getInternalUserId(), contact);
+                globalAddressBook.put(I(contact.getInternalUserId()), contact);
             }
         } catch (OXException e) {
             e.printStackTrace();

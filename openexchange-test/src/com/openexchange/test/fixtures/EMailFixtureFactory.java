@@ -80,7 +80,7 @@ import com.openexchange.test.fixtures.transformators.JChronicDateTransformator;
 public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
 
     private final File datapath;
-    private final FixtureLoader fixtureLoader;
+    final FixtureLoader fixtureLoader;
 
     public EMailFixtureFactory(final File datapath, FixtureLoader fixtureLoader) {
         this.datapath = datapath;
@@ -88,8 +88,8 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
     }
 
     @Override
-    public Fixtures<MailMessage> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new EMailFixture(fixtureName, entries, datapath, fixtureLoader);
+    public Fixtures<MailMessage> createFixture(final Map<String, Map<String, String>> entries) {
+        return new EMailFixture(entries, datapath, fixtureLoader);
     }
 
     private class EMailFixture extends DefaultFixtures<MailMessage> implements Fixtures<MailMessage> {
@@ -98,7 +98,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
         final Map<String, Fixture<MailMessage>> mails = new HashMap<String, Fixture<MailMessage>>();
         private final Map<String, Map<String, String>> entries;
 
-        public EMailFixture(final String fixtureName, final Map<String, Map<String, String>> entries, File datapath, FixtureLoader fixtureLoader) {
+        public EMailFixture(final Map<String, Map<String, String>> entries, File datapath, FixtureLoader fixtureLoader) {
             super(MailMessage.class, entries, fixtureLoader);
             this.entries = entries;
             this.dataPath = datapath;
@@ -272,39 +272,36 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             final String STR_FALSE = "false";
 
             synchronized (EMailFixture.class) {
-                if (sessionProperties == null) {
-                    /*
-                     * Define session properties
-                     */
-                    System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
-                    System.getProperties().put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
-                    System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
-                    System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-                    System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
-                    /*
-                     * Define imap session properties
-                     */
-                    sessionProperties = ((Properties) (System.getProperties().clone()));
-                    /*
-                     * A connected AccessedIMAPStore maintains a pool of IMAP protocol
-                     * objects for use in communicating with the IMAP server. The
-                     * AccessedIMAPStore will create the initial AUTHENTICATED connection
-                     * and seed the pool with this connection. As folders are opened
-                     * and new IMAP protocol objects are needed, the AccessedIMAPStore will
-                     * provide them from the connection pool, or create them if none
-                     * are available. When a folder is closed, its IMAP protocol
-                     * object is returned to the connection pool if the pool is not
-                     * over capacity.
-                     */
-                    sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
-                    /*
-                     * A mechanism is provided for timing out idle connection pool
-                     * IMAP protocol objects. Timed out connections are closed and
-                     * removed (pruned) from the connection pool.
-                     */
-                    sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
-                    return sessionProperties;
-                }
+                /*
+                 * Define session properties
+                 */
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+                System.getProperties().put(MimeSessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+                /*
+                 * Define imap session properties
+                 */
+                sessionProperties = ((Properties) (System.getProperties().clone()));
+                /*
+                 * A connected AccessedIMAPStore maintains a pool of IMAP protocol
+                 * objects for use in communicating with the IMAP server. The
+                 * AccessedIMAPStore will create the initial AUTHENTICATED connection
+                 * and seed the pool with this connection. As folders are opened
+                 * and new IMAP protocol objects are needed, the AccessedIMAPStore will
+                 * provide them from the connection pool, or create them if none
+                 * are available. When a folder is closed, its IMAP protocol
+                 * object is returned to the connection pool if the pool is not
+                 * over capacity.
+                 */
+                sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+                /*
+                 * A mechanism is provided for timing out idle connection pool
+                 * IMAP protocol objects. Timed out connections are closed and
+                 * removed (pruned) from the connection pool.
+                 */
+                sessionProperties.put(MimeSessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
                 return sessionProperties;
             }
         }

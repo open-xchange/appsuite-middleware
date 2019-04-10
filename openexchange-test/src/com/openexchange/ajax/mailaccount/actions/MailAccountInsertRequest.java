@@ -114,6 +114,7 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
         return "/ajax/account";
     }
 
+    @SuppressWarnings("serial")
     private MailAccount wrap(final MailAccountDescription acc) {
         return new MailAccount() {
 

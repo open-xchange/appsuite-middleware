@@ -1411,8 +1411,9 @@ public final class IMAPException extends OXException {
             return null;
         }
         try {
-            return (V) props.get(name);
-        } catch (final ClassCastException e) {
+            @SuppressWarnings("unchecked") V v = (V) props.get(name);
+            return v;
+        } catch (@SuppressWarnings("unused") ClassCastException e) {
             return null;
         }
     }

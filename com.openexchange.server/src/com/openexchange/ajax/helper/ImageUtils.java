@@ -98,9 +98,9 @@ public class ImageUtils {
 
     private static boolean isValidImageByBufferedImage(InputStream inputStream) {
         try {
-            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(inputStream);
+            java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(inputStream);
             return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return false;
         }
     }
@@ -110,7 +110,7 @@ public class ImageUtils {
         try {
             imageInputStream = ImageIO.createImageInputStream(inputStream);
             return isValidImageInputStream(imageInputStream);
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return false;
         } finally {
             Streams.close(imageInputStream, inputStream);

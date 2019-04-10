@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.SendRequest;
 import com.openexchange.ajax.mail.actions.SendResponse;
@@ -88,8 +87,6 @@ public class MSISDNAddressTest extends AbstractMailTest {
 
     private Contact contactData;
 
-    private String originalCellPhoneNumber;
-
     private final String validTestCellPhoneNumber = "491401234567890";
 
     private final String invalidTestCellPhoneNumber = "491501234567890";
@@ -98,6 +95,7 @@ public class MSISDNAddressTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -105,21 +103,21 @@ public class MSISDNAddressTest extends AbstractMailTest {
         // get the current contactData and
         GetResponse response = getClient().execute(new GetRequest(userValues.getUserId(), userValues.getTimeZone()));
         contactData = response.getContact();
-        originalCellPhoneNumber = contactData.getCellularTelephone1();
-        setCellularNumberOfContact(validTestCellPhoneNumber);
+        setCellularNumberOfContact();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
             // reset to original Number if tests expect this
-            setCellularNumberOfContact(originalCellPhoneNumber);
+            setCellularNumberOfContact();
         } finally {
             super.tearDown();
         }
     }
 
-    private void setCellularNumberOfContact(String cellPhoneNumber) throws OXException, IOException, JSONException {
+    private void setCellularNumberOfContact() throws OXException, IOException, JSONException {
         Contact changedContactData = new Contact();
         changedContactData.setObjectID(contactData.getObjectID());
         changedContactData.setInternalUserId(contactData.getInternalUserId());
@@ -136,7 +134,7 @@ public class MSISDNAddressTest extends AbstractMailTest {
      * Send an e-mail with the msisdn we just set in the contact
      */
     @Test
-    public void testValidFromAddress() throws OXException, IOException, JSONException, SAXException {
+    public void testValidFromAddress() throws OXException, IOException, JSONException {
         JSONObject createEMail = createEMail(getSendAddress(getClient()), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
         createEMail.put(MailJSONField.FROM.getKey(), validTestCellPhoneNumber);
         SendRequest request = new SendRequest(createEMail.toString());
@@ -145,7 +143,7 @@ public class MSISDNAddressTest extends AbstractMailTest {
     }
 
     @Test
-    public void testInvalidFromAddress() throws OXException, IOException, JSONException, SAXException {
+    public void testInvalidFromAddress() throws OXException, IOException, JSONException {
         System.out.println("Testing invalid");
         JSONObject createEMail = createEMail(getSendAddress(getClient()), "MSISDNSubject", MailContentType.PLAIN.name(), "Testing MSISDN as sender address");
         createEMail.put(MailJSONField.FROM.getKey(), invalidTestCellPhoneNumber);

@@ -1788,7 +1788,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return count;
     }
 
-    private void setSeenFlag(final String fullName, final MailMessage mail, final IMAPMessage msg) {
+    private void setSeenFlag(@SuppressWarnings("unused") final String fullName, final MailMessage mail, final IMAPMessage msg) {
         try {
             // Set \Seen fag explicitly although actually fetching content applies \Seen flag automatically,
             // but we cannot know for sure that content will really be fetched. Therefore accept a possibly
@@ -1848,20 +1848,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
             MailFields effectiveFields = prepareMailFieldsForSearch(mailFields, effectiveSortField);
             prepareMailFieldsForVirtualFolder(effectiveFields, fullName, session);
-            searchTerm = prepareSearchTerm(searchTerm);
+            SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
             MailMessage[] mailMessages;
-            if (searchViaIMAP(searchTerm == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)))) {
+            if (searchViaIMAP(searchTermToUse == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTermToUse)))) {
                 try {
-                    mailMessages = performIMAPSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
+                    mailMessages = performIMAPSearch(effectiveSortField, order, searchTermToUse, effectiveFields, indexRange, headerNames, messageCount);
                 } catch (OXException e) {
                     if (false == IMAPException.Code.UNSUPPORTED_SORT_FIELD.equals(e)) {
                         throw e;
                     }
                     // Fall back to in-app search&sort
-                    mailMessages = performInAppSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
+                    mailMessages = performInAppSearch(effectiveSortField, order, searchTermToUse, effectiveFields, indexRange, headerNames, messageCount);
                 }
             } else {
-                mailMessages = performInAppSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
+                mailMessages = performInAppSearch(effectiveSortField, order, searchTermToUse, effectiveFields, indexRange, headerNames, messageCount);
             }
 
             if (mailMessages.length == 0) {
@@ -2577,7 +2577,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 LOG.debug("Generic messaging error occurred for mail \"{}\" in folder \"{}\" with login \"{}\" on server \"{}\" (user={}, context={})", Long.valueOf(msgUID), fullName, imapConfig.getLogin(), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
             }
             throw e;
-        } catch (final java.lang.IndexOutOfBoundsException e) {
+        } catch (@SuppressWarnings("unused") java.lang.IndexOutOfBoundsException e) {
             /*
              * Obviously message was removed in the meantime
              */
@@ -2588,22 +2588,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, SearchTerm<?> searchTerm) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        searchTerm = prepareSearchTerm(searchTerm);
-        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, null, searchTerm);
+        SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
+        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, null, searchTermToUse);
     }
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        searchTerm = prepareSearchTerm(searchTerm);
-        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
+        SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
+        return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, headerNames, searchTermToUse);
     }
 
     @Override
     public MailMessage[] getThreadSortedMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        searchTerm = prepareSearchTerm(searchTerm);
-        return conversationWorker.getThreadSortedMessages(fullName, indexRange, sortField, order, searchTerm, mailFields);
+        SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
+        return conversationWorker.getThreadSortedMessages(fullName, indexRange, sortField, order, searchTermToUse, mailFields);
     }
 
     @Override
@@ -2614,8 +2614,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public List<MailThread> getThreadReferences(String fullName, int size, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
-        searchTerm = prepareSearchTerm(searchTerm);
-        return conversationWorker.getThreadReferences(fullName, size, sortField, order, searchTerm, mailFields, headerNames);
+        SearchTerm<?> searchTermToUse = prepareSearchTerm(searchTerm);
+        return conversationWorker.getThreadReferences(fullName, size, sortField, order, searchTermToUse, mailFields, headerNames);
     }
 
     @Override
@@ -2793,7 +2793,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private MailPath[] blockwiseDeletion(final long[] msgUIDs, final boolean backup, final String trashFullname, boolean returnTargetPaths) throws OXException, MessagingException {
+    private MailPath[] blockwiseDeletion(long[] msgUIDs, boolean backup, String trashFullname, boolean returnTargetPaths) throws OXException, MessagingException {
         if (0 == msgUIDs.length) {
             // Nothing to do on empty ID array
             return returnTargetPaths ? new MailPath[0] : null;
@@ -2806,12 +2806,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Block-wise deletion
              */
             int offset = 0;
-            final long[] tmp = new long[blockSize];
+            long[] tmp = new long[blockSize];
             for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
                 System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
                 offset += blockSize;
                 MailPath[] chunk = deleteByUIDs(trashFullname, backup, tmp, returnTargetPaths);
-                if (returnTargetPaths && null != chunk) {
+                if (targetPaths != null && chunk != null) {
                     for (MailPath mailPath : chunk) {
                         targetPaths.add(mailPath); // Supports null elements
                     }
@@ -2823,7 +2823,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             remain = msgUIDs;
         }
         MailPath[] chunk = deleteByUIDs(trashFullname, backup, remain, returnTargetPaths);
-        if (returnTargetPaths && null != chunk) {
+        if (targetPaths != null && chunk != null) {
             for (MailPath mailPath : chunk) {
                 targetPaths.add(mailPath); // Supports null elements
             }
@@ -2833,7 +2833,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
          */
         imapFolder.close(false);
         resetIMAPFolder();
-        return returnTargetPaths ? targetPaths.toArray(new MailPath[targetPaths.size()]) : null;
+        return returnTargetPaths && targetPaths != null ? targetPaths.toArray(new MailPath[targetPaths.size()]) : null;
     }
 
     private MailPath[] deleteByUIDs(String trashFullname, boolean backup, long[] uids, boolean returnTargetPaths) throws OXException, MessagingException {
@@ -4231,7 +4231,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         filler.setCommonHeaders(mimeMessage);
                         mimeMessage.setFlag(DRAFT, true);
                     }
-                } catch (final Exception e) {
+                } catch (@SuppressWarnings("unused") Exception e) {
                     mimeMessage = null;
                 }
             }
@@ -4628,9 +4628,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      *
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
-     * @throws OXException If mail account cannot be obtained
      */
-    protected static <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col, MailAccount account) throws OXException {
+    protected static <C extends Collection<MailMessage>, W extends Collection<C>> W setAccountInfo2(final W col, MailAccount account) {
         final String name = account.getName();
         final int id = account.getId();
         for (final C mailMessages : col) {

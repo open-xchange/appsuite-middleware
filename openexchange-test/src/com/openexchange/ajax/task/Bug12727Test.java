@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
@@ -80,7 +79,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name test name.
      */
     public Bug12727Test() {
@@ -90,6 +89,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,6 +101,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
     /**
      * {@inheritDoc}
      */
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -111,7 +112,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
     }
 
     @Test
-    public void testOccurrences() throws OXException, IOException, SAXException, JSONException {
+    public void testOccurrences() throws OXException, IOException, JSONException {
         final ListRequest request = new ListRequest(ListIDs.l(new int[] { task.getParentFolderID(), task.getObjectID()
         }), new int[]
         { Task.FOLDER_ID, Task.OBJECT_ID, Task.RECURRENCE_COUNT }, false);
@@ -126,7 +127,7 @@ public final class Bug12727Test extends AbstractTaskTestForAJAXClient {
         }
     }
 
-    private void createTask() throws OXException, IOException, SAXException, JSONException {
+    private void createTask() throws OXException, IOException, JSONException {
         task = getNewTask("Test for bug 12727");
         task.startsToday();
         task.endsTheFollowingDay();

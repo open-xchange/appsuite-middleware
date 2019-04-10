@@ -81,6 +81,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
 
     private FolderObject folder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

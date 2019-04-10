@@ -55,6 +55,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
+import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
@@ -71,7 +72,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
 
     /**
      * Initializes a new {@link FileParser}.
-     * 
+     *
      * @param failOnError
      */
     public FileParser(boolean failOnError) {
@@ -85,7 +86,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
     public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
-        assertEquals("Response contained wrong mime type.", "application/octet-stream", EntityUtils.getContentMimeType(entity));
+        assertEquals("Response contained wrong mime type.", "application/octet-stream", ContentType.getOrDefault(entity));
         fileBytes = EntityUtils.toByteArray(entity);
 
         return null;

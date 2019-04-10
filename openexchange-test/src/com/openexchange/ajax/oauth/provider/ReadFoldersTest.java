@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.oauth.provider;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -129,9 +130,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private Set<Integer> groups;
 
-    private EnumAPI api;
+    private final EnumAPI api;
 
-    private boolean altNames;
+    private final boolean altNames;
 
     private static final Map<Scope, ContentType> S2CT = new HashMap<>();
     static {
@@ -151,7 +152,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         List<Object[]> params = new ArrayList<>(S2CT.size());
         for (Scope scope : S2CT.keySet()) {
             for (EnumAPI api : APIS) {
-                for (boolean altNames : new boolean[] { true, false }) {
+                for (Boolean altNames : new Boolean[] { Boolean.TRUE, Boolean.FALSE }) {
                     params.add(new Object[] { scope, S2CT.get(scope), api, altNames });
                 }
             }
@@ -159,7 +160,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         return params;
     }
 
-    public ReadFoldersTest(Scope scope, ContentType contentType, EnumAPI api, boolean altNames) throws OXException {
+    public ReadFoldersTest(Scope scope, ContentType contentType, EnumAPI api, boolean altNames) {
         super(scope);
         this.contentType = contentType;
         this.api = api;
@@ -193,6 +194,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         return -1;
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -201,10 +203,10 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         GetResponse getResponse = getClient().execute(new GetRequest(userId, TimeZones.UTC));
         int[] userGroups = getResponse.getUser().getGroups();
         groups = new HashSet<>();
-        groups.add(GroupStorage.GROUP_ZERO_IDENTIFIER);
+        groups.add(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
         if (userGroups != null) {
             for (int g : userGroups) {
-                groups.add(g);
+                groups.add(I(g));
             }
         }
 
@@ -236,32 +238,32 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         // expect root folders
         Set<Integer> expectedFolderIds = new HashSet<>();
         if (api == EnumAPI.OUTLOOK) {
-            expectedFolderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+            expectedFolderIds.add(I(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         } else {
-            expectedFolderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-            expectedFolderIds.add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-            expectedFolderIds.add(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+            expectedFolderIds.add(I(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+            expectedFolderIds.add(I(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+            expectedFolderIds.add(I(FolderObject.SYSTEM_SHARED_FOLDER_ID));
         }
 
         RootRequest rootRequest = new RootRequest(api);
         rootRequest.setAltNames(altNames);
         Set<Integer> rootFolderIds = collectFolderIds(rootRequest);
         Assert.assertTrue("Missing expected root folder(s). Expected " + expectedFolderIds + " but got " + rootFolderIds, rootFolderIds.containsAll(expectedFolderIds));
-        Assert.assertFalse("Infostore root folder was contained in response but must not", rootFolderIds.contains(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        Assert.assertFalse("Infostore root folder was contained in response but must not", rootFolderIds.contains(I(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID)));
 
         ListRequest listPrivateRequest = new ListRequest(api, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
         listPrivateRequest.setAltNames(altNames);
         List<FolderObject> privateFolders = listFolders(listPrivateRequest);
         assertContentTypeAndPermissions(privateFolders);
         Set<Integer> privateFolderIds = collectFolderIds(privateFolders);
-        Assert.assertTrue("Missing expected private folder " + privateFolderId() + " in " + privateFolderIds, privateFolderIds.contains(privateFolderId()));
+        Assert.assertTrue("Missing expected private folder " + privateFolderId() + " in " + privateFolderIds, privateFolderIds.contains(I(privateFolderId())));
 
         ListRequest listPrivateSubfoldersRequest = new ListRequest(api, privateFolderId());
         listPrivateSubfoldersRequest.setAltNames(altNames);
         List<FolderObject> privateSubFolders = listFolders(listPrivateSubfoldersRequest);
         assertContentTypeAndPermissions(privateSubFolders);
         Set<Integer> privateSubFolderIds = collectFolderIds(privateSubFolders);
-        Assert.assertTrue("Missing expected private subfolder " + privateSubfolder.getObjectID() + " in " + privateSubFolderIds, privateSubFolderIds.contains(privateSubfolder.getObjectID()));
+        Assert.assertTrue("Missing expected private subfolder " + privateSubfolder.getObjectID() + " in " + privateSubFolderIds, privateSubFolderIds.contains(I(privateSubfolder.getObjectID())));
 
         // expect public folders
         ListRequest listPublicRequest = new ListRequest(api, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
@@ -269,7 +271,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         List<FolderObject> publicSubFolders = listFolders(listPublicRequest);
         assertContentTypeAndPermissions(publicSubFolders);
         Set<Integer> publicSubFolderIds = collectFolderIds(publicSubFolders);
-        Assert.assertTrue("Missing expected public subfolder " + publicSubfolder.getObjectID() + " in " + publicSubFolderIds, publicSubFolderIds.contains(publicSubfolder.getObjectID()));
+        Assert.assertTrue("Missing expected public subfolder " + publicSubfolder.getObjectID() + " in " + publicSubFolderIds, publicSubFolderIds.contains(I(publicSubfolder.getObjectID())));
 
         // expect shared folders
         ListRequest listSharedFolders = new ListRequest(api, FolderObject.SYSTEM_SHARED_FOLDER_ID);
@@ -288,7 +290,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         ListRequest listSharedSubFolders = new ListRequest(api, sharedFolderId);
         listSharedSubFolders.setAltNames(altNames);
         Set<Integer> sharedSubFolderIds = collectFolderIds(listSharedSubFolders);
-        Assert.assertTrue("Missing expected shared subfolder " + sharedSubfolder.getObjectID() + " in " + sharedSubFolderIds, sharedSubFolderIds.contains(sharedSubfolder.getObjectID()));
+        Assert.assertTrue("Missing expected shared subfolder " + sharedSubfolder.getObjectID() + " in " + sharedSubFolderIds, sharedSubFolderIds.contains(I(sharedSubfolder.getObjectID())));
     }
 
     @Test
@@ -302,22 +304,22 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         // private
         List<FolderObject> privateFolders = toList(response.getPrivateFolders());
         assertContentTypeAndPermissions(privateFolders);
-        expectedFolderIds.add(privateFolderId());
-        expectedFolderIds.add(privateSubfolder.getObjectID());
+        expectedFolderIds.add(I(privateFolderId()));
+        expectedFolderIds.add(I(privateSubfolder.getObjectID()));
         Assert.assertTrue(collectFolderIds(privateFolders).containsAll(expectedFolderIds));
 
         // public
         List<FolderObject> publicFolders = toList(response.getPublicFolders());
         assertContentTypeAndPermissions(publicFolders);
         expectedFolderIds.clear();
-        expectedFolderIds.add(publicSubfolder.getObjectID());
+        expectedFolderIds.add(I(publicSubfolder.getObjectID()));
         Assert.assertTrue(collectFolderIds(publicFolders).containsAll(expectedFolderIds));
 
         // shared
         List<FolderObject> sharedFolders = toList(response.getSharedFolders());
         assertContentTypeAndPermissions(sharedFolders);
         expectedFolderIds.clear();
-        expectedFolderIds.add(sharedSubfolder.getObjectID());
+        expectedFolderIds.add(I(sharedSubfolder.getObjectID()));
         Assert.assertTrue(collectFolderIds(sharedFolders).containsAll(expectedFolderIds));
     }
 
@@ -330,9 +332,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         List<FolderObject> folders = updatesResponse.getFolders();
         assertContentTypeAndPermissions(folders);
         Set<Integer> expectedFolderIds = new HashSet<>();
-        expectedFolderIds.add(privateSubfolder.getObjectID());
-        expectedFolderIds.add(publicSubfolder.getObjectID());
-        expectedFolderIds.add(sharedSubfolder.getObjectID());
+        expectedFolderIds.add(I(privateSubfolder.getObjectID()));
+        expectedFolderIds.add(I(publicSubfolder.getObjectID()));
+        expectedFolderIds.add(I(sharedSubfolder.getObjectID()));
         Assert.assertTrue(collectFolderIds(folders).containsAll(expectedFolderIds));
     }
 
@@ -345,9 +347,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         List<FolderObject> folders = toList(pathResponse.getFolder());
         assertContentTypeAndPermissions(folders);
         Set<Integer> expectedFolderIds = new HashSet<>();
-        expectedFolderIds.add(privateSubfolder.getObjectID());
-        expectedFolderIds.add(privateFolderId());
-        expectedFolderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        expectedFolderIds.add(I(privateSubfolder.getObjectID()));
+        expectedFolderIds.add(I(privateFolderId()));
+        expectedFolderIds.add(I(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         Set<Integer> collectFolderIds = collectFolderIds(folders);
         Assert.assertTrue(collectFolderIds.containsAll(expectedFolderIds));
         collectFolderIds.removeAll(expectedFolderIds);
@@ -357,13 +359,13 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     @Test
     public void testGet() throws Exception {
         Set<Integer> folderIds = new HashSet<>();
-        folderIds.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-        folderIds.add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        folderIds.add(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-        folderIds.add(privateFolderId());
-        folderIds.add(privateSubfolder.getObjectID());
-        folderIds.add(publicSubfolder.getObjectID());
-        folderIds.add(sharedSubfolder.getObjectID());
+        folderIds.add(I(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        folderIds.add(I(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        folderIds.add(I(FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        folderIds.add(I(privateFolderId()));
+        folderIds.add(I(privateSubfolder.getObjectID()));
+        folderIds.add(I(publicSubfolder.getObjectID()));
+        folderIds.add(I(sharedSubfolder.getObjectID()));
 
         for (int folderId : folderIds) {
             com.openexchange.ajax.folder.actions.GetRequest request = new com.openexchange.ajax.folder.actions.GetRequest(api, folderId);
@@ -440,7 +442,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         Assert.assertTrue("Unexpected module " + folder.getModule() + " for folder " + folder.getFolderName(), moduleId() == folder.getModule() || FolderObject.SYSTEM_MODULE == folder.getModule());
         boolean canRead = false;
         for (OCLPermission p : folder.getPermissions()) {
-            if (p.getEntity() == userId || (p.isGroupPermission() && groups.contains(p.getEntity()))) {
+            if (p.getEntity() == userId || (p.isGroupPermission() && groups.contains(I(p.getEntity())))) {
                 canRead = p.isFolderVisible();
                 break;
             }
@@ -482,7 +484,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
     private static Set<Integer> collectFolderIds(Iterator<FolderObject> it) {
         Set<Integer> folderIds = new HashSet<>();
         while (it.hasNext()) {
-            folderIds.add(it.next().getObjectID());
+            folderIds.add(I(it.next().getObjectID()));
         }
         return folderIds;
     }
@@ -492,6 +494,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         return collectFolderIds(folders);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

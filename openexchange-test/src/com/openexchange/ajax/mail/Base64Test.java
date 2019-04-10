@@ -51,9 +51,6 @@ package com.openexchange.ajax.mail;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,7 +61,6 @@ import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
 import com.openexchange.ajax.mail.actions.NewMailResponse;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 
 /**
@@ -74,21 +70,18 @@ import com.openexchange.exception.OXException;
  */
 public class Base64Test extends AbstractMailTest {
 
-    private static String attachment = readFile("attachment.base64");
-
-    private static String eml = readFile("bug29865.eml");
-
     private UserValues values;
 
     /**
      * Initializes a new {@link Base64Test}.
-     * 
+     *
      * @param name
      */
     public Base64Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -114,25 +107,5 @@ public class Base64Test extends AbstractMailTest {
         JSONObject attachment = data.getJSONArray("attachments").getJSONObject(0);
 
         assertTrue("Unexpected content in JSON mail representation:\n" + data.toString(2), attachment.getString("content").startsWith("Hallo Herr Gabler"));
-    }
-
-    private static String readFile(String fileName) {
-        try {
-            @SuppressWarnings("resource") BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + fileName));
-            StringBuilder sb = new StringBuilder();
-            String line = br.readLine();
-
-            while (line != null) {
-                sb.append(line);
-                sb.append("\n");
-                line = br.readLine();
-            }
-            return sb.toString();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 }

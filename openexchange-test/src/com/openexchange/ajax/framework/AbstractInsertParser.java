@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
  *
@@ -75,7 +76,7 @@ public abstract class AbstractInsertParser<T extends CommonInsertResponse> exten
             }
             retval.setId(objectId);
         } else if (isFailOnError()) {
-            fail("Missing created object identifier: " + response.getJSON());
+            fail("Missing created object identifier: " + ResponseWriter.getJSON(response));
         }
         return retval;
     }

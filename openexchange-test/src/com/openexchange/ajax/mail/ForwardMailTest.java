@@ -57,7 +57,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.exception.OXException;
 
@@ -70,12 +69,14 @@ public class ForwardMailTest extends AbstractReplyTest {
 
     MailTestManager manager;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -86,7 +87,7 @@ public class ForwardMailTest extends AbstractReplyTest {
     }
 
     @Test
-    public void testShouldForwardWithoutNotifyingFormerRecipients() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testShouldForwardWithoutNotifyingFormerRecipients() throws OXException, IOException, JSONException, OXException {
         String mail1 = getClient().getValues().getSendAddress();
 
         JSONObject mySentMail = createEMail(mail1, "Forward test", MailContentType.ALTERNATIVE.toString(), MAIL_TEXT_BODY);
@@ -107,7 +108,7 @@ public class ForwardMailTest extends AbstractReplyTest {
     }
 
     @Test
-    public void testShouldForwardUsingTestMailManager() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testShouldForwardUsingTestMailManager() throws OXException, IOException, JSONException, OXException {
 
         String mail1 = getClient().getValues().getSendAddress();
 
@@ -127,7 +128,7 @@ public class ForwardMailTest extends AbstractReplyTest {
     }
 
     @Test
-    public void testShouldForwardUsingTestMailManager2() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testShouldForwardUsingTestMailManager2() throws OXException, IOException, JSONException, OXException {
 
         String mail1 = getClient().getValues().getSendAddress();
 

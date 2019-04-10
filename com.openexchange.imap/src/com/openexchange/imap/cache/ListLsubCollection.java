@@ -50,6 +50,7 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -603,7 +604,7 @@ final class ListLsubCollection implements Serializable {
 
         if (debug) {
             long dur = System.currentTimeMillis() - st;
-            LOG.debug("LIST/LSUB cache built in {}msec", dur);
+            LOG.debug("LIST/LSUB cache built in {}msec", L(dur));
         }
         /*
          * Set time stamp
@@ -2481,20 +2482,6 @@ final class ListLsubCollection implements Serializable {
             return null == subscribed ? (null == lsubMap ? true : lsubMap.containsKey(fullName)) : subscribed.booleanValue();
         }
 
-        /**
-         * Sets the status.
-         *
-         * @param status The status
-         */
-        protected void setStatus(final int[] status) {
-            if (null == status) {
-                this.status = null;
-                return;
-            }
-            this.status = new int[status.length];
-            System.arraycopy(status, 0, this.status, 0, status.length);
-        }
-
         @Override
         public int getMessageCount() {
             return null == status ? -1 : status[0];
@@ -2510,10 +2497,6 @@ final class ListLsubCollection implements Serializable {
             return null == status ? -1 : status[2];
         }
 
-        protected void setMyRights(final Rights myRights) {
-            this.myRights = myRights;
-        }
-
         /**
          * Gets MYRIGHTS.
          *
@@ -2522,15 +2505,6 @@ final class ListLsubCollection implements Serializable {
         @Override
         public Rights getMyRights() {
             return myRights;
-        }
-
-        /**
-         * Sets the ACLs.
-         *
-         * @param acls The ACL list
-         */
-        protected void setAcls(final List<ACL> acls) {
-            this.acls = acls;
         }
 
         @Override
@@ -2638,35 +2612,6 @@ final class ListLsubCollection implements Serializable {
 
     } // End of class ListLsubEntryImpl
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
-        if (null == trace) {
-            sb.append("<missing stack trace>\n");
-            return;
-        }
-        for (final StackTraceElement ste : trace) {
-            final String className = ste.getClassName();
-            if (null != className) {
-                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(lineSeparator);
-            }
-        }
-    }
-
     /** Checks the full name */
     protected static String checkFullName(final String fullName, final char separator) {
         if (null == fullName) {
@@ -2684,4 +2629,5 @@ final class ListLsubCollection implements Serializable {
         }
         return fullName;
     }
+
 }

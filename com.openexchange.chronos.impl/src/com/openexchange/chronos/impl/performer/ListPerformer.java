@@ -50,7 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
@@ -70,6 +70,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -128,23 +129,31 @@ public class ListPerformer extends AbstractQueryPerformer {
                 objectIDs.add(eventID.getObjectID());
             }
         }
-        EventField[] fields = getFields(session, EventField.ATTENDEES, EventField.ORGANIZER);
+        /*
+         * get events with reduced fields & load additional event data for post processor dynamically
+         */
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField[] fields = getFieldsForStorage(requestedFields);
         List<Event> events = loadEventsInFolder(folder, objectIDs.toArray(new String[objectIDs.size()]), fields);
+        EventPostProcessor postProcessor = postProcessor(getObjectIDs(events), folder.getCalendarUserId(), requestedFields, fields);
+        /*
+         * generate resulting events
+         */
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
             /*
-             * lookup loaded event data, check permissions & userize event
+             * lookup loaded event data, post-process event & check permissions
              */
             Event event = find(events, eventID.getObjectID());
+            if (null != event) {
+                event = postProcessor.process(event, folder).getFirstEvent();
+                postProcessor.clear();
+            }
             if (null == event) {
                 continue; // skip
             }
             Check.eventIsVisible(folder, event);
             Check.eventIsInFolder(event, folder);
-            event = postProcessor().process(event, folder).getFirstEvent();
-            if (null == event) {
-                continue; // skip
-            }
             /*
              * retrieve targeted event occurrence if specified
              */

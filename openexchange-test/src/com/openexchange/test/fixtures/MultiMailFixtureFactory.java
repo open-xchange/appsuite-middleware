@@ -68,8 +68,8 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
     }
 
     @Override
-    public Fixtures<CustomMailAccount> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new MultiMailFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<CustomMailAccount> createFixture(final Map<String, Map<String, String>> entries) {
+        return new MultiMailFixtures(entries, fixtureLoader);
     }
 
     private class MultiMailFixtures extends DefaultFixtures<CustomMailAccount> implements Fixtures<CustomMailAccount> {
@@ -77,7 +77,7 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<CustomMailAccount>> mailaccounts = new HashMap<String, Fixture<CustomMailAccount>>();
 
-        public MultiMailFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
+        public MultiMailFixtures(final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(CustomMailAccount.class, entries, fixtureLoader);
             this.entries = entries;
 
@@ -96,8 +96,6 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
                 throw new FixtureException("Entry with name " + entryName + " not found");
             }
 
-            defaults(values);
-
             final CustomMailAccount customMailAccount = new CustomMailAccount(0);
 
             apply(customMailAccount, values);
@@ -108,8 +106,5 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
             return fixture;
         }
 
-        private void defaults(final Map<String, String> values) {
-
-        }
     }
 }

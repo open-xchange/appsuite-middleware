@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -92,6 +93,7 @@ import com.openexchange.java.util.UUIDs;
  */
 public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
+    @SuppressWarnings("hiding")
     private InfostoreTestManager itm;
     private Map<String, Boolean> shareStates;
     private Map<String, File> allFiles;
@@ -99,13 +101,14 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link InfostoreObjectPermissionTest}.
-     * 
+     *
      * @param name
      */
     public InfostoreObjectPermissionTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -130,10 +133,11 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
             File newDocument = newDocument(testFolder.getObjectID(), objectPermissions);
             itm.newAction(newDocument, upload);
             allFiles.put(newDocument.getId(), newDocument);
-            shareStates.put(newDocument.getId(), shared);
+            shareStates.put(newDocument.getId(), B(shared));
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -204,7 +208,7 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         Set<String> foundIds = new HashSet<String>(sharedFiles);
         for (File file : all) {
             int docId = Integer.parseInt(file.getId());
-            foundIds.remove(docId);
+            foundIds.remove(Integer.toString(docId));
         }
         assertTrue("Not all shared documents have been found", foundIds.isEmpty());
 
@@ -234,14 +238,14 @@ public class InfostoreObjectPermissionTest extends AbstractAJAXSession {
         all = itm.getAll(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY), Metadata.ID, Order.ASCENDING);
         for (File file : all) {
             int docId = Integer.parseInt(file.getId());
-            assertFalse(allFiles.containsKey(docId));
+            assertFalse(allFiles.containsKey(Integer.toString(docId)));
         }
 
         listItems.clear();
         for (String id : allFiles.keySet()) {
             listItems.add(new ListItem(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), id.toString()));
         }
-        List<File> list = itm.list(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY));
+        itm.list(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY));
         assertFalse(itm.getLastResponse().hasError());
     }
 

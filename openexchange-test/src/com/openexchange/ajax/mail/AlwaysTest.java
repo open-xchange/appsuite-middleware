@@ -58,17 +58,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.mail.MailListField;
@@ -86,11 +83,6 @@ public class AlwaysTest extends AbstractAJAXSession {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AlwaysTest.class);
 
     /**
-     * Random number generator.
-     */
-    private static final Random rand = new Random(System.currentTimeMillis());
-
-    /**
      * Number of mails to read in each mail folder.
      * <ul>
      * <li><code>-1</code> list all mails
@@ -98,11 +90,6 @@ public class AlwaysTest extends AbstractAJAXSession {
      * </ul>
      */
     private final static int MAX = -1;
-
-    /**
-     * This attributes of mails are requested when a mail folder is listed.
-     */
-    private static final int[] listAttributes = new int[] { MailListField.ID.getField(), MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(), MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(), MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(), MailListField.PRIORITY.getField(), CommonObject.COLOR_LABEL };
 
     private AJAXClient client;
 
@@ -130,10 +117,10 @@ public class AlwaysTest extends AbstractAJAXSession {
     /**
      * @param folder
      * @param max
-     * @throws Exception 
+     * @throws Exception
      */
     private void listMails(final String folderId, final int max) throws Exception {
-        MailMessage[] mails = mtm.listMails(folderId, MailListField.ID.getAllFields(), MailListField.ID.getField(), Order.DESCENDING, true, Collections.EMPTY_LIST);
+        MailMessage[] mails = mtm.listMails(folderId, MailListField.getAllFields(), MailListField.ID.getField(), Order.DESCENDING, true, Collections.EMPTY_LIST);
         assertFalse(mtm.getLastResponse().hasError());
         for (MailMessage mail : mails) {
             TestMail mailObj = mtm.get(mail.getFolder(), mail.getMailId());
@@ -142,7 +129,7 @@ public class AlwaysTest extends AbstractAJAXSession {
         }
     }
 
-    public static Map<String, String> getIMAPRights(final AJAXClient client, final String parent) throws IOException, SAXException, JSONException, OXException {
+    public static Map<String, String> getIMAPRights(final AJAXClient client, final String parent) throws IOException, JSONException, OXException {
         final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS }, false));
         final Map<String, String> retval = new HashMap<String, String>();
         for (final Object[] row : listR) {
@@ -151,7 +138,7 @@ public class AlwaysTest extends AbstractAJAXSession {
         return retval;
     }
 
-    public FolderObject getIMAPRootFolder() throws OXException, IOException, SAXException, JSONException, OXException {
+    public FolderObject getIMAPRootFolder() throws OXException, IOException, JSONException, OXException {
         final ListResponse listR = getClient().execute(new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
         final Iterator<FolderObject> iter = listR.getFolder();

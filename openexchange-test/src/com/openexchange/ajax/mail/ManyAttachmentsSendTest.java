@@ -78,12 +78,14 @@ public final class ManyAttachmentsSendTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         manager = new MailTestManager(getClient(), false);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

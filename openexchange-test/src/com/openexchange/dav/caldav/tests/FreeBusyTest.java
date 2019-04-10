@@ -69,7 +69,6 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.jdom2.JDOMException;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +95,7 @@ public class FreeBusyTest extends CalDAVTest {
 
     private String scheduleOutboxURL;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -103,7 +103,7 @@ public class FreeBusyTest extends CalDAVTest {
     }
 
     @Test
-    public void testDiscoverScheduleOutbox() throws Exception {
+    public void testDiscoverScheduleOutbox() {
         assertNotNull("got no schedule-outbox URL", this.scheduleOutboxURL);
     }
 
@@ -243,7 +243,7 @@ public class FreeBusyTest extends CalDAVTest {
 
         public String recipient, requestStatus, responseDescription, calendarData;
 
-        public static List<FreeBusyResponse> create(Document document) throws JDOMException {
+        public static List<FreeBusyResponse> create(Document document) {
             List<FreeBusyResponse> fbResponses = new ArrayList<FreeBusyTest.FreeBusyResponse>();
             NodeList nodes = document.getElementsByTagNameNS(PropertyNames.RESPONSE_CALDAV.getNamespace().getURI(), PropertyNames.RESPONSE_CALDAV.getName());
             for (int i = 0; i < nodes.getLength(); i++) {
@@ -253,7 +253,7 @@ public class FreeBusyTest extends CalDAVTest {
             return fbResponses;
         }
 
-        public static FreeBusyResponse create(Element response) throws JDOMException {
+        public static FreeBusyResponse create(Element response) {
             FreeBusyResponse fbResponse = new FreeBusyResponse();
             fbResponse.recipient = extractChildTextContent(PropertyNames.HREF, response);
             fbResponse.requestStatus = extractChildTextContent(PropertyNames.REQUEST_STATUS, response);

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;
@@ -108,8 +109,8 @@ public class GroupUseCountTest extends AbstractChronosTest {
         groupData.setDisplayName("Test2");
         groupData.setName("Test2");
         List<Integer> members = new ArrayList<>(2);
-        members.add(3);
-        members.add(4);
+        members.add(I(3));
+        members.add(I(4));
         groupData.setMembers(members);
         response = groupsApi.createGroup(getSessionId(), groupData);
         Assert.assertNull(response.getError(), response.getErrorDesc());
@@ -158,7 +159,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         }
 
         // use group 2
-        EventData eventData = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testUseCount", folderId);
+        EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testUseCount", folderId);
         Attendee att = new Attendee();
         att.setEntity(groupIds[1]);
         att.setCuType(CuTypeEnum.GROUP);
@@ -199,7 +200,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         task.setFolderId(getTaskFolderId());
         TaskParticipant participant = new TaskParticipant();
         participant.setId(groupIds[1]);
-        participant.setType(2); // 2 == user group
+        participant.setType(I(2)); // 2 == user group
         task.addParticipantsItem(participant);
         TaskUpdateResponse createTask = taskApi.createTask(getSessionId(), task);
         Assert.assertNull(createTask.getError(), createTask.getErrorDesc());
@@ -229,7 +230,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
             return (String) privateList.get(0).get(0);
         }
         for (ArrayList<?> folder : privateList) {
-            if ((Boolean) folder.get(1)) {
+            if (((Boolean) folder.get(1)).booleanValue()) {
                 return (String) folder.get(0);
             }
         }

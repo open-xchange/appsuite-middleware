@@ -197,7 +197,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putVCard(String uid, String vCard) throws Exception {
+    public int putVCard(String uid, String vCard) throws Exception {
         return putVCard(uid, vCard, "Contacts");
     }
 
@@ -567,15 +567,15 @@ public abstract class CardDAVTest extends WebDAVTest {
         return folder;
     }
 
-    protected FolderObject getDefaultFolder() throws OXException, IOException, JSONException {
+    protected FolderObject getDefaultFolder() {
         return getFolder(getDefaultFolderID());
     }
 
-    protected FolderObject getGABFolder() throws OXException, IOException, JSONException {
+    protected FolderObject getGABFolder() {
         return getFolder(getGABFolderID());
     }
 
-    protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
+    protected FolderObject createFolder(String folderName) {
         return super.createFolder(this.getDefaultFolder(), folderName);
     }
 

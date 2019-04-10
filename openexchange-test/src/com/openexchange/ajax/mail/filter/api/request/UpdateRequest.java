@@ -67,8 +67,9 @@ import com.openexchange.java.Strings;
 public class UpdateRequest extends AbstractMailFilterRequest<UpdateResponse> {
 
     private final Rule rule;
-    private String forUser;
-    private boolean failOnError;
+    private final String forUser;
+    @SuppressWarnings("hiding")
+    private final boolean failOnError;
 
     /**
      * Initialises a new {@link UpdateRequest}.

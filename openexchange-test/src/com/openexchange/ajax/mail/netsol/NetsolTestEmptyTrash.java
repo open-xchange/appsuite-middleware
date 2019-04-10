@@ -57,7 +57,7 @@ import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.FolderAndID;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.ajax.mail.netsol.actions.NetsolClearRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolClearRequest.NetsolClearResponse;
+import com.openexchange.ajax.mail.netsol.actions.NetsolClearResponse;
 import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
 import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
 import com.openexchange.mail.MailJSONField;
@@ -129,7 +129,7 @@ public final class NetsolTestEmptyTrash extends AbstractNetsolTest {
             /*
              * ... and empty trash
              */
-            final NetsolClearResponse resp = (NetsolClearResponse) Executor.execute(getSession(), new NetsolClearRequest(getTrashFolder()));
+            final NetsolClearResponse resp = Executor.execute(getSession(), new NetsolClearRequest(getTrashFolder()));
             assertTrue("List failed", resp.getFailed().length() == 0);
             assertTrue("Duration corrupt", resp.getRequestDuration() > 0);
             reqDurationTracker.addDuration(resp.getRequestDuration());

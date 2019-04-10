@@ -55,7 +55,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 
@@ -68,7 +67,7 @@ public class AllResponse extends CommonAllResponse {
         super(response);
     }
 
-    public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException, OXException {
+    public MailMessage[] getMailMessages(int[] columns) throws JSONException, AddressException {
         final JSONArray objectsArray = (JSONArray) getData();
         MailMessage[] messages = new MailMessage[objectsArray.length()];
         for (int i = 0; i < objectsArray.length(); i++) {
@@ -90,7 +89,7 @@ public class AllResponse extends CommonAllResponse {
             } else if (columns[i] == 601) {
                 message.setFolder((String) mailAsArray.get(i));
             } else if (columns[i] == 602) {
-                message.setHasAttachment((Boolean) mailAsArray.get(i));
+                message.setHasAttachment(((Boolean) mailAsArray.get(i)).booleanValue());
             } else if (columns[i] == 603) {
                 handleInnerArrays(mailAsArray, message, i, "from");
             } else if (columns[i] == 604) {
@@ -102,7 +101,7 @@ public class AllResponse extends CommonAllResponse {
             } else if (columns[i] == 607) {
                 message.setSubject((String) mailAsArray.get(i));
             } else if (columns[i] == 608) {
-                message.setSize((Integer) mailAsArray.get(i));
+                message.setSize(((Integer) mailAsArray.get(i)).intValue());
                 // Sent date
                 //else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
                 // Received date

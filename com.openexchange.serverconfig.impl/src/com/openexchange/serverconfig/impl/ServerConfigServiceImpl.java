@@ -148,6 +148,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     List<Map<String, Object>> calculateCustomHostConfigurations(String hostName, int userID, int contextID) throws OXException {
         // Get configured brands/server configurations
         ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
@@ -349,6 +350,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
      * @param serverConfiguration The configuration that might contain the languages entry.
      * @return The configuration with the adjusted languages entry.
      */
+    @SuppressWarnings("unchecked")
     private Map<String, Object> correctLanguageConfiguration(Map<String, Object> serverConfiguration) {
         Object languagesConfig = serverConfiguration.get("languages");
 

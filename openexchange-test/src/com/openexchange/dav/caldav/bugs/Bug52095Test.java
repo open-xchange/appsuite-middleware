@@ -70,7 +70,6 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.jdom2.JDOMException;
 import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
@@ -272,7 +271,7 @@ public class Bug52095Test extends CalDAVTest {
 
         public String recipient, requestStatus, responseDescription, calendarData;
 
-        public static List<FreeBusyResponse> create(Document document) throws JDOMException {
+        public static List<FreeBusyResponse> create(Document document) {
             List<FreeBusyResponse> fbResponses = new ArrayList<Bug52095Test.FreeBusyResponse>();
             NodeList nodes = document.getElementsByTagNameNS(PropertyNames.RESPONSE_CALDAV.getNamespace().getURI(), PropertyNames.RESPONSE_CALDAV.getName());
             for (int i = 0; i < nodes.getLength(); i++) {
@@ -282,7 +281,7 @@ public class Bug52095Test extends CalDAVTest {
             return fbResponses;
         }
 
-        public static FreeBusyResponse create(Element response) throws JDOMException {
+        public static FreeBusyResponse create(Element response) {
             FreeBusyResponse fbResponse = new FreeBusyResponse();
             fbResponse.recipient = extractChildTextContent(PropertyNames.HREF, response);
             fbResponse.requestStatus = extractChildTextContent(PropertyNames.REQUEST_STATUS, response);

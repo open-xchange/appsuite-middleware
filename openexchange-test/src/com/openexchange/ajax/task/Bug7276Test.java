@@ -64,7 +64,6 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXException.Generic;
 import com.openexchange.groupware.tasks.Create;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskExceptionCode;
@@ -77,7 +76,6 @@ import com.openexchange.groupware.tasks.TaskExceptionCode;
 public class Bug7276Test extends AbstractTaskTest {
 
     private AJAXClient client2;
-    private Generic expected;
 
     /**
      * @param name
@@ -127,20 +125,20 @@ public class Bug7276Test extends AbstractTaskTest {
             response.fillTask(task);
         }
         // User 2 checks if he can see it.
-        TaskTools.get(client2, new GetRequest(folder2, task.getObjectID()));
+        client2.execute(new GetRequest(folder2, task.getObjectID()));
         // User 1 modifies the task and removes participant User 2
         {
-            final GetResponse response = TaskTools.get(getClient(), new GetRequest(task.getParentFolderID(), task.getObjectID()));
+            final GetResponse response = getClient().execute(new GetRequest(task.getParentFolderID(), task.getObjectID()));
             task = response.getTask(getClient().getValues().getTimeZone());
         }
         task.setParticipants(ParticipantTools.createParticipants(getClient().getValues().getUserId()));
         {
-            final UpdateResponse response = TaskTools.update(getClient(), new UpdateRequest(task, getClient().getValues().getTimeZone()));
+            final UpdateResponse response = getClient().execute(new UpdateRequest(task, getClient().getValues().getTimeZone()));
             task.setLastModified(response.getTimestamp());
         }
         // Now User 2 tries to load the task again.
         {
-            final GetResponse response = TaskTools.get(client2, new GetRequest(folder2, task.getObjectID(), false));
+            final GetResponse response = client2.execute(new GetRequest(folder2, task.getObjectID(), false));
             assertTrue("Server does not give exception although it has to.", response.hasError());
             OXException expectedErr = TaskExceptionCode.NO_PERMISSION.create(I(0), I(0));
             OXException actual = response.getException();

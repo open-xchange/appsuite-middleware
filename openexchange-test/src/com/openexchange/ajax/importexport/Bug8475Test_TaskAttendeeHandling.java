@@ -132,8 +132,6 @@ public class Bug8475Test_TaskAttendeeHandling extends ManagedTaskTest {
 
         final Participant[] participants = task.getParticipants();
         assertEquals("One participant?", 1, participants.length);
-        final Participant p = participants[0];
-
         assertEquals(1, task.getUsers().length);
         UserParticipant internalParticipant = task.getUsers()[0];
         assertNotNull(internalParticipant);

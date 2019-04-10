@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -488,13 +489,13 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
              * Discard corrupt message
              */
             final OXException imapExc = MimeMailException.handleMessagingException(e);
-            LOG.error("Message #{} discarded", msg.getMessageNumber(), imapExc);
+            LOG.error("Message #{} discarded", I(msg.getMessageNumber()), imapExc);
             error = true;
         } catch (final OXException e) {
             /*
              * Discard corrupt message
              */
-            LOG.error("Message #{} discarded", msg.getMessageNumber(), e);
+            LOG.error("Message #{} discarded", I(msg.getMessageNumber()), e);
             error = true;
         }
         if (!error) {
@@ -637,7 +638,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 }
                 h = new InternetHeaders();
                 if (null == headerStream) {
-                    logger.debug("Cannot retrieve headers from message #{} in folder {}", msg.getMessageNumber(), msg.getFullname());
+                    logger.debug("Cannot retrieve headers from message #{} in folder {}", I(msg.getMessageNumber()), msg.getFullname());
                 } else {
                     h.load(headerStream);
                 }
@@ -663,8 +664,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         }
 
     } // End of HeaderFetchItemHandler
-
-    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
     /*-
      * ++++++++++++++ Item handlers ++++++++++++++
@@ -757,7 +756,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
                 msgStream = ((BODY) item).getByteArrayInputStream();
             }
             if (null == msgStream) {
-                logger.warn("Cannot retrieve body from message #{} in folder {}", msg.getMessageNumber(), msg.getFullname());
+                logger.warn("Cannot retrieve body from message #{} in folder {}", I(msg.getMessageNumber()), msg.getFullname());
             } else {
                 msg.parseStream(msgStream);
             }

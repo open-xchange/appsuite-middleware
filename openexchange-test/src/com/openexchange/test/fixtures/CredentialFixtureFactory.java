@@ -70,18 +70,20 @@ public class CredentialFixtureFactory implements FixtureFactory<SimpleCredential
     }
 
     @Override
-    public Fixtures<SimpleCredentials> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new CredentialFixtures(fixtureName, entries, userConfigFactory, contactFinder, fixtureLoader);
+    public Fixtures<SimpleCredentials> createFixture(final Map<String, Map<String, String>> entries) {
+        return new CredentialFixtures(entries, userConfigFactory, contactFinder, fixtureLoader);
     }
 
     private class CredentialFixtures extends DefaultFixtures<SimpleCredentials> implements Fixtures<SimpleCredentials> {
 
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<SimpleCredentials>> credentialMap = new HashMap<String, Fixture<SimpleCredentials>>();
+        @SuppressWarnings("hiding")
         private final TestUserConfigFactory userConfigFactory;
+        @SuppressWarnings("hiding")
         private final ContactFinder contactFinder;
 
-        public CredentialFixtures(final String fixtureName, final Map<String, Map<String, String>> values, TestUserConfigFactory userConfigFactory, ContactFinder contactFinder, FixtureLoader fixtureLoader) {
+        public CredentialFixtures(final Map<String, Map<String, String>> values, TestUserConfigFactory userConfigFactory, ContactFinder contactFinder, FixtureLoader fixtureLoader) {
             super(SimpleCredentials.class, values, fixtureLoader);
             this.entries = values;
             this.userConfigFactory = userConfigFactory;

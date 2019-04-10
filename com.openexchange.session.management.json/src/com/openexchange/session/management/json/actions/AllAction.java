@@ -152,7 +152,7 @@ public class AllAction implements AJAXActionService {
             for (int i = 0; i < others.length(); i++) {
                 result.add(result.length(), others.get(i));
             }
-        } catch (JSONException e) {
+        } catch (@SuppressWarnings("unused") JSONException e) {
             // should not happen
         }
         return new AJAXRequestResult(result, "json");

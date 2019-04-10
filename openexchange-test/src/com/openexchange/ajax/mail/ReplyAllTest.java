@@ -57,7 +57,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
@@ -91,7 +90,7 @@ public class ReplyAllTest extends AbstractReplyTest {
         assertTrue(mail1.length() > 0);
     }
 
-    public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, SAXException, JSONException {
+    public void no_testShouldReplyToSenderAndAllRecipients() throws OXException, IOException, JSONException {
         final AJAXClient client1 = getClient();
         final AJAXClient client2 = new AJAXClient(testContext.acquireUser());
         {

@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.task;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotEquals;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,7 +72,7 @@ import com.openexchange.test.pool.TestUser;
 
 /**
  * Checks if bug 11650 appears again.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug11650Test extends AbstractTaskTest {
@@ -83,13 +82,14 @@ public class Bug11650Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name Name of the test.
      */
     public Bug11650Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,6 +98,7 @@ public class Bug11650Test extends AbstractTaskTest {
         sharee = testContext.acquireUser();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         // Context cleared, so need to back user
@@ -106,7 +107,7 @@ public class Bug11650Test extends AbstractTaskTest {
 
     /**
      * Checks if the search in shared task folder is broken.
-     * 
+     *
      * @throws Throwable if an exception occurs.
      */
     @Test
@@ -150,7 +151,7 @@ public class Bug11650Test extends AbstractTaskTest {
     }
 
     private static FolderObject createFolder(final int owner, final int sharee) {
-        assertThat("Owner and sharee are the same. Sharing is not possible", owner, is(not(sharee)));
+        assertNotEquals("Owner and sharee are the same. Sharing is not possible", owner, sharee);
         final FolderObject folder = new FolderObject();
         folder.setFolderName("Bug 11650 folder");
         folder.setModule(FolderObject.TASK);

@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.mail.filter.tests;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -216,10 +218,12 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     @After
     public void tearDown() throws Exception {
         try {
-            for(Integer id: rulesToDelete){
+            for (Integer id : rulesToDelete) {
                 try {
-                    mailFilterAPI.deleteRule(id);
-                } catch (Exception e){
+                    if (id != null) {
+                        mailFilterAPI.deleteRule(id.intValue());
+                    }
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -228,8 +232,8 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
         }
     }
 
-    protected void rememberRule(Integer ruleId){
-        rulesToDelete.add(ruleId);
+    protected void rememberRule(int ruleId) {
+        rulesToDelete.add(I(ruleId));
     }
 
     protected void forgetRules() {
@@ -264,7 +268,7 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
     protected void assertRule(Rule expected, Rule actual) {
         assertEquals("The 'id' attribute differs", expected.getId(), actual.getId());
         assertEquals("The 'name' attribute differs", expected.getName(), actual.getName());
-        assertEquals("The 'active' attribute differs", expected.isActive(), actual.isActive());
+        assertTrue("The 'active' attribute differs", expected.isActive() == actual.isActive());
         assertEquals("The 'position' attribute differs", expected.getPosition(), actual.getPosition());
 
         assertArrayEquals("The 'flags' differ", expected.getFlags(), actual.getFlags());

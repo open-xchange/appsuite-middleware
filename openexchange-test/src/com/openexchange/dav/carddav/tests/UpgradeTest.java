@@ -155,10 +155,8 @@ public class UpgradeTest extends CardDAVTest {
          */
         final String contactsGroupUid = "f" + super.getClient().getValues().getContextId() + "_" + super.getDefaultFolderID();
         final String contactsGroupHRef = "http://www.open-xchange.com/carddav/" + contactsGroupUid + ".vcf";
-        final String contactsGroupETag = "http://www.open-xchange.com/carddav/" + contactsGroupUid + "_" + new Date().getTime();
         final String gabGroupUid = "f" + super.getClient().getValues().getContextId() + "_" + super.getGABFolderID();
         final String gabGroupHRef = "http://www.open-xchange.com/carddav/" + gabGroupUid + ".vcf";
-        //    	final String gabGroupETag = "http://www.open-xchange.com/carddav/" + gabGroupUid + "_" + new Date().getTime();
         /*
          * perform a client operation (create contact in default "Contacts" group)
          */

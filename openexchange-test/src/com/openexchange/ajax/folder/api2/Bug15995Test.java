@@ -78,6 +78,7 @@ public class Bug15995Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -86,6 +87,7 @@ public class Bug15995Test extends AbstractAJAXSession {
         client.execute(new SetRequest(Tree.Language, Locale.US));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

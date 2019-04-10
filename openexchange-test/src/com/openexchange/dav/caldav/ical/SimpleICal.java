@@ -86,7 +86,9 @@ public class SimpleICal {
             }
             return new Component(name, reader);
         } finally {
-            reader.close();
+            if (reader != null) {
+                reader.close();
+            }
         }
     }
 
@@ -151,11 +153,11 @@ public class SimpleICal {
             return exDates;
         }
 
-        public void setSummary(String summary) throws ParseException {
+        public void setSummary(String summary) {
             this.setProperty("SUMMARY", summary);
         }
 
-        public void setLocation(String location) throws ParseException {
+        public void setLocation(String location) {
             this.setProperty("LOCATION", location);
         }
 
@@ -167,11 +169,11 @@ public class SimpleICal {
             return ICalUtils.parseDate(this.getProperty("DTSTART"));
         }
 
-        public void setDTStart(Date start) throws ParseException {
+        public void setDTStart(Date start) {
             this.setProperty("DTSTART", ICalUtils.formatAsUTC(start));
         }
 
-        public void setDTStart(Date start, String timeZoneId) throws ParseException {
+        public void setDTStart(Date start, String timeZoneId) {
             this.setProperty("DTSTART", ICalUtils.format(start, timeZoneId), Collections.singletonMap("TZID", timeZoneId));
         }
 
@@ -179,11 +181,11 @@ public class SimpleICal {
             return ICalUtils.parseDate(this.getProperty("DTEND"));
         }
 
-        public void setDTEnd(Date end) throws ParseException {
+        public void setDTEnd(Date end) {
             this.setProperty("DTEND", ICalUtils.formatAsUTC(end));
         }
 
-        public void setDTEnd(Date end, String timeZoneId) throws ParseException {
+        public void setDTEnd(Date end, String timeZoneId) {
             this.setProperty("DTEND", ICalUtils.format(end, timeZoneId), Collections.singletonMap("TZID", timeZoneId));
         }
 
@@ -236,7 +238,7 @@ public class SimpleICal {
 
         public Property getProperty(String name) {
             for (Property property : this.properties) {
-                if (name.equals(property.name)) {
+                if (name.equals(property.getName())) {
                     return property;
                 }
             }
@@ -245,9 +247,9 @@ public class SimpleICal {
 
         public void setProperty(String name, String value, Map<String, String> attributes) {
             for (Property property : this.properties) {
-                if (name.equals(property.name)) {
-                    property.value = value;
-                    property.attributes = attributes;
+                if (name.equals(property.getName())) {
+                    property.setValue(value);
+                    property.setAttributes(attributes);
                     return;
                 }
             }
@@ -267,7 +269,7 @@ public class SimpleICal {
         public List<Property> getProperties(String name) {
             List<Property> properties = new ArrayList<SimpleICal.Property>();
             for (Property property : this.properties) {
-                if (name.equals(property.name)) {
+                if (name.equals(property.getName())) {
                     properties.add(property);
                 }
             }
@@ -280,7 +282,7 @@ public class SimpleICal {
 
         public String getPropertyValue(String propertyName) {
             Property property = getProperty(propertyName);
-            return null != property ? property.value : null;
+            return null != property ? property.getValue() : null;
         }
 
         @Override
@@ -307,15 +309,15 @@ public class SimpleICal {
 
         public Property(String line) throws SimpleICalException {
             super();
-            this.attributes = new HashMap<String, String>();
+            this.setAttributes(new HashMap<String, String>());
             this.parse(line);
         }
 
         public Property(String name, String value, Map<String, String> attributes) {
             super();
             this.name = name;
-            this.value = value;
-            this.attributes = attributes;
+            this.setValue(value);
+            this.setAttributes(attributes);
         }
 
         private void parse(String line) throws SimpleICalException {
@@ -324,7 +326,7 @@ public class SimpleICal {
                 throw new SimpleICalException("No ':' character found in " + line);
             }
             //this.value = line.substring(1 + index).trim();
-            this.value = StringEscapeUtils.unescapeJava(line.substring(1 + index));
+            this.setValue(StringEscapeUtils.unescapeJava(line.substring(1 + index)));
             String nameAndAttributes = line.substring(0, index);
             index = nameAndAttributes.indexOf(';');
             if (0 > index) {
@@ -340,7 +342,7 @@ public class SimpleICal {
                     char c = nameAndAttributes.charAt(i);
                     if (';' == c && false == inQuote) {
                         if (0 < attributeNameBuilder.length()) {
-                            attributes.put(attributeNameBuilder.toString(), attributeValueBuilder.toString());
+                            getAttributes().put(attributeNameBuilder.toString(), attributeValueBuilder.toString());
                             attributeNameBuilder.setLength(0);
                             attributeValueBuilder.setLength(0);
                             inAttributeName = true;
@@ -361,7 +363,7 @@ public class SimpleICal {
                     }
                 }
                 if (0 < attributeNameBuilder.length()) {
-                    attributes.put(attributeNameBuilder.toString(), attributeValueBuilder.toString());
+                    getAttributes().put(attributeNameBuilder.toString(), attributeValueBuilder.toString());
                 }
             }
         }
@@ -388,14 +390,14 @@ public class SimpleICal {
         }
 
         public String getAttribute(String attributeName) {
-            return attributes.get(attributeName);
+            return getAttributes().get(attributeName);
         }
 
         @Override
         public String toString() {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(name);
-            for (Entry<String, String> entry : attributes.entrySet()) {
+            for (Entry<String, String> entry : getAttributes().entrySet()) {
                 stringBuilder.append(";").append(entry.getKey()).append("=");
                 if (0 < entry.getValue().indexOf(',')) {
                     stringBuilder.append('"').append(entry.getValue()).append('"');
@@ -403,8 +405,26 @@ public class SimpleICal {
                     stringBuilder.append(entry.getValue());
                 }
             }
-            stringBuilder.append(":").append(value);
+            stringBuilder.append(":").append(getValue());
             return stringBuilder.toString();
+        }
+
+        /**
+         * Sets the value
+         *
+         * @param value The value to set
+         */
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        /**
+         * Sets the attributes
+         *
+         * @param attributes The attributes to set
+         */
+        public void setAttributes(Map<String, String> attributes) {
+            this.attributes = attributes;
         }
     }
 

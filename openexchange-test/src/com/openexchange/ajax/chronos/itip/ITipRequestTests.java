@@ -95,6 +95,18 @@ public class ITipRequestTests extends AbstractITipTest {
         });
     }
 
+    /**
+     * Initializes a new {@link ITipRequestTests}.
+     * 
+     * @param identifier The test identifier
+     * @param event The event to to actions on
+     * 
+     */
+    public ITipRequestTests(String identifier, EventData event) {
+        super();
+        this.event = event;
+    }
+
     public Map<PartStat, Function<ConversionDataSource, ActionResponse>> map = new HashMap<>(3);
     {
         map.put(PartStat.ACCEPTED, (ConversionDataSource body) -> {

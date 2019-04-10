@@ -85,6 +85,7 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
         super();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -94,6 +95,7 @@ public class ThirdpartyLifecycleTest extends AbstractInfostoreThirdpartyTest {
         }
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

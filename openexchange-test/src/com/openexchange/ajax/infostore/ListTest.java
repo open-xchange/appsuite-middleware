@@ -3,7 +3,7 @@ package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,7 +79,7 @@ public class ListTest extends InfostoreAJAXTest {
         for (int i = 0; i < size; i++) {
             final JSONArray row = arr.optJSONArray(i);
             assertTrue(row.length() == 1);
-            assertNotNull(row.optLong(0));
+            assertNotEquals(0, row.optLong(0));
         }
     }
 
@@ -124,13 +123,13 @@ public class ListTest extends InfostoreAJAXTest {
     // Find a non-existing ID
     public String getFantasyID() throws JSONException, IOException, OXException {
         String id = "20000";
-        com.openexchange.file.storage.File file = itm.getAction(id);
+        itm.getAction(id);
         assertTrue(itm.getLastResponse().hasError());
         return id;
     }
 
     public void checkEntries(final String[][] infostore_ids) throws Exception {
-        List<com.openexchange.file.storage.File> list = itm.list(infostore_ids, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL });
+        itm.list(infostore_ids, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL });
         assertFalse(itm.getLastResponse().hasError());
 
         final Set<String> ids = itm.getCreatedEntitiesIds();

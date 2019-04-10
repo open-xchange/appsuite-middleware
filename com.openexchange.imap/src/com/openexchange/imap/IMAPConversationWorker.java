@@ -249,7 +249,7 @@ public final class IMAPConversationWorker {
      * @return The message conversations
      * @throws OXException If message conversations cannot be returned
      */
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, @SuppressWarnings("unused") final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
         IMAPFolder sentFolder = null;
         try {
             final String sentFullName = imapFolderStorage.getSentFolder();
@@ -636,7 +636,7 @@ public final class IMAPConversationWorker {
         return list;
     }
 
-    static void fillMessagesStatic(List<List<MailMessage>> list, String fullName, String sentFullName, boolean mergeWithSent, MailFields usedFields, String[] headerNames, boolean isRev1, IMAPStore imapStore, IMAPServerInfo imapServerInfo, MailAccount mailAccount, MailConfig mailConfig) throws MessagingException, OXException {
+    static void fillMessagesStatic(List<List<MailMessage>> list, String fullName, String sentFullName, boolean mergeWithSent, MailFields usedFields, String[] headerNames, boolean isRev1, IMAPStore imapStore, IMAPServerInfo imapServerInfo, MailAccount mailAccount, MailConfig mailConfig) throws MessagingException {
         IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
         imapFolder.open(IMAPFolder.READ_ONLY);
         try {
@@ -680,12 +680,13 @@ public final class IMAPConversationWorker {
 
     private void fillMessages(List<List<MailMessage>> list, String fullName, String sentFullName, boolean mergeWithSent, MailFields usedFields, String[] headerNames, boolean body, boolean isRev1) throws MessagingException, OXException {
         // Fill messages
+        List<List<MailMessage>> l1st = list;
         boolean examineHasAttachmentUserFlags = imapMessageStorage.examineHasAttachmentUserFlags;
         if (mergeWithSent) {
             FetchProfile fetchProfile = IMAPMessageStorage.checkFetchProfile(getFetchProfile(usedFields.toArray(), headerNames, null, null, true, examineHasAttachmentUserFlags));
             List<MailMessage> msgs = new LinkedList<>();
             List<MailMessage> sentmsgs = new LinkedList<>();
-            for (List<MailMessage> conversation : list) {
+            for (List<MailMessage> conversation : l1st) {
                 for (MailMessage m : conversation) {
                     if (sentFullName.equals(m.getFolder())) {
                         sentmsgs.add(m);
@@ -705,17 +706,17 @@ public final class IMAPConversationWorker {
         } else {
             if (body) {
                 List<List<MailMessage>> newlist = new LinkedList<>();
-                for (List<MailMessage> conversation : list) {
+                for (List<MailMessage> conversation : l1st) {
                     List<MailMessage> newconversation = new LinkedList<>();
                     for (MailMessage mailMessage : conversation) {
                         newconversation.add(imapMessageStorage.getMessage(mailMessage.getFolder(), mailMessage.getMailId(), false));
                     }
                     newlist.add(newconversation);
                 }
-                list = newlist;
+                l1st = newlist;
             } else {
                 List<MailMessage> msgs = new LinkedList<>();
-                for (List<MailMessage> conversation : list) {
+                for (List<MailMessage> conversation : l1st) {
                     msgs.addAll(conversation);
                 }
                 new MailMessageFillerIMAPCommand(msgs, isRev1, getFetchProfile(usedFields.toArray(), headerNames, null, null, true, examineHasAttachmentUserFlags), imapMessageStorage.getImapServerInfo(), examineHasAttachmentUserFlags, imapMessageStorage.getImapFolder()).doCommand();
@@ -724,7 +725,7 @@ public final class IMAPConversationWorker {
         /*
          * Apply account identifier
          */
-        imapMessageStorage.setAccountInfo2(list);
+        imapMessageStorage.setAccountInfo2(l1st);
     }
 
     private List<List<MailMessage>> doImapThreadSort(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, String sentFullName, int messageCount, int lookAhead, boolean mergeWithSent, MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException, MessagingException {
@@ -998,28 +999,17 @@ public final class IMAPConversationWorker {
     private static final class ThreadReferencesProtocolCommand implements IMAPFolder.ProtocolCommand {
 
         private final String[] searchKeys;
-        private final Argument searchSequence;
         private final boolean uid;
+        private final javax.mail.search.SearchTerm searchTerm;
 
         /**
          * Initializes a new {@link IMAPConversationWorker.ThreadReferencesProtocolCommand}.
-         *
-         * @throws MessagingException If initialization fails
          */
-        ThreadReferencesProtocolCommand(boolean uid, String[] searchKeys, javax.mail.search.SearchTerm searchTerm) throws MessagingException {
+        ThreadReferencesProtocolCommand(boolean uid, String[] searchKeys, javax.mail.search.SearchTerm searchTerm) {
             super();
             this.uid = uid;
+            this.searchTerm = searchTerm;
             this.searchKeys = (searchKeys == null || searchKeys.length == 0) ? new String[] {"ALL"} : searchKeys;
-            if (null == searchTerm) {
-                this.searchSequence = null;
-            } else {
-                try {
-                    searchSequence = new SearchSequence().generateSequence(searchTerm, "UTF-8");
-                } catch (IOException ioex) {
-                    // should never happen
-                    throw new SearchException(ioex.toString(), ioex);
-                }
-            }
         }
 
         @Override
@@ -1055,6 +1045,17 @@ public final class IMAPConversationWorker {
                 args.writeArgument(sargs);  // sort criteria
             }
 
+            Argument searchSequence;
+            if (null == searchTerm) {
+                searchSequence = null;
+            } else {
+                try {
+                    searchSequence = new SearchSequence(protocol).generateSequence(searchTerm, "UTF-8");
+                } catch (IOException | SearchException e) {
+                    // should never happen
+                    throw new ProtocolException(e.toString(), e);
+                }
+            }
             if (searchSequence != null) {
                 args.append(searchSequence);
             }

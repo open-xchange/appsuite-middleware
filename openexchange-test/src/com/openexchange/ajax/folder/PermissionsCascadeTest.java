@@ -285,11 +285,11 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
      */
     private void assertUserInPermissions(int[] userIds, List<OCLPermission> permissions, int folderId, boolean isContained) {
         boolean found = false;
-        for (Integer userId : userIds) {
+        for (int userId : userIds) {
             for (int i = 0; !found && i < permissions.size(); i++) {
                 found = permissions.get(i).getEntity() == userId;
             }
-            assertEquals("User " + ((!isContained) ? "not" : "") + " found in permissions for folder '" + folderId + "'", isContained, found);
+            assertTrue("User " + ((!isContained) ? "not" : "") + " found in permissions for folder '" + folderId + "'", isContained == found);
         }
     }
 

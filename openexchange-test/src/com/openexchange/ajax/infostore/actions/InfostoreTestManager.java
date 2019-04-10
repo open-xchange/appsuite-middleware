@@ -207,17 +207,6 @@ public class InfostoreTestManager implements TestManager {
         }
     }
 
-    public void copyAction(String id, String folderId, File data, java.io.File file) throws OXException, IOException, JSONException {
-        CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
-        copyRequest.setFailOnError(getFailOnError());
-        CopyInfostoreResponse copyResponse = getClient().execute(copyRequest);
-        lastResponse = copyResponse;
-        if (!lastResponse.hasError()) {
-            data.setId(copyResponse.getID());
-            createdEntities.add(data);
-        }
-    }
-
     public Object getConfigAction(String name) throws OXException, IOException, JSONException {
         GetInfostoreConfigRequest req = new GetInfostoreConfigRequest(name);
         req.setFailOnError(getFailOnError());
@@ -439,7 +428,7 @@ public class InfostoreTestManager implements TestManager {
             file.setTitle(jsonFile.get(0).toString());
             file.setId(jsonFile.get(1).toString());
             file.setDescription(jsonFile.get(2).toString());
-            file.setLastModified(new Date((Long) jsonFile.get(3)));
+            file.setLastModified(new Date(((Long) jsonFile.get(3)).longValue()));
 
             found.add(file);
         }
@@ -470,8 +459,7 @@ public class InfostoreTestManager implements TestManager {
         return createFile;
     }
 
-    public static File createFile(int folderId, String fileName, String mimeType) throws Exception {
-        //        long now = System.currentTimeMillis();
+    public static File createFile(int folderId, String fileName, String mimeType) {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(folderId));
         file.setTitle(fileName);

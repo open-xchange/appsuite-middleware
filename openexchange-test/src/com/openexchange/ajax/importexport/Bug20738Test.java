@@ -70,13 +70,14 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 /**
  * No error message but a nullpointer when importing ical a second time
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Bug20738Test extends AbstractAJAXSession {
 
     private final List<DeleteRequest> toDelete = new ArrayList<DeleteRequest>();
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

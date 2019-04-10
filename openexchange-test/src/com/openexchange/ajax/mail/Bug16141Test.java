@@ -63,7 +63,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -78,7 +77,6 @@ import com.openexchange.configuration.AJAXConfig;
  */
 public class Bug16141Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
 
     private String folder;
 
@@ -94,10 +92,10 @@ public class Bug16141Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         values = getClient().getValues();
         folder = values.getInboxFolder();
         address = getClient().getValues().getSendAddress();
@@ -142,16 +140,18 @@ public class Bug16141Test extends AbstractAJAXSession {
     }
 
     private InputStream getMailAndReplaceAddress(String fileName) throws IOException {
-        InputStreamReader isr = new InputStreamReader(new FileInputStream(new File(testMailDir, fileName)), "UTF-8");
-        char[] buf = new char[512];
-        int length;
-        StringBuilder sb = new StringBuilder();
-        while ((length = isr.read(buf)) != -1) {
-            sb.append(buf, 0, length);
+        try (InputStreamReader isr = new InputStreamReader(new FileInputStream(new File(testMailDir, fileName)), "UTF-8")) {
+            char[] buf = new char[512];
+            int length;
+            StringBuilder sb = new StringBuilder();
+            while ((length = isr.read(buf)) != -1) {
+                sb.append(buf, 0, length);
+            }
+            return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes(com.openexchange.java.Charsets.UTF_8));
         }
-        return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -63,7 +63,7 @@ public class FolderFactory {
         NewFolderBodyFolder result = new NewFolderBodyFolder();
         result.setTitle(name);
         result.setModule(module);
-        result.setSubscribed(true);
+        result.setSubscribed(Boolean.TRUE);
         result.setPermissions(null);
         return result;
     }

@@ -148,7 +148,6 @@ public class Bug40142Test extends InfostoreApiClientTest {
 
 
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteFileWithExistingNameInTrash() throws FileNotFoundException, ApiException, IOException {
 
@@ -165,7 +164,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         InfoItemListElement element = new InfoItemListElement();
         element.setFolder(folderId);
         element.setId(actual.getId());
-        deleteInfoItems(Collections.singletonList(element), false);
+        deleteInfoItems(Collections.singletonList(element), Boolean.FALSE);
 
         actual = null;
 
@@ -180,7 +179,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         element = new InfoItemListElement();
         element.setFolder(folderId);
         element.setId(actual.getId());
-        deleteInfoItems(Collections.singletonList(element), false);
+        deleteInfoItems(Collections.singletonList(element), Boolean.FALSE);
 
         ConfigApi configAPI = new ConfigApi(getApiClient());
         ConfigResponse response = configAPI.getConfigNode("/modules/infostore/folder/trash", getApiClient().getSession());
@@ -204,7 +203,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         element2.setId(id2);
         toDelete.add(element2);
 
-        deleteInfoItems(toDelete, true);
+        deleteInfoItems(toDelete, Boolean.TRUE);
     }
 
 }

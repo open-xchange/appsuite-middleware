@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +90,7 @@ public class AdditionalFolderFieldList {
     }
 
     private void warnAboutCollision(final AdditionalFolderField field) {
-        LOG.warn("Collision in folder fields. Field '{}' : {} has already been taken. Ignoring second service.", field.getColumnName(), field.getColumnID());
+        LOG.warn("Collision in folder fields. Field '{}' : {} has already been taken. Ignoring second service.", field.getColumnName(), I(field.getColumnID()));
     }
 
     /**

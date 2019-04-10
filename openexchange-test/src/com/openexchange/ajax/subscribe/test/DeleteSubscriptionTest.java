@@ -55,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.DeleteSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.DeleteSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.GetSubscriptionRequest;
@@ -80,7 +79,7 @@ public class DeleteSubscriptionTest extends AbstractSubscriptionTest {
     }
 
     @Test
-    public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws OXException, IOException, SAXException, JSONException {
+    public void testDeleteOMXFSubscriptionShouldAlwaysWork() throws OXException, IOException, JSONException {
         //setup
         FolderObject folder = ftm.generatePublicFolder("subscriptionTest", FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
         ftm.insertFolderOnServer(folder);

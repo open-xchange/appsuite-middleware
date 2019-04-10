@@ -62,6 +62,7 @@ import com.openexchange.ajax.mail.filter.api.response.ConfigResponse;
  */
 public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
 
+    @SuppressWarnings("hiding")
     private final boolean failOnError;
 
     /**
@@ -73,7 +74,7 @@ public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
 
     /**
      * Initialises a new {@link ConfigRequest}.
-     * 
+     *
      * @param failOnError the fail on error flag
      */
     public ConfigRequest(final boolean failOnError) {

@@ -64,7 +64,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -97,7 +96,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testDeleteFolder() throws OXException, JSONException, IOException, SAXException, OXException, OXException {
+    public void testDeleteFolder() throws OXException, JSONException, IOException, OXException, OXException {
         final int userId = getClient().getValues().getUserId();
 
         FolderObject parentObj = FolderTestManager.createNewFolderObject("DeleteMeImmediately" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
@@ -121,7 +120,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testCheckFolderPermissions() throws OXException, OXException, IOException, SAXException, JSONException, OXException {
+    public void testCheckFolderPermissions() throws OXException, OXException, IOException, JSONException, OXException {
         final int userId = getClient().getValues().getUserId();
         FolderObject newFolder = FolderTestManager.createNewFolderObject("CheckMyPermissions", Module.CALENDAR.getFolderConstant(), FolderObject.PUBLIC, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
 
@@ -132,7 +131,7 @@ public class FolderTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testInsertRenameFolder() throws OXException, OXException, IOException, SAXException, JSONException, OXException, OXException {
+    public void testInsertRenameFolder() throws OXException, OXException, IOException, JSONException, OXException, OXException {
         int fuid = -1;
         try {
             final int userId = getClient().getValues().getUserId();

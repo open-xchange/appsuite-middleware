@@ -115,6 +115,7 @@ import net.fortuna.ical4j.model.component.VAvailability;
 @RunWith(Parameterized.class)
 public abstract class CalDAVTest extends WebDAVTest {
 
+    @SuppressWarnings("hiding")
     protected static final int TIMEOUT = 10000;
 
     private int folderId;
@@ -145,7 +146,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         return BaseEncoding.base64Url().omitPadding().encode(CalendarUtils.prependDefaultAccount(folderID).getBytes(Charsets.US_ASCII));
     }
 
-    protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
+    protected FolderObject createFolder(String folderName) {
         return createFolder(ftm.getFolderFromServer(folderId), folderName);
     }
 
@@ -243,7 +244,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     /**
      * Puts the specified iCal (containing one or multiple VAvailability components) via the
      * PROPATCH method to the server
-     * 
+     *
      * @param iCal The ical as string
      * @return The response code of the operation
      */
@@ -263,7 +264,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     /**
      * Sets and unsets the specified DAV properties from the specified resource using the PROPATCH method
-     * 
+     *
      * @param resource The resource name
      * @param setProps The properties to set
      * @param unsetProps The properties to unset
@@ -285,7 +286,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     /**
-     * 
+     *
      * @param property
      * @return
      * @throws Exception
@@ -300,7 +301,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     /**
-     * 
+     *
      * @return
      * @throws Exception
      */
@@ -415,7 +416,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putICalUpdate(ICalResource iCalResource) throws Exception {
+    public int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;
         try {
             put = new PutMethod(getBaseUri() + iCalResource.getHref());
@@ -451,7 +452,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         return exceptions;
     }
 
-    protected Task getTask(String folderID, String uid) throws OXException {
+    protected Task getTask(String folderID, String uid) {
         Task[] tasks = ttm.getAllTasksOnServer(parse(folderID), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
         for (Task task : tasks) {
             if (uid.equals(task.getUid())) {
@@ -551,7 +552,7 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     /**
      * Generates a {@link VAvailability} with one {@link Available} block
-     * 
+     *
      * @param start The start of the available block
      * @param end The end of the available block
      * @param uid The uid

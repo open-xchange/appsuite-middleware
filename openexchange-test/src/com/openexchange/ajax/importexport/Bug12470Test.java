@@ -59,7 +59,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
@@ -93,6 +92,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -106,6 +106,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
     /**
      * {@inheritDoc}
      */
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -116,7 +117,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testDueDate() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testDueDate() throws OXException, IOException, JSONException, OXException {
         final GetRequest request = new GetRequest(folderId, objectId);
         final GetResponse response = client.execute(request);
         final Task task = response.getTask(tz);
@@ -130,7 +131,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         assertEquals("Task due dates are not correctly imported.", expected, due);
     }
 
-    private void importvTodo() throws OXException, IOException, SAXException, JSONException {
+    private void importvTodo() throws OXException, IOException, JSONException {
         final ICalImportRequest request = new ICalImportRequest(folderId, vTodo);
         final ICalImportResponse response = client.execute(request);
         if (response.hasError()) {
@@ -140,7 +141,7 @@ public final class Bug12470Test extends AbstractAJAXSession {
         objectId = Integer.parseInt(result.getObjectId());
     }
 
-    private void deleteTask() throws OXException, IOException, SAXException, JSONException {
+    private void deleteTask() throws OXException, IOException, JSONException {
         if (null == lastModified) {
             lastModified = new Date(Long.MAX_VALUE);
         }

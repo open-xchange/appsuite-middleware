@@ -49,11 +49,14 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
+import java.io.IOException;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -100,9 +103,9 @@ public class QuotaTest extends ShareTest {
         }
         Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(client2.getValues().getContextId()), user, credentials);
+        iface.change(getContext(client2), user, credentials);
 
-        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(client2.getValues().getContextId()), user, "quota", credentials);
+        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(getContext(client2), user, "quota", credentials);
         System.out.println("User configuration related to 'quota' after changing the following properties:");
         for (String property : props.keySet()) {
             System.out.println(property + "' to " + props.get(property));
@@ -110,6 +113,10 @@ public class QuotaTest extends ShareTest {
         for (UserProperty prop : userConfigurationSource) {
             System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
         }
+    }
+
+    private Context getContext(AJAXClient client) throws OXException, IOException, JSONException {
+        return new Context(I(client.getValues().getContextId()));
     }
 
     @Override

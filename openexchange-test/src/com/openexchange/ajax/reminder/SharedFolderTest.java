@@ -230,7 +230,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         }
     }
 
-    public Appointment createAppointment() throws Exception {
+    public Appointment createAppointment() {
         final Calendar cal;
         final Appointment appointment = new Appointment();
         appointment.setTitle("SharedFolder Testappointment");

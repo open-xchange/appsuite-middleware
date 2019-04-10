@@ -97,7 +97,7 @@ public class CTMUtils {
 
         for (int a = 0; a < appointmentArray.length; a++) {
             appointmentArray[a] = new Appointment();
-            parseCols(cols, jsonArray.getJSONArray(a), appointmentArray[a], userTimeZone);
+            parseCols(cols, jsonArray.getJSONArray(a), appointmentArray[a]);
 
             if (!appointmentArray[a].getFullTime()) {
                 final Date startDate = appointmentArray[a].getStartDate();
@@ -115,15 +115,15 @@ public class CTMUtils {
         return appointmentArray;
     }
 
-    public static void parseCols(final int[] cols, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
+    public static void parseCols(final int[] cols, final JSONArray jsonArray, final Appointment appointmentObj) throws JSONException, OXException {
         assertEquals("compare array size with cols size", cols.length, jsonArray.length());
 
         for (int a = 0; a < cols.length; a++) {
-            parse(a, cols[a], jsonArray, appointmentObj, userTimeZone);
+            parse(a, cols[a], jsonArray, appointmentObj);
         }
     }
 
-    public static void parse(final int pos, final int field, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
+    public static void parse(final int pos, final int field, final JSONArray jsonArray, final Appointment appointmentObj) throws JSONException, OXException {
         switch (field) {
             case Appointment.ALARM:
                 if (!jsonArray.isNull(pos)) {

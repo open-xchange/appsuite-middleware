@@ -76,20 +76,21 @@ public abstract class AbstractFindTasksTest extends FindTasksTestEnvironment {
 
     /**
      * Fetch the results from the QueryResponse
-     * 
+     *
      * @param qr the QueryResponse
      * @return the results as a JSONArray, or null if the respond does not contain a results payload
      */
     protected static final JSONArray getResults(QueryResponse qr) {
         JSONArray ret = null;
-        if (qr.getData() != null && qr.getData() instanceof JSONObject)
+        if (qr.getData() != null && qr.getData() instanceof JSONObject) {
             ret = ((JSONObject) qr.getData()).optJSONArray("results");
+        }
         return ret;
     }
 
     /**
      * Helper method to assert the query response (no paging)
-     * 
+     *
      * @param expectedResultCount
      * @param f
      * @throws OXException
@@ -102,7 +103,7 @@ public abstract class AbstractFindTasksTest extends FindTasksTestEnvironment {
 
     /**
      * Helper method to assert the query response (with paging)
-     * 
+     *
      * @param expectedResultCount
      * @param f
      * @param start
@@ -123,7 +124,9 @@ public abstract class AbstractFindTasksTest extends FindTasksTestEnvironment {
 
         for (Object o : results.asList()) {
             Map<String, Object> m = (Map<String, Object>) o;
-            Task t = getTask((Integer) m.get("id"));
+            Integer taskId = (Integer) m.get("id");
+            assertNotNull("Task id should not be null", taskId);
+            Task t = getTask(taskId.intValue());
             assertNotNull("Expected object not found", t);
             assertEquals("Not the same", t.getTitle(), m.get("title"));
         }

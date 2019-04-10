@@ -73,6 +73,7 @@ public class Bug13173Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -96,6 +97,7 @@ public class Bug13173Test extends AbstractAJAXSession {
 
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -107,7 +109,7 @@ public class Bug13173Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug13173() throws Exception {
+    public void testBug13173() {
         testTask = ttm.insertTaskOnServer(testTask);
         setTaskComplete(testTask);
 
@@ -136,19 +138,6 @@ public class Bug13173Test extends AbstractAJAXSession {
         for (Task t : duplicates) {
             t.setParentFolderID(folderId);
             ttm.deleteTaskOnServer(t);
-        }
-    }
-
-    /**
-     * Only for cleaning up the database, if duplicates will not be deleted. Checks only for Task-Title!
-     */
-    private void deleteAll() {
-        Task[] tasks = ttm.getAllTasksOnServer(folderId);
-        for (Task t : tasks) {
-            if (t.getTitle().equals(testTask.getTitle())) {
-                t.setParentFolderID(folderId);
-                ttm.deleteTaskOnServer(t);
-            }
         }
     }
 
