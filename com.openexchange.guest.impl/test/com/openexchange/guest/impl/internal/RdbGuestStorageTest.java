@@ -314,20 +314,6 @@ public class RdbGuestStorageTest {
         Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
     }
 
-    @Test
-    public void testRemoveGuestAssignment_noChange_logUnexpectedReturnValue() throws OXException, SQLException {
-        Logger log = PowerMockito.mock(org.slf4j.Logger.class);
-        MockUtils.injectValueIntoPrivateField(RdbGuestStorage.class, "LOG", log);
-
-        Mockito.when(preparedStatement.executeUpdate()).thenReturn(0);
-
-        rdbGuestStorage.removeGuestAssignment(GUEST_ID, CONTEXT_ID, USER_ID, connection);
-
-        Mockito.verify(log, Mockito.times(1)).error(ArgumentMatchers.anyString(), ArgumentMatchers.anyLong(), ArgumentMatchers.anyString());
-        Mockito.verify(connection, Mockito.times(1)).prepareStatement(RdbGuestStorage.DELETE_GUEST_ASSIGNMENT);
-        Mockito.verify(preparedStatement, Mockito.times(1)).executeUpdate();
-    }
-
     @Test(expected = OXException.class)
     public void testRemoveGuests_connectionNull_throwException() throws OXException, SQLException {
         rdbGuestStorage.removeGuestAssignments(CONTEXT_ID, null);
