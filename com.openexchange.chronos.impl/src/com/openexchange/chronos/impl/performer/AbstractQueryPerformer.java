@@ -149,7 +149,8 @@ public abstract class AbstractQueryPerformer {
     /**
      * Initializes a new event post processor, implicitly supplying further data for the calendar user attendee and event flags as needed.
      * <p/>
-     * <b>Note:</b> Should only be used if different fields were used before when querying the event storage.   
+     * <b>Note:</b> Should only be used if different fields were used before when querying the event storage. In case all attendee data is
+     * not explicitly requested, the post-processor is enriched with data for the calendar user attendee implicitly.
      * 
      * @param eventIds The identifiers of the events being processed
      * @param calendarUserId The identifier of the underlying calendar user
