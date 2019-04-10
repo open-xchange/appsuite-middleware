@@ -58,6 +58,7 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -90,7 +91,6 @@ public final class Bug12926Test extends AbstractTaskTest {
 
     private Task task;
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -106,7 +106,6 @@ public final class Bug12926Test extends AbstractTaskTest {
         insertR.fillTask(task);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -117,7 +116,7 @@ public final class Bug12926Test extends AbstractTaskTest {
     }
 
     @Test
-    public void testTaskStaysInDelegatorFolder() throws OXException, IOException, JSONException {
+    public void testTaskStaysInDelegatorFolder() throws OXException, IOException, SAXException, JSONException {
         final Task task2 = new Task();
         task2.setObjectID(task.getObjectID());
         task2.setParentFolderID(task.getParentFolderID());

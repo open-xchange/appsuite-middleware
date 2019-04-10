@@ -63,9 +63,12 @@ import com.openexchange.ajax.tools.JSONCoercion;
 public class SimpleResponse {
 
     private Object data;
+    private final JSONObject response;
+
     private String error;
 
     public SimpleResponse(JSONObject response) throws JSONException {
+        this.response = response;
         if (response.has("error")) {
             this.error = response.toString();
         } else if (response.has("data")) {

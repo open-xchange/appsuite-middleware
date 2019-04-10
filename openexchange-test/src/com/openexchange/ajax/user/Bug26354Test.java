@@ -82,7 +82,7 @@ public final class Bug26354Test extends AbstractAJAXSession {
 
     private static final int ITERATIONS = 100;
 
-    static final TimeZone[] TIME_ZONES = new TimeZone[3];
+    private static final TimeZone[] TIME_ZONES = new TimeZone[3];
     static {
         TIME_ZONES[0] = TimeZones.PST;
         TIME_ZONES[1] = TimeZones.UTC;

@@ -49,7 +49,6 @@
 
 package com.openexchange.dav;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
@@ -70,6 +69,7 @@ import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Assert;
 import com.openexchange.ajax.oauth.provider.protocol.Grant;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
 import com.openexchange.dav.reports.SyncCollectionResponse;
@@ -95,7 +95,7 @@ public class WebDAVClient {
 
     public WebDAVClient(TestUser testUser, String userAgent, Grant oAuthGrant) throws OXException {
         super();
-
+        
         this.useOAuth = oAuthGrant != null;
         /*
          * init web client
@@ -115,7 +115,7 @@ public class WebDAVClient {
         HttpClient httpClient = new HttpClient();
         httpClient.getParams().setAuthenticationPreemptive(false);
         httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        httpClient.getParams().setParameter("http.protocol.max-redirects", I(0));
+        httpClient.getParams().setParameter("http.protocol.max-redirects", 0);
         httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
         return httpClient;
     }
@@ -190,7 +190,7 @@ public class WebDAVClient {
         return doGet(get, StatusCodes.SC_OK);
     }
 
-    public MultiStatusResponse[] doReport(final ReportMethod report, final int expectedStatus) throws HttpException, IOException {
+    public MultiStatusResponse[] doReport(final ReportMethod report, final int expectedStatus) throws HttpException, IOException, DavException {
         try {
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
             return report.getResponseBodyAsMultiStatus().getResponses();
@@ -202,7 +202,7 @@ public class WebDAVClient {
         }
     }
 
-    public SyncCollectionResponse doReport(SyncCollectionReportMethod report, int expectedStatus) throws HttpException, IOException {
+    public SyncCollectionResponse doReport(SyncCollectionReportMethod report, int expectedStatus) throws HttpException, IOException, DavException {
         try {
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
             return report.getResponseBodyAsSyncCollection();
@@ -214,11 +214,11 @@ public class WebDAVClient {
         }
     }
 
-    public MultiStatusResponse[] doReport(final ReportMethod report) throws HttpException, IOException {
+    public MultiStatusResponse[] doReport(final ReportMethod report) throws HttpException, IOException, DavException {
         return this.doReport(report, StatusCodes.SC_MULTISTATUS);
     }
 
-    public MultiStatusResponse[] doReport(final ReportInfo reportInfo, final String uri) throws IOException {
+    public MultiStatusResponse[] doReport(final ReportInfo reportInfo, final String uri) throws ConfigurationException, IOException, DavException {
         ReportMethod report = null;
         MultiStatusResponse[] responses = null;
         try {
@@ -231,7 +231,7 @@ public class WebDAVClient {
         return responses;
     }
 
-    public SyncCollectionResponse doReport(SyncCollectionReportInfo reportInfo, String uri) throws IOException {
+    public SyncCollectionResponse doReport(SyncCollectionReportInfo reportInfo, String uri) throws ConfigurationException, IOException, DavException {
         SyncCollectionReportMethod report = null;
         SyncCollectionResponse response = null;
         try {
@@ -244,7 +244,7 @@ public class WebDAVClient {
         return response;
     }
 
-    public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException {
+    public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
         try {
             int executeMethod = executeMethod(propFind);
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod);
@@ -257,7 +257,7 @@ public class WebDAVClient {
         }
     }
 
-    public MultiStatusResponse[] doPropPatch(PropPatchMethod propPatch, int expectedStatus) throws HttpException, IOException {
+    public MultiStatusResponse[] doPropPatch(PropPatchMethod propPatch, int expectedStatus) throws HttpException, IOException, DavException {
         try {
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(propPatch));
             return propPatch.getResponseBodyAsMultiStatus().getResponses();
@@ -269,7 +269,7 @@ public class WebDAVClient {
         }
     }
 
-    public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException {
+    public MultiStatusResponse[] doPropFind(final PropFindMethod propFind) throws HttpException, IOException, DavException {
         return this.doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
     }
 

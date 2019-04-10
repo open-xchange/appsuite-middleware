@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInBodyRequest;
 import com.openexchange.ajax.task.actions.ConfirmWithTaskInParametersRequest;
 import com.openexchange.exception.OXException;
@@ -81,7 +82,6 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -95,7 +95,6 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
 
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -107,7 +106,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
     }
 
     @Test
-    public void testConfirmWithTaskInParameters() throws OXException, IOException, JSONException {
+    public void testConfirmWithTaskInParameters() throws OXException, IOException, SAXException, JSONException {
         ConfirmWithTaskInParametersRequest request = new ConfirmWithTaskInParametersRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
 
@@ -115,7 +114,7 @@ public class ConfirmTest extends AbstractTaskTestForAJAXClient {
     }
 
     @Test
-    public void testConfirmWithTaskInBody() throws OXException, IOException, JSONException {
+    public void testConfirmWithTaskInBody() throws OXException, IOException, SAXException, JSONException {
         ConfirmWithTaskInBodyRequest request = new ConfirmWithTaskInBodyRequest(task, Task.ACCEPT, "Confirmanize!");
         getClient().execute(request);
 

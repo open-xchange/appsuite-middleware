@@ -74,7 +74,6 @@ import com.openexchange.ajax.session.actions.TokenLoginRequest;
 import com.openexchange.ajax.session.actions.TokenLoginResponse;
 import com.openexchange.ajax.session.actions.TokensRequest;
 import com.openexchange.ajax.session.actions.TokensResponse;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.sessiond.SessionExceptionCodes;
@@ -204,7 +203,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
         try {
             TokenLoginJSONResponse response = myClient.execute(new TokenLoginJSONRequest(testUser.getLogin(), testUser.getPassword(), true, true));
 
-            JSONObject json = ResponseWriter.getJSON(response.getResponse());
+            JSONObject json = response.getResponse().getJSON();
             assertNotNull(json);
             assertTrue("Error expected.", response.hasError());
             assertEquals("Wrong error.", AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.getNumber(), response.getException().getCode());

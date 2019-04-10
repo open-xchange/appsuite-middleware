@@ -136,7 +136,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         }
 
         // use resource 2
-        EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testUseCount", folderId);
+        EventData eventData = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testUseCount", folderId);
         Attendee att = new Attendee();
         att.setEntity(resourceIds[1]);
         att.setCuType(CuTypeEnum.RESOURCE);

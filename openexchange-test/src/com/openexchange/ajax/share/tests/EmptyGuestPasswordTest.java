@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.share.tests;
 
-import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -88,7 +87,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
     @After
     public void tearDown() throws Exception {
         try {
-            deleteFoldersSilently(getClient(), Collections.singletonList(I(folder.getObjectID())));
+            deleteFoldersSilently(getClient(), Collections.singletonList(folder.getObjectID()));
         } finally {
             super.tearDown();
         }

@@ -567,15 +567,15 @@ public abstract class CardDAVTest extends WebDAVTest {
         return folder;
     }
 
-    protected FolderObject getDefaultFolder() {
+    protected FolderObject getDefaultFolder() throws OXException, IOException, JSONException {
         return getFolder(getDefaultFolderID());
     }
 
-    protected FolderObject getGABFolder() {
+    protected FolderObject getGABFolder() throws OXException, IOException, JSONException {
         return getFolder(getGABFolderID());
     }
 
-    protected FolderObject createFolder(String folderName) {
+    protected FolderObject createFolder(String folderName) throws OXException, IOException, JSONException {
         return super.createFolder(this.getDefaultFolder(), folderName);
     }
 

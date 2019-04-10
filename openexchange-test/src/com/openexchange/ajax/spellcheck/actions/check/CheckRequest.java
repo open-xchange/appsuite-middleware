@@ -61,7 +61,7 @@ import com.openexchange.ajax.spellcheck.actions.AbstractSpellCheckRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class CheckRequest extends AbstractSpellCheckRequest<CheckResponse> {
+public final class CheckRequest extends AbstractSpellCheckRequest {
 
     private final String htmlContent;
 

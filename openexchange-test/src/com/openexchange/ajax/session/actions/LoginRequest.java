@@ -81,7 +81,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
 
         /**
          * Use the given guest login but omit the password and skip setting one
-         *
+         * 
          * @param login
          */
         public GuestCredentials(String login) {
@@ -92,7 +92,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
 
         /**
          * Use the given guest login and password
-         *
+         * 
          * @param login
          * @param password
          */
@@ -100,24 +100,6 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             super();
             this.login = login;
             this.password = password;
-        }
-
-        /**
-         * Gets the password
-         *
-         * @return The password
-         */
-        public String getPassword() {
-            return password;
-        }
-
-        /**
-         * Gets the login
-         *
-         * @return The login
-         */
-        public String getLogin() {
-            return login;
         }
     }
 
@@ -141,11 +123,11 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
         if (null != client && !client.isEmpty()) {
             parameters.add(new URLParameter(LoginFields.CLIENT_PARAM, client));
         }
-        parameters.add(new FieldParameter(PARAM_NAME, credentials.getLogin()));
-        if (Strings.isEmpty(credentials.getPassword())) {
+        parameters.add(new FieldParameter(PARAM_NAME, credentials.login));
+        if (Strings.isEmpty(credentials.password)) {
             parameters.add(new FieldParameter(PARAM_PASSWORD, ""));
         } else {
-            parameters.add(new FieldParameter(PARAM_PASSWORD, credentials.getPassword()));
+            parameters.add(new FieldParameter(PARAM_PASSWORD, credentials.password));
         }
         return new LoginRequest(parameters.toArray(new Parameter[parameters.size()]), failOnError);
     }
@@ -195,9 +177,9 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
         }, failOnError);
     }
 
-    @SuppressWarnings("unused")
     public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError, boolean passwordInURL) {
-        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN), new URLParameter(LoginFields.AUTHID_PARAM, authId), new URLParameter(LoginFields.CLIENT_PARAM, client), new URLParameter(LoginFields.VERSION_PARAM, version), new URLParameter(LoginFields.PASSWORD_PARAM, password), new FieldParameter(PARAM_NAME, login), new FieldParameter(PARAM_PASSWORD, password) }, failOnError);
+        this(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN), new URLParameter(LoginFields.AUTHID_PARAM, authId), new URLParameter(LoginFields.CLIENT_PARAM, client), new URLParameter(LoginFields.VERSION_PARAM, version), new URLParameter(LoginFields.PASSWORD_PARAM, password), new FieldParameter(PARAM_NAME, login), new FieldParameter(PARAM_PASSWORD, password)
+        }, failOnError);
     }
 
     public LoginRequest(String login, String password, String authId, String client, String version, String language, boolean failOnError) {

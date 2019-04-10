@@ -90,7 +90,6 @@ public final class Bug26217Test extends AbstractTaskTest {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -112,7 +111,6 @@ public final class Bug26217Test extends AbstractTaskTest {
         moveTo.setLastModified(response2.getTimestamp());
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

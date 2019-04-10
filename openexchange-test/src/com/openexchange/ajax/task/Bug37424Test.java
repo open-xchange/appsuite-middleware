@@ -71,7 +71,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link Bug37424Test}
- *
+ * 
  * Unknown task attribute 317
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -91,7 +91,6 @@ public class Bug37424Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -100,7 +99,6 @@ public class Bug37424Test extends AbstractAJAXSession {
         tasksToDelete = new ArrayList<Task>();
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

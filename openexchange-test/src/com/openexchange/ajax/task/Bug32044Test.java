@@ -99,7 +99,6 @@ public final class Bug32044Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -144,7 +143,6 @@ public final class Bug32044Test extends AbstractAJAXSession {
         cal.add(Calendar.HOUR_OF_DAY, 1);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

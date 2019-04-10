@@ -85,9 +85,9 @@ public class HttpAuthTest {
     @Before
     public void setUp() throws Exception {
         ProvisioningSetup.init();
-
+        
         testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-
+        
         protocol = AJAXConfig.getProperty(Property.PROTOCOL);
         hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         TestUser testUser = testContext.acquireUser();
@@ -96,7 +96,7 @@ public class HttpAuthTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         TestContextPool.backContext(testContext);
     }
 

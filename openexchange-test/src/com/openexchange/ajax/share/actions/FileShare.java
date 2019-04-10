@@ -119,7 +119,7 @@ public class FileShare extends DefaultFile {
 
     private List<ExtendedPermissionEntity> extendedFolderPermissions;
 
-    private FileShare() {
+    private FileShare() throws JSONException {
         super();
     }
 

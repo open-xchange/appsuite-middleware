@@ -68,14 +68,14 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * checks if the problem described in bug report #11195 appears again.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug11195Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
-     *
+     * 
      * @param name name of the test.
      */
     public Bug11195Test() {
@@ -84,7 +84,7 @@ public final class Bug11195Test extends AbstractTaskTest {
 
     /**
      * Tries to move a task into some other task folder.
-     *
+     * 
      * @throws Throwable if some exception occurs.
      */
     @Test
@@ -113,12 +113,12 @@ public final class Bug11195Test extends AbstractTaskTest {
                 move.setObjectID(task.getObjectID());
                 move.setParentFolderID(moveTo.getObjectID());
                 move.setLastModified(task.getLastModified());
-                final UpdateResponse response = client.execute(new UpdateRequest(task.getParentFolderID(), move, tz));
+                final UpdateResponse response = TaskTools.update(client, new UpdateRequest(task.getParentFolderID(), move, tz));
                 task.setLastModified(response.getTimestamp());
             }
             // Try to get it from the destination folder
             {
-                final GetResponse response = client.execute(new GetRequest(moveTo.getObjectID(), task.getObjectID(), false));
+                final GetResponse response = TaskTools.get(client, new GetRequest(moveTo.getObjectID(), task.getObjectID(), false));
                 assertFalse("Task was not moved.", response.hasError());
                 task.setParentFolderID(moveTo.getObjectID());
             }

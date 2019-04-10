@@ -80,7 +80,6 @@ public class Bug50739Test extends AbstractAJAXSession {
     FolderObject privateFolder;
     FolderObject sharedFolder;
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -305,7 +305,7 @@ public class AggregateSharesTest extends ShareTest {
         guestClientA.checkModuleAvailable(module2);
         guestClientA.checkFolderAccessible(String.valueOf(folderA.getObjectID()), guestPermission);
         guestClientA.checkFolderAccessible(String.valueOf(folderB.getObjectID()), guestPermission);
-        guestClientA.getShareResolveResponse().getTarget();
+        String folderATarget = guestClientA.getShareResolveResponse().getTarget();
         /*
          * check access to shares via link to folder B
          */

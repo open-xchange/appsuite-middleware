@@ -56,7 +56,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
  * Super class for task ajax tests.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractTaskTest extends AbstractAJAXSession {
@@ -69,7 +69,6 @@ public abstract class AbstractTaskTest extends AbstractAJAXSession {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

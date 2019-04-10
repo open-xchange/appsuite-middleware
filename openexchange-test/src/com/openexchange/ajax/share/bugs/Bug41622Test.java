@@ -95,7 +95,6 @@ public class Bug41622Test extends ShareTest {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -105,7 +104,6 @@ public class Bug41622Test extends ShareTest {
         clientsAndFolders.put(client2, new ArrayList<Integer>());
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

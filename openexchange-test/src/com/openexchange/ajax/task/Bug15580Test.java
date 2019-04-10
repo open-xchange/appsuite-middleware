@@ -57,6 +57,7 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDs;
@@ -74,7 +75,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests actual and target duration and costs set to 0.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug15580Test extends AbstractTaskTest {
@@ -93,7 +94,6 @@ public class Bug15580Test extends AbstractTaskTest {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -108,11 +108,11 @@ public class Bug15580Test extends AbstractTaskTest {
         insertR.fillTask(task);
     }
 
-    private void setToNull(Mapper<?> mapper) {
+    @SuppressWarnings("unchecked")
+    private void setToNull(Mapper mapper) {
         mapper.set(task, null);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -123,7 +123,7 @@ public class Bug15580Test extends AbstractTaskTest {
     }
 
     @Test
-    public void testDurationAndCostsSetToZero() throws OXException, IOException, JSONException, OXException {
+    public void testDurationAndCostsSetToZero() throws OXException, IOException, SAXException, JSONException, OXException {
         GetRequest request = new GetRequest(task);
         GetResponse response = client.execute(request);
         Task toTest = response.getTask(tz);

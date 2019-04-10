@@ -87,7 +87,6 @@ public final class Bug33258Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -99,7 +98,6 @@ public final class Bug33258Test extends AbstractAJAXSession {
         client1.execute(new InsertRequest(task, timeZone)).fillTask(task);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

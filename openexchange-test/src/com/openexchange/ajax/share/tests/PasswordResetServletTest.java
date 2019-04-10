@@ -90,6 +90,7 @@ import com.openexchange.share.recipient.GuestRecipient;
 public final class PasswordResetServletTest extends ShareTest {
 
     private OCLGuestPermission guestPermission;
+    private ExtendedPermissionEntity guest;
     private FolderObject folder;
     private String shareURL;
 
@@ -127,6 +128,7 @@ public final class PasswordResetServletTest extends ShareTest {
         shareURL = discoverShareURL(lGuest);
         GuestClient guestClient = resolveShare(shareURL, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
         guestClient.checkShareModuleAvailable();
+        this.guest = lGuest;
         this.guestPermission = lGuestPermission;
     }
 
@@ -156,8 +158,8 @@ public final class PasswordResetServletTest extends ShareTest {
         HttpPost confirmPWReset = new HttpPost(new URIBuilder().setScheme(getClient().getProtocol()).setHost(getClient().getHostname()).setPath("/ajax/share/reset/password").build());
         String newPW = UUIDs.getUnformattedStringFromRandom();
         List<BasicNameValuePair> params = new ArrayList<>(3);
-        params.add(new BasicNameValuePair("share", resetData.getShareToken()));
-        params.add(new BasicNameValuePair("confirm", resetData.getConfirmationToken()));
+        params.add(new BasicNameValuePair("share", resetData.shareToken));
+        params.add(new BasicNameValuePair("confirm", resetData.confirmationToken));
         params.add(new BasicNameValuePair("password", newPW));
         confirmPWReset.setEntity(new UrlEncodedFormEntity(params));
         HttpResponse confirmResponse = httpClient.execute(confirmPWReset);
@@ -198,72 +200,22 @@ public final class PasswordResetServletTest extends ShareTest {
             String[] kv = kvPair.split("=");
             if (kv.length == 2) {
                 if ("confirm".equals(kv[0])) {
-                    pwResetData.setConfirmationToken(URLDecoder.decode(kv[1], "UTF-8"));
+                    pwResetData.confirmationToken = URLDecoder.decode(kv[1], "UTF-8");
                 } else if ("share".equals(kv[0])) {
-                    pwResetData.setShareToken(URLDecoder.decode(kv[1], "UTF-8"));
+                    pwResetData.shareToken = URLDecoder.decode(kv[1], "UTF-8");
                 }
             }
         }
 
-        assertNotNull("Cannot extract share token from URL: " + url, pwResetData.getShareToken());
-        assertNotNull("Cannot extract confirmation token from URL: " + url, pwResetData.getConfirmationToken());
+        assertNotNull("Cannot extract share token from URL: " + url, pwResetData.shareToken);
+        assertNotNull("Cannot extract confirmation token from URL: " + url, pwResetData.confirmationToken);
         return pwResetData;
     }
 
-    /**
-     *
-     * {@link PWResetData}
-     *
-     * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
-     * @since 7.8.0
-     */
     private static final class PWResetData {
 
         private String shareToken;
         private String confirmationToken;
-
-        /**
-         * Initializes a new {@link PasswordResetServletTest.PWResetData}.
-         */
-        public PWResetData() {
-            super();
-        }
-
-        /**
-         * Gets the shareToken
-         *
-         * @return The shareToken
-         */
-        public String getShareToken() {
-            return shareToken;
-        }
-
-        /**
-         * Gets the confirmationToken
-         *
-         * @return The confirmationToken
-         */
-        public String getConfirmationToken() {
-            return confirmationToken;
-        }
-
-        /**
-         * Sets the shareToken
-         *
-         * @param shareToken The shareToken to set
-         */
-        public void setShareToken(String shareToken) {
-            this.shareToken = shareToken;
-        }
-
-        /**
-         * Sets the confirmationToken
-         *
-         * @param confirmationToken The confirmationToken to set
-         */
-        public void setConfirmationToken(String confirmationToken) {
-            this.confirmationToken = confirmationToken;
-        }
     }
 
 }
