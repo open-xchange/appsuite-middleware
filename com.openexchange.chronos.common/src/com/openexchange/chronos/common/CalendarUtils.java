@@ -1932,7 +1932,7 @@ public class CalendarUtils {
      * @param updatedAttendees The updated attendees
      * @return The collection update
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) {
         return getAttendeeUpdates(originalAttendees, updatedAttendees, true, (AttendeeField[]) null);
     }
 
@@ -1946,7 +1946,7 @@ public class CalendarUtils {
      * @return The collection update
      * @throws OXException In case mapping fails
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) {
         return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
 
             @Override
@@ -1967,7 +1967,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) {
         return getEventUpdates(originalEvents, updatedEvents, true, (EventField[]) null, fieldsToMatch);
     }
 
@@ -1984,7 +1984,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) {
         return new AbstractEventUpdates(originalEvents, updatedEvents, considerUnset, ignoredFields) {
 
             @Override

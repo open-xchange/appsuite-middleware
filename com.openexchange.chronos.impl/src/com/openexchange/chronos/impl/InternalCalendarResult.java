@@ -258,7 +258,7 @@ public class InternalCalendarResult {
      * @param updatedEvent The updated event
      * @return A self reference
      */
-    public InternalCalendarResult addPlainUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    public InternalCalendarResult addPlainUpdate(Event originalEvent, Event updatedEvent) {
         /*
          * merge with existing create result for same event if already contained
          */
@@ -287,7 +287,7 @@ public class InternalCalendarResult {
      * @param updatedEvent The updated event
      * @return A self reference
      */
-    public InternalCalendarResult addUserizedUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    public InternalCalendarResult addUserizedUpdate(Event originalEvent, Event updatedEvent) {
         /*
          * merge with existing create result for same event if already contained
          */
