@@ -68,6 +68,7 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1822,6 +1823,32 @@ public class CalendarUtils {
             }
         }
         return matchingProperties;
+    }
+
+    /**
+     * Removes all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     *
+     * @param extendedProperties The extended properties
+     * @param name The property name to match
+     * @return <code>true</code> if the properties were changed as a result of the call, <code>false</code>, otherwise
+     */
+    public static boolean removeExtendedProperties(ExtendedProperties extendedProperties, String name) {
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return false;
+        }
+        if (-1 == name.indexOf('*') && -1 == name.indexOf('?')) {
+            return extendedProperties.removeAll(name);
+        }
+        boolean removed = false;
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(name));
+        for (Iterator<ExtendedProperty> iterator = extendedProperties.iterator(); iterator.hasNext();) {
+            ExtendedProperty property = iterator.next();
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                iterator.remove();
+                removed = true;
+            }
+        }
+        return removed;
     }
 
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {

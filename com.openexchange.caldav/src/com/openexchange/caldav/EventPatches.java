@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -105,6 +106,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Streams;
@@ -295,6 +297,26 @@ public class EventPatches {
                 }
             }
         }
+
+        /**
+         * Restores the original <code>X-APPLE-TRAVEL-ADVISORY-BEHAVIOR</code> property in the event, in case it is located in a
+         * non-private folder.
+         *
+         * @param resource The parent event resource
+         * @param importedEvent The event being exported
+         */
+        private void adjustAppleTravelAdvisory(EventResource resource, Event importedEvent) {
+            if (resource.exists() && false == PrivateType.getInstance().equals(resource.getParent().getFolder().getType()) && 
+                (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
+                ExtendedProperty originalProperty = optExtendedProperty(resource.getEvent(), "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR");
+                if (null != originalProperty) {
+                    importedEvent.setExtendedProperties(addExtendedProperty(importedEvent.getExtendedProperties(), originalProperty, true));
+                } else {
+                    removeExtendedProperties(importedEvent.getExtendedProperties(), "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR");
+                }
+            }
+        }
+
 
         /**
          * Strips any extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the 
@@ -770,6 +792,7 @@ public class EventPatches {
                 restoreDeclinedDeleteExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null, null);
+                adjustAppleTravelAdvisory(resource, importedEvent);
                 applyManagedAttachments(importedEvent);
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
             }
@@ -781,6 +804,7 @@ public class EventPatches {
                     adjustAttendeeComments(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent, caldavImport.getCalender());
+                    adjustAppleTravelAdvisory(resource, importedEvent);
                     applyManagedAttachments(importedChangeException);
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
@@ -884,6 +908,26 @@ public class EventPatches {
             extendedProperties.add(new ExtendedProperty("X-APPLE-DEFAULT-ALARM", "TRUE"));
             alarm.setExtendedProperties(new ExtendedProperties(extendedProperties));
             return alarm;
+        }
+        
+        /**
+         * Forcibly disables "time to leave" notifications for Apple clients in non-private folders by inserting the extended property
+         * <code>X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:DISABLED</code> in the event.
+         *
+         * @param resource The parent event resource
+         * @param exportedEvent The event being exported
+         * @return The patched event
+         */
+        private Event adjustAppleTravelAdvisory(EventResource resource, Event exportedEvent) {
+            /*
+             * forcibly disable "time to leave" notifications for Apple clients in non-private folders
+             */
+            if (false == PrivateType.getInstance().equals(resource.getParent().getFolder().getType()) &&
+                (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
+                ExtendedProperty property = new ExtendedProperty("X-APPLE-TRAVEL-ADVISORY-BEHAVIOR", "DISABLED");
+                exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), property, true));
+            }   
+            return exportedEvent;
         }
 
         private Event adjustAlarms(EventResource resource, Event exportedEvent) {
@@ -1019,6 +1063,7 @@ public class EventPatches {
             exportedEvent = adjustProposedTimePrefixes(exportedEvent);
             exportedEvent = applyAttendeeComments(resource, exportedEvent);
             exportedEvent = adjustAlarms(resource, exportedEvent);
+            exportedEvent = adjustAppleTravelAdvisory(resource, exportedEvent);
             exportedEvent = prepareManagedAttachments(resource, exportedEvent);
             exportedEvent = removeAttachmentsFromExceptions(resource, exportedEvent);
             return exportedEvent;
