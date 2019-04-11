@@ -87,14 +87,12 @@ public class ListAliasTest extends AbstractTaskTest {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

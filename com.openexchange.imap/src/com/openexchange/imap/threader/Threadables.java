@@ -164,9 +164,8 @@ public final class Threadables {
             ThreadableImpl threadableImpl = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
             if (threadableImpl != null) {
                 return threadableImpl.getDelegatee();
-            } else {
-                LOG.warn("Unable to use apache commom net threader. Falling back to default threader.");
             }
+            LOG.warn("Unable to use apache commom net threader. Falling back to default threader.");
         }
         return new Threader().thread(threadable);
     }
@@ -265,11 +264,12 @@ public final class Threadables {
      * @param fetchProfile The FETCH profile
      * @param serverInfo The IMAP server information
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @return The fetched <tt>MailMessage</tt>s
      * @throws MessagingException If an error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean examineHasAttachmentUserFlags) throws MessagingException {
+    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean examineHasAttachmentUserFlags, final boolean previewSupported) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -295,7 +295,7 @@ public final class Threadables {
                             sb.append(messageCount - limit + 1).append(':').append('*');
                         }
                     }
-                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false, serverInfo)).append(')');
+                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fetchProfile, false, serverInfo, previewSupported)).append(')');
                     command = sb.toString();
                     sb = null;
                     final long start = System.currentTimeMillis();

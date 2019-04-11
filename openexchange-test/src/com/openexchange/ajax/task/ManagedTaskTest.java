@@ -14,7 +14,6 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
     protected int folderID;
     protected Task actual;
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

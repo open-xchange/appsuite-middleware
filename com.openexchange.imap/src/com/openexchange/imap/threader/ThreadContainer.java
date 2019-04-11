@@ -144,7 +144,7 @@ final class ThreadContainer {
             } else {
                 return child.findChild(target);
             }
-        } catch (final StackOverflowError error) {
+        } catch (@SuppressWarnings("unused") final StackOverflowError error) {
             return false;
         }
     }

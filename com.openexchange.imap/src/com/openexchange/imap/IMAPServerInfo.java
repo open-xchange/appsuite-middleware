@@ -127,4 +127,19 @@ public class IMAPServerInfo {
         return capabilities;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        builder.append("accountId=").append(accountId);
+        if (greeting != null) {
+            builder.append(", ").append("greeting=\"").append(greeting).append('\"');
+        }
+        if (capabilities != null) {
+            builder.append(", ").append("capabilities=").append(capabilities.values());
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
 }

@@ -213,7 +213,7 @@ public final class CapabilitiesCache {
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!imapConfig.getIMAPProperties().isIgnoreSubscription());
             imapCaps.setFileNameSearch(map.containsKey(IMAPCapabilities.CAP_SEARCH_FILENAME));
-            imapCaps.setTextPreview(map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW));
+            imapCaps.setTextPreview(map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW) || map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW));
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled
                 try {

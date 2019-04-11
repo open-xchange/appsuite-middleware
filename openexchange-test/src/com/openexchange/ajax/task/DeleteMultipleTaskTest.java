@@ -76,14 +76,13 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link DeleteMultipleTaskTest}.
-     *
+     * 
      * @param name
      */
     public DeleteMultipleTaskTest() {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -108,7 +107,6 @@ public class DeleteMultipleTaskTest extends AbstractAJAXSession {
         insRes2.fillTask(task2);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

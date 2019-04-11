@@ -60,6 +60,11 @@ import com.openexchange.config.lean.Property;
 public enum MultifactorProperties implements Property {
 
     /**
+     * Allow multiple primary multifactor devices
+     */
+    allowMultiple(true),
+
+    /**
      * WARNING: This puts the multifactor framework into demo mode.
      * This is for testing only!
      * DO NOT SET TO TRUE IN A PRODUCTIVE ENVIRONMENT!

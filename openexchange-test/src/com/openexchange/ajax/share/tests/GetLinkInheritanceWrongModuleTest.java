@@ -211,7 +211,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
     private void checkExtendedPermission(FolderData folder, Integer entity, boolean isInherited) {
         for (FolderExtendedPermission perm : folder.getComOpenexchangeShareExtendedPermissions()) {
             if (perm.getEntity() == entity) {
-                assertTrue("The extended permission does not have the expected inherited types", perm.getIsInherited().booleanValue() == isInherited);
+                assertTrue("The extended permission does not have the expected inherited types", perm.getIsInherited() == isInherited);
                 return;
             }
         }

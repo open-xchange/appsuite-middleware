@@ -50,13 +50,13 @@
 package com.openexchange.ajax.task;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -82,7 +82,7 @@ public class Bug11190Test extends AbstractAJAXSession {
      * results in a broken recurrence.
      */
     @Test
-    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, JSONException, OXException {
+    public void testSwitchingBetweenMonthlyRecurrencePatternsShouldNotBreakRecurrence() throws OXException, IOException, SAXException, JSONException, OXException {
         AJAXClient ajaxClient = getClient();
         final TimeZone timezone = ajaxClient.getValues().getTimeZone();
         final int folderId = ajaxClient.getValues().getPrivateTaskFolder();
@@ -128,7 +128,7 @@ public class Bug11190Test extends AbstractAJAXSession {
             assertEquals("Recurrence type does not match", Task.MONTHLY, resultingTask.getRecurrenceType());
             assertEquals("Recurrence interval does not match", 2, resultingTask.getInterval());
             assertEquals("Recurring day in month does not match", 12, resultingTask.getDayInMonth());
-            assertFalse("Recurring days should not be set anymore", resultingTask.containsDays());
+            assertEquals("Recurring days should not be set anymore", false, resultingTask.containsDays());
         } finally {
             DeleteRequest cleanUp = new DeleteRequest(taskWithRecurrence);
             ajaxClient.execute(cleanUp);

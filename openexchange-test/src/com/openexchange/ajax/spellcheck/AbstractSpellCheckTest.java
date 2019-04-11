@@ -52,6 +52,7 @@ package com.openexchange.ajax.spellcheck;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 
@@ -65,7 +66,7 @@ public abstract class AbstractSpellCheckTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AbstractSpellCheckTest}
-     *
+     * 
      * @param name
      */
     public AbstractSpellCheckTest() {
@@ -75,11 +76,11 @@ public abstract class AbstractSpellCheckTest extends AbstractAJAXSession {
     /**
      * @return the private task folder of the user.
      */
-    protected int getPrivateFolder() throws OXException, IOException, JSONException {
+    protected int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
         return getClient().getValues().getPrivateTaskFolder();
     }
 
-    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
         return getClient().getValues().getTimeZone();
     }
 }

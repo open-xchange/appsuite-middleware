@@ -137,9 +137,10 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -147,7 +148,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false, serverInfo);
+        command = getFetchCommand(isRev1, fp, false, serverInfo, previewSupported);
         uid = false;
         length = seqNums.length;
         map = new TLongObjectHashMap<MailMessage>(length);
@@ -167,9 +168,10 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fetchProfile The fetch profile to use
      * @param serverInfo The IMAP server information
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fetchProfile, IMAPServerInfo imapServerInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fetchProfile, IMAPServerInfo imapServerInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -181,11 +183,11 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         map = new TLongObjectHashMap<MailMessage>(length);
         if (length == messageCount) {
             fetchProfile.add(UIDFolder.FetchProfileItem.UID);
-            command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo);
+            command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo, previewSupported);
             args = (1 == length ? ARGS_FIRST : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo);
+            command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo, previewSupported);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }
@@ -919,10 +921,11 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
      * @param serverInfo The IMAP server information
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @return The FETCH items to craft a FETCH command
      */
-    private static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo) {
-        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody, serverInfo);
+    private static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo, boolean previewSupported) {
+        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody, serverInfo, previewSupported);
     }
 
     /**

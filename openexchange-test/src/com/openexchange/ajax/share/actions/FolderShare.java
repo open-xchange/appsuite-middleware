@@ -115,7 +115,7 @@ public class FolderShare extends FolderObject {
     /**
      * Initializes a new {@link FolderShare}.
      */
-    public FolderShare() {
+    public FolderShare() throws JSONException {
         super();
     }
 

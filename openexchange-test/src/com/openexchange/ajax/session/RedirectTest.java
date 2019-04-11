@@ -81,7 +81,6 @@ public class RedirectTest extends AbstractAJAXSession {
 
     private boolean insecure;
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

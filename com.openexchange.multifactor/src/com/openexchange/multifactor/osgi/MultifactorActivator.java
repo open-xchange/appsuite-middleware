@@ -61,6 +61,8 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.login.multifactor.MultifactorLoginService;
 import com.openexchange.multifactor.MultifactorAuthenticatorFactory;
 import com.openexchange.multifactor.MultifactorLockoutService;
@@ -73,6 +75,7 @@ import com.openexchange.multifactor.MultifactorRequest;
 import com.openexchange.multifactor.MultifactorSessionInspector;
 import com.openexchange.multifactor.MultifactorSessionStorage;
 import com.openexchange.multifactor.impl.MultifactorAuthenticatorFactoryImpl;
+import com.openexchange.multifactor.impl.MultifactorConfigTreeItem;
 import com.openexchange.multifactor.impl.MultifactorLoginServiceImpl;
 import com.openexchange.multifactor.impl.MultifactorManagementServiceImpl;
 import com.openexchange.multifactor.listener.MultifactorDispatcherListener;
@@ -169,6 +172,10 @@ public class MultifactorActivator extends HousekeepingActivator {
 
         registerService (MultifactorListenerChain.class, listenerChain);
         rememberTracker(listeners);
+
+        MultifactorConfigTreeItem item = new MultifactorConfigTreeItem ();
+        registerService(ConfigTreeEquivalent.class, item);
+        registerService(PreferencesItemService.class, item);
 
         // Announce multifactor service available and some providers exist
         final String sCapability = "multifactor_service";

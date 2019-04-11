@@ -180,10 +180,11 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param isSequential Whether the source array values are sequential
      * @param keepOrder Whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @throws MessagingException
      */
-    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, Object arr, FetchProfile fp, IMAPServerInfo serverInfo, boolean isSequential, boolean keepOrder) throws MessagingException {
-        this(imapFolder, isRev1, arr, fp, serverInfo, isSequential, keepOrder, false);
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, Object arr, FetchProfile fp, IMAPServerInfo serverInfo, boolean isSequential, boolean keepOrder, boolean previewSupported) throws MessagingException {
+        this(imapFolder, isRev1, arr, fp, serverInfo, isSequential, keepOrder, false, previewSupported);
     }
 
     /**
@@ -198,15 +199,16 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param keepOrder Whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @throws MessagingException
      */
-    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, Object arr, FetchProfile fp, IMAPServerInfo serverInfo, boolean isSequential, boolean keepOrder, boolean loadBody) throws MessagingException {
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, Object arr, FetchProfile fp, IMAPServerInfo serverInfo, boolean isSequential, boolean keepOrder, boolean loadBody, boolean previewSupported) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
+        command = getFetchCommand(isRev1, fp, loadBody, serverInfo, previewSupported);
         set(arr, isSequential, keepOrder);
     }
 
@@ -323,10 +325,11 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param fp The fetch profile
      * @param serverInfo The IMAP server information
      * @param fetchLen The total message count
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @throws MessagingException If a messaging error occurs
      */
-    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, int fetchLen) throws MessagingException {
-        this(imapFolder, isRev1, fp, serverInfo, fetchLen, false);
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, int fetchLen, boolean previewSupported) throws MessagingException {
+        this(imapFolder, isRev1, fp, serverInfo, fetchLen, false, previewSupported);
     }
 
     /**
@@ -340,9 +343,10 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param serverInfo The IMAP server information
      * @param fetchLen The total message count
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @throws MessagingException If a messaging error occurs
      */
-    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, int fetchLen, boolean loadBody) throws MessagingException {
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, int fetchLen, boolean loadBody, boolean previewSupported) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -355,7 +359,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         args = 1 == messageCount ? ARGS_FIRST : ARGS_ALL;
         uid = false;
         length = fetchLen;
-        command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
+        command = getFetchCommand(isRev1, fp, loadBody, serverInfo, previewSupported);
         retval = new ExtendedMimeMessage[length];
         index = 0;
     }
@@ -789,10 +793,11 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
      * @param serverInfo The IMAP server information
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @return The FETCH items to craft a FETCH command
      */
-    private static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo) {
-        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody, serverInfo);
+    private static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo, boolean previewSupported) {
+        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody, serverInfo, previewSupported);
     }
 
     /**

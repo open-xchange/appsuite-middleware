@@ -56,6 +56,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceAllRequest;
 import com.openexchange.ajax.resource.actions.ResourceAllResponse;
@@ -86,7 +87,7 @@ public final class ResourceListAJAXTest extends AbstractResourceTest {
      * Tests the <code>action=list</code>
      */
     @Test
-    public void testList() throws OXException, JSONException, IOException {
+    public void testList() throws OXException, JSONException, IOException, SAXException {
         int id = -1;
         try {
             /*

@@ -80,11 +80,10 @@ public class Bug18204Test extends AbstractAJAXSession {
     Calendar due;
     Task task;
 
-    public Bug18204Test() {
+    public Bug18204Test() throws Exception {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -116,7 +115,6 @@ public class Bug18204Test extends AbstractAJAXSession {
         assertFalse("Task contains Occurrences although it should not.", toCompare.containsOccurrence());
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -245,6 +245,7 @@ public class ConversationCache {
      * @param session The associated session
      * @return <code>true</code> if contaoined; othrewise <code>false</code>
      */
+    @SuppressWarnings("unchecked")
     public boolean containsCachedConversations(String fullName, int accountId, Session session) {
         CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
         Object obj = cache.get(mapKey);
@@ -267,6 +268,7 @@ public class ConversationCache {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
+    @SuppressWarnings("unchecked")
     public void removeUserConversations(int userId, int contextId) {
         CacheKey mapKey = getMapKey(userId, contextId);
         Object obj = cache.get(mapKey);
@@ -282,6 +284,7 @@ public class ConversationCache {
      *
      * @param session The associated session
      */
+    @SuppressWarnings("unchecked")
     public void removeAccountConversations(int accountId, Session session) {
         CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
         Object obj = cache.get(mapKey);
@@ -301,6 +304,7 @@ public class ConversationCache {
      * @param session The associated session
      * @return The cached conversations or <code>null</code>
      */
+    @SuppressWarnings("unchecked")
     public List<List<MailMessage>> getCachedConversations(String fullName, int accountId, String argsHash, Session session) {
         CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
         Object obj = cache.get(mapKey);
@@ -336,6 +340,7 @@ public class ConversationCache {
      * @param argsHash The arguments hash
      * @param session The associated session
      */
+    @SuppressWarnings("unchecked")
     public void putCachedConversations(List<List<MailMessage>> conversations, String fullName, int accountId, String argsHash, Session session) {
         CacheKey mapKey = getMapKey(session.getUserId(), session.getContextId());
 
@@ -348,7 +353,7 @@ public class ConversationCache {
                 ConcurrentHashMap<Integer, ConcurrentMap<String, CacheEntry>> newAccountEntries = new ConcurrentHashMap<Integer, ConcurrentMap<String, CacheEntry>>(8, 0.9F, 1);
                 accounts = newAccountEntries;
                 cache.putSafe(mapKey, newAccountEntries);
-            } catch (OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 obj = cache.get(mapKey);
                 accounts = (ConcurrentMap<Integer, ConcurrentMap<String, CacheEntry>>) obj;
             }

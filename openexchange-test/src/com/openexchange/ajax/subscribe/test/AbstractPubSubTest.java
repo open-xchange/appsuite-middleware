@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.json.JSONException;
+import org.xml.sax.SAXException;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
@@ -85,13 +86,13 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
        return contact;
    }
 
-    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) {
+   protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription, String folderID) throws OXException, IOException, SAXException, JSONException {
        Subscription sub = generateOXMFSubscription(formDescription);
        sub.setFolderId(folderID);
        return sub;
    }
 
-    protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) {
+   protected Subscription generateOXMFSubscription(DynamicFormDescription formDescription) throws OXException, IOException, SAXException, JSONException {
        Subscription subscription = new Subscription();
 
        subscription.setDisplayName("mySubscription");
@@ -108,17 +109,17 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
        return subscription;
    }
 
-    protected FolderObject createDefaultContactFolder() throws OXException, IOException, JSONException {
+   protected FolderObject createDefaultContactFolder() throws OXException, IOException, SAXException, JSONException {
        FolderObject folder = ftm.generatePublicFolder("pubsub default contact folder " + UUID.randomUUID().toString(), FolderObject.CONTACT, getClient().getValues().getPrivateContactFolder(), getClient().getValues().getUserId());
        ftm.insertFolderOnServer(folder);
        return folder;
    }
 
-    protected FolderObject createDefaultInfostoreFolder() throws OXException, IOException, JSONException {
+   protected FolderObject createDefaultInfostoreFolder() throws OXException, IOException, SAXException, JSONException {
        return createDefaultInfostoreFolder(null);
    }
 
-    protected FolderObject createDefaultInfostoreFolder(String folderName) throws OXException, IOException, JSONException {
+   protected FolderObject createDefaultInfostoreFolder(String folderName) throws OXException, IOException, SAXException, JSONException {
        if (folderName == null) {
            folderName = "pubsub default infostore folder " + this.getClass().getCanonicalName() + "-" + System.currentTimeMillis();
        }
@@ -127,7 +128,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
        return folder;
    }
 
-    protected Contact createDefaultContactFolderWithOneContact() throws OXException, IOException, JSONException {
+   protected Contact createDefaultContactFolderWithOneContact() throws OXException, IOException, SAXException, JSONException {
        FolderObject folder = createDefaultContactFolder();
 
        Contact contact = generateContact("Herbert", "Meier");

@@ -72,14 +72,16 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class AddGuestUserToGroupTest extends ShareTest {
 
+    //    private AJAXClient adminClient;
+
     public AddGuestUserToGroupTest() {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        //        adminClient = new AJAXClient(User.OXAdmin);
     }
 
     @Test

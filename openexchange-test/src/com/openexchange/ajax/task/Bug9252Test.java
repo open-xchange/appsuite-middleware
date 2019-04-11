@@ -65,7 +65,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Tests problem described in bug #9295.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Bug9252Test extends AbstractTaskTest {
@@ -84,7 +84,6 @@ public class Bug9252Test extends AbstractTaskTest {
     /**
      * {@inheritDoc}
      */
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -94,7 +93,7 @@ public class Bug9252Test extends AbstractTaskTest {
 
     /**
      * Tests if tasks in public folders created by other users can be read.
-     *
+     * 
      * @throws Throwable if this test fails.
      */
     @Test
@@ -112,7 +111,7 @@ public class Bug9252Test extends AbstractTaskTest {
             final InsertResponse iResponse = client1.execute(new InsertRequest(task, client1.getValues().getTimeZone()));
             task.setObjectID(iResponse.getId());
             // Now second user tries to read the task.
-            final GetResponse gResponse = client2.execute(new GetRequest(folder.getObjectID(), task.getObjectID()));
+            final GetResponse gResponse = TaskTools.get(client2, new GetRequest(folder.getObjectID(), task.getObjectID()));
             final Task reload = gResponse.getTask(client2.getValues().getTimeZone());
             TaskTools.compareAttributes(task, reload);
         } finally {

@@ -85,7 +85,7 @@ public final class ListTest extends AbstractSpellCheckTest {
         final String userWord = "clazz";
         Executor.execute(getSession(), new UserWordRequest(userWord, true, true));
 
-        final ListResponse listResponse = Executor.execute(getSession(), new ListRequest(true));
+        final ListResponse listResponse = (ListResponse) Executor.execute(getSession(), new ListRequest(true));
         final String[] uw = listResponse.getUserWords();
         assertTrue("No user words: " + Arrays.toString(uw), uw.length > 0);
 

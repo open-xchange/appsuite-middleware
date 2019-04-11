@@ -82,7 +82,6 @@ public class Bug34928Test extends AbstractAJAXSession {
 
     private AJAXClient client;
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import org.junit.Assert;
+import org.xml.sax.SAXException;
 import com.openexchange.ajax.UserTest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
@@ -79,7 +80,7 @@ public final class UserTools extends Assert {
         super();
     }
 
-    public static UserImpl4Test[] searchUser(AJAXClient client, String searchpattern) throws OXException, IOException, JSONException {
+    public static UserImpl4Test[] searchUser(AJAXClient client, String searchpattern) throws OXException, IOException, SAXException, JSONException {
         final ContactSearchObject search = new ContactSearchObject();
         search.setPattern(searchpattern);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
@@ -89,7 +90,7 @@ public final class UserTools extends Assert {
         return response.getUser();
     }
 
-    public static Contact getUserContact(AJAXClient client, int userId) throws OXException, IOException, JSONException {
+        public static Contact getUserContact(AJAXClient client, int userId) throws OXException, IOException, SAXException, JSONException {
             GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
             GetResponse response = client.execute(request);
             return response.getContact();

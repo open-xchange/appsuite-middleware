@@ -94,7 +94,6 @@ public class Bug21026Test extends AbstractAJAXSession {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -121,7 +120,6 @@ public class Bug21026Test extends AbstractAJAXSession {
         second = findNextOccurrence(client, task);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

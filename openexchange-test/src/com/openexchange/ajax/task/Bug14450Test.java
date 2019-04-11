@@ -75,7 +75,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Target duration set to null.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug14450Test extends AbstractTaskTest {
@@ -92,7 +92,6 @@ public class Bug14450Test extends AbstractTaskTest {
         super();
     }
 
-    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -104,7 +103,6 @@ public class Bug14450Test extends AbstractTaskTest {
         insertR.fillTask(task);
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -49,8 +49,6 @@
 
 package com.openexchange.imageconverter.api;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -109,19 +107,16 @@ public class ElementLock extends ReentrantLock {
      * @return
      */
     public boolean lock(final LockMode lockMode) {
-        m_useCount.incrementAndGet();
-
         if (lockMode.isTryLock()) {
             if (!super.tryLock()) {
-                m_useCount.decrementAndGet();
                 return false;
             }
         } else {
             super.lock();
         }
 
-        if (lockMode.needsWaiting() && m_isProcessing.get()) {
-            while (m_isProcessing.get() && !Thread.currentThread().isInterrupted()) {
+        if (lockMode.needsWaiting()) {
+            while (m_isProcessing && !Thread.currentThread().isInterrupted()) {
                 try {
                     m_processingFinishedCondition.await();
                 } catch (@SuppressWarnings("unused") InterruptedException e) {
@@ -131,7 +126,7 @@ public class ElementLock extends ReentrantLock {
         }
 
         if (lockMode.isBeginProcessing()) {
-            m_isProcessing.compareAndSet(false, true);
+            m_isProcessing = true;
         }
 
         return true;
@@ -140,35 +135,27 @@ public class ElementLock extends ReentrantLock {
     /**
      * @return
      */
-    public long unlockAndGetUseCount(final boolean finishProcessing) {
-        if (finishProcessing && m_isProcessing.compareAndSet(true, false)) {
+    public long unlock(final boolean finishProcessing) {
+        if (finishProcessing && m_isProcessing) {
+            m_isProcessing = false;
             m_processingFinishedCondition.signalAll();
         }
 
         super.unlock();
 
-        return m_useCount.decrementAndGet();
-    }
-
-    /**
-     * @return
-     */
-    public long getUseCount() {
-        return m_useCount.get();
+        return getHoldCount();
     }
 
     /**
      * @return
      */
     public boolean isProcessing() {
-        return m_isProcessing.get();
+        return m_isProcessing;
     }
 
     // - Members ---------------------------------------------------------------
 
     final private Condition m_processingFinishedCondition = newCondition();
 
-    final private AtomicLong m_useCount = new AtomicLong(0);
-
-    final private AtomicBoolean m_isProcessing = new AtomicBoolean(false);
+    volatile private boolean m_isProcessing = false;
 }

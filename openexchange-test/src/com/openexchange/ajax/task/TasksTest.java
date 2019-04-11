@@ -49,26 +49,21 @@
 
 package com.openexchange.ajax.task;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.ajax.task.TaskTools.deleteTask;
+import static com.openexchange.ajax.task.TaskTools.getTask;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.participant.ParticipantTools;
-import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.GetRequest;
-import com.openexchange.ajax.task.actions.GetResponse;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -77,7 +72,7 @@ import com.openexchange.test.TaskTestManager;
 
 /**
  * This class tests the AJAX interface of the tasks.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TasksTest extends AbstractAJAXSession {
@@ -89,7 +84,7 @@ public class TasksTest extends AbstractAJAXSession {
 
     /**
      * Tests inserting a delegated task.
-     *
+     * 
      * @throws Throwable if an error occurs.
      */
     @Test
@@ -105,7 +100,7 @@ public class TasksTest extends AbstractAJAXSession {
         task.setAfterComplete(new Date(1133971200000L));
         task.setNote("Description");
         task.setStatus(Task.NOT_STARTED); //FIXME!
-        task.setPriority(I(Task.NORMAL));
+        task.setPriority(Task.NORMAL);
         task.setCategories("Categories");
         task.setTargetDuration(L(1440));
         task.setActualDuration(L(1440));
@@ -126,7 +121,7 @@ public class TasksTest extends AbstractAJAXSession {
         task.setParentFolderID(folderId);
 
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
-        LOG.trace("Created delegated task: {}", I(taskId));
+        LOG.trace("Created delegated task: {}", taskId);
 
         final Task reload = ttm.getTaskFromServer(folderId, taskId);
         for (final Participant p1 : reload.getParticipants()) {
@@ -141,12 +136,8 @@ public class TasksTest extends AbstractAJAXSession {
             }
         }
         lastModified = reload.getLastModified();
-        deleteTask(folderId, taskId, lastModified);
-    }
 
-    private void deleteTask(int folderId, int taskId, Date lastModified) throws OXException, IOException, JSONException {
-        final DeleteRequest request = new DeleteRequest(folderId, taskId, lastModified);
-        getClient().execute(request);
+        deleteTask(getClient(), lastModified, folderId, taskId);
     }
 
     @Test
@@ -166,12 +157,10 @@ public class TasksTest extends AbstractAJAXSession {
 
         LOG.trace("Creating delegated task with participants: {}", firstParticipants);
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
-        LOG.trace("Created delegated task: {}", I(taskId));
-        GetRequest getRequest = new GetRequest(folderId, taskId);
-        GetResponse getResponse = getClient().execute(getRequest);
-
-        Date lastModified = getResponse.getTimestamp();
-        Task reload = (Task) getResponse.getData();
+        LOG.trace("Created delegated task: {}", taskId);
+        Response response = getTask(getClient(), folderId, taskId);
+        Date lastModified = response.getTimestamp();
+        Task reload = (Task) response.getData();
         assertEquals("Number of participants differ", firstParticipants.size(), reload.getParticipants().length);
         for (final Participant p1 : firstParticipants) {
             boolean found = false;
@@ -204,7 +193,7 @@ public class TasksTest extends AbstractAJAXSession {
             }
         }
 
-        deleteTask(folderId, taskId, lastModified);
+        deleteTask(getClient(), lastModified, folderId, taskId);
     }
 
     @Test
@@ -231,12 +220,12 @@ public class TasksTest extends AbstractAJAXSession {
         assertEquals("Title of task is not updated.", updatedTitle, updated.getTitle());
         lastModified = response.getLastModified();
 
-        deleteTask(folderId, taskId, lastModified);
+        deleteTask(getClient(), lastModified, folderId, taskId);
     }
 
     /**
      * Tests a full list of tasks in a folder with ordering.
-     *
+     * 
      * @throws Throwable if an error occurs.
      */
     @Test
@@ -256,7 +245,7 @@ public class TasksTest extends AbstractAJAXSession {
         // TODO parse JSON array
         final Date lastModified = loaded[0].getLastModified();
         for (final int[] folderAndTask : tasks) {
-            deleteTask(folderAndTask[0], folderAndTask[1], lastModified);
+            deleteTask(getClient(), lastModified, folderAndTask[0], folderAndTask[1]);
         }
     }
 
@@ -278,7 +267,7 @@ public class TasksTest extends AbstractAJAXSession {
         task.setParentFolderID(folderId);
 
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
-        LOG.trace("Created delegated task for confirmation: {}", I(taskId));
+        LOG.trace("Created delegated task for confirmation: {}", taskId);
 
         Task taskForUser = ttm2.getTaskFromServer(folderId2, taskId);
         taskForUser.setConfirm(Task.ACCEPT);
@@ -296,14 +285,14 @@ public class TasksTest extends AbstractAJAXSession {
             }
         }
         assertTrue("Can't find confirmation.", confirmed);
-
+        
         ttm2.cleanUp();
     }
 
     /**
      * Creates a task with a reminder and checks if the reminder is stored
      * correctly.
-     *
+     * 
      * @throws Throwable if an error occurs.
      */
     @Test
@@ -319,11 +308,10 @@ public class TasksTest extends AbstractAJAXSession {
 
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
 
-        GetRequest getRequest = new GetRequest(folderId, taskId);
-        GetResponse response = getClient().execute(getRequest);
+        final Response response = getTask(getClient(), folderId, taskId);
         final Task reload = (Task) response.getData();
         assertEquals("Missing reminder.", remind, reload.getAlarm());
-        deleteTask(folderId, taskId, response.getTimestamp());
+        deleteTask(getClient(), response.getTimestamp(), folderId, taskId);
     }
 
     /**

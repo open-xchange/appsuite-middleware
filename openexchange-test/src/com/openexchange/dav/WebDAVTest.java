@@ -142,7 +142,6 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     @Parameter(value = 0)
     public String authMethod;
 
-    @SuppressWarnings("unused")
     protected static Iterable<Object[]> availableAuthMethods() {
         if (false == AUTODISCOVER_AUTH) {
             List<Object[]> authMethods = new ArrayList<>(2);
@@ -196,7 +195,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     }
 
     @AfterClass
-    public static void unregisterOAuthClient() {
+    public static void unregisterOAuthClient() throws Exception {
         if (oAuthClientApp != null) {
             try {
                 AbstractOAuthTest.unregisterTestClient(oAuthClientApp);
@@ -228,8 +227,9 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             WebDAVClient webDAVClient = new WebDAVClient(testUser, getDefaultUserAgent(), oAuthGrant);
             this.webDAVClients.put(threadID, webDAVClient);
             return webDAVClient;
+        } else {
+            return this.webDAVClients.get(threadID);
         }
-        return this.webDAVClients.get(threadID);
     }
 
     /**
@@ -295,8 +295,9 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         if (null != href) {
             eTags.remove(href);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     protected String getHrefFromETags(Map<String, String> eTags, String uid) {
@@ -318,12 +319,11 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         return hrefs;
     }
 
-    @SuppressWarnings("unused")
     protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
         return ftm.updateFolderOnServer(folder);
     }
 
-    protected FolderObject getFolder(int folderID) {
+    protected FolderObject getFolder(int folderID) throws OXException, IOException, JSONException {
         return ftm.getFolderFromServer(folderID);
     }
 
@@ -331,7 +331,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         ftm.deleteFolderOnServer(folder);
     }
 
-    protected FolderObject createFolder(FolderObject parent, String folderName) {
+    protected FolderObject createFolder(FolderObject parent, String folderName) throws OXException, IOException, JSONException {
         FolderObject folder = new FolderObject();
         folder.setFolderName(folderName);
         folder.setParentFolderID(parent.getObjectID());
