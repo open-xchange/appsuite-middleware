@@ -49,7 +49,7 @@
 
 package com.openexchange.contactcollector;
 
-import java.util.List;
+import java.util.Collection;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.session.Session;
 
@@ -67,6 +67,6 @@ public interface ContactCollectorService {
      * @param incrementUseCount Whether use-count is supposed to be incremented
      * @param session The user-session
      */
-    void memorizeAddresses(List<InternetAddress> addresses, boolean incrementUseCount, Session session);
+    void memorizeAddresses(Collection<InternetAddress> addresses, boolean incrementUseCount, Session session);
 
 }

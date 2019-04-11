@@ -1427,7 +1427,7 @@ public class Mail extends PermissionServlet {
             Set<InternetAddress> addrs = AddressUtility.getAddresses(mail, session);
 
             if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
+                ccs.memorizeAddresses(addrs, incrementUseCount, session);
             }
         }
     }

@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.utils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -115,7 +114,7 @@ public class ContactCollectorUtility {
                 }
 
                 if (null != addrs && !addrs.isEmpty()) {
-                    ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), false, session);
+                    ccs.memorizeAddresses(addrs, false, session);
                 }
             }
         }

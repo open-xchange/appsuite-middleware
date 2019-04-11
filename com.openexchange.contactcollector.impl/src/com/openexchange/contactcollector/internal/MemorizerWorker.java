@@ -52,6 +52,7 @@ package com.openexchange.contactcollector.internal;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -337,7 +338,11 @@ public final class MemorizerWorker {
         }
 
         // Strip by well-known aliases
-        final Set<InternetAddress> addresses = new LinkedHashSet<InternetAddress>(memorizerTask.getAddresses());
+        final Set<InternetAddress> addresses;
+        {
+            Collection<InternetAddress> tmp = memorizerTask.getAddresses();
+            addresses = tmp instanceof Set ? (Set<InternetAddress>) tmp : new LinkedHashSet<InternetAddress>(tmp);
+        }
         try {
             UserService userService = services.getOptionalService(UserService.class);
             if (null == userService) {
