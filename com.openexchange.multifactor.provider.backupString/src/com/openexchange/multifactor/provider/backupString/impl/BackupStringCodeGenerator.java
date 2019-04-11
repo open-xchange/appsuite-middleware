@@ -59,12 +59,18 @@ import java.security.SecureRandom;
  */
 public class BackupStringCodeGenerator {
 
-    private static final String AVAILABLE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
-    private static final char[] chars = AVAILABLE_CHARS.toCharArray();
-    private static final SecureRandom random = new SecureRandom();
+    private static final char[] CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789".toCharArray();
+    private static final SecureRandom RANDOM = new SecureRandom();
+
+    /**
+     * Initializes a new {@link BackupStringCodeGenerator}.
+     */
+    private BackupStringCodeGenerator() {
+        super();
+    }
 
     private static char getChar(SecureRandom random) {
-        return chars[random.nextInt(AVAILABLE_CHARS.length())];
+        return CHARACTERS[random.nextInt(CHARACTERS.length)];
     }
 
     /**
@@ -74,11 +80,18 @@ public class BackupStringCodeGenerator {
      * @return The random string
      */
     public static String generateString(int length) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            sb.append(getChar(random));
+        if (length < 0) {
+            throw new IllegalArgumentException("Lenght must not be less than 0 (zero)");
         }
-        return sb.toString();
+        if (length == 0) {
+            return "";
+        }
+
+        char[] chars = new char[length];
+        for (int i = length; i-- > 0;) {
+            chars[i] = getChar(RANDOM);
+        }
+        return new String(chars);
     }
 
 }
