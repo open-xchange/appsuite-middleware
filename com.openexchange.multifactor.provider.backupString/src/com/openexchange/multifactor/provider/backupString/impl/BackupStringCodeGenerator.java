@@ -61,6 +61,7 @@ public class BackupStringCodeGenerator {
 
     private static final String AVAILABLE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ0123456789";
     private static final char[] chars = AVAILABLE_CHARS.toCharArray();
+    private static final SecureRandom random = new SecureRandom();
 
     private static char getChar(SecureRandom random) {
         return chars[random.nextInt(AVAILABLE_CHARS.length())];
@@ -73,10 +74,9 @@ public class BackupStringCodeGenerator {
      * @return The random string
      */
     public static String generateString(int length) {
-        SecureRandom rand = new SecureRandom();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.append(getChar(rand));
+            sb.append(getChar(random));
         }
         return sb.toString();
     }

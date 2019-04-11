@@ -62,6 +62,8 @@ import com.openexchange.multifactor.TokenCreationStrategy;
 
 public class HOTPTokenCreationStrategy implements TokenCreationStrategy {
 
+    private final SecureRandom random = new SecureRandom();
+
     /**
      * Internal method to create a random secret
      *
@@ -69,10 +71,9 @@ public class HOTPTokenCreationStrategy implements TokenCreationStrategy {
      * @return The random secret
      */
     private String createRandomSecret(int length) {
-        final SecureRandom rand = new SecureRandom();
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.append(rand.nextInt(10));
+            sb.append(random.nextInt(10));
         }
         return sb.toString();
     }

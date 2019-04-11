@@ -89,6 +89,7 @@ public class MultifactorTotpProvider implements MultifactorProvider {
     private final TotpMultifactorDeviceStorage deviceStorage;
     private final MemoryMultifactorDeviceStorage<TotpMultifactorDevice> pendingDeviceStorage;
     private final LeanConfigurationService configurationService;
+    private final TotpRegister challengeFactory = new TotpRegister();
 
     /**
      * Initializes a new {@link MultifactorTotpProvider}.
@@ -193,8 +194,7 @@ public class MultifactorTotpProvider implements MultifactorProvider {
         //Get the name from the request if present, or use a default name otherwise
         DeviceNaming.applyName(inputDevice, () -> getDefaultName(multifactorRequest));
         inputDevice.setId(newUid());
-        final TotpRegister challengeFactory = new TotpRegister(configurationService.getIntProperty(MultifactorTotpProperty.maximumQRCodeLength));
-        TotpChallenge challenge = challengeFactory.createChallenge(multifactorRequest, inputDevice);
+        TotpChallenge challenge = challengeFactory.createChallenge(multifactorRequest, inputDevice, configurationService.getIntProperty(MultifactorTotpProperty.maximumQRCodeLength));
         final TotpMultifactorDevice newDevice = new TotpMultifactorDevice(challenge.getDeviceId(), inputDevice.getName(), challenge.getSecret());
 
         // We just create a new TOTP device with the input device taken as basis
