@@ -61,7 +61,7 @@
         name: columns
         in: query
         type: string
-        description: A comma-separated list of columns to return. Each column is specified by the name of the Composition Space attribute. If no columns are specified only the "id" columne is set.
+        description: A comma-separated list of columns to return. Each column is specified by the name of the Composition Space attribute. If no columns are specified only the "id" column is set.
         required: false
 
     responses:
