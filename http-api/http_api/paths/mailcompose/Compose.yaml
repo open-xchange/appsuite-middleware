@@ -68,7 +68,15 @@
       200:
         description: A JSON array containing message models.
         schema:
-          $ref: "#/definitions/MailComposeResponse"
+          type: array
+          items:
+            type: object
+            properties:
+              fullObject:
+                $ref: "#/definitions/MailComposeResponse"
+              ids:
+                type: integer
+                description: Composition Space identifier, if no columns are requested.
       400:
         description: Bad request, response contains error message.
       401:
