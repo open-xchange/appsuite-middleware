@@ -183,7 +183,7 @@ public abstract class AbstractMultifactorDevice implements MultifactorDevice {
 
     @Override
     public Boolean isEnabled() {
-       return Boolean.TRUE.equals(this.enabled);
+       return Boolean.valueOf(this.enabled != null && this.enabled.booleanValue());
     }
 
     @Override
@@ -215,7 +215,7 @@ public abstract class AbstractMultifactorDevice implements MultifactorDevice {
 
     @Override
     public Boolean isTrustedApplicationDevice() {
-        return isTrustedApplicationDevice;
+        return isTrustedApplicationDevice ? Boolean.TRUE : Boolean.FALSE;
     }
 
     @Override

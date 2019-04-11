@@ -97,17 +97,17 @@ public class MultifactorConfigTreeItem implements ConfigTreeEquivalent, Preferen
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
 
-                Boolean enabled = (MultifactorProperties.allowMultiple.getDefaultValue() instanceof Boolean) ? (Boolean) MultifactorProperties.allowMultiple.getDefaultValue() : true;
+                Boolean enabled = (MultifactorProperties.allowMultiple.getDefaultValue() instanceof Boolean) ? (Boolean) MultifactorProperties.allowMultiple.getDefaultValue() : Boolean.TRUE;
 
                 if (factory != null) {
                     ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                     ComposedConfigProperty<Boolean> property = view.property(MultifactorProperties.allowMultiple.getFQPropertyName(), Boolean.class);
                     if (property.isDefined()) {
-                        enabled = property.get().booleanValue();
+                        enabled = property.get();
                     }
                 }
 
-                setting.setSingleValue(Boolean.valueOf(enabled));
+                setting.setSingleValue(enabled);
             }
 
             @Override

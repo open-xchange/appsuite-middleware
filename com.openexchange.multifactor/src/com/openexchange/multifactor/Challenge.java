@@ -66,8 +66,9 @@ public interface Challenge {
      * Get the challenge
      *
      * @return A map containing the data of the challenge
-     * @throws OXException
+     * @throws OXException If challenge cannot be returned
      */
+    @SuppressWarnings("unused")
     default public Map<String, Object> getChallenge() throws OXException {
         return Collections.emptyMap();
     };

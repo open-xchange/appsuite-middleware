@@ -62,7 +62,7 @@ public enum MultifactorProperties implements Property {
     /**
      * Allow multiple primary multifactor devices
      */
-    allowMultiple(true),
+    allowMultiple(Boolean.TRUE),
 
     /**
      * WARNING: This puts the multifactor framework into demo mode.
@@ -93,23 +93,14 @@ public enum MultifactorProperties implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;
     }
+
 }

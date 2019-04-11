@@ -103,7 +103,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             resultSet.getString("name"),
             resultSet.getString("secret"),
             resultSet.getInt("length"));
-        device.enable(resultSet.getBoolean("enabled"));
+        device.enable(resultSet.getBoolean("enabled") ? Boolean.TRUE : Boolean.FALSE);
         return device;
     }
 
@@ -127,7 +127,7 @@ public class RdbBackupStringMultifactorDeviceStorage extends MultifactorStorageC
             statement.setString(index++, device.getName());
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
-            statement.setBoolean(index++, device.isEnabled());
+            statement.setBoolean(index++, device.isEnabled().booleanValue());
             statement.setString(index++, device.getHashedSharedSecret());
             statement.setInt(index++, device.getSecretLength());
             statement.executeUpdate();

@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.totp;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -120,7 +121,7 @@ public class TotpRegister {
         final String newSharedSecret = getNewSharedSecret();
         final String url = TotpRegister.generateUrl(newSharedSecret, request.getHost(), device.getName());
         if (url.length() > maxQrSize) {
-            throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create(URL, url.length(), maxQrSize);
+            throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create(URL, I(url.length()), I(maxQrSize));
         }
 
         String base64Image = "";

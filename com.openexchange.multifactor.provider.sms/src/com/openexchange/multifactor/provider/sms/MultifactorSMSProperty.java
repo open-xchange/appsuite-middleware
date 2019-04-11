@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.sms;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 import com.openexchange.multifactor.MultifactorProperties;
 
@@ -65,29 +66,29 @@ public enum MultifactorSMSProperty implements Property {
      *
      * Only providers which are "enabled" can be used by a user.
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
 
     /**
      * Defines if the SMS provider can also be used as "backup provider".
      * I.E. This defines if it's possible for a user to register SMS based devices as backup device.
      */
-    backup(true),
+    backup(Boolean.TRUE),
 
     /**
      * Defines the length of the SMS token
      */
-    tokenLength(8),
+    tokenLength(I(8)),
 
     /**
      * Defines the lifetime (in seconds) of the SMS token in minutes before it expires and cannot be used for authentication anymore.
      *
      */
-    tokenLifetime(120),
+    tokenLifetime(I(120)),
 
     /**
      * The maximum amount of active tokens a user is allowed to own at a point in time
      */
-    maxTokenAmount(5);
+    maxTokenAmount(I(5));
 
     private static final String PREFIX = MultifactorProperties.PREFIX + "sms.";
     private Object defaultValue;

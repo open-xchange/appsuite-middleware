@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.backupString.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 import com.openexchange.multifactor.MultifactorProperties;
 
@@ -65,12 +66,12 @@ public enum MultifactorBackupStringProperty implements Property {
      *
      * Only providers which are "enabled" can be used by a user.
      */
-    enabled(true),
+    enabled(Boolean.TRUE),
 
     /**
      * Defines the length of the string generated
      */
-    stringLength(32);
+    stringLength(I(32));
 
     private static final String PREFIX = MultifactorProperties.PREFIX + "backupString.";
     private Object defaultValue;
@@ -79,17 +80,11 @@ public enum MultifactorBackupStringProperty implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;

@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.totp.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -139,7 +140,7 @@ public class MultifactorTotpProvider implements MultifactorProvider {
     private String getDefaultName(MultifactorRequest multifactorRequest) throws OXException {
         final int count = getCount(multifactorRequest) + 1;
         final String name = StringHelper.valueOf(multifactorRequest.getLocale()).getString(TotpStrings.AUTHENTICATOR_DEFAULT_NAME);
-        return String.format(name, count);
+        return String.format(name, I(count));
     }
 
     private void doAuthenticationInternal(ChallengeAnswer answer, TotpMultifactorDevice device) throws OXException {
@@ -178,7 +179,7 @@ public class MultifactorTotpProvider implements MultifactorProvider {
 
     @Override
     public Collection<MultifactorDevice> getEnabledDevices(MultifactorRequest multifactorRequest) throws OXException {
-        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled()).collect(Collectors.toList());
+        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled().booleanValue()).collect(Collectors.toList());
     }
 
     @Override
@@ -214,13 +215,13 @@ public class MultifactorTotpProvider implements MultifactorProvider {
                 doAuthenticationInternal(answer, pendingDevice.get());
 
                 //Enable the device
-                pendingDevice.get().enable(true);
+                pendingDevice.get().enable(Boolean.TRUE);
 
                 try {
                     //Add the device
                     deviceStorage.registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), pendingDevice.get());
                 } catch(Exception e) {
-                    pendingDevice.get().enable(false);
+                    pendingDevice.get().enable(Boolean.FALSE);
                     throw e;
                 }
 
