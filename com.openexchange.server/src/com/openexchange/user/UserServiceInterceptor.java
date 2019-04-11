@@ -67,6 +67,8 @@ public interface UserServiceInterceptor {
      * The constant for empty properties.
      */
     public static final Map<String, Object> EMPTY_PROPS = Collections.emptyMap();
+    
+    public static final String PROP_CONNECTION = "connection";
 
     /**
      * Gets the ranking for this interceptor, allowing a defined execution order of multiple interceptor implementations. Execution order is
@@ -94,9 +96,24 @@ public interface UserServiceInterceptor {
      * @param context The context
      * @param user A reference to the user data of the created user.
      * @param contactData A reference to the contact data of the created user. Possibly <code>null</code>.
+     * @param properties Arbitrary properties associated with this interception call; may be <code>null</code>
      * @throws OXException If interception fails
+     * @see #EMPTY_PROPS
      */
-    void afterCreate(Context context, User user, Contact contactData) throws OXException;
+    void afterCreate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException;
+
+    /**
+     * Invoked after a user is created.
+     *
+     * @param context The context
+     * @param user A reference to the user data of the created user.
+     * @param contactData A reference to the contact data of the created user. Possibly <code>null</code>.
+     * @throws OXException If interception fails
+     * @see #afterCreate(Context, User, Contact, Map)
+     */
+    default void afterCreate(Context context, User user, Contact contactData) throws OXException {
+        afterCreate(context, user, contactData, EMPTY_PROPS);
+    }
 
     /**
      * Invoked before a user is updated.

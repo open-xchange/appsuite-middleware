@@ -78,7 +78,7 @@ public abstract class AbstractUserServiceInterceptor implements UserServiceInter
     }
 
     @Override
-    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
+    public void afterCreate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         // no
     }
 
