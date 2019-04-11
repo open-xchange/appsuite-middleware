@@ -52,8 +52,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 /opt/open-xchange/lib/com.openexchange.multifactor.clt.jar
 
 %changelog
