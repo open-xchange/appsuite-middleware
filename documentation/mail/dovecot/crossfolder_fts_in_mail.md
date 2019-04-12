@@ -1,5 +1,5 @@
 ---
-title: Cross-folder fulltext search with Dovecot 
+title: Cross-folder Fulltext Search with Dovecot 
 classes: toc
 icon: fa-search
 ---

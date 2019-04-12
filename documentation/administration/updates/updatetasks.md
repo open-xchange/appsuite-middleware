@@ -1,5 +1,5 @@
 ---
-title: Update tasks
+title: Update Tasks
 classes: toc
 icon: fa-tasks
 ---

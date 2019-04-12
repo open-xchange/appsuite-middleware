@@ -1,5 +1,5 @@
 ---
-title: Upgrading without downtimes
+title: Upgrading Without Downtimes
 classes: toc
 icon: fa-level-up
 ---

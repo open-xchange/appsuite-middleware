@@ -1,5 +1,6 @@
 ---
-title: Proxy support
+title: Proxy Support
+classes: toc
 icon: fa-arrows-alt
 ---
 

@@ -1,5 +1,6 @@
 ---
 title: Microsoft
+classes: toc
 icon: fa-windows
 ---
 

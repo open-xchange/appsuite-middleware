@@ -1,5 +1,5 @@
 ---
-title: Session management
+title: Session Management
 classes: toc
 icon: fa-clock-o
 ---

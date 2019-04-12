@@ -1,5 +1,6 @@
 ---
 title: Audit Logging
+classes: toc
 icon: fa-tasks
 ---
 

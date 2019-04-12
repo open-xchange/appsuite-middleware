@@ -1,5 +1,5 @@
 ---
-title: Context provisioning
+title: Context Provisioning
 classes: toc
 icon: fa-connectdevelop
 ---

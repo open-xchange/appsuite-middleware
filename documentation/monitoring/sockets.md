@@ -1,5 +1,5 @@
 ---
-title: Socket monitoring
+title: Socket Monitoring
 classes: toc
 icon: fa-eye
 ---

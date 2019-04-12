@@ -1,5 +1,5 @@
 ---
-title: Configure trusted TLS certificates
+title: Configure Trusted TLS Certificates
 classes: toc
 icon: fa-certificate
 ---

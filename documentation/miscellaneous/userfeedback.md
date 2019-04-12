@@ -1,5 +1,5 @@
 ---
-title: User feedback
+title: User Feedback
 icon: fa-commenting
 ---
 

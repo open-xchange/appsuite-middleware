@@ -1,5 +1,5 @@
 ---
-title: Metrics overview
+title: Metrics Overview
 classes: toc
 icon: fa-bar-chart
 ---

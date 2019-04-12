@@ -1,5 +1,5 @@
 ---
-title: Database connection encryption
+title: Database Connection Encryption
 classes: toc
 icon: fa-database
 ---

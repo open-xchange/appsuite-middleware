@@ -1,5 +1,5 @@
 ---
-title: Supported databases
+title: Supported Databases
 classes: toc
 icon: fa-database
 ---
