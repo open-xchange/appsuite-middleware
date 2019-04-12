@@ -1,5 +1,5 @@
 ---
-title: Upgrading from 7.10.0 without downtimes
+title: Upgrading without downtimes
 ---
 
 Starting with 7.10.0, it is possible to upgrade directly to to any of its successor future releases without having any downtimes. This guide is mainly focused on sites with multiple OX nodes and multiple database schemata 

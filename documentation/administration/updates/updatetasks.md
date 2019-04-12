@@ -26,43 +26,9 @@ Furthermore, an administrator may (re-)execute certain update tasks through usin
 
 # Excluding update tasks
 
-In certain scenarios, specific update tasks may be forcibly excluded from being executed. In order to do so, the update task's name needs to be entered in the configuration file ``excludedupdatetasks.properties``. Update tasks and their identifying names are announced in the release notes.
+In certain scenarios, specific update tasks may be forcibly excluded from being executed. In order to do so, the update task's name needs to be entered in the configuration file ``excludedupdatetasks.properties``. Update tasks and their identifying names are announced in the release notes. Additionally, certain collections of update tasks may be excluded via their namespace. Possible namespaces are yielded with the command line tool ``listupdatetasknamespaces``.
 
-# Core update tasks
-
-The following list gives an overview about the known update tasks of the core Open-Xchange Middleware starting from v7.8.3.
-
-- ``com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks``  
-  Removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
-- ``com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask``  
-  Updates the service identifier and scope for LinkedIN accounts stored in the table "oauthAccounts" [The LinkedIN feature was REMOVED in 7.10.0].
-- ``com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask``  
-  Adds "oauth" column to the "user_mail_account" and "user_transport_account" tables.
-- ``com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask``  
-  Adds the column "scope" to the "oauthAccounts" table.
-- ``com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2``  
-  Corrects the column definitions for the table "oauthAccounts" if needed.
-- ``com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask``  
-  Creates the "oauthAccounts" table.
-- ``com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable``  
-  Ensures a NOT NULL value for "quota_max" column in "user" and "del_user" tables.
-- ``com.openexchange.groupware.update.tasks.AllowNullValuesForStandardFolderNamesUpdateTask``  
-  Updates the "user_mail_account" table to allow NULL values in folder names.
-- ``com.openexchange.groupware.update.tasks.FolderDefaultValuesForDelTablesTasks``  
-  Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
-- ``com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask``  
-  Changes the column definition for "uuid" to "uuid BINARY(16) NOT NULL" in the "driveEventSubscriptions" table, fills it with random values, then changes the primary key to "(cid,uuid)". Also, an additional index for "(cid,service,token)" is added.
-- ``com.openexchange.download.limit.rdb.FileAccessCreateTableTask``  
-  Creates the "fileAccess" table.
-- ``com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask``  
-  Adds the column "uuid BINARY(16) DEFAULT NULL" to the table "driveEventSubscriptions".
-- ``com.openexchange.groupware.update.tasks.UserSettingMediumTextTask``  
-  Applies "MEDIUM TEXT" to "user_setting" table.
-- ``com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask``  
-  Creates tables for the "pns" bundle.
-- ``com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask``  
-  Adds the 'client' column to the table's primary key.
-
+A general overview about all pending and excluded update tasks (either via the properties file ``excludedupdatetasks.properties`` or via namespace is availale through the command line utility ``listupdatetasks``.
 
 # Error scenarios
 
