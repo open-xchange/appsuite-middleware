@@ -1,5 +1,7 @@
 ---
 title: Update tasks
+classes: toc
+icon: fa-tasks
 ---
 
 # Introduction

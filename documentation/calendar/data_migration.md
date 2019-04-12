@@ -1,5 +1,7 @@
 ---
 title: Data Migration
+classes: toc
+icon: fa-random
 ---
 
 # Introduction
