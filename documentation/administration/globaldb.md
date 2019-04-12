@@ -1,5 +1,7 @@
 ---
 title: Cross-Context Database
+classes: toc
+icon: fa-database
 ---
 
 For storing data across context boundaries, a so called "global" database is used by the server. For example, such shared data could be information about guest users or data for registered OAuth applications. This article gives an overview about the basic concepts and how to setup a global database.
