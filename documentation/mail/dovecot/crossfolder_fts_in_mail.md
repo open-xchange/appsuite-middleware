@@ -1,5 +1,7 @@
 ---
 title: Cross-folder fulltext search with Dovecot 
+classes: toc
+icon: fa-search
 ---
 
 The mail search in OX App Suite can utilize fulltext and cross-folder search capabilities, as they are provided by Dovecot. This article aims to be a short walkthrough for setting up Dovecot and the OX App Suite middleware accordingly. It is assumed that you already have a working Dovecot installation that is used as the primary mail backend for an already existing and basically configured OX App Suite installation. It is further assumed that you are running OX App Suite in version 7.8.4.

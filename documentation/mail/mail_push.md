@@ -1,5 +1,7 @@
 ---
 title: Setup Mail Push
+classes: toc
+icon: fa-bell
 ---
 
 # Enable permanent mail push listeners
@@ -32,11 +34,11 @@ This article is focussed on ``open-xchange-push-dovecot``.
 
 Putting all together the following execution flow is taken to decide whether permanent listeners are spawned or not:
 
-![Mail push decision flow](mail_push_configuration.png "Mail push decision flow")
+![Mail push decision flow](mail_push/mail_push_configuration.png "Mail push decision flow")
 
 To check at any time what listeners are currently running, there is a new command-line tool ``/opt/open-xchange/sbin/listpushusers`` that outputs the user-id/context-id pair along-side with the information if the listener is of permanent nature or bound to an active session:
 
-![listpushusers output](mail_push_configuration2.png "listpushusers output")
+![listpushusers output](mail_push/mail_push_configuration2.png "listpushusers output")
 
 An exemplary out put might look like:
 

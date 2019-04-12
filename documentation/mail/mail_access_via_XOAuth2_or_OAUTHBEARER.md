@@ -1,5 +1,7 @@
 ---
-title: Mail access via XOAuth2 or OAUTHBEARER
+title: Mail Access via XOAuth2 or OAUTHBEARER
+classes: toc
+icon: fa-drivers-license-o
 ---
 
 The OX middleware supports the authentication against mailservers via XOAuth2 or OAUTHBEARER. This document describes how it can be used.

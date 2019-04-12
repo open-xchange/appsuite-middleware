@@ -1,5 +1,7 @@
 ---
 title: Drive Mail
+classes: toc
+icon: fa-hdd-o
 ---
 
 # How it works

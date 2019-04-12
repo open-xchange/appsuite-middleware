@@ -1,5 +1,7 @@
 ---
-title: Mail proxy configuration
+title: Mail Proxy Configuration
+classes: toc
+icon: fa-arrows-alt
 ---
 
 It is possible to configure a HTTP based proxy for IMAP communication. This especially is important for environments which only allow connections to the internet via a proxy.

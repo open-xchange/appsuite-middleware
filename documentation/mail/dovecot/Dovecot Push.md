@@ -1,5 +1,7 @@
 ---
 title: Dovecot Push
+classes: toc
+icon: fa-bell
 ---
 
 This article describes how to configure the Dovecot Push feature, which allows e.g. pushing events to mobile clients/apps.

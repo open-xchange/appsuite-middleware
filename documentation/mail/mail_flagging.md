@@ -1,5 +1,7 @@
 ---
 title: Mail Flagging
+classes: toc
+icon: fa-flag
 ---
 
 #Motivation

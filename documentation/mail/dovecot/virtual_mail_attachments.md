@@ -1,5 +1,7 @@
 ---
 title: Virtual Mail Attachments Connector
+classes: toc
+icon: fa-paperclip
 ---
 
 # How it works
