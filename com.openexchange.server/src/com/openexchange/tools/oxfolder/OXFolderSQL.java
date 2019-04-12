@@ -3389,12 +3389,12 @@ public final class OXFolderSQL {
             DBPool.push(ctx, readCon);
         }
     }
-    
+
     private static final String GET_UNIQUE_USER_FOLDERNAME_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND parent=10 AND fuid<>? AND fname=?";
 
     /**
      * Check if the given folder name is unique under {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID}
-     * 
+     *
      * @param conection The (read) connection to use
      * @param contextId The context to search in
      * @param folderName The folder name to check uniqueness for
