@@ -1,7 +1,12 @@
 ---
-title: Google OAuth
+title: Google
+classes: toc
 icon: fa-google
 ---
+
+# Pre-Steps
+
+Before proceceeding, please make sure that you have [OAuth 2.0]({{ site.baseurl }}/middleware/3rd_party_integrations.html) functionality installed and properly configured on your middleware node.
 
 # Register your App
 
@@ -10,9 +15,9 @@ First things first. As with every OAuth provider, you will first need to registe
 * Sign in to [Google Developers Console](https://console.developers.google.com/) using your Google account
 * Please follow [these](https://developers.google.com/identity/sign-in/web/devconsole-project) instructions to create a new project with a client ID, which is needed to call the sign-in API
 * Enable the APIs that are relevant for your project. The middleware currently supports functionality for:
-   * [Google Drive]({{ site.baseurl }}/middleware/components/drive_accounts/google_drive.html) (Read/Write)
-   * [Google Contacts]({{ site.baseurl }}/middleware/components/contacts/google_contacts.html) (Read Only)
-   * [Google Calendars]({{ site.baseurl }}/middleware/components/calendar/google_calendar.html) (Read Only)
+   * [Google Drive](#google-drive) (Read/Write)
+   * [Google Contacts](#google-contacts) (Read Only)
+   * [Google Calendars](#google-calendars) (Read Only)
 * The following permissions are shared among Google Drive, Contacts and Calendars and should be enabled right away:
   * Google Cloud SQL
   * Google Cloud Storage
@@ -21,7 +26,7 @@ First things first. As with every OAuth provider, you will first need to registe
 * Perform the [Google's site verification](https://support.google.com/webmasters/answer/35179)
    * You can use any method listed by Google in general
    * In case our OXaaS offering is used the HTML tag and HTML file methods are not accessible but the DNS based approach is required
-* [Get your app verified by Google](https://documentation.open-xchange.com/7.10.1/middleware/components/oauth/Google%20App%20Verification.html) to avoid awkward warnings.
+* [Get your app verified by Google](https://support.google.com/cloud/answer/7454865) to avoid awkward warnings.
 
 # Configuration
 
@@ -58,7 +63,7 @@ for further information. In essence, a verification process was introduced that 
 Without verification, users will see a warning message instead of a login form in the authorization popups. While the warning itself can be ignored with some effort, 
 also the number of users that might use a certain 3rd party app with Google gets limited.
 
-![](oauth_google/Google_verification_error.jpg)
+![](google/Google_verification_error.jpg)
 
 ## Solution
 The following is necessary to avoid the limitations: (also see [Google's documentation](https://developers.google.com/apps-script/guides/client-verification#requesting_verification))
@@ -109,3 +114,54 @@ Also, you need to provide an explanation why your instance of OX App Suite requi
 It might happen that despite submitting the verification request, you get no positive answer even after weeks. In that case please answer to the submit confirmation mail 
 and ask for guidance on how to proceed to get your app verified. Google seems to react to these eMails. In our case, we were asked to again explain the requested scopes 
 in more detail. After doing that, the app was verified within a day and the warning screen was gone.
+
+# Google Contacts
+
+## Required Permissions
+
+The following Google APIs are required to enable contact synchronisation:
+
+  * Contacts API
+  * Google Cloud SQL
+  * Google Cloud Storage
+  * Google Cloud Storage JSON API
+  * [BigQuery API](https://developers.google.com/identity/protocols/googlescopes#bigqueryv2)
+
+The APIs can be enabled via the [Google Developers Console](https://console.developers.google.com/).
+
+## Configuration
+
+Note that the contact synchronisation will NOT happen automatically every time a new contact is added to the third-party provider's address book. A full sync will happen once the user has created her account, and periodically once per day. The periodic update can be enabled or disabled via the `com.openexchange.subscribe.autorun` server property.
+
+Also note that this is an one-way sync, i.e. from the third-party provider towards the AppSuite and NOT vice versa.
+
+# Google Calendar
+
+## Required Permissions
+
+The following Google APIs are required to enable calendar synchronisation:
+
+  * Calendar API
+  * Google Cloud SQL
+  * Google Cloud Storage
+  * Google Cloud Storage JSON API
+  * [BigQuery API](https://developers.google.com/identity/protocols/googlescopes#bigqueryv2)
+
+The APIs can be enabled via the [Google Developers Console](https://console.developers.google.com/).
+
+# Google Drive
+
+## Required Permissions
+
+The following Google APIs are required to enable Google DriveThen you will have to enable the Google Drive integration:
+
+  * [Drive API](https://developers.google.com/identity/protocols/googlescopes#drivev3)
+  * Drive SDK
+  * Google Cloud SQL
+  * Google Cloud Storage
+  * Google Cloud Storage JSON API
+  * [BigQuery API](https://developers.google.com/identity/protocols/googlescopes#bigqueryv2)
+
+The APIs can be enabled via the [Google Developers Console](https://console.developers.google.com/).
+
+Last, install the package `open-xchange-file-storage-googledrive` and restart the middleware node.
