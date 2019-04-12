@@ -1,29 +1,50 @@
-#!/usr/bin/env groovy
+def intermediateDir = 'analyze-idir'
+def name = 'backend'
 
-node {
-    stage 'Checkout'
-    dir('backend') {
-        checkout scm
-    }
-
-    def ant = tool 'ant'
-
-    stage 'Build'
-    def workspace = pwd()
-    sh 'rm -rvf ' + workspace + '/deb'
-    sh 'ls -lhaR ' + ant
-    withEnv(['PATH+ANT=' + ant + '/bin']) {
-        dir('backend/build') {
-            sh 'ant -f obs.xml -Dbranch=' + env.BRANCH_NAME + ' -DprojectSets=backend-packages -DfullProductName=backend -DshortProductName=backend determineProject createProject deleteObsoletePackages'
-            sh 'ant -f buildAll.xml -Dbranch=' + env.BRANCH_NAME + ' -DprojectSets=backend-packages -DfullProductName=backend -DshortProductName=backend determineProject upload'
-            sh 'rm -rvf tmp'
-            sh 'ant -f obs.xml -Dbranch=' + env.BRANCH_NAME + ' -DprojectSets=backend-packages -DfullProductName=backend -DshortProductName=backend determineProject wait4Project'
-            sh 'ant -f buildAll.xml -Dbranch=' + env.BRANCH_NAME + ' -DdebDir=' + workspace + '/deb -DprojectSets=backend-packages -DfullProductName=backend -DshortProductName=backend determineProject fetch'
+node('git&&coverity') {
+    try {
+        def workspace = pwd()
+        stage('Checkout') {
+            dir(name) {
+                checkout([$class: 'GitSCM', branches: [[name: '*/develop']], browser: [$class: 'GitWeb', repoUrl: 'https://gitweb.open-xchange.com/?p=wd/backend;'], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'PruneStaleBranch'], [$class: 'CloneOption', honorRefspec: true, noTags: true, reference: '', shallow: true], [$class: 'SubmoduleOption', disableSubmodules: false, parentCredentials: true, recursiveSubmodules: true, reference: '', trackingSubmodules: false], [$class: 'CleanCheckout']], gitTool: 'Linux', submoduleCfg: [], userRemoteConfigs: [[credentialsId: '2cb98438-7e92-4038-af72-dad91b4ff6be', url: 'https://code.open-xchange.com/git/wd/backend']]])
+            }
         }
+        dir(intermediateDir) { deleteDir() }
+        try {
+            stage('Build') {
+                def ant = tool 'ant'
+                dir(name + '/build') {
+                    withEnv(['PATH+ANT=' + ant + '/bin', 'ANT_OPTS="-XX:MaxPermSize=256M"']) {
+                        sh 'cov-build --dir ' + workspace + '/' + intermediateDir + ' ant -f buildAll.xml -DprojectSets=backend-packages -DdestDir=' + workspace + '/build buildLocally'
+                        // sh 'cov-build --dir ' + workspace + '/' + intermediateDir + ' -no-command --fs-capture-search .'
+                    }
+                }
+            }
+            stage('Analyze') {
+                sh 'cov-analyze --dir ' + workspace + '/' + intermediateDir + ' --strip-path ' + workspace + '/' + name + '/ --webapp-security --webapp-security-preview --all'
+            }
+            stage('Commit') {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: '3b5aa8e5-031b-4363-99b6-c8465a430d7a', passwordVariable: 'COVERITY_PASSWORD', usernameVariable: 'COVERITY_LOGIN']]) {
+                    sh 'cov-commit-defects --dir ' + workspace + '/' + intermediateDir + ' --host coverity.open-xchange.com --https-port 8443 --user $COVERITY_LOGIN --password $COVERITY_PASSWORD --certs /home/jenkins/coverity.pem --stream OX-Middleware-develop'
+                }
+            }
+        } finally {
+            stage('Archive') {
+                dir(intermediateDir) {
+                    archiveArtifacts 'build-log.txt'
+                    archiveArtifacts 'output/analysis-log.txt'
+                    archiveArtifacts allowEmptyArchive: true, artifacts: 'output/distributor.log'
+                }
+                archiveArtifacts 'build/**'
+            }
+            deleteDir()
+        }
+    } catch (err) {
+        emailext attachLog: true,
+            body: "${env.BUILD_URL} failed.\\n\\nFull log at: ${env.BUILD_URL}console",
+            subject: "${env.JOB_NAME} (#${env.BUILD_NUMBER}) - ${currentBuild.result}",
+            to: 'backend@open-xchange.com'
+        manager.buildFailure()
+        throw err
     }
-    // TODO collect workspace/deb artifacts
-    deleteDir()
 }
-
-// vim: ft=groovy
-
