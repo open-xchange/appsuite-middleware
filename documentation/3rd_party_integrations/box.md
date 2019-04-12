@@ -1,5 +1,7 @@
 ---
 title: Box
+classes: toc
+icon: fa-archive
 ---
 
 To setup the Box.com file store you have to install the package `open-xchange-file-storage-boxcom`.

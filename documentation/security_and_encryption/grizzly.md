@@ -1,5 +1,7 @@
 ---
 title: Grizzly with SSL
+classes: toc
+icon: fa-key
 ---
 
 This guide explains how to enable HTTPS in addition to HTTP for [Grizzly](https://javaee.github.io/grizzly/), the OX App Suite Middleware Servlet Container, using a self-signed certificate. The guide follows the simplified assumption, that Apache2 and Middleware run on the same host and only one instance of each process exists.

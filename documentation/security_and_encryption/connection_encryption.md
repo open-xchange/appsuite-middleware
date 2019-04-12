@@ -1,5 +1,7 @@
 ---
 title: Database connection encryption
+classes: toc
+icon: fa-database
 ---
 
 # Introduction

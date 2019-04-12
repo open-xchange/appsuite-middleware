@@ -1,5 +1,7 @@
 ---
 title: Configure trusted TLS certificates
+classes: toc
+icon: fa-certificate
 ---
 
 # Introduction
