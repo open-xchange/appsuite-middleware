@@ -95,7 +95,7 @@ public final class ImportExportParser {
         if (warnings != null) {
             for (int i = 0, size = warnings.length(); i < size; i++) {
                 String code = warnings.getJSONObject(i).getString("code");
-                int number = Integer.valueOf(code.substring(code.indexOf("-"), code.length())).intValue();
+                int number = Integer.valueOf(code.substring(code.indexOf("-") + 1, code.length())).intValue();
                 ConversionWarning warning = new ConversionWarning(i, getCode(number));
                 conversionWarnings.add(warning);
             }
