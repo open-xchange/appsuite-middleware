@@ -150,18 +150,19 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
     }
 
     /**
-     * Generate a salted hash from value
+     * Generate a salted hash from the given value
      *
-     * @param salt Salt to use
-     * @param value Value to be hashed
-     * @return Hash
+     * @param salt The salt to append at the end of the given value before hashing
+     * @param value The value to be hashed
+     * @return The hash = h(value || salt)
      * @throws OXException
      */
     private String hashValue(String salt, String value) throws OXException {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(salt.getBytes(StandardCharsets.UTF_8));
-            final byte[] digest = md.digest(value.getBytes(StandardCharsets.UTF_8));
+            md.update(value.getBytes(StandardCharsets.UTF_8));
+            //Adding the salt at the end to prevent potential length extension attacks
+            final byte[] digest = md.digest(salt.getBytes(StandardCharsets.UTF_8));
             return toHex(digest);
         } catch (final NoSuchAlgorithmException e) {
             throw MultifactorExceptionCodes.ERROR_CREATING_FACTOR.create(e, e.getMessage());
