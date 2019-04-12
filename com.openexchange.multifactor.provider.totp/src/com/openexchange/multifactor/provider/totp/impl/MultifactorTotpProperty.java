@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.totp.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 import com.openexchange.multifactor.MultifactorProperties;
 
@@ -65,31 +66,25 @@ public enum MultifactorTotpProperty implements Property {
      *
      * Only providers which are "enabled" can be used by a user.
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
 
     /**
      * Defines the maximum amount of characters allowed to be included in a TOTP QR-Code created by the server
      */
-    maximumQRCodeLength(300);
+    maximumQRCodeLength(I(300));
 
     private static final String PREFIX = MultifactorProperties.PREFIX + "totp.";
-    private Object defaultValue;
+    private final Object defaultValue;
 
     MultifactorTotpProperty(Object defaultValue){
         this.defaultValue = defaultValue;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;

@@ -67,7 +67,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.multifactor.Challenge;
@@ -192,15 +191,15 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
             phoneNumber = "+" + phoneNumber;
         }
 
-        if (!isPhoneNumberRegistered(multifactorRequest, phoneNumber)) {
-            DeviceNaming.applyName(sourceDevice, () -> getDefaultName(multifactorRequest));
-            if (sourceDevice.getName() != null && sourceDevice.getName().isEmpty() && (phoneNumber.length() > 4)) {
-                sourceDevice.setName("*" + phoneNumber.substring(phoneNumber.length() - 4));
-            }
-            return new SMSMultifactorDevice(newUid(), sourceDevice.getName(), phoneNumber, Autoboxing.B(sourceDevice.isBackup()));
-        } else {
+        if (isPhoneNumberRegistered(multifactorRequest, phoneNumber)) {
             throw MultifactorExceptionCodes.DEVICE_ALREADY_REGISTERED.create();
         }
+
+        DeviceNaming.applyName(sourceDevice, () -> getDefaultName(multifactorRequest));
+        if (sourceDevice.getName() != null && sourceDevice.getName().isEmpty() && (phoneNumber.length() > 4)) {
+            sourceDevice.setName("*" + phoneNumber.substring(phoneNumber.length() - 4));
+        }
+        return new SMSMultifactorDevice(newUid(), sourceDevice.getName(), phoneNumber, sourceDevice.isBackup());
     }
 
     /**

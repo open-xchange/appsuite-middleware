@@ -115,7 +115,7 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
         final TotpMultifactorDevice device = new TotpMultifactorDevice(resultSet.getString("id"),
                                                                  resultSet.getString("name"),
                                                                  resultSet.getString("secret"));
-        device.enable(resultSet.getBoolean("enabled"));
+        device.enable(resultSet.getBoolean("enabled") ? Boolean.TRUE : Boolean.FALSE);
         device.setIsTrustedApplicationDevice(resultSet.getBoolean("trustedApplication"));
         return device;
     }
@@ -147,8 +147,8 @@ public class RdbTotpMultifactorDeviceStorage extends MultifactorStorageCommon im
             statement.setString(index++, device.getName());
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
-            statement.setBoolean(index++, device.isEnabled());
-            statement.setBoolean(index++, device.isTrustedApplicationDevice());
+            statement.setBoolean(index++, device.isEnabled().booleanValue());
+            statement.setBoolean(index++, device.isTrustedApplicationDevice().booleanValue());
             statement.setString(index++, device.getSharedSecret());
             statement.executeUpdate();
         } catch (final SQLException e) {

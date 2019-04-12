@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.storage.hazelcast.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -128,7 +129,7 @@ public class HazelcastMultifactorTokenStorage<T extends MultifactorToken<?>> imp
         getMap().putIfAbsent(
             toKey(multifactorRequest,key),
             new PortableMultifactorToken(token.getLifeTime().get(), token.getValue()),
-            token.getLifeTime().map(d -> d.getSeconds()).orElse(0L),
+            token.getLifeTime().map(d -> L(d.getSeconds())).orElse(L(0L)).longValue(),
             TimeUnit.SECONDS);
     }
 

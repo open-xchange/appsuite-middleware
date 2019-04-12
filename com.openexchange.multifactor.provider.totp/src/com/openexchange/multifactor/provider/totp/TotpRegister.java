@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.totp;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
@@ -67,24 +68,15 @@ import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
  */
 public class TotpRegister {
 
-    private final int maxQrSize;
     private static final String URL= "url";
+    private final SecureRandom random = new SecureRandom();
 
-    /**
-     * Initializes a new {@link TotpRegister}.
-     *
-     * @param maxQrSize The maximum allowed length of characters included in the challenge's QR-Code
-     */
-    public TotpRegister(int maxQrSize) {
-        this.maxQrSize = maxQrSize;
-    }
     /**
      * Creates a new, 20 bytes long, random generated String using a cryptographically secure PRNG (SecureRandom).
      *
      * @return A new random secret
      */
-    private static String getNewSharedSecret() {
-        SecureRandom random = new SecureRandom();
+    private String getNewSharedSecret() {
         byte[] newSecret = new byte[20];
         random.nextBytes(newSecret);
         return new Base32().encodeToString(newSecret);
@@ -121,14 +113,15 @@ public class TotpRegister {
      *
      * @param request The {@link MultifactorRequest}
      * @param device The {@link MultifactorDevice}
+     * @param maxQrSize The maximum allowed length of characters included in the challenge's QR-Code
      * @return A new {@link TotpChallenge}
      * @throws OXException
      */
-    public TotpChallenge createChallenge(MultifactorRequest request, MultifactorDevice device) throws OXException {
-        final String newSharedSecret = TotpRegister.getNewSharedSecret();
+    public TotpChallenge createChallenge(MultifactorRequest request, MultifactorDevice device, int maxQrSize) throws OXException {
+        final String newSharedSecret = getNewSharedSecret();
         final String url = TotpRegister.generateUrl(newSharedSecret, request.getHost(), device.getName());
         if (url.length() > maxQrSize) {
-            throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create(URL, url.length(), maxQrSize);
+            throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create(URL, I(url.length()), I(maxQrSize));
         }
 
         String base64Image = "";

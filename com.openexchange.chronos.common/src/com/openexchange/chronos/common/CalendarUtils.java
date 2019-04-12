@@ -68,6 +68,7 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -1824,6 +1825,32 @@ public class CalendarUtils {
         return matchingProperties;
     }
 
+    /**
+     * Removes all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     *
+     * @param extendedProperties The extended properties
+     * @param name The property name to match
+     * @return <code>true</code> if the properties were changed as a result of the call, <code>false</code>, otherwise
+     */
+    public static boolean removeExtendedProperties(ExtendedProperties extendedProperties, String name) {
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return false;
+        }
+        if (-1 == name.indexOf('*') && -1 == name.indexOf('?')) {
+            return extendedProperties.removeAll(name);
+        }
+        boolean removed = false;
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(name));
+        for (Iterator<ExtendedProperty> iterator = extendedProperties.iterator(); iterator.hasNext();) {
+            ExtendedProperty property = iterator.next();
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                iterator.remove();
+                removed = true;
+            }
+        }
+        return removed;
+    }
+
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
     }
@@ -1905,7 +1932,7 @@ public class CalendarUtils {
      * @param updatedAttendees The updated attendees
      * @return The collection update
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) {
         return getAttendeeUpdates(originalAttendees, updatedAttendees, true, (AttendeeField[]) null);
     }
 
@@ -1919,7 +1946,7 @@ public class CalendarUtils {
      * @return The collection update
      * @throws OXException In case mapping fails
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) {
         return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
 
             @Override
@@ -1940,7 +1967,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) {
         return getEventUpdates(originalEvents, updatedEvents, true, (EventField[]) null, fieldsToMatch);
     }
 
@@ -1957,7 +1984,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) {
         return new AbstractEventUpdates(originalEvents, updatedEvents, considerUnset, ignoredFields) {
 
             @Override

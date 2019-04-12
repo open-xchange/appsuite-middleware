@@ -49,6 +49,8 @@
 
 package com.openexchange.multifactor.storage.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,12 +87,12 @@ public class MemoryMultifactorTokenStorage<T extends MultifactorToken<?>> implem
             (entry) -> {
                 Map<String,T> innerMap = entry.getValue();
                 innerMap.entrySet().removeIf(e -> e.getValue().isExpired());
-                LOG.debug("inner storage size: {}", innerMap.size());
+                LOG.debug("inner storage size: {}", I(innerMap.size()));
             }
         );
 
         storage.entrySet().removeIf(innerMap -> innerMap.getValue().isEmpty());
-        LOG.debug("storage size: {}", storage.mappingCount());
+        LOG.debug("storage size: {}", L(storage.mappingCount()));
     }
 
     private Map<String, T> getTokensFor(MultifactorRequest multifactorRequest) {

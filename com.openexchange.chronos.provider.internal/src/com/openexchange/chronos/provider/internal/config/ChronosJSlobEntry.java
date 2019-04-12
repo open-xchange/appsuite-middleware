@@ -129,7 +129,7 @@ public abstract class ChronosJSlobEntry implements JSlobEntry {
         return null;
     }
 
-    private static boolean isAvailable(ServerSession session) throws OXException {
+    private static boolean isAvailable(ServerSession session) {
         if (session.isAnonymous() || session.getUser().isGuest() || false == session.getUserPermissionBits().hasCalendar()) {
             return false;
         }

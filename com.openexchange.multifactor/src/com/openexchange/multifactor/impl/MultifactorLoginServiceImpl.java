@@ -143,7 +143,7 @@ public class MultifactorLoginServiceImpl implements MultifactorLoginService {
         }
 
         Calendar lastVer = Calendar.getInstance();
-        lastVer.setTime(new Date((Long) lastValidated));
+        lastVer.setTime(new Date(((Long) lastValidated).longValue()));
         lastVer.add(Calendar.MINUTE, validMinutes);
 
         return lastVer.after(Calendar.getInstance());

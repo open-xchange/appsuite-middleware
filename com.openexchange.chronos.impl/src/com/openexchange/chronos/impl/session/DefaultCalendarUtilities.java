@@ -99,7 +99,7 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
     }
 
     @Override
-    public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
+    public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) {
         return new DefaultEventUpdate(original, update, considerUnset, ignoredFields);
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose;
 
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.mail.compose.Message.ContentType;
 import com.openexchange.mail.compose.Message.Priority;
@@ -177,7 +178,7 @@ public class MessageDescription {
     }
 
     public MessageDescription setCc(List<Address> cc) {
-        this.cc = cc;
+        this.cc = null == cc ? cc : new LinkedList<>(cc);
         bCc = true;
         return this;
     }

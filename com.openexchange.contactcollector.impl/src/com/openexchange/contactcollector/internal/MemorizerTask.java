@@ -49,7 +49,7 @@
 
 package com.openexchange.contactcollector.internal;
 
-import java.util.List;
+import java.util.Collection;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.session.Session;
 
@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  */
 public final class MemorizerTask {
 
-    private final List<InternetAddress> addresses;
+    private final Collection<InternetAddress> addresses;
     private final boolean incrementUseCount;
     private final Session session;
 
@@ -71,7 +71,7 @@ public final class MemorizerTask {
      * @param incrementUseCount Whether use-count is supposed to be incremented
      * @param session The associated session
      */
-    public MemorizerTask(List<InternetAddress> addresses, boolean incrementUseCount, Session session) {
+    public MemorizerTask(Collection<InternetAddress> addresses, boolean incrementUseCount, Session session) {
         super();
         this.addresses = addresses;
         this.incrementUseCount = incrementUseCount;
@@ -92,7 +92,7 @@ public final class MemorizerTask {
      *
      * @return The addresses
      */
-    public List<InternetAddress> getAddresses() {
+    public Collection<InternetAddress> getAddresses() {
         return addresses;
     }
 

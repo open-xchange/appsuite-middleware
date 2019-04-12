@@ -129,7 +129,7 @@ class SimpleResultTracker {
      * @param updatedEvent The updated {@link Event}
      * @throws OXException See {@link UpdateResultImpl#UpdateResultImpl(Event, Event)}
      */
-    public void addUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    public void addUpdate(Event originalEvent, Event updatedEvent) {
         addFolders(updatedEvent);
         UpdateResult newResult = new UpdateResultImpl(originalEvent, updatedEvent);
         updateResults.add(newResult);

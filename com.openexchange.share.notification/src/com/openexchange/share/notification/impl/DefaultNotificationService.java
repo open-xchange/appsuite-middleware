@@ -188,7 +188,7 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
         if ((null != ccs) && !collectedAddresses.isEmpty()) {
-            ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), true, session);
+            ccs.memorizeAddresses(collectedAddresses, true, session);
         }
 
         return warnings;
@@ -388,10 +388,10 @@ public class DefaultNotificationService implements ShareNotificationService {
             }
         }
 
-        ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
-        if (null != ccs) {
-            if (!collectedAddresses.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), true, session);
+        if (!collectedAddresses.isEmpty()) {
+            ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
+            if (null != ccs) {
+                ccs.memorizeAddresses(collectedAddresses, true, session);
             }
         }
 

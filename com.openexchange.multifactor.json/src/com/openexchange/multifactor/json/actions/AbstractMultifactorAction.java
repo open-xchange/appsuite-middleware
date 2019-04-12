@@ -95,7 +95,7 @@ public abstract class AbstractMultifactorAction implements AJAXActionService {
      * @throws OXException
      */
     private AJAXMultifactorRequest createaMultifactorRequest(AJAXRequestData requestData, ServerSession session) {
-        session = Objects.requireNonNull(session, "session must not be null");
+        Objects.requireNonNull(session, "session must not be null");
         final User user = session.getUser();
         if (user == null) {
             return new AJAXMultifactorRequest(requestData, session, null);

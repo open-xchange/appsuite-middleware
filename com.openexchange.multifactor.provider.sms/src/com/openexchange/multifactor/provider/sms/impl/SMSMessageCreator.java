@@ -69,7 +69,7 @@ public class SMSMessageCreator {
      * @return The localized message containing the secret multifactor token
      */
     public static String createMessage(MultifactorRequest multifactorRequest, String token) {
-        multifactorRequest = Objects.requireNonNull(multifactorRequest, "session must not be null");
+        Objects.requireNonNull(multifactorRequest, "session must not be null");
         StringBuilder sb = new StringBuilder();
         sb.append(StringHelper.valueOf(multifactorRequest.getLocale()).getString(MultifactorSMSStrings.MULTIFACTOR_SMS_TEXT));
         sb.append(token);

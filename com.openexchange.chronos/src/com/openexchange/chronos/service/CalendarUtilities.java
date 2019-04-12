@@ -74,7 +74,7 @@ public interface CalendarUtilities {
      * @param ignoredFields Fields to ignore when determining the differences
      * @return The event update providing the differences
      */
-    EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException;
+    EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields);
 
     /**
      * Initializes a new event and copies some or all fields over from another event.

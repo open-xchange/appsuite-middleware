@@ -109,7 +109,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
                                         resultSet.getString("name"),
                                         resultSet.getString("phone"),
                                         resultSet.getBoolean("backup"));
-        device.enable(resultSet.getBoolean("enabled"));
+        device.enable(resultSet.getBoolean("enabled") ? Boolean.TRUE : Boolean.FALSE);
         return device;
     }
 
@@ -139,7 +139,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setString(index++, device.getName());
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
-            statement.setBoolean(index++, device.isEnabled());
+            statement.setBoolean(index++, device.isEnabled().booleanValue());
             statement.setBoolean(index++, device.isBackup());
             statement.setString(index++, device.getPhoneNumber());
             statement.executeUpdate();

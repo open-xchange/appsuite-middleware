@@ -129,7 +129,7 @@ public class TotpCore {
         int resp = 0;
         try {
             resp = Integer.parseInt(response);
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             return false;
         }
 

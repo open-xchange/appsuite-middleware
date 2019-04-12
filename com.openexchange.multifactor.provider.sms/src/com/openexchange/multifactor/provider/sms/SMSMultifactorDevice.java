@@ -76,7 +76,7 @@ public class SMSMultifactorDevice extends AbstractMultifactorDevice {
      * @param phoneNumber The phone number of this device
      * @param backup whether this device is a backup device or not
      */
-    public SMSMultifactorDevice(String id, String name, String phoneNumber, Boolean backup) {
+    public SMSMultifactorDevice(String id, String name, String phoneNumber, boolean backup) {
         super(id, MultifactorSMSProvider.NAME, name);
         setBackup(backup);
         setPhoneNumber(phoneNumber);

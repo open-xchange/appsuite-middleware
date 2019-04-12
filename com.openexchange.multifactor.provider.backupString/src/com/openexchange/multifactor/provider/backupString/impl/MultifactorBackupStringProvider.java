@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.backupString.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -206,7 +207,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
 
     @Override
     public Collection<MultifactorDevice> getEnabledDevices(MultifactorRequest multifactorRequest) throws OXException {
-        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled()).collect(Collectors.toList());
+        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled().booleanValue()).collect(Collectors.toList());
     }
 
     @Override
@@ -237,7 +238,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
             inputDevice.getName(),
             hashValue(deviceId, newSharedSecret) /*we do only persist the hashed representation of the secret*/,
             newSharedSecret.length());
-        device.enable(true);
+        device.enable(Boolean.TRUE);
 
         // Just add device here, no finishRegistration action needed.
         deviceStorage.registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), device);
@@ -280,7 +281,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
 
             @Override
             public Map<String, Object> getChallenge() {
-                return Collections.singletonMap(BackupStringMultifactorDevice.BACKUP_STRING_LENGTH_PARAMETER, device.get().getSecretLength());
+                return Collections.singletonMap(BackupStringMultifactorDevice.BACKUP_STRING_LENGTH_PARAMETER, I(device.get().getSecretLength()));
             }
 
         };

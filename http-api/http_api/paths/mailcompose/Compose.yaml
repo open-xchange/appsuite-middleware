@@ -61,14 +61,22 @@
         name: columns
         in: query
         type: string
-        description: A comma-separated list of columns to return. Each column is specified by the name of the Composition Space attribute. If no columns are specified only the "id" columne is set.
+        description: A comma-separated list of columns to return. Each column is specified by the name of the Composition Space attribute. If no columns are specified only the "id" column is set.
         required: false
 
     responses:
       200:
         description: A JSON array containing message models.
         schema:
-          $ref: "#/definitions/MailComposeResponse"
+          type: array
+          items:
+            type: object
+            properties:
+              fullObject:
+                $ref: "#/definitions/MailComposeResponse"
+              ids:
+                type: integer
+                description: Composition Space identifier, if no columns are requested.
       400:
         description: Bad request, response contains error message.
       401:

@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.backupString;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.multifactor.AbstractMultifactorDevice;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.provider.backupString.impl.MultifactorBackupStringProvider;
@@ -129,7 +130,7 @@ public class BackupStringMultifactorDevice extends AbstractMultifactorDevice {
      * @return The original length of the unhashed secret
      */
     public int getSecretLength() {
-        return getParameter(BACKUP_STRING_LENGTH_PARAMETER);
+        return this.<Integer> getParameter(BACKUP_STRING_LENGTH_PARAMETER).intValue();
     }
 
     /**
@@ -139,7 +140,7 @@ public class BackupStringMultifactorDevice extends AbstractMultifactorDevice {
      * @return this
      */
     public BackupStringMultifactorDevice setSecretLength(int length) {
-        setParameter(BACKUP_STRING_LENGTH_PARAMETER, length);
+        setParameter(BACKUP_STRING_LENGTH_PARAMETER, I(length));
         return this;
     }
 }

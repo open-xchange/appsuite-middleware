@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.util;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.google.common.base.CharMatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -96,7 +97,7 @@ public class DeviceNaming {
             device.setName(defaultName.get());
         } else {
             if (device.getName().length() > MAX_NAME_LENGHT) {
-                throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create("name", device.getName().length(), MAX_NAME_LENGHT);
+                throw MultifactorExceptionCodes.INVALID_ARGUMENT_LENGTH.create("name", I(device.getName().length()), I(MAX_NAME_LENGHT));
             }
             //Remove all control characters from the device name in order to prevent injecting those characters into log-files or terminal outputs
             device.setName(CharMatcher.javaIsoControl().removeFrom(device.getName()));
