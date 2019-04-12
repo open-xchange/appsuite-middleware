@@ -16,6 +16,8 @@ import org.junit.Test;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
@@ -61,7 +63,7 @@ public class DetachTest extends InfostoreAJAXTest {
         itm.revert(file.getId());
         assertFalse(itm.getLastResponse().hasError());
         assertNotNull(itm.getLastResponse().getTimestamp());
-        checkVersions(origId, "0", 0);;
+        checkVersions(origId, "0", 0);
     }
 
     public void checkVersions(String objectId, String version, int numberoOfVersions) throws Exception {
@@ -92,6 +94,7 @@ public class DetachTest extends InfostoreAJAXTest {
         final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 1, 3, 5, 6 });
         assertEquals(0, notDetached.length);
 
+        itm.versions(origId, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
         AbstractAJAXResponse lastResponse = itm.getLastResponse();
         assertFalse(lastResponse.hasError());
         // Current Version reverts to 4 (being the newest available version
