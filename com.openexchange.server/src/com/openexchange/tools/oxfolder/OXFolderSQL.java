@@ -77,6 +77,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.EmptyResultSet;
 import com.openexchange.database.IllegalMixOfCollationsSQLException;
 import com.openexchange.database.StringLiteralSQLException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderPath;
@@ -681,7 +682,26 @@ public final class OXFolderSQL {
         return updated;
     }
 
-    private static final String SQL_UPDATE_NAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
+    /**
+     * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
+     *
+     * @param folderId The folder ID
+     * @param newName The new name to set
+     * @param lastModified The last modified timestamp
+     * @param modifiedBy The user who shall be inserted as modified-by
+     * @param ctx The context
+     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws SQLException If a SQL error occurs
+     */
+    public static void updateName(int folderId, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
+        Connection writeCon = null;
+        try {
+            writeCon = DBPool.pickupWriteable(ctx);
+            updateName(folderId, newName, lastModified, modifiedBy, writeCon, ctx);
+        } finally {
+            Database.back(ctx, true, writeCon);
+        }
+    }
 
     /**
      * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
@@ -690,53 +710,55 @@ public final class OXFolderSQL {
      * @param newName The new name to set
      * @param lastModified The last modified timestamp
      * @param modifiedBy The user who shall be inserted as modified-by
-     * @param writeConArg A writeable connection or <code>null</code> to fetch a new one from pool
+     * @param writeCon A writeable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    public static void updateName(final int folderId, final String newName, final long lastModified, final int modifiedBy, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
-        Connection writeCon = writeConArg;
-        boolean closeWriteCon = false;
+    public static void updateName(int folderId, String newName, long lastModified, int modifiedBy, Connection writeCon, Context ctx) throws OXException, SQLException {
+        if (null == writeCon) {
+            updateName(folderId, newName, lastModified, modifiedBy, ctx);
+            return;
+        }
+
+        String currentName = getFolderName(folderId, writeCon, ctx);
+        if (newName.equals(currentName)) {
+            // That name is already set
+            return;
+        }
+        
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean startedTransaction = false;
+        int rows = -1;
+        do {
+            try {
+                // Do the update
+                stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ? AND fname = ?");
+                stmt.setString(1, newName);
+                stmt.setLong(2, lastModified);
+                stmt.setInt(3, modifiedBy);
+                stmt.setInt(4, ctx.getContextId());
+                stmt.setInt(5, folderId);
+                stmt.setString(6, currentName);
+                rows = executeUpdate(stmt);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+            }
+        } while (rows <= 0);
+    }
+
+    @SuppressWarnings("resource")
+    private static String getFolderName(int folderId, Connection writeCon, Context ctx) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            if (writeCon == null) {
-                writeCon = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            startedTransaction = writeCon.getAutoCommit();
-            if (startedTransaction) {
-                writeCon.setAutoCommit(false);
-                rollback = true;
-            }
-
-            // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
-
-            // Do the update
-            stmt = writeCon.prepareStatement(SQL_UPDATE_NAME);
-            stmt.setString(1, newName);
-            stmt.setLong(2, lastModified);
-            stmt.setInt(3, modifiedBy);
+            // Read current name
+            stmt = writeCon.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
             stmt.setInt(4, ctx.getContextId());
             stmt.setInt(5, folderId);
-            executeUpdate(stmt);
-
-            if (startedTransaction) {
-                writeCon.commit();
-                rollback = false;
-                writeCon.setAutoCommit(true);
-            }
+            rs = stmt.executeQuery();
+            return rs.getString(1);
         } finally {
-            if (startedTransaction && rollback) {
-                if (null != writeCon) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
-                }
-            }
-            closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
