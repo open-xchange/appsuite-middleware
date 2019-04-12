@@ -1,5 +1,7 @@
 ---
 title: Supported databases
+classes: toc
+icon: fa-database
 ---
 
 

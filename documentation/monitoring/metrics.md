@@ -1,5 +1,7 @@
 ---
 title: Metrics overview
+classes: toc
+icon: fa-bar-chart
 ---
 
 # Introduction
@@ -11,14 +13,13 @@ You can access a list of those metrics with descriptions via jolokia. E.g. for l
 curl http://yourname:yourpassword@localhost:8009/monitoring/jolokia/list/com.openexchange.metrics
 ```
 
-Further information about how to setup jolokia can be found [here](login_counter_howto.html).
+Further information about how to setup jolokia can be found [here](jolokia.html).
 
 To access the value of a metric use:
 
 ```
 curl http://yourname:yourpassword@localhost:8009/monitoring/jolokia/read/com.openexchange.metrics:<metric_name>
 ```
-
 
 # Metric overview
 
