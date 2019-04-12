@@ -761,12 +761,27 @@ public final class IMAPConversationWorker {
             {
                 // Switch folder
                 imapMessageStorage.openReadOnly(sentFullName);
-                final List<MailMessage> sentMessages = Conversations.messagesFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope, examineHasAttachmentUserFlags, previewSupported);
-                for (final Conversation conversation : conversations) {
-                    for (final MailMessage sentMessage : sentMessages) {
-                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                            conversation.addMessage(sentMessage);
+                List<MailMessage> sentMessages = Conversations.messagesFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope, examineHasAttachmentUserFlags, previewSupported);
+                if (false == sentMessages.isEmpty()) {
+                    // Filter messages already contained in conversations
+                    {
+                        Set<String> allMessageIds = new HashSet<>(conversations.size());
+                        for (final Conversation conversation : conversations) {
+                            conversation.addMessageIdsTo(allMessageIds);
                         }
+                        for (Iterator<MailMessage> iter = sentMessages.iterator(); iter.hasNext();) {
+                            MailMessage sentMessage = iter.next();
+                            if (allMessageIds.contains(sentMessage.getMessageId())) {
+                                // Already contained
+                                iter.remove();
+                            }
+                        }
+                    }
+
+                    if (false == sentMessages.isEmpty()) {
+                        // Add to conversation if references or referenced-by
+                        Conversations.foldAndMergeWithList(conversations, sentMessages);
+                        sentMessages = null;
                     }
                 }
                 // Switch back folder
