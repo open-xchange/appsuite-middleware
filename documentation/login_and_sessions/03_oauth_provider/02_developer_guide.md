@@ -1,6 +1,10 @@
 ---
 title: Client Developer Guide
+classes: toc
+icon: fa-code
 ---
+
+<!-- Change to 'fa-dev' icon once we are on FontAwesome 5.x -->
 
 # General Assumptions
 

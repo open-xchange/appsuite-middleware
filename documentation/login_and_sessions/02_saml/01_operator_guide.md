@@ -1,5 +1,7 @@
 ---
 title: Operator Guide
+classes: toc
+icon: fa-book
 ---
 
 # Installation

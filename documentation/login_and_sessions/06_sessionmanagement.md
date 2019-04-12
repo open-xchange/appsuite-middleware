@@ -1,5 +1,7 @@
 ---
 title: Session management
+classes: toc
+icon: fa-clock-o
 ---
 
 # Introduction

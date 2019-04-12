@@ -1,6 +1,10 @@
 ---
 title: Developer Guide
+classes: toc
+icon: fa-code
 ---
+
+<!-- Change to 'fa-dev' icon once we are on FontAwesome 5.x -->
 
 The core implementation is contained in its own bundle `com.openexchange.saml` within the backend repository and relies on the OpenSAML library (https://wiki.shibboleth.net/confluence/display/OpenSAML). This guide assumes that you are familiar with the terminology and technological aspects of SAML 2.0.
 

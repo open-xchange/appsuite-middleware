@@ -1,6 +1,12 @@
 ---
-title: Session Cookies
+title: Cookies
+classes: toc
+icon: fa-circle
 ---
+
+<!-- Upon upgrade to FontAwesome 5.x change to 'fa-cookie-bite' icon -->
+
+# Cookies in General
 
 Belows table describes all cookies that may be set by App Suite Middleware to
 maintain user session state across HTTP requests. The information in this article
@@ -25,3 +31,16 @@ integrations).
 
  * `<hash>`: A hash value based on certain HTTP request parameters that are supposed to be unique per user session.
  * `<webmail>`: Domain under which the App Suite web interface is directly available, e.g. `webmail.example.com`.
+
+
+# Shard Cookie
+To route HTTP requests to their correct App Suite shard, an additional cookie is needed to identify the corresponding server. As most requests are authenticated and coupled to a session, the sharding cookie is aligned with usual session cookies. The cookies name is `open-xchange-shard`.
+
+#Usage
+This cookie is relevant only for the App Suite HTTP API and therefore not applied for other HTTP-based protocols like CardDav.
+
+# Lifecycle
+The cookie is set after login with the same parameters as the other session cookies, except for the value. The value is loaded from the server configuration and `default` if not set otherwise. On every session validation the cookies existence and value is also verified. As long as a valid session exists, this cookie will also exist and be recreated if absent or the value will be adjusted if it differs from the current configuration. The cookie is deleted alongside all other session related cookies or on expiry.
+
+# Configuration
+The value of the cookie can be configured by a lean and reloadable property, `com.openxchange.server.shardName` whose default value is `'default'`. This property is part of the server configuration and should reside in the `server.properties` file.

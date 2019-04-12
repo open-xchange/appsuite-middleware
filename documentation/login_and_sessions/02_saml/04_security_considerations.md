@@ -1,5 +1,7 @@
 ---
 title: Security Considerations
+classes: toc
+icon: fa-lock
 ---
 
 # General Assumptions
