@@ -85,7 +85,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -2161,11 +2160,6 @@ final class ListLsubCollection implements Serializable {
             return false;
         }
 
-        @Override
-        public Rights getMyRights() {
-            return null;
-        }
-
     }
 
     /**
@@ -2206,8 +2200,6 @@ final class ListLsubCollection implements Serializable {
         private transient List<ACL> acls;
 
         private Boolean hasChildren;
-
-        private transient Rights myRights;
 
         private Boolean subscribed;
 
@@ -2495,16 +2487,6 @@ final class ListLsubCollection implements Serializable {
         @Override
         public int getUnreadMessageCount() {
             return null == status ? -1 : status[2];
-        }
-
-        /**
-         * Gets MYRIGHTS.
-         *
-         * @return MYRIGHTS or <code>null</code> if absent
-         */
-        @Override
-        public Rights getMyRights() {
-            return myRights;
         }
 
         @Override
