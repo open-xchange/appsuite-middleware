@@ -746,15 +746,14 @@ public final class OXFolderSQL {
         } while (rows <= 0);
     }
 
-    @SuppressWarnings("resource")
     private static String getFolderName(int folderId, Connection writeCon, Context ctx) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             // Read current name
             stmt = writeCon.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
-            stmt.setInt(4, ctx.getContextId());
-            stmt.setInt(5, folderId);
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
             return rs.getString(1);
         } finally {
