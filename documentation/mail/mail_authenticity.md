@@ -1,5 +1,7 @@
 ---
 title: Mail Authenticity
+classes: toc
+icon: fa-certificate
 ---
 
 Since 7.10.0 the OX middleware provides the Mail Authenticity feature for the end user which enables her to be visually aware of the authentication status of emails that she receives and helps her identify phishing mails from regular communication.

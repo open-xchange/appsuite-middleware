@@ -1,5 +1,7 @@
 ---
 title: Health Check
+classes: toc
+icon: fa-heart
 ---
 
 # Introduction

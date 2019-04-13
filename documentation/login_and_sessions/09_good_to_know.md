@@ -1,5 +1,7 @@
 ---
-title: Good to know
+title: Good to Know
+classes: toc
+icon: fa-info
 ---
 
 # Introduction

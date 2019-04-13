@@ -1,5 +1,6 @@
 ---
 title: Twitter OAuth
+classes: toc
 icon: fa-twitter
 ---
 
@@ -21,7 +22,7 @@ Enter the appropriate information for:
  * *Callback URLs*
  * *Tell us how this app will be used* 
 
-![](oauth_twitter/create_app.png)
+![](twitter/create_app.png)
 
 **Note**: the callback URL has to use the `https` protocol and end with the `/ajax/defer` path. 
 
@@ -29,13 +30,13 @@ Click on *Create*
 
 When the application is successfully created, [access tokens](https://developer.twitter.com/en/docs/basics/authentication/guides/access-tokens), i.e. the consumer API key and secret will be automatically created for you. You can view those under the *Keys and Access Tokens* tab.
 
-![](oauth_twitter/tokens.png)
+![](twitter/tokens.png)
 
 Those tokens will be used to configure the AppSuite (that is the individual nodes of the middleware) that should have access to this Twitter App.
 
 A last step is required to ensure that the user will only view the latest Tweets and not post any new ones. For that, you will have to navigate to the *Permissions* tab and set the *Access permission* to *Read-only*.
 
-![](oauth_twitter/readonly.png)
+![](twitter/readonly.png)
 
 # Configuration
 

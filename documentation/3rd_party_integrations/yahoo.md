@@ -1,5 +1,6 @@
 ---
 title: Yahoo! Contacts
+classes: toc
 icon: fa-yahoo
 ---
 

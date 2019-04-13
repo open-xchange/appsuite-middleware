@@ -1,6 +1,10 @@
 ---
-title: Socket monitoring
+title: Socket Monitoring
+classes: toc
+icon: fa-eye
 ---
+
+<!-- Once we upgrade to FontAwesome 5.x use the 'fa-network-wired' icon -->
 
 This article describes how monitoring for socket connection can be enabled and configured. A socket connection is any kind of TCP connection the Open-Xchange Middleware opens to an end-point; be it a back-end service like IMAP, MySQL, etc. or certain remote HTTP end-points (e.g. OAuth).
 

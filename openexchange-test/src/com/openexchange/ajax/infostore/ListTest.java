@@ -1,9 +1,10 @@
 
 package com.openexchange.ajax.infostore;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.File;
@@ -79,7 +80,7 @@ public class ListTest extends InfostoreAJAXTest {
         for (int i = 0; i < size; i++) {
             final JSONArray row = arr.optJSONArray(i);
             assertTrue(row.length() == 1);
-            assertNotEquals(0, row.optLong(0));
+            assertNotNull(L(row.optLong(0)));
         }
     }
 

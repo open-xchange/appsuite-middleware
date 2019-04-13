@@ -3,7 +3,6 @@ package com.openexchange.ajax.infostore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
@@ -165,7 +164,9 @@ public class SearchTest extends AbstractAJAXSession {
             final JSONArray row = results.optJSONArray(i);
             assertNotNull(row);
             assertTrue(row.length() > 0);
-            assertNotEquals(0, row.optLong(0));
+            Object opt = row.opt(0);
+            assertNotNull(opt);
+            assertEquals(all[i], opt.toString());
         }
     }
 

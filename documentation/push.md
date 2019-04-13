@@ -1,4 +1,4 @@
 ---
 title: Push Notifications
-icon: fa-shield
+icon: fa-bell
 ---

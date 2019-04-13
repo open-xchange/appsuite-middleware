@@ -1,5 +1,7 @@
 ---
-title: Context provisioning
+title: Context Provisioning
+classes: toc
+icon: fa-connectdevelop
 ---
 
 This article outlines how context provisioning has been improved starting with v7.10. It describes the preconditions, implemented ideas and changes as well as modified and newly introduced command-line tools.

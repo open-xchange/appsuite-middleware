@@ -1,5 +1,7 @@
 ---
-title: Ignore deleted Mails
+title: Ignore Deleted Mails
+classes: toc
+icon: fa-ban
 ---
 
 With 7.10.0 it is possible to ignore mails marked as deleted for the primary mail account. To activate this mode it is only necessary to set the property 

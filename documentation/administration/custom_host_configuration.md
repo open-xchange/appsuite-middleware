@@ -1,5 +1,7 @@
 ---
-title: Custom host configuration
+title: Custom Host Configuration
+classes: toc
+icon: fa-cogs
 ---
 
 # Introduction

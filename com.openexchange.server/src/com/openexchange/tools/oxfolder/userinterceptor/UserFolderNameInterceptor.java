@@ -170,7 +170,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
                 Databases.autocommit(connection);
             }
 
-            if (close && null != connection) {
+            if (close) {
                 databaseService.backWritable(context, connection);
             }
         }

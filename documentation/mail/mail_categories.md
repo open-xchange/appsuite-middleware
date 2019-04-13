@@ -1,5 +1,7 @@
 ---
-title: Mail categories
+title: Mail Categories
+classes: toc
+icon: fa-tag
 ---
 
 # Mail categories documentation

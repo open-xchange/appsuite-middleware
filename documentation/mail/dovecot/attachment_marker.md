@@ -1,5 +1,7 @@
 ---
-title: Attachment marker
+title: Attachment Marker
+classes: toc
+icon: fa-paperclip
 ---
 
 # Introduction

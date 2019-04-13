@@ -1,5 +1,7 @@
 ---
 title: Monitoring Interface
+classes: toc
+icon: fa-info
 ---
 
 # Introduction

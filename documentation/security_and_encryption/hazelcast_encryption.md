@@ -1,5 +1,7 @@
 ---
 title: Encryption for Hazelcast
+classes: toc
+icon: fa-spinner
 ---
 
 # Overview

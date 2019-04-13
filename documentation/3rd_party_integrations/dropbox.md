@@ -1,5 +1,6 @@
 ---
 title: Dropbox
+classes: toc
 icon: fa-dropbox
 ---
 

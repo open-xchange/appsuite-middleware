@@ -1,5 +1,7 @@
 ---
-title: Ports overview
+title: Ports Overview
+classes: toc
+icon: fa-random
 ---
 
 This document describes the ports the AppSuite middleware listens on and their related configuration properties.

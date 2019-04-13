@@ -1,5 +1,6 @@
 ---
 title: Filestore
+classes: toc
 icon: fa-archive
 ---
 

@@ -1,5 +1,7 @@
 ---
-title: Message alarm handling
+title: Message Alarm Handling
+classses: toc
+icon: fa-bell-o
 ---
 
 This article will describe how message alarms like e-mail alarms are handled by the middleware. 

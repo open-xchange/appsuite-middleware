@@ -1,5 +1,7 @@
 ---
 title: Weakforced Connector
+classes: toc
+icon: fa-compress
 ---
 
 # How it works

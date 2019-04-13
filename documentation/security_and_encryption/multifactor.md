@@ -1,5 +1,7 @@
 ---
 title: Multifactor Authentication (since 7.10.2)
+classes: toc
+icon: fa-link
 ---
 
 Appsuite version 7.10.2 provides methods for users to require secondary, additional methods of authentication before creating a valid Appsuite session.  These methods may include SMS messages, Time based authenticator methods, U2F compatible devices/keyfobs, and other custom methods.

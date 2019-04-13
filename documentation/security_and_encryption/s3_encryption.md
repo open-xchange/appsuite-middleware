@@ -1,5 +1,7 @@
 ---
 title: Amazon SSE-S3
+classes: toc
+icon: fa-cubes
 ---
 
 Amazon SSE-S3 or Amazon Server Side Encryption is an encryption option which can be activated to encrypt communication within the amazon storage. The keys are managed by amazon itself and they are rotated regulary.

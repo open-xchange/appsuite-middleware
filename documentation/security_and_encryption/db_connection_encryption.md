@@ -1,5 +1,7 @@
 ---
-title: Database connection encryption
+title: Database Connection Encryption
+classes: toc
+icon: fa-database
 ---
 
 # Introduction
@@ -161,7 +163,6 @@ keytool -list -v -keystore keystore
 To activate SSL you have to set a bunch of properties in the configuration file 'dbconnector.yaml'. For a two way authentication, the file should look like this
 
 ```
-
 com.mysql.jdbc:
 # The driver properties should be kept at their defaults
     useUnicode: true
@@ -193,14 +194,21 @@ clientCertificateKeyStorePassword: changeit
 clientCertificateKeyStoreType: PKCS12
 ```
 
-Note: Properties for the `configdb` will be overwritten by the properties defined in `configdb.properties`!!
-
-Note: Based on the underlying JDK there might be problems with the available TLS versions. Newer JDK versions might only use TLSv1.1 or higher and the configured database might only accept TLSv1. PLease have a look at the [supported database]({{ site.baseurl }}/middleware/components/database/supported_versions.html) section, for supported TLS versions.
-
 For a full property overview please have a look at the official [documentation](https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-configuration-properties.html).
 
+Note: Properties for the `configdb` will be overwritten by the properties defined in `configdb.properties`!!
 
-# Reload properties and certificates in production
+Note: Based on the underlying JDK there might be problems with the available TLS versions. Newer JDK versions might only use TLSv1.1 or higher and the configured database might only accept TLSv1. The following table outlines the supported TLS versions:
+
+Version	|Description																											| TLS				| Released	|Supported since	
+--- 		| --- 																												| ---				| --- 		| --- 
+MariaDB 10.1	|For an overview please visit [Changes & Improvements in MariaDB 10.1](https://mariadb.com/kb/en/library/changes-improvements-in-mariadb-101/)	| TLSv1, TLSv1.1, TLSv1.2	| 2015		| 7.10.0
+MariaDB 10.2	|For an overview please visit [Changes & Improvements in MariaDB 10.2](https://mariadb.com/kb/en/library/changes-improvements-in-mariadb-102/)	| TLSv1, TLSv1.1, TLSv1.2	| 2017		| 7.10.0
+MySQL 5.6	|For an overview please visit [MySQL 5.6 Release Notes](https://dev.mysql.com/doc/relnotes/mysql/5.6/en/)			| TLSv1				| 2013		| 7.10.0 
+MySQL 5.7	|For an overview please visit [MySQL 5.7 Release Notes](https://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html)	| TLSv1, TLSv1.1		| 2015		| 7.10.0 
+
+
+## Reload properties and certificates in production
 
 The server is capable to reload the JDBC properties as well as the used certificates. To trigger such a rotation the command line tool "reloadConfiguration" is used.
 
@@ -269,5 +277,3 @@ systemclt restart mysql
 ```
 
 Note: Don't forget to remove all old certificates from the trust and the key store of the client.
-
-

@@ -49,6 +49,7 @@
 
 package com.openexchange.user.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
@@ -302,7 +303,7 @@ public final class UserServiceImpl implements UserService {
     public boolean authenticate(final User user, final String password) throws OXException {
         PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         if (passwordMech == null) {
-            throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), user.getId());
+            throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), I(user.getId()));
         }
         return passwordMech.check(password, user.getUserPassword(), user.getSalt());
     }

@@ -1,5 +1,7 @@
 ---
 title: Primary Address Header
+classes: toc
+icon: fa-at
 ---
 
 # Introduction

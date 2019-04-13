@@ -1,5 +1,6 @@
 ---
 title: XING Contacts
+classes: toc
 icon: fa-xing
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: Password change history
+title: Password Change History
 icon: fa-history
 ---
 

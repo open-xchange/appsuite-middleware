@@ -91,7 +91,7 @@ public interface UserServiceInterceptor {
     void beforeCreate(Context context, User user, Contact contactData) throws OXException;
 
     /**
-     * Invoked after a user is created.
+     * Invoked after a user is created. Default implementation uses {@link #afterCreate(Context, User, Contact)}
      *
      * @param context The context
      * @param user A reference to the user data of the created user.
@@ -100,7 +100,9 @@ public interface UserServiceInterceptor {
      * @throws OXException If interception fails
      * @see #EMPTY_PROPS
      */
-    void afterCreate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException;
+    default void afterCreate(Context context, User user, Contact contactData, @SuppressWarnings("unused") Map<String, Object> properties) throws OXException{
+        afterCreate(context, user, contactData);
+    }
 
     /**
      * Invoked after a user is created.
@@ -111,9 +113,7 @@ public interface UserServiceInterceptor {
      * @throws OXException If interception fails
      * @see #afterCreate(Context, User, Contact, Map)
      */
-    default void afterCreate(Context context, User user, Contact contactData) throws OXException {
-        afterCreate(context, user, contactData, EMPTY_PROPS);
-    }
+    void afterCreate(Context context, User user, Contact contactData) throws OXException;
 
     /**
      * Invoked before a user is updated.

@@ -1,5 +1,7 @@
 ---
 title: Login Rate Limiting
+classes: toc
+icon: fa-filter
 ---
 
 # Introduction

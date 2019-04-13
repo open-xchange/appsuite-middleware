@@ -1,5 +1,6 @@
 ---
 title: Web Sockets
+classes: toc
 icon: fa-rocket
 ---
 

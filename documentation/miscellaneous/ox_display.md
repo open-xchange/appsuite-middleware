@@ -1,5 +1,7 @@
 ---
 title: OX Display
+classes: toc
+icon: fa-bullhorn
 ---
 
 [OX Display](http://oxpedia.org/wiki/index.php?title=AppSuite:OX_Monetization) advertising plugins can be configured by making use of server-side configuration. For that, App Suite Middleware offers an administrative API to set the according configuration and App Suite UI can fetch and use that configuration through [App Suite HTTP API](https://documentation.open-xchange.com/components/middleware/http/latest/index.html#!/Advertisement/getAdvertisementConfig).
