@@ -116,7 +116,7 @@ public class NamespaceFolder extends IMAPFolder {
     @Override
     public Folder[] listSubscribed(final String pattern) throws MessagingException {
         String fullName = this.fullName;
-        char separator = this.separator;
+        char separator = getSeparator();
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
             @Override
