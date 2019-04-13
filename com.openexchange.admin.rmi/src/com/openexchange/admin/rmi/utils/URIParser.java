@@ -90,7 +90,7 @@ public final class URIParser {
             // Nothing to do
         } else {
             // Try fallback.
-            return new URI(input);
+            return toUriIfValid(input);
         }
         final URIDefaults defs = null == defaults ? URIDefaults.NULL : defaults;
         final int port = parsePort(input, matcher.group(3), defs);
@@ -118,7 +118,7 @@ public final class URIParser {
         } else {
             // Try to parse
             try {
-                @SuppressWarnings("unused") URI uri = new URI(input);
+                toUriIfValid(input);
                 return true;
             } catch (final URISyntaxException e) {
                 return false;
@@ -134,11 +134,19 @@ public final class URIParser {
             return false;
         }
         try {
-            @SuppressWarnings("unused") URI uri = new URI(matcher.group(1), null, matcher.group(2), port, null, null, null);
+            toUriIfValid(matcher.group(1), matcher.group(2), port);
             return true;
         } catch (final URISyntaxException e) {
             return false;
         }
+    }
+
+    private static URI toUriIfValid(String scheme, String host, int port) throws URISyntaxException {
+        return new URI(scheme, null, host, port, null, null, null);
+    }
+
+    private static URI toUriIfValid(final String input) throws URISyntaxException {
+        return new URI(input);
     }
 
     /**
