@@ -53,6 +53,7 @@ import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -98,19 +99,27 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
          * Get new store...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(name);
-        if (propagateClientIp) {
-            imapStore.setPropagateClientIpAddress(session.getLocalIp());
-        }
+        boolean error = true;
         try {
-            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
-        } catch (OXException e) {
-            throw new MessagingException(e.getMessage(), e);
+            if (propagateClientIp) {
+                imapStore.setPropagateClientIpAddress(session.getLocalIp());
+            }
+            try {
+                IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+            } catch (OXException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
+            /*
+             * ... and connect it
+             */
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
+            error = false;
+            return imapStore;
+        } finally {
+            if (error) {
+                Streams.close(imapStore);
+            }
         }
-        /*
-         * ... and connect it
-         */
-        doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
-        return imapStore;
     }
 
     /**
