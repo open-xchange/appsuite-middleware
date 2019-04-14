@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.converter.mapper;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Date;
@@ -298,12 +299,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setCreated(new Date(value));
+                object.setCreated(new Date(value.longValue()));
             }
 
             @Override
             public Long get(Event object) {
-                return object.getCreated() != null ? object.getCreated().getTime() : 0l;
+                return L(object.getCreated() != null ? object.getCreated().getTime() : 0l);
             }
 
             @Override
@@ -320,12 +321,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setTimestamp(value);
+                object.setTimestamp(value.longValue());
             }
 
             @Override
             public Long get(Event object) {
-                return object.getTimestamp();
+                return L(object.getTimestamp());
             }
 
             @Override
@@ -369,12 +370,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setLastModified(new Date(value));
+                object.setLastModified(new Date(value.longValue()));
             }
 
             @Override
             public Long get(Event object) {
-                return object.getLastModified() != null ? object.getLastModified().getTime() : 0l;
+                return L(object.getLastModified() != null ? object.getLastModified().getTime() : 0l);
             }
 
             @Override

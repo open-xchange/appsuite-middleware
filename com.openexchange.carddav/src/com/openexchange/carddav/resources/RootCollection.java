@@ -50,6 +50,7 @@
 package com.openexchange.carddav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -78,7 +79,6 @@ public class RootCollection extends DAVRootCollection {
     private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
     private static final String REDUCED_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.reducedAggregatedCollection";
     private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RootCollection.class);
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
     private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";
 
@@ -110,7 +110,7 @@ public class RootCollection extends DAVRootCollection {
 			/*
 			 * add the aggregated collection as child resource
 			 */
-		    if (isReducedAggregatedCollection()) {
+		    if (isReducedAggregatedCollection().booleanValue()) {
 		        children.add(createReducedAggregatedCollection());
             } else {
                 children.add(createAggregatedCollection());
@@ -130,7 +130,7 @@ public class RootCollection extends DAVRootCollection {
 				throw protocolException(getUrl(), e);
 			}
 		}
-		LOG.debug("{}: got {} child resources.", getUrl(), children.size());
+		LOG.debug("{}: got {} child resources.", getUrl(), I(children.size()));
 		return children;
 	}
 
@@ -148,11 +148,7 @@ public class RootCollection extends DAVRootCollection {
 			/*
 			 * this is the aggregated collection
 			 */
-		    if (isReducedAggregatedCollection()) {
-                return createReducedAggregatedCollection();
-		    } else {
-	            return createAggregatedCollection();
-		    }
+		    return isReducedAggregatedCollection().booleanValue() ? createReducedAggregatedCollection() : createAggregatedCollection();
 		}
 		if (isUseFolderCollections()) {
 	        try {
@@ -191,7 +187,7 @@ public class RootCollection extends DAVRootCollection {
         if (null == this.reducedAggregatedCollection) {
             reducedAggregatedCollection = Boolean.TRUE;
             try {
-                reducedAggregatedCollection = Boolean.parseBoolean(factory.getConfigValue(REDUCED_AGGREGATED_COLLECTION_PROPERTY, "true"));
+                reducedAggregatedCollection = Boolean.valueOf(factory.getConfigValue(REDUCED_AGGREGATED_COLLECTION_PROPERTY, "true"));
             } catch (OXException e) {
                 LOG.error("error getting reduced aggregated collection property from config, falling back to 'true'", e);
             }

@@ -53,6 +53,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -216,7 +217,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         if (Strings.isNotEmpty(settings.getName())) {
             internalConfig.putSafe("name", settings.getName());
         }
-        internalConfig.putSafe("subscribed", settings.isSubscribed());
+        internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
         return internalConfig;
     }
 
@@ -256,7 +257,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
             changed = true;
         }
         if (settings.containsSubscribed() && settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
-            internalConfig.putSafe("subscribed", settings.isSubscribed());
+            internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
             changed = true;
         }
         return changed ? internalConfig : null;

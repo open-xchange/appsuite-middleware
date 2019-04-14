@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter.mapper;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -154,7 +155,7 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
             attendee.setComment(from.isNull(ChronosJsonFields.Attendee.COMMENT) ? null : from.getString(ChronosJsonFields.Attendee.COMMENT));
         }
         if (from.has(ChronosJsonFields.Attendee.RSVP)) {
-            attendee.setRsvp(from.isNull(ChronosJsonFields.Attendee.RSVP) ? null : from.getBoolean(ChronosJsonFields.Attendee.RSVP));
+            attendee.setRsvp(from.isNull(ChronosJsonFields.Attendee.RSVP) ? null : B(from.getBoolean(ChronosJsonFields.Attendee.RSVP)));
         }
         if (from.has(ChronosJsonFields.Attendee.FOLDER)) {
             attendee.setFolderId(from.isNull(ChronosJsonFields.Attendee.FOLDER) ? null : from.getString(ChronosJsonFields.Attendee.FOLDER));

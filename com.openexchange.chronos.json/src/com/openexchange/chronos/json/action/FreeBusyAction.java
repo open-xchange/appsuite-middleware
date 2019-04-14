@@ -132,7 +132,7 @@ public class FreeBusyAction extends ChronosAction {
         List<Attendee> attendees = new ArrayList<>(splitByComma.length);
         for (String attendeeId : splitByComma) {
             Attendee attendee = new Attendee();
-            attendee.setEntity(Integer.valueOf(attendeeId));
+            attendee.setEntity(Integer.parseInt(attendeeId));
             attendees.add(attendee);
         }
 

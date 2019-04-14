@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter.mapper;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -129,7 +130,7 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
 
     @Override
     protected EnumMap<AlarmTriggerField, ? extends JsonMapping<? extends Object, AlarmTrigger>> createMappings() {
-        EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>> mappings = 
+        EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>> mappings =
             new EnumMap<AlarmTriggerField, JsonMapping<? extends Object, AlarmTrigger>>(AlarmTriggerField.class);
         mappings.put(AlarmTriggerField.ACTION, new StringMapping<AlarmTrigger>(ChronosAlarmTriggerJsonFields.ACTION, null) {
 
@@ -257,12 +258,12 @@ public class AlarmTriggerMapper extends DefaultJsonMapper<AlarmTrigger, AlarmTri
             @Override
             public void set(AlarmTrigger object, String value) {
                 DateTime dateTime = DateTime.parse("UTC", value);
-                object.setTime(dateTime.getTimestamp());
+                object.setTime(L(dateTime.getTimestamp()));
             }
 
             @Override
             public String get(AlarmTrigger object) {
-                DateTime result = new DateTime(object.getTime());
+                DateTime result = new DateTime(object.getTime().longValue());
                 return result.toString();
             }
 
