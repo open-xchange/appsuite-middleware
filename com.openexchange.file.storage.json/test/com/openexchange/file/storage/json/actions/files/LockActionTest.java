@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Date;
@@ -82,7 +83,7 @@ public class LockActionTest extends FileActionTest {
         final File document = new DefaultFile();
         document.setLastModified(new Date());
 
-        fileAccess().expectCall("lock", "12", 1337l);
+        fileAccess().expectCall("lock", "12", L(1337l));
         fileAccess().expectCall("getFileMetadata", "12", FileStorageFileAccess.CURRENT_VERSION).andReturn(document);
 
         perform();

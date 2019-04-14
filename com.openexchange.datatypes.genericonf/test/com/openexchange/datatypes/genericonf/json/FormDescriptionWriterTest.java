@@ -89,7 +89,7 @@ public class FormDescriptionWriterTest {
 
         JSONObject object = new FormDescriptionWriter(translator).write(element);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("input").hasKey("name").withValue("login").hasKey("displayName").withValue("Login name").hasKey("mandatory").withValue(true).hasKey("defaultValue").withValue("admin").objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("input").hasKey("name").withValue("login").hasKey("displayName").withValue("Login name").hasKey("mandatory").withValue(Boolean.TRUE).hasKey("defaultValue").withValue("admin").objectEnds();
 
         assertValidates(assertion, object);
 
@@ -101,7 +101,7 @@ public class FormDescriptionWriterTest {
 
         object = new FormDescriptionWriter(translator).write(element);
 
-        assertion = new JSONAssertion().isObject().hasKey("widget").withValue("password").hasKey("name").withValue("password").hasKey("displayName").withValue("Password").hasKey("mandatory").withValue(false).objectEnds();
+        assertion = new JSONAssertion().isObject().hasKey("widget").withValue("password").hasKey("name").withValue("password").hasKey("displayName").withValue("Password").hasKey("mandatory").withValue(Boolean.FALSE).objectEnds();
 
         assertValidates(assertion, object);
 
@@ -111,7 +111,7 @@ public class FormDescriptionWriterTest {
 
         object = new FormDescriptionWriter(translator).write(element);
 
-        assertion = new JSONAssertion().isObject().hasKey("widget").withValue("checkbox").hasKey("name").withValue("checkbox").hasKey("displayName").withValue("Checkbox").hasKey("mandatory").withValue(false).objectEnds();
+        assertion = new JSONAssertion().isObject().hasKey("widget").withValue("checkbox").hasKey("name").withValue("checkbox").hasKey("displayName").withValue("Checkbox").hasKey("mandatory").withValue(Boolean.FALSE).objectEnds();
 
         assertValidates(assertion, object);
 
@@ -131,7 +131,7 @@ public class FormDescriptionWriterTest {
 
         assertEquals(1, array.length());
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("input").hasKey("name").withValue("login").hasKey("displayName").withValue("Login name").hasKey("mandatory").withValue(true).hasKey("defaultValue").withValue("admin").objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("input").hasKey("name").withValue("login").hasKey("displayName").withValue("Login name").hasKey("mandatory").withValue(Boolean.TRUE).hasKey("defaultValue").withValue("admin").objectEnds();
 
         assertValidates(assertion, array.getJSONObject(0));
     }
@@ -148,7 +148,7 @@ public class FormDescriptionWriterTest {
 
         JSONObject object = new FormDescriptionWriter(translator).write(element);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("com.openexchange.test.thingamajickChooser").hasKey("name").withValue("thingamajick").hasKey("displayName").withValue("Thingamajick").hasKey("mandatory").withValue(true).hasKey("defaultValue").withValue("admin").objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("com.openexchange.test.thingamajickChooser").hasKey("name").withValue("thingamajick").hasKey("displayName").withValue("Thingamajick").hasKey("mandatory").withValue(Boolean.TRUE).hasKey("defaultValue").withValue("admin").objectEnds();
 
         assertValidates(assertion, object);
     }
@@ -165,7 +165,7 @@ public class FormDescriptionWriterTest {
 
         JSONObject object = new FormDescriptionWriter(translator).write(element);
 
-        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("input").hasKey("name").withValue("login").hasKey("displayName").withValue("Login name").hasKey("mandatory").withValue(true).hasKey("defaultValue").withValue("admin").hasKey("options").withValueObject().hasKey("someOption").withValue("12").hasKey("someOtherOption").withValue("23").objectEnds().objectEnds();
+        JSONAssertion assertion = new JSONAssertion().isObject().hasKey("widget").withValue("input").hasKey("name").withValue("login").hasKey("displayName").withValue("Login name").hasKey("mandatory").withValue(Boolean.TRUE).hasKey("defaultValue").withValue("admin").hasKey("options").withValueObject().hasKey("someOption").withValue("12").hasKey("someOtherOption").withValue("23").objectEnds().objectEnds();
 
         assertValidates(assertion, object);
     }

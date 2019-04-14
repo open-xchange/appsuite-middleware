@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings.database;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -67,7 +68,7 @@ public abstract class BigIntMapping<O> extends DefaultDbMapping<Long, O> {
 
 	@Override
 	public Long get(final ResultSet resultSet, String columnLabel) throws SQLException {
-		return resultSet.getLong(columnLabel);
+		return L(resultSet.getLong(columnLabel));
 	}
 
 }

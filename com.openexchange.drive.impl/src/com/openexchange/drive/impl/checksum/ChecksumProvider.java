@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.checksum;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -434,7 +435,7 @@ public class ChecksumProvider {
      * @return The checksum, or <code>null</code> if not found
      */
     private static DirectoryChecksum find(HashMap<Integer, DirectoryChecksum> checksums, FolderID folderID, int view) {
-        return checksums.get(getChecksumHelperKey(folderID, view));
+        return checksums.get(I(getChecksumHelperKey(folderID, view)));
     }
 
     /**
@@ -447,7 +448,7 @@ public class ChecksumProvider {
     private static HashMap<Integer, DirectoryChecksum> getChecksumHelperMap(Collection<? extends DirectoryChecksum> checksums) {
         HashMap<Integer, DirectoryChecksum> returnMap = new HashMap<Integer, DirectoryChecksum>();
         for (DirectoryChecksum checksum : checksums) {
-            returnMap.put(getChecksumHelperKey(checksum.getFolderID(), checksum.getView()), checksum);
+            returnMap.put(I(getChecksumHelperKey(checksum.getFolderID(), checksum.getView())), checksum);
         }
         return returnMap;
     }

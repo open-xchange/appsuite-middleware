@@ -76,6 +76,7 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Streams;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.session.Session;
@@ -112,7 +113,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#createFolder(com.openexchange.file.storage.FileStorageFolder, boolean)
      */
     @Override
@@ -122,7 +123,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Override
@@ -132,7 +133,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#exists(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -142,10 +143,10 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             @Override
             protected Boolean doPerform() throws OXException {
                 try {
-                    return null != getFileMetadata(folderId, id, version);
+                    return Autoboxing.valueOf(null != getFileMetadata(folderId, id, version));
                 } catch (OXException e) {
                     if (FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e)) {
-                        return false;
+                        return Boolean.FALSE;
                     }
                     throw e;
                 }
@@ -155,7 +156,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getFileMetadata(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -174,7 +175,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long)
      */
     @Override
@@ -184,7 +185,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long, java.util.List)
      */
     @Override
@@ -205,7 +206,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#copy(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, java.lang.String, com.openexchange.file.storage.File, java.io.InputStream, java.util.List)
      */
     @Override
@@ -228,7 +229,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#move(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, long, com.openexchange.file.storage.File, java.util.List)
      */
     @Override
@@ -249,7 +250,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocument(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -265,7 +266,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.ThumbnailAware#getThumbnailStream(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -281,7 +282,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long)
      */
     @Override
@@ -291,7 +292,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
      */
     @Override
@@ -307,7 +308,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.lang.String, long)
      */
     @Override
@@ -324,7 +325,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long)
      */
     @Override
@@ -334,7 +335,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long, boolean)
      */
     @Override
@@ -353,7 +354,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#touch(java.lang.String, java.lang.String)
      */
     @Override
@@ -363,7 +364,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String)
      */
     @Override
@@ -379,7 +380,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List)
      */
     @Override
@@ -389,7 +390,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
      */
     @Override
@@ -405,7 +406,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.util.List, java.util.List)
      */
     @Override
@@ -424,7 +425,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, boolean)
      */
     @Override
@@ -434,7 +435,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, boolean)
      */
     @Override
@@ -444,7 +445,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
      */
     @Override
@@ -454,7 +455,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, boolean, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
      */
     @Override
@@ -487,7 +488,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getAccountAccess()
      */
     @Override
@@ -497,7 +498,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageSequenceNumberProvider#getSequenceNumbers(java.util.List)
      */
     @Override

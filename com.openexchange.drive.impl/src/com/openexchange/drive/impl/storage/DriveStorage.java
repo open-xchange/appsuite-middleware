@@ -53,6 +53,7 @@ import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
 import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import static com.openexchange.drive.impl.DriveUtils.combine;
 import static com.openexchange.drive.impl.DriveUtils.split;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -640,7 +641,7 @@ public class DriveStorage {
         FileStorageFolder folder = getFolderAccess().getFolder(folderID);
         if (null == folder) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
-                session.getServerSession().getUserId(), session.getServerSession().getContextId());
+                I(session.getServerSession().getUserId()), I(session.getServerSession().getContextId()));
         }
         List<File> files = new ArrayList<File>();
         /*
@@ -652,6 +653,7 @@ public class DriveStorage {
         } else {
             final String path = getPath(folderID);
             final Set<String> existingNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
+            SyncSession session = this.session;
             filter = new FileNameFilter() {
 
                 @Override

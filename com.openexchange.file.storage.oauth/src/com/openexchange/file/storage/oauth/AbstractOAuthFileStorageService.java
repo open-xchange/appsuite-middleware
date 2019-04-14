@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.oauth;
 
 import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager.newInstanceFor;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -273,7 +274,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 account = storage.getAccount(session, accountId);
             } catch (OXException e) {
                 if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
-                    LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, session.getUserId(), session.getContextId());
+                    LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", I(accountId), I(session.getUserId()), I(session.getContextId()));
                     return;
                 }
                 throw e;
@@ -308,10 +309,10 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             return true;
         }
         if (updateScopesValue instanceof Boolean) {
-            return (boolean) updateScopesValue;
+            return ((Boolean) updateScopesValue).booleanValue();
         }
         if (updateScopesValue instanceof String) {
-            return Boolean.valueOf((String) updateScopesValue);
+            return Boolean.parseBoolean((String) updateScopesValue);
         }
         return true;
     }
@@ -338,14 +339,14 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         if (null == compositeAccountManager) {
             FileStorageAccountManager manager = getAccountManager0();
             if (null == manager) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, I(session.getUserId()), I(session.getContextId()));
             }
             return manager.getAccount(accountId, session);
         }
 
         FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
         if (null == manager) {
-            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, I(session.getUserId()), I(session.getContextId()));
         }
         return manager.getAccount(accountId, session);
     }

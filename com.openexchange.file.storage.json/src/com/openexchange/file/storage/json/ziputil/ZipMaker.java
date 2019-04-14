@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.ziputil;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.getZipDocumentsCompressionLevel;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -210,7 +211,7 @@ public class ZipMaker {
                  */
                 throw AjaxExceptionCodes.CONNECTION_RESET.create(e, e.getMessage());
             }
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, I(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), "Internal Server Error");
         }
     }
 
@@ -265,7 +266,7 @@ public class ZipMaker {
             // Complete the entry
             zipOutput.closeArchiveEntry();
         } catch (IOException e) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, I(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), "Internal Server Error");
         } finally {
             Streams.close(in);
         }

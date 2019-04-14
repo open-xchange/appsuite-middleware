@@ -77,6 +77,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
     private MySQLGenericConfigurationStorage storage = null;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         loadProperties();
@@ -97,7 +98,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         final Map<String, Object> content = new HashMap<String, Object>();
         content.put("login", "loginname");
         content.put("otherValue", "other");
-        content.put("booleanValue", true);
+        content.put("booleanValue", Boolean.TRUE);
 
         final int contextId = 1;
         final Context ctx = new SimContext(contextId);
@@ -132,7 +133,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         assertNotNull("Expected a value under key 'otherField", content.get("otherField"));
         assertEquals("Excpected value 'otherValue' under key 'otherField'", "otherValue", content.get("otherField"));
         assertNotNull("Expected a value under key 'booleanField", content.get("booleanField"));
-        assertEquals("Excpected value true under key 'booleanField'", true, content.get("booleanField"));
+        assertEquals("Excpected value true under key 'booleanField'", Boolean.TRUE, content.get("booleanField"));
 
     }
 
@@ -157,8 +158,8 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
         content.put("fourthField", "newValue");
         content.put("thirdField", null); // Will be removed
 
-        content.put("bool", true);
-        content.put("fourthBool", true);
+        content.put("bool", Boolean.TRUE);
+        content.put("fourthBool", Boolean.TRUE);
         content.put("thirdBool", null); // Will be removed
 
         final int id = 1001;
@@ -241,7 +242,7 @@ public class MySQLGenericConfigurationStorageTest extends SQLTestCase {
 
         // Try with join
 
-        query.put("bool", true);
+        query.put("bool", Boolean.TRUE);
         ids = storage.search(new SimContext(1002), query);
         assertNotNull("ids was null", ids);
         assertEquals("Wrong size of search result", 1, ids.size());

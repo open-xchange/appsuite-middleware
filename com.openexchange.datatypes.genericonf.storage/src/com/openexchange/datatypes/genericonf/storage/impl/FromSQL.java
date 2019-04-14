@@ -52,6 +52,7 @@ package com.openexchange.datatypes.genericonf.storage.impl;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.datatypes.genericonf.WidgetSwitcher;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link FromSQL}
@@ -68,7 +69,7 @@ public class FromSQL implements WidgetSwitcher {
         String columnName = (String) args[1];
 
         try {
-            return rs.getBoolean(columnName);
+            return Autoboxing.valueOf(rs.getBoolean(columnName));
         } catch (SQLException e) {
             this.exception = e;
             return null;

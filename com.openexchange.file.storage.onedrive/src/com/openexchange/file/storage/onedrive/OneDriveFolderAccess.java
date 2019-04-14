@@ -64,6 +64,7 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.UserCreatedFileStorageFolderAccess;
 import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.file.storage.onedrive.osgi.Services;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService;
 import com.openexchange.microsoft.graph.onedrive.OneDriveFolder;
@@ -99,7 +100,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#exists(java.lang.String)
      */
     @Override
@@ -108,14 +109,14 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
             @Override
             protected Boolean doPerform() throws OXException {
-                return driveService.existsFolder(getAccessToken(), toOneDriveFolderId(folderId));
+                return Autoboxing.valueOf(driveService.existsFolder(getAccessToken(), toOneDriveFolderId(folderId)));
             }
         }).booleanValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getFolder(java.lang.String)
      */
     @Override
@@ -131,7 +132,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getPersonalFolder()
      */
     @Override
@@ -141,7 +142,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getTrashFolder()
      */
     @Override
@@ -151,7 +152,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getPublicFolders()
      */
     @Override
@@ -161,7 +162,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getUserSharedFolders()
      */
     @Override
@@ -171,7 +172,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getSubfolders(java.lang.String, boolean)
      */
     @Override
@@ -187,7 +188,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getRootFolder()
      */
     @Override
@@ -199,7 +200,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#createFolder(com.openexchange.file.storage.FileStorageFolder)
      */
     @Override
@@ -209,7 +210,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#createFolder(com.openexchange.file.storage.FileStorageFolder, boolean)
      */
     @Override
@@ -234,7 +235,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#updateFolder(java.lang.String, com.openexchange.file.storage.FileStorageFolder)
      */
     @Override
@@ -245,7 +246,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -255,7 +256,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -265,7 +266,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess#moveFolder(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Override
@@ -304,7 +305,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#renameFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -330,7 +331,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String)
      */
     @Override
@@ -340,7 +341,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#deleteFolder(java.lang.String, boolean)
      */
     @Override
@@ -357,7 +358,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#clearFolder(java.lang.String)
      */
     @Override
@@ -379,7 +380,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getPath2DefaultFolder(java.lang.String)
      */
     @Override
@@ -406,7 +407,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getStorageQuota(java.lang.String)
      */
     @Override
@@ -422,7 +423,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getFileQuota(java.lang.String)
      */
     @Override
@@ -432,7 +433,7 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFolderAccess#getQuotas(java.lang.String, com.openexchange.file.storage.Quota.Type[])
      */
     @Override

@@ -115,7 +115,7 @@ public final class UpdateBundle extends AbstractConsoleHandler {
     public void update(final String bundleName, final boolean autorefresh) throws Exception {
         final ObjectName objectName = getObjectName();
         final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-        mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, autorefresh }, new String[] {
+        mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, Boolean.valueOf(autorefresh) }, new String[] {
             "java.lang.String", "boolean" });
     }
 

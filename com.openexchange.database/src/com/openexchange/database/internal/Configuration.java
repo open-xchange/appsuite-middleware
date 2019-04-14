@@ -49,6 +49,8 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +62,7 @@ import java.util.stream.Collectors;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.pooling.ExhaustedActions;
 import com.openexchange.pooling.PoolConfig;
@@ -309,25 +312,25 @@ public final class Configuration {
 
         List<Object> logArgs = new ArrayList<>(24);
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.maxIdle);
+        logArgs.add(I(poolConfig.maxIdle));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.maxIdleTime);
+        logArgs.add(L(poolConfig.maxIdleTime));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.maxActive);
+        logArgs.add(I(poolConfig.maxActive));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.maxWait);
+        logArgs.add(L(poolConfig.maxWait));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.maxLifeTime);
+        logArgs.add(L(poolConfig.maxLifeTime));
         logArgs.add(Strings.getLineSeparator());
         logArgs.add(poolConfig.exhaustedAction);
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.testOnActivate);
+        logArgs.add(Autoboxing.valueOf(poolConfig.testOnActivate));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.testOnDeactivate);
+        logArgs.add(Autoboxing.valueOf(poolConfig.testOnDeactivate));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.testOnIdle);
+        logArgs.add(Autoboxing.valueOf(poolConfig.testOnIdle));
         logArgs.add(Strings.getLineSeparator());
-        logArgs.add(poolConfig.testThreads);
+        logArgs.add(Autoboxing.valueOf(poolConfig.testThreads));
         // @formatter:off
         LOG.info("Database pooling options:" +
             "{}    Maximum idle connections: {}" +

@@ -53,6 +53,7 @@ import static com.openexchange.file.storage.mail.MailDriveFileAccess.FETCH_PROFI
 import static com.openexchange.file.storage.mail.sort.MailDriveSortUtility.performEsort;
 import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -370,7 +371,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 folderId = getMailDriveFolderId(folderId);
                 FullName fullName = MailDriveAccountAccess.optFolderId(folderId, mailDriveService.getFullNameCollectionFor(session));
                 if (null == fullName) {
-                    throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
+                    throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, I(session.getUserId()), I(session.getContextId()));
                 }
                 fullNames = Collections.singletonList(fullName);
             }

@@ -121,7 +121,7 @@ public class Columns implements Serializable{
     public int[] getIntColumns() {
         int[] array = new int[intColumns.size()];
         for (int i = 0; i < array.length; i++) {
-            array[i] = intColumns.get(i);
+            array[i] = intColumns.get(i).intValue();
         }
         return array;
     }

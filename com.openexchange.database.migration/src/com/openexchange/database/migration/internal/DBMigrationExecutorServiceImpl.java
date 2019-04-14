@@ -50,6 +50,7 @@
 package com.openexchange.database.migration.internal;
 
 import static com.openexchange.database.migration.internal.LiquibaseHelper.LIQUIBASE_NO_DEFINED_CONTEXT;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -100,7 +101,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     /**
      * Initialises the {@link OXException} spawners
-     * 
+     *
      * @return An unmodifiable {@link Map} with {@link OXException} spawners
      */
     private Map<Class<? extends Exception>, Function<Exception, OXException>> initialiseExceptionSpawners() {
@@ -139,7 +140,7 @@ public class DBMigrationExecutorServiceImpl implements DBMigrationExecutorServic
 
     @Override
     public DBMigrationState scheduleDBRollback(DBMigration migration, int numberOfChangeSets) {
-        return executor.scheduleRollback(migration, null, numberOfChangeSets);
+        return executor.scheduleRollback(migration, null, I(numberOfChangeSets));
     }
 
     @Override

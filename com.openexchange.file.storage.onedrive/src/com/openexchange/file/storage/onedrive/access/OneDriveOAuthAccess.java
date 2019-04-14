@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.onedrive.access;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
@@ -98,7 +99,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.AbstractOAuthAccess#dispose()
      */
     @Override
@@ -109,7 +110,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#initialize()
      */
     @Override
@@ -136,7 +137,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#ping()
      */
     @Override
@@ -161,7 +162,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
      */
     @Override
@@ -175,7 +176,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
      */
     @Override
@@ -210,7 +211,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
     /**
      * Checks whether the token is expired
-     * 
+     *
      * @param oauthAccount The OAuth account
      * @param session The groupware session
      * @return <code>true</code> if the token is expired, <code>false</code> otherwise
@@ -251,7 +252,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             String refreshToken = cachedAccount.getSecret();
             if (Strings.isEmpty(refreshToken)) {
                 // Impossible request a new access token without a refresh token. Manual reauthorization is required.
-                throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cachedAccount.getDisplayName(), cachedAccount.getId(), session.getUserId(), session.getContextId());
+                throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cachedAccount.getDisplayName(), I(cachedAccount.getId()), I(session.getUserId()), I(session.getContextId()));
             }
 
             ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MicrosoftGraphApi.class);

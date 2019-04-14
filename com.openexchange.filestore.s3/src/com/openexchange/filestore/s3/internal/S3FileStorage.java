@@ -50,6 +50,7 @@
 package com.openexchange.filestore.s3.internal;
 
 import static com.openexchange.filestore.s3.internal.S3ExceptionCode.wrap;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
@@ -200,7 +201,7 @@ public class S3FileStorage implements FileStorage {
     public InputStream getFile(String name, long offset, long length) throws OXException {
         long fileSize = getFileSize(name);
         if (offset >= fileSize || length >= 0 && length > fileSize - offset) {
-            throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, fileSize);
+            throw FileStorageCodes.INVALID_RANGE.create(L(offset), L(length), name, L(fileSize));
         }
         String key = addPrefix(name);
         GetObjectRequest request = new GetObjectRequest(bucketName, key);
@@ -213,7 +214,7 @@ public class S3FileStorage implements FileStorage {
             return new AbortIfNotFullyConsumedS3ObjectInputStreamWrapper(amazonS3.getObject(request).getObjectContent());
         } catch (AmazonClientException e) {
             if (AmazonServiceException.class.isInstance(e) && HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
-                throw FileStorageCodes.INVALID_RANGE.create(e, offset, length, name, fileSize);
+                throw FileStorageCodes.INVALID_RANGE.create(e, L(offset), L(length), name, L(fileSize));
             }
             throw wrap(e, key);
         }

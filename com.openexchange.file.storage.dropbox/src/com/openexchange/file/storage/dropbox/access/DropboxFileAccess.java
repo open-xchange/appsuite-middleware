@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -107,6 +108,7 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -709,7 +711,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         for (String folderId : folderIds) {
             try {
                 FolderMetadata metadata = getFolderMetadata(folderId);
-                sequenceNumbers.put(folderId, getSequenceNumber(metadata));
+                sequenceNumbers.put(folderId, L(getSequenceNumber(metadata)));
             } catch (GetMetadataErrorException e) {
                 throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
             } catch (DbxException e) {
@@ -860,7 +862,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
         String path = new StringBuilder(file.getFolderId()).append('/').append(name).toString();
         try {
-            UploadBuilder builder = client.files().uploadBuilder(path).withMode(WriteMode.OVERWRITE).withAutorename(false);
+            UploadBuilder builder = client.files().uploadBuilder(path).withMode(WriteMode.OVERWRITE).withAutorename(Boolean.FALSE);
             FileMetadata metadata = builder.uploadAndFinish(data);
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
@@ -945,10 +947,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (Strings.isEmpty(pattern) || pattern.equals("*")) {
                 // Return everything
                 return getAllFiles(folderId, includeSubfolders);
-            } else {
-                // Search
-                return fireSearch(folderId, pattern, includeSubfolders);
             }
+            // Search
+            return fireSearch(folderId, pattern, includeSubfolders);
         } catch (SearchErrorException e) {
             throw DropboxExceptionHandler.handleSearchErrorException(e, folderId, pattern);
         } catch (ListFolderErrorException e) {
@@ -969,7 +970,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     private List<File> getAllFiles(String folderId, boolean recursive) throws ListFolderErrorException, DbxException {
         List<File> results = new ArrayList<>();
-        ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(recursive).start();
+        ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(Autoboxing.valueOf(recursive)).start();
         boolean hasMore = false;
         do {
             hasMore = listFolderResult.getHasMore();
@@ -1016,7 +1017,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             if (hasMore) {
                 long start = searchResult.getStart();
-                searchResult = client.files().searchBuilder(folderId, pattern).withStart(start).start();
+                searchResult = client.files().searchBuilder(folderId, pattern).withStart(L(start)).start();
             }
         } while (hasMore);
 

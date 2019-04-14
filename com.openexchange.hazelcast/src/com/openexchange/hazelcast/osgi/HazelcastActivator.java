@@ -50,6 +50,7 @@
 
 package com.openexchange.hazelcast.osgi;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -279,7 +280,7 @@ public class HazelcastActivator implements BundleActivator {
                 shutDownTask.cancel(true);
                 hazelcast.getLifecycleService().terminate();
             }
-            LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
+            LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, L(System.currentTimeMillis() - start), lf);
         }
     }
 
@@ -322,7 +323,7 @@ public class HazelcastActivator implements BundleActivator {
         OutOfMemoryErrorDispatcher.setServerHandler(handler);
         long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
-        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
+        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, L(System.currentTimeMillis() - hzStart), lf);
         this.hazelcastInstance = hazelcast;
         return hazelcast;
     }

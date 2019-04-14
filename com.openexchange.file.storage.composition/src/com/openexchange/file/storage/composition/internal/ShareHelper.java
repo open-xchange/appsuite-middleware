@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.supports;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -115,7 +116,7 @@ public class ShareHelper {
              */
             if (comparedPermissions.hasChanges() && false == supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
                 throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(
-                    fileAccess.getAccountAccess().getService().getDisplayName(), document.getFolderId(), session.getContextId());
+                    fileAccess.getAccountAccess().getService().getDisplayName(), document.getFolderId(), I(session.getContextId()));
             }
 
             /*
@@ -127,13 +128,13 @@ public class ShareHelper {
                 FileStorageGuestObjectPermission newAnonymousPermission = null;
                 for (FileStorageGuestObjectPermission p : newGuestPermissions) {
                     if (isInvalidGuestPermission(p)) {
-                        throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                        throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(I(p.getPermissions()), I(p.getEntity()), document.getId());
                     }
                     if (RecipientType.ANONYMOUS.equals(p.getRecipient().getType())) {
                         if (null == newAnonymousPermission) {
                             newAnonymousPermission = p;
                         } else {
-                            throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                            throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(I(p.getPermissions()), I(p.getEntity()), document.getId());
                         }
                     }
                 }
@@ -142,7 +143,7 @@ public class ShareHelper {
                  */
                 if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
                     throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(
-                        newAnonymousPermission.getPermissions(), newAnonymousPermission.getEntity(), document.getId());
+                        I(newAnonymousPermission.getPermissions()), I(newAnonymousPermission.getEntity()), document.getId());
                 }
             }
             /*
@@ -153,15 +154,15 @@ public class ShareHelper {
                  FileStorageObjectPermission addedAnonymousPermission = null;
                  for (Integer guest : comparedPermissions.getAddedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getAddedGuestPermission(guest);
-                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(guest);
+                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(guest.intValue());
                      if (isInvalidGuestPermission(p, guestInfo) || (isAnonymous(guestInfo) && isNotEqualsTarget(document, fileAccess.getAccountAccess(), guestInfo.getLinkTarget()))) {
-                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(I(p.getPermissions()), I(p.getEntity()), document.getId());
                      }
                      if (isAnonymous(guestInfo)) {
                          if (null == addedAnonymousPermission) {
                              addedAnonymousPermission = p;
                          } else {
-                             throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                             throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(I(p.getPermissions()), I(p.getEntity()), document.getId());
                          }
                      }
                  }
@@ -170,14 +171,14 @@ public class ShareHelper {
                   */
                  if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
                      throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(
-                         addedAnonymousPermission.getPermissions(), addedAnonymousPermission.getEntity(), document.getId());
+                         I(addedAnonymousPermission.getPermissions()), I(addedAnonymousPermission.getEntity()), document.getId());
                  }
              }
              if (comparedPermissions.hasModifiedGuests()) {
                  for (Integer guest : comparedPermissions.getModifiedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getModifiedGuestPermission(guest);
-                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest))) {
-                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest.intValue()))) {
+                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(I(p.getPermissions()), I(p.getEntity()), document.getId());
                      }
                  }
              }
@@ -197,7 +198,7 @@ public class ShareHelper {
         List<Integer> modifiedGuests = comparedPermissions.getModifiedGuests();
         for (FileStorageObjectPermission p : newPermissions) {
             // gather all new user entities except the one executing this operation
-            if (!p.isGroup() && p.getEntity() != session.getUserId() && !modifiedGuests.contains(p.getEntity())) {
+            if (!p.isGroup() && p.getEntity() != session.getUserId() && !modifiedGuests.contains(I(p.getEntity()))) {
                 addedPermissions.add(p);
             }
         }
@@ -225,12 +226,11 @@ public class ShareHelper {
     public static IDTuple applyGuestPermissions(Session session, FileStorageFileAccess fileAccess, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
         List<FileStorageObjectPermission> updatedPermissions = handleGuestPermissions(session, fileAccess, document, comparedPermissions);
         updateEncryptionForGuests(session, fileAccess, document, comparedPermissions, updatedPermissions);
-        if (null != updatedPermissions) {
-            document.setObjectPermissions(updatedPermissions);
-            return fileAccess.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
-        } else {
+        if (null == updatedPermissions) {
             return new IDTuple(document.getFolderId(), document.getId());
         }
+        document.setObjectPermissions(updatedPermissions);
+        return fileAccess.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
     }
 
     /**

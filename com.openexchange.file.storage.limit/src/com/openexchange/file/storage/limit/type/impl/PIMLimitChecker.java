@@ -81,7 +81,7 @@ public class PIMLimitChecker extends AbstractCombinedTypeLimitChecker {
     public List<OXException> check(Session session, String folderId, List<LimitFile> files) throws OXException {
         List<OXException> exceededLimits = new ArrayList<>();
 
-        long fileTotalSize = files.stream().collect(Collectors.summingLong(LimitFile::getSize));
+        long fileTotalSize = files.stream().collect(Collectors.summingLong(LimitFile::getSize)).longValue();
         QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
         if (fileStorage != null) {
             long quota = fileStorage.getQuota();

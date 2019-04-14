@@ -49,6 +49,7 @@
 
 package com.openexchange.contacts.json;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -184,7 +185,7 @@ public class ContactRequest {
         	if (0 < sort) {
         		ContactField sortField = ContactMapper.getInstance().getMappedField(sort);
         		if (null == sortField) {
-                    throw OXJSONExceptionCodes.INVALID_VALUE.create(sort, "sort");
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(I(sort), "sort");
         		}
         		sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, getOrder()) });
         	}
@@ -433,23 +434,19 @@ public class ContactRequest {
     public int getId() throws OXException {
     	//TODO: as String
         if (request.isSet("id")) {
-            return request.getParameter("id", int.class);
+            return request.getParameter("id", int.class).intValue();
         }
         return user.getContactId();
     }
 
     public int getFolder() throws OXException {
     	//TODO: as String
-        return request.getParameter("folder", int.class);
+        return request.getParameter("folder", int.class).intValue();
     }
 
     public TimeZone getTimeZone() {
         final String timezone = request.getParameter("timezone");
-        if (timezone == null) {
-            return TimeZoneUtils.getTimeZone(user.getTimeZone());
-        } else {
-            return TimeZoneUtils.getTimeZone(timezone);
-        }
+        return timezone == null ? TimeZoneUtils.getTimeZone(user.getTimeZone()) : TimeZoneUtils.getTimeZone(timezone);
     }
 
     public ServerSession getSession() {
@@ -477,11 +474,11 @@ public class ContactRequest {
     }
 
     public boolean isExcludeAdmin() throws OXException {
-        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class);
+        return request.containsParameter("admin") && false == request.getParameter("admin", boolean.class).booleanValue();
     }
 
     public boolean isRequireEmail() throws OXException {
-        return false == request.containsParameter("email") || request.getParameter("email", boolean.class);
+        return false == request.containsParameter("email") || request.getParameter("email", boolean.class).booleanValue();
     }
 
     public String getQuery() throws OXException {
@@ -576,7 +573,7 @@ public class ContactRequest {
     }
 
     public long getTimestamp() throws OXException {
-        return request.getParameter("timestamp", long.class);
+        return request.getParameter("timestamp", long.class).longValue();
     }
 
     public int[] getUserIds() throws OXException {

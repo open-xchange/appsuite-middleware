@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -67,7 +68,7 @@ public abstract class IntegerMapping<O> extends DefaultDbMapping<Integer, O> {
 
 	@Override
 	public Integer get(final ResultSet resultSet, String columnLabel) throws SQLException {
-		return resultSet.getInt(this.getColumnLabel());
+		return I(resultSet.getInt(this.getColumnLabel()));
 	}
 
 }

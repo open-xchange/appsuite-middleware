@@ -49,6 +49,7 @@
 
 package com.openexchange.database.tombstone.cleanup.cleaners;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,7 +85,7 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
 
     /**
      * Ensures to have tables in a state to be cleaned up. If a table is not in the desired state an {@link OXException} will be thrown.
-     * 
+     *
      * @param connection {@link Connection} to retrieve table meta information
      * @throws OXException In case table validation fails
      * @throws SQLException If an error occurred while retrieving table information
@@ -93,7 +94,7 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
 
     /**
      * Delegate for {@link TombstoneTableCleaner#cleanup(Connection, long)} that will be called after the table design has been verified by {@link #checkTables(Connection)}
-     * 
+     *
      * @param connection Write connection to the destination schema
      * @param timestamp Timestamp defining the border of what will be removed which means older entries than the given timestamp will be removed
      * @return {@link Map} Containing the number of items that have been deleted by the {@link TombstoneTableCleaner} mapped to the table
@@ -103,7 +104,7 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
 
     /**
      * Executes the given delete statement by setting the timestamp
-     * 
+     *
      * @param connection The write connection used for deletion
      * @param timestamp The timestamp to delete all entries before it
      * @param deleteStatement The statement that will be used for deletion
@@ -130,7 +131,7 @@ public abstract class AbstractTombstoneTableCleaner implements TombstoneTableCle
             }
             long start = System.currentTimeMillis();
             final int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), I(rowCount), L(System.currentTimeMillis() - start));
             return rowCount;
         } catch (SQLException e) {
             LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());

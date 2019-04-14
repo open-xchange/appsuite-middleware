@@ -52,6 +52,7 @@ package com.openexchange.filestore.swift;
 import static com.openexchange.filestore.utils.PropertyNameBuilder.optIntProperty;
 import static com.openexchange.filestore.utils.PropertyNameBuilder.optProperty;
 import static com.openexchange.filestore.utils.PropertyNameBuilder.requireProperty;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -165,7 +166,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                         contextId = extractionResult.getContextId();
                         userId = extractionResult.getUserId();
                         databaseAccess = new DefaultDatabaseAccess(userId, contextId, services.getService(DatabaseService.class));
-                        LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, contextId, userId);
+                        LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, I(contextId), I(userId));
                     } else {
                         contextId = 0;
                         userId = 0;

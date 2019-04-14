@@ -50,6 +50,7 @@
 
 package com.openexchange.mobile.configuration.generator;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -122,7 +123,7 @@ public class MobileConfigServlet extends HttpServlet {
 
         static {
             for (final ErrorMessage errmsg : ErrorMessage.values()) {
-                members.put(errmsg.ordinal(), errmsg);
+                members.put(I(errmsg.ordinal()), errmsg);
             }
         }
 
@@ -220,7 +221,7 @@ public class MobileConfigServlet extends HttpServlet {
             iphoneRegEx = MobileConfigProperties.getProperty(service, Property.iPhoneRegex);
             winMobRegEx = MobileConfigProperties.getProperty(service, Property.WinMobRegex);
             final Boolean secureConnect = MobileConfigProperties.getProperty(service, Property.OnlySecureConnect);
-            if (secureConnect) {
+            if (secureConnect.booleanValue()) {
                 if (!req.isSecure()) {
                     printError(req, resp, ErrorMessage.MSG_UNSECURE_ACCESS);
                     return;

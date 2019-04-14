@@ -49,6 +49,7 @@
 
 package com.openexchange.dataretention.csv.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -140,7 +141,7 @@ final class CSVFileCreationCallable implements Callable<Boolean> {
                     writeTask.csvFile.setFile(dest);
                     LOG.info("Successfully created CSV file \"{}\" and added starting header line", writeTask.csvFile.getFile().getPath());
                 } else {
-                    LOG.warn("Renaming to CSV file \"{}\" failed. Retry #{}", dest.getPath(), counter);
+                    LOG.warn("Renaming to CSV file \"{}\" failed. Retry #{}", dest.getPath(), I(counter));
                 }
             }
             if (!success) {

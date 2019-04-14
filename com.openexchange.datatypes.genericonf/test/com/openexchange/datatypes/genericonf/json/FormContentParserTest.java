@@ -88,7 +88,7 @@ public class FormContentParserTest {
         assertNotNull("Content was null!", content);
         assertEquals("login was wrong", "blupp", content.get("login"));
         assertEquals("password was wrong", "secret", content.get("password"));
-        assertEquals("checkbox was wrong", true, content.get("checkbox"));
+        assertEquals("checkbox was wrong", Boolean.TRUE, content.get("checkbox"));
 
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.mobile.configuration.generator;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -150,16 +151,17 @@ public class MobileConfigSigner extends Writer {
                 if (waitFor != 0) {
                     throw new IOException(OPENSSL_EXITED_UNEXPECTEDLY_WITH + waitFor);
                 }
-                return waitFor;
+                return I(waitFor);
             }
 
         });
         try {
             Integer property = MobileConfigProperties.getProperty(Property.OpensslTimeout);
             if (property == null) {
-                property = 3000;
+                submit.get(3000, TimeUnit.MILLISECONDS);
+            } else {
+                submit.get(property.intValue(), TimeUnit.MILLISECONDS);
             }
-            submit.get(property, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
