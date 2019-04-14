@@ -119,7 +119,7 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public class EventPatches {
-    
+
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
 
     /**
@@ -220,7 +220,7 @@ public class EventPatches {
 
     /**
      * Removes all extended properties from an event that are derived from others.
-     * 
+     *
      * @param event The event to strip the derived extended properties from
      * @return The passed event reference
      */
@@ -306,7 +306,7 @@ public class EventPatches {
          * @param importedEvent The event being exported
          */
         private void adjustAppleTravelAdvisory(EventResource resource, Event importedEvent) {
-            if (resource.exists() && false == PrivateType.getInstance().equals(resource.getParent().getFolder().getType()) && 
+            if (resource.exists() && false == PrivateType.getInstance().equals(resource.getParent().getFolder().getType()) &&
                 (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
                 ExtendedProperty originalProperty = optExtendedProperty(resource.getEvent(), "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR");
                 if (null != originalProperty) {
@@ -319,11 +319,11 @@ public class EventPatches {
 
 
         /**
-         * Strips any extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the 
+         * Strips any extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the
          * calendar user's point of view.
          * <p/>
-         * Otherwise, all known and handled extended properties are removed to avoid ambigiouties, as they will be derived from other 
-         * properties upon the next export. 
+         * Otherwise, all known and handled extended properties are removed to avoid ambigiouties, as they will be derived from other
+         * properties upon the next export.
          *
          * @param eventResource The event resource
          * @param importedEvent The event
@@ -717,9 +717,9 @@ public class EventPatches {
         }
 
         /**
-         * Restores deleted change exception events from the past where the calendar user attendee's participation status was 
-         * previously set to 'declined'. This is done for the iOS client who sometimes decides to send such updates without user 
-         * interaction. 
+         * Restores deleted change exception events from the past where the calendar user attendee's participation status was
+         * previously set to 'declined'. This is done for the iOS client who sometimes decides to send such updates without user
+         * interaction.
          *
          * @param resource The event resource
          * @param importedEvent The imported series master event as supplied by the client
@@ -762,7 +762,7 @@ public class EventPatches {
                         }
                         return null;
                     }
-                }.execute(factory.getSession());                
+                }.execute(factory.getSession());
             } catch (OXException e) {
                 LOG.warn("Error restoring declined delete exceptions", e);
             }
@@ -909,7 +909,7 @@ public class EventPatches {
             alarm.setExtendedProperties(new ExtendedProperties(extendedProperties));
             return alarm;
         }
-        
+
         /**
          * Forcibly disables "time to leave" notifications for Apple clients in non-private folders by inserting the extended property
          * <code>X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:DISABLED</code> in the event.
@@ -926,7 +926,7 @@ public class EventPatches {
                 (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
                 ExtendedProperty property = new ExtendedProperty("X-APPLE-TRAVEL-ADVISORY-BEHAVIOR", "DISABLED");
                 exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), property, true));
-            }   
+            }
             return exportedEvent;
         }
 
@@ -1084,7 +1084,7 @@ public class EventPatches {
             }
             return calendarExport;
         }
-        
+
         /**
          * Creates a fake master from the given phantom and exported events
          *
@@ -1101,7 +1101,7 @@ public class EventPatches {
             SortedSet<RecurrenceId> recurrenceIds = CalendarUtils.getRecurrenceIds(exportedEvents);
             fake.setRecurrenceDates(recurrenceIds);
             fake.setStartDate(recurrenceIds.first().getValue());
-            
+
             ExtendedProperties extendedProperties = new ExtendedProperties();
             extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_FAKED_MASTER.getId(), "1"));
             extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_GENERATION.getId(), Integer.valueOf(phantom.getSequence())));
@@ -1112,18 +1112,18 @@ public class EventPatches {
             fake.setExtendedProperties(extendedProperties);
             return fake;
         }
-        
+
         /**
          * Finds the first X-MOZ-ACK property in the alarms of the given events
          *
          * @param events The events to search for
          * @return An optional which may or may not contain the X-MOZ-ACK value
          */
-        private static Optional<Object> findXMOZASTACK (List<Event> events) {
-            for(Event eve: events) {
-                if(eve.containsAlarms()) {
+        private static Optional<Object> findXMOZASTACK(List<Event> events) {
+            for (Event eve : events) {
+                if (eve.containsAlarms()) {
                     Optional<Alarm> findAny = eve.getAlarms().stream().filter((alarm) -> alarm.containsExtendedProperties() && alarm.getExtendedProperties().contains(Lightning.X_MOZ_LASTACK.getId())).findAny();
-                    if(findAny.isPresent()) {
+                    if (findAny.isPresent()) {
                         return Optional.ofNullable(findAny.get().getExtendedProperties().get(Lightning.X_MOZ_LASTACK.getId()).getValue());
                     }
                 }

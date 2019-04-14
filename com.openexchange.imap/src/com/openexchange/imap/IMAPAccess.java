@@ -99,6 +99,7 @@ import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.imap.util.HostAndPortAndCredentials;
 import com.openexchange.imap.util.StampAndOXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.audit.AuditLogService;
@@ -1046,10 +1047,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         if (MailAccount.DEFAULT_ID == accountId) {
+            boolean failedToSetClientParameters = true; // Pessimistic
             try {
                 IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+                failedToSetClientParameters = false;
             } catch (OXException e) {
                 throw new MessagingException(e.getMessage(), e);
+            } finally {
+                if (failedToSetClientParameters) {
+                    Streams.close(imapStore);
+                }
             }
         }
         /*
@@ -1061,7 +1068,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 if (null != capabilities) {
                     preAuthStartTlsCap[0] = capabilities.containsKey("STARTTLS");
                 }
-            } catch (@SuppressWarnings("unused") Exception e) {
+            } catch (Exception e) {
                 // Ignore
             }
         }
@@ -1088,28 +1095,34 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @throws MessagingException If operation fails
      */
     public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session, boolean knownExternal) throws MessagingException {
-        Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
-        if (null == kerberosSubject) {
-            imapStore.connect(server, port, login, pw);
-        } else {
-            synchronized (kerberosSubject) {
+        boolean error = true;
+        try {
+            Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
+            if (null == kerberosSubject) {
                 imapStore.connect(server, port, login, pw);
+            } else {
+                synchronized (kerberosSubject) {
+                    imapStore.connect(server, port, login, pw);
+                }
             }
-        }
-
-        AuditLogService auditLogService = Services.optService(AuditLogService.class);
-        if (null != auditLogService) {
-            String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
-            auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
-        }
-
-        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
-        if (null != sessionInformation) {
-            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
-        }
-        java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
-        if (null != remoteAddress) {
-            LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
+            AuditLogService auditLogService = Services.optService(AuditLogService.class);
+            if (null != auditLogService) {
+                String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
+                auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
+            }
+            String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+            if (null != sessionInformation) {
+                LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+            }
+            java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
+            if (null != remoteAddress) {
+                LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
+            }
+            error = false;
+        } finally {
+            if (error) {
+                Streams.close(imapStore);
+            }
         }
     }
 
