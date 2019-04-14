@@ -38,7 +38,7 @@ spec:
                 allOf {
                     branch 'develop'
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.USER) }
+                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
                 }
             }
             tools {
@@ -65,7 +65,7 @@ spec:
                 allOf {
                     branch 'develop'
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.USER) }
+                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
                 }
             }
             steps {
@@ -79,7 +79,7 @@ spec:
                 allOf {
                     branch 'develop'
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.USER) }
+                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
                 }
             }
             steps {
