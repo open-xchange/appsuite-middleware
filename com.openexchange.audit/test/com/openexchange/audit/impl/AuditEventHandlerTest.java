@@ -49,6 +49,8 @@
 
 package com.openexchange.audit.impl;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import org.dmfs.rfc5545.DateTime;
 import org.junit.Assert;
@@ -172,7 +174,7 @@ public class AuditEventHandlerTest {
     public void testHandleEvent_InfoLoggingDisabled_Return() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
-        PowerMockito.when(log.isInfoEnabled()).thenReturn(false);
+        PowerMockito.when(B(log.isInfoEnabled())).thenReturn(Boolean.FALSE);
         MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
 
         this.auditEventHandler.handleEvent(event);
@@ -184,7 +186,7 @@ public class AuditEventHandlerTest {
     public void testHandleEvent_InfoLoggingEnabledButWrongEvent_NothingToWrite() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
-        PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
+        PowerMockito.when(B(log.isInfoEnabled())).thenReturn(Boolean.TRUE);
         MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("topicOfAnyOtherEvent");
 
@@ -203,7 +205,7 @@ public class AuditEventHandlerTest {
             }
         };
 
-        PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
+        PowerMockito.when(B(log.isInfoEnabled())).thenReturn(Boolean.TRUE);
         MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/infostore/");
 
@@ -222,7 +224,7 @@ public class AuditEventHandlerTest {
             }
         };
 
-        PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
+        PowerMockito.when(B(log.isInfoEnabled())).thenReturn(Boolean.TRUE);
         MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/");
 
@@ -242,7 +244,7 @@ public class AuditEventHandlerTest {
             }
         };
 
-        PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
+        PowerMockito.when(B(log.isInfoEnabled())).thenReturn(Boolean.TRUE);
         MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/infostore/");
 
@@ -262,7 +264,7 @@ public class AuditEventHandlerTest {
             }
         };
 
-        PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
+        PowerMockito.when(B(log.isInfoEnabled())).thenReturn(Boolean.TRUE);
         MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/");
 
@@ -289,7 +291,7 @@ public class AuditEventHandlerTest {
     public void testHandleMainCommmonEvent_EventInsert_AddInsertToLog() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
+        Mockito.when(I(commonEvent.getAction())).thenReturn(I(CommonEvent.INSERT));
 
         this.auditEventHandler.handleMainCommmonEvent(commonEvent, stringBuilder);
 
@@ -300,7 +302,7 @@ public class AuditEventHandlerTest {
     public void testHandleMainCommmonEvent_EventDelete_AddDeleteToLog() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.DELETE);
+        Mockito.when(I(commonEvent.getAction())).thenReturn(I(CommonEvent.DELETE));
 
         this.auditEventHandler.handleMainCommmonEvent(commonEvent, stringBuilder);
 
@@ -311,7 +313,7 @@ public class AuditEventHandlerTest {
     public void testHandleMainCommmonEvent_EventUpdate_AddUpdateToLog() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.UPDATE);
+        Mockito.when(I(commonEvent.getAction())).thenReturn(I(CommonEvent.UPDATE));
 
         this.auditEventHandler.handleMainCommmonEvent(commonEvent, stringBuilder);
 
@@ -345,10 +347,10 @@ public class AuditEventHandlerTest {
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
+        Mockito.when(I(commonEvent.getAction())).thenReturn(I(CommonEvent.INSERT));
         Mockito.when(commonEvent.getActionObj()).thenReturn(event);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
         Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
         Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
         Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
@@ -375,10 +377,10 @@ public class AuditEventHandlerTest {
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
+        Mockito.when(I(commonEvent.getAction())).thenReturn(I(CommonEvent.INSERT));
         Mockito.when(commonEvent.getActionObj()).thenReturn(event);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
         Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
         Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
         Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
@@ -408,10 +410,10 @@ public class AuditEventHandlerTest {
         Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
 
         com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
-        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.DELETE);
+        Mockito.when(I(commonEvent.getAction())).thenReturn(I(CommonEvent.DELETE));
         Mockito.when(commonEvent.getActionObj()).thenReturn(event);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
         Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
         Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
         Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
@@ -453,11 +455,11 @@ public class AuditEventHandlerTest {
         };
 
         Mockito.when(commonEvent.getActionObj()).thenReturn(contact);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(contact.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(contact.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(contact.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(contact.getObjectID())).thenReturn(I(this.objectId));
+        Mockito.when(I(contact.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(contact.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(contact.getTitle()).thenReturn(this.objectTitle);
 
         this.auditEventHandler.handleContactCommonEvent(commonEvent, context, stringBuilder);
@@ -476,11 +478,11 @@ public class AuditEventHandlerTest {
         };
 
         Mockito.when(commonEvent.getActionObj()).thenReturn(contact);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(contact.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(contact.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(contact.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(contact.getObjectID())).thenReturn(I(this.objectId));
+        Mockito.when(I(contact.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(contact.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(contact.getDisplayName()).thenReturn(this.objectTitle);
 
         this.auditEventHandler.handleContactCommonEvent(commonEvent, context, stringBuilder);
@@ -501,14 +503,14 @@ public class AuditEventHandlerTest {
         };
 
         Mockito.when(commonEvent.getActionObj()).thenReturn(contact);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(contact.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(contact.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(contact.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(contact.getObjectID())).thenReturn(I(this.objectId));
+        Mockito.when(I(contact.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(contact.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(contact.getDisplayName()).thenReturn(this.objectTitle);
-        Mockito.when(contact.containsCreatedBy()).thenReturn(true);
-        Mockito.when(contact.containsModifiedBy()).thenReturn(true);
+        Mockito.when(B(contact.containsCreatedBy())).thenReturn(Boolean.TRUE);
+        Mockito.when(B(contact.containsModifiedBy())).thenReturn(Boolean.TRUE);
 
         this.auditEventHandler.handleContactCommonEvent(commonEvent, context, stringBuilder);
 
@@ -544,11 +546,11 @@ public class AuditEventHandlerTest {
 
         Task task = PowerMockito.mock(Task.class);
         Mockito.when(commonEvent.getActionObj()).thenReturn(task);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(task.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(task.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(task.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(task.getObjectID())).thenReturn(I(this.objectId));
+        Mockito.when(I(task.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(task.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(task.getTitle()).thenReturn(this.objectTitle);
 
         this.auditEventHandler.handleTaskCommonEvent(commonEvent, context, stringBuilder);
@@ -568,11 +570,11 @@ public class AuditEventHandlerTest {
 
         Task task = PowerMockito.mock(Task.class);
         Mockito.when(commonEvent.getActionObj()).thenReturn(task);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(task.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(task.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(task.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(task.getObjectID())).thenReturn(I(this.objectId));
+        Mockito.when(I(task.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(task.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(task.getTitle()).thenReturn(this.objectTitle);
 
         this.auditEventHandler.handleTaskCommonEvent(commonEvent, context, stringBuilder);
@@ -608,10 +610,10 @@ public class AuditEventHandlerTest {
 
         DocumentMetadata documentMetadata = PowerMockito.mock(DocumentMetadata.class);
         Mockito.when(commonEvent.getActionObj()).thenReturn(documentMetadata);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(documentMetadata.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(documentMetadata.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(documentMetadata.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(documentMetadata.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(documentMetadata.getTitle()).thenReturn(this.objectTitle);
 
         this.auditEventHandler.handleInfostoreCommonEvent(commonEvent, context, stringBuilder);
@@ -631,12 +633,12 @@ public class AuditEventHandlerTest {
 
         DocumentMetadata documentMetadata = PowerMockito.mock(DocumentMetadata.class);
         Mockito.when(commonEvent.getActionObj()).thenReturn(documentMetadata);
-        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
-        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(documentMetadata.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(documentMetadata.getModifiedBy()).thenReturn(this.userId);
+        Mockito.when(I(commonEvent.getContextId())).thenReturn(I(this.contextId));
+        Mockito.when(I(commonEvent.getUserId())).thenReturn(I(this.userId));
+        Mockito.when(I(documentMetadata.getCreatedBy())).thenReturn(I(this.userId));
+        Mockito.when(I(documentMetadata.getModifiedBy())).thenReturn(I(this.userId));
         Mockito.when(documentMetadata.getTitle()).thenReturn(this.objectTitle);
-        Mockito.when(documentMetadata.getId()).thenReturn(this.objectId);
+        Mockito.when(I(documentMetadata.getId())).thenReturn(I(this.objectId));
 
         this.auditEventHandler.handleInfostoreCommonEvent(commonEvent, context, stringBuilder);
 
@@ -667,9 +669,9 @@ public class AuditEventHandlerTest {
         Session session = PowerMockito.mock(Session.class);
         PowerMockito.when(session.getParameter(ArgumentMatchers.anyString())).thenReturn(Boolean.FALSE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
+        PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(I(this.objectId));
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).thenReturn(this.userId);
+        PowerMockito.when(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).thenReturn(I(this.userId));
         PowerMockito.when(event.getProperty(FileStorageEventConstants.FOLDER_ID)).thenReturn(this.objectTitle);
 
         this.auditEventHandler.handleInfostoreEvent(event, stringBuilder);
@@ -685,15 +687,15 @@ public class AuditEventHandlerTest {
     public void testHandleInfostoreEvent_AccessTopic_AppendLocalIp() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
-        PowerMockito.when(AuditConfiguration.getFileAccessLogging()).thenReturn(Boolean.TRUE);
+        PowerMockito.when(B(AuditConfiguration.getFileAccessLogging())).thenReturn(Boolean.TRUE);
 
         PowerMockito.when(event.getTopic()).thenReturn(FileStorageEventConstants.ACCESS_TOPIC);
         Session session = PowerMockito.mock(Session.class);
         PowerMockito.when(session.getParameter(ArgumentMatchers.anyString())).thenReturn(Boolean.TRUE);
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SESSION)).thenReturn(session);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(this.objectId);
+        PowerMockito.when(event.getProperty(FileStorageEventConstants.OBJECT_ID)).thenReturn(I(this.objectId));
         PowerMockito.when(event.getProperty(FileStorageEventConstants.SERVICE)).thenReturn(this.objectTitle);
-        PowerMockito.when(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).thenReturn(this.userId);
+        PowerMockito.when(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).thenReturn(I(this.userId));
         PowerMockito.when(event.getProperty(FileStorageEventConstants.FOLDER_ID)).thenReturn(this.objectTitle);
         PowerMockito.when(event.getProperty("remoteAddress")).thenReturn("172.16.13.71");
 
@@ -747,8 +749,8 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(event.getProperty(CommonEvent.EVENT_KEY)).thenReturn(this.commonEvent);
-        PowerMockito.when(this.commonEvent.getContextId()).thenReturn(this.contextId);
-        PowerMockito.when(this.commonEvent.getModule()).thenReturn(Types.APPOINTMENT);
+        PowerMockito.when(I(this.commonEvent.getContextId())).thenReturn(I(this.contextId));
+        PowerMockito.when(I(this.commonEvent.getModule())).thenReturn(I(Types.APPOINTMENT));
         ContextStorage contextStorage = PowerMockito.mock(ContextStorage.class);
         PowerMockito.when(contextStorage.getContext(this.contextId)).thenReturn(this.context);
 
@@ -773,8 +775,8 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(event.getProperty(CommonEvent.EVENT_KEY)).thenReturn(this.commonEvent);
-        PowerMockito.when(this.commonEvent.getContextId()).thenReturn(this.contextId);
-        PowerMockito.when(this.commonEvent.getModule()).thenReturn(Types.CONTACT);
+        PowerMockito.when(I(this.commonEvent.getContextId())).thenReturn(I(this.contextId));
+        PowerMockito.when(I(this.commonEvent.getModule())).thenReturn(I(Types.CONTACT));
         ContextStorage contextStorage = PowerMockito.mock(ContextStorage.class);
         PowerMockito.when(contextStorage.getContext(this.contextId)).thenReturn(this.context);
 
@@ -799,8 +801,8 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(event.getProperty(CommonEvent.EVENT_KEY)).thenReturn(this.commonEvent);
-        PowerMockito.when(this.commonEvent.getContextId()).thenReturn(this.contextId);
-        PowerMockito.when(this.commonEvent.getModule()).thenReturn(Types.TASK);
+        PowerMockito.when(I(this.commonEvent.getContextId())).thenReturn(I(this.contextId));
+        PowerMockito.when(I(this.commonEvent.getModule())).thenReturn(I(Types.TASK));
         ContextStorage contextStorage = PowerMockito.mock(ContextStorage.class);
         PowerMockito.when(contextStorage.getContext(this.contextId)).thenReturn(this.context);
 
@@ -825,8 +827,8 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(event.getProperty(CommonEvent.EVENT_KEY)).thenReturn(this.commonEvent);
-        PowerMockito.when(this.commonEvent.getContextId()).thenReturn(this.contextId);
-        PowerMockito.when(this.commonEvent.getModule()).thenReturn(Types.INFOSTORE);
+        PowerMockito.when(I(this.commonEvent.getContextId())).thenReturn(I(this.contextId));
+        PowerMockito.when(I(this.commonEvent.getModule())).thenReturn(I(Types.INFOSTORE));
         ContextStorage contextStorage = PowerMockito.mock(ContextStorage.class);
         PowerMockito.when(contextStorage.getContext(this.contextId)).thenReturn(this.context);
 

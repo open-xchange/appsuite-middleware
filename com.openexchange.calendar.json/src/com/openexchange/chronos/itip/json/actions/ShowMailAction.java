@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,7 +171,7 @@ public class ShowMailAction extends AppointmentAction {
             for (int i = 0, size = array.length(); i < size; i++) {
                 final JSONObject participantSpec = array.getJSONObject(i);
                 if (participantSpec.has("confirm")) {
-                    final int confirm = participantSpec.getInt("confirm");
+                    final Integer confirm = I(participantSpec.getInt("confirm"));
                     if (participantSpec.has("id")) {
                         confirmMap.put(participantSpec.get("id").toString(), confirm);
                     }
@@ -186,7 +187,7 @@ public class ShowMailAction extends AppointmentAction {
             for (int i = 0, size = array.length(); i < size; i++) {
                 final JSONObject participantSpec = array.getJSONObject(i);
                 if (participantSpec.has("confirm")) {
-                    final int confirm = participantSpec.getInt("confirm");
+                    final Integer confirm = I(participantSpec.getInt("confirm"));
                     if (participantSpec.has("id")) {
                         confirmMap.put(participantSpec.get("id").toString(), confirm);
                     }
@@ -202,7 +203,7 @@ public class ShowMailAction extends AppointmentAction {
             for (int i = 0, size = array.length(); i < size; i++) {
                 final JSONObject participantSpec = array.getJSONObject(i);
                 if (participantSpec.has("status")) {
-                    final int confirm = participantSpec.getInt("status");
+                    final Integer confirm = I(participantSpec.getInt("status"));
                     if (participantSpec.has("id")) {
                         confirmMap.put(participantSpec.get("id").toString(), confirm);
                     }
@@ -224,7 +225,7 @@ public class ShowMailAction extends AppointmentAction {
                     }
 
                     if (confirmStatus != null) {
-                        up.setConfirm(confirmStatus);
+                        up.setConfirm(confirmStatus.intValue());
                     }
 
                 }
@@ -237,7 +238,7 @@ public class ShowMailAction extends AppointmentAction {
                     }
 
                     if (confirmStatus != null) {
-                        ep.setConfirm(confirmStatus);
+                        ep.setConfirm(confirmStatus.intValue());
                     }
                 }
             }
@@ -252,7 +253,7 @@ public class ShowMailAction extends AppointmentAction {
                 }
 
                 if (confirmStatus != null) {
-                    up.setConfirm(confirmStatus);
+                    up.setConfirm(confirmStatus.intValue());
                 }
             }
         }
@@ -266,7 +267,7 @@ public class ShowMailAction extends AppointmentAction {
                 }
 
                 if (confirmStatus != null) {
-                    ep.setStatus(ConfirmStatus.byId(confirmStatus));
+                    ep.setStatus(ConfirmStatus.byId(confirmStatus.intValue()));
                 }
             }
         }

@@ -49,6 +49,8 @@
 
 package com.openexchange.calendar.json.compat;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.calendar.Constants;
@@ -361,16 +363,16 @@ public class Appointment extends CalendarObject implements Cloneable {
     public void set(int field, Object value) {
         switch (field) {
         case SHOWN_AS:
-            setShownAs((Integer) value);
+            setShownAs(((Integer) value).intValue());
             break;
         case ALARM:
-            setAlarm((Integer) value);
+            setAlarm(((Integer) value).intValue());
             break;
         case TIMEZONE:
             setTimezone((String) value);
             break;
         case RECURRENCE_START:
-            setRecurringStart((Long) value);
+            setRecurringStart(((Long) value).longValue());
             break;
         case LOCATION:
             setLocation((String) value);
@@ -384,13 +386,13 @@ public class Appointment extends CalendarObject implements Cloneable {
     public Object get(int field) {
         switch (field) {
         case SHOWN_AS:
-            return getShownAs();
+            return I(getShownAs());
         case ALARM:
-            return getAlarm();
+            return I(getAlarm());
         case TIMEZONE:
             return getTimezone();
         case RECURRENCE_START:
-            return getRecurringStart();
+            return L(getRecurringStart());
         case LOCATION:
             return getLocation();
         default:
