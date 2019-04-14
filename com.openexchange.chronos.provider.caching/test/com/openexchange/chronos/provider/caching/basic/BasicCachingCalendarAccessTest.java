@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -199,7 +202,7 @@ public class BasicCachingCalendarAccessTest {
     @Test // cache invalidated
     public void testUpdateCacheIfNeeded_lastUpdateNegative_update() throws OXException {
         JSONObject lastUpdate = new JSONObject();
-        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, -1);
+        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, I(-1));
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
@@ -213,7 +216,7 @@ public class BasicCachingCalendarAccessTest {
     @Test
     public void testUpdateCacheIfNeeded_lastUpdateZero_update() throws OXException {
         JSONObject lastUpdate = new JSONObject();
-        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
+        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, I(0));
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
@@ -227,7 +230,7 @@ public class BasicCachingCalendarAccessTest {
     @Test
     public void testUpdateCacheIfNeeded_refreshIntervalExceeded_update() throws OXException {
         JSONObject lastUpdate = new JSONObject();
-        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(61L));
+        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(61L)));
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
@@ -241,11 +244,11 @@ public class BasicCachingCalendarAccessTest {
     @Test
     public void testUpdateCacheIfNeeded_cacheUpdateRequestedButInBlockingTime_throwException() throws OXException {
         JSONObject lastUpdate = new JSONObject();
-        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60L));
+        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(60L)));
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
-        Mockito.when(parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE)).thenReturn(Boolean.TRUE);
+        Mockito.when(B(parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE))).thenReturn(Boolean.TRUE);
         Mockito.when(parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
@@ -263,7 +266,7 @@ public class BasicCachingCalendarAccessTest {
     @Test // see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL
     public void testUpdateCacheIfNeeded_updateRejectedDueTo2SecondsBlockingToPreventAbuse_noUpdate() throws OXException {
         JSONObject lastUpdate = new JSONObject();
-        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(1L));
+        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(1L)));
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
@@ -277,11 +280,11 @@ public class BasicCachingCalendarAccessTest {
     @Test
     public void testUpdateCacheIfNeeded_refreshIntervalNotExceededButCacheRefreshForced_update() throws OXException {
         JSONObject lastUpdate = new JSONObject();
-        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(59L));
+        lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(59L)));
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, lastUpdate);
         account = new DefaultCalendarAccount("providerId", 1, 1, internalConfig, internalConfig, new Date(System.currentTimeMillis()));
-        Mockito.when(parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE)).thenReturn(Boolean.TRUE);
+        Mockito.when(B(parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE))).thenReturn(Boolean.TRUE);
         Mockito.when(parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 

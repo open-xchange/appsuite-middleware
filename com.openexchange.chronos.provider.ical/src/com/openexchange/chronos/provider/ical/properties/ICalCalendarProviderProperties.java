@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.ical.properties;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,27 +74,27 @@ public enum ICalCalendarProviderProperties implements Property {
     /**
      * Defines the default timeout interval for contacting the external resource after an error occurred.
      */
-    retryAfterErrorInterval(3600L, ICalCalendarProviderProperties.PREFIX), // one hour
+    retryAfterErrorInterval(L(3600L), ICalCalendarProviderProperties.PREFIX), // one hour
     /**
      * Defines the default refresh interval of the calendar feeds
      */
-    refreshInterval(10080L, ICalCalendarProviderProperties.PREFIX), // one week
+    refreshInterval(L(10080L), ICalCalendarProviderProperties.PREFIX), // one week
     /**
      * Defines the maximum possible number of connections used to access the calendar feed
      */
-    maxConnections(1000, ICalCalendarProviderProperties.PREFIX),
+    maxConnections(I(1000), ICalCalendarProviderProperties.PREFIX),
     /**
      * Defines the maximum possible number of connections per host used to access the calendar feed
      */
-    maxConnectionsPerRoute(100, ICalCalendarProviderProperties.PREFIX),
+    maxConnectionsPerRoute(I(100), ICalCalendarProviderProperties.PREFIX),
     /**
      * Defines the connection timeout
      */
-    connectionTimeout(5000, ICalCalendarProviderProperties.PREFIX),
+    connectionTimeout(I(5000), ICalCalendarProviderProperties.PREFIX),
     /**
      * Defines the timeout on waiting to read data
      */
-    socketReadTimeout(30000, ICalCalendarProviderProperties.PREFIX),
+    socketReadTimeout(I(30000), ICalCalendarProviderProperties.PREFIX),
     /**
      * Defines hosts that are blacklisted which means that they are not allowed to be accessed
      */

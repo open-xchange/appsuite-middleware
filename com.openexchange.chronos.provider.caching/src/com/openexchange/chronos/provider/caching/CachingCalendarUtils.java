@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.caching;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -83,10 +85,10 @@ public class CachingCalendarUtils {
             try {
                 JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccessConstants.CACHING);
                 if (caching != null) {
-                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, newLastUpdateTimestamp);
+                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(newLastUpdateTimestamp));
                 }
             } catch (JSONException e) {
-                LOG.error("Unable to retrieve caching information for calendar account '{}' with provider '{}': {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
+                LOG.error("Unable to retrieve caching information for calendar account '{}' with provider '{}': {}", I(calendarAccount.getAccountId()), calendarAccount.getProviderId(), e.getMessage(), e);
             }
         }
     }

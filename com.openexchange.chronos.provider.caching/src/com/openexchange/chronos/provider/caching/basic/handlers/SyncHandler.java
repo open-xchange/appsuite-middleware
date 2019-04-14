@@ -157,9 +157,9 @@ public class SyncHandler extends AbstractExtensionHandler {
                 if (0 < deletedEvents.size() && timestamp < deletedEvents.get(0).getTimestamp()) {
                     timestamp = deletedEvents.get(0).getTimestamp();
                 }
-                return timestamp;
+                return L(timestamp);
             }
-        }.executeQuery();
+        }.executeQuery().longValue();
     }
 
     /**
