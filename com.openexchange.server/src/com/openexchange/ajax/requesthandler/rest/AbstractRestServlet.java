@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,6 +104,30 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
         }
 
         @Override
+        public String getModule(String prefix, HttpServletRequest req) {
+            // Obtain method's handler...
+            MethodHandler methodHandler = getMethodHandler(req, servlet);
+            if (null == methodHandler) {
+                return super.getModule(prefix, req);
+            }
+
+            return methodHandler.getModule();
+        }
+
+        @Override
+        public String getAction(HttpServletRequest req) {
+            // Obtain method's handler...
+            MethodHandler methodHandler = getMethodHandler(req, servlet);
+            if (null == methodHandler) {
+                return super.getAction(req);
+            }
+
+            // Split path
+            String[] pathElements = splitPath(req);
+            return methodHandler.getAction(pathElements, req);
+        }
+
+        @Override
         public AJAXRequestData parseRequest(HttpServletRequest req, boolean bPreferStream, boolean bIsFileUpload, boolean preLoadRequestBody, ServerSession session, String prefix, HttpServletResponse optResp) throws IOException, OXException {
             // Determine values for "preferStream" and "isFileUpload" argument
             boolean preferStream = false;
@@ -129,14 +154,8 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
             // Parse to an instance of AJAXRequestData
             AJAXRequestData requestData = super.parseRequest(req, preferStream, isFileUpload, preLoadRequestBody, session, prefix, optResp);
 
-            // Determine the request's method
-            Method method = Method.valueOf(req);
-            if (null == method) {
-                return requestData;
-            }
-
             // Obtain method's handler...
-            MethodHandler methodHandler = servlet.getMethodHandler(method);
+            MethodHandler methodHandler = getMethodHandler(req, servlet);
             if (null == methodHandler) {
                 return requestData;
             }
@@ -144,6 +163,63 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
             // ... and modify request appropriately to trigger the right Dispatcher call
             return methodHandler.modifyRequest(requestData, req);
         }
+    }
+
+    private static final String ATTR_PATH_ELEMS = "__ajax.rest.pathelems";
+
+    /**
+     * Splits given request's {@link HttpServletRequest#getPathInfo() extra path information} into tokens.
+     *
+     * @param restRequest The request
+     * @return The split path or <code>null</code> if there is no extra path information available
+     */
+    protected static String[] splitPath(HttpServletRequest restRequest) {
+        Reference<String[]> pathElementsRef = (Reference<String[]>) restRequest.getAttribute(ATTR_PATH_ELEMS);
+        if (pathElementsRef == null) {
+            String[] pathElements;
+            String pathInfo = restRequest.getPathInfo();
+            if (Strings.isEmpty(pathInfo)) {
+                // No extra path information available
+                pathElements = null;
+            } else {
+                if (pathInfo.charAt(0) == '/') {
+                    // Drop starting slash character
+                    pathInfo = pathInfo.substring(1);
+                }
+                pathElements = Strings.splitBy(pathInfo, '/', false);
+            }
+            pathElementsRef = new Reference<String[]>(pathElements);
+            restRequest.setAttribute(ATTR_PATH_ELEMS, pathElementsRef);
+        }
+        return pathElementsRef.getValue();
+    }
+
+    private static final String ATTR_METHOD_HANDLER = "__ajax.rest.methodhandler";
+
+    /**
+     * Gets the method handler associated with given request.
+     *
+     * @param req The request
+     * @param restServlet The REST servlet providing the look-up
+     * @return The method handler
+     */
+    protected static MethodHandler getMethodHandler(HttpServletRequest req, AbstractRestServlet restServlet) {
+        MethodHandler methodHandler = (MethodHandler) req.getAttribute(ATTR_METHOD_HANDLER);
+        if (methodHandler == null) {
+            // Determine the request's method
+            Method method = Method.valueOf(req);
+            if (null == method) {
+                return null;
+            }
+
+            // Obtain method's handler...
+            methodHandler = restServlet.getMethodHandler(method);
+            if (null == methodHandler) {
+                return null;
+            }
+            req.setAttribute(ATTR_METHOD_HANDLER, methodHandler);
+        }
+        return methodHandler;
     }
 
 }

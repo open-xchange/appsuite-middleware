@@ -73,24 +73,34 @@ public final class PutMethodHandler extends AbstractMailComposeMethodHandler {
 
     @Override
     protected void modifyByPathInfo(AJAXRequestData requestData, String[] restPathElements, HttpServletRequest req) throws IOException, OXException {
-        if (hasNoPathInfo(restPathElements)) {
+        String action = getAction(restPathElements, req);
+        if (action == null) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
+        requestData.setAction(action);
 
-        int length = restPathElements.length;
-        if (0 == length) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-
-        if (1 == length) {
+        if ("update".equals(action)) {
             /*-
              *  PUT /mail/compose/123
              */
-            requestData.setAction("update");
             requestData.putParameter("id", restPathElements[0]);
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(req.getPathInfo());
         }
+    }
+
+    @Override
+    protected String doGetAction(String[] restPathElements, HttpServletRequest restRequest) {
+        if (hasPathInfo(restPathElements)) {
+            int length = restPathElements.length;
+            if (1 == length) {
+                /*-
+                 *  PUT /mail/compose/123
+                 */
+                return "update";
+            }
+        }
+        return null;
     }
 
 }
