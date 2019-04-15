@@ -755,7 +755,10 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             rs = stmt.executeQuery();
-            return rs.getString(1);
+            if (rs.next()) {
+                return rs.getString(1);
+            }
+            return null;
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
