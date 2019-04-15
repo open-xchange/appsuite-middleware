@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.query;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,8 +87,8 @@ public class FilterMatchTest {
         boolean matches = analyzer.match(filter, captured);
         assertTrue(matches);
         assertEquals(2, captured.size());
-        assertEquals(D("08.09.2011 22:00").getTime(), captured.get(0));
-        assertEquals(-1L, captured.get(1));
+        assertEquals(L(D("08.09.2011 22:00").getTime()), captured.get(0));
+        assertEquals(L(-1L), captured.get(1));
 
         filter = new Filter().addFilter(
             compFilter("VCALENDAR").addFilter(

@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,7 +139,7 @@ public class OSGiFileFieldCollector implements ServiceTrackerCustomizer<Addition
         AdditionalFileField existingField = knownFields.putIfAbsent(columnID, field);
         if (null != existingField) {
             org.slf4j.LoggerFactory.getLogger(OSGiFileFieldCollector.class).warn(
-                "Collision in file fields. Field '{}' : {} has already been taken. Ignoring second service.", field.getColumnName(), field.getColumnID());
+                "Collision in file fields. Field '{}' : {} has already been taken. Ignoring second service.", field.getColumnName(), I(field.getColumnID()));
 
         }
         return field;

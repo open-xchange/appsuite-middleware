@@ -304,7 +304,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         notificationService.notifyHandlers(new DefaultCalendarEvent(    session.getContextId(),
                                                                         account.getAccountId(),
                                                                         session.getUserId(),
-                                                                        Collections.singletonMap(session.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+                                                                        Collections.singletonMap(I(session.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
                                                                         result.getCreations(),
                                                                         result.getUpdates(),
                                                                         result.getDeletions(),
@@ -350,7 +350,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
                     @Override
                     public long getTimestamp() {
-                        return timestamp;
+                        return timestamp.longValue();
                     }
                 };
             }
@@ -369,7 +369,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 iterator.set(new DelegatingEvent(event) {
                     @Override
                     public long getTimestamp() {
-                        return timestamp;
+                        return timestamp.longValue();
                     }
                     @Override
                     public boolean containsTimestamp() {
@@ -507,7 +507,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
      * <p/>
      * In case an inaccessible birthday event is referenced, the corresponding trigger, and any configured alarms for that birthday event
      * are cleaned up implicitly.
-     * 
+     *
      * @param alarmTriggers The alarm triggers to remove inaccessible ones from
      * @return The passed collection, with the inaccessible triggers removed
      */
@@ -628,7 +628,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
         int foldersHash = 1;
         for (String folder : folders) {
-            foldersHash = 31 * foldersHash + folder.hashCode(); 
+            foldersHash = 31 * foldersHash + folder.hashCode();
             try (SearchIterator<Contact> searchIterator = contactService.getModifiedContacts(session, folder, lastModified, LAST_MODIFIED_FIELDS, sortOptions)) {
                 if (searchIterator.hasNext()) {
                     Contact contact = searchIterator.next();
@@ -642,7 +642,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
                 }
             }
         }
-        
+
         Date latestAlarmLastModified = new Date(getAlarmHelper().getLatestTimestamp(session.getUserId()));
         lastModified = lastModified.after(latestAlarmLastModified) ? lastModified : latestAlarmLastModified;
 

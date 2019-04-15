@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -76,23 +77,23 @@ public class VersionContainer {
     }
 
     public boolean containsVersion(int version) {
-        return versions.containsKey(version);
+        return versions.containsKey(I(version));
     }
 
     public FileHolder getVersion(int version) {
-        return versions.get(version);
+        return versions.get(I(version));
     }
 
     public int addVersion(FileHolder fileHolder) {
         int version = ++currentVersion;
-        versions.put(version, fileHolder);
+        versions.put(I(version), fileHolder);
         fileHolder.getInternalFile().setVersion("" + version);
 
         return version;
     }
 
     public FileHolder removeVersion(int version)  {
-        FileHolder removed = versions.remove(version);
+        FileHolder removed = versions.remove(I(version));
         if (version == currentVersion) {
             int tmp = -1;
             for (int v : versions.keySet()) {
@@ -108,13 +109,13 @@ public class VersionContainer {
     }
 
     public FileHolder getCurrentVersion() {
-        return versions.get(currentVersion);
+        return versions.get(I(currentVersion));
     }
 
     public int getCurrentVersionNumber() {
         return currentVersion;
     }
-    
+
     public Collection<FileHolder> getAllVersions() {
         return versions.values();
     }

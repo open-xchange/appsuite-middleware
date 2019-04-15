@@ -983,8 +983,12 @@ public class AJAXRequestData {
      * @return The coerced value
      * @throws OXException if coercion fails
      */
-    public @Nullable <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
-        return getParameter(name, coerceTo, false);
+    public @NonNull <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo) throws OXException {
+        T parameter = getParameter(name, coerceTo, false);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return parameter;
     }
 
     /**

@@ -49,6 +49,7 @@
 
 package com.openexchange.database.tombstone.cleanup.update.cleaners;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -94,7 +95,7 @@ public class InfostoreTombstoneUpdateTaskCleaner extends InfostoreTombstoneClean
         List<Integer> affectedContextIds = new ConcurrentList<>();
         while (resultSet.next()) {
             int contextId = resultSet.getInt("cid");
-            affectedContextIds.add(contextId);
+            affectedContextIds.add(I(contextId));
         }
         return affectedContextIds;
     }

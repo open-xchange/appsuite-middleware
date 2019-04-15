@@ -66,7 +66,7 @@ public enum DriveEventsGCMProperty implements Property {
      * GCM API key.
      * Default: false
      */
-    ENABLED("enabled", false),
+    ENABLED("enabled", Boolean.FALSE),
 
     /**
      * Specifies the API key of the server application.

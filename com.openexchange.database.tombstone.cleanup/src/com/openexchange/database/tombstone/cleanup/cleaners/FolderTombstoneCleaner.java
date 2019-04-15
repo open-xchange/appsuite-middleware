@@ -49,6 +49,7 @@
 
 package com.openexchange.database.tombstone.cleanup.cleaners;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -114,12 +115,12 @@ public class FolderTombstoneCleaner extends AbstractContextBasedTombstoneTableCl
         Map<Integer, Set<Integer>> candidatesPerContext = new ConcurrentHashMap<>();
         while (resultSet.next()) {
             int contextId = resultSet.getInt("cid");
-            Set<Integer> contextIdList = candidatesPerContext.get(contextId);
+            Set<Integer> contextIdList = candidatesPerContext.get(I(contextId));
             if (contextIdList == null) {
                 contextIdList = new ConcurrentHashSet<>();
-                candidatesPerContext.put(contextId, contextIdList);
+                candidatesPerContext.put(I(contextId), contextIdList);
             }
-            contextIdList.add(resultSet.getInt("fuid"));
+            contextIdList.add(I(resultSet.getInt("fuid")));
         }
         return candidatesPerContext;
     }

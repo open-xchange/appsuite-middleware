@@ -64,7 +64,7 @@ public class TimeFrame {
 
     private final long to;
 
-    private boolean inclusive;
+    private final boolean inclusive;
 
     private TimeFrame(final long from, final long to, final boolean inclusive) {
         super();
@@ -139,7 +139,7 @@ public class TimeFrame {
         long to = -1L;
         if (!"*".equals(sFrom)) {
             try {
-                from = Long.valueOf(sFrom);
+                from = Long.parseLong(sFrom);
             } catch (NumberFormatException e) {
                 return null;
             }
@@ -147,7 +147,7 @@ public class TimeFrame {
 
         if (!"*".equals(sTo)) {
             try {
-                to = Long.valueOf(sTo);
+                to = Long.parseLong(sTo);
             } catch (NumberFormatException e) {
                 return null;
             }

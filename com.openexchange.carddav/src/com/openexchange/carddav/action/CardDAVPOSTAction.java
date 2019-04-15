@@ -141,7 +141,7 @@ public class CardDAVPOSTAction extends POSTAction {
             String maxSimStr = request.getHeader(MAX_SIMILARITY);
             float maxSimilarity = 0;
             if (maxSimStr != null) {
-                maxSimilarity = Float.valueOf(maxSimStr);
+                maxSimilarity = Float.parseFloat(maxSimStr);
                 if (maxSimilarity > 1) {
                     maxSimilarity = 1;
                 }

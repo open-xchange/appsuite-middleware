@@ -52,6 +52,7 @@ package com.openexchange.groupware.tools.mappings.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link BooleanMapping} - Database mapping for <code>Types.INTEGER</code>.
@@ -67,7 +68,7 @@ public abstract class BooleanMapping<O> extends DefaultDbMapping<Boolean, O> {
 
 	@Override
 	public Boolean get(final ResultSet resultSet, String columnLabel) throws SQLException {
-		return resultSet.getBoolean(this.getColumnLabel());
+		return Autoboxing.valueOf(resultSet.getBoolean(this.getColumnLabel()));
 	}
 
 }

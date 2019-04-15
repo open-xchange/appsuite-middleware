@@ -53,7 +53,7 @@ import com.openexchange.config.lean.Property;
 
 
 /**
- * 
+ *
  * {@link DriveEventsAPNProperty}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -62,21 +62,21 @@ import com.openexchange.config.lean.Property;
 public enum DriveEventsAPNProperty implements Property {
 
     /**
-     * Enables or disables push event notifications to clients using the Apple Push Notification service (APNS). 
+     * Enables or disables push event notifications to clients using the Apple Push Notification service (APNS).
      * This requires a valid configuration for the APNS certificate and keys, or install the restricted components packages for drive.
      * Default: false
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
 
     /**
      * Indicates which APNS service is used when sending push notifications to devices.
      * A value of "true" will use the production service, a value of "false" the sandbox service.
      * Default: true
      */
-    production(true),
+    production(Boolean.TRUE),
 
     /**
-     * Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys for the application, e.g. "/opt/open-xchange/etc/drive-apns.p12". 
+     * Specifies the path to the local keystore file (PKCS #12) containing the APNS certificate and keys for the application, e.g. "/opt/open-xchange/etc/drive-apns.p12".
      * Required if com.openexchange.drive.events.apn.[os].enabled is "true" and the package containing the restricted drive components is not installed.
      * Default: no default
      */
@@ -88,10 +88,10 @@ public enum DriveEventsAPNProperty implements Property {
      * Default: no default
      */
     password(null),
-    
+
     /**
-     * Configures the interval between queries to the APN feedback service for the subscribed devices. 
-     * The value can be defined using units of measurement: "D" (=days), "W" (=weeks) and "H" (=hours). 
+     * Configures the interval between queries to the APN feedback service for the subscribed devices.
+     * The value can be defined using units of measurement: "D" (=days), "W" (=weeks) and "H" (=hours).
      * Leaving this parameter empty disables the feedback queries on this node. Since each received feedback is processed cluster-wide, only one node in the cluster should be enabled here.
      */
     feedbackQueryInterval("1D")

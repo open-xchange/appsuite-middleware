@@ -49,6 +49,7 @@
 
 package liquibase.precondition.ext;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -60,6 +61,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import com.openexchange.java.Autoboxing;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomPreconditionErrorException;
@@ -90,9 +92,9 @@ public class ColumnSizePreconditionTest {
 
     private ResultSet resultSetMock;
 
-    private String expectedSize = "255";
+    private final String expectedSize = "255";
 
-    private String columnName = "columnName";
+    private final String columnName = "columnName";
 
     @Before
     public void setUp() throws Exception {
@@ -107,12 +109,12 @@ public class ColumnSizePreconditionTest {
 
         resultSetMock = Mockito.mock(ResultSet.class);
         Mockito.when(resultSetMock.getString("COLUMN_NAME")).thenReturn(columnName);
-        Mockito.when(resultSetMock.getInt("COLUMN_SIZE")).thenReturn(new Integer(expectedSize));
+        Mockito.when(I(resultSetMock.getInt("COLUMN_SIZE"))).thenReturn(new Integer(expectedSize));
 
         Mockito.when(databaseMetaData.getColumns(ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn(resultSetMock);
         Mockito.when(databaseMetaData.getColumns(ArgumentMatchers.isNull(), ArgumentMatchers.isNull(), ArgumentMatchers.isNull(), ArgumentMatchers.isNull())).thenReturn(resultSetMock);
 
-        Mockito.when(resultSetMock.next()).thenReturn(true).thenReturn(true).thenReturn(false);
+        Mockito.when(Autoboxing.valueOf(resultSetMock.next())).thenReturn(Boolean.TRUE).thenReturn(Boolean.TRUE).thenReturn(Boolean.FALSE);
     }
 
     @Test(expected = CustomPreconditionErrorException.class)
@@ -133,7 +135,7 @@ public class ColumnSizePreconditionTest {
 
     @Test
     public void testCheck_columnFoundSizeDifferent_nothingTodoSoThatExecutionIsTriggeredByLiquibase() throws CustomPreconditionFailedException, CustomPreconditionErrorException, NumberFormatException, SQLException {
-        Mockito.when(resultSetMock.getInt("COLUMN_SIZE")).thenReturn(128);
+        Mockito.when(I(resultSetMock.getInt("COLUMN_SIZE"))).thenReturn(I(128));
         columnSizePrecondition.check(database);
     }
 
@@ -146,7 +148,7 @@ public class ColumnSizePreconditionTest {
 
     @Test(expected = CustomPreconditionErrorException.class)
     public void testCheck_tableNotFound_throwException() throws CustomPreconditionFailedException, CustomPreconditionErrorException, SQLException {
-        Mockito.when(resultSetMock.next()).thenReturn(false);
+        Mockito.when(Autoboxing.valueOf(resultSetMock.next())).thenReturn(Boolean.FALSE);
 
         columnSizePrecondition.check(database);
     }

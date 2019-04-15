@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -84,7 +85,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
      */
     @Override
@@ -97,7 +98,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
                     continue;
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.debug("No association found between file storage account {} and oauth account {} for user {} in context {}.", fileStorageAccount.getId(), accountId, session.getUserId(), session.getContextId(), e);
+                LOGGER.debug("No association found between file storage account {} and oauth account {} for user {} in context {}.", fileStorageAccount.getId(), I(accountId), I(session.getUserId()), I(session.getContextId()), e);
                 continue;
             }
             if (null == associations) {
@@ -111,7 +112,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
 
     /**
      * Creates a new {@link OAuthAccountAssociation} for the specified {@link FileStorageAccount}
-     * 
+     *
      * @param accountId The OAuthAccount identifier
      * @param account The file storage account
      * @param userId The user identifier

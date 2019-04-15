@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.internal;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -111,7 +112,7 @@ public class LongPollingListener {
         lock.lock();
         try {
             if (null == this.event) {
-                LOG.debug("Awaiting events for max. {}ms...", timeout);
+                LOG.debug("Awaiting events for max. {}ms...", L(timeout));
                 hasEvent.await(timeout, TimeUnit.MILLISECONDS);
             } else {
                 LOG.debug("Stored event available, no need to wait.");

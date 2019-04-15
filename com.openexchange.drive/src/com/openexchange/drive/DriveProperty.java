@@ -49,6 +49,7 @@
 
 package com.openexchange.drive;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 
 /**
@@ -75,7 +76,7 @@ public enum DriveProperty implements Property {
      * uploads are performed directly in the target folder.
      * Default: true
      */
-    USE_TEMP_FOLDER("useTempFolder", true),
+    USE_TEMP_FOLDER("useTempFolder", Boolean.TRUE),
 
     /**
      * Configures the interval between runs of the cleaner process for the
@@ -151,21 +152,21 @@ public enum DriveProperty implements Property {
      * unavailable), and the client is instructed to try again at a later time.
      * Default: -1
      */
-    MAX_CONCURRENT_SYNC_OPERATIONS("maxConcurrentSyncOperations", -1),
+    MAX_CONCURRENT_SYNC_OPERATIONS("maxConcurrentSyncOperations", I(-1)),
 
     /**
      * Defines the maximum number of synchronizable directories per root folder. A
      * value of "-1" disables the limitation.
      * Default: 65535 (2^16 - 1)
      */
-    MAX_DIRECTORIES("maxDirectories", 65535),
+    MAX_DIRECTORIES("maxDirectories", I(65535)),
 
     /**
      * Defines the maximum number of synchronizable files per root folder. A
      * value of "-1" disables the limitation.
      * Default: 65535 (2^16 - 1)
      */
-    MAX_FILES_PER_DIRECTORY("maxFilesPerDirectory", 65535),
+    MAX_FILES_PER_DIRECTORY("maxFilesPerDirectory", I(65535)),
 
     /**
      * Configures a list of allowed file storage services where synchronization via
@@ -330,7 +331,7 @@ public enum DriveProperty implements Property {
      * enabled for testing purposes.
      * Default: false
      */
-    EVENTS_BLOCKING_LONG_POLLING_ENABLED("events.blockingLongPolling.enabled", false),
+    EVENTS_BLOCKING_LONG_POLLING_ENABLED("events.blockingLongPolling.enabled", Boolean.FALSE),
 
     /**
      * The name of the system wide drive branding identifier
@@ -343,7 +344,7 @@ public enum DriveProperty implements Property {
      * The minimum expected API version the client has to support
      * Default: 1
      */
-    MIN_API_VERSION("minApiVersion", 1),
+    MIN_API_VERSION("minApiVersion", I(1)),
 
     /**
      * REGEX-pattern to filter file names to exclude from sync
@@ -363,7 +364,7 @@ public enum DriveProperty implements Property {
      * backend, but increases the chance of rename- and move-optimizations not being detected.
      * Default: 1000
      */
-    MAX_DIRECTORY_ACTIONS("maxDirectoryActions", 1000),
+    MAX_DIRECTORY_ACTIONS("maxDirectoryActions", I(1000)),
 
     /**
      * Gets the maximum number of actions to be evaluated per synchronization request. Any further open actions will need to be handled in
@@ -371,7 +372,7 @@ public enum DriveProperty implements Property {
      * backend, but increases the chance of rename- and move-optimizations not being detected.
      * Default: 500
      */
-    MAX_FILE_ACTIONS("maxFileActions", 500),
+    MAX_FILE_ACTIONS("maxFileActions", I(500)),
 
     /**
      * Template for direct link fragments for a file.

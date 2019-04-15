@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.json.JSONException;
@@ -84,7 +85,7 @@ public class NewTest extends FileActionTest {
         file.setTitle("nice title");
         file.setId(FileStorageFileAccess.NEW);
 
-        fileAccess().expectCall("saveFileMetadata", file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        fileAccess().expectCall("saveFileMetadata", file, L(FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER));
 
         perform();
 

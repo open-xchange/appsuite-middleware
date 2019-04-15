@@ -50,6 +50,8 @@
 package com.openexchange.carddav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -159,7 +161,7 @@ public class ContactResource extends CommonResource<Contact> {
                 return Long.valueOf(vCardResource.getVCard().getLength());
             }
         }
-        return 0L;
+        return L(0L);
     }
 
     @Override
@@ -567,7 +569,7 @@ public class ContactResource extends CommonResource<Contact> {
                     LOG.debug("{}: saved vCard in '{}'.", getUrl(), vCardID);
                     return vCardID;
                 } catch (OXException | IOException e) {
-                    LOG.warn("Error storing vCard in context {}.", contextID, e);
+                    LOG.warn("Error storing vCard in context {}.", I(contextID), e);
                 }
             }
         }
@@ -588,7 +590,7 @@ public class ContactResource extends CommonResource<Contact> {
                 try {
                     return vCardStorage.getVCard(vCardID, contextID);
                 } catch (OXException e) {
-                    LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, contextID, e);
+                    LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, I(contextID), e);
                 }
             }
         }
@@ -610,9 +612,9 @@ public class ContactResource extends CommonResource<Contact> {
                     return vCardStorage.deleteVCard(vCardID, contextID);
                 } catch (OXException e) {
                     if ("FLS-0017".equals(e.getErrorCode())) {
-                        LOG.debug("vCard file with id {} in context {} no longer found in storage.", vCardID, contextID, e);
+                        LOG.debug("vCard file with id {} in context {} no longer found in storage.", vCardID, I(contextID), e);
                     } else {
-                        LOG.warn("Error while deleting vCard with id {} in context {} from storage.", vCardID, contextID, e);
+                        LOG.warn("Error while deleting vCard with id {} in context {} from storage.", vCardID, I(contextID), e);
                     }
                 }
             }

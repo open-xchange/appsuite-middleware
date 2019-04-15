@@ -331,7 +331,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
 
     private void setDayInMonthFromSetPos(final int index, final CalendarObject obj, final Recur rrule) {
         if (!rrule.getSetPosList().isEmpty()) {
-            int firstPos = (Integer) rrule.getSetPosList().get(0);
+            int firstPos = ((Integer) rrule.getSetPosList().get(0)).intValue();
             if (firstPos == -1) {
                 firstPos = 5;
             }

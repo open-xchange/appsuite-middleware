@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.List;
 import org.json.JSONObject;
@@ -87,7 +88,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     /**
      * Checks if the alarms are valid
-     * 
+     *
      * @param json A json object containing the user config
      * @throws OXException
      */
@@ -145,7 +146,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
             if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
                 JSONObject accountCaching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
                 if (accountCaching != null) {
-                    accountCaching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
+                    accountCaching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, I(0));
                 }
             }
         }
@@ -160,7 +161,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     /**
      * Checks if the desired update contains fields that shouldn't be allowed to change.
-     * 
+     *
      * @param session The user's session
      * @param originUserConfiguration Previously stored user configuration
      * @param newUserConfiguration New user configuration

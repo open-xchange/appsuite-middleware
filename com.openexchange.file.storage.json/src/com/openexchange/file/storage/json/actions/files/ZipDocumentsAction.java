@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.util.List;
 import org.json.JSONArray;
@@ -132,7 +133,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
             // Signal direct response
             AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
             if (bytesWritten != 0) {
-                result.setResponseProperty("X-Content-Size", bytesWritten);
+                result.setResponseProperty("X-Content-Size", L(bytesWritten));
             }
             return result;
         }

@@ -92,7 +92,7 @@ public class CalendarFormatter {
             weekdayFormat.setTimeZone(timezone);
         }
     }
-    
+
     public String getInterval() {
         return formatInterval(appointment);
     }
@@ -106,8 +106,8 @@ public class CalendarFormatter {
 
 
     public String formatDate(Map<String, Object> appointment) {
-        Date startDate = new Date((Long) appointment.get("start_date"));
-        Date endDate = new Date((Long) appointment.get("end_date"));
+        Date startDate = new Date(((Long) appointment.get("start_date")).longValue());
+        Date endDate = new Date(((Long) appointment.get("end_date")).longValue());
         if (isFullTime()) {
             endDate = new Date(endDate.getTime()-1000);
         }
@@ -115,12 +115,10 @@ public class CalendarFormatter {
         if (differentDays(startDate, endDate)) {
             if (isFullTime()) {
                 return String.format("%s - %s", formatDate(startDate, utc), formatDate(endDate, utc));
-            } else {
-                return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
             }
-        } else {
-            return formatDate(startDate);
+            return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
         }
+        return formatDate(startDate);
     }
 
     public String formatDate(Date date) {
@@ -149,18 +147,16 @@ public class CalendarFormatter {
             return StringHelper.valueOf(locale).getString(CalendarPrintingStrings.FULL_TIME);
         }
         // TODO: Longer than a day
-        Date startDate = new Date((Long) appointment.get("start_date"));
-        Date endDate = new Date((Long) appointment.get("end_date"));
-        
+        Date startDate = new Date(((Long) appointment.get("start_date")).longValue());
+        Date endDate = new Date(((Long) appointment.get("end_date")).longValue());
+
         if (differentDays(startDate, endDate)) {
             if (differentWeeks(startDate, endDate)) {
                 return formatTimeAndDay(startDate) + " - " + formatTimeAndDay(endDate);
-            } else {
-                return formatTimeAndWeekday(startDate) + " - " + formatTimeAndWeekday(endDate);
             }
-        } else {
-            return formatTime(startDate) + " - " + formatTime(endDate) + " (" + timezone.getDisplayName(locale) + ")";
+            return formatTimeAndWeekday(startDate) + " - " + formatTimeAndWeekday(endDate);
         }
+        return formatTime(startDate) + " - " + formatTime(endDate) + " (" + timezone.getDisplayName(locale) + ")";
     }
 
     private boolean differentDays(Date startDate, Date endDate) {
@@ -194,10 +190,10 @@ public class CalendarFormatter {
     private String formatTimeAndWeekday(Date date) {
         return String.format("%s, %s (%s)", weekdayFormat.format(date), formatTime(date), timezone.getDisplayName(locale));
     }
-    
+
     private boolean isFullTime() {
         Boolean fullTime = (Boolean) appointment.get("full_time");
-        return fullTime == null || fullTime;
+        return fullTime == null || fullTime.booleanValue();
     }
-    
+
 }

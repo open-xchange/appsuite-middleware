@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement.impl.services;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -96,8 +97,8 @@ public class AbstractAdvertisementConfigServiceTest {
     public void setUp() throws Exception{
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
-        PowerMockito.when(session.getContextId()).thenReturn(contextId);
-        PowerMockito.when(session.getUserId()).thenReturn(userId);
+        PowerMockito.when(I(session.getContextId())).thenReturn(I(contextId));
+        PowerMockito.when(I(session.getUserId())).thenReturn(I(userId));
 
         PowerMockito.when(Services.getService(CacheService.class)).thenReturn(cacheService);
         PowerMockito.when(cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION)).thenReturn(userCache);

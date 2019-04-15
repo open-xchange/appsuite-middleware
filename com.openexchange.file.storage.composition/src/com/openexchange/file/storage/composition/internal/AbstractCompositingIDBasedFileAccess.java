@@ -56,6 +56,7 @@ import static com.openexchange.file.storage.composition.internal.FileStorageTool
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -2007,7 +2008,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             warnings.add(FileStorageExceptionCodes.NO_CATEGORIES_SUPPORT.create(fileName, getAccountName(this, fileAccess), file.getId(), file.getFolderId()));
         }
         if (null != file.getObjectPermissions() && 0 < file.getObjectPermissions().size() && !FileStorageTools.supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
-            warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(getAccountName(this, fileAccess), file.getFolderId(), session.getContextId()));
+            warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(getAccountName(this, fileAccess), file.getFolderId(), I(session.getContextId())));
         }
         return warnings;
     }

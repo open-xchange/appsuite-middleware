@@ -49,6 +49,7 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -114,7 +115,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         try {
             return databaseService.getAssignment(contextId);
         } catch (OXException e) {
-            LoggerHolder.LOG.warn("Found no assignment for context {}", contextId, e);
+            LoggerHolder.LOG.warn("Found no assignment for context {}", I(contextId), e);
             return null;
         }
     }

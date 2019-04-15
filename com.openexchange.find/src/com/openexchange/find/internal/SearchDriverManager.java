@@ -49,6 +49,7 @@
 
 package com.openexchange.find.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -132,7 +133,7 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
                 }
             }
         } else if (failOnMissingPermission) {
-            throw FindExceptionCode.MODULE_DISABLED.create(module.getIdentifier(), session.getUserId(), session.getContextId());
+            throw FindExceptionCode.MODULE_DISABLED.create(module.getIdentifier(), I(session.getUserId()), I(session.getContextId()));
         }
 
         return determined;

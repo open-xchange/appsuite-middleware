@@ -49,6 +49,7 @@
 
 package com.openexchange.database.tombstone.cleanup;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -134,7 +135,7 @@ public class SchemaTombstoneCleaner {
             LOG.error("Cannot clean up data in schema '{}': {}", schemaName, e.getMessage(), e);
         } finally {
             Databases.autocommit(writeConnection);
-            databaseService.backNoTimeoout(writePoolId, writeConnection);
+            databaseService.backNoTimeoout(writePoolId.intValue(), writeConnection);
         }
         return tableCleanupResults;
     }
@@ -160,7 +161,7 @@ public class SchemaTombstoneCleaner {
             Map<String, Integer> cleanedTables = cleaner.cleanup(writeConnection, timestamp);
             tableCleanupResults.putAll(cleanedTables);
             long after = System.currentTimeMillis();
-            LOG.debug("Successfully finished TombstoneCleaner '{}' on schema '{}'. Processing took {}ms.", cleaner.toString(), writeConnection.getCatalog(), after - before);
+            LOG.debug("Successfully finished TombstoneCleaner '{}' on schema '{}'. Processing took {}ms.", cleaner.toString(), writeConnection.getCatalog(), L(after - before));
         }
         return tableCleanupResults;
     }

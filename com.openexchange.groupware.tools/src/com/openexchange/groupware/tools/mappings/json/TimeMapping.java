@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tools.mappings.json;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
@@ -82,7 +83,7 @@ public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
 		Date value = this.get(from);
-		return null != value ? addTimeZoneOffset(value.getTime(), timeZone) : JSONObject.NULL;
+		return null != value ? L(addTimeZoneOffset(value.getTime(), timeZone)) : JSONObject.NULL;
 	}
 
     private static long addTimeZoneOffset(final long date, final TimeZone timeZone) {

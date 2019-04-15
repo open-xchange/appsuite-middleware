@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.ical.conn;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -223,7 +224,7 @@ public class ICalFeedClient {
 
         long allowedFeedSize = ICalCalendarProviderProperties.allowedFeedSize();
         if (contentLength > allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > allowedFeedSize)) {
-            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), allowedFeedSize, contentLength2 != null ? contentLength2 : contentLength);
+            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), L(allowedFeedSize), contentLength2 != null ? contentLength2 : L(contentLength));
         }
         response.setCalendar(importCalendar(entity));
         return response;
@@ -302,10 +303,10 @@ public class ICalFeedClient {
             }
             return tmp;
         }
-        
+
         static String initUserAgent() {
             VersionService versionService = Services.getService(VersionService.class);
-            String versionString = null; 
+            String versionString = null;
             if (null == versionService) {
                 versionString = "<unknown version>";
             } else {
@@ -347,7 +348,7 @@ public class ICalFeedClient {
     private OXException unauthorizedException(HttpResponse response) {
         String feedUrl = iCalFeedConfig.getFeedUrl();
         AuthInfo authInfo = iCalFeedConfig.getAuthInfo();
-        
+
         boolean hadCredentials = null != authInfo && (Strings.isNotEmpty(authInfo.getPassword()) || Strings.isNotEmpty(authInfo.getToken()));
         String realm = getFirstHeaderElement(response, HttpHeaders.WWW_AUTHENTICATE, "Basic realm");
         if (null != realm && realm.contains("Share/Anonymous/")) {

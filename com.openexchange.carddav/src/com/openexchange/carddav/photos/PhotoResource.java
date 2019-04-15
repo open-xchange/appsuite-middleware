@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.photos;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,9 +102,8 @@ public class PhotoResource extends DAVResource {
     public String getETag() throws WebdavProtocolException {
         if (false == exists() || null == contact || null == contact.getImageLastModified()) {
             return "";
-        } else {
-            return "http://www.open-xchange.com/etags/" + contact.getObjectID() + "-" + contact.getImageLastModified().getTime();
         }
+        return "http://www.open-xchange.com/etags/" + contact.getObjectID() + "-" + contact.getImageLastModified().getTime();
     }
 
     @Override
@@ -114,7 +114,7 @@ public class PhotoResource extends DAVResource {
     @Override
     public Long getLength() throws WebdavProtocolException {
         byte[] image = getPhotoData();
-        return null == image ? 0L : image.length;
+        return L(null == image ? 0L : image.length);
     }
 
     @Override

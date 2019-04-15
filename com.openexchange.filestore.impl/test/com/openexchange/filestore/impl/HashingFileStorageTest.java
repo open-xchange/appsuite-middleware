@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -98,7 +99,7 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         for(int i = 0; i < 10; i++) {
             String data = "I am nice data in the file number "+i;
             String fileId = fs.saveNewFile( IS(data) );
-            files.put(fileId, i);
+            files.put(fileId, I(i));
         }
 
         SortedSet<String> fileList = fs.getFileList();
@@ -116,7 +117,7 @@ public class HashingFileStorageTest extends AbstractHashingFileStorageTest {
         for(int i = 0; i < 10; i++) {
             String data = "I am nice data in the file number "+i;
             String fileId = fs.saveNewFile( IS(data) );
-            files.put(fileId, i);
+            files.put(fileId, I(i));
         }
 
         fs.remove();

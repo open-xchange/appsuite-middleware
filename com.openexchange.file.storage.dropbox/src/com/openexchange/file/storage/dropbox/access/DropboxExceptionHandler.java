@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.dropbox.core.BadRequestException;
 import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.ProtocolException;
@@ -106,7 +108,7 @@ final class DropboxExceptionHandler {
         // Invalid token or account was unlinked
         if (InvalidAccessTokenException.class.isInstance(e)) {
             API api = oauthAccount.getAPI();
-            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), I(oauthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
         }
 
         // Bad request
@@ -114,7 +116,7 @@ final class DropboxExceptionHandler {
             String message = e.getMessage();
             if (null != message && message.indexOf("access token is malformed") >= 0) {
                 API api = oauthAccount.getAPI();
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), I(oauthAccount.getId()), I(session.getUserId()), L(session.getContextId()));
             }
         }
 

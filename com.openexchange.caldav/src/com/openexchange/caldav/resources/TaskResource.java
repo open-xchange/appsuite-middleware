@@ -50,6 +50,7 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Date;
@@ -216,7 +217,7 @@ public class TaskResource extends CommonResource<Task> {
                     property.setXML(true);
                     property.setValue(new StringBuilder().append("<CS:first-name>").append(user.getGivenName()).append("</CS:first-name>").append("<CS:last-name>").append(user.getSurname()).append("</CS:last-name>").append("<CS:dtstamp>").append(Tools.formatAsUTC(timestamp)).append("</CS:dtstamp>").append("<D:href>mailto:").append(user.getMail()).append("</D:href>").toString());
                 } catch (OXException e) {
-                    LOG.warn("error resolving user '{}'", entityID, e);
+                    LOG.warn("error resolving user '{}'", I(entityID), e);
                 }
             }
             return property;

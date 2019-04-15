@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -120,7 +121,7 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
         try {
             return CACHE.getAccount(serviceId, Integer.parseInt(id), session);
         } catch (NumberFormatException e) {
-            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, serviceId, session.getUserId(), session.getContextId());
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, serviceId, I(session.getUserId()), I(session.getContextId()));
         }
     }
 
@@ -158,10 +159,10 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
     public void cleanUp(final String secret, final Session session) throws OXException {
         CACHE.cleanUp(service, secret, session);
     }
-    
+
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
-        CACHE.removeUnrecoverableItems(service, secret, session);        
+        CACHE.removeUnrecoverableItems(service, secret, session);
     }
 
 }

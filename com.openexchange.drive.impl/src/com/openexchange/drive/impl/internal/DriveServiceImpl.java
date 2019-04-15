@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -172,7 +174,7 @@ public class DriveServiceImpl implements DriveService {
         }
         int maxDirectories = DriveConfig.getInstance().getMaxDirectories(serverSession.getContextId(), serverSession.getUserId());
         if (-1 != maxDirectories && null != clientVersions && maxDirectories < clientVersions.size()) {
-            OXException error = DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(maxDirectories);
+            OXException error = DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(maxDirectories));
             LOG.debug("Client synchronization aborted for {}", session, error);
             List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
             actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, true));
@@ -282,7 +284,7 @@ public class DriveServiceImpl implements DriveService {
         ServerSession serverSession = session.getServerSession();
         int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory(serverSession.getContextId(), serverSession.getUserId());
         if (-1 != maxFilesPerDirectory && null != clientVersions && maxFilesPerDirectory < clientVersions.size()) {
-            OXException error = DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
+            OXException error = DriveExceptionCodes.TOO_MANY_FILES.create(I(maxFilesPerDirectory), path);
             LOG.debug("Client synchronization aborted for {}", session, error);
             List<AbstractAction<FileVersion>> actionsForClient = new ArrayList<AbstractAction<FileVersion>>(1);
             actionsForClient.add(new ErrorFileAction(null, null, null, path, error, false, true));
@@ -357,7 +359,7 @@ public class DriveServiceImpl implements DriveService {
     public IFileHolder download(DriveSession session, String path, FileVersion fileVersion, long offset, long length) throws OXException {
         DriveVersionValidator.validateFileVersion(fileVersion);
         SyncSession syncSession = new SyncSession(session);
-        LOG.debug("Handling download: file version: {}, offset: {}, length: {}", fileVersion, offset, length);
+        LOG.debug("Handling download: file version: {}, offset: {}, length: {}", fileVersion, L(offset), L(length));
         /*
          * track sync result to represent the download as performed by client
          */
@@ -401,11 +403,11 @@ public class DriveServiceImpl implements DriveService {
             if ("FLS-0022".equals(e.getErrorCode())) {
                 // The connected client closed the connection unexpectedly
                 LOG.debug("Client connection lost during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
-                    e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
+                    e.getMessage(), syncSession, path, originalVersion, newVersion, L(offset), L(totalLength), e);
                 throw DriveExceptionCodes.CLIENT_CONNECTION_LOST.create(e);
             }
             LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
-                e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
+                e.getMessage(), syncSession, path, originalVersion, newVersion, L(offset), L(totalLength), e);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
                 TempCleaner.cleanUpIfNeeded(syncSession, true);

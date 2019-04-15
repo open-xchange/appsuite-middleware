@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Set;
 import com.openexchange.context.ContextService;
@@ -130,7 +131,7 @@ public class InfostoreFileStorageService implements AdministrativeFileStorageSer
     @Override
     public AdministrativeFileStorageFileAccess getAdministrativeFileAccess(String accountId, int contextId) throws OXException {
         if (!accountId.equals(InfostoreDefaultAccountManager.DEFAULT_ID)) {
-            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), "admin", contextId);
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, getId(), "admin", I(contextId));
         }
         return new AdministrativeInfostoreFileAccess(getInfostore(), Services.getService(ContextService.class).getContext(contextId));
     }

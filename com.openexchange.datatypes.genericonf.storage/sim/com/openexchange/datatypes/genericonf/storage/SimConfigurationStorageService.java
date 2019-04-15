@@ -49,6 +49,7 @@
 
 package com.openexchange.datatypes.genericonf.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,12 +71,12 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
 
     @Override
     public void delete(Context ctx, int id) throws OXException {
-        entries.remove(id);
+        entries.remove(I(id));
     }
 
     @Override
     public void delete(Connection con, Context ctx, int id) throws OXException {
-        entries.remove(id);
+        entries.remove(I(id));
     }
 
     @Override
@@ -85,42 +86,42 @@ public class SimConfigurationStorageService implements GenericConfigurationStora
 
     @Override
     public void fill(Context ctx, int id, Map<String, Object> content) throws OXException {
-        if (!entries.containsKey(id)) {
+        if (!entries.containsKey(I(id))) {
             return;
         }
-        content.putAll(entries.get(id));
+        content.putAll(entries.get(I(id)));
     }
 
     @Override
     public void fill(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
-        if (!entries.containsKey(id)) {
+        if (!entries.containsKey(I(id))) {
             return;
         }
-        content.putAll(entries.get(id));
+        content.putAll(entries.get(I(id)));
     }
 
     @Override
     public int save(Context ctx, Map<String, Object> content) throws OXException {
         int id = currentId++;
-        entries.put(id, content);
+        entries.put(I(id), content);
         return id;
     }
 
     @Override
     public int save(Connection con, Context ctx, Map<String, Object> content) throws OXException {
         int id = currentId++;
-        entries.put(id, content);
+        entries.put(I(id), content);
         return id;
     }
 
     @Override
     public void update(Context ctx, int id, Map<String, Object> content) throws OXException {
-        entries.put(id, content);
+        entries.put(I(id), content);
     }
 
     @Override
     public void update(Connection con, Context ctx, int id, Map<String, Object> content) throws OXException {
-        entries.put(id, content);
+        entries.put(I(id), content);
     }
 
     @Override

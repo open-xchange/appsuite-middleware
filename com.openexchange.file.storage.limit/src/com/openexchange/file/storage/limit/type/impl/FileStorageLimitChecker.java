@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.limit.type.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,11 +93,11 @@ public class FileStorageLimitChecker extends AbstractCombinedTypeLimitChecker {
         List<OXException> exceededLimits = new ArrayList<>();
         Quota fileQuota = folderAccess.getFileQuota(folderId);
         if (fileQuota != null && fileQuota.getLimit() > 0 && fileQuota.getUsage() + files.size() > fileQuota.getLimit()) {
-            exceededLimits.add(FileLimitExceptionCodes.TOO_MANY_FILES.create(fileQuota.getLimit()));
+            exceededLimits.add(FileLimitExceptionCodes.TOO_MANY_FILES.create(L(fileQuota.getLimit())));
         }
 
         Quota storageQuota = folderAccess.getStorageQuota(folderId);
-        long fileTotalSize = files.stream().collect(Collectors.summingLong(LimitFile::getSize));
+        long fileTotalSize = files.stream().collect(Collectors.summingLong(LimitFile::getSize)).longValue();
         if (storageQuota != null) {
             if (storageQuota.getLimit() == 0) {
                 exceededLimits.add(FileLimitExceptionCodes.NOT_ALLOWED.create(folderId));

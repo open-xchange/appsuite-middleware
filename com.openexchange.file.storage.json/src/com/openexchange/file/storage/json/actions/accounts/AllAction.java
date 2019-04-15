@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.accounts;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -135,7 +136,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
                         try {
                             fsService.getAccountManager().deleteAccount(account, session);
                         } catch (Exception x) {
-                            LOG.debug("Failed to delete the file storage account '{}' for user '{}' in context '{}'", account.getId(), session.getUserId(), session.getContextId(), x);
+                            LOG.debug("Failed to delete the file storage account '{}' for user '{}' in context '{}'", account.getId(), I(session.getUserId()), I(session.getContextId()), x);
                         }
                     } else {
                         // Add account with error

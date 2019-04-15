@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.json.compat;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -275,7 +276,7 @@ public class AppointmentWriter extends CalendarWriter {
             }
             break;
         default:
-            LOG.warn("Column {} is unknown for appointment.", column);
+            LOG.warn("Column {} is unknown for appointment.", I(column));
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -103,9 +104,9 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
      * @param parameters The calendar parameters
      */
     public BasicICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(  session, 
-                account, 
-                parameters, 
+        super(  session,
+                account,
+                parameters,
                 Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
@@ -203,7 +204,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
                 Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
                 long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
                 if (0 == persistedInterval || persistedInterval != refreshIntervalFromFeed) {
-                    iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, refreshIntervalFromFeed);
+                    iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, L(refreshIntervalFromFeed));
                 }
             } catch (IllegalArgumentException e) {
                 LOG.error("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
