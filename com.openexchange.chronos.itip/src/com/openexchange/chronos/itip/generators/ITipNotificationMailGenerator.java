@@ -610,7 +610,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
     private void recalculateOccurrence(final NotificationMail mail) throws OXException {
         final Event originalOcurrence = mail.getOriginal();
         final Event newEvent = mail.getEvent();
-        if (newEvent.getSeriesId() == null || !CalendarUtils.isSeriesException(newEvent)) {
+        if (!CalendarUtils.isSeriesEvent(newEvent) || !CalendarUtils.isSeriesException(newEvent)) {
             return;
         }
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
