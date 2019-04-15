@@ -50,12 +50,7 @@
                 <path refid="rmiClasspath"/>
                 <pathelement path="${binDir}"/>
             </classpath>
-        	<!-- <test name="com.openexchange.admin.console.util.AdminConsoleUtilTestSuite" todir="${logDir}"/> -->
-            <!-- <test name="com.openexchange.admin.console.AdminConsoleTestSuite" todir="${logDir}"/> -->
-            <!-- <test name="com.openexchange.admin.contextrestore.AdminContextrestoreTestSuite" todir="${logDir}"/> -->
-            <test name="com.openexchange.admin.rmi.AdminRmiTestSuite" todir="${logDir}"/>
-            <test name="com.openexchange.admin.tools.AdminToolsTestSuite" todir="${logDir}"/>
-            <test name="com.openexchange.admin.user.copy.rmi.AdminUserCopyRmiTestSuite" todir="${logDir}"/>
+            <test name="com.openexchange.admin.AdminRMITestSuite" todir="${logDir}"/>
             <formatter type="xml"/>
             <sysproperty key="logback.configurationFile" value="${confDir}/logback.xml"/>
             <sysproperty key="rmi_test_host" value="${rmiHost}"/>
