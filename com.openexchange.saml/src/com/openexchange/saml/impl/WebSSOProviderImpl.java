@@ -215,6 +215,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         requestInfo.setDomainName(domainName);
         requestInfo.setLoginPath(httpRequest.getParameter("loginPath"));
         requestInfo.setClientID(httpRequest.getParameter("client"));
+        requestInfo.setUriFragment(httpRequest.getParameter("hash"));
 
         String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
@@ -290,6 +291,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             String clientID = requestInfo.getClientID();
             if (clientID != null) {
                 redirectLocation.setParameter(LoginFields.CLIENT_PARAM, clientID);
+            }
+
+            String uriFragment = requestInfo.getUriFragment();
+            if (uriFragment != null) {
+                redirectLocation.setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, uriFragment);
             }
 
             Tools.disableCaching(httpResponse);

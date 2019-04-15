@@ -222,7 +222,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             uiWebPath = conf.getUiWebPath();
         }
 
-        resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, uiWebPath));
+        String uriFragment = req.getParameter(SAMLLoginTools.PARAM_URI_FRAGMENT);
+        resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, uiWebPath, uriFragment));
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration, final String samlCookieValue) throws OXException {

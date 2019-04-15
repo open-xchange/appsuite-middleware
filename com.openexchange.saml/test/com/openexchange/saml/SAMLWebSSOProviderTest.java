@@ -843,6 +843,61 @@ public class SAMLWebSSOProviderTest {
         assertCachingDisabledHeaders(initLogoutResponse);
     }
 
+    @Test
+    public void testLoginWithDeepLink() throws Exception {
+        /*
+         * Trigger AuthnRequest
+         */
+        String requestHost = "webmail.example.com";
+        String uriFragment = "app=io.ox/mail&folder=default0/INBOX";
+        SimHttpServletRequest loginHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost(requestHost)
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "login")
+            .setParameter("hash", uriFragment)
+            .build());
+        URI authnRequestURI = new URI(provider.buildAuthnRequest(loginHTTPRequest, new SimHttpServletResponse()));
+
+        /*
+         * Validate redirect location
+         */
+        String relayState = parseURIQuery(authnRequestURI).get("RelayState");
+        Assert.assertNotNull(relayState);
+        SimHttpServletRequest authnHTTPRequest = prepareHTTPRequest("GET", authnRequestURI);
+        Assert.assertNull(SignatureHelper.validateURISignature(authnHTTPRequest, Collections.singletonList(testCredentials.getSPSigningCredential())));
+        AuthnRequest authnRequest = parseAuthnRequest(authnHTTPRequest);
+
+        /*
+         * Build response and process it
+         */
+        Response response = buildResponse(authnRequest);
+        String marshall = marshall(response);
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall.getBytes()))
+            .setParameter("RelayState", relayState)
+            .build());
+
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final login redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals(requestHost, locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals(uriFragment, redirectParams.get(SAMLLoginTools.PARAM_URI_FRAGMENT));
+        Assert.assertEquals(SAMLLoginTools.ACTION_SAML_LOGIN, redirectParams.get("action"));
+        String reservationToken = redirectParams.get(SAMLLoginTools.PARAM_TOKEN);
+        Assert.assertNotNull(reservationToken);
+        Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
+    }
+
     private void assertCachingDisabledHeaders(SimHttpServletResponse response) {
         // Pragma: no-cache
         Assert.assertEquals("no-cache", response.getHeader("Pragma"));
