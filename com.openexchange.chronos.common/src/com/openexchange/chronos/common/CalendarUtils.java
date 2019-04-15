@@ -693,7 +693,7 @@ public class CalendarUtils {
      * the properties {@link EventField#ID} and {@link EventField#SERIES_ID}.
      *
      * @param event The event to check
-     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
+     * @return <code>true</code> if the event is an exceptional event of a recurring series, <code>false</code>, otherwise
      */
     public static boolean isSeriesException(Event event) {
         return null != event && null != event.getSeriesId() && false == event.getSeriesId().equals(event.getId());
