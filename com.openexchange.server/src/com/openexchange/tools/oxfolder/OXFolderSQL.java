@@ -721,15 +721,14 @@ public final class OXFolderSQL {
             return;
         }
 
-        String currentName = getFolderName(folderId, writeCon, ctx);
-        if (newName.equals(currentName)) {
-            // That name is already set
-            return;
-        }
-        
-        PreparedStatement stmt = null;
         int rows = -1;
         do {
+            String currentName = getFolderName(folderId, writeCon, ctx);
+            if (newName.equals(currentName)) {
+                // That name is already set
+                return;
+            }
+            PreparedStatement stmt = null;
             try {
                 // Do the update
                 stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ? AND fname = ?");
