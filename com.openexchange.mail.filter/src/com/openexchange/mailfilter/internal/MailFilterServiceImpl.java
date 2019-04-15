@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.PrivilegedActionException;
@@ -244,7 +245,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (IOException e) {
-                throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), sieveHandler.getSievePort());
+                throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), I(sieveHandler.getSievePort()));
             }
         }
     }
@@ -337,7 +338,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
                 if (rightRule == null) {
-                    throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getUserid(), credentials.getContextid());
+                    throw MailFilterExceptionCode.NO_SUCH_ID.create(I(uid), I(credentials.getUserid()), I(credentials.getContextid()));
                 }
 
                 // Check redirect limit
@@ -396,7 +397,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 for (int uid : uids) {
                     RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
                     if (deletedrule == null) {
-                        throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getUserid(), credentials.getContextid());
+                        throw MailFilterExceptionCode.NO_SUCH_ID.create(I(uid), I(credentials.getUserid()), I(credentials.getContextid()));
                     }
                     rules.remove(deletedrule.rule);
                 }
@@ -584,7 +585,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
                     if (uids.length > clientrules.size()) {
                         LOGGER.debug("The contents of the reorder array are: {}", uids);
-                        throw MailFilterExceptionCode.INVALID_REORDER_ARRAY.create(uids.length, clientrules.size(), credentials.getUserid(), credentials.getContextid());
+                        throw MailFilterExceptionCode.INVALID_REORDER_ARRAY.create(I(uids.length), I(clientrules.size()), I(credentials.getUserid()), I(credentials.getContextid()));
                     }
 
                     // Identify rule groups
@@ -769,7 +770,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * @param contextId
      * @return
      */
-    private boolean useSIEVEResponseCodes(int userId, int contextId) {
+    boolean useSIEVEResponseCodes(int userId, int contextId) {
         LeanConfigurationService config = services.getService(LeanConfigurationService.class);
         return config.getBooleanProperty(userId, contextId, MailFilterProperty.useSIEVEResponseCodes);
     }
@@ -858,7 +859,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             return;
         }
         Integer maxRedirects = (Integer) maxRedirectObject;
-        if (size > maxRedirects) {
+        if (size > maxRedirects.intValue()) {
             throw MailFilterExceptionCode.TOO_MANY_REDIRECT.create();
         }
     }
@@ -1037,7 +1038,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     /**
      * Search within the given List of Rules for the one matching the specified UID
      */
-    private RuleAndPosition getRightRuleForUniqueId(List<Rule> clientrules, int uniqueid) throws OXException {
+    private RuleAndPosition getRightRuleForUniqueId(List<Rule> clientrules, int uniqueid) {
         for (int i = 0; i < clientrules.size(); i++) {
             Rule rule = clientrules.get(i);
             if (uniqueid == rule.getUniqueId()) {

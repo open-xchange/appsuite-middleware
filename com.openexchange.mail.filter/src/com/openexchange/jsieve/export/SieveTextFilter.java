@@ -49,6 +49,7 @@
 
 package com.openexchange.jsieve.export;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -414,10 +415,10 @@ public final class SieveTextFilter {
             final Rule rule = finalRules.get(i);
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
-                LOG.debug("Added line number {} to comment {}", lineNumber, ruleComment);
+                LOG.debug("Added line number {} to comment {}", I(lineNumber), ruleComment);
                 ruleComment.setLine(lineNumber++);
             }
-            LOG.debug("Added line number {} to rule {}", lineNumber, rule);
+            LOG.debug("Added line number {} to rule {}", I(lineNumber), rule);
             rule.setLinenumber(lineNumber);
             // Here we add one because a space between two rules looks better
             final ArrayList<Command> commands = rule.getCommands();
@@ -446,7 +447,7 @@ public final class SieveTextFilter {
         return number;
     }
 
-    private void addPlainTextToRule(final String wholeText, final String commentedText, final RuleComment ruleComment, final Rule rightRule) {
+    private void addPlainTextToRule(final String wholeText, final String commentedText, final Rule rightRule) {
         final int lineNumber = rightRule.getLinenumber();
         final int endLineNumber = rightRule.getEndlinenumber();
         // Known comments aren't written to the plain text part, otherwise they will be doubled when writing back
@@ -528,12 +529,12 @@ public final class SieveTextFilter {
                 if (null != errorText) {
                     final String errorMsg = rightRule.getErrormsg();
                     rightRule.setErrormsg(null != errorMsg ? errorMsg + CRLF + errorText : errorText);
-                    if (handleRuleError(wholeText, commentedText, ruleComment, rightRule)) {
+                    if (handleRuleError(wholeText, commentedText, rightRule)) {
                         errorAdded = true;
                     }
                 } else {
                     rightRule.setRuleComments(ruleComment);
-                    if (handleRuleError(wholeText, commentedText, ruleComment, rightRule)) {
+                    if (handleRuleError(wholeText, commentedText, rightRule)) {
                         errorAdded = true;
                     }
                 }
@@ -669,7 +670,7 @@ public final class SieveTextFilter {
                         try {
                             final int uniqueId = Integer.parseInt(matcher.group(2));
                             ruleComments.add(new RuleComment(flagList, uniqueId, matcher.group(3), i + 1));
-                        } catch (final NumberFormatException e) {
+                        } catch (@SuppressWarnings("unused") final NumberFormatException e) {
                             ruleComments.add(new RuleComment(i + 1, "Unique id is no integer"));
                         }
                     }
@@ -677,7 +678,7 @@ public final class SieveTextFilter {
                     try {
                         final int uniqueId = Integer.parseInt(matcher.group(2));
                         ruleComments.add(new RuleComment(uniqueId, matcher.group(3), i + 1));
-                    } catch (final NumberFormatException e) {
+                    } catch (@SuppressWarnings("unused") final NumberFormatException e) {
                         ruleComments.add(new RuleComment(i + 1, "Unique id is no integer"));
                     }
                 }
@@ -689,16 +690,15 @@ public final class SieveTextFilter {
     /**
      * @param wholeText
      * @param commentedText
-     * @param ruleComment
      * @param rightRule
      * @return true if an errortext and plaintext has been added false otherwise
      */
-    private boolean handleRuleError(final String wholeText, final String commentedText, final RuleComment ruleComment, final Rule rightRule) {
+    private boolean handleRuleError(final String wholeText, final String commentedText, final Rule rightRule) {
         final String errorMsg = rightRule.getErrormsg();
         if (null != errorMsg) {
             rightRule.setCommands(null);
             try {
-                addPlainTextToRule(wholeText, commentedText, ruleComment, rightRule);
+                addPlainTextToRule(wholeText, commentedText, rightRule);
             } catch (Exception e) {
                 LOG.warn("Unable to add add rule", e);
                 // continue in case an error occurs
@@ -870,9 +870,8 @@ public final class SieveTextFilter {
                 sb.append(',');
             }
             return (0 != sb.length()) ? sb.deleteCharAt(sb.length() - 1).toString() : sb.toString();
-        } else {
-            return "";
         }
+        return "";
     }
 
     private String listToString(final List<String> list) {
@@ -940,11 +939,11 @@ public final class SieveTextFilter {
                         max = uniqueId;
                     }
                 } else {
-                    uniqueIds.add(o);
+                    uniqueIds.add(I(o));
                 }
                 rule.setPosition(i++);
                 if (null != rule.getErrormsg() && null == rule.getText()) {
-                    if (handleRuleError(wholeText, commentedText, null, rule)) {
+                    if (handleRuleError(wholeText, commentedText, rule)) {
                         errorText = true;
                     }
                 }
@@ -952,7 +951,7 @@ public final class SieveTextFilter {
         }
         // Now we go through all the rules which have to unique id
         for (final Integer id : uniqueIds) {
-            final Rule rule = finalRules.get(id);
+            final Rule rule = finalRules.get(id.intValue());
             final RuleComment ruleComment = rule.getRuleComment();
             if (null != ruleComment) {
                 ruleComment.setUniqueid(++max);

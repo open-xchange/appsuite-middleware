@@ -49,6 +49,7 @@
 
 package com.openexchange.jsieve.export;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Charsets.UTF_8;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -264,7 +265,7 @@ public class SieveHandler {
      */
     private void measureEnd(final String method) {
         long end = System.currentTimeMillis();
-        log.debug("SieveHandler.{}() took {}ms to perform", method, (end - this.mStart));
+        log.debug("SieveHandler.{}() took {}ms to perform", method, L(end - this.mStart));
     }
 
     /**
@@ -548,7 +549,7 @@ public class SieveHandler {
                 try {
                     configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
                 } catch (IllegalArgumentException e) {
-                    log.warn("Invalid property '{}' for '{}' found in mailfilter.properties.", psm, MailFilterProperty.preferredSaslMech.getFQPropertyName());
+                    log.warn("Invalid property '{}' for '{}' found in mailfilter.properties.", psm, MailFilterProperty.preferredSaslMech.getFQPropertyName(), e);
                 }
             }
             if (null == configuredPreferredSASLMechanism) {
@@ -993,7 +994,7 @@ public class SieveHandler {
         }
     }
 
-    private boolean authXOAUTH2(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean authXOAUTH2(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException {
         if (Strings.isEmpty(oauthToken)) {
             return false;
         }
@@ -1028,7 +1029,7 @@ public class SieveHandler {
         }
     }
 
-    private boolean authOAUTHBEARER(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean authOAUTHBEARER(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException {
         if (Strings.isEmpty(oauthToken)) {
             return false;
         }
@@ -1063,7 +1064,7 @@ public class SieveHandler {
         }
     }
 
-    private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean authGSSAPI() throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String authname = getRightEncodedString(sieve_auth, "authname");
 
         final HashMap<String, String> saslProps = new HashMap<String, String>();
@@ -1283,10 +1284,9 @@ public class SieveHandler {
                 if (group.startsWith("{")) {
                     // Multi line, use the multiline parsed before here
                     return new SieveResponse(code, multiline);
-                } else {
-                    // Single line
-                    return new SieveResponse(code, group);
                 }
+                // Single line
+                return new SieveResponse(code, group);
             }
         }
         return null;
@@ -1382,7 +1382,7 @@ public class SieveHandler {
             try {
                 switch (auth_mech) {
                     case GSSAPI:
-                        return authGSSAPI(commandBuilder);
+                        return authGSSAPI();
                     case LOGIN:
                         return authLOGIN(commandBuilder);
                     case OAUTHBEARER:
@@ -1428,7 +1428,7 @@ public class SieveHandler {
         try {
             keyword = WelcomeKeyword.valueOf(token);
         } catch (IllegalArgumentException e) {
-            log.debug("Unknown keyword '{}'", token);
+            log.debug("Unknown keyword '{}'", token, e);
             return;
         }
 
@@ -1451,7 +1451,7 @@ public class SieveHandler {
                 try {
                     capa.addExtendedProperty(keyword.name(), Integer.valueOf(unquoted));
                 } catch (NumberFormatException ex) {
-                    log.error("Unable to parse '{}' capability value: {}", keyword, unquoted);
+                    log.error("Unable to parse '{}' capability value: {}", keyword, unquoted, ex);
                 }
                 return;
             case SASL: {
@@ -1482,9 +1482,8 @@ public class SieveHandler {
      * @param actualline
      * @return
      * @throws IOException
-     * @throws OXSieveHandlerException
      */
-    private String parseError(final String actualline) throws IOException, OXSieveHandlerException {
+    private String parseError(final String actualline) throws IOException {
         final StringBuilder sb = new StringBuilder();
         final String answer = actualline.substring(3);
         final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
@@ -1499,12 +1498,11 @@ public class SieveHandler {
                 sb.append(buf, 0, octetsRead);
             }
             return sb.toString();
-        } else {
-            return parseQuotedErrorMessage(answer);
         }
+        return parseQuotedErrorMessage(answer);
     }
 
-    private String parseQuotedErrorMessage(final String answer) throws IOException, OXSieveHandlerException {
+    private String parseQuotedErrorMessage(final String answer) throws IOException {
         StringBuilder inputBuilder = new StringBuilder();
         String line = answer;
         while (line != null) {

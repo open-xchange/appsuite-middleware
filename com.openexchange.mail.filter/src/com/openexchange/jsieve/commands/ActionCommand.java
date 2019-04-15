@@ -445,7 +445,7 @@ public class ActionCommand extends ControlOrActionCommand {
                 final String tag = tagArg.getTag();
                 // Check if an argument is allowed for this tag
                 final Hashtable<String, Integer> tagArgs = this.command.getTagArgs();
-                if (null != tagArgs && tagArgs.containsKey(tag) && 0 < tagArgs.get(tag)) {
+                if (null != tagArgs && tagArgs.containsKey(tag) && tagArgs.get(tag) != null && 0 < tagArgs.get(tag).intValue()) {
                     // Get next element check if it is a list and insert
                     final Object object2 = arguments.get(++i);
                     if (object2 instanceof List) {
@@ -463,7 +463,8 @@ public class ActionCommand extends ControlOrActionCommand {
                 }
             } else {
                 for (String tag : command.getTagArgs().keySet()) {
-                    if (command.getTagArgs().get(tag) > 0 && i == 0) {
+                    Integer arg = command.getTagArgs().get(tag);
+                    if ( arg != null && arg .intValue()> 0 && i == 0) {
                         throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
                     }
                 }

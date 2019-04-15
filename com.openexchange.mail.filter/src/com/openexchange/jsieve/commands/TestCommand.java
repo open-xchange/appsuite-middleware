@@ -555,6 +555,7 @@ public class TestCommand extends Command {
 
     private final List<String> optRequired = new ArrayList<>();
 
+    private final boolean useIndexComparator = false;
     private final int indexOfComparator = -1;
 
     /**
@@ -620,7 +621,7 @@ public class TestCommand extends Command {
 
             if (null != this.arguments && this.command.getNumberOfArguments() >= 0) {
                 final int realArguments = this.arguments.size() - this.tagArguments.size();
-                final int minArguments = this.command.getNumberOfArguments() + ((-1 != indexOfComparator) ? 1 : 0);
+                final int minArguments = this.command.getNumberOfArguments() + (useIndexComparator ? 1 : 0);
                 final int maxArguments = this.command.getMaxNumberOfArguments();
                 if (realArguments < minArguments || realArguments > maxArguments) {
                     throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandName() + " is not valid.");
@@ -767,7 +768,7 @@ public class TestCommand extends Command {
             retval.addAll(required);
         }
         // Here we add require for the comparator rule if there are any
-        if (-1 != indexOfComparator) {
+        if (useIndexComparator) {
             final ArrayList<String> object = (ArrayList<String>) this.arguments.get(indexOfComparator);
             final String string = this.command.getComparator().get(object.get(0));
             if (null != string && !string.equals("")) {
