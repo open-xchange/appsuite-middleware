@@ -507,10 +507,14 @@ MailAccountStatusResponse:
 # Module: mailcompose
 MailComposeResponse:
   $ref: ./mailcompose/MailComposeResponse.yaml
+MailComposeGetResponse:
+  $ref: ./mailcompose/MailComposeGetResponse.yaml
 MailComposeMessageModel:
   $ref: ./mailcompose/MessageModel.yaml
 MailComposeAttachmentResponse:
   $ref: ./mailcompose/MailComposeAttachmentResponse.yaml
+MailComposeAttachmentPostResponse:
+  $ref: ./mailcompose/MailComposeAttachmentPostResponse.yaml
 MailComposeAttachment:
   $ref: ./mailcompose/Attachment.yaml
 # Module: autoconfig

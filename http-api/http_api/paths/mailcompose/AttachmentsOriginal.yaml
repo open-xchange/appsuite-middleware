@@ -15,10 +15,7 @@
       200:
         description: A JSON array containing the added attachments to concat.
         schema:
-          description: Attachments array
-          type: array
-          items:
-            $ref: "#/definitions/MailComposeAttachmentResponse"
+          $ref: "#/definitions/MailComposeAttachmentPostResponse"
       400:
         description: Bad request, response contains error message.
       401:
