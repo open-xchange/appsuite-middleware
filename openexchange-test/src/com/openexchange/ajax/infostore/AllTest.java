@@ -28,7 +28,8 @@ public class AllTest extends InfostoreAJAXTest {
     public void testBasic() throws Exception {
         final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
         final Set<String> titles = new HashSet<String>(Arrays.asList("test knowledge", "test url"));
-
+        
+        itm.getAll(folderId);
         assertFalse(itm.getLastResponse().hasError());
 
         final JSONArray entries = (JSONArray) itm.getLastResponse().getData();
