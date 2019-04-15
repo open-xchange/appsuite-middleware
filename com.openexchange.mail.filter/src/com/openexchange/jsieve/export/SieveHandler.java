@@ -64,6 +64,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -884,14 +885,27 @@ public class SieveHandler {
     }
 
     /**
-     * Get the list of active sieve scripts
+     * Gets the name of the currently active sieve script.
      *
-     * @return List of scripts, or null if no script is active
+     * @return The name of the active script, or <code>null</code> if no script is active
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
     public String getActiveScript() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        return getActiveScript(null);
+    }
+
+    /**
+     * Gets the name of the currently active sieve script.
+     *
+     * @param optExpectedName The optional expected name or <code>null</code>
+     * @return The name of the active script, or <code>null</code> if no script is active
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     * @throws OXSieveHandlerException
+     */
+    public String getActiveScript(String optExpectedName) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (!(AUTH)) {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
@@ -902,7 +916,7 @@ public class SieveHandler {
 
         String scriptname = null;
         while (true) {
-            final String temp = bis_sieve.readLine();
+            String temp = bis_sieve.readLine();
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -913,11 +927,96 @@ public class SieveHandler {
                 throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
             }
 
-            if (temp.matches(".*ACTIVE")) {
-                scriptname = temp.substring(temp.indexOf('\"') + 1, temp.lastIndexOf('\"'));
+            int count = -1;
+            if (temp.startsWith("{")) {
+                count = Integer.parseInt(temp.substring(1, temp.lastIndexOf('}')));
+                temp = bis_sieve.readLine();
+                if (null == temp) {
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                }
+            }
+
+            if (temp.endsWith(" ACTIVE")) {
+                if (count >= 0) {
+                    // Literal
+                    scriptname = temp.substring(0, count);
+                } else if (temp.startsWith("\"")) {
+                    // QuotedString
+                    scriptname = temp.substring(1, temp.lastIndexOf('\"'));
+                } else {
+                    // Atom
+                    scriptname = readAtom(temp);
+                }
+                if (optExpectedName != null && !scriptname.equals(optExpectedName)) {
+                    throw new OXSieveHandlerException("Currently active script \"" + scriptname + "\" is not the expected one \"" + optExpectedName + '\"', sieve_host, sieve_host_port, null);
+                }
             }
         }
+    }
 
+    /**
+     * Lists the scripts the user has on the server.
+     *
+     * @return The listed scripts
+     * @throws OXSieveHandlerException
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+    public List<SieveScript> listScripts() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        if (!(AUTH)) {
+            throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
+        }
+
+        bos_sieve.write(SIEVE_LIST.getBytes(UTF_8));
+        bos_sieve.flush();
+
+        List<SieveScript> scrips = null;
+        while (true) {
+            String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+            }
+            if (temp.startsWith(SIEVE_OK)) {
+                return scrips == null ? Collections.emptyList() : scrips;
+            }
+            if (temp.startsWith(SIEVE_NO)) {
+                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+            }
+
+            String scriptName;
+            if (temp.startsWith("\"")) {
+                // QuotedString
+                scriptName = temp.substring(1, temp.lastIndexOf('\"'));
+            } else if (temp.startsWith("{")) {
+                // Literal
+                int count = Integer.parseInt(temp.substring(1, temp.lastIndexOf('}')));
+                temp = bis_sieve.readLine();
+                if (null == temp) {
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                }
+                scriptName = temp.substring(0, count);
+            } else {
+                // Atom
+                scriptName = readAtom(temp);
+            }
+
+            boolean active = temp.endsWith(" ACTIVE");
+            if (scrips == null) {
+                scrips = new ArrayList<SieveScript>(4);
+            }
+            scrips.add(new SieveScript(scriptName, active));
+        }
+    }
+
+    private static String ASTRING_CHAR_DELIM = " (){%*\"\\";
+
+    private static String readAtom(String line) {
+        int end = 0;
+        char c;
+        while (end < line.length() && (c = line.charAt(end)) >= ' ' && ASTRING_CHAR_DELIM.indexOf(c) < 0 && c != 0x7F) {
+            end++;
+        }
+        return line.substring(0, end);
     }
 
     /**

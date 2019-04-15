@@ -256,10 +256,11 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * <b>Must only be called when holding lock!</b>
      *
      * @param sieveHandler The Sieve handler to use
+     * @param expectedScriptName The expected name for the active script or <code>null</code>
      * @return The action Siege script or an empty string
      */
-    private String getScript(SieveHandler sieveHandler) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
-        String activeScript = sieveHandler.getActiveScript();
+    private String getScript(SieveHandler sieveHandler, String expectedScriptName) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        String activeScript = sieveHandler.getActiveScript(expectedScriptName);
         return null != activeScript ? sieveHandler.getScript(activeScript) : "";
     }
 
@@ -272,7 +273,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
-                String activeScript = sieveHandler.getActiveScript();
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String activeScript = sieveHandler.getActiveScript(expectedScriptName);
                 String script = (activeScript != null) ? sieveHandler.getScript(activeScript) : "";
 
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -298,7 +300,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
-                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
+                writeScript(sieveHandler, activeScript, writeback, expectedScriptName);
 
                 return nextuid;
             } catch (UnsupportedEncodingException e) {
@@ -326,7 +328,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
-                String activeScript = sieveHandler.getActiveScript();
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String activeScript = sieveHandler.getActiveScript(expectedScriptName);
                 if (null == activeScript) {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
                 }
@@ -355,7 +358,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
 
-                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
+                writeScript(sieveHandler, activeScript, writeback, expectedScriptName);
             } catch (ParseException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (SieveException e) {
@@ -384,7 +387,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
-                String activeScript = sieveHandler.getActiveScript();
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String activeScript = sieveHandler.getActiveScript(expectedScriptName);
                 if (null == activeScript) {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
                 }
@@ -403,7 +407,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 }
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeback = sieveTextFilter.rewriteRequire(writeback, script);
-                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
+                writeScript(sieveHandler, activeScript, writeback, expectedScriptName);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
@@ -427,10 +431,12 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String activeScript = sieveHandler.getActiveScript();
+
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String activeScript = sieveHandler.getActiveScript(expectedScriptName);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 String writeback = sieveTextFilter.writeEmptyScript();
-                writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
+                writeScript(sieveHandler, activeScript, writeback, expectedScriptName);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
@@ -450,7 +456,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                return getScript(sieveHandler);
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                return getScript(sieveHandler, expectedScriptName);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (IOException e) {
@@ -479,7 +486,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String script = getScript(sieveHandler);
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String script = getScript(sieveHandler, expectedScriptName);
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -535,7 +543,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String script = getScript(sieveHandler);
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String script = getScript(sieveHandler, expectedScriptName);
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -574,34 +583,33 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String activeScript = sieveHandler.getActiveScript();
-                if (null != activeScript) {
-                    String script = sieveHandler.getScript(activeScript);
-                    RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
-
-                    ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
-
-                    List<Rule> clientrules = clientrulesandrequire.getRules();
-
-                    if (uids.length > clientrules.size()) {
-                        LOGGER.debug("The contents of the reorder array are: {}", uids);
-                        throw MailFilterExceptionCode.INVALID_REORDER_ARRAY.create(I(uids.length), I(clientrules.size()), I(credentials.getUserid()), I(credentials.getContextid()));
-                    }
-
-                    // Identify rule groups
-                    List<MailFilterGroup> groups = getMailFilterGroups(uids);
-                    List<Rule> tmpList = new ArrayList<>(clientrules);
-                    clientrules.clear();
-                    for (MailFilterGroup group : groups) {
-                        clientrules.addAll(group.getOrderedRules(tmpList));
-                    }
-
-                    String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
-                    writeback = sieveTextFilter.rewriteRequire(writeback, script);
-                    writeScript(sieveHandler, activeScript, writeback, getScriptName(credentials.getUserid(), credentials.getContextid()));
-                } else {
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String activeScript = sieveHandler.getActiveScript(expectedScriptName);
+                if (null == activeScript) {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
                 }
+
+                String script = sieveHandler.getScript(activeScript);
+                RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+
+                ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
+                List<Rule> clientrules = clientrulesandrequire.getRules();
+                if (uids.length > clientrules.size()) {
+                    LOGGER.debug("The contents of the reorder array are: {}", uids);
+                    throw MailFilterExceptionCode.INVALID_REORDER_ARRAY.create(I(uids.length), I(clientrules.size()), I(credentials.getUserid()), I(credentials.getContextid()));
+                }
+
+                // Identify rule groups
+                List<MailFilterGroup> groups = getMailFilterGroups(uids);
+                List<Rule> tmpList = new ArrayList<>(clientrules);
+                clientrules.clear();
+                for (MailFilterGroup group : groups) {
+                    clientrules.addAll(group.getOrderedRules(tmpList));
+                }
+
+                String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
+                writeback = sieveTextFilter.rewriteRequire(writeback, script);
+                writeScript(sieveHandler, activeScript, writeback, expectedScriptName);
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (ParseException e) {
@@ -636,7 +644,8 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
-                String activeScript = sieveHandler.getActiveScript();
+                String expectedScriptName = getScriptName(credentials.getUserid(), credentials.getContextid());
+                String activeScript = sieveHandler.getActiveScript(expectedScriptName);
                 if (activeScript == null) {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
                 }
@@ -1007,7 +1016,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * @param sieveHandler the sieveHandler to use
      * @param activeScript the activeScript
      * @param writeback the write-back String
-     * @param scriptName TODO
+     * @param scriptName The configured name of the script
      * @throws OXSieveHandlerException
      * @throws IOException
      * @throws UnsupportedEncodingException
@@ -1060,7 +1069,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      * Furthermore this method contains a thread synchronization if Kerberos is used. If the Kerberos subject is not <code>null</code>, that Kerberos subject object is used to only allow a single IMAP/SIEVE login per Kerberos
      * subject. The service ticket for the IMAP/SIEVE server is stored in the Kerberos subject once the IMAP/SIEVE login was successful. If multiple threads can execute this in concurrently, multiple service tickets are
      * requested, which is discouraged for performance reasons.
-     * 
+     *
      * @param sieveHandler The SIEVE handler to connect
      * @param kerberosSubject The optional Kerberos subject or <code>null</code>
      * @throws OXException
@@ -1073,7 +1082,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
             if (kerberosSubject != null) {
                 synchronized (kerberosSubject) {
                     Subject.doAs(kerberosSubject, new PrivilegedExceptionAction<Object>() {
-    
+
                         @Override
                         public Object run() throws Exception {
                             sieveHandler.initializeConnection();
