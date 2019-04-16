@@ -1,6 +1,7 @@
 ---
 title: 3rd Party Integrations
 icon: fa-plug
+tags: 3rd Party, Configuration, Installation
 ---
 
 # Via OAuth 2.0

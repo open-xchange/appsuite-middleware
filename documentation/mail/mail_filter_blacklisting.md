@@ -2,6 +2,7 @@
 title: Mail Filter Blacklisting
 classes: toc
 icon: fa-filter
+tags: Mail, Sieve, Configuration
 ---
 
 Typically sieve rules consists of three types of elements: tests, comparators and actions. By default the appsuite middleware provides the hole stack of available and implemented elements.

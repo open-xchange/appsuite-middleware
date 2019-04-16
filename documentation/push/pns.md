@@ -2,6 +2,7 @@
 title: Push Notification Service
 clases: toc
 icon: fa-bell
+tags: Push, Installation, Configuration
 ---
 
 # Introduction

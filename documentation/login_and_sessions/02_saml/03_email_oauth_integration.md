@@ -2,6 +2,7 @@
 title: E-Mail Authentication with OAuth 2.0
 classes: toc
 icon: fa-envelope-o
+tags: SAML, OAuth, Authentication, Mail, Configuration
 ---
 
 With version 7.8.4 the middleware supports OAuth authentication for the primary mail account via SAML Bearer Assertion Authorization Grant.

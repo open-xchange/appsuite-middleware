@@ -2,6 +2,7 @@
 title: Virtual Mail Attachments Connector
 classes: toc
 icon: fa-paperclip
+tags: Mail, Configuration
 ---
 
 # How it works

@@ -2,6 +2,7 @@
 title: Security Considerations
 classes: toc
 icon: fa-lock
+tags: SAML, Security, SSO
 ---
 
 # General Assumptions

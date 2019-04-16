@@ -2,6 +2,7 @@
 title: Monitoring Interface
 classes: toc
 icon: fa-info
+tags: Monitoring, Administration
 ---
 
 # Introduction

@@ -2,6 +2,7 @@
 title: Removal of Calendar Data for a User
 classes: toc
 icon: fa-calendar-minus-o
+tags: API, Calendar, Administration
 ---
 
 This article will describe the different effects on the calendar data when removing calendar access for a user.

@@ -2,6 +2,7 @@
 title: Audit Logging
 classes: toc
 icon: fa-tasks
+tags: Logging, Configuration, Installation
 ---
 
 # How it works

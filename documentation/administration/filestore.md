@@ -2,6 +2,7 @@
 title: Filestore
 classes: toc
 icon: fa-archive
+tags: Administration, Filestore, Configuration, Command Line Tools
 ---
 
 # Filestore Documentation

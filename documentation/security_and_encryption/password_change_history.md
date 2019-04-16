@@ -1,6 +1,7 @@
 ---
 title: Password Change History
 icon: fa-history
+tags: Security, Configuration, Installation
 ---
 
 # Introduction

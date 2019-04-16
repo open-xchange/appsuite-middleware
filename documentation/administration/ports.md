@@ -2,6 +2,7 @@
 title: Ports Overview
 classes: toc
 icon: fa-random
+tags: Administration, Configuration
 ---
 
 This document describes the ports the AppSuite middleware listens on and their related configuration properties.

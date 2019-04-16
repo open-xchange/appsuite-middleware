@@ -2,6 +2,7 @@
 title: S3 Storage Metrics
 classes: toc
 icon: fa-cubes
+tags: Monitoring, Administration, S3, Configuration
 ---
 
 The OX middleware now exposes monitoring metrics for the S3 object storage via JMX.

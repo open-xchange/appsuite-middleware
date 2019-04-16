@@ -1,6 +1,7 @@
 ---
 title: User Feedback
 icon: fa-commenting
+tags: Feedback, Configuration
 ---
 
 # Introduction

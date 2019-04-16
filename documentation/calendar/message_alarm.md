@@ -2,6 +2,7 @@
 title: Message Alarm Handling
 classses: toc
 icon: fa-bell-o
+tags: API, Calendar, Configuration, Limits
 ---
 
 This article will describe how message alarms like e-mail alarms are handled by the middleware. 

@@ -2,6 +2,7 @@
 title: OAuth 2.0 with Postfix and Dovecot
 classes: toc
 icon: fa-drivers-license-o
+tags: Mail, Configuration, OAuth
 ---
 
 This article contains exemplary configuration for Dovecot and Postfix. Dovecot will provide the SASL mechanisms [OAUTHBEARER](https://tools.ietf.org/html/rfc7628) and [XOAUTH2](https://developers.google.com/gmail/xoauth2_protocol) for IMAP and ManageSieve. It will also provide an Unix socket that is used by Postfix for SMTP authentication via SASL.

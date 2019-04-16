@@ -2,6 +2,7 @@
 title: Operator Guide
 classes: toc
 icon: fa-book
+tags: SAML, Installation, Configuration, SSO
 ---
 
 # Installation

@@ -2,6 +2,7 @@
 title: Geolocation
 classes: toc
 icon: fa-globe
+tags: Geolocation, Configuration, Installation
 ---
 
 # Installation on OX App Suite

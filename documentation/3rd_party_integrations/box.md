@@ -2,6 +2,7 @@
 title: Box
 classes: toc
 icon: fa-archive
+tags: 3rd Party, Box, Installation, Configuration, Filestore
 ---
 
 To setup the Box.com file store you have to install the package `open-xchange-file-storage-boxcom`.

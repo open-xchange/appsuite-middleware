@@ -2,6 +2,7 @@
 title: Encryption for Hazelcast
 classes: toc
 icon: fa-spinner
+tags: Security, Configuration, Administration
 ---
 
 # Overview

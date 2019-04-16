@@ -2,6 +2,7 @@
 title: SAML 2.0 SSO
 classes: toc
 icon: fa-key
+tags: SAML, SSO
 ---
 
 Starting with 7.8.0 OX App Suite supports single sign-on via SAML 2.0. In concrete the backend supports the *Web Browser SSO Profile* and the *Single Logout Profile*, supported bindings are *HTTP-Redirect* and *HTTP-POST*. The core implementation of SAML needs always be complemented by an environment-specific counterpart. Such a counterpart is called a *SAML backend*. It is responsible for resolving users by incoming assertions and can make use of several extension points that allow to customize the generation and processing of SAML messages.

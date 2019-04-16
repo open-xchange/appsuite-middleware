@@ -2,6 +2,7 @@
 title: Session Management
 classes: toc
 icon: fa-clock-o
+tags: Session, Installation, Configuration, Geolocation
 ---
 
 # Introduction

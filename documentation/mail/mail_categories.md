@@ -2,6 +2,7 @@
 title: Mail Categories
 classes: toc
 icon: fa-tag
+tags: Mail, Configuration, Installation, Sieve
 ---
 
 # Mail categories documentation

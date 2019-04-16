@@ -2,6 +2,7 @@
 title: Good to Know
 classes: toc
 icon: fa-info
+tags: Session, Authentication, Client Development
 ---
 
 # Introduction

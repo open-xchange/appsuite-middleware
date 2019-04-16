@@ -2,6 +2,7 @@
 title: Health Check
 classes: toc
 icon: fa-heart
+tags: Configuration, Installation, Administration, Monitoring
 ---
 
 # Introduction

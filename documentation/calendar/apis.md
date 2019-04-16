@@ -2,6 +2,7 @@
 title: APIs 
 classes: toc
 icon: fa-exchange
+tags: API, Calendar
 ---
 
 Calendar features are exposed to clients via different APIs, most prominently our HTTP API. 
