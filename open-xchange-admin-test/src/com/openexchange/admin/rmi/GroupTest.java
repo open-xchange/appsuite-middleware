@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -68,9 +69,22 @@ import com.openexchange.java.Autoboxing;
  * @author cutmasta
  * @author d7
  */
-public class GroupTest extends UserTest {
+public class GroupTest extends AbstractRMITest {
 
     private final String VALID_CHAR_TESTGROUP = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
+
+    protected Context context;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.rmi.AbstractTest#setUp()
+     */
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        context = getContextManager().create(contextAdminCredentials);
+    }
 
     @Test
     public void testCreateGroup() throws Exception {
@@ -219,7 +233,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as groupmember
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
@@ -244,7 +258,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as groupmember
         Group tmp = new Group();
@@ -271,7 +285,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as groupmember
         Group tmp = new Group(createdgroup.getId());
@@ -298,7 +312,7 @@ public class GroupTest extends UserTest {
 
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as groupmember
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
@@ -337,7 +351,7 @@ public class GroupTest extends UserTest {
 
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as group member
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
@@ -379,7 +393,7 @@ public class GroupTest extends UserTest {
 
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as group member
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
@@ -556,7 +570,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // add user as groupmember
         getGroupManager().addMember(createdgroup, context, new User[] { createduser }, contextAdminCredentials);
@@ -575,7 +589,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // We only want to resolve by name
         createdgroup.setId(null);
@@ -597,7 +611,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // We only want to resolve by name
         createduser.setId(null);
@@ -624,7 +638,7 @@ public class GroupTest extends UserTest {
         // create user to add
         User usr = UserFactory.createUser("groupmemberadduser" + System.currentTimeMillis(), "netline", TEST_DOMAIN, context);
         UserModuleAccess access = new UserModuleAccess();
-        User createduser = addUser(context, usr, access);
+        User createduser = getUserManager().create(context, usr, access, contextAdminCredentials);
 
         // We only want to resolve by name
         createduser.setId(null);

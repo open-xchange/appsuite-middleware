@@ -52,9 +52,18 @@ package com.openexchange.admin;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.rmi.AdminRmiTestSuite;
-import com.openexchange.admin.tools.AdminToolsTestSuite;
-import com.openexchange.admin.user.copy.rmi.AdminUserCopyRmiTestSuite;
+import com.openexchange.admin.rmi.AdditionalRMITests;
+import com.openexchange.admin.rmi.Bug16865Test;
+import com.openexchange.admin.rmi.Bug19379Test;
+import com.openexchange.admin.rmi.Bug27065Test;
+import com.openexchange.admin.rmi.Bug62360Test;
+import com.openexchange.admin.rmi.ContextTest;
+import com.openexchange.admin.rmi.GroupTest;
+import com.openexchange.admin.rmi.ResourceTest;
+import com.openexchange.admin.rmi.UserTest;
+import com.openexchange.admin.rmi.UtilDatabaseTest;
+import com.openexchange.admin.rmi.UtilTest;
+import com.openexchange.admin.user.copy.rmi.UserCopyTest;
 
 /**
  * {@link AdminRMITestSuite}
@@ -65,9 +74,18 @@ import com.openexchange.admin.user.copy.rmi.AdminUserCopyRmiTestSuite;
 @RunWith(Suite.class)
 @SuiteClasses({
     //@formatter:off
-    AdminRmiTestSuite.class,
-    AdminToolsTestSuite.class,
-    AdminUserCopyRmiTestSuite.class
+    AdditionalRMITests.class,
+    Bug16865Test.class,
+    Bug19379Test.class,
+    Bug27065Test.class,
+    Bug62360Test.class,
+    ContextTest.class,
+    GroupTest.class,
+    ResourceTest.class,
+    UtilDatabaseTest.class,
+    UtilTest.class,
+    UserCopyTest.class,
+    UserTest.class,
     //@formatter:on
 })
 public class AdminRMITestSuite {

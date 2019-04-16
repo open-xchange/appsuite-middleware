@@ -47,27 +47,25 @@
  *
  */
 
-package com.openexchange.admin.tools;
+package com.openexchange.admin;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import com.openexchange.admin.rmi.dataobjects.User;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.admin.tools.NetUtilTest;
+
 
 /**
- * {@link Bug19733Test}
+ * 
+ * {@link UnitTests}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.2
  */
-public final class Bug19733Test {
+@RunWith(Suite.class)
+@SuiteClasses({
+    NetUtilTest.class,
+})
+public class UnitTests {
 
-    public Bug19733Test() {
-        super();
-    }
-
-    @Test
-    public void testGetImapPort() {
-        final User user = new User();
-        user.setImapServer("21a7:a92c:2323::1");
-        assertEquals("Ports are not equal", 143, user.getImapPort());
-    }
 }
