@@ -190,10 +190,16 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public Event loadEvent(String eventId, EventField[] fields) throws OXException {
+        List<Event> events = loadEvents(Collections.singletonList(eventId), fields);
+        return 0 < events.size() ? events.get(0) : null;
+    }
+
+    @Override
+    public List<Event> loadEvents(List<String> eventIds, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvent(connection, eventId, fields);
+            return selectEvents(connection, eventIds, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -526,20 +532,30 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private Event selectEvent(Connection connection, String id, EventField[] fields) throws SQLException, OXException {
+    private List<Event> selectEvents(Connection connection, List<String> ids, EventField[] fields) throws SQLException, OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyList();
+        }
+        List<Event> events = new ArrayList<Event>(ids.size());
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM calendar_event ")
-            .append("WHERE cid=? AND account=? AND id=?;")
+            .append("WHERE cid=? AND account=? AND id").append(Databases.getPlaceholders(ids.size())).append(';')
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, accountId);
-            stmt.setInt(3, asInt(id));
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (String id : ids) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
+                while (resultSet.next()) {
+                    events.add(readEvent(resultSet, mappedFields, null));
+                }
             }
         }
+        return events;
     }
 
     private Event selectException(Connection connection, String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws SQLException, OXException {

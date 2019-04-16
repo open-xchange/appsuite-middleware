@@ -52,16 +52,12 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -74,9 +70,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link ListPerformer}
@@ -122,17 +115,13 @@ public class ListPerformer extends AbstractQueryPerformer {
     }
 
     private List<Event> readEventsInFolder(CalendarFolder folder, List<EventID> eventIDs) throws OXException {
-        String[] objectIds;
-        {
-            Set<String> idsInFolder = new HashSet<String>(eventIDs.size());
-            for (EventID eventID : eventIDs) {
-                if (folder.getId().equals(eventID.getFolderID())) {
-                    idsInFolder.add(eventID.getObjectID());
-                }
+        List<String> objectIds = new ArrayList<String>(eventIDs.size());
+        for (EventID eventID : eventIDs) {
+            if (folder.getId().equals(eventID.getFolderID())) {
+                objectIds.add(eventID.getObjectID());
             }
-            objectIds = idsInFolder.toArray(new String[idsInFolder.size()]);
         }
-        if (0 == objectIds.length) {
+        if (0 == objectIds.size()) {
             return Collections.emptyList();
         }
         /*
@@ -140,8 +129,9 @@ public class ListPerformer extends AbstractQueryPerformer {
          */
         EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         EventField[] fields = getFieldsForStorage(requestedFields);
-        List<Event> events = loadEventsInFolder(folder, objectIds, fields);
-        EventPostProcessor postProcessor = postProcessor(objectIds, folder.getCalendarUserId(), requestedFields, fields);
+        List<Event> events = storage.getEventStorage().loadEvents(objectIds, fields);
+        events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
+        EventPostProcessor postProcessor = postProcessor(objectIds.toArray(new String[objectIds.size()]), folder.getCalendarUserId(), requestedFields, fields);
         /*
          * generate resulting events
          */
@@ -172,7 +162,6 @@ public class ListPerformer extends AbstractQueryPerformer {
                     Event occurrence = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
                     if (null == occurrence) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
-
                     }
                     orderedEvents.add(occurrence);
                 } else if (recurrenceId.equals(event.getRecurrenceId())) {
@@ -185,31 +174,6 @@ public class ListPerformer extends AbstractQueryPerformer {
             }
         }
         return orderedEvents;
-    }
-
-    private List<Event> loadEventsInFolder(CalendarFolder folder, String[] objectIDs, EventField[] fields) throws OXException {
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder));
-        if (null != objectIDs) {
-            if (0 == objectIDs.length) {
-                return Collections.emptyList();
-            } else if (1 == objectIDs.length) {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectIDs[0]));
-            } else {
-                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                for (String objectID : objectIDs) {
-                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectID));
-                }
-                searchTerm.addSearchTerm(orTerm);
-            }
-        }
-        /*
-         * perform search & load necessary event data
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, fields);
-        return storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
     }
 
     private Map<CalendarFolder, List<EventID>> getIdsPerFolder(List<EventID> eventIDs) throws OXException {

@@ -241,6 +241,29 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
+    public List<Event> loadEvents(List<String> eventIds, EventField[] fields) throws OXException {
+        if (null == eventIds || eventIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Event> events = new ArrayList<Event>(eventIds.size());
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            for (String id : eventIds) {
+                Event event = selectEvent(connection, context.getContextId(), asInt(id), fields);
+                if (null != event) {
+                    events.add(event);
+                }
+            }
+            return events;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public Event loadException(String seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException {
         long recurrenceDatePosition;
         if (PositionAwareRecurrenceId.class.isInstance(recurrenceID)) {
