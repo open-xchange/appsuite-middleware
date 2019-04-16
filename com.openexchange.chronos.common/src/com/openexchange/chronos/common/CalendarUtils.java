@@ -329,6 +329,8 @@ public class CalendarUtils {
     /**
      * Gets a value indicating whether one calendar user equals another, by comparing all properties of the calendar users, after the
      * identifying properties (<i>entity</i> and <i>uri</i>) do match based on {@link #matches(CalendarUser, CalendarUser)}.
+     * <p/>
+     * A possibly set calendar user in <i>sent-by</i> is ignored implicitly.
      *
      * @param user1 The first calendar user to check
      * @param user2 The second calendar user to check
@@ -356,13 +358,6 @@ public class CalendarUtils {
                 return false;
             }
         } else if (!user1.getEMail().equals(user2.getEMail())) {
-            return false;
-        }
-        if (user1.getSentBy() == null) {
-            if (user2.getSentBy() != null) {
-                return false;
-            }
-        } else if (!user1.getSentBy().equals(user2.getSentBy())) {
             return false;
         }
         return true;
