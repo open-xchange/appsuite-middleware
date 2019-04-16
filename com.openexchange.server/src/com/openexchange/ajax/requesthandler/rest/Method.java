@@ -63,7 +63,7 @@ import com.openexchange.java.Strings;
 public enum Method {
 
     /**
-     * Use <code>GET</code> requests to retrieve resource representation/information only – and not to modify it in any way
+     * Use <code>GET</code> requests to retrieve resource representation/information only - and not to modify it in any way
      * <p>
      * As GET requests do not change the state of the resource, these are said to be safe methods. Additionally, GET APIs should be
      * idempotent, which means that making multiple identical requests must produce the same result every time until another API
@@ -90,14 +90,14 @@ public enum Method {
      * entity describing the status, <code>202 (Accepted)</code> if the action has been queued, or 204 (No Content) if the action has been
      * performed but the response does not include an entity.
      * <p>
-     * <code>DELETE</code> operations are idempotent. If you <code>DELETE</code> a resource, it’s removed from the collection of resource.
+     * <code>DELETE</code> operations are idempotent. If you <code>DELETE</code> a resource, it is removed from the collection of resource.
      * Repeatedly calling <code>DELETE</code> on that resource will not change the outcome.
      */
     DELETE,
     /**
      * HTTP <code>PATCH</code> requests are to make partial update on a resource. If you see <code>PUT</code> requests also modify a
-     * resource entity so to make more clear – <code>PATCH</code> method is the correct choice for partially updating an existing resource
-     * and <code>PUT</code> should only be used if you’re replacing a resource in its entirety.
+     * resource entity so to make more clear - <code>PATCH</code> method is the correct choice for partially updating an existing resource
+     * and <code>PUT</code> should only be used if you are replacing a resource in its entirety.
      */
     PATCH;
 
