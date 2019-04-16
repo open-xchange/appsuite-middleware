@@ -83,7 +83,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
             data.setDelivery(data.getFile().getDelivery());
         }
         data.setContentType(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_TYPE), true));
-        data.setContentTypeByParameter(false);
+        data.setContentTypeByParameter(Boolean.FALSE);
         if (Strings.isEmpty(data.getContentType())) {
             if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {
                 data.setContentType(IDataWrapper.SAVE_AS_TYPE);
@@ -91,7 +91,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
                 data.setContentType(data.getFileContentType());
             }
         } else {
-            data.setContentTypeByParameter(true);
+            data.setContentTypeByParameter(Boolean.TRUE);
         }
         data.setContentType(unquote(data.getContentType()));
         // Delivery is set to "view", but Content-Type is indicated as application/octet-stream

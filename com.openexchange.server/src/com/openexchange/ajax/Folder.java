@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import static com.openexchange.tools.oxfolder.OXFolderUtility.folderModule2String;
 import java.io.IOException;
@@ -525,7 +526,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                     }
                 } else if (parentId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
                     if (!session.getUserPermissionBits().hasInfostore()) {
-                        throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(session.getUserId(), folderModule2String(FolderObject.INFOSTORE), Integer.valueOf(ctx.getContextId()));
+                        throw OXFolderExceptionCode.NO_MODULE_ACCESS.create(I(session.getUserId()), folderModule2String(FolderObject.INFOSTORE), Integer.valueOf(ctx.getContextId()));
                     }
                     /*
                      * Get subfolders' iterator
@@ -1841,7 +1842,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 retval = Integer.toString(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(),
+                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(I(session.getUserId()),
                     folderIdentifier,
                     Integer.valueOf(ctx.getContextId()));
             } else {
@@ -1973,7 +1974,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 retval = Integer.toString(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (parentFolder.startsWith(FolderObject.SHARED_PREFIX)) {
-                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(session.getUserId(),
+                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(I(session.getUserId()),
                     parentFolder,
                     Integer.valueOf(ctx.getContextId()));
             } else {
@@ -2104,7 +2105,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         foldersqlinterface.deleteFolderObject(delFolderObj, timestamp);
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(),
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(I(session.getUserId()),
                             deleteIdentifier,
                             Integer.valueOf(ctx.getContextId()));
                     } else {
@@ -2222,7 +2223,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                         folderInterface.clearFolder(delFolderObj, timestamp);
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(), deleteIdentifier, Integer.valueOf(ctx.getContextId()));
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(I(session.getUserId()), deleteIdentifier, Integer.valueOf(ctx.getContextId()));
                     } else {
                         final MessagingFolderIdentifier mfi = MessagingFolderIdentifier.parseFQN(deleteIdentifier);
                         if (null == mfi) {

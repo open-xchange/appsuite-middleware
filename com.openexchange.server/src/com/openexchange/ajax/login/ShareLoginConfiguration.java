@@ -252,7 +252,7 @@ public class ShareLoginConfiguration {
         String  shareClientVersion = configService.getProperty(ShareLoginProperty.CLIENT_VERSION.getPropertyName(), ShareLoginProperty.CLIENT_VERSION.getDefaultValue());
         String shareCookieTTLValue = configService.getProperty(ShareLoginProperty.COOKIE_TTL.getPropertyName());
         Integer shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
-        boolean shareTransientSessions = configService.getBoolProperty(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName(), Boolean.valueOf(ShareLoginProperty.TRANSIENT_SESSIONS.getDefaultValue()));
+        boolean shareTransientSessions = configService.getBoolProperty(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName(), Boolean.parseBoolean(ShareLoginProperty.TRANSIENT_SESSIONS.getDefaultValue()));
         reinitialise(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
 

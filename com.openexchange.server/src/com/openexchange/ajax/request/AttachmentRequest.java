@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.request;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -249,7 +250,7 @@ public class AttachmentRequest extends CommonRequest {
                 }
 
                 final Response resp = new Response(session);
-                resp.setData(attachment.getId());
+                resp.setData(I(attachment.getId()));
                 resp.setTimestamp(new Date(ts));
 
                 ResponseWriter.write(resp, w, localeFrom(session));
