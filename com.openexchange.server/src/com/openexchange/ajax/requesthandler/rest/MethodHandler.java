@@ -72,4 +72,20 @@ public interface MethodHandler {
      */
     AJAXRequestData modifyRequest(AJAXRequestData requestData, HttpServletRequest restRequest) throws IOException, OXException;
 
+    /**
+     * Gets the module identifier.
+     *
+     * @return The module identifier
+     */
+    String getModule();
+
+    /**
+     * Gets the action identifier dependent n given extra path information.
+     *
+     * @param restPathElements The extra path information or <code>null</code>
+     * @param restRequest The REST request
+     * @return The action identifier
+     */
+    String getAction(String[] restPathElements, HttpServletRequest restRequest);
+
 }

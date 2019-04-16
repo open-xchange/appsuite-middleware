@@ -52,7 +52,6 @@ package com.openexchange.admin;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.admin.reseller.rmi.AdminResellerRmiTestSuite;
 import com.openexchange.admin.rmi.AdminRmiTestSuite;
 import com.openexchange.admin.tools.AdminToolsTestSuite;
 import com.openexchange.admin.user.copy.rmi.AdminUserCopyRmiTestSuite;
@@ -66,7 +65,6 @@ import com.openexchange.admin.user.copy.rmi.AdminUserCopyRmiTestSuite;
 @RunWith(Suite.class)
 @SuiteClasses({
     //@formatter:off
-    AdminResellerRmiTestSuite.class,
     AdminRmiTestSuite.class,
     AdminToolsTestSuite.class,
     AdminUserCopyRmiTestSuite.class

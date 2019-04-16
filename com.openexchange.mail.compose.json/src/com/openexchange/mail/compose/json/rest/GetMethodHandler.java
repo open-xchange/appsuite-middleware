@@ -73,27 +73,22 @@ public final class GetMethodHandler extends AbstractMailComposeMethodHandler {
 
     @Override
     protected void modifyByPathInfo(AJAXRequestData requestData, String[] restPathElements, HttpServletRequest req) throws IOException, OXException {
-        if (hasNoPathInfo(restPathElements)) {
-            requestData.setAction("all");
+        String action = getAction(restPathElements, req);
+        if (action == null) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        requestData.setAction(action);
+
+        if ("all".equals(action)) {
             return;
         }
 
-        int length = restPathElements.length;
-        if (0 == length) {
-            /*-
-             *  GET /mail/compose
-             */
-            requestData.setAction("all");
-            return;
-        }
-
-        if (1 == length) {
+        if ("get".equals(action)) {
             /*-
              *  GET /mail/compose/123
              */
-            requestData.setAction("get");
             requestData.putParameter("id", restPathElements[0]);
-        } else if (3 == length) {
+        } else if ("getAttachment".equals(action)) {
             /*-
              *  GET /mail/compose/123/attachments/1
              */
@@ -101,12 +96,39 @@ public final class GetMethodHandler extends AbstractMailComposeMethodHandler {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(req.getPathInfo());
             }
 
-            requestData.setAction("getAttachment");
             requestData.putParameter("id", restPathElements[0]);
             requestData.putParameter("attachmentId", restPathElements[2]);
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(req.getPathInfo());
         }
+    }
+
+    @Override
+    protected String doGetAction(String[] restPathElements, HttpServletRequest restRequest) {
+        if (hasNoPathInfo(restPathElements)) {
+            return "all";
+        }
+
+        int length = restPathElements.length;
+        if (0 == length) {
+            /*-
+             *  GET /mail/compose
+             */
+            return "all";
+        }
+
+        if (1 == length) {
+            /*-
+             *  GET /mail/compose/123
+             */
+            return "get";
+        } else if (3 == length) {
+            /*-
+             *  GET /mail/compose/123/attachments/1
+             */
+            return "getAttachment";
+        }
+        return null;
     }
 
 }

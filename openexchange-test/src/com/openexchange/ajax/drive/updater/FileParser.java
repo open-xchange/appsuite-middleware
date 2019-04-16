@@ -86,7 +86,7 @@ public class FileParser extends AbstractAJAXParser<FileResponse> {
     public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         HttpEntity entity = resp.getEntity();
-        assertEquals("Response contained wrong mime type.", "application/octet-stream", ContentType.getOrDefault(entity));
+        assertEquals("Response contained wrong mime type.", "application/octet-stream", ContentType.getOrDefault(entity).toString());
         fileBytes = EntityUtils.toByteArray(entity);
 
         return null;

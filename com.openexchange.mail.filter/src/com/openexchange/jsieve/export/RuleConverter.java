@@ -93,7 +93,7 @@ public class RuleConverter {
         for (int k = 0; k < argumentslist.size(); k++) {
             final Object object = argumentslist.get(k);
             if (object instanceof List) {
-                final List sublist = (List) object;
+                final List<String> sublist = (List<String>) object;
                 final ASTargument arg = new ASTargument(js[0]++);
                 arg.jjtAddChild(createStringList(sublist, js), 0);
                 targuments.jjtAddChild(arg, p[0]++);

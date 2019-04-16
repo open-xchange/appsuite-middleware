@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,21 +47,55 @@
  *
  */
 
-package com.openexchange.rest.passwordchange.history;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+package com.openexchange.jsieve.export;
 
 /**
- * {@link PasswordChangeHistorySuite}
+ * {@link SieveScript} - Provides the name of a Sieve script and whether that script is currently marked as the active one.
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    PasswordChangeHistoryTest.class,
-})
-public class PasswordChangeHistorySuite {
+public class SieveScript {
+
+    private final String name;
+    private final boolean active;
+
+    /**
+     * Initializes a new {@link SieveScript}.
+     */
+    public SieveScript(String name, boolean active) {
+        super();
+        this.name = name;
+        this.active = active;
+    }
+
+    /**
+     * Gets the name of the script.
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Checks whether this script is currently marked as the active one.
+     *
+     * @return <code>true</code> if active; otherwise <code>false</code>
+     */
+    public boolean isActive() {
+        return active;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append('[');
+        if (name != null) {
+            builder.append("name=").append(name).append(", ");
+        }
+        builder.append("active=").append(active).append(']');
+        return builder.toString();
+    }
 
 }

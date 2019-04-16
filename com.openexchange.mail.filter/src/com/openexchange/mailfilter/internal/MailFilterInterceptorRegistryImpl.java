@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -110,7 +111,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
     @Override
     public void register(MailFilterInterceptor interceptor) {
         boolean registered = interceptors.add(interceptor);
-        LOGGER.debug("MailFilterInterceptor '{}' with rank {} was {} registered.", interceptor.getClass().getSimpleName(), interceptor.getRank(), registered ? "sucessfully" : "not");
+        LOGGER.debug("MailFilterInterceptor '{}' with rank {} was {} registered.", interceptor.getClass().getSimpleName(), I(interceptor.getRank()), registered ? "sucessfully" : "not");
     }
 
     /*
@@ -122,7 +123,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
     public void executeBefore(int userId, int contextId, List<Rule> rules) throws OXException {
         LOGGER.debug("Executing pre-processing mail filter interceptors...");
         for (MailFilterInterceptor interceptor : interceptors) {
-            LOGGER.debug("Executing pre-processing mail filter interceptor {} with rank {}", interceptor.getClass().getSimpleName(), interceptor.getRank());
+            LOGGER.debug("Executing pre-processing mail filter interceptor {} with rank {}", interceptor.getClass().getSimpleName(), I(interceptor.getRank()));
             interceptor.before(userId, contextId, rules);
         }
     }
@@ -136,7 +137,7 @@ public class MailFilterInterceptorRegistryImpl implements MailFilterInterceptorR
     public void executeAfter(int userId, int contextId, List<Rule> rules) throws OXException {
         LOGGER.debug("Executing post-processing mail filter interceptors...");
         for (MailFilterInterceptor interceptor : interceptors) {
-            LOGGER.debug("Executing post-processing mail filter interceptor {} with rank {}", interceptor.getClass().getSimpleName(), interceptor.getRank());
+            LOGGER.debug("Executing post-processing mail filter interceptor {} with rank {}", interceptor.getClass().getSimpleName(), I(interceptor.getRank()));
             interceptor.after(userId, contextId, rules);
         }
     }

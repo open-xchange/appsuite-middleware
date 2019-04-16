@@ -104,4 +104,9 @@ public class TagArgument implements Argument
         return o instanceof TagArgument && ((TagArgument) o).getTag().equals(this.getTag());
     }
 
+    @Override
+    public int hashCode() {
+        return getTag().hashCode();
+    }
+
 }

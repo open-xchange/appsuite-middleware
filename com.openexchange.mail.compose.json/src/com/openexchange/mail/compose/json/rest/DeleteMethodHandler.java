@@ -73,22 +73,18 @@ public final class DeleteMethodHandler extends AbstractMailComposeMethodHandler 
 
     @Override
     protected void modifyByPathInfo(AJAXRequestData requestData, String[] restPathElements, HttpServletRequest req) throws IOException, OXException {
-        if (hasNoPathInfo(restPathElements)) {
+        String action = getAction(restPathElements, req);
+        if (action == null) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
+        requestData.setAction(action);
 
-        int length = restPathElements.length;
-        if (0 == length) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-
-        if (1 == length) {
+        if ("delete".equals(action)) {
             /*-
              *  DELETE /mail/compose/123
              */
-            requestData.setAction("delete");
             requestData.putParameter("id", restPathElements[0]);
-        } else if (3 == length) {
+        } else if ("deleteAttachment".equals(action)) {
             /*-
              *  DELETE /mail/compose/123/attachments/1
              */
@@ -96,12 +92,30 @@ public final class DeleteMethodHandler extends AbstractMailComposeMethodHandler 
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(req.getPathInfo());
             }
 
-            requestData.setAction("deleteAttachment");
             requestData.putParameter("id", restPathElements[0]);
             requestData.putParameter("attachmentId", restPathElements[2]);
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(req.getPathInfo());
         }
+    }
+
+    @Override
+    protected String doGetAction(String[] restPathElements, HttpServletRequest restRequest) {
+        if (hasPathInfo(restPathElements)) {
+            int length = restPathElements.length;
+            if (1 == length) {
+                /*-
+                 *  DELETE /mail/compose/123
+                 */
+                return "delete";
+            } else if (3 == length) {
+                /*-
+                 *  DELETE /mail/compose/123/attachments/1
+                 */
+                return "deleteAttachment";
+            }
+        }
+        return null;
     }
 
 }
