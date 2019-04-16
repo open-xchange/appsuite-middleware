@@ -69,7 +69,6 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.java.ConcurrentList;
-import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceHolderInit;
 import com.openexchange.session.inspector.SessionInspectorChain;
 import com.openexchange.session.inspector.SessionInspectorService;
@@ -92,7 +91,6 @@ import com.openexchange.tools.strings.TimeSpanParser;
  */
 public final class GlobalActivator implements BundleActivator {
 
-    private Initialization initialization;
     private ServiceTracker<StringParser,StringParser> parserTracker;
     private ServiceRegistration<StringParser> parserRegistration;
     private ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
@@ -113,9 +111,6 @@ public final class GlobalActivator implements BundleActivator {
     public synchronized void start(final BundleContext context) throws Exception {
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GlobalActivator.class);
         try {
-            final Initialization initialization = new ServerInitialization();
-            this.initialization = initialization;
-            initialization.start();
             ServiceHolderInit.getInstance().start();
             initStringParsers(context);
 
@@ -244,11 +239,6 @@ public final class GlobalActivator implements BundleActivator {
             }
             ServiceHolderInit.getInstance().stop();
 
-            Initialization initialization = this.initialization;
-            if (null != initialization) {
-                this.initialization = null;
-                initialization.stop();
-            }
             shutdownStringParsers();
 
             ServiceRegistration<CloseableControlService> closeableControlRegistration = this.closeableControlRegistration;
