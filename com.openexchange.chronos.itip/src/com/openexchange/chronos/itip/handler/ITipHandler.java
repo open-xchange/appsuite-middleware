@@ -299,24 +299,23 @@ public class ITipHandler implements CalendarHandler {
                 }
             }
         }
-        
-        if(isMove(update)) {
+
+        if (isMove(update)) {
             return;
         }
 
         // Handle update
         handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
     }
-    
-    
+
     private static final EventField[] NOT_MOVE_EVENT_FIELDS;
-    
+
     static {
         List<EventField> allitems = new ArrayList<>(Arrays.asList(EventField.values()));
         allitems.removeAll(Arrays.asList(EventField.ATTENDEES, EventField.TIMESTAMP, EventField.LAST_MODIFIED));
         NOT_MOVE_EVENT_FIELDS = allitems.toArray(new EventField[allitems.size()]);
     }
-    
+
     /**
      * 
      * Checks if the {@link UpdateResult} only contains a move operation
@@ -337,7 +336,7 @@ public class ITipHandler implements CalendarHandler {
             return false;
         }
         // @formatter:on
-        
+
         return true;
     }
 
