@@ -52,6 +52,7 @@ package com.openexchange.imageconverter.api;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.imageconverter.api.ElementLock.LockMode;
+import com.openexchange.imageconverter.api.ElementLock.UnlockMode;
 
 /**
  * {@link ElementLocker}
@@ -109,20 +110,20 @@ public class ElementLocker {
      * @param element
      */
     public static void unlock(final String element) {
-        unlock(element, false);
+        unlock(element, UnlockMode.STANDARD);
     }
 
     /**
      * @param element
      * @param finishProcessing
      */
-    public static void unlock(final String element, final boolean finishProcessing) {
+    public static void unlock(final String element, final UnlockMode unlockMode) {
         if (null != element) {
             synchronized (m_elementLockMap) {
                 final ElementLock keyLock = m_elementLockMap.get(element);
 
                 if (null != keyLock) {
-                    if ((0 == keyLock.unlock(finishProcessing)) && !keyLock.isProcessing()) {
+                    if ((0 == keyLock.unlock(unlockMode)) && !keyLock.isProcessing()) {
                         m_elementLockMap.remove(element);
                     }
                 }
