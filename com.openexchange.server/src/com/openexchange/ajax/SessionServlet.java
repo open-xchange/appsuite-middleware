@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -154,7 +155,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 if (maxConcurrentRequests > 0) {
                     counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                     if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
-                        LOG.info("User {} in context {} exceeded max. concurrent requests ({}).", session.getUserId(), session.getContextId(), maxConcurrentRequests);
+                        LOG.info("User {} in context {} exceeded max. concurrent requests ({}).", I(session.getUserId()), I(session.getContextId()), I(maxConcurrentRequests));
                         throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                     }
                 }

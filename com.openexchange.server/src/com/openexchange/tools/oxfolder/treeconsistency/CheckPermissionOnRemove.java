@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -231,12 +232,12 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             final ToDoPermission toDoPermission = iterator.value();
             final int[] users = toDoPermission.getUsers();
             for (final int user : users) {
-                LOG.debug("Auto-Delete system-folder-read permission for user {} from folder {}", UserStorage.getInstance().getUser(user, ctx).getDisplayName(), fid);
+                LOG.debug("Auto-Delete system-folder-read permission for user {} from folder {}", UserStorage.getInstance().getUser(user, ctx).getDisplayName(), I(fid));
                 deleteSystemFolderReadPermission(fid, user);
             }
             final int[] groups = toDoPermission.getGroups();
             for (final int group : groups) {
-                LOG.debug("Auto-Delete system-folder-read permission for group with id {} from folder {}", group, fid);
+                LOG.debug("Auto-Delete system-folder-read permission for group with id {} from folder {}", I(group), I(fid));
 
                 deleteSystemFolderReadPermission(fid, group);
             }

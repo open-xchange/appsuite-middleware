@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -62,29 +63,29 @@ public class EntityImpl implements Entity {
 
     private static final long serialVersionUID = -4838502301287665200L;
     private EntityType type;
-    private MultiKey identifier;
+    private final MultiKey identifier;
     private Context context;
     private User user;
 
     /**
      * Initialises a new {@link EntityImpl} as {@link Context}.
-     * 
+     *
      * @param context The context
      */
     public EntityImpl(Context context) {
-        this(new MultiKey(new Object[] { context.getContextId() }));
+        this(new MultiKey(new Object[] { I(context.getContextId()) }));
         this.context = context;
 
     }
 
     /**
      * Initialises a new {@link EntityImpl} as {link User}
-     * 
+     *
      * @param context The context
      * @param user The user
      */
     public EntityImpl(Context context, User user) {
-        this(new MultiKey(context.getContextId(), user.getId()));
+        this(new MultiKey(I(context.getContextId()), I(user.getId())));
         this.context = context;
         this.user = user;
     }
@@ -112,7 +113,7 @@ public class EntityImpl implements Entity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.Entity#getId()
      */
     @Override
@@ -122,7 +123,7 @@ public class EntityImpl implements Entity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.Entity#getType()
      */
     @Override
@@ -132,7 +133,7 @@ public class EntityImpl implements Entity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.Entity#getContext()
      */
     @Override
@@ -142,7 +143,7 @@ public class EntityImpl implements Entity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.Entity#getUser()
      */
     @Override
@@ -152,7 +153,7 @@ public class EntityImpl implements Entity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     @Override

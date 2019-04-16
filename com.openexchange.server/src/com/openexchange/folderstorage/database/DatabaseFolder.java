@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -263,7 +264,7 @@ public class DatabaseFolder extends AbstractFolder {
             case FolderObject.TEMPLATES:
                 return TemplatesContentType.getInstance();
             default:
-                LOG.warn("Unknown database folder content type: {}", module);
+                LOG.warn("Unknown database folder content type: {}", I(module));
                 return SystemContentType.getInstance();
         }
     }
@@ -323,7 +324,7 @@ public class DatabaseFolder extends AbstractFolder {
     /**
      * Determine if the current user can see this folder because of his non system permissions. Group
      * permissions are also considered.
-     * 
+     *
      * @return true, if this folder is hidden, false if the user has the permission to see this folder
      */
     public boolean isHidden() {
@@ -353,7 +354,7 @@ public class DatabaseFolder extends AbstractFolder {
     /**
      * Checks if the current user has visibility permissions granted through at least one system
      * permission for this folder. Group permissions are considered also.
-     * 
+     *
      * @return true, if at least one permission has the system flag and is visible. false otherwise
      */
     public boolean isVisibleThroughSystemPermissions() {
@@ -361,7 +362,7 @@ public class DatabaseFolder extends AbstractFolder {
             ServerSession session = getSession();
             if (null != session) {
                 List<Integer> entities = Arrays.stream(session.getUser().getGroups()).boxed().collect(Collectors.toList());
-                entities.add(session.getUserId());
+                entities.add(I(session.getUserId()));
                 for (OCLPermission permission : folderObject.getPermissions()) {
                     if (entities.contains(Integer.valueOf(permission.getEntity())) && permission.isFolderVisible() && permission.isSystem()) {
                         return true;

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -240,7 +241,7 @@ abstract class CheckPermission {
              */
             eventAdmin.sendEvent(event);
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CheckPermission.class);
-            logger.debug("Notified content-related-wise changed folder \"{} in context {}", folderId, session.getContextId());
+            logger.debug("Notified content-related-wise changed folder \"{} in context {}", I(folderId), I(session.getContextId()));
         }
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.contact.AutocompleteParameters;
@@ -317,7 +318,7 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(lastRead, "lastRead");
         Check.argNotNull(contact, "contact");
         if (contact.containsParentFolderID() && contact.getParentFolderID() != parse(folderId)) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), session.getContextId());
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(parse(id)), I(session.getContextId()));
         }
         this.doUpdateUser(session, folderId, id, contact, lastRead);
     }

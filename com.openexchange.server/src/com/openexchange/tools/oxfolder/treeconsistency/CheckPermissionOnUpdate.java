@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.treeconsistency;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.osgi.service.event.EventAdmin;
@@ -125,12 +126,12 @@ public final class CheckPermissionOnUpdate extends CheckPermission {
                     final ToDoPermission toDoPermission = it.value();
                     final int[] users = toDoPermission.getUsers();
                     for (int j = 0; j < users.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", users[j], folderId);
+                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", I(users[j]), I(folderId));
                         addSystemFolderReadPermission(folderId, users[j], false);
                     }
                     final int[] groups = toDoPermission.getGroups();
                     for (int j = 0; j < groups.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", groups[j], folderId);
+                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", I(groups[j]), I(folderId));
                         addSystemFolderReadPermission(folderId, groups[j], true);
                     }
                     /*

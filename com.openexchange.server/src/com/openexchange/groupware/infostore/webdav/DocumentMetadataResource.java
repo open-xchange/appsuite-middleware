@@ -803,7 +803,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			    ), Long.MAX_VALUE, session);
             if (nd.size() > 0) {
                 database.rollback();
-                throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.parseInt(nd.get(0).getId()));
+                throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.valueOf(nd.get(0).getId()));
             }
             database.commit();
         } catch (final OXException x) {

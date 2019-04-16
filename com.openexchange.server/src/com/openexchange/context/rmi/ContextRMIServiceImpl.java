@@ -49,6 +49,7 @@
 
 package com.openexchange.context.rmi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -84,7 +85,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.context.rmi.ContextRMIService#checkLogin2ContextMapping()
      */
     @Override
@@ -144,7 +145,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.context.rmi.ContextRMIService#checkLogin2ContextMapping(int)
      */
     @Override
@@ -175,7 +176,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
 
     /**
      * Try inserting a login mapping to the 'login2context' table.
-     * 
+     *
      * @param contextId The context identifier
      * @param connection The writeable connection to configdb
      * @return The amount of affected rows
@@ -196,7 +197,7 @@ public class ContextRMIServiceImpl implements ContextRMIService {
 
     /**
      * Invalidates the specified context
-     * 
+     *
      * @param contextId The context identifier
      * @param contextStorage The {@link ContextStorage}
      */
@@ -205,13 +206,13 @@ public class ContextRMIServiceImpl implements ContextRMIService {
             contextStorage.invalidateContext(contextId);
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(ContextRMIServiceImpl.class);
-            logger.warn("Error invalidating cached infos of context {} in context storage", contextId, e);
+            logger.warn("Error invalidating cached infos of context {} in context storage", I(contextId), e);
         }
     }
 
     /**
      * Retrieves the {@link DatabaseService}
-     * 
+     *
      * @return The {@link DatabaseService}
      * @throws RemoteException if the {@link DatabaseService} is absent
      */

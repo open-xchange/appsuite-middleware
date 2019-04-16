@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.internal.solver;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
 import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
@@ -74,7 +75,7 @@ public class DeleteBrokenVCardReferencesSolver implements ProblemSolver {
         }
         if (problems.size() > 0) {
             vCardStorageMetadataStore.removeByRefId(entity.getContext().getContextId(), problems);
-            LOG.info("Deleted {} broken VCard references.", problems.size());
+            LOG.info("Deleted {} broken VCard references.", I(problems.size()));
         }
     }
 

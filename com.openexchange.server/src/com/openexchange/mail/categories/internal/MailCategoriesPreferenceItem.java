@@ -227,7 +227,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService, Con
                             throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue(), setting.getName());
                         }
                         MailCategoryConfig.Builder builder = new MailCategoryConfig.Builder();
-                        MailCategoryConfig mcc = builder.category(catID).enabled(enable).name(name).build();
+                        MailCategoryConfig mcc = builder.category(catID).enabled(enable.booleanValue()).name(name).build();
                         newConfigs.add(mcc);
                     }
                     if (!newConfigs.isEmpty()) {

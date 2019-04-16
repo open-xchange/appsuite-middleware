@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -593,7 +594,7 @@ public final class FolderWriter {
                 } else {
 
                     if (!additionalFields.knows(curField)) {
-                        LOG.warn("Unknown folder field: {}", curField);
+                        LOG.warn("Unknown folder field: {}", I(curField));
                     }
 
                     final AdditionalFolderField folderField = additionalFields.get(curField);

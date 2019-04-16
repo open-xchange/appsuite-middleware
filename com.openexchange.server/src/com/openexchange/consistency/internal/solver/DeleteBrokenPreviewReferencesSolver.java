@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.internal.solver;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.consistency.Entity;
@@ -72,7 +73,7 @@ public class DeleteBrokenPreviewReferencesSolver implements ProblemSolver {
 
         ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
         metadataStore.removeByRefId(entity.getContext().getContextId(), problems);
-        LOG.info("Deleted {} broken preview cache references.", problems.size());
+        LOG.info("Deleted {} broken preview cache references.", I(problems.size()));
     }
 
     @Override

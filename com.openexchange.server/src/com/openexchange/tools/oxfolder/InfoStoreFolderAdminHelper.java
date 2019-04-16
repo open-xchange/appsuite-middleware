@@ -196,7 +196,7 @@ public final class InfoStoreFolderAdminHelper {
                 Context context = new ContextImpl(contextID);
                 String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
                 if (null == name) {
-                    throw LdapExceptionCode.USER_NOT_FOUND.create(userID, contextID).setPrefix("USR");
+                    throw LdapExceptionCode.USER_NOT_FOUND.create(I(userID), I(contextID)).setPrefix("USR");
                 }
                 int resetLen = name.length();
                 int count = 0;

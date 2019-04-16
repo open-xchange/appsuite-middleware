@@ -182,7 +182,7 @@ public class ContactDisplayNameHelper {
         LeanConfigurationService configService = ServerServiceRegistry.getServize(LeanConfigurationService.class);
         if (null == configService) {
             boolean defaultValue = false;
-            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
+            LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue ? Boolean.TRUE : Boolean.FALSE, ContactProperty.showDepartments);
             return defaultValue;
         }
         return configService.getBooleanProperty(ContactProperty.showDepartments);

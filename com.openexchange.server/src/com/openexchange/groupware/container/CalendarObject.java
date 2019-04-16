@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -226,7 +227,7 @@ public abstract class CalendarObject extends CommonObject {
     protected String principal;
 
     protected int principalId;
-    
+
     /**
      * An attachment link.
      */
@@ -907,12 +908,12 @@ public abstract class CalendarObject extends CommonObject {
         this.attachmentLink = attachmentLink;
         this.bAttachmentLink = true;
     }
-    
+
     public void removeAttachmentLink() {
         this.attachmentLink = null;
         this.bAttachmentLink = false;
     }
-    
+
     public boolean containsAttachmentLink() {
         return bAttachmentLink;
     }
@@ -1096,41 +1097,41 @@ public abstract class CalendarObject extends CommonObject {
 			setEndDate((Date) value);
 			break;
 		case RECURRENCE_POSITION:
-			setRecurrencePosition((Integer) value);
+			setRecurrencePosition(((Integer) value).intValue());
 			break;
 		case RECURRENCE_CALCULATOR:
-			setRecurrenceCalculator((Integer) value);
+			setRecurrenceCalculator(((Integer) value).intValue());
 			break;
 		case DAYS:
-			setDays((Integer) value);
+			setDays(((Integer) value).intValue());
 			break;
 		case NOTIFICATION:
-			setNotification((Boolean) value);
+			setNotification(((Boolean) value).booleanValue());
 			break;
 		case MONTH:
-			setMonth((Integer) value);
+			setMonth(((Integer) value).intValue());
 			break;
 		case RECURRENCE_COUNT:
-			setRecurrenceCount((Integer) value);
+			setRecurrenceCount(((Integer) value).intValue());
 			setOccurrence(getRecurrenceCount());
 			break;
 		case DAY_IN_MONTH:
-			setDayInMonth((Integer) value);
+			setDayInMonth(((Integer) value).intValue());
 			break;
 		case RECURRENCE_TYPE:
-			setRecurrenceType((Integer) value);
+			setRecurrenceType(((Integer) value).intValue());
 			break;
 		case START_DATE:
 			setStartDate((Date) value);
 			break;
 		case INTERVAL:
-			setInterval((Integer) value);
+			setInterval(((Integer) value).intValue());
 			break;
 		case TITLE:
 			setTitle((String) value);
 			break;
 		case RECURRENCE_ID:
-			setRecurrenceID((Integer) value);
+			setRecurrenceID(((Integer) value).intValue());
 			break;
 		case PARTICIPANTS:
 			if (List.class.isInstance(value)) {
@@ -1164,19 +1165,19 @@ public abstract class CalendarObject extends CommonObject {
 			setOrganizer((String) value);
 			break;
 		case SEQUENCE:
-			setSequence((Integer) value);
+			setSequence(((Integer) value).intValue());
 			break;
 		case ORGANIZER_ID:
-		    setOrganizerId((Integer) value);
+		    setOrganizerId(((Integer) value).intValue());
 		    break;
 		case PRINCIPAL:
 		    setPrincipal((String) value);
 		    break;
 		case PRINCIPAL_ID:
-		    setPrincipalId((Integer) value);
+		    setPrincipalId(((Integer) value).intValue());
 		    break;
         case FULL_TIME:
-            setFullTime((Boolean) value);
+            setFullTime(((Boolean) value).booleanValue());
             break;
 		default:
 			super.set(field, value);
@@ -1202,33 +1203,33 @@ public abstract class CalendarObject extends CommonObject {
 		case END_DATE:
 			return getEndDate();
 		case RECURRENCE_POSITION:
-			return getRecurrencePosition();
+			return I(getRecurrencePosition());
 		case RECURRENCE_CALCULATOR:
-			return getRecurrenceCalculator();
+			return I(getRecurrenceCalculator());
 		case DAYS:
-			return getDays();
+			return I(getDays());
 		case NOTIFICATION:
-			return getNotification();
+			return getNotification() ? Boolean.TRUE : Boolean.FALSE;
 		case MONTH:
-			return getMonth();
+			return I(getMonth());
 		case RECURRENCE_COUNT:
 			if (containsRecurrenceCount()) {
-                return getRecurrenceCount();
+                return I(getRecurrenceCount());
             } else {
-                return getOccurrence();
+                return I(getOccurrence());
             }
 		case DAY_IN_MONTH:
-			return getDayInMonth();
+			return I(getDayInMonth());
 		case RECURRENCE_TYPE:
-			return getRecurrenceType();
+			return I(getRecurrenceType());
 		case START_DATE:
 			return getStartDate();
 		case INTERVAL:
-			return getInterval();
+			return I(getInterval());
 		case TITLE:
 			return getTitle();
 		case RECURRENCE_ID:
-			return getRecurrenceID();
+			return I(getRecurrenceID());
 		case PARTICIPANTS:
 			return getParticipants();
 		case CHANGE_EXCEPTIONS:
@@ -1238,17 +1239,17 @@ public abstract class CalendarObject extends CommonObject {
 		case ORGANIZER:
 			return getOrganizer();
 		case SEQUENCE:
-			return getSequence();
+			return I(getSequence());
 		case CONFIRMATIONS:
 			return getConfirmations();
 		case ORGANIZER_ID:
-		    return getOrganizerId();
+		    return I(getOrganizerId());
 		case PRINCIPAL:
 		    return getPrincipal();
 		case PRINCIPAL_ID:
-		    return getPrincipalId();
+		    return I(getPrincipalId());
         case FULL_TIME:
-            return getFullTime();
+            return getFullTime() ? Boolean.TRUE : Boolean.FALSE;
 		default:
 			return super.get(field);
 		}

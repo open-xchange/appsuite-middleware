@@ -96,7 +96,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
                 if (method.isAnnotationPresent(OAuthScopeCheck.class)) {
                     if (hasScopeCheckSignature(method)) {
                         try {
-                            if ((boolean) method.invoke(action, requestData, session, oAuthAccess)) {
+                            if (((Boolean) method.invoke(action, requestData, session, oAuthAccess)).booleanValue()) {
                                 return;
                             }
                         } catch (InvocationTargetException e) {
