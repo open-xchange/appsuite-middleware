@@ -61,7 +61,45 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Method {
-    GET, PUT, POST, DELETE, PATCH;
+
+    /**
+     * Use <code>GET</code> requests to retrieve resource representation/information only – and not to modify it in any way
+     * <p>
+     * As GET requests do not change the state of the resource, these are said to be safe methods. Additionally, GET APIs should be
+     * idempotent, which means that making multiple identical requests must produce the same result every time until another API
+     * (<code>POST</code> or <code>PUT</code>) has changed the state of the resource on the server.
+     */
+    GET,
+    /**
+     * Use <code>PUT</code> primarily to update existing resource (if the resource does not exist then API may decide to create a new
+     * resource or not). If a new resource has been created by the PUT API, the origin server MUST inform the user agent via the HTTP
+     * response code 201 (Created) response and if an existing resource is modified, either the <code>200 (OK)</code> or
+     * <code>204 (No Content)</code> response codes SHOULD be sent to indicate successful completion of the request.
+     */
+    PUT,
+    /**
+     * Use <code>POST</code> to create new subordinate resources, e.g. a file is subordinate to a directory containing it or a row is
+     * subordinate to a database table. Talking strictly in terms of REST, POST methods are used to create a new resource into the
+     * collection of resources.
+     */
+    POST,
+    /**
+     * As the name applies, <code>DELETE</code>s are used to delete resources (identified by the Request-URI).
+     * <p>
+     * A successful response of <code>DELETE</code> requests SHOULD be HTTP response code <code>200 (OK)</code> if the response includes an
+     * entity describing the status, <code>202 (Accepted)</code> if the action has been queued, or 204 (No Content) if the action has been
+     * performed but the response does not include an entity.
+     * <p>
+     * <code>DELETE</code> operations are idempotent. If you <code>DELETE</code> a resource, it’s removed from the collection of resource.
+     * Repeatedly calling <code>DELETE</code> on that resource will not change the outcome.
+     */
+    DELETE,
+    /**
+     * HTTP <code>PATCH</code> requests are to make partial update on a resource. If you see <code>PUT</code> requests also modify a
+     * resource entity so to make more clear – <code>PATCH</code> method is the correct choice for partially updating an existing resource
+     * and <code>PUT</code> should only be used if you’re replacing a resource in its entirety.
+     */
+    PATCH;
 
     private static final Map<String, Method> MAP;
 

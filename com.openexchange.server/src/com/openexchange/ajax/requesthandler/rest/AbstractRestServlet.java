@@ -96,17 +96,22 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
 
     private static final class RestRequestDataTools extends AJAXRequestDataTools {
 
-        private final AbstractRestServlet servlet;
+        private final AbstractRestServlet restServlet;
 
-        public RestRequestDataTools(final AbstractRestServlet servlet) {
+        /**
+         * Initializes a new {@link RestRequestDataTools}.
+         *
+         * @param restServlet The REST end-point
+         */
+        RestRequestDataTools(final AbstractRestServlet restServlet) {
             super();
-            this.servlet = servlet;
+            this.restServlet = restServlet;
         }
 
         @Override
         public String getModule(String prefix, HttpServletRequest req) {
             // Obtain method's handler...
-            MethodHandler methodHandler = getMethodHandler(req, servlet);
+            MethodHandler methodHandler = getMethodHandler(req, restServlet);
             if (null == methodHandler) {
                 return super.getModule(prefix, req);
             }
@@ -117,7 +122,7 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
         @Override
         public String getAction(HttpServletRequest req) {
             // Obtain method's handler...
-            MethodHandler methodHandler = getMethodHandler(req, servlet);
+            MethodHandler methodHandler = getMethodHandler(req, restServlet);
             if (null == methodHandler) {
                 return super.getAction(req);
             }
@@ -155,7 +160,7 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
             AJAXRequestData requestData = super.parseRequest(req, preferStream, isFileUpload, preLoadRequestBody, session, prefix, optResp);
 
             // Obtain method's handler...
-            MethodHandler methodHandler = getMethodHandler(req, servlet);
+            MethodHandler methodHandler = getMethodHandler(req, restServlet);
             if (null == methodHandler) {
                 return requestData;
             }
