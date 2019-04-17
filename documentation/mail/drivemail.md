@@ -2,6 +2,7 @@
 title: Drive Mail
 classes: toc
 icon: fa-hdd-o
+tags: Mail, Configuration, Installation
 ---
 
 # How it works

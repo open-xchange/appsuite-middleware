@@ -226,7 +226,7 @@ public class DefaultDispatcher implements Dispatcher {
                         if (optionalKey != null) {
                             UUID contained = jobQueue.contains(optionalKey);
                             if (null != contained) {
-                                throw JobQueueExceptionCodes.ALREADY_RUNNING.create(UUIDs.getUnformattedString(contained), session.getUserId(), session.getContextId());
+                                throw JobQueueExceptionCodes.ALREADY_RUNNING.create(UUIDs.getUnformattedString(contained), I(session.getUserId()), I(session.getContextId()));
                             }
                         }
 

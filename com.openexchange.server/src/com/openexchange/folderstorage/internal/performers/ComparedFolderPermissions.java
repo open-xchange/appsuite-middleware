@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -166,7 +167,7 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
      * @param guestInfo The guest info
      */
     public void rememberGuestInfo(GuestInfo guestInfo) {
-        guestInfos.put(guestInfo.getGuestID(), guestInfo);
+        guestInfos.put(I(guestInfo.getGuestID()), guestInfo);
     }
 
     /**
@@ -181,13 +182,13 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
             return null;
         }
 
-        GuestInfo guestInfo = guestInfos.get(guestId);
+        GuestInfo guestInfo = guestInfos.get(I(guestId));
         if (guestInfo == null) {
             guestInfo = getShareService().getGuestInfo(session, guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }
-            guestInfos.put(guestId, guestInfo);
+            guestInfos.put(I(guestId), guestInfo);
         }
 
         if (guestInfo == NO_GUEST) {

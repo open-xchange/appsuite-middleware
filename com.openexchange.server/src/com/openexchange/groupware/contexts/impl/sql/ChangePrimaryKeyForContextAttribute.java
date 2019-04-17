@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contexts.impl.sql;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -195,14 +196,14 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
 
             String newValue = taxonomies.stream().collect(Collectors.joining(","));
             update(attribute, newValue, con);
-            LOGGER.warn("Found multiple values for 'taxonomy/types' in context {}. The values found {} will be merged to '{}'.", attribute.contextId, Strings.concat(";", dupValues), newValue);
+            LOGGER.warn("Found multiple values for 'taxonomy/types' in context {}. The values found {} will be merged to '{}'.", I(attribute.contextId), Strings.concat(";", dupValues), newValue);
         } else {
             String newValue = deleteAllButLast(attribute, values, con);
             if (attribute.name.startsWith("config/")) {
-                LOGGER.warn("Found duplicate configuration for config '{}' in context {}. Will keep value '{}'.", attribute.name, attribute.contextId, newValue);
+                LOGGER.warn("Found duplicate configuration for config '{}' in context {}. Will keep value '{}'.", attribute.name, I(attribute.contextId), newValue);
                 return;
             }
-            LOGGER.warn("Found multiple values for setting '{}' in context {}. Previous values {} will be reduced to '{}'.", attribute.name, attribute.contextId, Strings.concat(";", dupValues), newValue);
+            LOGGER.warn("Found multiple values for setting '{}' in context {}. Previous values {} will be reduced to '{}'.", attribute.name, I(attribute.contextId), Strings.concat(";", dupValues), newValue);
         }
     }
 

@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.dmfs.rfc5545.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
@@ -298,24 +299,23 @@ public class ITipHandler implements CalendarHandler {
                 }
             }
         }
-        
-        if(isMove(update)) {
+
+        if (isMove(update)) {
             return;
         }
 
         // Handle update
         handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
     }
-    
-    
+
     private static final EventField[] NOT_MOVE_EVENT_FIELDS;
-    
+
     static {
         List<EventField> allitems = new ArrayList<>(Arrays.asList(EventField.values()));
         allitems.removeAll(Arrays.asList(EventField.ATTENDEES, EventField.TIMESTAMP, EventField.LAST_MODIFIED));
         NOT_MOVE_EVENT_FIELDS = allitems.toArray(new EventField[allitems.size()]);
     }
-    
+
     /**
      * 
      * Checks if the {@link UpdateResult} only contains a move operation
@@ -336,7 +336,7 @@ public class ITipHandler implements CalendarHandler {
             return false;
         }
         // @formatter:on
-        
+
         return true;
     }
 
@@ -425,7 +425,14 @@ public class ITipHandler implements CalendarHandler {
         return null;
     }
 
-    private boolean isIgnorableException(UpdateResult master, CreateResult created) throws OXException {
+    /**
+     * Don't send messages in case the attendee added an personal alarm
+     *
+     * @param master The master event to build an {@link EventUpdate} on
+     * @param created The exception that has been created
+     * @return <code>true</code> if the creation of the exception can be ignored.
+     */
+    private boolean isIgnorableException(UpdateResult master, CreateResult created) {
         EventUpdate eventUpdate = DefaultEventUpdate.builder() //@formatter:off
             .originalEvent(master.getUpdate())
             .updatedEvent(created.getCreatedEvent())
@@ -437,7 +444,44 @@ public class ITipHandler implements CalendarHandler {
         /*
          * Exception was created to add/change/remove an alarm without changing anything else. So ignore it
          */
-        return eventUpdate.isEmpty();
+        if (eventUpdate.isEmpty()) {
+            // Have a detailed look on start and end date again
+            return compareByDate(master.getOriginal(), created.getCreatedEvent());
+        }
+        return false;
+    }
+
+    /**
+     * Compares if two events are starting and ending on the same hours and minutes.
+     *
+     * @param e1 One event
+     * @param e2 The other event
+     * @return <code>true</code> if the start and end date are equal based on the hour and minutes
+     *         <code>false</code> otherwise
+     */
+    private boolean compareByDate(Event e1, Event e2) {
+        return compareByDate(e1.getStartDate(), e2.getStartDate()) && compareByDate(e1.getEndDate(), e2.getEndDate());
+    }
+
+    /**
+     * 
+     * Compares if two DateTimes have the same hours and minutes set
+     *
+     * @param date1 One {@link DateTime}
+     * @param date2 The other {@link DateTime}
+     * @return <code>true</code> if hours and minutes match, <code>false</code> otherwise
+     */
+    private boolean compareByDate(DateTime date1, DateTime date2) {
+        if (date1.getHours() == 0) {
+            // Still all day event?
+            return date2.getHours() == 0;
+        }
+
+        if (date1.getHours() == date2.getHours()) {
+            // Check by minutes
+            return date1.getMinutes() == date2.getMinutes();
+        }
+        return false;
     }
 
     private CalendarService getCalendarService() throws OXException {

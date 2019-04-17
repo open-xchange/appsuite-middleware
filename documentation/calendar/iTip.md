@@ -2,6 +2,7 @@
 title: iCalendar Transport-Independent Interoperability Protocol (iTIP)
 classes: toc
 icon: fa-book
+tags: API, Calendar
 ---
 
 

@@ -51,6 +51,7 @@
 
 package com.openexchange.groupware.reminder;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -103,10 +104,10 @@ public class ReminderConfigImpl extends AbstractConfigWrapper implements Reminde
 		}
 
 		isReminderEnabled = parseProperty(prop, "com.openexchange.groupware.reminder.isReminderEnabled", isReminderEnabled);
-		LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled={}", isReminderEnabled);
+		LOG.debug("Reminder property: com.openexchange.groupware.reminder.isReminderEnabled={}", isReminderEnabled ? Boolean.TRUE : Boolean.FALSE);
 
 		reminderInterval = parseProperty(prop, "com.openexchange.groupware.reminder.reminderInterval", reminderInterval);
-		LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval={}", reminderInterval);
+		LOG.debug("Reminder property: com.openexchange.groupware.reminder.reminderInterval={}", I(reminderInterval));
 
 		isInit = true;
 	}

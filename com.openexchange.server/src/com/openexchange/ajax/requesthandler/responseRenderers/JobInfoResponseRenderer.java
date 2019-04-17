@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.ajax.fields.ResponseFields.DATA;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -138,7 +139,7 @@ public class JobInfoResponseRenderer implements ResponseRenderer {
             JSONObject jResponse = new JSONObject(2);
             jResponse.put(DATA, jData);
 
-            OXException warning = JobQueueExceptionCodes.LONG_RUNNING_OPERATION.create(session.getUserId(), session.getContextId());
+            OXException warning = JobQueueExceptionCodes.LONG_RUNNING_OPERATION.create(I(session.getUserId()), I(session.getContextId()));
             Locale locale = localeFrom(session);
             ResponseWriter.addException(jResponse, warning, locale, false);
             ResponseWriter.addWarning(jResponse, warning, locale);

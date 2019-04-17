@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.regex.Matcher;
@@ -60,16 +61,16 @@ public class ContactFieldDocumentor {
 
     /**
      * Entry point
-     * 
+     *
      * @param args The arguments
      */
     public static void main(String[] args) {
         try (Formatter formatter = new Formatter()) {
             ContactField[] fields = ContactField.values();
-            Arrays.sort(fields, (o1, o2) -> ((ContactField) o1).getNumber() - ((ContactField) o2).getNumber());
+            Arrays.sort(fields, (o1, o2) -> o1.getNumber() - o2.getNumber());
             System.out.println(formatter.format("%3s %38s %38s%n", "#", "Ajax name", "OXMF name"));
             for (ContactField field : fields) {
-                System.out.println(formatter.format("%3s %38s %38s%n", field.getNumber(), field.getAjaxName(), oxmf(field.getAjaxName())));
+                System.out.println(formatter.format("%3s %38s %38s%n", I(field.getNumber()), field.getAjaxName(), oxmf(field.getAjaxName())));
 
             }
         }

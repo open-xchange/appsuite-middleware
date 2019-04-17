@@ -2,6 +2,7 @@
 title: Developer Guide
 classes: toc
 icon: fa-code
+tags: SAML, Custom Dev, SSO
 ---
 
 <!-- Change to 'fa-dev' icon once we are on FontAwesome 5.x -->

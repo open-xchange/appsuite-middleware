@@ -97,7 +97,7 @@ public final class ContactDeleteListener implements DeleteListener {
 
             Integer destUser = deleteEvent.getDestinationUserID();
             if(destUser == null){
-                destUser = deleteEvent.getContext().getMailadmin();
+                destUser = I(deleteEvent.getContext().getMailadmin());
             }
             /*
              * Drop affected distribution list entries
@@ -107,7 +107,7 @@ public final class ContactDeleteListener implements DeleteListener {
             /*
              * Proceed
              */
-            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), destUser, readCon, writeCon);
+            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), destUser.intValue(), readCon, writeCon);
         } else if (type == DeleteEvent.TYPE_CONTEXT) {
             handleContextDeletion(writeCon, deleteEvent.getContext());
         }
@@ -262,7 +262,7 @@ public final class ContactDeleteListener implements DeleteListener {
             EventClient eventClient = new EventClient(session);
             for (Contact contact : toDelete) {
                 try {
-                    FolderObject parentFolder = parentFolders.get(contact.getParentFolderID());
+                    FolderObject parentFolder = parentFolders.get(I(contact.getParentFolderID()));
                     if (null != parentFolder) {
                         eventClient.delete(contact, parentFolder);
                     } else {

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
@@ -235,7 +236,7 @@ public class SyncServlet extends PermissionServlet {
                         folderSyncInterface.clearFolder(delFolderObj, timestamp);
                         lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
                     } else if (deleteIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
-                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(sessionObj.getUserId(), deleteIdentifier, Integer.valueOf(ctx.getContextId()));
+                        throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(I(sessionObj.getUserId()), deleteIdentifier, Integer.valueOf(ctx.getContextId()));
                     } else {
                         if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
                             if (mailInterface == null) {

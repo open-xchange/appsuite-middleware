@@ -2,6 +2,7 @@
 title: Jolokia
 classes: toc
 icon: fa-leaf
+tags: Monitoring, Configuration, Administration
 ---
 
 <!-- Once on FontAwesome 5.x change to 'fa-pepper-hot' icon -->

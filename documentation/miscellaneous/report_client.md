@@ -1,6 +1,7 @@
 ---
 title: Report Client
 icon: fa-flag-checkered
+tags: Configuration, Installation
 ---
 
 # Introduction

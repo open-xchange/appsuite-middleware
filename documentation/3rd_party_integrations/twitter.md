@@ -2,6 +2,7 @@
 title: Twitter OAuth
 classes: toc
 icon: fa-twitter
+tags: 3rd Party, Twitter, Installation, Configuration
 ---
 
 # Installation

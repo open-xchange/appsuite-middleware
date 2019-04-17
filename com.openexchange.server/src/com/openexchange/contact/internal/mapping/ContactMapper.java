@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.internal.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.EnumMap;
 import javax.mail.internet.AddressException;
@@ -2277,7 +2278,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setObjectID(value);
+                contact.setObjectID(value.intValue());
             }
 
             @Override
@@ -2287,7 +2288,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getObjectID();
+                return I(contact.getObjectID());
             }
 
             @Override
@@ -2301,7 +2302,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Boolean value) {
-                contact.setPrivateFlag(value);
+                contact.setPrivateFlag(value.booleanValue());
             }
 
             @Override
@@ -2311,7 +2312,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Boolean get(Contact contact) {
-                return contact.getPrivateFlag();
+                return contact.getPrivateFlag() ? Boolean.TRUE : Boolean.FALSE;
             }
 
             @Override
@@ -2324,7 +2325,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfDistributionLists(value);
+                contact.setNumberOfDistributionLists(value.intValue());
             }
 
             @Override
@@ -2334,7 +2335,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfDistributionLists();
+                return I(contact.getNumberOfDistributionLists());
             }
 
             @Override
@@ -2416,7 +2417,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setParentFolderID(value);
+                contact.setParentFolderID(value.intValue());
             }
 
             @Override
@@ -2426,7 +2427,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getParentFolderID();
+                return I(contact.getParentFolderID());
             }
 
             @Override
@@ -2440,7 +2441,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setContextId(value);
+                contact.setContextId(value.intValue());
             }
 
             @Override
@@ -2450,7 +2451,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getContextId();
+                return I(contact.getContextId());
             }
 
             @Override
@@ -2464,7 +2465,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setCreatedBy(value);
+                contact.setCreatedBy(value.intValue());
             }
 
             @Override
@@ -2474,7 +2475,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getCreatedBy();
+                return I(contact.getCreatedBy());
             }
 
             @Override
@@ -2488,7 +2489,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setModifiedBy(value);
+                contact.setModifiedBy(value.intValue());
             }
 
             @Override
@@ -2498,7 +2499,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getModifiedBy();
+                return I(contact.getModifiedBy());
             }
 
             @Override
@@ -2702,7 +2703,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setInternalUserId(value);
+                contact.setInternalUserId(value.intValue());
             }
 
             @Override
@@ -2712,7 +2713,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getInternalUserId();
+                return I(contact.getInternalUserId());
             }
 
             @Override
@@ -2726,7 +2727,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setLabel(value);
+                contact.setLabel(value.intValue());
             }
 
             @Override
@@ -2736,7 +2737,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getLabel();
+                return I(contact.getLabel());
             }
 
             @Override
@@ -2774,7 +2775,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setDefaultAddress(value);
+                contact.setDefaultAddress(value.intValue());
             }
 
             @Override
@@ -2784,7 +2785,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getDefaultAddress();
+                return I(contact.getDefaultAddress());
             }
 
             @Override
@@ -2798,7 +2799,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Boolean value) {
-                contact.setMarkAsDistributionlist(value);
+                contact.setMarkAsDistributionlist(value.booleanValue());
             }
 
             @Override
@@ -2808,7 +2809,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Boolean get(Contact contact) {
-                return contact.getMarkAsDistribtuionlist();
+                return contact.getMarkAsDistribtuionlist() ? Boolean.TRUE : Boolean.FALSE;
             }
 
             @Override
@@ -2822,7 +2823,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfAttachments(value);
+                contact.setNumberOfAttachments(value.intValue());
             }
 
             @Override
@@ -2832,7 +2833,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfAttachments();
+                return I(contact.getNumberOfAttachments());
             }
 
             @Override
@@ -2918,7 +2919,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfImages(value);
+                contact.setNumberOfImages(value.intValue());
             }
 
             @Override
@@ -2929,7 +2930,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfImages();
+                return I(contact.getNumberOfImages());
             }
 
             @Override

@@ -2,6 +2,7 @@
 title: Dovecot Push
 classes: toc
 icon: fa-bell
+tags: Mail, Configuration, Push
 ---
 
 This article describes how to configure the Dovecot Push feature, which allows e.g. pushing events to mobile clients/apps.

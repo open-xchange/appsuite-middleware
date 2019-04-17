@@ -2,6 +2,7 @@
 title: Login Rate Limiting
 classes: toc
 icon: fa-filter
+tags: Authentication, Limits, Configuration
 ---
 
 # Introduction

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.helper;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import java.awt.Dimension;
@@ -915,7 +917,7 @@ public final class DownloadUtility {
                 int resolution = dimension.height * dimension.width;
                 if (resolution > maxResolution) {
                     // Resolution too high
-                    throw UploadCode.IMAGE_RESOLUTION_TOO_HIGH.create(resolution, maxResolution);
+                    throw UploadCode.IMAGE_RESOLUTION_TOO_HIGH.create(I(resolution), L(maxResolution));
                 }
             }
         }

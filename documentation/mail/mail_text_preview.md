@@ -2,6 +2,7 @@
 title: Mail Text Previews
 classes: toc
 icon: fa-align-justify
+tags: Mail, Configuration, Installation
 ---
 
 # Motivation

@@ -2,6 +2,7 @@
 title: Quota
 classes: toc
 icon: fa-pie-chart
+tags: Limits, Configuration, Installation
 ---
 
 This article attempts to outline the supported quota options that are available in order to specify/define limitations/restrictions for various resources.

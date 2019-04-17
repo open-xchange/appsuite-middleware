@@ -2,6 +2,7 @@
 title: Upgrading Without Downtimes
 classes: toc
 icon: fa-level-up
+tags: Administration, Upgrade, Database
 ---
 
 Starting with 7.10.0, it is possible to upgrade directly to to any of its successor future releases without having any downtimes. This guide is mainly focused on sites with multiple OX nodes and multiple database schemata 

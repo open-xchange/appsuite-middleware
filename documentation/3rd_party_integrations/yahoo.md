@@ -2,6 +2,7 @@
 title: Yahoo! Contacts
 classes: toc
 icon: fa-yahoo
+tags: 3rd Party, Yahoo, Installation, Configuration, Contacts
 ---
 
 # Preparation

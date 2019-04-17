@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -329,7 +330,7 @@ public final class DatabaseFolderConverter {
                                             localizableName = UserStorage.getInstance().getUser(fo.getCreatedBy(), ctx).getDisplayName();
                                         } catch (Exception e) {
                                             org.slf4j.LoggerFactory.getLogger(DatabaseFolderConverter.class).error(
-                                                "error getting owner for folder {}", fo.getObjectID(), e);
+                                                "error getting owner for folder {}", I(fo.getObjectID()), e);
                                         }
                                     }
                                 }

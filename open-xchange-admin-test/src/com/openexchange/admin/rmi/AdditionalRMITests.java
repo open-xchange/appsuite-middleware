@@ -219,7 +219,7 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateFirstUser() throws Exception {
-        Context newContext = ContextFactory.createContext(((int) (Math.random() * 1000)), "newContext");
+        Context newContext = ContextFactory.createContext(getRandomContextId(), "newContext");
 
         User newAdmin = UserFactory.createUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
@@ -431,8 +431,9 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testContextExistsException() throws Exception {
+        int contextId = getRandomContextId();
         boolean contextCreated = false;
-        Context newContext = ContextFactory.createContext(666, "newContext");
+        Context newContext = ContextFactory.createContext(contextId, "newContext");
         User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = getContextManager().create(newContext, newAdmin);

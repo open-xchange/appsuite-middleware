@@ -2,6 +2,7 @@
 title: Client Developer Guide
 classes: toc
 icon: fa-code
+tags: OAuth, Client Development
 ---
 
 <!-- Change to 'fa-dev' icon once we are on FontAwesome 5.x -->

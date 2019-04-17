@@ -2,6 +2,7 @@
 title: Cookies
 classes: toc
 icon: fa-circle
+tags: Cookies, Authentication, Session
 ---
 
 <!-- Upon upgrade to FontAwesome 5.x change to 'fa-cookie-bite' icon -->
@@ -36,7 +37,7 @@ integrations).
 # Shard Cookie
 To route HTTP requests to their correct App Suite shard, an additional cookie is needed to identify the corresponding server. As most requests are authenticated and coupled to a session, the sharding cookie is aligned with usual session cookies. The cookies name is `open-xchange-shard`.
 
-#Usage
+# Usage
 This cookie is relevant only for the App Suite HTTP API and therefore not applied for other HTTP-based protocols like CardDav.
 
 # Lifecycle

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -277,7 +278,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         } catch (final OXException e) {
             //Bug 42565
             if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
-                throw AjaxExceptionCodes.HTTP_ERROR.create(404, e.getMessage());
+                throw AjaxExceptionCodes.HTTP_ERROR.create(I(404), e.getMessage());
             }
             throw e;
         } finally {

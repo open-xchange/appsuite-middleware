@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.outlook.sql;
 
 import static com.openexchange.folderstorage.outlook.sql.Utility.debugSQL;
 import static com.openexchange.folderstorage.outlook.sql.Utility.getDatabaseService;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -423,7 +424,7 @@ public final class Delete {
         }
 
         if (success) {
-            LOGGER.debug("{} {}folder {} from virtual tree {} (user={}, context={})", (backup ? "Backup'ed" : "Deleted"), (global ? "global " : ""), folderId, tree, user, cid, new Throwable("Debug throwable"));
+            LOGGER.debug("{} {}folder {} from virtual tree {} (user={}, context={})", (backup ? "Backup'ed" : "Deleted"), (global ? "global " : ""), folderId, I(tree), I(user), I(cid), new Throwable("Debug throwable"));
         }
 
         return success;

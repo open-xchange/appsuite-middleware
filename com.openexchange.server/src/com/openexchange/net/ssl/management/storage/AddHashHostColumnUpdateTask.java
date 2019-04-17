@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.management.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,7 +105,7 @@ public class AddHashHostColumnUpdateTask extends UpdateTaskAdapter {
             Tools.checkAndAddColumns(connection, TABLE_NAME, hostHash);
 
             int updated = setHostHashes(connection);
-            LOG.info("Calculated hashes for already existing hosts, {} rows affected.", updated);
+            LOG.info("Calculated hashes for already existing hosts, {} rows affected.", I(updated));
 
             Tools.dropPrimaryKey(connection, TABLE_NAME);
             Tools.createPrimaryKey(connection, TABLE_NAME, new String[] { "cid", "userid", "host_hash", "fingerprint" });

@@ -2,6 +2,7 @@
 title: Database Connection Encryption
 classes: toc
 icon: fa-database
+tags: Security, Configuration, Administration
 ---
 
 # Introduction

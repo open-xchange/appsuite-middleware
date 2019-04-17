@@ -2,6 +2,7 @@
 title: Socket Monitoring
 classes: toc
 icon: fa-eye
+tags: Monitoring, Administration, Configuration, Logging
 ---
 
 <!-- Once we upgrade to FontAwesome 5.x use the 'fa-network-wired' icon -->

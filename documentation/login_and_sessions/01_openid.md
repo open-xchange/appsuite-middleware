@@ -2,6 +2,7 @@
 title: OpenID Connect 1.0 SSO
 classes: toc
 icon: fa-openid
+tags: OpenId, SSO, Configuration
 ---
 
 # Introduction

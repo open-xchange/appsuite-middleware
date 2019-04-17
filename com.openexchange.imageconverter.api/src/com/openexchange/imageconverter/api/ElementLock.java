@@ -69,31 +69,20 @@ public class ElementLock extends ReentrantLock {
      */
     public enum LockMode {
         STANDARD,
+        BEGIN_PROCESSING,
         WAIT_IF_PROCESSED,
-        WAIT_IF_PROCESSED_AND_BEGIN_PROCESSING,
-        PROCESSING,
         TRY_LOCK;
+    }
 
-        /**
-         * @return
-         */
-        boolean needsWaiting() {
-            return (PROCESSING != this);
-        }
-
-        /**
-         * @return
-         */
-        boolean isBeginProcessing() {
-            return (WAIT_IF_PROCESSED_AND_BEGIN_PROCESSING == this);
-        }
-
-        /**
-         * @return
-         */
-        boolean isTryLock() {
-            return TRY_LOCK == this;
-        }
+    /**
+     * {@link UnlockMode}
+     *
+     * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+     * @since v7.10.2
+     */
+    public enum UnlockMode {
+        STANDARD,
+        END_PROCESSING
     }
 
     /**
@@ -107,7 +96,7 @@ public class ElementLock extends ReentrantLock {
      * @return
      */
     public boolean lock(final LockMode lockMode) {
-        if (lockMode.isTryLock()) {
+        if (LockMode.TRY_LOCK == lockMode) {
             if (!super.tryLock()) {
                 return false;
             }
@@ -115,7 +104,7 @@ public class ElementLock extends ReentrantLock {
             super.lock();
         }
 
-        if (lockMode.needsWaiting()) {
+        if (LockMode.WAIT_IF_PROCESSED == lockMode) {
             while (m_isProcessing && !Thread.currentThread().isInterrupted()) {
                 try {
                     m_processingFinishedCondition.await();
@@ -125,7 +114,7 @@ public class ElementLock extends ReentrantLock {
             }
         }
 
-        if (lockMode.isBeginProcessing()) {
+        if (LockMode.BEGIN_PROCESSING == lockMode) {
             m_isProcessing = true;
         }
 
@@ -135,8 +124,8 @@ public class ElementLock extends ReentrantLock {
     /**
      * @return
      */
-    public long unlock(final boolean finishProcessing) {
-        if (finishProcessing && m_isProcessing) {
+    public long unlock(final UnlockMode unlockMode) {
+        if (m_isProcessing && (UnlockMode.END_PROCESSING == unlockMode)) {
             m_isProcessing = false;
             m_processingFinishedCondition.signalAll();
         }

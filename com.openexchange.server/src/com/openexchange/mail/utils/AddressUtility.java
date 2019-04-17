@@ -132,16 +132,32 @@ public class AddressUtility {
             return Collections.emptySet();
         }
 
-        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-        addrs.addAll(Arrays.asList(mail.getFrom()));
-        addrs.addAll(Arrays.asList(mail.getTo()));
-        addrs.addAll(Arrays.asList(mail.getCc()));
-        addrs.addAll(Arrays.asList(mail.getBcc()));
-
-        if (null != aliases) {
-            addrs.removeAll(aliases);
+        // Collect available addresses from given mail message
+        Set<InternetAddress> addrs = addAll(mail.getFrom(), null);
+        addrs = addAll(mail.getTo(), addrs);
+        addrs = addAll(mail.getCc(), addrs);
+        addrs = addAll(mail.getBcc(), addrs);
+        if (addrs == null) {
+            return Collections.emptySet();
         }
 
+        if (aliases != null) {
+            // Filter by aliases
+            addrs.removeAll(aliases);
+        }
         return addrs;
     }
+
+    private static Set<InternetAddress> addAll(InternetAddress[] addressesToAdd, Set<InternetAddress> targetSet) {
+        Set<InternetAddress> addrs = targetSet;
+        if (addressesToAdd.length> 0) {
+            if (addrs == null) {
+                addrs = new HashSet<InternetAddress>(Arrays.asList(addressesToAdd));
+            } else {
+                addrs.addAll(Arrays.asList(addressesToAdd));
+            }
+        }
+        return addrs;
+    }
+
 }

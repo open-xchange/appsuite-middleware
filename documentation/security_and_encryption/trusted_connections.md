@@ -2,6 +2,7 @@
 title: Configure Trusted TLS Certificates
 classes: toc
 icon: fa-certificate
+tags: Security, Configuration, Installation
 ---
 
 # Introduction

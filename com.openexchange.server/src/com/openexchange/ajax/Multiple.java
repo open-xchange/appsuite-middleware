@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -445,7 +446,7 @@ public class Multiple extends SessionServlet {
                 if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
                     if (MailRequest.isMove(jsonObj) || MailRequest.isStoreFlags(jsonObj) || MailRequest.isColorLabel(jsonObj)) {
                         handles = false;
-                    } 
+                    }
                 } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
                     handles = false;
                 } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET) && MailRequest.isCollectableGet(jsonObj)) {
@@ -481,7 +482,7 @@ public class Multiple extends SessionServlet {
                         jData.put("job", UUIDs.getUnformattedString(jobInfo.getId()));
                         jsonWriter.value(jData);
 
-                        OXException warning = JobQueueExceptionCodes.LONG_RUNNING_OPERATION.create(session.getUserId(), session.getContextId());
+                        OXException warning = JobQueueExceptionCodes.LONG_RUNNING_OPERATION.create(I(session.getUserId()), I(session.getContextId()));
                         {
                             boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
                             ResponseWriter.writeException(warning, jsonWriter, localeFrom(session), includeStackTraceOnError);

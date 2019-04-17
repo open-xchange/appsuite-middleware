@@ -2,6 +2,7 @@
 title: Dropbox
 classes: toc
 icon: fa-dropbox
+tags: 3rd Party, Dropbox, Installation, Configuration, Filestore
 ---
 
 To setup the Dropbox file store you have to install the package `open-xchange-file-storage-dropbox`.

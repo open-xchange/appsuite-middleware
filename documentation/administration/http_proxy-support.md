@@ -2,6 +2,7 @@
 title: Proxy Support
 classes: toc
 icon: fa-arrows-alt
+tags: Administration, Proxy, Configuration
 ---
 
 # Introduction

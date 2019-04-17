@@ -2,6 +2,7 @@
 title: Setup Mail Push
 classes: toc
 icon: fa-bell
+tags: Mail, Configuration, Push, Installation
 ---
 
 # Enable permanent mail push listeners

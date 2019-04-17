@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -1135,14 +1136,14 @@ public class DatabaseImpl extends DBService {
 
     public void removeUser(final int id, final Context ctx, Integer destUser, final ServerSession session, final EntityLockManager locks) throws OXException {
         if (destUser == null) {
-            destUser = ctx.getMailadmin();
+            destUser = I(ctx.getMailadmin());
         }
         if (id != ctx.getMailadmin()) {
-            if (destUser <= 0) {
+            if (destUser.intValue() <= 0) {
                 removeAllForUser(id, ctx, session, true);
             } else {
                 removePrivate(id, ctx, session);
-                assignToUser(id, ctx, destUser);
+                assignToUser(id, ctx, destUser.intValue());
             }
         } else {
             removeAll(ctx, session);

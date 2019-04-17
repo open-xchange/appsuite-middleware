@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -113,8 +114,9 @@ public class CheckSizeSwitch {
     }
 
     public int getSize(final Metadata field) {
-        if(SIZES.containsKey(field)) {
-            return SIZES.get(field);
+        Integer iSize = SIZES.get(field);
+        if (null != iSize) {
+            return iSize.intValue();
         }
 
         Connection con = null;
@@ -122,7 +124,7 @@ public class CheckSizeSwitch {
             con = provider.getWriteConnection(ctx);
             final String[] tuple = InfostoreQueryCatalog.getInstance().getFieldTuple(field, new InfostoreQueryCatalog.VersionWins());
             final int size = DBUtils.getColumnSize(con, tuple[0], tuple[1]);
-            SIZES.put(field, size);
+            SIZES.put(field, I(size));
             return size;
         } catch (final SQLException e) {
             LOG.error("", e);

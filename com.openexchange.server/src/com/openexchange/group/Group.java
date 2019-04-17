@@ -49,12 +49,13 @@
 
 package com.openexchange.group;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import com.openexchange.ajax.AJAXServlet;
 
 /**
  * This is the data container class for group.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class Group implements Cloneable {
@@ -195,7 +196,7 @@ public class Group implements Cloneable {
 
     /**
      * Setter for displayName.
-     * 
+     *
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -205,7 +206,7 @@ public class Group implements Cloneable {
 
     /**
      * Getter for displayName.
-     * 
+     *
      * @return Display name.
      */
     public String getDisplayName() {
@@ -214,7 +215,7 @@ public class Group implements Cloneable {
 
     /**
      * Setter for unique identifier.
-     * 
+     *
      * @param identifier unique identifier.
      */
     public void setIdentifier(final int identifier) {
@@ -224,7 +225,7 @@ public class Group implements Cloneable {
 
     /**
      * Getter for unique identifier.
-     * 
+     *
      * @return unique identifier.
      */
     public int getIdentifier() {
@@ -233,7 +234,7 @@ public class Group implements Cloneable {
 
     /**
      * Setter for member.
-     * 
+     *
      * @param member Member.
      */
     public void setMember(final int[] member) {
@@ -243,7 +244,7 @@ public class Group implements Cloneable {
 
     /**
      * Getter for member.
-     * 
+     *
      * @return the members of the group. If the group doesn't have any members
      *         an empty array will be returned.
      */
@@ -340,7 +341,7 @@ public class Group implements Cloneable {
             return getSimpleName();
         }
         if (field == Field.ID) {
-            return getIdentifier();
+            return I(getIdentifier());
         }
         if (field == Field.LAST_MODIFIED) {
             return getLastModified();

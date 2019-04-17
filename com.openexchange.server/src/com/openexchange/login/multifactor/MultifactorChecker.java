@@ -89,8 +89,8 @@ public class MultifactorChecker {
                 return new SessionEnhancement () {
                     @Override
                     public void enhanceSession(Session session) {
-                        session.setParameter(Session.MULTIFACTOR_PARAMETER, true);
-                        session.setParameter(Session.MULTIFACTOR_AUTHENTICATED, true);
+                        session.setParameter(Session.MULTIFACTOR_PARAMETER, Boolean.TRUE);
+                        session.setParameter(Session.MULTIFACTOR_AUTHENTICATED, Boolean.TRUE);
                     }
                 };
             }
@@ -99,7 +99,7 @@ public class MultifactorChecker {
             return new SessionEnhancement () {
                 @Override
                 public void enhanceSession(Session session) {
-                    session.setParameter(Session.MULTIFACTOR_PARAMETER, true);
+                    session.setParameter(Session.MULTIFACTOR_PARAMETER, Boolean.TRUE);
                 }
             };
         }

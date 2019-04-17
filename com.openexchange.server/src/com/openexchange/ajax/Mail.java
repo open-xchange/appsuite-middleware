@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -2103,7 +2104,7 @@ public class Mail extends PermissionServlet {
             try {
                 tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
             } catch (final UnsupportedEncodingException e) {
-                LOG.error("Unsupported encoding in a message detected and monitored: \"{}{}", STR_UTF8, '"', e);
+                LOG.error("Unsupported encoding in a message detected and monitored: \"{}\"", STR_UTF8, e);
                 MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(STR_UTF8);
                 return fileName;
             }
@@ -2474,7 +2475,7 @@ public class Mail extends PermissionServlet {
                                 // Huh... No drafts folder in default account
                                 throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                             }
-                            LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
+                            LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", I(accountId), I(session.getUserId()), I(session.getContextId()));
                             // No drafts folder in detected mail account; auto-save to default account
                             accountId = MailAccount.DEFAULT_ID;
                             composedMail.setFolder(mailInterface.getDraftsFolder(accountId));

@@ -2,6 +2,7 @@
 title: Implementation Details 
 classes: toc
 icon: fa-info
+tags: API, Calendar
 ---
 
 This section provides some deeper insights for certain topics of the new calendar implementation. Whenever appropriate, semantical differences to the previous calendar stack or the standards are highlighted.

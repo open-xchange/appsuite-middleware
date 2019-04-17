@@ -2,6 +2,7 @@
 title: Anti-Virus
 classes: toc
 icon: fa-bug
+tags: Security, Installation, Configuration
 ---
 
 # Introduction

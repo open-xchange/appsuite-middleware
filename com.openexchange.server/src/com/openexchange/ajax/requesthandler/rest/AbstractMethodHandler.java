@@ -54,7 +54,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
 
@@ -65,8 +64,6 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractMethodHandler implements MethodHandler {
 
-    private static final String PARAM_PARSED = "__ajax.rest.parsed";
-
     /**
      * Initializes a new {@link AbstractMethodHandler}.
      */
@@ -74,12 +71,27 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         super();
     }
 
+    private static final String ATTR_ACTION = "__ajax.rest.action";
+
+    /**
+     * Gets the action identifier dependent n given extra path information.
+     *
+     * @param restPathElements The extra path information or <code>null</code>
+     * @param restRequest The REST request
+     * @return The action identifier
+     */
+    @Override
+    public String getAction(String[] restPathElements, HttpServletRequest restRequest) {
+        String action = (String) restRequest.getAttribute(ATTR_ACTION);
+        if (action == null) {
+            action = doGetAction(restPathElements, restRequest);
+            restRequest.setAttribute(ATTR_ACTION, action);
+        }
+        return action;
+    }
+
     @Override
     public AJAXRequestData modifyRequest(AJAXRequestData requestData, HttpServletRequest restRequest) throws IOException, OXException {
-        if (AJAXRequestDataTools.parseBoolParameter(requestData.getParameter(PARAM_PARSED))) {
-            return requestData;
-        }
-
         // Set the module
         requestData.setModule(getModule());
 
@@ -101,27 +113,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         }
 
         // Return modified AJAX request data
-        requestData.putParameter(PARAM_PARSED, "true");
         return requestData;
-    }
-
-    private static final String ATTR_ACTION = "__ajax.rest.action";
-
-    /**
-     * Gets the action identifier dependent n given extra path information.
-     *
-     * @param restPathElements The extra path information or <code>null</code>
-     * @param restRequest The REST request
-     * @return The action identifier
-     */
-    @Override
-    public String getAction(String[] restPathElements, HttpServletRequest restRequest) {
-        String action = (String) restRequest.getAttribute(ATTR_ACTION);
-        if (action == null) {
-            action = doGetAction(restPathElements, restRequest);
-            restRequest.setAttribute(ATTR_ACTION, action);
-        }
-        return action;
     }
 
     /**

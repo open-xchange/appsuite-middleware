@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.fields;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.AttributeSwitch;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -89,7 +90,7 @@ public class GetSwitch implements AttributeSwitch {
 
     @Override
     public Object id() {
-        return desc.getId();
+        return I(desc.getId());
     }
 
     @Override

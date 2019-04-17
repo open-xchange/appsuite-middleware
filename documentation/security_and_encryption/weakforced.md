@@ -2,6 +2,7 @@
 title: Weakforced Connector
 classes: toc
 icon: fa-compress
+tags: Security, Configuration, Installation
 ---
 
 # How it works

@@ -212,7 +212,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             }
             boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
             if (!isRecursion) {
-                decorator.put(RECURSION_MARKER, true);
+                decorator.put(RECURSION_MARKER, Boolean.TRUE);
             }
             /*
              * check for any present guest permissions

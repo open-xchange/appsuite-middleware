@@ -2,9 +2,10 @@
 title: Mail Flagging
 classes: toc
 icon: fa-flag
+tags: Mail, Configuration
 ---
 
-#Motivation
+# Motivation
 
 Almost every mail client supports IMAP \Flagged to enable hilghlighting of certain mails. First OX App Suite did not support that in the past and came along with a proprietary concept of color flags. But now in addition to the color flags both concepts are offered in a configurable manner.
 
@@ -26,8 +27,8 @@ If the native OX Mail app is offered in addition to the web interface, it is rec
 
 
 
-#Flagging modes
-##Color only
+# Flagging modes
+## Color only
 
 ![Color Only](mail_flagging/cob.png "Color Only")
 
@@ -60,7 +61,7 @@ After the desired mode has been specified, the mail configuration file must be r
 ```
 
 
-##Flagged only 
+## Flagged only 
 
 ![Flagged Only](mail_flagging/fob.png "Flagged Only")
 
@@ -93,7 +94,7 @@ After the desired mode has been specified, the mail configuration file must be r
 ```
 
 
-##Flagged and Color
+## Flagged and Color
 
 ![Flagged and Color](mail_flagging/facb.png "Flagged and Color")
 
@@ -125,7 +126,7 @@ After the desired mode has been specified, the mail configuration file must be r
 /opt/open-xchange/sbin/reloadconfiguration
 ```
 
-##Flagged Implicit 
+## Flagged Implicit 
 
 ![Flagged Implicit](mail_flagging/cob.png "Flagged Implicit")
 
@@ -155,7 +156,7 @@ After the desired mode has been specified, the mail configuration file must be r
 
 <br />
 
-###specify the color
+### specify the color
 
 Regarding to the "Flaged Implicit" mode, there is another property to specify the desired color.
 

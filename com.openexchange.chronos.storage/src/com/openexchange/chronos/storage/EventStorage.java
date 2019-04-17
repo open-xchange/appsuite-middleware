@@ -112,9 +112,22 @@ public interface EventStorage {
      *
      * @param eventId The identifier of the event to load
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
-     * @return The event
+     * @return The event, or <code>null</code> if not found
      */
     Event loadEvent(String eventId, EventField[] fields) throws OXException;
+
+    /**
+     * Loads multiple events.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
+     *
+     * @param eventIds The identifiers of the events to load
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The found events, or an empty list if none were found
+     */
+    List<Event> loadEvents(List<String> eventIds, EventField[] fields) throws OXException;
 
     /**
      * Loads a specific exception from a recurring event series.

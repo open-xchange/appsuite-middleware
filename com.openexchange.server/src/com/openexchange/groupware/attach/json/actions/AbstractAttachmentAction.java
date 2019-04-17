@@ -167,7 +167,7 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
         List<Integer> retList = new LinkedList<>();
         for (int i = 0; i < array.length; i++) {
             try {
-                retList.add(Integer.parseInt(array[i]));
+                retList.add(Integer.valueOf(array[i]));
             } catch (NumberFormatException e) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, name);
             }

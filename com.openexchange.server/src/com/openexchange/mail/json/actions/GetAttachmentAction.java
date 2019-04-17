@@ -638,7 +638,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 //Check for encryption
                 final boolean encrypt = req.optBool("encrypt");
                 if (encrypt) {
-                    storeProps.put("encrypt", true);
+                    storeProps.put("encrypt", Boolean.TRUE);
                 }
             }
 

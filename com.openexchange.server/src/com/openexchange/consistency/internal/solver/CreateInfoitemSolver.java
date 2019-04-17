@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.internal.solver;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.MessageFormat;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
@@ -107,7 +108,7 @@ public class CreateInfoitemSolver implements ProblemSolver {
                 int fsOwner = database.getDocumentHolderFor(identifier, context);
                 if (fsOwner < 0) {
                     fsOwner = admin.getId();
-                    LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", identifier, context.getContextId());
+                    LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", identifier, I(context.getContextId()));
                 }
 
                 QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive());

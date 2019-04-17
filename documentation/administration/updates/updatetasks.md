@@ -2,6 +2,7 @@
 title: Update Tasks
 classes: toc
 icon: fa-tasks
+tags: Administration, Update Task, Database
 ---
 
 # Introduction

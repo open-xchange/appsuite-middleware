@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.search;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -87,7 +88,7 @@ public class CreatedByTerm extends AbstractNumberSearchTerm {
 
     @Override
     protected Number getNumber(DocumentMetadata file) {
-        return file.getCreatedBy();
+        return I(file.getCreatedBy());
     }
 
     @Override

@@ -50,6 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -104,66 +105,66 @@ public final class Check {
 
 	public static void isNotPrivate(final Contact contact, final Session session, final String folderID) throws OXException {
 		if (contact.containsPrivateFlag()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(parse(folderID)), I(session.getContextId()), I(session.getUserId()));
 		}
 	}
 
 	public static void canReadOwn(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
 		if (false == permission.canReadOwnObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(parse(folderID)), I(session.getContextId()), I(session.getUserId()));
 		}
 	}
 
     public static void canWriteOwn(final EffectivePermission permission, final Session session) throws OXException {
         if (false == permission.canWriteOwnObjects()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(session.getUserId()), I(session.getContextId()));
         }
         checkForSubscription(session, String.valueOf(permission.getFuid()), session.getContextId());
     }
 
     public static void canWriteAll(final EffectivePermission permission, final Session session) throws OXException {
         if (false == permission.canWriteAllObjects()) {
-            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(session.getUserId(), session.getContextId());
+            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(session.getUserId()), I(session.getContextId()));
         }
         checkForSubscription(session, String.valueOf(permission.getFuid()), session.getContextId());
     }
 
 	public static void canReadAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
 		if (false == permission.canReadAllObjects()) {
-			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+			throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(parse(folderID)), I(session.getContextId()), I(session.getUserId()));
 		}
 	}
 
     public static void canCreateObjects(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
         if (false == permission.canCreateObjects()) {
-            throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+            throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(parse(folderID)), I(session.getContextId()), I(session.getUserId()));
         }
         checkForSubscription(session, folderID, session.getContextId());
     }
 
     public static void canDeleteOwn(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
         if (false == permission.canDeleteOwnObjects()) {
-            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(parse(folderID)), I(session.getContextId()), I(session.getUserId()));
         }
         checkForSubscription(session, folderID, session.getContextId());
     }
 
     public static void canDeleteAll(final EffectivePermission permission, final Session session, final String folderID) throws OXException {
         if (false == permission.canDeleteAllObjects()) {
-            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderID), session.getContextId(), session.getUserId());
+            throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(parse(folderID)), I(session.getContextId()), I(session.getUserId()));
         }
         checkForSubscription(session, folderID, session.getContextId());
     }
 
     public static void isContactFolder(final FolderObject folder, final Session session) throws OXException {
 		if (FolderObject.CONTACT != folder.getModule()) {
-			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(folder.getObjectID(), session.getContextId(), session.getUserId());
+			throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(folder.getObjectID()), I(session.getContextId()), I(session.getUserId()));
 		}
     }
 
     public static void contactNotNull(final Contact contact, final int contextID, final int id) throws OXException {
         if (null == contact) {
-            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(id, contextID);
+            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(id), I(contextID));
         }
     }
 
@@ -175,13 +176,13 @@ public final class Check {
 
     public static void folderEquals(final Contact contact, final String folderID, final int contextID) throws OXException {
     	if (contact.getParentFolderID() != parse(folderID)) {
-			throw ContactExceptionCodes.NOT_IN_FOLDER.create(contact.getObjectID(), parse(folderID), contextID);
+			throw ContactExceptionCodes.NOT_IN_FOLDER.create(I(contact.getObjectID()), I(parse(folderID)), I(contextID));
 		}
     }
 
     public static void noPrivateInPublic(final FolderObject folder, final Contact contact, final Session session) throws OXException {
     	if (FolderObject.PUBLIC == folder.getType() && contact.getPrivateFlag()) {
-            throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(folder.getObjectID(), session.getContextId(), session.getUserId());
+            throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(I(folder.getObjectID()), I(session.getContextId()), I(session.getUserId()));
         }
     }
 
@@ -216,7 +217,7 @@ public final class Check {
 		     * check legacy edit flag
 		     */
 	        if (false == OXFolderProperties.isEnableInternalUsersEdit()) {
-	            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(update.getObjectID(), session.getContextId());
+	            throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(update.getObjectID()), I(session.getContextId()));
 	        }
 	        /*
              * further checks for mandatory properties
@@ -236,7 +237,7 @@ public final class Check {
 	        if (update.containsEmail1() && (null == original || null == original.getEmail1() || false == original.getEmail1().equals(update.getEmail1()))) {
 	        	if (Tools.getContext(session).getMailadmin() != session.getUserId()) {
 	        		throw ContactExceptionCodes.NO_PRIMARY_EMAIL_EDIT.create(
-	        		    session.getContextId(), update.getObjectID(), session.getUserId());
+	        		    I(session.getContextId()), I(update.getObjectID()), I(session.getUserId()));
 	        	}
 	        }
 		}
@@ -244,7 +245,7 @@ public final class Check {
 
     /**
      * Ensures that the display name is unique. Skip the check if configuration allows same display names.
-     * 
+     *
      * @param storage The {@link ContactStorage} to search for the display name in
      * @param session The current {@link Session}
      * @param folderID The folder identifier to search contacts in
@@ -262,7 +263,7 @@ public final class Check {
         if (Tools.isEmpty(update.getDisplayName())) {
             throw ContactExceptionCodes.DISPLAY_NAME_MANDATORY.create();
         }
-        
+
         ConfigViewFactory configViewFactory = ContactServiceLookup.getService(ConfigViewFactory.class, true);
         ConfigView view = configViewFactory.getView(-1, session.getContextId());
         if (null != view && false == view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
@@ -294,12 +295,12 @@ public final class Check {
     }
 
     private static final Pattern MULTIPLE_WILDCARD_PATTERN = Pattern.compile("\\*");
-    
+
     private static final Pattern SINGLE_WILDCARD_PATTERN = Pattern.compile("\\?");
 
     /**
      * Sanitize special characters to avoid generic searches
-     * 
+     *
      * @param update The updated display name to search for
      * @return A sanitized version of the display name
      */
