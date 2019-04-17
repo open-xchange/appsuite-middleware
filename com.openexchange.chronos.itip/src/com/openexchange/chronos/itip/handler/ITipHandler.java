@@ -392,8 +392,9 @@ public class ITipHandler implements CalendarHandler {
      * @param master The master event to build an {@link EventUpdate} on
      * @param created The exception that has been created
      * @return <code>true</code> if the creation of the exception can be ignored.
+     * @throws OXException If operation fails
      */
-    private boolean isIgnorableException(UpdateResult master, CreateResult created) {
+    private boolean isIgnorableException(UpdateResult master, CreateResult created) throws OXException {
         EventUpdate eventUpdate = DefaultEventUpdate.builder() //@formatter:off
             .originalEvent(master.getUpdate())
             .updatedEvent(created.getCreatedEvent())
@@ -403,7 +404,7 @@ public class ITipHandler implements CalendarHandler {
             .ignoreDefaults(true)
             .build(); //@formatter:on
         /*
-         * Exception was created to add/change/remove an alarm without changing anything else. So ignore it 
+         * Exception was created to add/change/remove an alarm without changing anything else. So ignore it
          */
         if (eventUpdate.isEmpty()) {
             // Have a detailed look on start and end date again
@@ -425,7 +426,7 @@ public class ITipHandler implements CalendarHandler {
     }
 
     /**
-     * 
+     *
      * Compares if two DateTimes have the same hours and minutes set
      *
      * @param date1 One {@link DateTime}
