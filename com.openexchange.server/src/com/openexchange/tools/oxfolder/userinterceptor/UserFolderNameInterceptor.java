@@ -95,6 +95,12 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
     }
 
     @Override
+    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
+        handle(context, user, contactData, UserServiceInterceptor.EMPTY_PROPS);
+        super.afterCreate(context, user, contactData);
+    }
+
+    @Override
     public void afterCreate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         handle(context, user, contactData, properties);
         super.afterCreate(context, user, contactData, properties);
