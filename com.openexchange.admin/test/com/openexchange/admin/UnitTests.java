@@ -52,6 +52,7 @@ package com.openexchange.admin;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.admin.storage.mysqlStorage.DBWeightComparatorTest;
 import com.openexchange.admin.tools.NetUtilTest;
 
 
@@ -65,6 +66,7 @@ import com.openexchange.admin.tools.NetUtilTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     NetUtilTest.class,
+    DBWeightComparatorTest.class,
 })
 public class UnitTests {
 
