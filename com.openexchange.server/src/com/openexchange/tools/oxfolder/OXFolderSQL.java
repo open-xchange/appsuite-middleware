@@ -687,7 +687,7 @@ public final class OXFolderSQL {
      *
      * @param folderId The folder ID
      * @param newName The new name to set
-     * @param lastModified The last modified timestamp
+     * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
      * @param ctx The context
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
@@ -708,7 +708,7 @@ public final class OXFolderSQL {
      *
      * @param folderId The folder ID
      * @param newName The new name to set
-     * @param lastModified The last modified timestamp
+     * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
      * @param writeCon A writeable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
@@ -721,46 +721,20 @@ public final class OXFolderSQL {
             return;
         }
 
-        int rows = -1;
-        do {
-            String currentName = null;
-            
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                // Read current name
-                stmt = writeCon.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
-                stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, folderId);
-                rs = stmt.executeQuery();
-                if (rs.next()) {
-                    currentName =  rs.getString(1);
-                } else {
-                    return; // Not found
-                }
-            } finally {
-                Databases.closeSQLStuff(rs, stmt);
-            }
-            
-            if (newName.equals(currentName)) {
-                // That name is already set
-                return;
-            }
-            stmt = null;
-            try {
-                // Do the update
-                stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ? AND fname = ?");
-                stmt.setString(1, newName);
-                stmt.setLong(2, lastModified);
-                stmt.setInt(3, modifiedBy);
-                stmt.setInt(4, ctx.getContextId());
-                stmt.setInt(5, folderId);
-                stmt.setString(6, currentName);
-                rows = executeUpdate(stmt);
-            } finally {
-                Databases.closeSQLStuff(stmt);
-            }
-        } while (rows <= 0);
+        // Update name
+        PreparedStatement stmt = null;
+        try {
+            // Do the update
+            stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?");
+            stmt.setString(1, newName);
+            stmt.setLong(2, lastModified);
+            stmt.setInt(3, modifiedBy);
+            stmt.setInt(4, ctx.getContextId());
+            stmt.setInt(5, folderId);
+            executeUpdate(stmt);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
