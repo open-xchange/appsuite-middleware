@@ -723,12 +723,30 @@ public final class OXFolderSQL {
 
         int rows = -1;
         do {
-            String currentName = getFolderName(folderId, writeCon, ctx);
+            String currentName = null;
+            
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                // Read current name
+                stmt = writeCon.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, folderId);
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                    currentName =  rs.getString(1);
+                } else {
+                    return; // Not found
+                }
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+            
             if (newName.equals(currentName)) {
                 // That name is already set
                 return;
             }
-            PreparedStatement stmt = null;
+            stmt = null;
             try {
                 // Do the update
                 stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ? AND fname = ?");
@@ -743,24 +761,6 @@ public final class OXFolderSQL {
                 Databases.closeSQLStuff(stmt);
             }
         } while (rows <= 0);
-    }
-
-    private static String getFolderName(int folderId, Connection writeCon, Context ctx) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            // Read current name
-            stmt = writeCon.prepareStatement("SELECT fname FROM oxfolder_tree WHERE cid = ? AND fuid = ?");
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, folderId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getString(1);
-            }
-            return null;
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
     }
 
     private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
