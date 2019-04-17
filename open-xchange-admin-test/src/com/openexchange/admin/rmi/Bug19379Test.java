@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 
 /**
  * {@link Bug19379Test}
@@ -70,7 +71,7 @@ public class Bug19379Test extends AbstractRMITest {
 
     @Test
     public void testAddSingleMapping() throws Exception {
-        final int contextId = getRandomContextId();
+        final int contextId = ContextFactory.getRandomContextId();
         try {
             Context context = createContext(contextId, createMappings("m1", "m2"));
 
@@ -94,7 +95,7 @@ public class Bug19379Test extends AbstractRMITest {
 
     @Test
     public void testChangeContextName() throws Exception {
-        final int contextId = getRandomContextId();
+        final int contextId = ContextFactory.getRandomContextId();
         try {
             Context context = createContext(contextId, createMappings("m2"));
 
@@ -119,8 +120,8 @@ public class Bug19379Test extends AbstractRMITest {
 
     @Test
     public void testDuplicateContextMappings() throws Exception {
-        final int contextId1 = getRandomContextId();
-        final int contextId2 = getRandomContextId();
+        final int contextId1 = ContextFactory.getRandomContextId();
+        final int contextId2 = ContextFactory.getRandomContextId();
         try {
             Context context1 = createContext(contextId1, createMappings("m1", "m2"));
             Context context2 = createContext(contextId2, createMappings("m3"));

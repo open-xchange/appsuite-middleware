@@ -69,13 +69,6 @@ public class ResourceTest extends AbstractRMITest {
 
     private Context context;
 
-    /**
-     * Initialises a new {@link ResourceTest}.
-     */
-    public ResourceTest() {
-        super();
-    }
-
     /*
      * (non-Javadoc)
      * 

@@ -96,7 +96,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         setupContexts();
     }
 
-    public final void setupContexts() throws Exception {
+    private void setupContexts() throws Exception {
         context = TestTool.createContext(getContextManager(), "AdditionalCtx_", contextAdmin, "all", superAdminCredentials);
 
         user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
@@ -219,20 +219,15 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateFirstUser() throws Exception {
-        Context newContext = ContextFactory.createContext(getRandomContextId(), "newContext");
+        Context newContext = ContextFactory.createContext("newContext");
 
         User newAdmin = UserFactory.createUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
-        try {
-            newContext = getContextManager().create(newContext, newAdmin);// required line for test
-            Credentials newAdminCredentials = new Credentials();
-            newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
-            newAdminCredentials.setLogin(newAdmin.getName());
-            newAdminCredentials.setPassword("secret");
-            assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
-        } finally {
-            // no need to delete the admin account. Actually, it is not possible at all.
-            getContextManager().delete(newContext);
-        }
+        newContext = getContextManager().create(newContext, newAdmin);// required line for test
+        Credentials newAdminCredentials = new Credentials();
+        newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
+        newAdminCredentials.setLogin(newAdmin.getName());
+        newAdminCredentials.setPassword("secret");
+        assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
     }
 
     @Test
@@ -431,9 +426,8 @@ public class AdditionalRMITests extends AbstractRMITest {
 
     @Test
     public void testContextExistsException() throws Exception {
-        int contextId = getRandomContextId();
         boolean contextCreated = false;
-        Context newContext = ContextFactory.createContext(contextId, "newContext");
+        Context newContext = ContextFactory.createContext("newContext");
         User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = getContextManager().create(newContext, newAdmin);

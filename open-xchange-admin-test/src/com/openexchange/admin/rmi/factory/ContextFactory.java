@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.rmi.factory;
 
-import com.openexchange.admin.rmi.AbstractRMITest;
+import java.util.Random;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
@@ -68,7 +68,11 @@ public class ContextFactory {
      * @return The new {@link Context} object
      */
     public static Context createContext(long maxQuota) {
-        return createContext(AbstractRMITest.getRandomContextId(), maxQuota);
+        return createContext(getRandomContextId(), maxQuota);
+    }
+
+    public static Context createContext(String name) {
+        return createContext(getRandomContextId(), name);
     }
 
     /**
@@ -102,4 +106,10 @@ public class ContextFactory {
         newContext.setMaxQuota(filestore.getSize());
         return newContext;
     }
+
+    public static int getRandomContextId() {
+        Random r = new Random();
+        return r.ints(11, (10000000 + 1)).findFirst().getAsInt();
+    }
+
 }

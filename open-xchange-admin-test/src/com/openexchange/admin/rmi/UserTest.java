@@ -75,6 +75,7 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
 import com.openexchange.data.conversion.ical.Assert;
@@ -107,7 +108,7 @@ public class UserTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = getContextManager().create(contextAdminCredentials);
+        context = getContextManager().create(ContextFactory.createContext(5000L), contextAdminCredentials);
     }
 
     /**
