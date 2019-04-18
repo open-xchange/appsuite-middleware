@@ -49,22 +49,9 @@
 
 package com.openexchange.imap.entity2acl;
 
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.imap.services.Services;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.user.UserService;
 
 /**
  * {@link CourierEntity2ACL} - Handles the ACL entities used by Courier IMAP server.
@@ -91,9 +78,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CourierEntity2ACL extends Entity2ACL {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CourierEntity2ACL.class);
+public class CourierEntity2ACL extends AbstractOwnerCapableEntity2ACL {
 
     private static final CourierEntity2ACL INSTANCE = new CourierEntity2ACL();
 
@@ -106,53 +91,15 @@ public class CourierEntity2ACL extends Entity2ACL {
         return INSTANCE;
     }
 
-    private static final String ALIAS_OWNER = "owner";
-
     private static final String ALIAS_ANYONE = "anyone";
 
     // ------------------------------------------------------------------------------------------------------------------------------
-
-    private final Cache<String, CachedString> cacheSharedOwners;
 
     /**
      * Default constructor
      */
     private CourierEntity2ACL() {
         super();
-        cacheSharedOwners = CacheBuilder.newBuilder().maximumSize(50000).expireAfterAccess(30, TimeUnit.MINUTES).build();
-    }
-
-    private final String getSharedFolderOwner(final String sharedFolderName, final char delim, String otherUserNamespace) {
-        if (null == otherUserNamespace || !sharedFolderName.startsWith(otherUserNamespace, 0)) {
-            return null;
-        }
-
-        CachedString wrapper = cacheSharedOwners.getIfPresent(sharedFolderName);
-        if (null == wrapper) {
-            String quotedDelim = Pattern.quote(String.valueOf(delim));
-            // E.g. "Shared\\Q/\\E((?:\\\\\\Q/\\E|[^\\Q/\\E])+)\\Q/\\E\.+"
-            StringBuilder abstractPattern = new StringBuilder().append(otherUserNamespace).append(quotedDelim);
-            abstractPattern.append("((?:\\\\").append(quotedDelim).append("|[^").append(quotedDelim).append("])+)");
-            abstractPattern.append(quotedDelim).append(".+");
-            Pattern pattern = Pattern.compile(abstractPattern.toString(), Pattern.CASE_INSENSITIVE);
-            Matcher m = pattern.matcher(sharedFolderName);
-            if (m.matches()) {
-                wrapper = CachedString.wrapperFor(m.group(1).replaceAll("\\s+", String.valueOf(delim)));
-            } else {
-                wrapper = CachedString.NIL;
-            }
-            cacheSharedOwners.put(sharedFolderName, wrapper);
-        }
-
-        return wrapper.string;
-    }
-
-    private boolean equalsOrStartsWith(String fullName, String publicNamespace, char separator) {
-        if (Strings.isEmpty(publicNamespace)) {
-            return false;
-        }
-
-        return (fullName.equals(publicNamespace) || fullName.startsWith(new StringBuilder(32).append(publicNamespace).append(separator).toString()));
     }
 
     @Override
@@ -171,12 +118,12 @@ public class CourierEntity2ACL extends Entity2ACL {
         int sessionUser = ((Integer) args[2]).intValue();
         String fullName = (String) args[3];
         char separator = ((Character) args[4]).charValue();
-        String sharedOwner = getSharedFolderOwner(fullName, separator, (String) args[5]);
+        String sharedOwner = getSharedFolderOwner(fullName, separator, (String[]) args[5]);
         if (null == sharedOwner) {
             /*
              * A non-shared folder
              */
-            if ((sessionUser == userId) && !equalsOrStartsWith(fullName, (String) args[6], separator)) {
+            if ((sessionUser == userId) && !equalsOrStartsWith(fullName, (String[]) args[6], separator)) {
                 /*
                  * Logged-in user is equal to given user
                  */
@@ -197,29 +144,6 @@ public class CourierEntity2ACL extends Entity2ACL {
         return getACLNameInternal(userId, ctx, accountId, serverurl);
     }
 
-    private static final String getACLNameInternal(final int userId, final Context ctx, final int accountId, final String serverUrl) throws OXException {
-        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        if (null == storageService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( MailAccountStorageService.class.getName());
-        }
-        final String userLoginInfo;
-        {
-            final UserService userService = Services.getService(UserService.class);
-            if (null == userService) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( UserService.class.getName());
-            }
-            userLoginInfo = userService.getUser(userId, ctx).getLoginInfo();
-        }
-        try {
-            return MailConfig.getMailLogin(storageService.getMailAccount(accountId, userId, ctx.getContextId()), userLoginInfo, userId, ctx.getContextId());
-        } catch (final OXException e) {
-            throw Entity2ACLExceptionCode.UNKNOWN_USER.create(
-                Integer.valueOf(userId),
-                Integer.valueOf(ctx.getContextId()),
-                serverUrl);
-        }
-    }
-
     @Override
     public UserGroupID getEntityID(final String pattern, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
         if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
@@ -232,7 +156,7 @@ public class CourierEntity2ACL extends Entity2ACL {
         final int accountId = ((Integer) args[0]).intValue();
         final String serverUrl = args[1].toString();
         final int sessionUser = ((Integer) args[2]).intValue();
-        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue(), (String) args[5]);
+        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue(), (String[]) args[5]);
         if (null == sharedOwner) {
             /*
              * A non-shared folder
@@ -255,25 +179,6 @@ public class CourierEntity2ACL extends Entity2ACL {
             return getUserRetval(getUserIDInternal(sharedOwner, ctx, accountId, serverUrl, sessionUser));
         }
         return getUserRetval(getUserIDInternal(pattern, ctx, accountId, serverUrl, sessionUser));
-    }
-
-    private static int getUserIDInternal(final String pattern, final Context ctx, final int accountId, final String serverUrl, final int sessionUser) throws OXException {
-        final int[] ids = MailConfig.getUserIDsByMailLogin(pattern, MailAccount.DEFAULT_ID == accountId, serverUrl, sessionUser, ctx);
-        if (0 == ids.length) {
-            throw Entity2ACLExceptionCode.RESOLVE_USER_FAILED.create(pattern);
-        }
-        if (1 == ids.length) {
-            return ids[0];
-        }
-        // Prefer session user
-        Arrays.sort(ids);
-        final int pos = Arrays.binarySearch(ids, sessionUser);
-        if (pos >= 0) {
-            LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe session user's ID is returned.", pattern, serverUrl, Arrays.toString(ids));
-            return ids[pos];
-        }
-        LOG.warn("Found multiple users with login \"{}\" subscribed to IMAP server \"{}\": {}\nThe first found user is returned.", pattern, serverUrl, Arrays.toString(ids));
-        return ids[0];
     }
 
 }

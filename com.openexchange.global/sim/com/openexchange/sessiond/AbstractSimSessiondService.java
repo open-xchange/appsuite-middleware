@@ -72,6 +72,11 @@ public class AbstractSimSessiondService implements SessiondService {
     public boolean storeSession(String sessionId) throws OXException {
         return false;
     }
+    
+    @Override
+    public boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException {
+        return false;
+    }
 
     @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) {

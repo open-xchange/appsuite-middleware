@@ -214,7 +214,9 @@ public class Obfuscator implements ObfuscatorService {
         // Instantiate session
         SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient(), false);
         for (String name : session.getParameterNames()) {
-            sessionImpl.setParameter(name, session.getParameter(name));
+            Object value = session.getParameter(name);
+            sessionImpl.setParameter(name, value);
+            LOG.debug("Restored remote parameter '{}' with value '{}' for session {} ({}@{})", name, value, session.getSessionID(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
 
         // Return

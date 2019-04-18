@@ -90,6 +90,16 @@ public interface SessiondService {
      * @throws OXException If storing the session fails
      */
     public boolean storeSession(String sessionId) throws OXException;
+    
+    /**
+     * Stores the session associated with given identifier into session storage (if such a session exists).
+     *
+     * @param sessionId The session identifier
+     * @param addIfAbsent Adds the session to storage only if absent
+     * @return <code>true</code> if stored; otherwise <code>false</code>
+     * @throws OXException If storing the session fails
+     */
+    boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException;
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.

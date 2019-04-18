@@ -104,7 +104,13 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public boolean storeSession(String sessionId) throws OXException {
-        return SessionHandler.storeSession(sessionId);
+        // Assume 'addIfAbsent' is false to force update of the session in session storage
+        return SessionHandler.storeSession(sessionId, false);
+    }
+
+    @Override
+    public boolean storeSession(String sessionId, boolean addIfAbsent) throws OXException {
+        return SessionHandler.storeSession(sessionId, addIfAbsent);
     }
 
     @Override
