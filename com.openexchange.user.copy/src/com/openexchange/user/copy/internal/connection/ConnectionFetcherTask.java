@@ -125,10 +125,12 @@ public class ConnectionFetcherTask implements CopyUserTaskService {
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
         if (null != dstCon) {
             try {
-                if (failed) {
-                    dstCon.rollback();
-                } else {
-                    dstCon.commit();
+                if (!dstCon.getAutoCommit()) {
+                    if (failed) {
+                        dstCon.rollback();
+                    } else {
+                        dstCon.commit();
+                    }
                 }
             } catch (final SQLException e) {
                 LOG.error("", e);

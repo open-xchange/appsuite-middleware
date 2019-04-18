@@ -55,9 +55,8 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -102,13 +101,6 @@ public abstract class AbstractRMITest {
     public Timeout globalTimeout = new Timeout(30, TimeUnit.SECONDS); // 30 seconds max per method tested
 
     /**
-     * Initializes a new {@link AbstractRMITest}.
-     */
-    public AbstractRMITest() {
-        super();
-    }
-
-    /**
      * Initialises the test configuration and creates one context for the tests
      * 
      * @throws Exception if an error occurs during initialisation of the configuration
@@ -121,8 +113,9 @@ public abstract class AbstractRMITest {
     /**
      * Clean up managers
      */
-    @AfterClass
-    public static void cleanUpManagers() throws Exception {
+    @SuppressWarnings("unused")
+    @After
+    public void tearDown() throws Exception {
         // perform any clean-ups here
         getContextManager().cleanUp();
         getUserManager().cleanUp();
@@ -369,10 +362,5 @@ public abstract class AbstractRMITest {
      */
     protected static TaskManagementManager getTaskManagementManager() {
         return TaskManagementManager.getInstance(getRMIHostUrl(), getMasterAdminCredentials());
-    }
-
-    public static int getRandomContextId() {
-        Random r = new Random();
-        return r.ints(11, (1000000 + 1)).findFirst().getAsInt();
     }
 }

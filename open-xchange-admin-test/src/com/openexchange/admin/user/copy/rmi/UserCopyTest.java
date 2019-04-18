@@ -51,7 +51,6 @@ package com.openexchange.admin.user.copy.rmi;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,22 +71,10 @@ public class UserCopyTest extends AbstractRMITest {
     private Context srcCtx;
     private Context dstCtx;
 
-    /**
-     * Initialises a new {@link UserCopyTest}.
-     */
-    public UserCopyTest() {
-        super();
-    }
-
     @Before
     public final void setupContexts() throws Exception {
         srcCtx = TestTool.createContext(getContextManager(), "UserCopySourceCtx_", contextAdmin, "all", superAdminCredentials);
         dstCtx = TestTool.createContext(getContextManager(), "UserCopyDestinationCtx_", contextAdmin, "all", superAdminCredentials);
-    }
-
-    @After
-    public final void tearDownContexts() throws Exception {
-        getContextManager().cleanUp();
     }
 
     @Test

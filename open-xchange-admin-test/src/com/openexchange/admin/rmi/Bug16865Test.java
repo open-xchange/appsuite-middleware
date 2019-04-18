@@ -61,13 +61,6 @@ import com.openexchange.admin.rmi.dataobjects.Database;
  */
 public final class Bug16865Test extends AbstractRMITest {
 
-    /**
-     * Initialises a new {@link Bug16865Test}.
-     */
-    public Bug16865Test() {
-        super();
-    }
-
     @Test
     public void testDefaultInitial() throws Throwable {
         Database db = new Database();

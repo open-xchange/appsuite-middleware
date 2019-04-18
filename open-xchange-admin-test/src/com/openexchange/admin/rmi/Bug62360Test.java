@@ -65,13 +65,12 @@ import com.openexchange.admin.rmi.factory.UserFactory;
  */
 public final class Bug62360Test extends AbstractRMITest {
 
-    private final int contextId = getRandomContextId();
     private Context context;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = createContext("bug62360context.com", contextId);
+        context = createContext("bug62360context.com", ContextFactory.getRandomContextId());
     }
 
     @Test

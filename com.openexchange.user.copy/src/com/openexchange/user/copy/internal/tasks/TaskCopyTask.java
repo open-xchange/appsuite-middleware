@@ -145,7 +145,7 @@ public class TaskCopyTask implements CopyUserTaskService {
 
         final Map<Integer, Task> tasks = loadTasksFromDatabase(srcCon, srcCtx, srcUserId, sourceFolderIds);
         addParticipants(tasks);
-        exchangeIds(tasks, folderMapping, dstUserId, dstCtx, dstCon);
+        exchangeIds(tasks, folderMapping, dstUserId, dstCtx);
         writeTasksToDatabase(dstCon, dstCtx, srcCtx, dstUserId, tasks);
 
         final IntegerMapping mapping = new IntegerMapping();
@@ -267,12 +267,12 @@ public class TaskCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx, final Connection con) throws OXException {
+    private void exchangeIds(final Map<Integer, Task> tasks, final ObjectMapping<FolderObject> folderMapping, final int userId, final Context ctx) throws OXException {
         final Map<Integer, Task> series = new HashMap<Integer, Task>();
         try {
             for (Iterator<Entry<Integer, Task>> iterator = tasks.entrySet().iterator(); iterator.hasNext();) {
                 Entry<Integer, Task> entry = iterator.next();
-                final int newTaskId = IDGenerator.getId(ctx, com.openexchange.groupware.Types.TASK, con);
+                final int newTaskId = IDGenerator.getId(ctx, com.openexchange.groupware.Types.TASK);
                 final Task task = entry.getValue();
                 task.setObjectID(newTaskId);
                 task.setCreatedBy(userId);

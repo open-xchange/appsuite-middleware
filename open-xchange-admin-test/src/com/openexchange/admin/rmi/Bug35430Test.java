@@ -66,7 +66,7 @@ import com.openexchange.admin.rmi.factory.UserFactory;
  */
 public final class Bug35430Test extends AbstractRMITest {
 
-    private final int contextId = getRandomContextId();
+    private final int contextId = ContextFactory.getRandomContextId();
 
     /**
      * Initialises a new {@link Bug35430Test}.

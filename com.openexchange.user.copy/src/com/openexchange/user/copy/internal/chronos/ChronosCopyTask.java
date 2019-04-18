@@ -81,8 +81,10 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -170,7 +172,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         final Set<Integer> sourceFolderIds = folderMapping.getSourceKeys();
         //CalendarAccounts
         List<CalendarAccount> srcAccountList = loadSourceCalendarAccounts(srcUsrId);
-        insertDestinationCalendarAccounts(srcAccountList, dstUsrId);
+        insertDestinationCalendarAccounts(srcAccountList, dstUsrId, dstCtx);
         //Events
         List<Event> srcEventList = loadSourceEvents(srcUsrId, sourceFolderIds);
         //sourceAlarms
@@ -361,13 +363,17 @@ public class ChronosCopyTask implements CopyUserTaskService {
         return properties;
     }
 
-    private void insertDestinationCalendarAccounts(List<CalendarAccount> srcAccountList, int dstUserId) throws OXException {
+    private void insertDestinationCalendarAccounts(List<CalendarAccount> srcAccountList, int dstUserId, Context context) throws OXException {
         for (CalendarAccount srcCalendarAccount : srcAccountList) {
-            int destAccountId;
+            int destAccountId = 0;
             if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(srcCalendarAccount.getProviderId())) {
                 destAccountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
             } else {
-                destAccountId = dstCalendarStorage.getAccountStorage().nextId();
+                try {
+                    destAccountId = IDGenerator.getId(context, Types.SUBSCRIPTION);
+                } catch (SQLException e) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                }
             }
             dstCalendarStorage.getAccountStorage().insertAccount(new DefaultCalendarAccount(
                 srcCalendarAccount.getProviderId(),

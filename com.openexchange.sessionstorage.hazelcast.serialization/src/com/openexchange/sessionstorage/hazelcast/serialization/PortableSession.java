@@ -139,7 +139,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
 
     // -------------------------------------------------------------------------------------------------
 
-    private final Set<String> remoteParameterNames;
+    private Set<String> remoteParameterNames;
     private Long localLastActive;
 
     /**
@@ -156,13 +156,15 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
      *
      * @param session The underlying session
      */
-    public PortableSession(final Session session) {
+    public PortableSession(Session session) {
         super(session);
         localLastActive = null;
         Collection<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
         Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
+
         // Add static remote parameters
         remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
+
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);
         this.remoteParameterNames = remoteParameterNames;
@@ -334,9 +336,14 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             String sRemoteParameters = reader.readUTF(PARAMETER_REMOTE_PARAMETERS);
             if (null != sRemoteParameters) {
                 try {
-                    for (Map.Entry<String,Object> entry : new JSONObject(sRemoteParameters).entrySet()) {
-                        parameters.put(entry.getKey(), entry.getValue());
+                    JSONObject jRemoteParameters = new JSONObject(sRemoteParameters);
+                    Set<String> remoteParameterNames = new LinkedHashSet<>(jRemoteParameters.length()); // Keep order
+                    for (Map.Entry<String,Object> entry : jRemoteParameters.entrySet()) {
+                        String name = entry.getKey();
+                        parameters.put(name, entry.getValue());
+                        remoteParameterNames.add(name);
                     }
+                    this.remoteParameterNames = remoteParameterNames;
                 } catch (JSONException je) {
                     LOG.warn("Failed to decode remote parameters from session {}.", sessionId, je);
                 }
