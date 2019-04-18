@@ -198,7 +198,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public JSONObject createEventWithAttachment(EventData eventData, Asset asset, boolean expectException) throws ApiException, ChronosApiException {
-        String response = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.toJson(), new File(asset.getAbsolutePath()), Autoboxing.B(ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null);
+        String response = userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.toJson(), new File(asset.getAbsolutePath()), NOT(ignoreConflicts), Boolean.FALSE, Boolean.FALSE, null);
         JSONObject responseData = extractBody(response);
         if (expectException) {
             assertNotNull("An error was expected", responseData.optString("error"));
@@ -221,7 +221,7 @@ public class EventManager extends AbstractManager {
         for (Asset asset : assets) {
             files.add(new File(asset.getAbsolutePath()));
         }
-        return handleCreation(userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.toJson(), files, Autoboxing.B(ignoreConflicts), Boolean.FALSE));
+        return handleCreation(userApi.getEnhancedChronosApi().createEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.toJson(), files, NOT(ignoreConflicts), Boolean.FALSE));
     }
 
     /**
@@ -235,7 +235,7 @@ public class EventManager extends AbstractManager {
      */
     public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
         prepareEventAttachment(eventData, asset);
-        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, B(ignoreConflicts), Boolean.FALSE, null));
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, Boolean.TRUE, NOT(ignoreConflicts), Boolean.FALSE, null));
     }
 
     /**
@@ -261,7 +261,7 @@ public class EventManager extends AbstractManager {
         } else {
             sb.append(eventData.toJson());
         }
-        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), sb.toString(), new File(asset.getAbsolutePath()), null, B(ignoreConflicts), Boolean.TRUE, Boolean.FALSE, null));
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), getFolder(eventData), eventData.getId(), eventData.getLastModified(), sb.toString(), new File(asset.getAbsolutePath()), null, NOT(ignoreConflicts), Boolean.TRUE, Boolean.FALSE, null));
     }
 
     private void prepareEventAttachment(EventData eventData, Asset asset) {
