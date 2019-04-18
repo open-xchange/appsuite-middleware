@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.servlets;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
@@ -1138,7 +1139,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         private static final Map<Integer, LoginError> errorsByCodes = new HashMap<>(3, 0.75f);
         static {
             for (LoginError error : LoginError.values()) {
-                errorsByCodes.put(error.code, error);
+                errorsByCodes.put(I(error.code), error);
             }
         }
 
@@ -1178,7 +1179,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
 
             try {
                 int intCode = Integer.parseInt(code);
-                return errorsByCodes.get(intCode);
+                return errorsByCodes.get(I(intCode));
             } catch (NumberFormatException e) {
                 return null;
             }

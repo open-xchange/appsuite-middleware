@@ -196,7 +196,8 @@ public class ClientManagementImpl implements ClientManagement {
             grantStorage.deleteGrantsByClientId(clientId);
             return clientStorage.unregisterClient(groupId, clientId);
         } catch (OXException e) {
-            return handleOXException(e);
+            Boolean b = handleOXException(e);
+            return b.booleanValue();
         }
     }
 

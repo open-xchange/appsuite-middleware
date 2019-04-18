@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.yahoo.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -90,7 +91,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(YahooServiceImpl.class);
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link YahooServiceImpl}.
@@ -102,7 +103,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
@@ -112,7 +113,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.OAuthAccountDeleteListener#onAfterOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
@@ -126,13 +127,13 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
 
         boolean purged = registry.purgeUserAccess(cid, user, id);
         if (purged) {
-            LOGGER.info("Removed Yahoo! OAuth access from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", id, user, cid);
+            LOGGER.info("Removed Yahoo! OAuth access from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", I(id), I(user), I(cid));
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.yahoo.YahooService#getContacts(com.openexchange.session.Session, int, int, int)
      */
     @Override
@@ -195,7 +196,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.yahoo.YahooService#getAccountDisplayName(com.openexchange.session.Session, int, int, int)
      */
     @Override
@@ -214,7 +215,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
 
     /**
      * Gets the {@link OAuthAccess} for the specified account identifier
-     * 
+     *
      * @param session The {@link Session}
      * @param accountId The account identifier
      * @return The {@link OAuthAccess}

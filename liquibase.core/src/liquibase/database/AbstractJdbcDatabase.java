@@ -186,7 +186,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             } else {
                 // Store the previous auto-commit mode, because the connection needs to be restored to it when this
                 // AbstractDatabase type is closed. This is important for systems which use connection pools.
-                previousAutoCommit = autoCommit;
+                previousAutoCommit = autoCommit ? Boolean.TRUE : Boolean.FALSE;
 
                 LogFactory.getLogger().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
@@ -382,7 +382,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection == null) {
             return null;
         }
-        
+
         java.sql.CallableStatement statement = null;
         ResultSet resultSet = null;
         try {
@@ -711,13 +711,13 @@ public abstract class AbstractJdbcDatabase implements Database {
             boolean liquibaseColumnNotRightSize = false;
             if (!connection.getDatabaseProductName().equals("SQLite")) {
                 Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
+                liquibaseColumnNotRightSize = columnSize != null && columnSize.intValue() != 20;
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!connection.getDatabaseProductName().equals("SQLite")) {
                 Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize != 35;
+                checksumNotRightSize = columnSize != null && columnSize.intValue() != 35;
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
 
@@ -740,7 +740,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
                 statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", Integer.valueOf(-1)));
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
             }
             if (checksumNotRightSize) {
@@ -935,7 +935,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
         }
-    	
+
     	if (caseSensitive == null) {
             return false;
     	} else {
@@ -983,7 +983,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
 	            final long createSnapshotStarted = System.currentTimeMillis();
 	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", Long.valueOf(System.currentTimeMillis() - createSnapshotStarted), typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -991,7 +991,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 	        final long changeSetStarted = System.currentTimeMillis();
 	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
-	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
+	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", Long.valueOf(System.currentTimeMillis() - changeSetStarted)));
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
@@ -1463,8 +1463,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         AbstractJdbcDatabase that = (AbstractJdbcDatabase) o;
 
@@ -1490,7 +1494,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (connection != null) {
             if (previousAutoCommit != null) {
                 try {
-                    connection.setAutoCommit(previousAutoCommit);
+                    connection.setAutoCommit(previousAutoCommit.booleanValue());
                 } catch (DatabaseException e) {
                     LogFactory.getLogger().warning("Failed to restore the auto commit to " + previousAutoCommit);
 
@@ -1607,13 +1611,15 @@ public abstract class AbstractJdbcDatabase implements Database {
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         if (lastChangeSetSequenceValue == null) {
             if (getConnection() == null) {
-                lastChangeSetSequenceValue = 0;
+                lastChangeSetSequenceValue = Integer.valueOf(0);
             } else {
-                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
+                lastChangeSetSequenceValue = Integer.valueOf(ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement()));
             }
         }
 
-        return ++lastChangeSetSequenceValue;
+        int next = lastChangeSetSequenceValue.intValue() + 1;
+        lastChangeSetSequenceValue = Integer.valueOf(next);
+        return next;
     }
 
     @Override
@@ -1742,11 +1748,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
     }
-    
+
  	@Override
     public void setOutputDefaultSchema(boolean outputDefaultSchema) {
 		this.outputDefaultSchema = outputDefaultSchema;
- 		
+
  	}
 
     @Override
