@@ -49,6 +49,7 @@
 
 package com.openexchange.nosql.cassandra.osgi;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.concurrent.TimeUnit;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
@@ -73,10 +74,12 @@ import com.openexchange.timer.TimerService;
  */
 public class CassandraActivator extends HousekeepingActivator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraActivator.class);
+
+    private static final long DELAY = TimeUnit.SECONDS.toMillis(15);
+
     private CassandraService cassandraService;
     private ObjectName objectName;
-    private static final long DELAY = TimeUnit.SECONDS.toMillis(15);
-    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraActivator.class);
     private ScheduledTimerTask timerTask;
 
     /**
@@ -104,7 +107,7 @@ public class CassandraActivator extends HousekeepingActivator {
                 throw e;
             }
             // Create a self-cancelling task to initialise the cassandra service
-            LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), TimeUnit.MILLISECONDS.toSeconds(DELAY), e);
+            LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), L(TimeUnit.MILLISECONDS.toSeconds(DELAY)), e);
             TimerService service = getService(TimerService.class);
             timerTask = service.scheduleAtFixedRate(new CassandraInitialiser((CassandraServiceImpl) cassandraService), DELAY, DELAY, TimeUnit.MILLISECONDS);
         }
@@ -150,7 +153,7 @@ public class CassandraActivator extends HousekeepingActivator {
      */
     private final class CassandraInitialiser implements Runnable {
 
-        private CassandraServiceImpl cassandraService;
+        private final CassandraServiceImpl cassandraService;
         private final Logger LOGGER = LoggerFactory.getLogger(CassandraInitialiser.class);
 
         /**
@@ -163,7 +166,7 @@ public class CassandraActivator extends HousekeepingActivator {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Runnable#run()
          */
         @Override
@@ -174,7 +177,7 @@ public class CassandraActivator extends HousekeepingActivator {
                 timerTask.cancel();
             } catch (OXException e) {
                 if (CassandraServiceExceptionCodes.CONTACT_POINTS_NOT_REACHABLE.equals(e)) {
-                    LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), TimeUnit.MILLISECONDS.toSeconds(DELAY), e);
+                    LOGGER.error("Cassandra failed to initialise: {}. Will retry in {} seconds", e.getMessage(), L(TimeUnit.MILLISECONDS.toSeconds(DELAY)), e);
                 }
             }
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.config.impl.jslob;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Map;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -102,10 +103,10 @@ public class AcceptUntrustedCertificatesJSLobEntry implements JSlobEntry {
     public Object getValue(Session sessiond) throws OXException {
         boolean allowedToDefineTrustLevel = userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(sessiond.getUserId(), sessiond.getContextId());
         if (!allowedToDefineTrustLevel) {
-            return false;
+            return Boolean.FALSE;
         }
 
-        return userAwareSSLConfigurationService.isTrustAll(sessiond.getUserId(), sessiond.getContextId());
+        return B(userAwareSSLConfigurationService.isTrustAll(sessiond.getUserId(), sessiond.getContextId()));
     }
 
     @Override

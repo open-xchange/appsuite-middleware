@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import org.scribe.model.Token;
@@ -214,10 +215,10 @@ public abstract class AbstractReauthorizeClusterTask {
     /// TEMP ///
     private void checkForEmptySecrets() {
         if (Strings.isEmpty(cachedAccount.getSecret())) {
-            LOG.debug("The cached account {} of user {} in context {} has an empty secret", cachedAccount.getId(), session.getUserId(), session.getContextId());
+            LOG.debug("The cached account {} of user {} in context {} has an empty secret", I(cachedAccount.getId()), I(session.getUserId()), I(session.getContextId()));
         }
         if (Strings.isEmpty(dbAccount.getSecret())) {
-            LOG.debug("The DB account {} of user {} in context {} has an empty secret", dbAccount.getId(), session.getUserId(), session.getContextId());
+            LOG.debug("The DB account {} of user {} in context {} has an empty secret", I(dbAccount.getId()), I(session.getUserId()), I(session.getContextId()));
         }
     }
 

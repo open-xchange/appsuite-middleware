@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -296,11 +297,11 @@ public final class OAuthUtil {
             throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
         }
     }
-    
+
     /**
      * Handles the specified {@link OAuthException} for the specified {@link OAuthAccount} and the
      * specified {@link Session} and returns an appropriate {@link OXException}.
-     * 
+     *
      * @param e The exception to handle
      * @param oauthAccount the {@link OAuthAccount}
      * @param session The groupware session
@@ -321,7 +322,7 @@ public final class OAuthUtil {
         }
         if (exMessage.contains("invalid_grant") || exMessage.contains("deleted_client")) {
             if (null != oauthAccount) {
-                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, oauthAccount.getDisplayName(), oauthAccount.getId(), session.getUserId(), session.getContextId());
+                return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(e, oauthAccount.getDisplayName(), I(oauthAccount.getId()), I(session.getUserId()), I(session.getContextId()));
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
@@ -331,14 +332,14 @@ public final class OAuthUtil {
             return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
         }
         if (errorDescription.contains("Missing required parameter: refresh_token")) {
-             return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(oauthAccount.getDisplayName(), oauthAccount.getId());
+             return OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(oauthAccount.getDisplayName(), I(oauthAccount.getId()));
         }
         return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
     }
 
     /**
      * Parses the specified key from from the specified message
-     * 
+     *
      * @param message The message from which to parse the error code
      * @return The error code, or <code>null</code> if none can be parsed
      */
