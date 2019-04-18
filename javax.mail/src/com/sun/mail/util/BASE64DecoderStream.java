@@ -389,27 +389,26 @@ public class BASE64DecoderStream extends FilterInputStream {
     private String recentChars() {
 	// reach into the input buffer and extract up to 10
 	// recent characters, to help in debugging.
-	String errstr = "";
+	StringBuilder errstr = new StringBuilder();
 	int nc = input_pos > 10 ? 10 : input_pos;
 	if (nc > 0) {
-	    errstr += ", the " + nc +
-			    " most recent characters were: \"";
+	    errstr.append(", the ").append(nc).append(" most recent characters were: \"");
 	    for (int k = input_pos - nc; k < input_pos; k++) {
 		char c = (char)(input_buffer[k] & 0xff);
 		switch (c) {
-		case '\r':	errstr += "\\r"; break;
-		case '\n':	errstr += "\\n"; break;
-		case '\t':	errstr += "\\t"; break;
+		case '\r':	errstr.append("\\r"); break;
+		case '\n':	errstr.append("\\n"); break;
+		case '\t':	errstr.append("\\t"); break;
 		default:
 		    if (c >= ' ' && c < 0177)
-			errstr += c;
+		    errstr.append(c);
 		    else
-			errstr += ("\\" + (int)c);
+			errstr.append("\\").append((int)c);
 		}
 	    }
-	    errstr += "\"";
+	    errstr.append("\"");
 	}
-	return errstr;
+	return errstr.toString();
     }
 
     /**

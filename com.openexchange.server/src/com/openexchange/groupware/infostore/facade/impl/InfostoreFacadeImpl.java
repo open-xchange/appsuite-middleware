@@ -1551,6 +1551,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         document.setModifiedBy(session.getUserId());
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
+        if (null == document.getLastModified() || false == updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
+            document.setLastModified(new Date());
+            updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
+        }
+
         CheckSizeSwitch.checkSizes(document, this, context);
         DocumentMetadata oldDocument;
         if (checkWriteLock) {

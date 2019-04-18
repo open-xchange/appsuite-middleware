@@ -88,6 +88,12 @@ public class Bug58814Test extends AbstractChronosTest {
         super();
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        eventManager.setIgnoreConflicts(true);
+    }
+
     /**
      * Create a non-full day series with no time and no timezone information on the 'until' property
      * of the recurrence frequency and change it to a full day series.
