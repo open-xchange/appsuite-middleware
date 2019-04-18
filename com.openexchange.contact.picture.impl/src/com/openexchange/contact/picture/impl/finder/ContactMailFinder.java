@@ -55,6 +55,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.picture.PictureSearchData;
+import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -125,17 +126,16 @@ public class ContactMailFinder extends AbstractContactFinder {
         Set<String> emails = data.getEmails();
         for (Iterator<String> iterator = emails.iterator(); iterator.hasNext();) {
             String email = iterator.next();
-            if (Strings.isEmpty(email)) {
+            if (Strings.isEmpty(email) || false == ContactPictureUtil.isValidMailAddress(email)) {
                 // skip empty email addresses
                 continue;
             }
 
             ContactSearchObject cso = new ContactSearchObject();
-            cso.setEmail1(email);
-            cso.setEmail2(email);
-            cso.setEmail3(email);
+            cso.setAllEmail(email);
             cso.setOrSearch(true);
             cso.setHasImage(true);
+            cso.setExactMatch(true);
 
             SearchIterator<Contact> result = null;
             try {

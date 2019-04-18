@@ -50,6 +50,10 @@
 package com.openexchange.contact.picture.impl;
 
 import java.util.Date;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contact.picture.ContactPicture;
@@ -66,6 +70,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since v7.10.1
  */
 public class ContactPictureUtil extends FinderUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContactPictureUtil.class);
 
     /**
      * Generates a {@link ContactPicture} based on the given bytes
@@ -135,8 +141,27 @@ public class ContactPictureUtil extends FinderUtil {
             return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isGlobalAddressBookEnabled();
         } catch (OXException e) {
             // Ignore
+            LOGGER.debug("No GAB access.", e);
         }
         return false;
+    }
+
+    /**
+     * Checks if the given mail address is valid
+     *
+     * @param mail The mail address
+     * @return <code>true</code> if the mail can be parsed and is valid,
+     *         <code>false</code> otherwise
+     * @see InternetAddress
+     */
+    public static boolean isValidMailAddress(String mail) {
+        try {
+            new InternetAddress(mail).validate();
+        } catch (AddressException e) {
+            LOGGER.debug("Mail address isn't valid.", e);
+            return false;
+        }
+        return true;
     }
 
 }
