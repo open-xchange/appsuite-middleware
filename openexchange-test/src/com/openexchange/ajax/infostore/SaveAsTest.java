@@ -34,12 +34,13 @@ public class SaveAsTest extends InfostoreAJAXTest {
 
         final String id = itm.saveAs(attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(), m("folder_id", "" + folderId, "title", "My Attachment", "description", "An attachment cum InfoItem"));
 
+        itm.setFailOnError(true);
         com.openexchange.file.storage.File obj = itm.getAction(id);
 
-        assertEquals("My Attachment", obj.getTitle());
-        assertEquals("An attachment cum InfoItem", obj.getDescription());
-        assertEquals("1", obj.getVersion());
-        assertEquals(testFile.getName(), obj.getFileName());
+        assertEquals("Unexpected title", "My Attachment", obj.getTitle());
+        assertEquals("Unexpected description", "An attachment cum InfoItem", obj.getDescription());
+        assertEquals("Unexpected version", "1", obj.getVersion());
+        assertEquals("Unexpected filename", testFile.getName(), obj.getFileName());
 
         InputStream is = null;
         InputStream is2 = null;
