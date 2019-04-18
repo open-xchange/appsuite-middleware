@@ -2289,32 +2289,32 @@ public class CalendarUtils {
         if (isAttendeeSchedulingResource(event, calendarUser)) {
             flags.add(calendarUser == user ? EventFlag.ATTENDEE : EventFlag.ATTENDEE_ON_BEHALF);
         }
-        if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
+        if (Classification.CONFIDENTIAL.matches(event.getClassification())) {
             flags.add(EventFlag.CONFIDENTIAL);
-        } else if (Classification.PRIVATE.equals(event.getClassification())) {
+        } else if (Classification.PRIVATE.matches(event.getClassification())) {
             flags.add(EventFlag.PRIVATE);
         }
         if (false == isOpaqueTransparency(event)) {
             flags.add(EventFlag.TRANSPARENT);
         }
-        if (EventStatus.CONFIRMED.equals(event.getStatus())) {
+        if (EventStatus.CONFIRMED.matches(event.getStatus())) {
             flags.add(EventFlag.EVENT_CONFIRMED);
-        } else if (EventStatus.CANCELLED.equals(event.getStatus())) {
+        } else if (EventStatus.CANCELLED.matches(event.getStatus())) {
             flags.add(EventFlag.EVENT_CANCELLED);
-        } else if (EventStatus.TENTATIVE.equals(event.getStatus())) {
+        } else if (EventStatus.TENTATIVE.matches(event.getStatus())) {
             flags.add(EventFlag.EVENT_TENTATIVE);
         }
         Attendee attendee = find(event.getAttendees(), calendarUser);
         if (null != attendee) {
-            if (ParticipationStatus.ACCEPTED.equals(attendee.getPartStat())) {
+            if (ParticipationStatus.ACCEPTED.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.ACCEPTED);
-            } else if (ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.DECLINED.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.DECLINED);
-            } else if (ParticipationStatus.DELEGATED.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.DELEGATED.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.DELEGATED);
-            } else if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.NEEDS_ACTION.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.NEEDS_ACTION);
-            } else if (ParticipationStatus.TENTATIVE.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.TENTATIVE.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.TENTATIVE);
             }
         }
