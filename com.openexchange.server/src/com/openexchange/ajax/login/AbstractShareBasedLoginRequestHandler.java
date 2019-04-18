@@ -164,7 +164,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 }
 
                 // Get the login info from HTTP request
-                LoginInfo loginInfo = getLoginInfoFrom(httpRequest);
+                LoginInfo loginInfo = getLoginInfoFrom(httpRequest, guest);
 
                 // Resolve context
                 Context context;
@@ -477,10 +477,11 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * Gets the appropriate share's login information from given HTTP request
      *
      * @param httpRequest The HTTP request
+     * @param guest The guest information
      * @return The login information
      * @throws OXException If login information cannot be returned
      */
-    protected abstract LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest) throws OXException;
+    protected abstract LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest, GuestInfo guest) throws OXException;
 
     /**
      * Authenticates the user associated with specified share using given login information.
