@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import java.text.DateFormat;
@@ -69,7 +70,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Implements test case 1803 partly.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SmokeTest extends AbstractTaskTest {
@@ -84,7 +85,7 @@ public class SmokeTest extends AbstractTaskTest {
     /**
      * Tests inserting a private task.
      * http://testlink6.open-xchange.com/testlink/lib/execute/execSetResults.php?level=testcase&id=1803
-     * 
+     *
      * @throws Throwable if an error occurs.
      */
     @Test
@@ -100,12 +101,12 @@ public class SmokeTest extends AbstractTaskTest {
         task.setStartDate(dateF.parse("26.02.2007"));
         task.setEndDate(dateF.parse("27.02.2007"));
         task.setStatus(Task.IN_PROGRESS);
-        task.setPriority(Task.HIGH);
+        task.setPriority(I(Task.HIGH));
         task.setPercentComplete(75);
         task.setTargetDuration(L(2));
         task.setActualDuration(L(2));
         final InsertResponse insertR = client.execute(new InsertRequest(task, timeZone));
-        final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
+        final GetResponse getR = client.execute(new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
         final CommonAllResponse allR = TaskTools.all(client, new AllRequest(folderId, AbstractTaskRequest.GUI_COLUMNS, AllRequest.GUI_SORT, AllRequest.GUI_ORDER));

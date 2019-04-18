@@ -54,7 +54,6 @@ import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.resource.actions.ResourceGetRequest;
 import com.openexchange.ajax.resource.actions.ResourceGetResponse;
@@ -83,7 +82,7 @@ public final class ResourceGetAJAXTest extends AbstractResourceTest {
      * Tests the <code>action=get</code> request
      */
     @Test
-    public void testUpdate() throws OXException, JSONException, IOException, SAXException {
+    public void testUpdate() throws OXException, JSONException, IOException {
         int id = -1;
         try {
             /*
@@ -99,7 +98,7 @@ public final class ResourceGetAJAXTest extends AbstractResourceTest {
             /*
              * Perform GET
              */
-            final ResourceGetResponse response = (ResourceGetResponse) Executor.execute(getSession(), new ResourceGetRequest(id, true));
+            final ResourceGetResponse response = Executor.execute(getSession(), new ResourceGetRequest(id, true));
 
             resource = response.getResource();
             assertTrue("GET failed", resource != null && resource.getIdentifier() == id);

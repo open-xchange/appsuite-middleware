@@ -68,14 +68,14 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Checks if external participants contain identifier 0 in JSON.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug11397Test extends AbstractTaskTest {
 
     /**
      * Default constructor.
-     * 
+     *
      * @param name test name
      */
     public Bug11397Test() {
@@ -84,7 +84,7 @@ public final class Bug11397Test extends AbstractTaskTest {
 
     /**
      * Checks if external participant does not contain identifier 0.
-     * 
+     *
      * @throws Throwable if some problem occurs.
      */
     @Test
@@ -95,7 +95,7 @@ public final class Bug11397Test extends AbstractTaskTest {
         });
         final InsertResponse insertR = client.execute(new InsertRequest(task, getTimeZone()));
         try {
-            final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
+            final GetResponse getR = client.execute(new GetRequest(insertR));
             task = getR.getTask(getTimeZone());
             final JSONObject json = (JSONObject) getR.getData();
             final JSONArray partArray = json.getJSONArray(TaskFields.PARTICIPANTS);

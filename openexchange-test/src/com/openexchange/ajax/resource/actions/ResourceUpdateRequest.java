@@ -64,7 +64,7 @@ import com.openexchange.resource.json.ResourceWriter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class ResourceUpdateRequest extends AbstractResourceRequest {
+public final class ResourceUpdateRequest extends AbstractResourceRequest<ResourceUpdateResponse> {
 
     private final boolean failOnError;
 

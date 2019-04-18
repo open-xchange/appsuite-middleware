@@ -86,7 +86,7 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
          * en
          */
         String htmlContent = "lvoe";
-        SuggestionsResponse suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "en", true));
+        SuggestionsResponse suggestionsResponse = Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "en", true));
 
         String[] mw = suggestionsResponse.getSuggestions();
         assertTrue("No suggestions retrieved: " + Arrays.toString(mw), mw.length > 0);
@@ -94,7 +94,7 @@ public final class SuggestionsTest extends AbstractSpellCheckTest {
          * de
          */
         htmlContent = "leibe";
-        suggestionsResponse = (SuggestionsResponse) Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "de", true));
+        suggestionsResponse = Executor.execute(getSession(), new SuggestionsRequest(htmlContent, "de", true));
         assertFalse("Error occured!", suggestionsResponse.hasError());
 
         mw = suggestionsResponse.getSuggestions();

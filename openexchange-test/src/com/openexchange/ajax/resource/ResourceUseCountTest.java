@@ -56,7 +56,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
@@ -140,7 +139,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         }
 
         // use resource 2
-        EventData eventData = EventFactory.createSingleTwoHourEvent(Autoboxing.i(defaultUserApi.getCalUser()), "testUseCount", folderId);
+        EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testUseCount", folderId);
         Attendee att = new Attendee();
         att.setEntity(resourceIds[1]);
         att.setCuType(CuTypeEnum.RESOURCE);
