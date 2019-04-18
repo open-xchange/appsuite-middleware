@@ -1,3 +1,9 @@
+open-xchange-drive-client-windows (7.10.0-29) stable; urgency=medium
+
+  * Build for patch 2019-04-19 (5215)
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Thu, 18 Apr 2019 11:27:00 +0200
+
 open-xchange-drive-client-windows (7.10.0-28) stable; urgency=medium
 
   * Build for patch 2019-04-01 (5179)
