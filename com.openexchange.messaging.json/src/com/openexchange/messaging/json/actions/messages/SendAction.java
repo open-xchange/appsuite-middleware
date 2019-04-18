@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -91,7 +92,7 @@ public class SendAction extends AbstractMessagingAction {
             throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(req.getMessagingServiceId());
         }
         transport.transport(message, req.getRecipients());
-        return new AJAXRequestResult(1);
+        return new AJAXRequestResult(I(1));
     }
 
 }

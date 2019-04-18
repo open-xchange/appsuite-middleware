@@ -75,7 +75,7 @@ public final class TwitterEventHandler implements EventHandler {
                 if (null != contextId) {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
-                        if (TwitterAccessRegistry.getInstance().removeAccessIfLast(contextId, userId)) {
+                        if (TwitterAccessRegistry.getInstance().removeAccessIfLast(contextId.intValue(), userId.intValue())) {
                             LOG.debug("Twitter access removed for user {} in context {}", userId, contextId);
                         }
                     }
