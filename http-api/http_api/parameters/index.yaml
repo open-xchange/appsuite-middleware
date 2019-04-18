@@ -506,7 +506,7 @@ QueryParamChronosNotification:
   type: boolean
   description: Specifies that attendees should be notified about the changes when saving a meeting or not.
   required: false
-  default: false
+  default: true
 ChronosFromTimeRange:
   name: from
   in: query
