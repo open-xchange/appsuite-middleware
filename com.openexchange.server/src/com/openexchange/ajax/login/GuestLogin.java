@@ -97,7 +97,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest) throws OXException {
+    protected LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest, GuestInfo guest) throws OXException {
         try {
             final String login;
             final String pass;

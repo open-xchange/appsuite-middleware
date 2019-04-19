@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
@@ -220,12 +221,12 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         final DeferringURLService deferrer = services.getService(DeferringURLService.class);
         if (null != deferrer && deferrer.isDeferrerURLAvailable(session.getUserId(), session.getContextId())) {
             final String retval = deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
-            LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), session.getUserId(), session.getContextId(), retval);
+            LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), I(session.getUserId()), I(session.getContextId()), retval);
             return retval;
         }
 
         final String retval = deferredURLUsing(callbackUrl, new StringBuilder(extractProtocol(callbackUrl)).append("://").append(currentHost.getHost()).toString());
-        LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), session.getUserId(), session.getContextId(), retval);
+        LOGGER.debug("Initializing {} OAuth account for user {} in context {} with call-back URL: {}", getDisplayName(), I(session.getUserId()), I(session.getContextId()), retval);
         return retval;
     }
 

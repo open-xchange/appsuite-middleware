@@ -50,6 +50,7 @@
 package com.openexchange.objectusecount.impl;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -286,7 +287,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                     stmt.setInt(4, objectId);
                     stmt.setInt(5, 1);
                     stmt.addBatch();
-                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, folderId, objectId, contextId);
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", I(userId), I(folderId), I(objectId), I(contextId));
                 }
                 stmt.executeBatch();
             } else {
@@ -297,7 +298,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                 stmt.setInt(4, objectId);
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
-                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, folderId, objectId, contextId);
+                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", I(userId), I(folderId), I(objectId), I(contextId));
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -413,7 +414,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             stmt.setInt(6, value);
             stmt.executeUpdate();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Set object use count to {} for user {}, folder {}, object {} in context {}", value, userId, folderId, objectId, contextId, new Throwable("use-count-trace"));
+                LOG.debug("Set object use count to {} for user {}, folder {}, object {} in context {}", I(value), I(userId), I(folderId), I(objectId), I(contextId), new Throwable("use-count-trace"));
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());

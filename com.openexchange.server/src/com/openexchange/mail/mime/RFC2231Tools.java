@@ -86,6 +86,17 @@ public final class RFC2231Tools {
     private static final Pattern PAT_CL = Pattern.compile("([\\p{ASCII}&&[^']]+)'([\\p{ASCII}&&[^']]*)'(\\p{ASCII}+)");
 
     /**
+     * Checks if given string possibly contains contains a <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small>
+     * value.
+     *
+     * @param toCheck The string to check
+     * @return <code>true</code> for RFC2231 value; otherwise <code>false</code>
+     */
+    public static boolean containsRFC2231Value(final String toCheck) {
+        return PAT_CL.matcher(toCheck).find();
+    }
+
+    /**
      * Parses given <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value into its charset, language and
      * rfc2231-encoded value. Therefore <small><b><a href="http://www.ietf.org/rfc/rfc2231.txt">RFC2231</a></b></small> value should match
      * pattern:

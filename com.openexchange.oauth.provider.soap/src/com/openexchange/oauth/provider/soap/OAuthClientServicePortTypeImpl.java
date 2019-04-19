@@ -207,7 +207,7 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
 
         {
             boolean enabled = client.isEnabled();
-            soapClient.setEnabled(Boolean.valueOf(enabled));
+            soapClient.setEnabled(enabled);
         }
 
         {

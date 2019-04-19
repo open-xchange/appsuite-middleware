@@ -50,6 +50,7 @@
 package com.openexchange.oidc.tools;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -278,7 +279,7 @@ public class OIDCTools {
      * @param entrySet The key, that should be used in the session for the value, loaded from the map
      */
     public static void addParameterToSession(Session session, Map<String, String> map, String entryLoad, String entrySet) {
-        LOG.trace("void addParameterToSession(Session session: {}, Map<String, String> map size: {}, String entryLoad: {}, String entrySet: {})", session.getSessionID(), map.size(), entryLoad, entrySet);
+        LOG.trace("void addParameterToSession(Session session: {}, Map<String, String> map size: {}, String entryLoad: {}, String entrySet: {})", session.getSessionID(), I(map.size()), entryLoad, entrySet);
         String parameter = map.get(entryLoad);
         if (!Strings.isEmpty(parameter)) {
             session.setParameter(entrySet, parameter);

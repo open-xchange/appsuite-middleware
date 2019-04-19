@@ -49,6 +49,7 @@
 
 package com.openexchange.modules.storage.sql.engines;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.modules.model.Metadata;
@@ -79,7 +80,7 @@ public class UserScopedStorage<T extends Model<T>> extends BasicStorage<T>{
     @Override
     protected List<Object> getExtraValues() {
         List<Object> values = super.getExtraValues();
-        values.add(userId);
+        values.add(I(userId));
         return values;
     }
 

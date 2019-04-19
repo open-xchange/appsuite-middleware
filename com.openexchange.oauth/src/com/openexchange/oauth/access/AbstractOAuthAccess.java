@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.access;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -124,7 +125,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         // Verify that the account has an access token
         if (Strings.isEmpty(account.getToken())) {
             API api = account.getAPI();
-            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), account.getId(), session.getUserId(), session.getContextId());
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getDisplayName(), I(account.getId()), I(session.getUserId()), I(session.getContextId()));
         }
 
         // Verify that scopes are available and enabled

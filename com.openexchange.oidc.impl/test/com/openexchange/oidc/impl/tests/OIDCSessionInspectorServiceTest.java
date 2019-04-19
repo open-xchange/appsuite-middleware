@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.impl.tests;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Collections;
@@ -102,10 +103,10 @@ public class OIDCSessionInspectorServiceTest {
 
     @Mock
     private Session mockedSession;
-    
+
     @Mock
     private OIDCBackend mockedBackend;
-    
+
     @Mock
     private OIDCBackendConfig mockedBackendConfig;
 
@@ -148,10 +149,10 @@ public class OIDCSessionInspectorServiceTest {
     @Test
     public void onSessionHit_TokenNotExpiredTest() throws Exception {
       PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
-      Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(false);
-      
+      Mockito.when(B(mockedBackend.isTokenExpired(mockedSession))).thenReturn(B(false));
+
       Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
-      
+
       Mockito.verify(mockedBackend, Mockito.times(0)).updateOauthTokens(mockedSession);
       assertTrue("Wrong reply", result == Reply.NEUTRAL);
     }
@@ -159,11 +160,11 @@ public class OIDCSessionInspectorServiceTest {
     @Test
     public void onSessionHit_UpdateTokensFailTest() throws Exception {
         PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
-        Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(true);
-        Mockito.when(mockedBackend.updateOauthTokens(mockedSession)).thenReturn(false);
-        
+        Mockito.when(B(mockedBackend.isTokenExpired(mockedSession))).thenReturn(B(true));
+        Mockito.when(B(mockedBackend.updateOauthTokens(mockedSession))).thenReturn(B(false));
+
         Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
-        
+
         Mockito.verify(mockedBackend, Mockito.times(1)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
         assertTrue("Wrong reply", result == Reply.NEUTRAL);
     }
@@ -171,11 +172,11 @@ public class OIDCSessionInspectorServiceTest {
     @Test
     public void onSessionHit_UpdateTokensSuccessTest() throws Exception {
         PowerMockito.doReturn(mockedBackend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
-        Mockito.when(mockedBackend.isTokenExpired(mockedSession)).thenReturn(true);
-        Mockito.when(mockedBackend.updateOauthTokens(mockedSession)).thenReturn(true);
-        
+        Mockito.when(B(mockedBackend.isTokenExpired(mockedSession))).thenReturn(B(true));
+        Mockito.when(B(mockedBackend.updateOauthTokens(mockedSession))).thenReturn(B(true));
+
         Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
-        
+
         Mockito.verify(mockedBackend, Mockito.times(0)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
         assertTrue("Wrong reply", result == Reply.NEUTRAL);
     }

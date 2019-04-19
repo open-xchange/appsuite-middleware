@@ -49,6 +49,7 @@
 
 package com.openexchange.microsoft.graph.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -102,7 +103,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Initialises a new {@link MicrosoftGraphOneDriveAPI}.
-     * 
+     *
      * @param client The rest client
      */
     public MicrosoftGraphOneDriveAPI(MicrosoftGraphRESTClient client) {
@@ -111,7 +112,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Gets the user's OneDrive
-     * 
+     *
      * @param accessToken OAuth The access token
      * @return A {@link JSONObject} with the user's one drive metadata
      * @throws OXException if an error is occurred
@@ -123,7 +124,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Gets the user's OneDrive
-     * 
+     *
      * @param accessToken OAuth The access token
      * @return A {@link JSONObject} with the user's one drive metadata
      * @throws OXException if an error is occurred
@@ -135,7 +136,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of the root folder for a user's default Drive
-     * 
+     *
      * @param accessToken The oauth access token
      * @return A {@link JSONObject} with the metadata of the user's root folder
      *         of the default Drive
@@ -148,7 +149,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of the root folder for a user's default Drive
-     * 
+     *
      * @param accessToken The oauth access token
      * @param queryParams The request query parameters
      * @return A {@link JSONObject} with the metadata of the user's root folder
@@ -162,7 +163,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of all children (files and folders) of the specified folder.
-     * 
+     *
      * @param accessToken The oauth access token
      * @param queryParams The request query parameters
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
@@ -175,7 +176,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of the folder with the specified identifier for a user's default Drive
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderPath The folder's unique identifier
      * @return A {@link JSONObject} with the metadata of the user's specified folder
@@ -192,7 +193,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of the folder with the specified identifier for a user's default Drive
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderPath The folder's unique identifier
      * @param queryParams The request query parameters
@@ -210,7 +211,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of all children (files and folders) of the specified folder.
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderPath The folder's unique identifier
      * @return A {@link JSONObject} with the metadata of all children (files and folders) of the specified folder.
@@ -223,7 +224,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the metadata of all children (files and folders) of the specified folder.
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderPath The folder's unique identifier
      * @param offset The offset for the request
@@ -241,7 +242,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Returns the item (being either a file or folder) with the specified identifier
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item's identifier
      * @return The item as a {@link JSONObject}
@@ -254,7 +255,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Downloads the contents of a file
-     * 
+     *
      * @param accessToken the oauth access token
      * @param itemId The item's identifier
      * @return The InputStream with the contents of the file
@@ -270,7 +271,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
     /**
      * Asynchronously creates a copy of a driveItem (including any children), under a new parent item or with a new name.
      * If another file with the same name already exists it will automatically be renamed by the API
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item identifier
      * @param body The body with the copy information such as new parent identifier or name conflict behaviour
@@ -288,13 +289,13 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
         if (restResponse.getStatusCode() == 202) {
             return restResponse.getHeader(HttpHeaders.LOCATION);
         }
-        throw MicrosoftGraphDriveClientExceptionCodes.ASYNC_COPY_FAILED.create(itemId, restResponse.getStatusCode());
+        throw MicrosoftGraphDriveClientExceptionCodes.ASYNC_COPY_FAILED.create(itemId, I(restResponse.getStatusCode()));
     }
 
     /**
      * Synchronously creates a copy of a drive item.
      * If another file with the same name already exists it will automatically be renamed by the API
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item identifier
      * @param body The body with the copy information such as new parent identifier or name conflict behaviour
@@ -329,7 +330,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Retrieves the status report from the specified monitor URL
-     * 
+     *
      * @param accessToken The oauth access token
      * @param location The URL from which to retrieve the status report
      * @return A {@link JSONObject} with the status report
@@ -347,7 +348,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Retrieves the thumbnails' metadata of the item with the specified identifier
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item's identifier
      * @return A {@link JSONObject} with the thumbnails' metadata
@@ -359,7 +360,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Retrieves the thumbnail content of the specified item
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item's identifier
      * @return An {@link InputStream} with the thumbnail's contents ready to be streamed to the client
@@ -394,7 +395,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Deletes the item with the specified identifier
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item's identifier
      * @throws OXException if an error is occurred
@@ -406,7 +407,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Performs a search and returns the results
-     * 
+     *
      * @param accessToken The oauth access token
      * @param query the search query
      * @param queryParams The request query parameters
@@ -420,7 +421,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Updates the metadata of the specified item
-     * 
+     *
      * @param accessToken the oauth access token
      * @param itemId the item's identifier
      * @param body The body with the metadata to update (delta)
@@ -434,7 +435,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
 
     /**
      * Creates a folder under the specified parent folder
-     * 
+     *
      * @param accessToken The oauth access token
      * @param parentItemId The parent identifier (an empty or <code>null</code> parent identifier implies the root folder)
      * @param autorename <code>true</code> if an autorename should happen in case of name conflicts
@@ -461,7 +462,7 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
      * Performs a resumable upload, i.e. a chunk-wise streaming of the data. This is a blocking operation.
      * If another file is already present with the same filename in the same folder then its contents will be
      * overridden.
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderId The folder identifier of the parent folder (if empty or <code>null</code> the root folder will be used)
      * @param filename The file's name
@@ -513,14 +514,14 @@ public class MicrosoftGraphOneDriveAPI extends AbstractMicrosoftGraphAPI {
                 // Upload
                 RESTResponse response = client.execute(put);
                 if (response.getStatusCode() < 200 || response.getStatusCode() > 203) {
-                    LOG.debug("Upload failed with status code '{}'. Response body: \n{}", response.getStatusCode(), response.getResponseBody());
-                    throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED_STATUS_CODE.create(filename, folderId, response.getStatusCode());
+                    LOG.debug("Upload failed with status code '{}'. Response body: \n{}", I(response.getStatusCode()), response.getResponseBody());
+                    throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED_STATUS_CODE.create(filename, folderId, I(response.getStatusCode()));
                 }
                 if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
                     LOG.debug("Upload status for upload with id '{}': Successfully completed.", uploadId);
                     return ((JSONValue) response.getResponseBody()).toObject();
                 }
-                LOG.debug("Upload status for upload with id '{}': Completed: {}% ", uploadId, String.format("%1.2f", (((double) transferredBytes / contentLength * 100))));
+                LOG.debug("Upload status for upload with id '{}': Completed: {}% ", uploadId, String.format("%1.2f", Double.valueOf((((double) transferredBytes / contentLength * 100)))));
             }
             throw MicrosoftGraphDriveClientExceptionCodes.UPLOAD_FAILED.create(filename, folderId);
         } catch (JSONException e) {

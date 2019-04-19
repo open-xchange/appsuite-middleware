@@ -49,6 +49,7 @@
 
 package com.openexchange.microsoft.graph.onedrive.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -96,7 +97,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /**
      * Initialises a new {@link MicrosoftGraphDriveServiceImpl}.
-     * 
+     *
      * @param api The {@link MicrosoftGraphOneDriveAPI}
      */
     public MicrosoftGraphDriveServiceImpl(MicrosoftGraphOneDriveAPI api) {
@@ -108,7 +109,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolderId(java.lang.String)
      */
     @Override
@@ -119,7 +120,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#existsFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -137,7 +138,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getRootFolder(java.lang.String)
      */
     @Override
@@ -147,7 +148,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFolder(int, java.lang.String, java.lang.String)
      */
     @Override
@@ -157,7 +158,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getSubFolders(java.lang.String, java.lang.String)
      */
     @Override
@@ -179,7 +180,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#createFolder(int, java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Override
@@ -195,7 +196,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -208,7 +209,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#clearFolder(java.lang.String, java.lang.String)
      */
     @Override
@@ -233,7 +234,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#renameFolder(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -250,7 +251,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFolder(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -268,7 +269,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFolder(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -287,7 +288,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.lang.String)
      */
     @Override
@@ -308,7 +309,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFile(int, java.lang.String, java.lang.String)
      */
     @Override
@@ -318,7 +319,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFiles(int, java.lang.String, java.util.List)
      */
     @Override
@@ -329,7 +330,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
                 files.add(fileEntityParser.parseEntity(userId, api.getItem(accessToken, itemId)));
             } catch (OXException e) {
                 if (MicrosoftGraphAPIExceptionCodes.ITEM_NOT_FOUND.equals(e)) {
-                    LOG.debug("Item with id '{}' for user with id '{}' was not found in OneDrive", itemId, userId);
+                    LOG.debug("Item with id '{}' for user with id '{}' was not found in OneDrive", itemId, I(userId));
                     continue;
                 }
                 throw e;
@@ -340,7 +341,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#deleteFile(java.lang.String, java.lang.String)
      */
     @Override
@@ -350,7 +351,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#moveFile(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -360,7 +361,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#updateFile(java.lang.String, com.openexchange.file.storage.File, java.lang.String)
      */
     @Override
@@ -375,7 +376,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#copyFile(java.lang.String, com.openexchange.file.storage.File, java.lang.String)
      */
     @Override
@@ -385,7 +386,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#copyFile(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -395,7 +396,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getFile(java.lang.String, java.lang.String)
      */
     @Override
@@ -405,7 +406,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getThumbnail(java.lang.String, java.lang.String)
      */
     @Override
@@ -415,7 +416,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#getQuota(java.lang.String)
      */
     @Override
@@ -431,7 +432,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#searchFiles(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
     @Override
@@ -474,7 +475,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.microsoft.graph.onedrive.MicrosoftGraphDriveService#upload(java.lang.String, com.openexchange.file.storage.File, java.io.InputStream)
      */
     @Override
@@ -487,7 +488,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /**
      * Moves the item with the specified identifier under the parent folder with the specified identifier
-     * 
+     *
      * @param accessToken The oauth access token
      * @param itemId The item's identifier
      * @param parentId The new parent's identifier
@@ -501,7 +502,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /**
      * Checks whether a folder with the specified name already exists as a sub-folder of the folder with the specified identifier
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderName The folder name to check
      * @param parentId The parent folder's identifier
@@ -532,7 +533,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /**
      * Checks whether the folder with the specified identifier has any sub-folders
-     * 
+     *
      * @param accessToken The oauth access token
      * @param folderId The folder identifier
      * @return <code>true</code> if the folder has at least one sub-folder;<code>false</code> otherwise
@@ -560,7 +561,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     /**
      * Parses the specified {@link JSONArray} of entities in to a {@link List}
      * of {@link OneDriveFolder}s
-     * 
+     *
      * @param userId the user identifier
      * @param entities The {@link JSONArray} with the entities
      * @return A {@link List} with the {@link OneDriveFolder}s
@@ -585,7 +586,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
 
     /**
      * Checks and extracts a 'skipToken' if available.
-     * 
+     *
      * @param response The {@link JSONObject} response body
      * @return the skipToken or <code>null</code> if none available.
      */
@@ -613,7 +614,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * <li>{@link Field#FILENAME}</li>
      * <li>{@link Field#DESCRIPTION}</li>
      * </ul>
-     * 
+     *
      * @param file The {@link File} containing the item's metadata
      * @param modifiedFields A {@link List} with the modified fields
      * @param description The description of the new item
@@ -647,7 +648,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
     /**
      * Compiles an update body with the specified parent identifier. The parent identifier
      * designates the destination folder in a move operation.
-     * 
+     *
      * @param parentId The parent identifier
      * @return The update body
      * @throws OXException if a JSON error is occurred
@@ -661,7 +662,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * Compiles an update body with the specified parent identifier and the specified new name.
      * The parent identifier designates the destination folder in a move operation. The new name
      * designates the new name of the item (file or folder) in a rename and move operation.
-     * 
+     *
      * @param parentId The parent identifier
      * @param newName The new name of the folder
      * @return The update body
@@ -677,7 +678,7 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
      * Compiles an update body with the specified parent identifier and the specified new name.
      * The parent identifier designates the destination folder in a move operation. The new name
      * designates the new name of the item (file or folder) in a rename and move operation.
-     * 
+     *
      * @param parentId The parent identifier
      * @param newName The new name of the item
      * @param description The description of the new item

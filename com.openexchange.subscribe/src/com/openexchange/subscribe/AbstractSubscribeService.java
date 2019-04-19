@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -124,12 +126,12 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
                 if(userId == -1) {
                     subscriptions.add(subscription);
-                } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId())) {
+                } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId()).booleanValue()) {
                     subscriptions.add(subscription);
                 } else {
                     final EffectivePermission folderPermission = FOLDERS.get().getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
                     final boolean visible = folderPermission.isFolderVisible() ;
-                    canSee.put(subscription.getFolderId(), visible);
+                    canSee.put(subscription.getFolderId(), B(visible));
                     if(visible) {
                         subscriptions.add(subscription);
                     }
@@ -446,7 +448,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         for (Subscription existingSubscription : subscriptions) {
             Map<String, Object> existingConfiguration = existingSubscription.getConfiguration();
             if (null != existingConfiguration && isEqualConfiguration(configuration, existingConfiguration)) {
-                throw SubscriptionErrorMessage.DUPLICATE_SUBSCRIPTION.create(subscription.getSource().getId(), subscription.getUserId(), subscription.getContext().getContextId());
+                throw SubscriptionErrorMessage.DUPLICATE_SUBSCRIPTION.create(subscription.getSource().getId(), I(subscription.getUserId()), I(subscription.getContext().getContextId()));
             }
         }
     }

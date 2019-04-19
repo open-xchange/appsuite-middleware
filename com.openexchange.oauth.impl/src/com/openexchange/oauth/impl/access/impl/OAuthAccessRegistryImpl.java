@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl.access.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -229,15 +230,15 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry {
         }
 
         boolean containsAccess(int oauthAccountId) {
-            return map.containsKey(oauthAccountId);
+            return map.containsKey(I(oauthAccountId));
         }
 
         OAuthAccess optAccess(int oauthAccountId) {
-            return map.get(oauthAccountId);
+            return map.get(I(oauthAccountId));
         }
 
         void addAccess(int oauthAccountId, OAuthAccess access) {
-            map.put(oauthAccountId, access);
+            map.put(I(oauthAccountId), access);
         }
 
         Collection<OAuthAccess> allAccesses() {
@@ -245,7 +246,7 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry {
         }
 
         boolean removeAccess(int oauthAccountId) {
-            return map.remove(oauthAccountId) != null;
+            return map.remove(I(oauthAccountId)) != null;
         }
 
         boolean invalidateIfEmpty() {

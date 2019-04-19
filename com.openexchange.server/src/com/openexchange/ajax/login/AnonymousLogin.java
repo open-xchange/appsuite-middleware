@@ -96,7 +96,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest) throws OXException {
+    protected LoginInfo getLoginInfoFrom(HttpServletRequest httpRequest, GuestInfo guest) throws OXException {
         try {
             final String pass;
 
@@ -120,7 +120,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
                 }
                 @Override
                 public String getUsername() {
-                    return "anonymous";
+                    return guest.getBaseToken();
                 }
                 @Override
                 public Map<String, Object> getProperties() {
