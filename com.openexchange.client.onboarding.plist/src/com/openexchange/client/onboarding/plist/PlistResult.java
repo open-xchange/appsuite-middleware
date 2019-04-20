@@ -228,16 +228,26 @@ public class PlistResult implements Result {
     }
 
     private ThresholdFileHolder sign(ThresholdFileHolder fileHolder, Session session) throws OXException, IOException {
-        PListSigner signer = Services.getService(PListSigner.class);
-        IFileHolder signed = signer.signPList(fileHolder, session);
+        ThresholdFileHolder tfh = null;
+        boolean error = true;
+        try {
+            PListSigner signer = Services.getService(PListSigner.class);
+            IFileHolder signed = signer.signPList(fileHolder, session);
 
-        if (signed instanceof ThresholdFileHolder) {
-            return (ThresholdFileHolder) signed;
+            if (signed instanceof ThresholdFileHolder) {
+                error = false;
+                return (ThresholdFileHolder) signed;
+            }
+
+            tfh = new ThresholdFileHolder(signed);
+            signed.close();
+            error = false;
+            return tfh;
+        } finally {
+            if (error) {
+                Streams.close(tfh, fileHolder);
+            }
         }
-
-        ThresholdFileHolder tfh = new ThresholdFileHolder(signed);
-        signed.close();
-        return tfh;
     }
 
     // --------------------------------------------- SMS utils --------------------------------------------------------------
