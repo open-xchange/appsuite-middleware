@@ -57,12 +57,12 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link CalendarFormatter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */
 public class TimeSpanFormatter extends DateFormatter {
-	
+
 	private final Map<String, Object> timespanThingy;
 
 	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
@@ -76,11 +76,11 @@ public class TimeSpanFormatter extends DateFormatter {
 
 
 	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
-	
+
 		if (isFullTime) {
 			endDate = new Date(endDate.getTime() - 1000);
 		}
-	
+
 		if (differentDays(startDate, endDate)) {
 			if (isFullTime) {
 				return String.format("%s - %s", formatDate(startDate, utc),
@@ -116,7 +116,7 @@ public class TimeSpanFormatter extends DateFormatter {
 
 	private boolean isFullTime() {
 		Boolean fullTime = (Boolean) timespanThingy.get("full_time");
-		return fullTime == null || fullTime;
+		return fullTime == null || fullTime.booleanValue();
 	}
 
 }

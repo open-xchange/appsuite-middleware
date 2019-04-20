@@ -51,6 +51,7 @@
 
 package com.openexchange.custom.parallels.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -173,7 +174,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
         } catch (final OXException e) {
             LOG.error("", e);
         } catch (final ServiceException e) {
-            LOG.error("Error resolving branded url for context {}", contextid);
+            LOG.error("Error resolving branded url for context {}", I(contextid));
         }
 
         final JSONObject obj = new JSONObject();
@@ -203,7 +204,7 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
 
 
-    private String getBrandingHostFromLoginMappings(final Context ctx) throws OXException {
+    private String getBrandingHostFromLoginMappings(final Context ctx) {
 
         final String[] login_mappings = ctx.getLoginInfo();
         final ConfigurationService configservice = Services.getService(ConfigurationService.class);
@@ -212,39 +213,41 @@ public final class ParallelsInfoServlet extends PermissionServlet {
 
         // load suffix for branding string dynamically in loginmappings
         final String suffix_branded = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_SUFFIX);
-        LOG.debug("Loaded loginmappings {} for context {}", Arrays.toString(login_mappings), ctx.getContextId());
+        LOG.debug("Loaded loginmappings {} for context {}", Arrays.toString(login_mappings), I(ctx.getContextId()));
         boolean found_host = false;
-        if( null != suffix_branded && suffix_branded.length() != 0) {
+        if (null != suffix_branded && suffix_branded.length() != 0) {
             for (final String login_mapping : login_mappings) {
-                if(login_mapping.startsWith(suffix_branded)){
+                if (login_mapping.startsWith(suffix_branded)) {
                     /**
                      *
-                     *  We found our mapping which contains the branded host!
+                     * We found our mapping which contains the branded host!
                      *
-                     *  Now split up the string to get the host part
+                     * Now split up the string to get the host part
                      *
                      */
                     final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
-                    if(URL_.length!=3){
-                        LOG.error("getBrandingHostFromLoginMappings: Could not split up branded host {} login mapping for context {}", login_mapping, ctx.getContextId());
-                    }else{
+                    if (URL_.length != 3) {
+                        LOG.error("getBrandingHostFromLoginMappings: Could not split up branded host {} login mapping for context {}", login_mapping, I(ctx.getContextId()));
+                    } else {
                         branded_host = URL_[2];
-                        LOG.debug("Successfully resolved HOST to {} for branded context {}", branded_host, ctx.getContextId());
+                        LOG.debug("Successfully resolved HOST to {} for branded context {}", branded_host, I(ctx.getContextId()));
                     }
                 }
             }
         }
-        if(!found_host){
+        if (!found_host) {
             // now host was provisioned, load fallback from configuration
             branded_host = configservice.getProperty(ParallelsOptions.PROPERTY_BRANDING_FALLBACKHOST);
             // use systems getHostname() if no fallbackhost is set
-            if( null == branded_host || branded_host.length() == 0 ) {
+            if (null == branded_host || branded_host.length() == 0) {
                 try {
                     branded_host = InetAddress.getLocalHost().getCanonicalHostName();
-                } catch (UnknownHostException e) { }
+                } catch (UnknownHostException e) {
+                    // Ignore
+                }
             }
-            if( null == branded_host || branded_host.length() == 0 ) {
-                LOG.warn("getHostname: Unable to determine any hostname for context {}", ctx.getContextId());
+            if (null == branded_host || branded_host.length() == 0) {
+                LOG.warn("getHostname: Unable to determine any hostname for context {}", I(ctx.getContextId()));
             }
         }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.passwordchange.servlet;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -134,7 +135,7 @@ public class PasswordChangeServletTest {
         PowerMockito.when(serviceLookup.getService(ContextService.class)).thenReturn(contextService);
         PowerMockito.when(serviceLookup.getService(UserService.class)).thenReturn(userService);
         PowerMockito.when(userService.getUser(ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any())).thenReturn(user);
-        PowerMockito.when(user.isGuest()).thenReturn(Boolean.FALSE);
+        PowerMockito.when(B(user.isGuest())).thenReturn(Boolean.FALSE);
     }
 
      @Test

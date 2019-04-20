@@ -49,6 +49,7 @@
 
 package com.openexchange.password.mechanism.osgi;
 
+import static com.openexchange.java.Autoboxing.L;
 import static java.lang.System.currentTimeMillis;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.config.ConfigurationService;
@@ -88,9 +89,9 @@ public class PasswordMechImplActivator extends HousekeepingActivator {
         long after = currentTimeMillis();
         long duration = after - before;
         if (duration > 20000) {
-            getLogger(PasswordMechImplActivator.class).warn("STARTING BUNDLE {} TOOK {}ms! PLEASE MAKE SURE TO HAVE AN APPROPRIATE LEVEL OF ENTROPY ON THE SYSTEM!", context.getBundle().getSymbolicName(), duration);
+            getLogger(PasswordMechImplActivator.class).warn("STARTING BUNDLE {} TOOK {}ms! PLEASE MAKE SURE TO HAVE AN APPROPRIATE LEVEL OF ENTROPY ON THE SYSTEM!", context.getBundle().getSymbolicName(), L(duration));
         } else {
-            getLogger(PasswordMechImplActivator.class).info("Starting bundle {} took {}ms", context.getBundle().getSymbolicName(), duration);
+            getLogger(PasswordMechImplActivator.class).info("Starting bundle {} took {}ms", context.getBundle().getSymbolicName(), L(duration));
         }
     }
 

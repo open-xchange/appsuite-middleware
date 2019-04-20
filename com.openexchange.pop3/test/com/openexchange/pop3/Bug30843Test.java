@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,7 +91,7 @@ public class Bug30843Test {
         this.configService = PowerMockito.mock(ConfigurationService.class);
         PowerMockito.when(configService.getProperty(ArgumentMatchers.anyString())).thenReturn("");
         PowerMockito.when(configService.getProperty(ArgumentMatchers.anyString(), ArgumentMatchers.anyString())).thenReturn("");
-        PowerMockito.when(configService.getIntProperty(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(0);
+        PowerMockito.when(I(configService.getIntProperty(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt()))).thenReturn(I(0));
         PowerMockito.when(configService.getProperty("com.openexchange.pop3.pop3AuthEnc", "UTF-8")).thenReturn("UTF-8");
         PowerMockito.when(configService.getProperty("com.openexchange.pop3.ssl.protocols", "SSLv3 TLSv1")).thenReturn("SSLv3 TLSv1");
 
