@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.balancing.reschedulerpolicy;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -514,7 +515,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     // No other cluster members - assign all available permanent listeners to this node
                     LOG.info("Going to apply all push users to local member (no other members available): {}", localMember);
                     List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
-                    LOG.info("{} now runs permanent listeners for {} users", localMember, startedOnes.size());
+                    LOG.info("{} now runs permanent listeners for {} users", localMember, I(startedOnes.size()));
                     return null;
                 }
 
@@ -585,7 +586,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     // No other cluster members - assign all available permanent listeners to this node
                     LOG.info("Going to apply all push users to local member (no other capable member available): {}", localMember);
                     List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(allPushUsers, 0L);
-                    LOG.info("{} now runs permanent listeners for {} users", localMember, startedOnes.size());
+                    LOG.info("{} now runs permanent listeners for {} users", localMember, I(startedOnes.size()));
                     return null;
                 }
 
@@ -624,7 +625,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(ps, TimeUnit.NANOSECONDS.convert(2L, TimeUnit.SECONDS));
                     int numberOfStartedOnes = startedOnes.size();
 
-                    LOG.info("{} now runs permanent listeners for {} users", localMember, numberOfStartedOnes);
+                    LOG.info("{} now runs permanent listeners for {} users", localMember, I(numberOfStartedOnes));
 
                     // For safety reason, request explicit drop on other nodes for push users started on this node
                     List<PushUser> pushUsers = new ArrayList<>(numberOfStartedOnes);
@@ -662,7 +663,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                     // Apply newly calculated initial permanent listeners
                     List<PermanentListenerJob> startedOnes = pushManagerRegistry.applyInitialListeners(ps, _2secNanos);
-                    LOG.info("{} now runs permanent listeners for {} users", localMember, startedOnes.size());
+                    LOG.info("{} now runs permanent listeners for {} users", localMember, I(startedOnes.size()));
                 } else {
                     Member master = capableMembers.get(0);
                     if (localMember.getUuid().equals(master.getUuid())) {

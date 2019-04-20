@@ -6,6 +6,8 @@
 
 package com.openexchange.push.soap;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,8 +57,8 @@ public class PushSoapInterfacePortTypeImpl implements PushSoapInterfacePortType 
                 com.openexchange.push.PushUserClient pushClient = pushClients.get(i);
                 if (null != pushClient) {
                     com.openexchange.push.soap.PushUser soapPushUser = new com.openexchange.push.soap.PushUser();
-                    soapPushUser.setContextId(pushClient.getContextId());
-                    soapPushUser.setUserId(pushClient.getUserId());
+                    soapPushUser.setContextId(I(pushClient.getContextId()));
+                    soapPushUser.setUserId(I(pushClient.getUserId()));
 
                     com.openexchange.push.soap.PushUserClient soapType = new com.openexchange.push.soap.PushUserClient();
                     soapType.setClient(pushClient.getClient());
@@ -105,11 +107,11 @@ public class PushSoapInterfacePortTypeImpl implements PushSoapInterfacePortType 
                 com.openexchange.push.PushUserInfo pushUser = pushUsers.get(i);
                 if (null != pushUser) {
                     com.openexchange.push.soap.PushUser soapPushUser = new com.openexchange.push.soap.PushUser();
-                    soapPushUser.setContextId(pushUser.getContextId());
-                    soapPushUser.setUserId(pushUser.getUserId());
+                    soapPushUser.setContextId(I(pushUser.getContextId()));
+                    soapPushUser.setUserId(I(pushUser.getUserId()));
 
                     com.openexchange.push.soap.PushUserInfo soapType = new com.openexchange.push.soap.PushUserInfo();
-                    soapType.setPermanent(pushUser.isPermanent());
+                    soapType.setPermanent(B(pushUser.isPermanent()));
                     soapType.setPushUser(soapPushUser);
                     list.add(soapType);
                 }

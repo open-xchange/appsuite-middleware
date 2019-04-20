@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -86,7 +87,7 @@ public class PushMulticastSocket implements Runnable {
 
         try {
             if (config.isMultiCastEnabled()) {
-                LOG.info("Starting Multicast Socket on Port: {}", multicastPort);
+                LOG.info("Starting Multicast Socket on Port: {}", I(multicastPort));
                 multicastSocket = new MulticastSocket(multicastPort);
                 multicastSocket.joinGroup(multicastAddress);
 

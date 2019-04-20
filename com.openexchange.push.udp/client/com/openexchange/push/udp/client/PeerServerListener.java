@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp.client;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
@@ -98,7 +99,7 @@ public class PeerServerListener {
     }
 
     private void register() throws IOException {
-        send(PushRequest.REMOTE_HOST_REGISTER, myAddress.getHostAddress(), myPort);
+        send(I(PushRequest.REMOTE_HOST_REGISTER), myAddress.getHostAddress(), I(myPort));
     }
 
     private void receiveAndPrint() {
@@ -145,7 +146,7 @@ public class PeerServerListener {
         final String myPort = "44331"; //args[4];
 
         try {
-            new PeerServerListener(remoteHost, remotePort, myHost, myPort).send(PushRequest.REMOTE_HOST_REGISTER,"fe80::223:32ff:fec8:2bc8", myPort);
+            new PeerServerListener(remoteHost, remotePort, myHost, myPort).send(I(PushRequest.REMOTE_HOST_REGISTER),"fe80::223:32ff:fec8:2bc8", myPort);
         } catch (final Exception e) {
             LOG.error("Unexpected exception.", e);
         }

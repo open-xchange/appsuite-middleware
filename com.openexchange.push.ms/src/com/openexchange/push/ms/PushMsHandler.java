@@ -49,6 +49,7 @@
 
 package com.openexchange.push.ms;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
@@ -152,7 +153,7 @@ public class PushMsHandler implements EventHandler {
             }
             break;
         default:
-            LOG.warn("Got event with unimplemented module: {}", module);
+            LOG.warn("Got event with unimplemented module: {}", I(module));
         }
     }
 

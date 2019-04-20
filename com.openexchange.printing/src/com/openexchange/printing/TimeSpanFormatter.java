@@ -81,21 +81,21 @@ public class TimeSpanFormatter extends DateFormatter {
 			endDate = new Date(endDate.getTime() - 1000);
 		}
 
-		if (differentDays(startDate, endDate)) {
-			if (isFullTime) {
-				return String.format("%s - %s", formatDate(startDate, utc),
-						formatDate(endDate, utc));
-			} else {
-				return String.format("%s - %s", formatDate(startDate),
-						formatDate(endDate));
-			}
-		} else {
+		if (!differentDays(startDate, endDate)) {
 			return formatDate(startDate);
 		}
+
+        if (isFullTime) {
+        	return String.format("%s - %s", formatDate(startDate, utc),
+        			formatDate(endDate, utc));
+        }
+
+        return String.format("%s - %s", formatDate(startDate),
+        		formatDate(endDate));
 	}
 	public String formatDate(Map<String, Object> appointment) {
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
+		Date startDate = new Date(((Long) appointment.get("start_date")).longValue());
+		Date endDate = new Date(((Long) appointment.get("end_date")).longValue());
 		return formatDate(startDate, endDate, isFullTime());
 	}
 
@@ -103,8 +103,8 @@ public class TimeSpanFormatter extends DateFormatter {
 		if (isFullTime()) {
 			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
 		}
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
+		Date startDate = new Date(((Long) appointment.get("start_date")).longValue());
+		Date endDate = new Date(((Long) appointment.get("end_date")).longValue());
 		return formatInterval(startDate, endDate, isFullTime());
 	}
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.push.udp.PushChannels.ChannelType.EXTERNAL;
 import static com.openexchange.push.udp.PushChannels.ChannelType.INTERNAL;
 import java.nio.charset.StandardCharsets;
@@ -407,7 +408,7 @@ public class PushOutputQueue implements Runnable {
     @Override
     public void run() {
         while (isRunning) {
-            LOG.debug("get push objects from queue: {}", queue.size());
+            LOG.debug("get push objects from queue: {}", I(queue.size()));
 
             try {
                 // Breaks IBM Java < 1.5.0_sr9

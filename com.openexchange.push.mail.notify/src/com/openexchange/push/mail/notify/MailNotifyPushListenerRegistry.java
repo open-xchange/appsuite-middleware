@@ -549,7 +549,7 @@ public final class MailNotifyPushListenerRegistry {
             String loginInfo = user.getLoginInfo();
             if (loginInfo != null) {
                 mboxIds.add(loginInfo.toLowerCase());
-                LOG.debug("Added login info from user with id {} in context {}.", userId, contextId);
+                LOG.debug("Added login info from user with id {} in context {}.", I(userId), I(contextId));
             }
         }
         return mboxIds;
