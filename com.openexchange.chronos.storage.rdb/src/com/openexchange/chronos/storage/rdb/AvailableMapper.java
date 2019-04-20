@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -138,7 +139,7 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
 
             @Override
             public void set(Available object, Integer value) throws OXException {
-                object.setId(Integer.toString(value));
+                object.setId(Integer.toString(value.intValue()));
             }
 
             @Override
@@ -161,12 +162,12 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
 
             @Override
             public void set(Available object, Integer value) throws OXException {
-                object.setCalendarUser(value);
+                object.setCalendarUser(value.intValue());
             }
 
             @Override
             public Integer get(Available object) {
-                return object.getCalendarUser();
+                return I(object.getCalendarUser());
             }
 
             @Override
@@ -292,7 +293,7 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
             @Override
             public Long get(Available object) {
                 Date created = object.getCreated();
-                return created == null ? null : created.getTime();
+                return created == null ? null : L(created.getTime());
             }
 
             @Override
@@ -309,12 +310,12 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
 
             @Override
             public void set(Available object, Long value) throws OXException {
-                object.setLastModified(value == null ? null : new Date(value));
+                object.setLastModified(value == null ? null : new Date(value.longValue()));
             }
 
             @Override
             public Long get(Available object) {
-                return object.getLastModified().getTime();
+                return L(object.getLastModified().getTime());
             }
 
             @Override
@@ -332,7 +333,6 @@ public class AvailableMapper extends DefaultDbMapper<Available, AvailableField> 
             @Override
             public void set(Available object, String value) throws OXException {
                 object.setDescription(value);
-                ;
             }
 
             @Override

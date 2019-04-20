@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -197,7 +198,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess i
     private String getUserKey() throws OXException {
         String key = account.getInternalConfiguration().optString(SchedJoulesFields.USER_KEY);
         if (Strings.isEmpty(key)) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(account.getAccountId(), session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(I(account.getAccountId()), I(session.getUserId()), I(session.getContextId()));
         }
         return key;
     }

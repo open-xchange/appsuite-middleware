@@ -58,6 +58,8 @@ import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.IT
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
 import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -166,7 +168,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
          */
         JSONObject userConfig = settings.getConfig();
         if (null == userConfig) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(I(-1), I(session.getUserId()), I(session.getContextId()));
         }
         String locale = getLocale(session, userConfig);
         int itemId = getItemId(session, userConfig);
@@ -181,9 +183,9 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         CalendarSettings proposedSettings = new CalendarSettings();
         JSONObject proposedConfig = new JSONObject();
         ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
-        proposedConfig.putSafe(ITEM_ID, itemId);
+        proposedConfig.putSafe(ITEM_ID, I(itemId));
         proposedConfig.putSafe(LOCALE, locale);
-        proposedConfig.putSafe(REFRESH_INTERVAL, refreshInterval);
+        proposedConfig.putSafe(REFRESH_INTERVAL, L(refreshInterval));
         if (null != color) {
             proposedExtendedProperties.add(COLOR(color, false));
         }
@@ -209,7 +211,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
         String locale = getLocale(session, userConfig);
         userConfig.putSafe(SchedJoulesFields.LOCALE, locale);
-        userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, getRefreshInterval(session, userConfig));
+        userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, L(getRefreshInterval(session, userConfig)));
 
         JSONObject item = fetchItem(session.getContextId(), getItemId(session, userConfig), locale);
         /*
@@ -222,7 +224,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         }
         Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
         if (null != usedForSync && CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync.booleanValue());
+            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync.booleanValue()));
         }
         try {
             if (Strings.isNotEmpty(settings.getName())) {
@@ -310,7 +312,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
                 return true;
             }
         } catch (MalformedURLException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(e, account.getAccountId());
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(e, I(account.getAccountId()));
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -359,7 +361,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     private int getItemId(Session session, JSONObject userConfig) throws OXException {
         int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
         if (0 == itemId) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(I(-1), I(session.getUserId()), I(session.getContextId()));
         }
         return itemId;
     }
@@ -375,7 +377,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     private long getRefreshInterval(Session session, JSONObject userConfig) throws OXException {
         long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(I(-1), I(session.getUserId()), I(session.getContextId()));
         }
         return refreshInterval;
     }
@@ -393,17 +395,17 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             SchedJoulesService schedJoulesService = Services.getService(SchedJoulesService.class);
             JSONValue jsonValue = schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
             if (!jsonValue.isObject()) {
-                throw SchedJoulesProviderExceptionCodes.PAGE_DOES_NOT_DENOTE_TO_JSON.create(itemId);
+                throw SchedJoulesProviderExceptionCodes.PAGE_DOES_NOT_DENOTE_TO_JSON.create(I(itemId));
             }
 
             JSONObject page = jsonValue.toObject();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
-                throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
+                throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(I(itemId));
             }
             return page;
         } catch (OXException e) {
             if (SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
-                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, itemId);
+                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, I(itemId));
             }
             throw e;
         }

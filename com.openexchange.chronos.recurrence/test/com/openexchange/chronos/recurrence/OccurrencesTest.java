@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import java.util.Iterator;
@@ -114,7 +115,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
-        Iterator<Event> instances = service.calculateInstances(master, null, null, 3);
+        Iterator<Event> instances = service.calculateInstances(master, null, null, I(3));
         int count = 0;
         while (instances.hasNext()) {
             Event instance = instances.next();
@@ -258,7 +259,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
-        Iterator<Event> instances = service.calculateInstances(master, getCal("03.10.2008 14:00:00"), getCal("07.10.2008 17:00:00"), 3);
+        Iterator<Event> instances = service.calculateInstances(master, getCal("03.10.2008 14:00:00"), getCal("07.10.2008 17:00:00"), I(3));
         int count = 0;
         outer: while (instances.hasNext()) {
             Event instance = instances.next();
@@ -320,7 +321,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
-        Iterator<Event> instances = service.calculateInstances(master, getCal(leftBoundary), null, 1);
+        Iterator<Event> instances = service.calculateInstances(master, getCal(leftBoundary), null, I(1));
         int count = 0;
         while (instances.hasNext()) {
             Event instance = instances.next();
@@ -384,7 +385,7 @@ public class OccurrencesTest extends AbstractSingleTimeZoneTest {
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
 
-        Iterator<Event> instances = service.calculateInstances(master, null, getCal(rightBoundary), 1);
+        Iterator<Event> instances = service.calculateInstances(master, null, getCal(rightBoundary), I(1));
         int count = 0;
         while (instances.hasNext()) {
             Event instance = instances.next();

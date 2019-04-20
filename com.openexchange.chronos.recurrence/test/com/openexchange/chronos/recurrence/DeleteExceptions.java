@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -166,7 +167,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         deleteExceptions.add(new DefaultRecurrenceId(DT("03.10.2008 14:45:00", tz, false)));
         master.setDeleteExceptionDates(deleteExceptions);
 
-        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, 3, null);
+        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, I(3), null);
         int count = 0;
         while (instances.hasNext()) {
             Event instance = instances.next();
@@ -238,7 +239,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         deleteExceptions.add(new DefaultRecurrenceId(DT("09.10.2008 14:45:00", tz, false)));
         master.setDeleteExceptionDates(deleteExceptions);
 
-        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, getCal("03.10.2008 14:00:00"), getCal("10.10.2008 17:00:00"), 3, null);
+        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, getCal("03.10.2008 14:00:00"), getCal("10.10.2008 17:00:00"), I(3), null);
         int count = 0;
         outer: while (instances.hasNext()) {
             Event instance = instances.next();
@@ -272,7 +273,7 @@ public class DeleteExceptions extends AbstractSingleTimeZoneTest {
         deleteExceptions.add(new DefaultRecurrenceId(DT("03.10.2008 14:45:00", tz, false)));
         master.setDeleteExceptionDates(deleteExceptions);
 
-        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, 3, null);
+        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, I(3), null);
         assertFalse("Didn't expect any occurrences at all", instances.hasNext());
         try {
             instances.next();

@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding.plist;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -291,7 +292,7 @@ public class PlistResult implements Result {
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         if (smsRemaining == 2) {
             int hours = smsBucketService.getRefreshInterval(session);
-            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
+            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(I(hours)));
         }
 
         return resultObject;

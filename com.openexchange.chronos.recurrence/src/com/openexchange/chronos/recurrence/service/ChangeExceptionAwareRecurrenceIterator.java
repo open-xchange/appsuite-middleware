@@ -79,7 +79,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
     private int count = 0;
 
     public ChangeExceptionAwareRecurrenceIterator(RecurrenceConfig config, Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) throws OXException {
-        if (limit != null && limit == 0) {
+        if (limit != null && limit.intValue() == 0) {
             //Nothing to do.
             return;
         }
@@ -134,7 +134,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
     }
 
     private void innerNext() {
-        if (limit != null && count >= limit) {
+        if (limit != null && count >= limit.intValue()) {
             // Reached limit
             next = null;
             return;
