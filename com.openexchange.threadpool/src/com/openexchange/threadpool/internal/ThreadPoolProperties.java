@@ -49,6 +49,9 @@
 
 package com.openexchange.threadpool.internal;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -244,7 +247,7 @@ public final class ThreadPoolProperties {
         }
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolProperties.class);
         final String ls = System.getProperty("line.separator");
-        LOG.info("Thread Pool Configuration:\n\tcorePoolSize={}{}\tenforceCorePoolSize={}{}\tprestartAllCoreThreads={}{}\tkeepAliveTime={}sec{}\tworkQueue={}{}\trefusedExecutionBehavior={}", corePoolSize, ls, enforceCorePoolSize, ls, prestartAllCoreThreads, ls, keepAliveTime, ls, workQueue, ls, refusedExecutionBehavior);
+        LOG.info("Thread Pool Configuration:\n\tcorePoolSize={}{}\tenforceCorePoolSize={}{}\tprestartAllCoreThreads={}{}\tkeepAliveTime={}sec{}\tworkQueue={}{}\trefusedExecutionBehavior={}", I(corePoolSize), ls, B(enforceCorePoolSize), ls, B(prestartAllCoreThreads), ls, L(keepAliveTime), ls, workQueue, ls, refusedExecutionBehavior);
         return this;
     }
 

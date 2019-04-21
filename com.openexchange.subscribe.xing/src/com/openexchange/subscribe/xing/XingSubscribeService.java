@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.xing;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,11 +231,11 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
                     offset += chunk.size();
                 }
                 // All retrieved
-                LOG.info("Going to convert {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
+                LOG.info("Going to convert {} XING contacts for user {} in context {}", I(total), I(session.getUserId()), I(session.getContextId()));
                 final Map<String, String> photoUrlsMap = new HashMap<String, String>(total);
                 final PhotoHandler photoHandler = new CollectingPhotoHandler(photoUrlsMap);
                 final List<Contact> retval = convert(chunk, photoHandler, subscription, session);
-                LOG.info("Converted {} XING contacts for user {} in context {}", total, session.getUserId(), session.getContextId());
+                LOG.info("Converted {} XING contacts for user {} in context {}", I(total), I(session.getUserId()), I(session.getContextId()));
 
                 // TODO: Schedule a separate task to fill photos
 
@@ -252,7 +253,7 @@ public class XingSubscribeService extends AbstractOAuthSubscribeService {
                         final List<User> chunk = xingAPI.getContactsFrom(userId, remain > maxLimit ? maxLimit : remain, off, null, userFields).getUsers();
                         // Store them
                         final List<Contact> convertees = convert(chunk, loadingPhotoHandler, subscription, session);
-                        LOG.info("Converted {} XING contacts for user {} in context {}", chunk.size(), session.getUserId(), session.getContextId());
+                        LOG.info("Converted {} XING contacts for user {} in context {}", I(chunk.size()), I(session.getUserId()), I(session.getContextId()));
                         folderUpdater.save(new SearchIteratorDelegator<Contact>(convertees), subscription);
                         // Next chunk...
                         off += chunk.size();

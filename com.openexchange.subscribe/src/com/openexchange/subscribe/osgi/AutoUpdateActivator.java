@@ -84,8 +84,8 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoUpdateActivator.class);
 
-    private static final AtomicReference<OSGiSubscriptionSourceDiscoveryCollector> COLLECTOR_REFERENCE = new AtomicReference<>();
-    
+    static final AtomicReference<OSGiSubscriptionSourceDiscoveryCollector> COLLECTOR_REFERENCE = new AtomicReference<>();
+
     /**
      * Sets the collector to use
      *
@@ -95,8 +95,8 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         COLLECTOR_REFERENCE.set(collector);
     }
 
-    private static final AtomicReference<SubscriptionExecutionServiceImpl> EXECUTOR_REFERENCE = new AtomicReference<>();
-    
+    static final AtomicReference<SubscriptionExecutionServiceImpl> EXECUTOR_REFERENCE = new AtomicReference<>();
+
     /**
      * Sets the executor to use.
      *
@@ -105,7 +105,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
     public static void setExecutor(SubscriptionExecutionServiceImpl executor) {
         EXECUTOR_REFERENCE.set(executor);
     }
-    
+
     // -------------------------------------------------------------------------------
 
     @Override
@@ -117,8 +117,8 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
     protected void startBundle() throws Exception {
         registerService(LoginHandlerService.class, new SubscriptionLoginHandler());
     }
-    
-    private static final Long DEFAULT_INTERVAL = Long.valueOf(24 * 60 * 60 * 1000l);
+
+    static final Long DEFAULT_INTERVAL = Long.valueOf(24 * 60 * 60 * 1000l);
 
     private final class SubscriptionLoginHandler implements LoginHandlerService, NonTransient {
 
@@ -133,16 +133,16 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         public void handleLogin(LoginResult login) {
             try {
                 ConfigView view = getService(ConfigViewFactory.class).getView(login.getUser().getId(), login.getContext().getContextId());
-                if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, false)) {
+                if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, Boolean.FALSE).booleanValue()) {
                     return;
                 }
-                
+
                 OSGiSubscriptionSourceDiscoveryCollector collector = COLLECTOR_REFERENCE.get();
                 if (collector == null) {
                     LOG.warn("Autoupdate of subscriptions enabled but collector not available.");
                     return;
                 }
-                
+
                 SubscriptionExecutionServiceImpl executor = EXECUTOR_REFERENCE.get();
                 if (executor == null) {
                     LOG.warn("Autoupdate of subscriptions enabled but executor not available.");
@@ -188,7 +188,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
         /**
          * Builds the {@link RequestContext} from the specified {@link LoginResult}
-         * 
+         *
          * @param login The {@link LoginResult} from which to build the {@link RequestContext}
          * @return The built {@link RequestContext}
          */
@@ -202,7 +202,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
         /**
          * Creates and returns the {@link HostData} out of the specified {@link LoginResult}
-         * 
+         *
          * @param login The {@link LoginResult} from which to create the {@link HostData}
          * @return The {@link HostData}
          */

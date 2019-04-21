@@ -49,6 +49,7 @@
 
 package com.openexchange.twitter.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.twitter.internal.TwitterUtils.handleTwitterException;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -227,7 +228,7 @@ public final class TwitterServiceImpl implements TwitterService {
                 final int size = forms.size();
                 for (int i = 0; null == loginForm && i < size; i++) {
                     final HtmlForm form = iter.next();
-                    LOG.debug("Forms action attribute / index is : {} / {}, should be {} / {}", form.getActionAttribute(), i, actionOfLoginForm, formIndex);
+                    LOG.debug("Forms action attribute / index is : {} / {}, should be {} / {}", form.getActionAttribute(), I(i), actionOfLoginForm, I(formIndex));
                     if (formIndex == i) {
                         if ((actionOfLoginForm.equals(form.getActionAttribute()) || idOfLoginForm.equals(form.getId())) && form.getInputsByName(nameOfUserField) != null) {
                             loginForm = form;

@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -131,7 +132,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     protected boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
-        } 
+        }
         return o1.equals(o2);
     }
 
@@ -139,7 +140,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     public void closeSession(final Object session) {
         if(session instanceof Map<?,?>) {
             @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
-            Session ses = (Session) userInfo.get(SESSION);
+            Session ses = (Session) userInfo.get(I(SESSION));
             ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
         }
     }
@@ -203,7 +204,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @SuppressWarnings("unchecked")
     private Object getFromSession(final int key, final Object session) {
-        return ((Map<Integer, Object>) session).get(key);
+        return ((Map<Integer, Object>) session).get(I(key));
     }
 
     @Override
@@ -211,10 +212,10 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         final TargetFolderSession session = new TargetFolderSession(target);
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
-        userInfo.put(SQL_INTERFACE, contactService);
-        userInfo.put(TARGET, target);
+        userInfo.put(I(SQL_INTERFACE), contactService);
+        userInfo.put(I(TARGET), target);
         session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
-        userInfo.put(SESSION, session);
+        userInfo.put(I(SESSION), session);
         return userInfo;
     }
 
