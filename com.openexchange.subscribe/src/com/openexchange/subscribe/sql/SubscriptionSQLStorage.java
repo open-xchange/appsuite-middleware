@@ -655,9 +655,9 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 throw SQLException.create(e);
             }
             if (modified) {
-                dbProvider.releaseWriteConnectionAfterReading(ctx, writeConnection);
-            } else {
                 dbProvider.releaseWriteConnection(ctx, writeConnection);
+            } else {
+                dbProvider.releaseWriteConnectionAfterReading(ctx, writeConnection);
             }
         }
     }
