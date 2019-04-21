@@ -89,7 +89,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
     @Override
@@ -103,7 +103,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
@@ -117,7 +117,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -128,7 +128,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
             if (null == contextId) {
                 System.out.println(rmiService.sanitizeMimeTypesInDatabaseFor(-1, invalids));
             } else {
-                System.out.println(rmiService.sanitizeMimeTypesInDatabaseFor(contextId, invalids));
+                System.out.println(rmiService.sanitizeMimeTypesInDatabaseFor(contextId.intValue(), invalids));
             }
             error = false;
         } catch (final RemoteException e) {
@@ -147,7 +147,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
      */
     @Override
@@ -157,7 +157,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -170,7 +170,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
         if (cmd.hasOption('c')) {
             String contextVal = cmd.getOptionValue('c');
             try {
-                contextId = Integer.parseInt(contextVal.trim());
+                contextId = Integer.valueOf(contextVal.trim());
             } catch (NumberFormatException e) {
                 System.err.println("Cannot parse '" + contextVal + "' as a context id");
                 printHelp();
@@ -195,7 +195,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getFooter()
      */
     @Override
@@ -205,7 +205,7 @@ public final class SanitizeFileMimeTypesCLT extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getName()
      */
     @Override

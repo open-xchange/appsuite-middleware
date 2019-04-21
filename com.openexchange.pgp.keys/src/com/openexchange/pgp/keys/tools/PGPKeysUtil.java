@@ -49,6 +49,7 @@
 
 package com.openexchange.pgp.keys.tools;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Objects;
@@ -415,7 +416,7 @@ public final class PGPKeysUtil {
         PGPSignatureGenerator generator = new PGPSignatureGenerator(
             new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
         generator.init(PGPSignature.POSITIVE_CERTIFICATION, privateKey);
-        PGPSignatureSubpacketGenerator signhashgen = createSignatureGeneratorFromPrior (publicKey, privateKey.getKeyID());
+        PGPSignatureSubpacketGenerator signhashgen = createSignatureGeneratorFromPrior (publicKey, L(privateKey.getKeyID()));
         generator.setHashedSubpackets(signhashgen.generate());
         PGPSignature certification = generator.generateCertification(userId, publicKey);
         return PGPPublicKey.addCertification(publicKey, userId, certification);
@@ -475,7 +476,7 @@ public final class PGPKeysUtil {
             }
             while (sigs.hasNext()) {
                 PGPSignature sig = sigs.next();
-                if (sig.isCertification() && sig.getKeyID() == keyId) {
+                if (sig.isCertification() && sig.getKeyID() == keyId.longValue()) {
                     PGPSignatureSubpacketVector vectors = sig.getHashedSubPackets();
                     if (vectors != null) {
                         if (vectors.isPrimaryUserID()) {

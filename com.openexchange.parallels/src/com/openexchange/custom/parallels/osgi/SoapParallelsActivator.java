@@ -1,6 +1,7 @@
 
 package com.openexchange.custom.parallels.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -103,7 +104,7 @@ public class SoapParallelsActivator extends HousekeepingActivator {
         registerService(HostnameService.class.getName(), new ParallelsHostnameService(), null);
         LOG.debug("Successfully registered POA hostname/directlinks plugin");
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.MAX_VALUE);
+        props.put(Constants.SERVICE_RANKING, I(Integer.MAX_VALUE));
         registerService(MailResolver.class, new ParallelsMailMappingService(this), props);
         LOG.debug("Successfully registered POA Mailmappings plugin");
         // Register SOAP service

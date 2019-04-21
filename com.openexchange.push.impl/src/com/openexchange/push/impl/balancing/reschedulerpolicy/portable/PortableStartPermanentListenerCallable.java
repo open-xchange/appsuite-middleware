@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.LinkedList;
@@ -131,7 +132,7 @@ public class PortableStartPermanentListenerCallable extends AbstractCustomPortab
         }
 
         List<PermanentListenerJob> startedOnes = PushManagerRegistry.getInstance().applyInitialListeners(pushUsers, nanos);
-        LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", HOSTNAME, startedOnes.isEmpty() ? "none" : startedOnes.size());
+        LOG.info("This cluster member \"{}\" now runs permanent listeners for {} users", HOSTNAME, startedOnes.isEmpty() ? "none" : I(startedOnes.size()));
 
         return Boolean.TRUE;
     }

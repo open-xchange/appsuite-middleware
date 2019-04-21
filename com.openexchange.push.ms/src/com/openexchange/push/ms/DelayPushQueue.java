@@ -49,6 +49,7 @@
 
 package com.openexchange.push.ms;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,7 @@ public class DelayPushQueue implements Runnable {
         final BufferingQueue<PushMsObject> delayQueue = this.delayQueue;
         final List<PushMsObject> objects = new ArrayList<PushMsObject>(16);
         while (isRunning.get()) {
-            LOG.debug("Awaiting push objects from DelayQueue with current size: {}", delayQueue.size());
+            LOG.debug("Awaiting push objects from DelayQueue with current size: {}", I(delayQueue.size()));
             try {
                 objects.clear();
                 // Blocking wait for at least 1 DelayedPushMsObject to expire.

@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.config.lean.Property;
 
@@ -66,7 +68,7 @@ public enum SchedJoulesProperty implements Property {
      * The refresh interval of subscriptions in milliseconds.
      * Defaults to 86400000 (1 day)
      */
-    refreshInterval(TimeUnit.DAYS.toMillis(1)),
+    refreshInterval(L(TimeUnit.DAYS.toMillis(1))),
     /**
      * The host to access schedjoules.
      * Defaults to 'api.schedjoules.com'<br>
@@ -83,7 +85,7 @@ public enum SchedJoulesProperty implements Property {
      * Defines the connection timeout (in msec) of a connection to the SchedJoules servers.
      * Defaults to 30000
      */
-    connectionTimeout(30000),
+    connectionTimeout(I(30000)),
     /**
      * Defines a comma separated blacklist for itemIds of SchedJoules calendars and pages that should be hidden from
      * the end user.
@@ -128,7 +130,7 @@ public enum SchedJoulesProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
     @Override
@@ -138,7 +140,7 @@ public enum SchedJoulesProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getDefaultValue()
      */
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding.plist;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -227,16 +228,26 @@ public class PlistResult implements Result {
     }
 
     private ThresholdFileHolder sign(ThresholdFileHolder fileHolder, Session session) throws OXException, IOException {
-        PListSigner signer = Services.getService(PListSigner.class);
-        IFileHolder signed = signer.signPList(fileHolder, session);
+        ThresholdFileHolder tfh = null;
+        boolean error = true;
+        try {
+            PListSigner signer = Services.getService(PListSigner.class);
+            IFileHolder signed = signer.signPList(fileHolder, session);
 
-        if (signed instanceof ThresholdFileHolder) {
-            return (ThresholdFileHolder) signed;
+            if (signed instanceof ThresholdFileHolder) {
+                error = false;
+                return (ThresholdFileHolder) signed;
+            }
+
+            tfh = new ThresholdFileHolder(signed);
+            signed.close();
+            error = false;
+            return tfh;
+        } finally {
+            if (error) {
+                Streams.close(tfh, fileHolder);
+            }
         }
-
-        ThresholdFileHolder tfh = new ThresholdFileHolder(signed);
-        signed.close();
-        return tfh;
     }
 
     // --------------------------------------------- SMS utils --------------------------------------------------------------
@@ -291,7 +302,7 @@ public class PlistResult implements Result {
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         if (smsRemaining == 2) {
             int hours = smsBucketService.getRefreshInterval(session);
-            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
+            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(I(hours)));
         }
 
         return resultObject;

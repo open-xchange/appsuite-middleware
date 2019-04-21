@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.connect;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
@@ -269,7 +270,7 @@ public final class POP3StoreConnector {
             try {
                 staticCapabilities = POP3CapabilityCache.getCapability(InetAddress.getByName(IDNA.toASCII(server)), port, pop3Config.isSecure(), pop3ConfProps, pop3Config.getLogin());
             } catch (final Exception e) {
-                LOG.warn("Couldn't detect capabilities from POP3 server \"{}\" with login \"{}\" (user={}, context={})", server, pop3Config.getLogin(), session.getUserId(), session.getContextId(), e);
+                LOG.warn("Couldn't detect capabilities from POP3 server \"{}\" with login \"{}\" (user={}, context={})", server, pop3Config.getLogin(), I(session.getUserId()), I(session.getContextId()), e);
                 staticCapabilities = POP3CapabilityCache.getDeaultCapabilities();
             }
             /*

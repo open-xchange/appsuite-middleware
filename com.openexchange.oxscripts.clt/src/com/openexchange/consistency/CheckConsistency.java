@@ -166,7 +166,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
     @Override
@@ -200,7 +200,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -222,12 +222,12 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
         ConsistencyRMIService rmiService = getRmiStub(optRmiHostName, ConsistencyRMIService.RMI_NAME);
         switch (action) {
             case check_configdb:
-                params.add(false);
+                params.add(Boolean.FALSE);
                 printList(rmiService.checkOrRepairConfigDB(false));
                 System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
                 break;
             case repair_configdb:
-                params.add(true);
+                params.add(Boolean.TRUE);
                 printList(rmiService.checkOrRepairConfigDB(true));
                 break;
             case list_missing:
@@ -325,7 +325,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /**
      * Lists the missing files
-     * 
+     *
      * @param rmiService The {@link ConsistencyRMIService}
      * @throws RemoteException if a remote error is occurred
      */
@@ -352,7 +352,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /**
      * Lists the unassigned files
-     * 
+     *
      * @param rmiService The {@link ConsistencyRMIService}
      * @throws RemoteException if a remote error is occurred
      */
@@ -380,7 +380,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /**
      * Performs a repair
-     * 
+     *
      * @param rmiService The {@link ConsistencyRMIService}
      * @throws RemoteException if a remote error is occurred
      */
@@ -513,7 +513,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
 
     /**
      * Prints to the console the specified list of strings
-     * 
+     *
      * @param results the list to print
      */
     private void printList(List<String> results) {
@@ -525,7 +525,7 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
     /**
      * Converts and returns the specified {@link Set} of {@link ConsistencyEntity}s
      * as a {@link List} of Strings.
-     * 
+     *
      * @param keySet The {@link Set} to convert
      * @return The converted set as a {@link List}
      */

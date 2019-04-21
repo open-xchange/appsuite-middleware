@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -125,7 +126,7 @@ public class PushRequest {
 
                 registerObj = new RegisterObject(userId, contextId, hostAddress.getHostAddress(), port, false);
 
-                    LOG.debug("register package: user id={},host address={},port={}", userId, hostAddress, port);
+                    LOG.debug("register package: user id={},host address={},port={}", I(userId), hostAddress, I(port));
 
                 RegisterHandler.addRegisterObject(registerObj);
                 PushOutputQueue.add(registerObj, true);

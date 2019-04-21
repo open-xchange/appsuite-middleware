@@ -49,6 +49,7 @@
 
 package com.openexchange.plist.xml;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.util.Date;
 import java.util.Formatter;
@@ -141,9 +142,9 @@ public final class Utility {
             for (int i = 0; i < len; i = s.offsetByCodePoints(i, 1)) {
                 int c = s.codePointAt(i);
                 if (c < 32 || c > 126 || c == '&' || c == '<' || c == '>') {
-                    formatter.format("&#x%x;", c);
+                    formatter.format("&#x%x;", I(c));
                 } else {
-                    formatter.format("%c", c);
+                    formatter.format("%c", I(c));
                 }
             }
             return formatter.toString();

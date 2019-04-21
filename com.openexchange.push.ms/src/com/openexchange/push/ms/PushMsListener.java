@@ -49,6 +49,7 @@
 
 package com.openexchange.push.ms;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
@@ -117,7 +118,7 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
                         final Dictionary<String, RemoteEvent> ht = new Hashtable<String, RemoteEvent>(1);
                         ht.put(RemoteEvent.EVENT_KEY, remEvent);
                         eventAdmin.postEvent(new Event(topicName, ht));
-                        LOG.debug("Posted remote event to user {} in context {}: {}", user, pushObj.getContextId(), remEvent);
+                        LOG.debug("Posted remote event to user {} in context {}: {}", I(user), I(pushObj.getContextId()), remEvent);
                     }
                 }
             } else {

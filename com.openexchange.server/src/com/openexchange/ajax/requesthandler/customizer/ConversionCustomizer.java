@@ -82,10 +82,7 @@ public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCus
     public AJAXRequestResult outgoing(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
         final String requestedFormat = requestData.getFormat();
         final String currentFormat = result.getFormat();
-        if(null == currentFormat) {
-            return null;
-        }
-        if (currentFormat.equals(requestedFormat)) {
+        if (null == currentFormat || currentFormat.equals(requestedFormat)) {
             return result;
         }
         if (result.getType() == ResultType.HTTP_ERROR) {

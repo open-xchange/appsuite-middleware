@@ -49,6 +49,7 @@
 
 package com.openexchange.principleusecount.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -105,7 +106,7 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
     @Override
     public void set(Session session, int principal, int value) throws OXException {
         try {
-            Task<Void> task = new PrincipalUseCountTask(session, principal, value);
+            Task<Void> task = new PrincipalUseCountTask(session, principal, I(value));
             ThreadPools.submitElseExecute(task);
         } catch (RuntimeException e) {
             throw PrincipalUseCountExceptionCode.UNKNOWN.create(e, e.getMessage());
@@ -135,16 +136,16 @@ public class PrincipalUseCountServiceImpl implements PrincipalUseCountService {
             stmt.setInt(index++, session.getContextId());
             stmt.setInt(index++, session.getUserId());
             for (Integer id : principals) {
-                stmt.setInt(index++, id);
+                stmt.setInt(index++, id.intValue());
             }
             rs = stmt.executeQuery();
             Map<Integer, Integer> result = new HashMap<>();
             // Initialize result map with 0 values
             for (Integer id : principals) {
-                result.put(id, 0);
+                result.put(id, I(0));
             }
             while (rs.next()) {
-                result.put(rs.getInt("principal"), rs.getInt("value"));
+                result.put(I(rs.getInt("principal")), I(rs.getInt("value")));
             }
             Map<Integer, Integer> sorted = result.entrySet().stream().sorted(Entry.comparingByValue()).collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2, LinkedHashMap::new));
             return sorted;

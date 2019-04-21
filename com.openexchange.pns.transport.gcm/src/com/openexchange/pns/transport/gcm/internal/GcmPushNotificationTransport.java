@@ -362,7 +362,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     private Message checkMessage(Message message) throws OXException {
         int currentLength = PushNotifications.getPayloadLength(message.toString());
         if (currentLength > MAX_PAYLOAD_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_PAYLOAD_SIZE, currentLength);
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(I(MAX_PAYLOAD_SIZE), I(currentLength));
         }
         return message;
     }

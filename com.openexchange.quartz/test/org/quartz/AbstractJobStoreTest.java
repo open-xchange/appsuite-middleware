@@ -16,6 +16,7 @@
 
 package org.quartz;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -328,7 +329,7 @@ public abstract class AbstractJobStoreTest {
             // Manually trigger the first fire time computation that scheduler would do. Otherwise
             // the store.acquireNextTriggers() will not work properly.
             Date fireTime = trigger.computeFirstFireTime(null);
-            Assert.assertEquals(true, fireTime != null);
+            Assert.assertEquals(Boolean.TRUE, B(fireTime != null));
 
             store.storeJobAndTrigger(job, trigger);
         }
@@ -368,7 +369,7 @@ public abstract class AbstractJobStoreTest {
             // Manually trigger the first fire time computation that scheduler would do. Otherwise
             // the store.acquireNextTriggers() will not work properly.
             Date fireTime = trigger.computeFirstFireTime(null);
-            Assert.assertEquals(true, fireTime != null);
+            Assert.assertEquals(Boolean.TRUE, B(fireTime != null));
 
             store.storeJobAndTrigger(job, trigger);
         }

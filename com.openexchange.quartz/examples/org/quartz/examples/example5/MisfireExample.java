@@ -17,6 +17,7 @@
 
 package org.quartz.examples.example5;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.quartz.DateBuilder.nextGivenSecondDate;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
@@ -77,7 +78,7 @@ public class MisfireExample {
         // (but it will delay for ten seconds)
         JobDetail job = newJob(StatefulDumbJob.class)
             .withIdentity("statefulJob1", "group1")
-            .usingJobData(StatefulDumbJob.EXECUTION_DELAY, 10000L)
+            .usingJobData(StatefulDumbJob.EXECUTION_DELAY, L(10000L))
             .build();
 
         SimpleTrigger trigger = newTrigger()
@@ -98,7 +99,7 @@ public class MisfireExample {
         // (but it will delay for ten seconds - and therefore purposely misfire after a few iterations)
         job = newJob(StatefulDumbJob.class)
             .withIdentity("statefulJob2", "group1")
-            .usingJobData(StatefulDumbJob.EXECUTION_DELAY, 10000L)
+            .usingJobData(StatefulDumbJob.EXECUTION_DELAY, L(10000L))
             .build();
 
         trigger = newTrigger()

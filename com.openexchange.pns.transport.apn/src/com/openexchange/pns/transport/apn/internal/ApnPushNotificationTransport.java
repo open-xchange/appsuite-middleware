@@ -49,6 +49,8 @@
 
 package com.openexchange.pns.transport.apn.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -348,7 +350,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                         Device device = notification.getDevice();
                         int removed = removeSubscriptions(device);
                         if (0 < removed) {
-                            LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                            LOG.info("Removed {} subscriptions for device with token: {}.", I(removed), device.getToken());
                         }
                     }
                 }
@@ -402,7 +404,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         int payloadLength = PushNotifications.getPayloadLength(payload.toString());
         // Check payload length
         if (payloadLength > ApnsConstants.APNS_MAX_PAYLOAD_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnsConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(I(ApnsConstants.APNS_MAX_PAYLOAD_SIZE), I(payloadLength));
         }
         try {
             return new PayloadPerDevice(payload, match.getToken());
@@ -498,14 +500,14 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                 for (Device device : devices) {
                     LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
                     int numRemoved = removeSubscriptions(device);
-                    LOG.info("Removed {} subscriptions associated with client {} for device with token: {}.", numRemoved, clientId, device.getToken());
+                    LOG.info("Removed {} subscriptions associated with client {} for device with token: {}.", I(numRemoved), clientId, device.getToken());
                 }
             } else {
                 LOG.info("No devices to unregister received from feedback service for client {}.", clientId);
             }
         }
 
-        LOG.info("Finished processing APNS feedback after {} ms.", (System.currentTimeMillis() - start));
+        LOG.info("Finished processing APNS feedback after {} ms.", L(System.currentTimeMillis() - start));
     }
 
     private int removeSubscriptions(Device device) {

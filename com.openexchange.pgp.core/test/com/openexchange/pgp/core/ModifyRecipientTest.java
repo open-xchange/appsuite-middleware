@@ -104,8 +104,8 @@ public class ModifyRecipientTest extends AbstractPGPTest {
     @Parameters(name = "{index} - Ascii-armored: {0}")
     public static Iterable parameters() {
         return Arrays.asList(new Object[][] {
-            { true /* Runs the tests in ASCII-Armored mode */},
-            { false /* Runs the tests in Binary-Mode */}
+            { Boolean.TRUE /* Runs the tests in ASCII-Armored mode */},
+            { Boolean.FALSE /* Runs the tests in Binary-Mode */}
         });
 
     }

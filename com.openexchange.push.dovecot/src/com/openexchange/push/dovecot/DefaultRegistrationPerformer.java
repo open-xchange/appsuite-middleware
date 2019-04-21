@@ -163,7 +163,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
         DoveAdmDataResponse dataResponse = response.asDataResponse();
         String value = dataResponse.getResults().get(0).getValue("value");
         if (valueToSet.equals(value)) {
-            LOGGER.debug("Successfully detected an existent Dovecot Push for user {} in context {}", registrationContext.getUserId(), registrationContext.getContextId());
+            LOGGER.debug("Successfully detected an existent Dovecot Push for user {} in context {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()));
             return RegistrationResult.successRegistrationResult();
         }
 
@@ -175,7 +175,7 @@ public class DefaultRegistrationPerformer implements RegistrationPerformer {
             return RegistrationResult.failedRegistrationResult(oexc, true, null);
         }
 
-        LOGGER.debug("Successfully registered Dovecot Push for user {} in context {}", registrationContext.getUserId(), registrationContext.getContextId());
+        LOGGER.debug("Successfully registered Dovecot Push for user {} in context {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()));
         return RegistrationResult.successRegistrationResult();
     }
 

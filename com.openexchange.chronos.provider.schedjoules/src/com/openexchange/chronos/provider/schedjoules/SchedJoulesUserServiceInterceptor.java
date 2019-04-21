@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.schedjoules;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
      */
     private static final String LOCALE_PARAMETER = "l";
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link SchedJoulesUserServiceInterceptor}.
@@ -131,7 +132,7 @@ public class SchedJoulesUserServiceInterceptor extends AbstractUserServiceInterc
 
                     CachingCalendarUtils.invalidateCache(account, 0);
                 } catch (JSONException e) {
-                    LOGGER.warn("Invalid/Malformed configuration detected in SchedJoules account '{}' for user '{}' in context '{}'", account.getAccountId(), user.getId(), context.getContextId(), e);
+                    LOGGER.warn("Invalid/Malformed configuration detected in SchedJoules account '{}' for user '{}' in context '{}'", I(account.getAccountId()), I(user.getId()), I(context.getContextId()), e);
                 }
             }
             service.updateAccount(context.getContextId(), user.getId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());

@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -86,7 +87,7 @@ public class PushChannels {
 
         try {
             if (config.isPushEnabled()) {
-                LOG.info("Starting Push Register Socket on Port: {}", serverRegisterPort);
+                LOG.info("Starting Push Register Socket on Port: {}", I(serverRegisterPort));
 
                 if (senderAddress != null) {
                     externalChannel = new DatagramSocket(serverRegisterPort, senderAddress);
@@ -147,7 +148,7 @@ public class PushChannels {
         try {
             getSocket(channel).send(datagramPackage);
         } catch (IOException x) {
-            LOG.error("Could not send package to {}:{} Using {} socket.", host, port, channel, x);
+            LOG.error("Could not send package to {}:{} Using {} socket.", host, I(port), channel, x);
         }
     }
 
