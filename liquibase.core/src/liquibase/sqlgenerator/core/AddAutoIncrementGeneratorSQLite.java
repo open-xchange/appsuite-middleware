@@ -71,8 +71,8 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
             @Override
             public boolean createThisColumn(ColumnConfig column) {
                 if (column.getName().equals(statement.getColumnName())) {
-                    column.setAutoIncrement(true);
-                    column.setConstraints(new ConstraintsConfig().setPrimaryKey(true));
+                    column.setAutoIncrement(Boolean.TRUE);
+                    column.setConstraints(new ConstraintsConfig().setPrimaryKey(Boolean.TRUE));
                     column.setType("INTEGER");
                 }
                 return true;

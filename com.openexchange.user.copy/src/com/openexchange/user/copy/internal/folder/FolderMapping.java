@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.folder;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.user.copy.internal.IntegerToObjectMapping;
 
@@ -64,7 +65,7 @@ public class FolderMapping extends IntegerToObjectMapping<FolderObject> {
      */
     @Override
     public FolderObject getDestination(final FolderObject source) {
-        return getDestinationById(source.getObjectID());
+        return getDestinationById(I(source.getObjectID()));
     }
 
 }

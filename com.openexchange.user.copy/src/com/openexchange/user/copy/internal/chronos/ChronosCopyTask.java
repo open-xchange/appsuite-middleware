@@ -51,6 +51,7 @@ package com.openexchange.user.copy.internal.chronos;
 
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -158,8 +159,8 @@ public class ChronosCopyTask implements CopyUserTaskService {
     @Override
     public ObjectMapping<?> copyUser(Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);
-        final Integer srcUsrId = copyTools.getSourceUserId();
-        final Integer dstUsrId = copyTools.getDestinationUserId();
+        final int srcUsrId = copyTools.getSourceUserId().intValue();
+        final int dstUsrId = copyTools.getDestinationUserId().intValue();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
         Context srcCtx = copyTools.getSourceContext();
@@ -201,7 +202,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
 
         final IntegerMapping mapping = new IntegerMapping();
         for (Entry<String, Event> eventMapping : dstEventMapping.entrySet()) {
-            mapping.addMapping(Integer.parseInt(eventMapping.getKey()), Integer.parseInt(eventMapping.getValue().getId()));
+            mapping.addMapping(Integer.valueOf(eventMapping.getKey()), Integer.valueOf(eventMapping.getValue().getId()));
         }
         return mapping;
     }
@@ -348,7 +349,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
                     alarmList.add(alarm);
                 }
                 //add to inner map
-                alarmsByUser.put(dstUsrId, alarmList);
+                alarmsByUser.put(I(dstUsrId), alarmList);
                 alarmsByUserByEventId.put(dstEventMapping.get(alarmsPerEvent.getKey()).getId(), alarmsByUser);
         }
         return alarmsByUserByEventId;
@@ -398,7 +399,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
             if (null != alarmsByUserByEventId.get(event.getId())) {
                 for (Entry<Integer, List<Alarm>> entry : alarmsByUserByEventId.get(event.getId()).entrySet()) {
                     for (Attendee attendee : attendees.get(event.getId())) {
-                        if (attendee.getEntity() == entry.getKey()) {
+                        if (attendee.getEntity() == entry.getKey().intValue()) {
                             event.setFolderId(attendee.getFolderId());
                         }
                     }

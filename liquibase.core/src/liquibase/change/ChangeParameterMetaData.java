@@ -33,17 +33,17 @@ public class ChangeParameterMetaData {
 
     public static final String COMPUTE = "COMPUTE";
 
-    private Change change;
-    private String parameterName;
-    private String description;
-    private String exampleValue;
-    private String displayName;
+    private final Change change;
+    private final String parameterName;
+    private final String description;
+    private final String exampleValue;
+    private final String displayName;
     private String dataType;
-    private String since;
-    private Set<String> requiredForDatabase;
-    private Set<String> supportedDatabases;
-    private String mustEqualExisting;
-    private LiquibaseSerializable.SerializationType serializationType;
+    private final String since;
+    private final Set<String> requiredForDatabase;
+    private final Set<String> supportedDatabases;
+    private final String mustEqualExisting;
+    private final LiquibaseSerializable.SerializationType serializationType;
 
     public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
@@ -313,7 +313,7 @@ public class ChangeParameterMetaData {
             return exampleValue;
         }
 
-        Map standardExamples = new HashMap();
+        Map<String, String> standardExamples = new HashMap<>();
         standardExamples.put("tableName", "person");
         standardExamples.put("schemaName", "public");
         standardExamples.put("catalogName", "cat");
@@ -345,9 +345,9 @@ public class ChangeParameterMetaData {
         if (dataType.equals("string")) {
             return "A String";
         } else if (dataType.equals("integer")) {
-            return 3;
+            return Integer.valueOf(3);
         } else if (dataType.equals("boolean")) {
-            return true;
+            return Boolean.TRUE;
         } else if (dataType.equals("bigInteger")) {
             return new BigInteger("371717");
         } else if (dataType.equals("list")) {

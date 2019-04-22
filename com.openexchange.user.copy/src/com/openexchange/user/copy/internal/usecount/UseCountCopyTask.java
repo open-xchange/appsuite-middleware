@@ -118,6 +118,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
 
     @Override
     public void done(Map<String, ObjectMapping<?>> copied, boolean failed) {
+        // nothing
     }
 
     private void correctObjectUseCountTable(Connection srcCon, int srcCtxId, int srcUserId, Connection dstCon, int dstCtxId, int dstUserId, ObjectMapping<Integer> contactMapping, ObjectMapping<FolderObject> folderMapping) throws OXException {
@@ -135,14 +136,14 @@ public class UseCountCopyTask implements CopyUserTaskService {
             while (rs.next()) {
                 dstStmt.setInt(1, dstCtxId);
                 dstStmt.setInt(2, dstUserId);
-                FolderObject folderObj = new FolderObject(I(rs.getInt(1)));
+                FolderObject folderObj = new FolderObject(rs.getInt(1));
                 FolderObject destFolderObj = folderMapping.getDestination(folderObj);
                 if (destFolderObj == null) {
                     // skip use counts without folder mapping (probably internal users)
                     continue;
                 }
                 dstStmt.setInt(3, destFolderObj.getObjectID());
-                dstStmt.setInt(4, contactMapping.getDestination(I(rs.getInt(2))));
+                dstStmt.setInt(4, contactMapping.getDestination(I(rs.getInt(2))).intValue());
                 dstStmt.setInt(5, rs.getInt(3));
                 dstStmt.addBatch();
             }

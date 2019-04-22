@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -82,7 +83,7 @@ public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
      */
     @Override
     public T getSource(final int id) {
-        return sourceMapping.get(id);
+        return sourceMapping.get(I(id));
     }
 
     /**

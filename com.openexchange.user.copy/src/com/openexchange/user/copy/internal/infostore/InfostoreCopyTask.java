@@ -49,7 +49,7 @@
 
 package com.openexchange.user.copy.internal.infostore;
 
-import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.user.copy.internal.CopyTools.replaceIdsInQuery;
 import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
 import java.io.InputStream;
@@ -171,23 +171,23 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final CopyTools copyTools = new CopyTools(copied);
         final Context srcCtx = copyTools.getSourceContext();
         final Context dstCtx = copyTools.getDestinationContext();
-        final Integer srcCtxId = copyTools.getSourceContextId();
-        final Integer dstCtxId = copyTools.getDestinationContextId();
-        final Integer dstUsrId = copyTools.getDestinationUserId();
+        final int srcCtxId = copyTools.getSourceContextId().intValue();
+        final int dstCtxId = copyTools.getDestinationContextId().intValue();
+        final int dstUsrId = copyTools.getDestinationUserId().intValue();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
         final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
         final List<Integer> infostoreFolders = detectInfostoreFolders(folderMapping);
 
-        final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, i(srcCtxId));
+        final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, srcCtxId);
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
-        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId, Info.administrative()); // Avoid considering unified quota
+        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId().intValue(), srcCtxId, Info.administrative()); // Avoid considering unified quota
         dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId, Info.administrative()); // Avoid considering unified quota
 
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
-        exchangeFolderIds(originDocuments, folderMapping, dstCon, i(dstCtxId));
-        writeInfostoreDocumentsToDB(originDocuments, dstCon, i(dstCtxId), i(dstUsrId));
+        exchangeFolderIds(originDocuments, folderMapping, dstCon, dstCtxId);
+        writeInfostoreDocumentsToDB(originDocuments, dstCon, dstCtxId, dstUsrId);
 
         return null;
     }
@@ -269,7 +269,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                     try {
                         is = srcFileStorage.getFile(location);
                         if (is == null) {
-                            LOG.warn("Did not find file for infostore document {} ({}).", master.getId(), master.getFileName());
+                            LOG.warn("Did not find file for infostore document {} ({}).", I(master.getId()), master.getFileName());
                             continue;
                         }
 
@@ -354,7 +354,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final List<Integer> ids = new ArrayList<Integer>();
         final List<Integer> folderIds = new ArrayList<Integer>(folderMapping.getSourceKeys());
         for (final Integer sourceId : folderIds) {
-            final FolderObject source = folderMapping.getSource(sourceId);
+            final FolderObject source = folderMapping.getSource(sourceId.intValue());
 
             if (source.getModule() == FolderObject.INFOSTORE) {
                 ids.add(sourceId);
@@ -369,6 +369,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
      */
     @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
+        // Nothing
     }
 
 }

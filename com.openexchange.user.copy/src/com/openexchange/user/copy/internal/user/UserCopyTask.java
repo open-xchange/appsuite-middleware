@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.user;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -122,7 +123,7 @@ public class UserCopyTask implements CopyUserTaskService {
         final CopyTools tools = new CopyTools(copied);
         final Context srcCtx = tools.getSourceContext();
         final Context dstCtx = tools.getDestinationContext();
-        final Integer srcUsrId = tools.getSourceUserId();
+        final int srcUsrId = tools.getSourceUserId().intValue();
         final Connection srcCon = tools.getSourceConnection();
         final Connection dstCon = tools.getDestinationConnection();
 
@@ -131,7 +132,7 @@ public class UserCopyTask implements CopyUserTaskService {
         int dstUsrId = 0;
         try {
             UserMapping mapping = new UserMapping();
-            User srcUser = userService.getUser(srcCon, srcUsrId.intValue(), srcCtx);
+            User srcUser = userService.getUser(srcCon, srcUsrId, srcCtx);
             if (userExistsInDestinationCtx(dstCtx, srcUser, dstCon)) {
                 throw UserCopyExceptionCodes.USER_ALREADY_EXISTS.create(srcUser.getLoginInfo(), Integer.valueOf(dstCtx.getContextId()));
             }
@@ -139,12 +140,12 @@ public class UserCopyTask implements CopyUserTaskService {
             int fileStorageOwner = srcUser.getFileStorageOwner();
             if (fileStorageOwner > 0) {
                 // Cannot copy a user whose files belong to another user in source context
-                throw UserCopyExceptionCodes.FILE_STORAGE_CONFLICT.create(fileStorageOwner, srcCtx.getContextId());
+                throw UserCopyExceptionCodes.FILE_STORAGE_CONFLICT.create(I(fileStorageOwner), I(srcCtx.getContextId()));
             }
             String qfsMode = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(srcUsrId, srcCtx.getContextId(), Info.drive()).getMode();
             if (UnifiedQuotaService.MODE.equals(qfsMode)) {
                 // Cannot copy a user using unified quota
-                throw UserCopyExceptionCodes.UNIFIED_QUOTA_CONFLICT.create(srcUsrId, srcCtx.getContextId());
+                throw UserCopyExceptionCodes.UNIFIED_QUOTA_CONFLICT.create(I(srcUsrId), I(srcCtx.getContextId()));
             }
 
             dstUsrId = userService.createUser(dstCon, dstCtx, srcUser);
@@ -170,7 +171,7 @@ public class UserCopyTask implements CopyUserTaskService {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
 
-            mapping.addMapping(srcUser.getId(), srcUser, dstUsrId, dstUser);
+            mapping.addMapping(I(srcUser.getId()), srcUser, I(dstUsrId), dstUser);
             error = false;
             return mapping;
         } catch (final OXException e) {

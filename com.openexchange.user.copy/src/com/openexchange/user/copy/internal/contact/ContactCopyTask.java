@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
 import static com.openexchange.user.copy.internal.CopyTools.setBinaryOrNull;
@@ -172,7 +173,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         final IntegerMapping mapping = new IntegerMapping();
 
         if (!contacts.isEmpty()) {
-            loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId);
+            loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId.intValue());
             exchangeIds(contacts, folderMapping, copyTools.getDestinationContext(), i(srcUsrId), i(dstUsrId));
             writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
             writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
@@ -180,7 +181,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             for (Map.Entry<Integer, Contact> entry : contacts.entrySet()) {
                 Integer contactId = entry.getKey();
                 Contact contact = entry.getValue();
-                mapping.addMapping(contactId, contact.getObjectID());
+                mapping.addMapping(contactId, I(contact.getObjectID()));
             }
         }
 
@@ -335,7 +336,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                          * This list entry refers to an existing contact.
                          * If this contact isn't visible to the moved user, the entry becomes an external member.
                          */
-                        final Contact dlistContact = contacts.get(entryId);
+                        final Contact dlistContact = contacts.get(I(entryId));
                         if (dlistContact == null) {
                             entry.setEntryID(-1);
                             entry.setEmailfield(-1);
@@ -407,10 +408,10 @@ public class ContactCopyTask implements CopyUserTaskService {
                 entry.setFirstname(rs.getString(i++));
                 entry.setEmailaddress(rs.getString(i++));
 
-                List<DistributionListEntryObject> list = dlistMap.get(contactId);
+                List<DistributionListEntryObject> list = dlistMap.get(I(contactId));
                 if (list == null) {
                     list = new ArrayList<DistributionListEntryObject>();
-                    dlistMap.put(contactId, list);
+                    dlistMap.put(I(contactId), list);
                 }
 
                 list.add(entry);
@@ -454,7 +455,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                     }
                 }
 
-                contacts.put(contact.getObjectID(), contact);
+                contacts.put(I(contact.getObjectID()), contact);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
