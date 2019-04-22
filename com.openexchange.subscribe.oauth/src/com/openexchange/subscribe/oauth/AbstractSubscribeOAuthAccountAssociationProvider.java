@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -93,7 +94,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
      */
     @Override
@@ -106,7 +107,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
                     continue;
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.debug("No association found between subscription {} and oauth account {} for user {} in context {}.", subscription.getId(), accountId, session.getUserId(), session.getContextId(), e);
+                LOGGER.debug("No association found between subscription {} and oauth account {} for user {} in context {}.", I(subscription.getId()), I(accountId), I(session.getUserId()), I(session.getContextId()), e);
                 continue;
             }
             if (null == associations) {
@@ -122,7 +123,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
 
     /**
      * Creates a new {@link OAuthAccountAssociation} for the specified {@link Subscription}
-     * 
+     *
      * @param accountId The OAuthAccount identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -132,7 +133,7 @@ public abstract class AbstractSubscribeOAuthAccountAssociationProvider implement
 
     /**
      * Returns a {@link List} with all {@link Subscription}s of the user
-     * 
+     *
      * @param session the groupware {@link Session}
      * @return A {@link List} with all {@link Subscription}s of the user.
      * @throws OXException if an error is occurred

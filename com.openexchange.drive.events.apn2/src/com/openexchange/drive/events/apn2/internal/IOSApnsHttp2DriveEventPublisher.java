@@ -54,10 +54,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options;
 import com.openexchange.drive.events.apn2.ApnsHttp2Options.AuthType;
+import com.openexchange.exception.OXException;
 import com.openexchange.drive.events.apn2.ApnsHttp2OptionsProvider;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -86,25 +89,25 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
     }
 
     @Override
-    protected ApnsHttp2Options getOptions(int contextId, int userId) {
+    protected ApnsHttp2Options getOptions(int contextId, int userId) throws OXException {
         LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
         if (null == configService) {
-            LOG.warn("Unable to get configuration service to determine options for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
-            return null;
+            throw ServiceExceptionCode.absentService(LeanConfigurationService.class);
         }
-        /*
-         * check if push via APNs HTTP/2 is enabled
-         */
+
+        // Check if push via APNs HTTP/2 is enabled
         if (false == configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.enabled)) {
             LOG.trace("Push via {} is disabled for user {} in context {}.", getServiceID(), I(userId), I(contextId));
             return null;
         }
+
+        // Determine APNs HTTP/2 options by auth type
         ApnsHttp2Options options = null;
-        {
-            AuthType authType = AuthType.authTypeFor(configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.authtype));
-            if (AuthType.CERTIFICATE.equals(authType)) {
+        AuthType authType = requireAuthType(contextId, userId, configService);
+        switch (authType) {
+            case CERTIFICATE:
                 /*
-                 * get certificate options via config cascade
+                 * Get certificate options via config cascade
                  */
                 String keystoreName = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keystore);
                 if (Strings.isEmpty(keystoreName)) {
@@ -119,9 +122,10 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
                     boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
                     options = new ApnsHttp2Options(new File(keystoreName), password, production, topic);
                 }
-            } else if (AuthType.JWT.equals(authType)) {
+                break;
+            case JWT:
                 /*
-                 * get jwt options via config cascade
+                 * Get JWT options via config cascade
                  */
                 String privateKeyFile = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.privatekey);
                 if (Strings.isEmpty(privateKeyFile)) {
@@ -131,9 +135,16 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
                     }
                 } else {
                     LOG.trace("Using configured JWT options for push via {} for user {} in context {}.", getServiceID(), I(userId), I(contextId));
+
                     String keyId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.keyid);
+                    checkNotEmpty(keyId, DriveEventsAPN2IOSProperty.keyid);
+
                     String teamId = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.teamid);
+                    checkNotEmpty(teamId, DriveEventsAPN2IOSProperty.teamid);
+
                     String topic = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.topic);
+                    checkNotEmpty(topic, DriveEventsAPN2IOSProperty.topic);
+
                     boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPN2IOSProperty.production);
                     try {
                         options = new ApnsHttp2Options(Files.readAllBytes(new File(privateKeyFile).toPath()), keyId, teamId, production, topic);
@@ -142,9 +153,30 @@ public class IOSApnsHttp2DriveEventPublisher extends ApnsHttp2DriveEventPublishe
                         return null;
                     }
                 }
-            }
+                break;
         }
         return options;
+    }
+
+    private static AuthType requireAuthType(int contextId, int userId, LeanConfigurationService configService) throws OXException {
+        String sAuthType = configService.getProperty(userId, contextId, DriveEventsAPN2IOSProperty.authtype);
+        checkNotEmpty(sAuthType, DriveEventsAPN2IOSProperty.authtype);
+
+        AuthType authType = AuthType.authTypeFor(sAuthType);
+        if (authType == null) {
+            String propertyName = DriveEventsAPN2IOSProperty.authtype.getFQPropertyName();
+            LOG.error("Unsupported value for property: {}", propertyName);
+            throw OXException.general("No such auth type: " + sAuthType);
+        }
+        return authType;
+    }
+
+    private static void checkNotEmpty(String value, Property prop) throws OXException {
+        if (Strings.isEmpty(value)) {
+            String propertyName = prop.getFQPropertyName();
+            LOG.error("Missing required property: {}", propertyName);
+            throw OXException.general("Missing property: " + propertyName);
+        }
     }
 
     private ApnsHttp2Options getFallbackOptions(int contextId, int userId) {

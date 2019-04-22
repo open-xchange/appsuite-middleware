@@ -79,8 +79,8 @@ public class InsertExample {
 		INSERT insert = new INSERT().INTO("a_table").SET("a",
 				Constant.PLACEHOLDER).SET(
 				"b",
-				new PLUS(new Constant(10), new TIMES(new SQRT(45),
-						new Constant(3))));
+				new PLUS(new Constant(Integer.valueOf(10)), new TIMES(new SQRT(Integer.valueOf(45)),
+						new Constant(Integer.valueOf(3)))));
 		System.out.println(new StatementBuilder().buildCommand(insert));
 	}
 
@@ -94,7 +94,7 @@ public class InsertExample {
         INTO(delDates).
         subSelect(new SELECT("*").
             FROM(dates).
-            WHERE(new EQUALS(dates.getColumn("intfield01"), new Constant(1000)))
+            WHERE(new EQUALS(dates.getColumn("intfield01"), new Constant(Integer.valueOf(1000))))
         );
 
 	    System.out.println(new StatementBuilder().buildCommand(insert));

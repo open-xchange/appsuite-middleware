@@ -73,7 +73,6 @@ import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
-import com.openexchange.admin.user.copy.rmi.TestTool;
 
 /**
  * {@link AdditionalRMITests}
@@ -87,7 +86,6 @@ public class AdditionalRMITests extends AbstractRMITest {
     public String myDisplayName = "Thorben Betten";
 
     private Context context;
-    private User user;
     private Resource testResource;
 
     @Override
@@ -97,14 +95,14 @@ public class AdditionalRMITests extends AbstractRMITest {
     }
 
     private void setupContexts() throws Exception {
-        context = TestTool.createContext(getContextManager(), "AdditionalCtx_", contextAdmin, "all", superAdminCredentials);
-
-        user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
+        context = getContextManager().create(ContextFactory.createContext(1000L), contextAdminCredentials);
+        
+        User user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = getUserManager().create(context, user, contextAdminCredentials);
+        getUserManager().create(context, user, contextAdminCredentials);
     }
 
     /**

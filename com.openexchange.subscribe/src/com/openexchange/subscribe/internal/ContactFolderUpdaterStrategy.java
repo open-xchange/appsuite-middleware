@@ -179,7 +179,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
     public void closeSession(final Object session) {
         if(session instanceof Map<?,?>) {
             @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
-            Session ses = (Session) userInfo.get(SESSION);
+            Session ses = (Session) userInfo.get(I(SESSION));
             ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
         }
     }
@@ -245,15 +245,15 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @SuppressWarnings("unchecked")
     private Object getFromSession(final int key, final Object session) {
-        return ((Map<Integer, Object>) session).get(key);
+        return ((Map<Integer, Object>) session).get(I(key));
     }
 
     @Override
     public Object startSession(final TargetFolderDefinition target) {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
-        userInfo.put(CONTACT_SERVICE, contactService);
-        userInfo.put(TARGET, target);
+        userInfo.put(I(CONTACT_SERVICE), contactService);
+        userInfo.put(I(TARGET), target);
         Session session = null;
         if (target instanceof SessionAwareTargetFolderDefinition) {
             session = ((SessionAwareTargetFolderDefinition) target).getSession();
@@ -262,7 +262,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             session = new TargetFolderSession(target);
         }
         session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
-        userInfo.put(SESSION, session);
+        userInfo.put(I(SESSION), session);
         return userInfo;
     }
 
