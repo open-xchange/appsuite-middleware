@@ -176,7 +176,7 @@ public class GroupUseCountTest extends AbstractChronosTest {
         x = 1;
         // Check that groups are returned in the inverse order now
         for (GroupData group : groups) {
-            Assert.assertEquals(groupIds[x--], group.getId());
+            Assert.assertEquals("Unexpected order of groups.", groupIds[x--], group.getId());
         }
     }
 
