@@ -281,6 +281,17 @@ public class SessionHandlerTest {
         Assert.assertTrue(sessions.contains(s1.getSessionID()) && sessions.contains(s2.getSessionID()));
     }
 
+    @Test
+    public void testRemoteParameterRoundtrip() throws Exception {
+        String v1 = UUID.randomUUID().toString();
+        SessionImpl s1 = addSession(v1);
+        Assert.assertEquals(1, SessionHandler.getSessions().size());
+        SessionHandler.setLocalIp(s1, "172.16.33.66");
+        List<String> sessions = SessionHandler.findRemoteSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
+        Assert.assertEquals(1, sessions.size());
+        Assert.assertEquals(s1.getSessionID(), sessions.get(0));
+    }
+
     private static SessionImpl addSession() throws OXException {
         return addSession((String[]) null);
     }

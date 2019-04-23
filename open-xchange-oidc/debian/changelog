@@ -1,3 +1,9 @@
+open-xchange-oidc (7.10.0-26) stable; urgency=medium
+
+  * Build for patch 2019-04-19 (5215)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 18 Apr 2019 11:26:56 +0200
+
 open-xchange-oidc (7.10.0-25) stable; urgency=medium
 
   * Build for patch 2019-04-01 (5179)

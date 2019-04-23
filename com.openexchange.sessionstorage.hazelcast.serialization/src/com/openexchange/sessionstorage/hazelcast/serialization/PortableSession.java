@@ -81,6 +81,8 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
 
     private static final long serialVersionUID = -2346327568417617677L;
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
+
     /**
      * BitSet of www-form-url safe characters.
      */
@@ -160,7 +162,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
 
     // -------------------------------------------------------------------------------------------------
 
-    private final Set<String> remoteParameterNames;
+    private Set<String> remoteParameterNames;
     private Long localLastActive;
 
     /**
@@ -182,8 +184,10 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         localLastActive = null;
         Collection<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
         Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
+
         // Add static remote parameters
         remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
+
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);
         this.remoteParameterNames = remoteParameterNames;
@@ -279,9 +283,9 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                         }
                         names.append(parameterName);
                         values.append(getSafeValue(sValue));
+                        LOG.debug("Put remote parameter '{}' with value '{}' into portable session {} ({}@{})", parameterName, value, sessionId, Integer.valueOf(userId), Integer.valueOf(contextId));
                     } else {
-                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                        logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+                        LOG.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                     }
                 }
             }
@@ -343,14 +347,18 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             if (null != sNames) {
                 List<String> names = parseColonString(sNames);
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
+                Set<String> remoteParameterNames = new LinkedHashSet<>(names.size()); // Keep order
                 for (int i = 0, size = names.size(); i < size; i++) {
                     try {
                         Object value = parseToSerializablePojo(decodeSafeValue(values.get(i)));
-                        parameters.put(names.get(i), value);
+                        String name = names.get(i);
+                        parameters.put(name, value);
+                        remoteParameterNames.add(name);
                     } catch (DecoderException e) {
                         // Ignore
                     }
                 }
+                this.remoteParameterNames = remoteParameterNames;
             }
         }
     }

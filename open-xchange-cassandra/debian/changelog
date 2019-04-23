@@ -1,3 +1,9 @@
+open-xchange-cassandra (7.10.0-29) stable; urgency=medium
+
+  * Build for patch 2019-04-19 (5215)
+
+ -- Ioannis Chouklis <ioannis.chouklis@open-xchange.com>  Thu, 18 Apr 2019 11:25:36 +0200
+
 open-xchange-cassandra (7.10.0-28) stable; urgency=medium
 
   * Build for patch 2019-04-01 (5179)
