@@ -166,8 +166,8 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
         try {
-            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId, Info.general());
-            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId, Info.general());
+            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId.intValue(), Info.general());
+            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId.intValue(), Info.general());
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
         }
@@ -181,7 +181,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         final List<Attachment> attachments = loadAttachmentsFromDB(srcCon, i(srcCtxId), appointmentIds, contactIds, taskIds);
         copyFiles(attachments, srcFileStorage, dstFileStorage);
         exchangeIds(attachments, appointmentMapping, contactMapping, taskMapping, i(dstUsrId), dstCtx);
-        writeAttachmentsToDB(dstCon, attachments, dstCtxId);
+        writeAttachmentsToDB(dstCon, attachments, dstCtxId.intValue());
 
         return null;
     }
@@ -240,7 +240,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             }
 
             if (mapping == null) {
-                LOG.warn("Unknown module {} for attachment ({}). Skipping ID exchange!", module, attachment.getId());
+                LOG.warn("Unknown module {} for attachment ({}). Skipping ID exchange!", I(module), I(attachment.getId()));
                 continue;
             }
 
@@ -263,7 +263,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             try {
                 is = srcFileStorage.getFile(attachment.getFileId());
                 if (is == null) {
-                    LOG.warn("Did not find file for attachment {} ({}).", attachment.getId(), attachment.getFileId());
+                    LOG.warn("Did not find file for attachment {} ({}).", I(attachment.getId()), attachment.getFileId());
                     continue;
                 }
 

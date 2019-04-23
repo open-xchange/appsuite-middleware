@@ -262,7 +262,7 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
                 subscription.setCreated(rs.getLong(i++));
                 subscription.setLastModified(rs.getLong(i++));
 
-                subscriptions.put(id, subscription);
+                subscriptions.put(I(id), subscription);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
