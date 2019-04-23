@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Map;
@@ -107,7 +108,7 @@ public class SubscriptionJSONParserTest {
         assertEquals("Got wrong folder", "12", subscription.getFolderId());
         assertNotNull("Got wrong subscription source", subscription.getSource());
         assertEquals("Got wrong subscription source", SOURCE_NAME, subscription.getSource().getId());
-        assertEquals("Got wrong enablement", false, subscription.isEnabled());
+        assertEquals("Got wrong enablement", B(false), B(subscription.isEnabled()));
 
         Map<String, Object> configuration = subscription.getConfiguration();
 

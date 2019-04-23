@@ -200,7 +200,7 @@ public class ShareTargetPath {
                 if (Strings.isEmpty(segment)) {
                     iterator.remove();
                 } else if (-1 == version) {
-                    version = Integer.valueOf(segment);
+                    version = Integer.parseInt(segment);
                     iterator.remove();
                 }
             }
@@ -272,7 +272,7 @@ public class ShareTargetPath {
             String value = segment.substring(1);
             switch (segment.charAt(0)) {
                 case 'm':
-                    module = Integer.valueOf(value);
+                    module = Integer.parseInt(value);
                     break;
                 case 'f':
                     folder = base64(value, false);

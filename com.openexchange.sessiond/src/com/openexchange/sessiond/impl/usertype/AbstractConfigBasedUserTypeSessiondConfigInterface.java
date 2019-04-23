@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl.usertype;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigRegistry.UserType;
 
@@ -74,7 +75,7 @@ public abstract class AbstractConfigBasedUserTypeSessiondConfigInterface impleme
         this.userType = userType;
         String propertyName = getPropertyName();
         maxSessions = conf.getIntProperty(propertyName, getDefaultValue());
-        LOG.debug("Sessiond property: {}={}", propertyName, maxSessions);
+        LOG.debug("Sessiond property: {}={}", propertyName, I(maxSessions));
     }
 
     @Override

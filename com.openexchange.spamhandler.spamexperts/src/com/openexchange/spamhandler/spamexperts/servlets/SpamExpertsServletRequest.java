@@ -1,5 +1,6 @@
 package com.openexchange.spamhandler.spamexperts.servlets;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -160,14 +161,14 @@ public final class SpamExpertsServletRequest {
 		try {
 			// new parameter version to optionally determine the UI version
 			String uiVersion = jArgs.optString("version", null);
-			LOG.debug("trying to create new spamexperts panel session for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
+			LOG.debug("trying to create new spamexperts panel session for user {} in context {}", getCurrentUserUsername(), I(getCurrentUserContextID()));
 
 			// create complete new session identifier
 			String sessionid = createPanelSessionID(uiVersion);
             if (sessionid == null) {
                 throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
             }
-            LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
+            LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), I(getCurrentUserContextID()));
 
 			String panelWebUiUrl = config.getUriProperty(session, "com.openexchange.custom.spamexperts.panel.web_ui_url", "http://demo1.spambrand.com/?authticket=").toString();
 
@@ -211,7 +212,7 @@ public final class SpamExpertsServletRequest {
             }
         }
 
-		LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), getCurrentUserContextID());
+		LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), I(getCurrentUserContextID()));
 
 		HttpGet getRequest = null;
 		HttpResponse getResponse = null;
@@ -239,7 +240,7 @@ public final class SpamExpertsServletRequest {
             }
 
             String resp = EntityUtils.toString(entity);
-            LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
+            LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), I(getCurrentUserContextID()), resp);
 
             if (Strings.isEmpty(resp)) {
                 return null;

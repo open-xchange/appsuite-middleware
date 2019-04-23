@@ -49,8 +49,10 @@
 
 package com.openexchange.share.impl;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -506,7 +508,7 @@ public class DefaultShareService implements ShareService {
                         }
                         includeSubfolders = ((SubfolderAwareTargetPermission) permission).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
                     }
-                    entities.put(I(permission.getEntity()), includeSubfolders);
+                    entities.put(I(permission.getEntity()), B(includeSubfolders));
                 }
             }
             if (0 < entities.size()) {
@@ -522,7 +524,7 @@ public class DefaultShareService implements ShareService {
                     if (ShareTool.isAnonymousGuest(user)) {
                         moduleSupport = requireService(ModuleSupport.class, moduleSupport);
                         ShareTarget dstTarget = moduleSupport.adjustTarget(proxy.getTarget(), session, user.getId());
-                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entry.getValue());
+                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entry.getValue().booleanValue());
                     }
                 }
             }
@@ -600,7 +602,7 @@ public class DefaultShareService implements ShareService {
                     moduleSupport = requireService(ModuleSupport.class, moduleSupport);
                     List<TargetProxy> targets = moduleSupport.listTargets(contextID, guestID);
                     if (targets.isEmpty()) {
-                        guestsWithoutShares.add(guestID);
+                        guestsWithoutShares.add(I(guestID));
                     } else {
                         for (TargetProxy proxy : targets) {
                             ShareTargetPath targetPath = proxy.getTargetPath();
@@ -1020,7 +1022,7 @@ public class DefaultShareService implements ShareService {
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
                 if (amountQuota.isExceeded() || amountQuota.willExceed(anonymousShares.size())) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(amountQuota.getUsage(), amountQuota.getLimit());
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
                 }
             }
         }
@@ -1036,7 +1038,7 @@ public class DefaultShareService implements ShareService {
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
                 if (amountQuota.isExceeded() || amountQuota.willExceed(guestShares.size())) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(amountQuota.getUsage(), amountQuota.getLimit());
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
                 }
             }
         }
@@ -1112,7 +1114,7 @@ public class DefaultShareService implements ShareService {
                      */
                     UserPermissionBits userPermissionBits = utils.setPermissionBits(connection, context, existingUser.getId(), permissionBits, true);
                     GuestLastModifiedMarker.clearLastModified(services, context, existingUser);
-                    LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingUser.getId());
+                    LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingUser.getMail(), I(userPermissionBits.getPermissionBits()), I(context.getContextId()), I(existingUser.getId()));
                     /*
                      * As the recipient already belongs to an existing user, its password must be set to null, to avoid wrong notification
                      * messages
@@ -1123,7 +1125,7 @@ public class DefaultShareService implements ShareService {
                      * guest recipient points to internal user
                      */
                     LOG.debug("Guest recipient {} points to internal user {} in context {}: {}",
-                        guestRecipient.getEmailAddress(), existingUser.getLoginInfo(), context.getContextId(), existingUser.getId());
+                        guestRecipient.getEmailAddress(), existingUser.getLoginInfo(), I(context.getContextId()), I(existingUser.getId()));
                 }
                 return existingUser;
             }
@@ -1151,7 +1153,7 @@ public class DefaultShareService implements ShareService {
          */
         requireService(UserPermissionService.class).saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context));
         if (AnonymousRecipient.class.isInstance(recipient)) {
-            LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
+            LOG.info("Created anonymous guest user with permissions {} in context {}: {}", I(permissionBits), I(context.getContextId()), I(guestID));
         } else {
             GuestService guestService = requireService(GuestService.class);
             if (guestService == null) {
@@ -1162,7 +1164,7 @@ public class DefaultShareService implements ShareService {
 
             guestService.addGuest(guestUser.getMail(), groupId, context.getContextId(), guestID, guestUser.getUserPassword(), guestUser.getPasswordMech(), guestUser.getSalt());
 
-            LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), permissionBits, context.getContextId(), guestID);
+            LOG.info("Created guest user {} with permissions {} in context {}: {}", guestUser.getMail(), I(permissionBits), I(context.getContextId()), I(guestID));
         }
 
         return guestUser;

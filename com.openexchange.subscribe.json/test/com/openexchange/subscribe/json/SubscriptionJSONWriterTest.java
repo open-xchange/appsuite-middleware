@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe.json;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
@@ -107,9 +109,9 @@ public class SubscriptionJSONWriterTest {
         JSONAssertion assertion =
             new JSONAssertion()
                 .isObject()
-                .hasKey("id").withValue(2)
+                .hasKey("id").withValue(I(2))
                 .hasKey("folder").withValue("12")
-                .hasKey("enabled").withValue(false)
+                .hasKey("enabled").withValue(B(false))
                 .hasKey("displayName").withValue("mySubscription")
                 .hasKey("source").withValue("com.openexchange.subscribe.test1")
                 .hasKey("com.openexchange.subscribe.test1").withValueObject()
@@ -133,7 +135,7 @@ public class SubscriptionJSONWriterTest {
 
         JSONAssertion assertion =
             new JSONAssertion()
-                .isArray().withValues(2, "com.openexchange.subscribe.test1", "mySubscription", false, "My Username");
+                .isArray().withValues(I(2), "com.openexchange.subscribe.test1", "mySubscription", B(false), "My Username");
 
         assertValidates(assertion, array);
     }
@@ -151,7 +153,7 @@ public class SubscriptionJSONWriterTest {
             Arrays.asList("com.openexchange.subscribe.test2"), form, TimeZone.getTimeZone("utc"));
 
         JSONAssertion assertion = new JSONAssertion().isArray().withValues(
-            2,
+            I(2),
             "com.openexchange.subscribe.test1",
             JSONObject.NULL,
             JSONObject.NULL,

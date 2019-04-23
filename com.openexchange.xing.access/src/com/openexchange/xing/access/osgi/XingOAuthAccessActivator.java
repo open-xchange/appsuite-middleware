@@ -49,6 +49,7 @@
 
 package com.openexchange.xing.access.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.ServiceRegistration;
@@ -150,7 +151,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
                     return oAuthService.getDefaultAccount(KnownApi.XING, session).getId();
                 } catch (OXException e) {
                     if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
-                        throw XingExceptionCodes.NO_OAUTH_ACCOUNT.create(e, session.getUserId(), session.getContextId());
+                        throw XingExceptionCodes.NO_OAUTH_ACCOUNT.create(e, I(session.getUserId()), I(session.getContextId()));
                     }
                     throw e;
                 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.share.notification;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -83,7 +84,7 @@ public class Entities {
      * @param permissions The permissions according to the passed type
      */
     public void addUser(int userId, PermissionType type, int permissions) {
-        users.put(userId, new Permission(type, permissions));
+        users.put(I(userId), new Permission(type, permissions));
     }
 
     /**
@@ -94,7 +95,7 @@ public class Entities {
      * @param permissions The permissions according to the passed type
      */
     public void addGroup(int groupId, PermissionType type, int permissions) {
-        groups.put(groupId, new Permission(type, permissions));
+        groups.put(I(groupId), new Permission(type, permissions));
     }
 
     public Set<Integer> getUsers() {
@@ -112,7 +113,7 @@ public class Entities {
      * @return The permission bits as folder permission bit mask
      */
     public Permission getUserPermissionBits(int userId) {
-        return users.get(userId);
+        return users.get(I(userId));
     }
 
     /**
@@ -122,7 +123,7 @@ public class Entities {
      * @return The permission bits as folder permission bit mask
      */
     public Permission getGroupPermissionBits(int groupId) {
-        return groups.get(groupId);
+        return groups.get(I(groupId));
     }
 
     public int size() {

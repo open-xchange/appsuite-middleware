@@ -49,6 +49,7 @@
 
 package com.openexchange.xing;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,6 +105,9 @@ import com.openexchange.xing.session.Session;
  * rare circumstances) writing your own API calls.
  */
 public class RESTUtility {
+
+    private static final List<Integer> EXPECTED_200_OK_OR_206_PARTIAL_CONTENT = Arrays.asList(I(XingServerException._200_OK), I(XingServerException._206_PARTIAL_CONTENT));
+    private static final List<Integer> EXPECTED_200_OK = Arrays.asList(I(XingServerException._200_OK));
 
     /**
      * No initialization.
@@ -187,7 +191,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, null, session).response;
-        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
+        return parseAsJSON(resp, EXPECTED_200_OK);
     }
 
     /**
@@ -212,7 +216,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
-        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
+        return parseAsJSON(resp, EXPECTED_200_OK);
     }
 
     /**
@@ -269,7 +273,7 @@ public class RESTUtility {
             params,
             null,
             session,
-            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
+            EXPECTED_200_OK_OR_206_PARTIAL_CONTENT);
     }
 
     /**
@@ -328,7 +332,7 @@ public class RESTUtility {
             params,
             requestInformation,
             session,
-            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
+            EXPECTED_200_OK_OR_206_PARTIAL_CONTENT);
     }
 
     /**
@@ -443,7 +447,7 @@ public class RESTUtility {
         }
 
         final int statusCode = response.getStatusLine().getStatusCode();
-        if (false == expectedStatusCode.contains(statusCode)) {
+        if (false == expectedStatusCode.contains(I(statusCode))) {
             if (statusCode == XingServerException._401_UNAUTHORIZED) {
                 throw new XingUnlinkedException();
             }
@@ -578,7 +582,7 @@ public class RESTUtility {
 
             final int statusCode = response.getStatusLine().getStatusCode();
 
-            if (false == expectedStatusCode.contains(statusCode)) {
+            if (false == expectedStatusCode.contains(I(statusCode))) {
                 // This will throw the right thing: either a XingServerException or a XingProxyException
                 parseAsJSON(response, expectedStatusCode);
             }

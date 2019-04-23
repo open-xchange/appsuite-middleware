@@ -22,6 +22,7 @@
  */
 package com.openexchange.socketio.websocket;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -226,7 +227,7 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         Session session = getSession();
         session.setTimeout(getConfig().getTimeout(Config.DEFAULT_PING_TIMEOUT));
 
-        LOGGER.debug("{} WebSocket configuration: timeout={}", getConfig().getNamespace(), session.getTimeout());
+        LOGGER.debug("{} WebSocket configuration: timeout={}", getConfig().getNamespace(), L(session.getTimeout()));
     }
 
     @Override

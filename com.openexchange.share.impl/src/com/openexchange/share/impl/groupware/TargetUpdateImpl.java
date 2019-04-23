@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -251,9 +252,9 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 UserizedFolder parentFolder = foldersById.get(target.getFolder());
                 if (checkPermissions && !canShareObject(parentFolder, proxy, handler)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
-                        parameters.getUser().getId(),
+                        I(parameters.getUser().getId()),
                         proxy.getTitle(),
-                        parameters.getContext().getContextId());
+                        I(parameters.getContext().getContextId()));
                 }
 
                 proxies.put(target, proxy);
@@ -273,9 +274,9 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 FolderTargetProxy proxy = new FolderTargetProxy(folderTarget, folder);
                 if (checkPermissions && !canShareFolder(folder)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
-                        parameters.getUser().getId(),
+                        I(parameters.getUser().getId()),
                         proxy.getTitle(),
-                        parameters.getContext().getContextId());
+                        I(parameters.getContext().getContextId()));
                 }
 
                 foldersById.put(folder.getID(), folder);

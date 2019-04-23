@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.mime;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -114,7 +115,7 @@ public class MimeSnippetManagementTest {
 
         Mockito.when(mimeMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null)).thenReturn("multipart/form-data");
         Mockito.when(mimeMessage.getAllHeaders()).thenReturn(headers);
-        Mockito.when(headers.hasMoreElements()).thenReturn(Boolean.TRUE, Boolean.FALSE);
+        Mockito.when(B(headers.hasMoreElements())).thenReturn(Boolean.TRUE, Boolean.FALSE);
         Mockito.when(headers.nextElement()).thenReturn(new Header("createdby", "0"));
 
         bodypart = new MimeBodyPart();

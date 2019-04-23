@@ -49,6 +49,7 @@
 
 package com.openexchange.share.notification.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -245,7 +246,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 guestName = NotificationStrings.UNKNOWN_USER_NAME;
             }
 
-            throw ShareNotifyExceptionCodes.MISSING_MAIL_ADDRESS.create(guestName, user.getId(), session.getContextId());
+            throw ShareNotifyExceptionCodes.MISSING_MAIL_ADDRESS.create(guestName, I(user.getId()), I(session.getContextId()));
         }
 
         try {

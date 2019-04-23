@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.fields;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -106,7 +107,7 @@ public class ExtendedObjectPermission extends ExtendedPermission {
         } else {
             User user = resolver.getUser(permission.getEntity());
             if (null == user) {
-                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for file {}", permission.getEntity(), file);
+                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for file {}", I(permission.getEntity()), file);
             } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 if (guest == null) {
