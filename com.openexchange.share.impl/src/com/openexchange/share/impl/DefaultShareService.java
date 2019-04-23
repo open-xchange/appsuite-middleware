@@ -316,7 +316,7 @@ public class DefaultShareService implements ShareService {
              * check quota restrictions & commit transaction
              * store shares
              */
-            checkQuota(session, connectionHelper, sharesInfos);
+            checkQuota(session, sharesInfos);
             connectionHelper.commit();
             LOG.info("Accounts at {} in context {} configured: {}", target, I(session.getContextId()), sharesByRecipient.values());
             return new CreatedSharesImpl(sharesByRecipient);
@@ -524,7 +524,8 @@ public class DefaultShareService implements ShareService {
                     if (ShareTool.isAnonymousGuest(user)) {
                         moduleSupport = requireService(ModuleSupport.class, moduleSupport);
                         ShareTarget dstTarget = moduleSupport.adjustTarget(proxy.getTarget(), session, user.getId());
-                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entry.getValue().booleanValue());
+                        ShareTargetPath path = moduleSupport.getPath(dstTarget, session);
+                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, path, entry.getValue().booleanValue());
                     }
                 }
             }
@@ -991,10 +992,9 @@ public class DefaultShareService implements ShareService {
      * Share infos pointing to internal users and groups are skipped implicitly.
      *
      * @param session The session
-     * @param connectionHelper A (started) connection helper
      * @param shareInfos The shares to store
      */
-    private void checkQuota(Session session, ConnectionHelper connectionHelper, List<ShareInfo> shareInfos) throws OXException {
+    private void checkQuota(Session session, List<ShareInfo> shareInfos) throws OXException {
         if (null == shareInfos || 0 == shareInfos.size()) {
             return;
         }
@@ -1219,7 +1219,7 @@ public class DefaultShareService implements ShareService {
             AnonymousRecipient recipient = new AnonymousRecipient(LINK_PERMISSION_BITS, null, null);
             LOG.info("Adding new share link to {} for {} in context {}...", target, recipient, I(session.getContextId()));
             ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
-            checkQuota(session, connectionHelper, Collections.singletonList(shareInfo));
+            checkQuota(session, Collections.singletonList(shareInfo));
             /*
              * apply new permission entity for this target
              */
