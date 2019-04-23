@@ -19,7 +19,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:	@OXVERSION@
-%define        ox_release 55
+%define        ox_release 56
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -76,6 +76,8 @@ fi
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Tue Apr 23 2019 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2019-04-29 (5209)
 * Mon Mar 25 2019 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2019-04-01 (5178)
 * Tue Mar 12 2019 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
