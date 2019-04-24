@@ -7,7 +7,7 @@ tags: Security, Configuration
 
 Appsuite version 7.10.2 provides methods for users to require secondary, additional methods of authentication before creating a valid Appsuite session.  These methods may include SMS messages, Time based authenticator methods, U2F compatible devices/keyfobs, and other custom methods.
 
-## Enabling Multifactor
+# Enabling Multifactor
 
 The `open-xchange-multifactor` package is required for the core of multifactor authentication. For some methods (such as SMS), additional packages will be required.
 
@@ -21,7 +21,7 @@ com.openexchange.capability.multifactor=true
 
 
 
-## Enabling SMS
+# Enabling SMS
 
 First, the SMS provider must be installed and configured.  Most will require a configured username and password, or AUTH_TOKEN.  Install the needed package and configure.
 
@@ -39,7 +39,7 @@ com.openexchange.multifactor.sms.tokenLifetime (Number of minutes until challeng
 com.openexchange.multifactor.maxTokenAmount (Maximum number of challenges before locked out)
 ```
 
-## Enabling TOTP
+# Enabling TOTP
 
 TOTP is Time-based One Time Password.  This works with several apps available in mobile stores, such as Google Authenticator.
 
@@ -61,7 +61,7 @@ com.openexchange.multifactor.backupString.enabled=true
 
 
 
-## Enabling U2F
+# Enabling U2F
 
 U2F is supported in Google Chrome, as well as Firefox (though requires user changing advanced settings).
 
@@ -79,7 +79,7 @@ Then, the domain that the user will be using must be specified.  This will be us
 
 
 
-## Login Page
+# Login Page
 
 By default, the UI will change from the login page, draw the customized toolbar, then display a prompt for the multifactor authentication.
 
