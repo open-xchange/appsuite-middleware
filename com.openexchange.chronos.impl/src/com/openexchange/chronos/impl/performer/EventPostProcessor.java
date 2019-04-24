@@ -97,7 +97,6 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -337,10 +336,11 @@ public class EventPostProcessor {
     }
 
     /**
-     * Clears the collection of precessed events.
+     * Clears the collection of processed events and resets the maximum timestamp.
      */
     public void clear() {
         events.clear();
+        maximumTimestamp = 0L;
     }
 
     /**
@@ -374,14 +374,17 @@ public class EventPostProcessor {
         if (null == requestedFields || Arrays.contains(requestedFields, EventField.FLAGS)) {
             event.setFlags(getFlags(event, folder));
         }
-        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);
         if (isSeriesMaster(event)) {
             if (isResolveOccurrences(session)) {
                 /*
                  * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
                  */
-                return events.addAll(resolveOccurrences(event));
+                if (events.addAll(resolveOccurrences(event))) {
+                    maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
+                    return true;
+                }
+                return false;
             }
             if (getFrom(session) != null && getUntil(session) != null) {
                 if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
@@ -394,6 +397,7 @@ public class EventPostProcessor {
             /*
              * apply 'userized' exception dates to series master as requested
              */
+            maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
             if (null == requestedFields || Arrays.contains(requestedFields, EventField.CHANGE_EXCEPTION_DATES) || 
                 Arrays.contains(requestedFields, EventField.DELETE_EXCEPTION_DATES)) {
                 return events.add(applyExceptionDates(storage, event, folder.getCalendarUserId()));
@@ -406,6 +410,7 @@ public class EventPostProcessor {
              */
             return false;
         }
+        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         return events.add(event);
     }
 
@@ -417,7 +422,6 @@ public class EventPostProcessor {
             return false;
         }
         event.setFolderId(folderId);
-        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         event = anonymizeIfNeeded(session, event);
         if (isSeriesMaster(event) && false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
             /*
@@ -430,6 +434,7 @@ public class EventPostProcessor {
              */
             return false;
         }
+        maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
         return events.add(event);
     }
 
