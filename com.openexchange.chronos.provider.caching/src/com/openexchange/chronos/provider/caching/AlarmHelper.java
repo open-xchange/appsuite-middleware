@@ -352,11 +352,8 @@ public class AlarmHelper {
                  * (re)-schedule any alarm triggers & return appropriate update result
                  */
                 List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
-                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(
-                    event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
-                if (null != originalAlarms && 0 < originalAlarms.size()) {
-                    storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
-                }
+                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+                storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
                 storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
 
                 return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(updated, newAlarms));
