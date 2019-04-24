@@ -798,21 +798,21 @@ public final class PushManagerRegistry implements PushListenerService {
             /*
              * It's a guest
              */
-            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Guest user.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         if (false == hasWebMail(session)) {
             /*
              * No "webmail" permission granted
              */
-            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         if (false == PushUtility.allowedClient(session.getClient(), session, true)) {
             /*
              * No push listener for the client associated with current session.
              */
-            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            LOG.debug("Skipping registration of a mail push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         /*
@@ -825,13 +825,13 @@ public final class PushManagerRegistry implements PushListenerService {
                 // Initialize a new push listener for session
                 PushListener pl = pushManager.startListener(session);
                 if (null != pl) {
-                    LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", I(session.getUserId()), I(session.getContextId()), pushManager);
+                    LOG.debug("Started mail push listener for user {} in context {} by push manager \"{}\"", I(session.getUserId()), I(session.getContextId()), pushManager);
                     return pl;
                 }
             } catch (OXException e) {
-                LOG.error("Error while starting push listener.", e);
+                LOG.error("Error while starting mail push listener.", e);
             } catch (RuntimeException e) {
-                LOG.error("Runtime error while starting push listener.", e);
+                LOG.error("Runtime error while starting mail push listener.", e);
             }
         }
         return null;
