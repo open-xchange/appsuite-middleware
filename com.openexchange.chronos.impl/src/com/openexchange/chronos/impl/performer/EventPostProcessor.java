@@ -97,6 +97,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -381,11 +382,14 @@ public class EventPostProcessor {
                  * add resolved occurrences; no need to apply individual exception dates here, as a removed attendee can only occur in exceptions
                  */
                 return events.addAll(resolveOccurrences(event));
-            } else if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
-                /*
-                 * exclude series master event if there are no occurrences in requested range
-                 */
-                return false;
+            }
+            if (getFrom(session) != null && getUntil(session) != null) {
+                if (false == session.getRecurrenceService().iterateEventOccurrences(event, getFrom(session), getUntil(session)).hasNext()) {
+                    /*
+                     * exclude series master event if there are no occurrences in requested range
+                     */
+                    return false;
+                }
             }
             /*
              * apply 'userized' exception dates to series master as requested

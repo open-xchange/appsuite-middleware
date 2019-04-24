@@ -991,7 +991,6 @@ public class EventManager extends AbstractManager {
 
     /**
      * Sets the ignoreConflicts flag for all requests if not explicitly specified.
-     * setIgnoreConflicts
      *
      * @param The ignoreConflicts flag
      */
