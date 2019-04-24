@@ -1,11 +1,11 @@
 ---
-title: Multifactor Authentication (since 7.10.2)
+title: Multifactor Authentication
 classes: toc
 icon: fa-link
 tags: Security, Configuration
 ---
 
-Appsuite version 7.10.2 provides methods for users to require secondary, additional methods of authentication before creating a valid Appsuite session.  These methods may include SMS messages, Time based authenticator methods, U2F compatible devices/keyfobs, and other custom methods.
+Appsuite provides methods for users to require secondary, additional methods of authentication before creating a valid Appsuite session. These methods may include SMS messages, Time based authenticator methods, U2F compatible devices/keyfobs, and other custom methods.
 
 # Enabling Multifactor
 
@@ -18,8 +18,6 @@ Then, multifactor must be enabled as a capability.  This can be done in the mult
 ```properties
 com.openexchange.capability.multifactor=true
 ```
-
-
 
 # Enabling SMS
 
@@ -59,8 +57,6 @@ To enable, set in the multifactor.properties file
 com.openexchange.multifactor.backupString.enabled=true
 ```
 
-
-
 # Enabling U2F
 
 U2F is supported in Google Chrome, as well as Firefox (though requires user changing advanced settings).
@@ -76,8 +72,6 @@ Then, the domain that the user will be using must be specified.  This will be us
 ```properties
  com.openexchange.multifactor.u2f.appId=https://yourdomain
 ```
-
-
 
 # Login Page
 

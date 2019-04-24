@@ -39,7 +39,7 @@ To review the collected feedback, a service provider can trigger the export of t
 
 ## star-rating-v1 export
 
-For feedback type <code>star-rating-v1</code> the export as comma separated values in a file is provided. This can be done by using the provided REST API or a CLT (CSV only), [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/ExportUserFeedback.html). 
+For feedback type <code>star-rating-v1</code> the export as comma separated values in a file is provided. This can be done by using the provided REST API or a CLT (CSV only).
 
 To ensure privacy the user and context id are delivered in a hashed form. This way multiple entries can be matched to one user without revealing their identity. Generally the following parameters are supported to filter the stored data:
 
@@ -61,7 +61,7 @@ Raw export will provide a JSON array containing the requested feedback (based on
 
 
 # Delete feedback
-After a certain amount of time, it can be necessary to delete the collected feedback data to preserve database space. For those purposes a REST service or a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/DeleteUserFeedback.html) are available. The data can be deleted for a context group and one feedback type at a time. If no information is provided, the used default values are:
+After a certain amount of time, it can be necessary to delete the collected feedback data to preserve database space. For those purposes a REST service or a CLT. The data can be deleted for a context group and one feedback type at a time. If no information is provided, the used default values are:
 
 * context group : 'default'
 * feedback type : 'star-rating-v1'
@@ -69,7 +69,7 @@ After a certain amount of time, it can be necessary to delete the collected feed
 The user can also provide a timeframe, that should be considered. Only the data inside this timeframe will be deleted.
 
 # Send Feedback via mail
-In some cases the feedback has to be provided for a set of interested parties to evaluate the result. For this purpose the server provides a service to send the feedback file via email. There are two ways to trigger this, by using the REST service or a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/SendFeedback.html). Since feedback providing and sending is an administrative task, the service provider must also configure the SMTP server to be used, by setting the properties [described here](/components/middleware/config{{ site.baseurl }}/index.html#mode=features&feature=Feedback Mail SMTP-Service) in a <code>.properties</code> file, accessible by the server.
+In some cases the feedback has to be provided for a set of interested parties to evaluate the result. For this purpose the server provides a service to send the feedback file via email. There are two ways to trigger this, by using the REST service or a CLT. Since feedback providing and sending is an administrative task, the service provider must also configure the SMTP server to be used, by setting the properties [described here](/components/middleware/config{{ site.baseurl }}/index.html#mode=features&feature=Feedback Mail SMTP-Service) in a <code>.properties</code> file, accessible by the server.
 
 ## Send secure
 

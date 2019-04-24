@@ -5,7 +5,7 @@ icon: fa-book
 tags: OAuth, API
 ---
 
-With OX App Suite v7.8.0 a service provider can decide to publish a certain subset of the OX HTTP API via OAuth 2.0. See the [developer guide](AppSuite:OAuth_2_0_Client_Developer_Guide "wikilink") for an overview of the available APIs. The feature as a whole is contained in separate optional packages and requires some configuration. Supported client applications must be of type `confidential` according to the `web application` profile defined in [RFC 6749](http://tools.ietf.org/html/rfc6749). The OX middleware will act as `resource server` and by default also as `authorization server`.
+With OX App Suite v7.8.0 a service provider can decide to publish a certain subset of the OX HTTP API via OAuth 2.0. See the [developer guide](02_developer_guide.html) for an overview of the available APIs. The feature as a whole is contained in separate optional packages and requires some configuration. Supported client applications must be of type `confidential` according to the `web application` profile defined in [RFC 6749](http://tools.ietf.org/html/rfc6749). The OX middleware will act as `resource server` and by default also as `authorization server`.
 
 When acting as `authorization server`, every application must be registered at the OX backend. The registration process is up to you, while the backend provides SOAP and RMI interfaces to persist those registrations and generates the client-specific credentials that are needed to gain access for granting users. With OX App Suite v7.8.1 it is possible to use an external authorization server.
 

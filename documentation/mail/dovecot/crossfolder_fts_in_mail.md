@@ -174,7 +174,7 @@ http://10.50.0.85:8080/solr/admin
 
 ```
 
-![Cross-folder search](solr_admin_panel.png)
+![Cross-folder search](search/solr_admin_panel.png)
 
 Congratulations! You have installed Solr 7 successfully. 
 
@@ -197,7 +197,7 @@ $ curl http://localhost:8080/solr/dovecot/config -d '{"set-user-property": {"upd
 
 Now first of all verify that a new folder `dovecot` has been created in the directory mentioned above (`/var/solr/data/dovecot`).You should also be able to select the dovecot core in the Solr admin panel. 
 
-![Cross-folder search](solr_core_dovecot.png)
+![Cross-folder search](search/solr_core_dovecot.png)
 
 If this is the case, go to the config folder in this dovecot directory and delete the `managed-schema.xml`file there first. Solr uses a so called schema that defines the structure of the index. A schema is defined in an XML file. So you also have to replace Solr´s default existing `schema.xml` with the neccessary `solr-schema.xml` from Dovecot. The schema for Dovecot is provided by the dovecot-solr package and can be found in the `/usr/share/dovecot` directory. Additionally you have to make the solr user its owner. To do this, use the following commands:
 
@@ -307,7 +307,7 @@ Congratulations, searching within mail bodies now utilizes Solr and is blazing f
 
 If you now have indexed something, for example the inbox of an user, this should be noticeable in the Solr admin panel. 
 
-![Cross-folder search](solr_after_searching.png)
+![Cross-folder search](search/solr_after_searching.png)
 
 
 ## Configuring the all-messages folder
@@ -398,4 +398,4 @@ $ systemctl restart open-xchange
 
 OX App Suite uses that folder now when starting a search from within the inbox:
 
-![Cross-folder search](all_folder_search.png)
+![Cross-folder search](search/all_folder_search.png)

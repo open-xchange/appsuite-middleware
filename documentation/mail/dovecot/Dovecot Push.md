@@ -7,11 +7,11 @@ tags: Mail, Configuration, Push
 
 This article describes how to configure the Dovecot Push feature, which allows e.g. pushing events to mobile clients/apps.
 
-For a comprehensive guide to setup up Open-Xchange Middleware for mail push, please see [here]({{ site.baseurl }}/middleware/components/mailpush/mailpush.html)
+For a comprehensive guide to setup up Open-Xchange Middleware for mail push, please see [here]({{ site.baseurl }}/middleware/mail/mail_push.html)
 
 The following picture should demonstrate how the overall communication flow between a mobile app, Open-Xchange Middleware, and the Dovecot Push plug-in takes place.
 
-![Dovecot Push flow](mail_push_flow.png)
+![Dovecot Push flow](push/mail_push_flow.png)
 
 # Prerequisites
 

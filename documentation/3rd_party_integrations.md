@@ -48,5 +48,5 @@ Install via your OS's package manager the package `open-xchange-oauth`. This pac
 * [Google]({{ site.baseurl }}/middleware/3rd_party_integrations/google.html)
 * [Microsoft]({{ site.baseurl }}/middleware/3rd_party_integrations/microsoft.html)
 * [Twitter]({{ site.baseurl }}/middleware/3rd_party_integrations/twitter.html)
-* [Yahoo]({{ site.baseurl }}/middleware/3rd_party_integrations/yahoo.html)
 * [Xing]({{ site.baseurl }}/middleware/3rd_party_integrations/xing.html)
+* [Yahoo]({{ site.baseurl }}/middleware/3rd_party_integrations/yahoo.html)

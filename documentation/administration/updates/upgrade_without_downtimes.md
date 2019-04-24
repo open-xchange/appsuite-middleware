@@ -200,7 +200,7 @@ This is what the second load balancer is for.
 **Q**: Is it possible for a user, that the context she resides in was not upgraded to x.y.z yet, to land on an x.y.z node, and if yes what happens then?
 
 **A**: No. The x.y.z nodes will always be available through the main load balancer (i.e. through the main site's address), unless the user does know the address of the secondary load balancer. 
-For example, the main site is available through www.mysite.com and the secondary (the x.y.z cluster) through www.XYZ.mysite.com. If any user with a context that is still in 7.10.0 tries to log in to the www.XYZ.mysite.com, 
+For example, the main site is available through `www.mysite.com` and the secondary (the x.y.z cluster) through `www.XYZ.mysite.com`. If any user with a context that is still in 7.10.0 tries to log in to the `www.XYZ.mysite.com`, 
 then login will fail with a 'CTX-0012' exception which indicates that the context the user is trying to login is located in another server. No redirect will happen in this case, since it may result in an endless loop.
 
 **Q**: From an administrator point of view, is it somehow possible to determine whether a context exists on a given server instance?

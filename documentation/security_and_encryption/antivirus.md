@@ -26,7 +26,7 @@ The later package will install ClamAV alongside its dependencies and its C-ICAP 
 # Configuration
 
 ## OX
-The only thing that needs to be configured on the middleware's side is to actually enable the anti-virus scanning via the `com.openexchange.antivirus.enabled` property, which by default is set to `false`. There are other things that you can configure, such as max file size that is allowed to be scanned or the timeout of the ICAP client. For more information on the configuration have a look [here](https://documentation.open-xchange.com/components/middleware/config/7.10.2/#mode=tags&tag=anti-virus).
+The only thing that needs to be configured on the middleware's side is to actually enable the anti-virus scanning via the `com.openexchange.antivirus.enabled` property, which by default is set to `false`. There are other things that you can configure, such as max file size that is allowed to be scanned or the timeout of the ICAP client. For more information on the configuration have a look [here](https://documentation.open-xchange.com/components/middleware/config{{site.baseurl}}/#mode=tags&tag=anti-virus).
 
 ### Advanced Configuration
 

@@ -51,15 +51,15 @@ user=402, context=1, permanent=true
 
 # Setup Dovecot Mail Push
 
-Please see [here]({{ site.baseurl }}/middleware/dovecot/push/Dovecot%20Push.html)
+Please see [here]({{ site.baseurl }}/middleware/mail/dovecot/Dovecot%20Push.html)
 
 # Setup Web Sockets (if demanded)
 
-Web Sockets are only relevant if new mail push should also be advertised to App Suite UI. In case new mail push is intended being setup for OX Mail v2 0, Web Sockets do not need to be setup. Please see [here]({{ site.baseurl }}/middleware/components/websockets.html) to check how to setup Web Sockets if new mail push to App Suite UI is demanded.
+Web Sockets are only relevant if new mail push should also be advertised to App Suite UI. In case new mail push is intended being setup for OX Mail v2 0, Web Sockets do not need to be setup. Please see [here]({{ site.baseurl }}/middleware/push/websockets.html) to check how to setup Web Sockets if new mail push to App Suite UI is demanded.
 
 # Setup Push Notification Service
 
-Please see [here]({{ site.baseurl }}/middleware/components/pns.html). As mentioned in previous chapter, the Web Sockets content of that artcile should only be considered if new mail push should also be advertised to App Suite UI. In case of OX Mail v2 0, only APNS and FCM/GCM transport need tio be considered.
+Please see [here]({{ site.baseurl }}/middleware/push/pns.html). As mentioned in previous chapter, the Web Sockets content of that artcile should only be considered if new mail push should also be advertised to App Suite UI. In case of OX Mail v2 0, only APNS and FCM/GCM transport need tio be considered.
 
 # Setup for OX Mail v2 0
 
