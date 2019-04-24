@@ -49,6 +49,8 @@
 
 package com.openexchange.smtp.config;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
@@ -139,7 +141,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpAuthStr = configuration.getProperty("com.openexchange.smtp.smtpAuthentication", "false").trim();
             smtpAuth = Boolean.parseBoolean(smtpAuthStr);
             logBuilder.append("    SMTP Authentication: {}{}");
-            args.add(smtpAuth);
+            args.add(B(smtpAuth));
             args.add(lineSeparator);
         }
 
@@ -147,7 +149,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String sendPartialStr = configuration.getProperty("com.openexchange.smtp.sendPartial", "false").trim();
             sendPartial = Boolean.parseBoolean(sendPartialStr);
             logBuilder.append("    Send Partial: {}{}");
-            args.add(sendPartial);
+            args.add(B(sendPartial));
             args.add(lineSeparator);
         }
 
@@ -155,7 +157,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpEnvFromStr = configuration.getProperty("com.openexchange.smtp.setSMTPEnvelopeFrom", "false").trim();
             smtpEnvelopeFrom = Boolean.parseBoolean(smtpEnvFromStr);
             logBuilder.append("    Set SMTP ENVELOPE-FROM: {}{}");
-            args.add(smtpEnvelopeFrom);
+            args.add(B(smtpEnvelopeFrom));
             args.add(lineSeparator);
         }
 
@@ -163,7 +165,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.smtp.logTransport", "false").trim();
             logTransport = Boolean.parseBoolean(tmp);
             logBuilder.append("    Log transport: {}{}");
-            args.add(logTransport);
+            args.add(B(logTransport));
             args.add(lineSeparator);
         }
 
@@ -188,13 +190,13 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             try {
                 smtpTimeout = Integer.parseInt(smtpTimeoutStr);
                 logBuilder.append("    SMTP Timeout: {}{}");
-                args.add(smtpTimeout);
+                args.add(I(smtpTimeout));
                 args.add(lineSeparator);
             } catch (final NumberFormatException e) {
                 smtpTimeout = 5000;
                 logBuilder.append("    SMTP Timeout: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(smtpTimeoutStr);
-                args.add(smtpTimeout);
+                args.add(I(smtpTimeout));
                 args.add(lineSeparator);
 
             }
@@ -205,13 +207,13 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             try {
                 smtpConnectionTimeout = Integer.parseInt(smtpConTimeoutStr);
                 logBuilder.append("    SMTP Connection Timeout: {}{}");
-                args.add(smtpConnectionTimeout);
+                args.add(I(smtpConnectionTimeout));
                 args.add(lineSeparator);
             } catch (final NumberFormatException e) {
                 smtpConnectionTimeout = 10000;
                 logBuilder.append("    SMTP Connection Timeout: Invalid value \"{}\". Setting to fallback {}{}");
                 args.add(smtpConTimeoutStr);
-                args.add(smtpConnectionTimeout);
+                args.add(I(smtpConnectionTimeout));
                 args.add(lineSeparator);
 
             }

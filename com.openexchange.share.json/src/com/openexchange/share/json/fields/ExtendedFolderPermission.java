@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.fields;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -109,7 +110,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
         } else {
             User user = resolver.getUser(permission.getEntity());
             if (null == user) {
-                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for folder {}", permission.getEntity(), folder);
+                LoggerHolder.LOGGER.debug("Can't resolve user permission entity {} for folder {}", I(permission.getEntity()), folder);
             } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 if (guest == null) {
@@ -122,7 +123,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
                     if (permission.getType() == FolderPermissionType.INHERITED) {
-                        FolderObject legator = new FolderObject(Integer.valueOf(permission.getPermissionLegator()));
+                        FolderObject legator = new FolderObject(Integer.parseInt(permission.getPermissionLegator()));
                         legator.setModule(folder.getModule());
                         addShareInfo(requestData, jsonObject, resolver.getShare(legator, permission.getEntity()));
                     } else {

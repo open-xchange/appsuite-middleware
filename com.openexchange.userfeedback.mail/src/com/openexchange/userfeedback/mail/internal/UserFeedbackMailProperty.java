@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.mail.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 
 /**
@@ -62,9 +63,9 @@ public enum UserFeedbackMailProperty implements Property {
     senderAddress(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "mail."),
     exportPrefix(UserFeedbackMailProperty.EXPORT_PREFIX, UserFeedbackMailProperty.PREFIX + "mail."),
     hostname(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
-    port(587, UserFeedbackMailProperty.PREFIX + "smtp."),
-    timeout(50000, UserFeedbackMailProperty.PREFIX + "smtp."),
-    connectionTimeout(10000, UserFeedbackMailProperty.PREFIX + "smtp."),
+    port(I(587), UserFeedbackMailProperty.PREFIX + "smtp."),
+    timeout(I(50000), UserFeedbackMailProperty.PREFIX + "smtp."),
+    connectionTimeout(I(10000), UserFeedbackMailProperty.PREFIX + "smtp."),
     username(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
     password(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "smtp."),
     signKeyFile(UserFeedbackMailProperty.EMPTY, UserFeedbackMailProperty.PREFIX + "pgp."),

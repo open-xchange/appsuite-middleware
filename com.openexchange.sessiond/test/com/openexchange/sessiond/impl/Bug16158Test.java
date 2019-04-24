@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import java.util.List;
 import org.junit.After;
@@ -136,7 +137,7 @@ public class Bug16158Test {
             wasTimeout |= rotator.hasTimeout();
         }
         for (final SessionFinder finder : finders) {
-            assertEquals("Expected shows timeout. Actual represents not found session.", wasTimeout, finder.hasNotFound());
+            assertEquals("Expected shows timeout. Actual represents not found session.", B(wasTimeout), B(finder.hasNotFound()));
         }
         if (wasTimeout) {
             int foundTimeouts = 0;

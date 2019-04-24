@@ -23,6 +23,8 @@
 
 package com.openexchange.socketio.protocol;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.ParsePosition;
@@ -335,8 +337,8 @@ public final class SocketIOProtocol {
             return map;
         } else if (json instanceof InputStream) {
             LinkedHashMap<String, Object> map = new LinkedHashMap<>();
-            map.put("_placeholder", true);
-            map.put("num", attachments.size());
+            map.put("_placeholder", B(true));
+            map.put("num", I(attachments.size()));
             attachments.add((InputStream) json);
 
             return map;

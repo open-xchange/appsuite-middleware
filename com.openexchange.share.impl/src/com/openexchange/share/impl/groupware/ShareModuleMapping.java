@@ -91,8 +91,8 @@ public class ShareModuleMapping {
                     for (String module : mapping.split(",")) {
                         String moduleName = module.split("=")[0];
                         String moduleId = module.split("=")[1];
-                        moduleMapping2Int.put(moduleName, Integer.parseInt(moduleId));
-                        moduleMapping2String.put(Integer.parseInt(moduleId), moduleName);
+                        moduleMapping2Int.put(moduleName, Integer.valueOf(moduleId));
+                        moduleMapping2String.put(Integer.valueOf(moduleId), moduleName);
                     }
                 }
             } catch (RuntimeException e) {

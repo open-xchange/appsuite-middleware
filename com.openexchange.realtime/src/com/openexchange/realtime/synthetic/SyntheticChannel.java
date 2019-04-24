@@ -85,28 +85,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-/*
- * @startuml doc-files/HandleIncomingStanza.png
- * (*) -> "Stanza arrives in
- * SyntheticChannel#send()"
- * if "Addressed ComponentHandle exists" then
- *   --> [true] "Update access time"
- *   --> "Find RunLoop assigned
- *   to ComponentHandle"
- *   --> "Offer Stanza to RunLoop"
- *   if "Stanza taken" then
- *   --> [true] (*)
- *   else
- *   --> [false] "Throw RealtimeException"
- *   --> (*)
- * endif
- * else
- *   --> [false] "Throw RealtimeException"
- *   --> (*)
- * endif
- * @enduml
- */
-
 public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel, Runnable {
 
     public static final String PROTOCOL = "synthetic";

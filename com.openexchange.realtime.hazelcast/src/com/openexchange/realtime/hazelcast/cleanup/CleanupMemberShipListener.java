@@ -76,30 +76,6 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-/*
- * @startuml doc-files/CleanupActivity.png
- * (*) -> "Member leaves the Cluster"
- * -> "Try to get cluster
- * wide cleanup lock"
- * 
- * -> "Get cleanup status 
- * from global cleanup map"
- * 
- * if "Some other node already did cleanup" then
- *   -->[true] (*)
- * else 
- *   -->[false] "Get resources from member
- *   that left the cluster"
- *   --> "Issue global realtime cleanup
- *   for each found resource"
- *   --> "Put new CleanupStatus into
- *   global cleanup map"
- *   -->"Release global cleanup lock"
- *   --> (*)
- * endif
- * 
- * @enduml
- */
 public class CleanupMemberShipListener implements MembershipListener {
 
     private String cleanupLockMapName;

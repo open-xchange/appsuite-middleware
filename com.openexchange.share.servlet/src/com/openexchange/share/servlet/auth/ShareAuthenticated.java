@@ -49,6 +49,7 @@
 
 package com.openexchange.share.servlet.auth;
 
+import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
@@ -126,7 +127,7 @@ public class ShareAuthenticated implements GuestAuthenticated, SessionEnhancemen
         if (null != enhancement) {
             enhancement.enhanceSession(session);
         }
-        session.setParameter(Session.PARAM_GUEST, true);  // Guest authenticated.  Set Guest parameter True
+        session.setParameter(Session.PARAM_GUEST, B(true));  // Guest authenticated.  Set Guest parameter True
     }
 
 }

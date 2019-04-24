@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.mail.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -251,15 +252,15 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
         SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
         String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
         properties.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
-        properties.put("mail.smtp.ssl.socketFactory.port", leanConfig.getIntProperty(UserFeedbackMailProperty.port));
-        properties.put("mail.smtp.starttls.enable", true);
+        properties.put("mail.smtp.ssl.socketFactory.port", I(leanConfig.getIntProperty(UserFeedbackMailProperty.port)));
+        properties.put("mail.smtp.starttls.enable", Boolean.TRUE);
         properties.put("mail.smtp.ssl.trust", "*");
 
         properties.put("mail.smtp.host", leanConfig.getProperty(UserFeedbackMailProperty.hostname));
-        properties.put("mail.smtp.port", leanConfig.getIntProperty(UserFeedbackMailProperty.port));
-        ;
-        properties.put("mail.smtp.connectiontimeout", leanConfig.getIntProperty(UserFeedbackMailProperty.connectionTimeout));
-        properties.put("mail.smtp.timeout", leanConfig.getIntProperty(UserFeedbackMailProperty.timeout));
+        properties.put("mail.smtp.port", I(leanConfig.getIntProperty(UserFeedbackMailProperty.port)));
+
+        properties.put("mail.smtp.connectiontimeout", I(leanConfig.getIntProperty(UserFeedbackMailProperty.connectionTimeout)));
+        properties.put("mail.smtp.timeout", I(leanConfig.getIntProperty(UserFeedbackMailProperty.timeout)));
 
         return properties;
     }

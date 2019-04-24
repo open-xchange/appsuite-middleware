@@ -49,6 +49,7 @@
 
 package com.openexchange.share.core.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -140,9 +141,9 @@ public abstract class AbstractTargetProxy implements TargetProxy {
             ListMultimap<Integer, T> permissionsByGroup = ArrayListMultimap.create();
             for (T permission : origPermissions) {
                 if (converter.isGroup(permission)) {
-                    permissionsByGroup.put(converter.getEntity(permission), permission);
+                    permissionsByGroup.put(I(converter.getEntity(permission)), permission);
                 } else {
-                    permissionsByUser.put(converter.getEntity(permission), permission);
+                    permissionsByUser.put(I(converter.getEntity(permission)), permission);
                 }
             }
 
@@ -152,9 +153,9 @@ public abstract class AbstractTargetProxy implements TargetProxy {
             for (TargetPermission permission : permissions) {
                 List<T> removed;
                 if (permission.isGroup()) {
-                    removed = permissionsByGroup.removeAll(permission.getEntity());
+                    removed = permissionsByGroup.removeAll(I(permission.getEntity()));
                 } else {
-                    removed = permissionsByUser.removeAll(permission.getEntity());
+                    removed = permissionsByUser.removeAll(I(permission.getEntity()));
                 }
 
                 newPermissions.add(converter.convert(permission));

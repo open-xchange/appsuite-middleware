@@ -49,6 +49,8 @@
 
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -63,14 +65,14 @@ import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SessionToucher implements Runnable {
-    
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessionToucher.class);
-    
+
     private final HazelcastSessionStorageService sessionStorage;
 
     /**
      * Initializes a new {@link SessionToucher}.
-     * 
+     *
      * @param sessionStorage The session storage service
      */
     public SessionToucher(HazelcastSessionStorageService sessionStorage) {
@@ -101,14 +103,14 @@ public class SessionToucher implements Runnable {
             } catch (OXException e) {
                 LOG.error("Error touching active sessions in storage", e);
             }
-            LOG.info("Detected {} active sessions in local containers, thereof touched {} sessions in distributed session storage ({}ms elapsed).", 
-                sessionIDs.size(), touched, (System.currentTimeMillis() - start));
+            LOG.info("Detected {} active sessions in local containers, thereof touched {} sessions in distributed session storage ({}ms elapsed).",
+                I(sessionIDs.size()), I(touched), L((System.currentTimeMillis() - start)));
         }
     }
-    
+
     /**
      * Gets the required touch period for sessions in the distributed storage based on the configured session default lifetime.
-     * 
+     *
      * @param configService A reference to the configuration service
      * @return The touch period in milliseconds
      */
@@ -116,7 +118,7 @@ public class SessionToucher implements Runnable {
         int defaultValue = 60 * 60 * 1000;
         int value;
         if (null == configService) {
-            LOG.warn("Unable to determine \"com.openexchange.sessiond.sessionDefaultLifeTime\", falling back to {}.", defaultValue);
+            LOG.warn("Unable to determine \"com.openexchange.sessiond.sessionDefaultLifeTime\", falling back to {}.", I(defaultValue));
             value = defaultValue;
         } else {
             value = configService.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", defaultValue);

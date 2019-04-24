@@ -50,6 +50,7 @@
 package com.openexchange.spamhandler.parallels;
 
 import static com.openexchange.custom.parallels.impl.ParallelsOptions.PROPERTY_ANTISPAM_XMLRPC_PORT;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -219,7 +220,7 @@ public class ParallelsSpamdService implements SpamdService {
 
             // spamd port from configuration
             int spamd_provider_port = getPort(session);
-            LOG.debug("Using port {} for connections to spamd service", spamd_provider_port);
+            LOG.debug("Using port {} for connections to spamd service", I(spamd_provider_port));
 
             // get the user object from the OX API to retrieve users primary mail address
             final User oxuser = getUser(session);
@@ -230,7 +231,7 @@ public class ParallelsSpamdService implements SpamdService {
             final java.net.URI tp = new java.net.URI(oxuser.getSmtpServer());// this will always be the smtp://host:port of the user
             final String xmlrpc_server = tp.getHost();
             int xml_rpc_port = getXmlPort(session);
-            LOG.debug("Using port {} for connections to xmlrpc service", xml_rpc_port);
+            LOG.debug("Using port {} for connections to xmlrpc service", I(xml_rpc_port));
 
             final String URL_to_xmlrpc = "http://" +xmlrpc_server+":"+xml_rpc_port;
             post_method.setURI(new URI(URL_to_xmlrpc));

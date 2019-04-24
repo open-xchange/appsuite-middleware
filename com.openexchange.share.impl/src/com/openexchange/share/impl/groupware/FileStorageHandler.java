@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -235,7 +236,7 @@ public class FileStorageHandler implements ModuleHandler {
                         File file = ((FileTargetProxy) proxy).getFile();
                         FileID fileID = new FileID(file.getId());
                         if (false == fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.OBJECT_PERMISSIONS)) {
-                            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(fileID.getService(), file.getFolderId(), parameters.getContext().getContextId());
+                            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(fileID.getService(), file.getFolderId(), I(parameters.getContext().getContextId()));
                         }
                         fileAccess.saveFileMetadata(file, file.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                     }

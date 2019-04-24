@@ -80,7 +80,7 @@ public class GuestLastModifiedMarker {
         String value = ShareTool.getUserAttribute(guestUser, GUEST_LAST_MODIFIED_ATTRIBUTE);
         if (null != value) {
             try {
-                return new Date(Long.valueOf(value));
+                return new Date(Long.parseLong(value));
             } catch (NumberFormatException e) {
                 LOG.warn("Ignoring invalid value in \"{}\"", GUEST_LAST_MODIFIED_ATTRIBUTE, e);
             }

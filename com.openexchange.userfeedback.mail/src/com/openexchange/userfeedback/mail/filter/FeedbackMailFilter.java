@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.mail.filter;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -119,12 +120,12 @@ public class FeedbackMailFilter implements FeedbackFilter {
 
     @Override
     public Long start() {
-        return start;
+        return L(start);
     }
 
     @Override
     public Long end() {
-        return end;
+        return L(end);
     }
 
     public String getCtxGroup() {

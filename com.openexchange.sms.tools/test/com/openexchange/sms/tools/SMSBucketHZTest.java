@@ -49,6 +49,8 @@
 
 package com.openexchange.sms.tools;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.AfterClass;
@@ -151,14 +153,14 @@ public class SMSBucketHZTest {
         });
         //        PowerMockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(factory);
         PowerMockito.when(factory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(view);
-        PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class)).thenReturn(true);
+        PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class)).thenReturn(B(true));
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, String.class)).thenReturn("2");
         PowerMockito.when(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class)).thenReturn("3");
         fake = PowerMockito.mock(Session.class, new Answer<Integer>() {
 
             @Override
             public Integer answer(InvocationOnMock invocation) throws Throwable {
-                return 1;
+                return I(1);
             }
         });
 

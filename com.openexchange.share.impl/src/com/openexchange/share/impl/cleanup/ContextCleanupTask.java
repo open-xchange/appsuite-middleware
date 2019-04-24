@@ -96,7 +96,7 @@ public class ContextCleanupTask extends AbstractTask<List<GuestCleanupTask>> {
             return cleanContext();
         } catch (OXException e) {
             if ("CTX-0002".equals(e.getErrorCode())) {
-                LOG.debug("Context {} no longer found, cancelling cleanup.", contextID, e);
+                LOG.debug("Context {} no longer found, cancelling cleanup.", I(contextID), e);
                 return Collections.emptyList();
             }
             throw e;

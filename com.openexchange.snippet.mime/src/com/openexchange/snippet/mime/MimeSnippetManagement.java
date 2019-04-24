@@ -49,6 +49,8 @@
 
 package com.openexchange.snippet.mime;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
@@ -565,7 +567,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         if (null != quota) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
             if (null != amountQuota && (amountQuota.isExceeded() || amountQuota.willExceed(1))) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
             }
             // Check if size is already exceeded
             Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
@@ -1202,7 +1204,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             deleteSnippet(identifier, userId, contextId, con);
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
-            logger.warn("Failed to delete snippet {} for user {} in context {}", identifier, userId, contextId, e);
+            logger.warn("Failed to delete snippet {} for user {} in context {}", identifier, I(userId), I(contextId), e);
         }
     }
 

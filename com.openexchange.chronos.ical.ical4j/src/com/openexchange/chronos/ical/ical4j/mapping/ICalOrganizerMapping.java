@@ -142,7 +142,7 @@ public abstract class ICalOrganizerMapping<T extends Component, U> extends Abstr
         Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
         if (null != sentByParameter && Strings.isNotEmpty(sentByParameter.getValue())) {
             CalendarUser sentByUser = new CalendarUser();
-            sentByUser.setUri(property.getValue());
+            sentByUser.setUri(sentByParameter.getValue());
             organizer.setSentBy(sentByUser);
         }
         return organizer;
