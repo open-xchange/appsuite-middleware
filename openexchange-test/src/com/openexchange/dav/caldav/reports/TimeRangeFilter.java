@@ -49,61 +49,39 @@
 
 package com.openexchange.dav.caldav.reports;
 
-import java.util.List;
-import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
-import org.apache.jackrabbit.webdav.version.report.ReportInfo;
-import org.apache.jackrabbit.webdav.xml.DomUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import com.openexchange.dav.PropertyNames;
-
 /**
- * {@link CalendarQueryReportInfo}
+ * {@link TimeRangeFilter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.2
  */
-public class CalendarQueryReportInfo extends ReportInfo {
+public class TimeRangeFilter {
 
-    private final CompFilter filter;
+    private final String start;
+    private final String end;
 
-    public CalendarQueryReportInfo(CompFilter filter, DavPropertyNameSet propertyNames, int depth) {
-        super(CalendarQueryReport.CALENDAR_QUERY, depth, propertyNames);
-        this.filter = filter;
+    public TimeRangeFilter(String start, String end) {
+        super();
+        this.start = start;
+        this.end = end;
     }
 
-    @Override
-    public Element toXml(final Document document) {
-        Element element = super.toXml(document);
-        Element filterElement = DomUtil.createElement(document, "filter", PropertyNames.NS_CALDAV);
-        if (null != filter) {
-            filterElement.appendChild(getFilterElement(document, filter));
-        }
-        element.appendChild(filterElement);
-        return element;
+    /**
+     * Gets the start
+     *
+     * @return The start
+     */
+    public String getStart() {
+        return start;
     }
 
-    private static Element getFilterElement(Document document, CompFilter filter) {
-        Element element = DomUtil.createElement(document, "comp-filter", PropertyNames.NS_CALDAV);
-        element.setAttribute("name", filter.getName());
-        TimeRangeFilter timeRangeFilter = filter.getTimeRangeFilter();
-        if (null != timeRangeFilter) {
-            Element timeRangeElement = DomUtil.createElement(document, "time-range", PropertyNames.NS_CALDAV);
-            if (null != timeRangeFilter.getStart()) {
-                timeRangeElement.setAttribute("start", timeRangeFilter.getStart());
-            }
-            if (null != timeRangeFilter.getEnd()) {
-                timeRangeElement.setAttribute("end", timeRangeFilter.getEnd());
-            }
-            element.appendChild(timeRangeElement);
-        }
-        List<CompFilter> subFilters = filter.getSubFilters();
-        if (null != subFilters) {
-            for (CompFilter subFilter : subFilters) {
-                element.appendChild(getFilterElement(document, subFilter));
-            }
-        }
-        return element;
+    /**
+     * Gets the end
+     *
+     * @return The end
+     */
+    public String getEnd() {
+        return end;
     }
 
 }

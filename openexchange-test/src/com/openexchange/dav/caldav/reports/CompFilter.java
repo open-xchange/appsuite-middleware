@@ -61,11 +61,19 @@ public class CompFilter {
 
     private String name;
     private List<CompFilter> subFilters;
+    private TimeRangeFilter timeRangeFilter;
 
     public CompFilter(String name, List<CompFilter> subFilters) {
         super();
         this.setSubFilters(subFilters);
         this.setName(name);
+    }
+
+    public CompFilter(String name, List<CompFilter> subFilters, TimeRangeFilter timeRangeFilter) {
+        super();
+        this.setSubFilters(subFilters);
+        this.setName(name);
+        this.setTimeRangeFilter(timeRangeFilter);
     }
 
     /**
@@ -102,6 +110,24 @@ public class CompFilter {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Gets the timeRangeFilter
+     *
+     * @return The timeRangeFilter
+     */
+    public TimeRangeFilter getTimeRangeFilter() {
+        return timeRangeFilter;
+    }
+
+    /**
+     * Sets the timeRangeFilter
+     *
+     * @param timeRangeFilter The timeRangeFilter to set
+     */
+    public void setTimeRangeFilter(TimeRangeFilter timeRangeFilter) {
+        this.timeRangeFilter = timeRangeFilter;
     }
 
 }
