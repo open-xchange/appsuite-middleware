@@ -54,6 +54,7 @@ import static com.openexchange.ajax.task.TaskTools.getTask;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.math.BigDecimal;
@@ -309,7 +310,10 @@ public class TasksTest extends AbstractAJAXSession {
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
 
         final Response response = getTask(getClient(), folderId, taskId);
-        final Task reload = (Task) response.getData();
+        assertNull(response.getErrorMessage(), response.getErrorMessage());
+        Object data = response.getData();
+        assertTrue(data instanceof Task);
+        final Task reload = (Task) data;
         assertEquals("Missing reminder.", remind, reload.getAlarm());
         deleteTask(getClient(), response.getTimestamp(), folderId, taskId);
     }
