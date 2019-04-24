@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,6 +59,8 @@ ox_update_permissions /opt/open-xchange/etc/filestore-sproxyd.properties root:op
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Apr 24 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-04-29 (5211)
 * Tue Mar 26 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-04-01 (5180)
 * Tue Mar 12 2019 Marcus Klein <marcus.klein@open-xchange.com>

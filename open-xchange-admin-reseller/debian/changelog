@@ -1,3 +1,9 @@
+open-xchange-admin-reseller (7.10.1-11) stable; urgency=medium
+
+  * Build for patch 2019-04-29 (5211)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Wed, 24 Apr 2019 12:42:40 +0200
+
 open-xchange-admin-reseller (7.10.1-10) stable; urgency=medium
 
   * Build for patch 2019-04-01 (5180)
