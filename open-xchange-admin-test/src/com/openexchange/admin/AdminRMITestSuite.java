@@ -49,6 +49,7 @@
 
 package com.openexchange.admin;
 
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
@@ -90,4 +91,17 @@ import com.openexchange.admin.user.copy.rmi.UserCopyTest;
 })
 public class AdminRMITestSuite {
 
+    @BeforeClass
+    public static void sleep() {
+        int x = 20;
+        System.out.println("Waiting for " + x + " seconds to let the MW recover from whatever...");
+        try {
+            for (int i = 0; i < x; i++) {
+                System.out.print(" ... " + i + " ... ");
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException e) {
+            // nothing to do
+        }
+    }
 }
