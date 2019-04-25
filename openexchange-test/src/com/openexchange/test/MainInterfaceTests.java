@@ -49,9 +49,12 @@
 
 package com.openexchange.test;
 
-import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.ajax.drive.DriveAJAXSuite;
+import com.openexchange.ajax.find.FindTestSuite;
+import com.openexchange.ajax.jslob.JSlobTestSuite;
+import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -61,7 +64,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    // @formatter:off
     com.openexchange.SmokeTestSuite.class,
     com.openexchange.ajax.FolderTest.class,
     com.openexchange.ajax.UserTest.class,
@@ -105,34 +107,20 @@ import com.openexchange.test.concurrent.ParallelSuite;
     com.openexchange.ajax.tokenloginV2.TokenLoginV2Test.class,
     com.openexchange.ajax.oauth.OAuthTests.class,
     com.openexchange.test.resourcecache.ResourceCacheTest.class,
-    com.openexchange.ajax.find.FindTestSuite.class,
+    FindTestSuite.class,
     com.openexchange.ajax.quota.QuotaTestSuite.class,
-    com.openexchange.ajax.jslob.JSlobTestSuite.class,
+    JSlobTestSuite.class,
     // Needs to be disabled as associated test suite requires a frontend package, which is currently not available
     // ManifestsTestSuite.class,
     // TODO: enable
-    com.openexchange.ajax.drive.DriveAJAXSuite.class,
+    DriveAJAXSuite.class,
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
-    com.openexchange.ajax.oauth.provider.OAuthProviderTests.class,
+    OAuthProviderTests.class,
     com.openexchange.ajax.userfeedback.StoreTest.class,
     com.openexchange.ajax.sessionmanagement.SessionManagementSuite.class,
     com.openexchange.ajax.chronos.ChronosTestSuite.class,
     com.openexchange.ajax.multifactor.MultifactorTestSuite.class
-    // @formatter:on
 })
 public final class MainInterfaceTests {
 
-    @BeforeClass
-    public static void sleep() {
-        int x = 20;
-        System.out.println("Waiting for " + x + " seconds to let the MW recover from whatever...");
-        try {
-            for (int i = 0; i < x; i++) {
-                System.out.print(" ... " + i + " ... ");
-                Thread.sleep(1000);
-            }
-        } catch (InterruptedException e) {
-            // nothing to do
-        }
-    }
 }
