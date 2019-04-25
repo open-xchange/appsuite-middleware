@@ -50,8 +50,8 @@ Properties:
 This section defines a list of CLT's and their descriptions which are useful in context of filestores.
 To get further informations about a specific CLT run it with the --help option.
 
-|Name | Description|
-| --|--|
+| Name              | Description                     |
+|:------------------|:--------------------------------|
 | registerfilestore | Allows to register a filestore. |
 | unregisterfilestore | Allows to remove a filestore. |
 | movecontextfilestore | Moves all data of a context to another filestore and assign this new filestore to the context. |
