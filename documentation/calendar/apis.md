@@ -1,6 +1,5 @@
 ---
 title: APIs 
-classes: toc
 icon: fa-exchange
 tags: API, Calendar
 ---

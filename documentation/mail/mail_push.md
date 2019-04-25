@@ -1,6 +1,5 @@
 ---
-title: Setup Mail Push
-classes: toc
+title: Mail Push
 icon: fa-bell
 tags: Mail, Configuration, Push, Installation
 ---

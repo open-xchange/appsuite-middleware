@@ -1,6 +1,5 @@
 ---
 title: Mail Filter Blacklisting
-classes: toc
 icon: fa-filter
 tags: Mail, Sieve, Configuration
 ---

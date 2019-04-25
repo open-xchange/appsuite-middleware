@@ -1,6 +1,5 @@
 ---
 title: Custom Host Configuration
-classes: toc
 icon: fa-cogs
 tags: Administration, Configuration
 ---

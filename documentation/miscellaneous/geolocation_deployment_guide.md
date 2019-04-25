@@ -1,6 +1,5 @@
 ---
-title: Geolocation
-classes: toc
+title: Geolocation Deployment Guide
 icon: fa-globe
 tags: Geolocation, Configuration, Installation
 ---

@@ -1,6 +1,5 @@
 ---
-title: XING Contacts
-classes: toc
+title: XING
 icon: fa-xing
 tags: 3rd Party, XING, Installation, Configuration, Contacts
 ---

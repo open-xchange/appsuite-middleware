@@ -1,6 +1,5 @@
 ---
 title: Attachment Marker
-classes: toc
 icon: fa-paperclip
 tags: Mail, Configuration
 ---

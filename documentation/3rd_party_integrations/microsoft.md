@@ -1,6 +1,5 @@
 ---
 title: Microsoft
-classes: toc
 icon: fa-windows
 tags: 3rd Party, Microsoft, Installation, Configuration, Filestore, Contacts
 ---

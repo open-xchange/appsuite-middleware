@@ -1,6 +1,5 @@
 ---
 title: Google
-classes: toc
 icon: fa-google
 tags: 3rd Party, Google, Installation, Configuration, Filestore, Calendar, Contacts
 ---

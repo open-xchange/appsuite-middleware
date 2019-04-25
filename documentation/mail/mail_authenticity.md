@@ -1,6 +1,5 @@
 ---
 title: Mail Authenticity
-classes: toc
 icon: fa-certificate
 tags: Mail, Configuration, Security
 ---

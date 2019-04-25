@@ -1,45 +1,10 @@
 ---
 title: Mail Categories
-classes: toc
 icon: fa-tag
 tags: Mail, Configuration, Installation, Sieve
 ---
 
-# Mail categories documentation
-
-<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-- [Prerequisites](#prerequisites)
-- [Quickstart guide](#quickstart-guide)
-	- [1. Install the open-xchange-mail-categories package.](#1-install-the-open-xchange-mail-categories-package)
-	- [2. Add 'mail_categories' capability](#2-add-mailcategories-capability)
-	- [3. Add category identifiers](#3-add-category-identifiers)
-	- [4. Add category configurations](#4-add-category-configurations)
-	- [5. Setup the initiale system category rules (optional)](#5-setup-the-initiale-system-category-rules-optional)
-	- [6. Check properties and restart the server](#6-check-properties-and-restart-the-server)
-- [Introduction](#introduction)
-- [Requirements](#requirements)
-- [Configuration](#configuration)
-	- [Server](#server)
-		- [com.openexchange.mail.categories](#com-openexchange-mail-categories)
-		- [com.openexchange.mail.categories.enabled](#com-openexchange-mail-categories-enabled)
-		- [com.openexchange.mail.categories.forced](#com-openexchange-mail-categories-forced)
-		- [com.openexchange.mail.categories.general.name.fallback](#com-openexchange-mail-categories-general-name-fallback)
-		- [com.openexchange.mail.categories.general.name.[locale]](#com-openexchange-mail-categories-general-name-locale)
-		- [com.openexchange.mail.categories.identifiers](#com-openexchange-mail-categories-identifiers)
-		- [com.openexchange.mail.categories.identifiers](#com-openexchange-mail-categories-identifiers)
-		- [com.openexchange.mail.categories.[category].flag](#com-openexchange-mail-categories-category-flag)
-		- [com.openexchange.mail.categories.[category].active](#com-openexchange-mail-categories-category-active)
-		- [com.openexchange.mail.categories.[category].force](#com-openexchange-mail-categories-category-force)
-		- [com.openexchange.mail.categories.[category].name.fallback](#com-openexchange-mail-categories-category-name-fallback)
-		- [com.openexchange.mail.categories.[category].name.[locale]](#com-openexchange-mail-categories-category-name-locale)
-		- [com.openexchange.mail.categories.apply.ox.rules](#com-openexchange-mail-categories-apply-ox-rules)
-		- [com.openexchange.mail.categories.rules.[category]](#com-openexchange-mail-categories-rules-category)
-	- [Client](#client)
-
-<!-- /TOC -->
-
-## Prerequisites
+# Prerequisites
 
 The mail categorization feature has some requirements towards the used IMAP server for the primary mail accounts:
 
@@ -53,7 +18,7 @@ The mail categorization feature has some requirements towards the used IMAP serv
 Open-Xchange recommends the use of Dovecot 2.2 or higher along with the Pigeonhole Sieve implementation.
 
 
-## Quickstart guide
+# Quickstart guide
 
 This guide gives a quick overview on how to get the mail categories feature running. If you instead want to know more about the feature and its configuration details take a look at the other chapters below.
 
@@ -61,22 +26,22 @@ This guide provides the quickest way to get the feature running. It will activat
 
 In order to get the mail categories feature running you have to do the following steps:
 
-#### 1. Install the open-xchange-mail-categories package.
+## Install the open-xchange-mail-categories package.
 
 First of all you have to install the "open-xchange-mail-categories" package.
 
-#### 2. Add 'mail_categories' capability
+## Add 'mail_categories' capability
 
 Open /opt/open-xchange/etc/mail-categories.properties and set ```com.openexchange.mail.categories``` to 'true'.
 
-#### 3. Add category identifiers
+## Add category identifiers
 
 Change following properties:
 
     com.openexchange.mail.categories.identifiers=promotion,social,purchases
     com.openexchange.mail.user.categories.identifiers=uc1,uc2
 
-#### 4. Add category configurations
+## Add category configurations
 
 Add following properties:
 
@@ -109,7 +74,7 @@ Add following properties:
     com.openexchange.mail.categories.uc2.name.de_DE=Arbeit
 
 
-#### 5. Setup the initial system category rules (optional)
+## Setup the initial system category rules (optional)
 
 Since the mails are currently not flagged at all, all categories except the general category will be empty. In order to prevent such a bad user experience you have the possibility to define predefined rules, which will be added to each user individually. But in order to improve the imap performance it is strongly recommended to use system wide rules instead! This also makes changes/improvements of the rules much easier.
 
@@ -145,7 +110,7 @@ and uncomment or add the example mail address lists:
 The used lists in both variants are not complete and are only applicable for users in Germany. Therefore you should always adapt this lists to you individual needs.
 
 
-#### 6. Check properties and restart the server
+## Check properties and restart the server
 
 Finally your ```mail-categories.properties``` file should look similar to this:
 
@@ -232,7 +197,7 @@ Finally your ```mail-categories.properties``` file should look similar to this:
 If everything is allright you only have to restart the server.
 
 
-## Introduction
+# Introduction
 
 With OX Middleware version 7.8.2 a feature called mail categories (aka tabbed inbox) is introduced.
 This features divides the inbox of the primary email account into categories. Each category acts like a container for emails.
@@ -291,11 +256,11 @@ If another category is trained with the same address the old rule will be remove
 In addition to option two the user is also able to reorganize all existing mails within the inbox.
 That means that all mails which match the rules of the category will be categorized in this category.
 
-## Requirements
+# Requirements
 
 The mail categories feature requires an imap server with support of the the imap4flags extension. See https://tools.ietf.org/html/rfc5232 for further informations.
 
-## Configuration
+# Configuration
 
 ### Server
 
@@ -321,7 +286,7 @@ All configurations are config cascade aware and can therefore be overwritten on 
 | [com.openexchange.mail.categories.rules.[category]](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.mail.categories.rules.[category])                                                                                                                  | Comma separated list of strings | |         |
 
 
-#### com.openexchange.mail.categories
+## com.openexchange.mail.categories
 
 This property defines whether the user capability is granted to use the mail categories feature. This is the main switch for an administrator to enable/disable that feature.
 
@@ -332,57 +297,57 @@ This property defines whether the user capability is granted to use the mail cat
 
 the mail categories feature becomes effectively available for a user.
 
-#### com.openexchange.mail.categories.enabled
+## com.openexchange.mail.categories.enabled
 
 This property defines whether the mail categories feature should be enabled or not. This property only influence the starting value.
 For example set this property to 'true' if you want your users to see the mail features after their first login. If you rather want the same UI experience like before set this value to 'false' instead.
 Anyway users are able to show or hide the feature via configuration.
 
-#### com.openexchange.mail.categories.forced
+## com.openexchange.mail.categories.forced
 
 If this property is set to true it overwrites the com.openexchange.mail.categories.enabled property. Then users will not be able to hide the feature via configuration.
 
-#### com.openexchange.mail.categories.general.name.fallback
+## com.openexchange.mail.categories.general.name.fallback
 
 Defines the default name of the general category.
 Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe".
 
-#### com.openexchange.mail.categories.general.name.[locale]
+## com.openexchange.mail.categories.general.name.[locale]
 
 Each entry defines a localized name of the general category. For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US).
 Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe".
 
 For example: com.openexchange.mail.categories.general.name.de_DE=Allgemein
 
-#### com.openexchange.mail.categories.identifiers
+## com.openexchange.mail.categories.identifiers
 
 Specifies a comma separated list of system category identifiers. This identifiers will be used to identify category specific configurations.
 It is not necessary but recommended to use meaningful names like "promotion" or "social". Please also notice that the categories will be displayed in the same order they are listed here, whereby the system categories will be placed before the user categories.
 It is also possible to define only one type of categories, either system or user categories.
 
-#### com.openexchange.mail.user.categories.identifiers
+## com.openexchange.mail.user.categories.identifiers
 
 Specifies a comma separated list of user category identifiers. This identifiers will be used to identify category specific configurations.
 Since the purpose of these categories can change over time it is not necessary to use meaningful names here. Please also notice that the categories will be displayed in the same order they are listed here, whereby the system categories will be placed before the user categories.
 It is also possible to define only one type of categories, either system or user categories.
 
-#### com.openexchange.mail.categories.[category].flag
+## com.openexchange.mail.categories.[category].flag
 
 A category specific attribute which defines the used flag string for this category. Never use the same flag for different categories, since this would cause mails to be present in more than one category at the same time.
 If your mails are already flagged by any mechanism you can reuse the written flags here to categorize these mails.
 
 
-#### com.openexchange.mail.categories.[category].active
+## com.openexchange.mail.categories.[category].active
 
 A category specific attribute which defines whether the category is active as default. If the value is set to false the mails with the flag of this category will be shown under the genereal tab until the user manually activates this particular category.
 
 
-#### com.openexchange.mail.categories.[category].force
+## com.openexchange.mail.categories.[category].force
 
 A system category specific attribute which defines whether the category should always be shown. If set to true the user isn't able to deactivate this specific category any more.
 
 
-#### com.openexchange.mail.categories.[category].name.fallback
+## com.openexchange.mail.categories.[category].name.fallback
 
 Each entry defines a category specific default name for the specific category.
 Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe".
@@ -390,7 +355,7 @@ Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe".
 For example: com.openexchange.mail.categories.uc1.name.fallback=Work
 
 
-#### com.openexchange.mail.categories.[category].name.[locale]
+## com.openexchange.mail.categories.[category].name.[locale]
 
 Each entry defines a category specific localized name for the specific category. For each entry [locale] must be replaced with a ISO-639-2 language code followed by a underscore followed by a ISO-3166 country code (e.g. de_DE or en_US).
 Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe".
@@ -398,19 +363,19 @@ Please use unicode notation for non-ascii characters; e.g. "Entw\u00fcrfe".
 For example: com.openexchange.mail.categories.uc1.name.de_DE=Arbeit
 
 
-#### com.openexchange.mail.categories.apply.ox.rules
+## com.openexchange.mail.categories.apply.ox.rules
 
 Defines whether user rules should be created or not. It is strongly recommended to set this value to false and use system wide rules instead to increase the performance of the imap server.
 
 
-#### com.openexchange.mail.categories.rules.[category]
+## com.openexchange.mail.categories.rules.[category]
 
 A system category specific attribute which Defines a comma separated list of email addresses. This addresses will be used to create a starting rule for the given system category.
 It is also possible to use mail address parts here. For example "@amazon.com".
 
 
 
-### Client
+# Client
 
 The config tree is extended with additional entries. First of all the capability mail_categories is introduced, which defines whether the mail_categories module is available for the user.
 In addition the io.ox/mail tree is extended with an entry 'categories':
@@ -462,7 +427,7 @@ The 'list' field contains an array of single category configurations and always 
 The permissions _rename_ and _disable_ indicating whether the fields _name_ and _active_ are writable or not. All other fields are read only and must not be changed by the client.
 
 
-## Summary and recommendations
+# Summary and recommendations
 
 This chapter contains a list of recommendations, which should be considered in order to provide the best performance and user experience.
 

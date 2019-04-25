@@ -1,6 +1,5 @@
 ---
 title: Mail Flagging
-classes: toc
 icon: fa-flag
 tags: Mail, Configuration
 ---
@@ -24,8 +23,6 @@ With this mode the user gets offered the special \Flagged system flag in additio
 With this mode the user gets offered the color flags but the special \Flagged system flag only implicit. So only color flags are offered to the user, but mails that have been flagged by other clients via IMAP \Flagged are displayed in a configurable color and a color set mail by an App Suite client appears highlighted in non-App Suite clients. So a certain color label is linked with the \Flagged system flag. 
 
 If the native OX Mail app is offered in addition to the web interface, it is recommended to use the "Flagged only" or "Flagged implicit" mode. Currently OX Mail only supports IMAP flagging.
-
-
 
 # Flagging modes
 ## Color only
