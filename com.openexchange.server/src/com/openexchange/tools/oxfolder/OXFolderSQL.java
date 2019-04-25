@@ -738,7 +738,7 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
+    private static final String SQL_LOOKUPFOLDER = "SELECT fuid, fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
 
     /**
      * Returns an {@link TIntList} of folders whose name (ignoring case) and module matches the given parameters in the given parent
@@ -758,7 +758,6 @@ public final class OXFolderSQL {
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final TIntList folderList = new TIntLinkedList();
         try {
             if (readCon == null) {
                 readCon = DBPool.pickup(ctx);
@@ -766,22 +765,24 @@ public final class OXFolderSQL {
             }
             stmt = readCon.prepareStatement(SQL_LOOKUPFOLDER);
             stmt.setInt(1, ctx.getContextId()); // cid
-            stmt.setInt(2, parent); // parent
-            stmt.setString(3, folderName); // fname
-            stmt.setInt(4, module); // module
+            stmt.setInt(2, parent);             // parent
+            stmt.setString(3, folderName);      // fname
+            stmt.setInt(4, module);             // module
             rs = executeQuery(stmt);
-            while (rs.next()) {
-                final int fuid = rs.getInt(1);
-                final String fname = rs.getString(2);
-                if (Strings.equalsNormalizedIgnoreCase(folderName, fname)) {
-                    folderList.add(fuid);
-                }
+            if (!rs.next()) {
+                return new TIntArrayList(0);
             }
+
+            TIntList folderIds = new TIntLinkedList();
+            do {
+                if (Strings.equalsNormalizedIgnoreCase(folderName, rs.getString(2)/*fname*/)) {
+                    folderIds.add(rs.getInt(1)/*fuid*/);
+                }
+            } while (rs.next());
+            return folderIds;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-
-        return folderList;
     }
 
     /**
