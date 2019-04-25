@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -1608,8 +1609,7 @@ public final class OXFolderSQL {
                     stmt.setLong(9, creatingTime);
                     stmt.setInt(10, userId);
                     stmt.setInt(11, permissionFlag);
-                    stmt.setInt(12, 0); // new folder does not contain
-                    // subfolders
+                    stmt.setInt(12, 0); // new folder does not contain subfolders
                     if (setDefaultFlag) {
                         stmt.setInt(13, folder.isDefaultFolder() ? 1 : 0); // default_flag
                     } else {
@@ -1628,8 +1628,8 @@ public final class OXFolderSQL {
                     stmt.setString(17, folder.getFolderName());
                     stmt.setInt(18, FolderObject.MIN_FOLDER_ID);
                     if (0 == executeUpdate(stmt)) {
-                        // due to already existing subfolder with the same name
-                        throw new SQLException("Entry not inserted");
+                        // Due to already existing subfolder with the same name
+                        throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
                     }
                     stmt.close();
                     stmt = null;
@@ -1682,7 +1682,7 @@ public final class OXFolderSQL {
                     }
                 } finally {
                     if (stmt != null) {
-                        stmt.close();
+                        Databases.closeSQLStuff(stmt);
                         stmt = null;
                     }
                     Streams.close(metaStream);
