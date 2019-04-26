@@ -170,7 +170,7 @@ public final class EventFactory {
     }
 
     /**
-     * Creates a simple daily two hour event with the specified amount of occurrences
+     * Creates a simple daily event series with the specified amount of occurrences
      *
      * @param userId The user identifier
      * @param summary The summary of the event
@@ -184,7 +184,7 @@ public final class EventFactory {
     }
 
     /**
-     * Creates a simple daily two hour event with the specified amount of occurrences
+     * Creates a simple daily event series with the specified amount of occurrences
      *
      * @param userId The user identifier
      * @param summary The summary of the event
