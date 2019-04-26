@@ -76,7 +76,6 @@ import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.configuration.asset.Asset;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
@@ -583,7 +582,7 @@ public class EventManager extends AbstractManager {
     public EventData updateEvent(EventData eventData, boolean expectException, boolean checkconflicts) throws ApiException, ChronosApiException {
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
-        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, eventData.getLastModified(), null, null, B(checkconflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES, null);
+        ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), getFolder(eventData), eventData.getId(), body, L(lastTimeStamp), null, null, B(checkconflicts), Boolean.FALSE, Boolean.FALSE, null, null, null, EXPAND_SERIES, null);
         return handleUpdate(updateResponse, expectException);
     }
 
@@ -1000,7 +999,7 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * 
+     *
      * Returns the ignoreCoflicts flag.
      *
      * @return The ignoreConflicts flag

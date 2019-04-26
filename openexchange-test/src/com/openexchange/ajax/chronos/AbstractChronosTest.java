@@ -209,6 +209,21 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
+        return createAndRememberNewFolder(api, session, parent, entity, permissions);
+    }
+
+    /**
+     * Creates a new folder and remembers it.
+     *
+     * @param api The {@link UserApi}
+     * @param session The user's session
+     * @param parent The parent folder
+     * @param entity The user id
+     * @param permissions The permissions to set
+     * @return The result of the operation
+     * @throws ApiException if an API error is occurred
+     */
+    protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity, List<FolderPermission> permissions) throws ApiException {
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule(EVENT_MODULE);
@@ -399,7 +414,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         body.setEvent(eventData);
         return body;
     }
-    
+
     protected static List<EventData> getEventsByUid(List<EventData> events, String uid) {
         List<EventData> matchingEvents = new ArrayList<EventData>();
         if (null != events) {
@@ -426,7 +441,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         });
         return matchingEvents;
     }
-    
+
     /**
      * Returns the id of the calendar user of the default user api
      *
