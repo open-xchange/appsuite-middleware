@@ -47,27 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.chronos.bugs;
+package com.openexchange.ajax.chronos;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * {@link AbstractSecondUserChronosTest}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug58814Test.class,
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    // @formatter:on
+public class AbstractSecondUserChronosTest extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    protected UserApi userApi2;
+    protected EventManager eventManager2;
+    protected String defaultFolderId2;
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        ApiClient apiClient2 = generateApiClient(testUser2);
+        rememberClient(apiClient2);
+        EnhancedApiClient enhancedApiClient2 = generateEnhancedClient(testUser2);
+        rememberClient(enhancedApiClient2);
+        userApi2 = new UserApi(apiClient2, enhancedApiClient2, testUser2, true);
+        defaultFolderId2 = getDefaultFolder(userApi2.getSession(), userApi2.getFoldersApi());
+        eventManager2 = new EventManager(userApi2, defaultFolderId2);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        eventManager2.cleanUp();
+    }
 
 }

@@ -49,25 +49,54 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertNotNull;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractSecondUserChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.EventsResponse;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * Checks if the calendar has a vulnerability in the list request.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug58814Test.class,
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    // @formatter:on
+public final class Bug10836Test extends AbstractSecondUserChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    /**
+     * Default constructor.
+     *
+     * @param name Name of the test.
+     */
+    public Bug10836Test() {
+        super();
+    }
 
+    /**
+     * Creates a private appointment with user A and tries to read it with user
+     * B through a list request.
+     *
+     * @throws Throwable if some exception occurs.
+     */
+    @Test
+    public void testVulnerability() throws Throwable {
+
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug10836Test", folderId);
+        EventData createEvent = eventManager.createEvent(event);
+        List<EventId> body = new ArrayList<>();
+        EventId id = new EventId();
+        id.setFolder(folderId);
+        id.setId(createEvent.getId());
+        body.add(id);
+        EventsResponse response = userApi2.getChronosApi().getEventList(userApi2.getSession(), body, null, null);
+        assertNotNull("Missing error.", response.getError());
+
+        id.setFolder(defaultFolderId2);
+        response = userApi2.getChronosApi().getEventList(userApi2.getSession(), body, null, null);
+        assertNotNull("Missing error.", response.getError());
+    }
 }

@@ -57,14 +57,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import com.openexchange.ajax.chronos.AbstractChronosTest;
-import com.openexchange.ajax.chronos.EnhancedApiClient;
-import com.openexchange.ajax.chronos.UserApi;
+import com.openexchange.ajax.chronos.AbstractSecondUserChronosTest;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -75,7 +71,7 @@ import com.openexchange.testing.httpclient.models.FolderPermission;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.3
  */
-public final class Bug10154Test extends AbstractChronosTest {
+public final class Bug10154Test extends AbstractSecondUserChronosTest {
 
     /**
      * @param name test name.
@@ -90,12 +86,6 @@ public final class Bug10154Test extends AbstractChronosTest {
      */
     @Test
     public void testParticipantsLost() throws Throwable {
-        ApiClient apiClient2 = generateApiClient(testUser2);
-        rememberClient(apiClient2);
-        EnhancedApiClient enhancedApiClient2 = generateEnhancedClient(testUser2);
-        rememberClient(enhancedApiClient2);
-        UserApi userApi2 = new UserApi(apiClient2, enhancedApiClient2, testUser2, true);
-
         List<FolderPermission> permissions = new ArrayList<>();
         // User A
         FolderPermission perm = new FolderPermission();
@@ -125,9 +115,8 @@ public final class Bug10154Test extends AbstractChronosTest {
         update.setEndDate(DateTimeUtil.incrementDateTimeData(createEvent.getEndDate(), TimeUnit.HOURS.toMillis(1)));
         update.setAttendees(null);
 
-        EventManager manager2 = new EventManager(userApi2, sharedFolder);
-        manager2.getEvent(sharedFolder, createEvent.getId()); // update timestamp info
-        manager2.updateEvent(update);
+        eventManager2.getEvent(sharedFolder, createEvent.getId()); // update timestamp info
+        eventManager2.updateEvent(update);
 
         EventData event = eventManager.getEvent(sharedFolder, createEvent.getId());
         List<Attendee> atts = event.getAttendees();

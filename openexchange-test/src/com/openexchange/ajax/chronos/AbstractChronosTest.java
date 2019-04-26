@@ -309,7 +309,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @return The default calendar folder of the user
      * @throws Exception if the default calendar folder cannot be found
      */
-    private String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
+    protected String getDefaultFolder(String session, FoldersApi foldersApi) throws Exception {
         ArrayList<ArrayList<?>> privateList = getPrivateFolderList(foldersApi, session, "event", "1,308", "0");
         if (privateList.size() == 1) {
             return (String) privateList.get(0).get(0);
