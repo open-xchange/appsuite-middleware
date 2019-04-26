@@ -66,6 +66,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug10733Test.class,
     Bug10836Test.class,
     Bug11250Test.class,
+    Bug12099Test.class,
     // @formatter:on
 
 })

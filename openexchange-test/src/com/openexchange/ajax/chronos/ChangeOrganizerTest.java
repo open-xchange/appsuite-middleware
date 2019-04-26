@@ -99,7 +99,7 @@ public class ChangeOrganizerTest extends AbstractOrganizerTest {
             id.setId(event.getId());
             try {
                 id.setFolder(null != event.getFolder() ? event.getFolder() : defaultFolderId);
-                eventManager.deleteEvent(id);
+                eventManager.deleteEvent(id, System.currentTimeMillis(), false);
             } catch (Exception e) {
                 // Ignore
             }
@@ -265,7 +265,7 @@ public class ChangeOrganizerTest extends AbstractOrganizerTest {
         data = eventManager2.updateEvent(data);
         Assert.assertThat("Summary can't be changed by new organizer", data.getSummary(), is(summary));
     }
-    
+
     private EventData createEvent() throws ApiException {
         return eventManager.createEvent(event, true);
     }

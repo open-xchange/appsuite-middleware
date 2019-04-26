@@ -112,7 +112,7 @@ public class BasicCommentTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         if (null != eventData) {
-            eventManager.deleteEvent(getEventId());
+            eventManager.deleteEvent(getEventId(), System.currentTimeMillis(), false);
         }
         super.tearDown();
     }

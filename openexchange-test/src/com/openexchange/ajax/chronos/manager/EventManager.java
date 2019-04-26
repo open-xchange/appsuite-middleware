@@ -86,6 +86,7 @@ import com.openexchange.testing.httpclient.models.CalendarUser;
 import com.openexchange.testing.httpclient.models.ChangeOrganizerBody;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.ChronosErrorAwareCalendarResult;
 import com.openexchange.testing.httpclient.models.ChronosMultipleCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.DeleteBody;
@@ -538,7 +539,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public void deleteEvent(EventId eventId) throws ApiException {
-        deleteEvent(eventId, System.currentTimeMillis());
+        deleteEvent(eventId, System.currentTimeMillis(), true);
     }
 
     /**
@@ -546,15 +547,31 @@ public class EventManager extends AbstractManager {
      *
      * @param eventId The {@link EventId}
      * @param timestamp Timestamp of the last update of the events.
+     * @param checkForResultErrors Checks if the calendar results contain any errors
      * @throws ApiException if an API error is occurred
      */
-    public void deleteEvent(EventId eventId, long timestamp) throws ApiException {
+    public void deleteEvent(EventId eventId, long timestamp, boolean checkForResultErrors) throws ApiException {
         DeleteBody body = new DeleteBody();
         body.addEventsItem(eventId);
         ChronosMultipleCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), L(timestamp), body, null, null, EXPAND_SERIES, Boolean.FALSE, null, null);
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
+        if (checkForResultErrors) {
+            checkForErrors(deleteResponse.getData());
+        }
         forgetEventId(eventId);
         setLastTimeStamp(deleteResponse.getTimestamp());
+    }
+
+    /**
+     * Checks if the list of results contains any errors
+     *
+     * @param list The list to check
+     */
+    private void checkForErrors(List<ChronosErrorAwareCalendarResult> list) {
+        for (ChronosErrorAwareCalendarResult result : list) {
+            String message = result.getError() != null ? result.getError().getErrorDesc() : null;
+            assertNull(message, result.getError());
+        }
     }
 
     /**
