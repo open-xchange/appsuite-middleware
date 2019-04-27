@@ -131,7 +131,7 @@ public class ConversationCache {
      *
      * @return The calculated hash string
      */
-    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, String[] headerNames, int total, long uidnext, int sentTotal, long sentUidNext) {
+    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, String[] headerNames, int total, long uidnext, long highestModSeq, int sentTotal, long sentUidNext, long sentHighestModSeq) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(sortField.getKey().getBytes(Charsets.UTF_8));
@@ -146,9 +146,11 @@ public class ConversationCache {
             }
             md.update(intToByteArray(total));
             md.update(longToByteArray(uidnext));
+            md.update(longToByteArray(highestModSeq));
             if (mergeWithSent) {
                 md.update(intToByteArray(sentTotal));
                 md.update(longToByteArray(sentUidNext));
+                md.update(longToByteArray(sentHighestModSeq));
             }
             return asHex(md.digest());
         } catch (final NoSuchAlgorithmException e) {

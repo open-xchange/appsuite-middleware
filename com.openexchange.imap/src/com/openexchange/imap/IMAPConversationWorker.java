@@ -132,6 +132,11 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public final class IMAPConversationWorker {
 
+    /**
+     * CONDSTORE support according to <a href="https://tools.ietf.org/html/rfc7162">https://tools.ietf.org/html/rfc7162</a>
+     */
+    private static final String CAP_CONDSTORE = IMAPCapabilities.CAP_CONDSTORE;
+
     private static volatile Boolean useImapThreaderIfSupported;
     /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure. Default is <code>false</code> */
     static boolean useImapThreaderIfSupported() {
@@ -327,26 +332,30 @@ public final class IMAPConversationWorker {
         final boolean isRev1 = imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1();
 
         // Check cache
+        boolean supportsCondStore = imapMessageStorage.getImapConfig().asMap().containsKey(CAP_CONDSTORE);
         final ConversationCache optConversationCache = useCache() ? ConversationCache.getInstance() : null;
         if (optConversationCache != null) {
             if (false == body) {
                 if (optConversationCache.containsCachedConversations(fullName, imapMessageStorage.getAccountId(), imapMessageStorage.getSession())) {
                     int total = imapMessageStorage.getImapFolder().getMessageCount();
                     long uidNext = imapMessageStorage.getImapFolder().getUIDNext();
+                    long highestModSeq = supportsCondStore ? imapMessageStorage.getImapFolder().getHighestModSeq() : -1L;
                     int sentTotal = 0;
                     long sentUidNext = 0L;
+                    long sentHighestModSeq = -1L;
                     if (mergeWithSent) {
                         // Switch folder
                         imapMessageStorage.openReadOnly(sentFullName);
 
                         sentTotal = imapMessageStorage.getImapFolder().getMessageCount();
                         sentUidNext = imapMessageStorage.getImapFolder().getUIDNext();
+                        sentHighestModSeq = supportsCondStore ? imapMessageStorage.getImapFolder().getHighestModSeq() : -1L;
 
                         // Switch back folder
                         imapMessageStorage.openReadOnly(fullName);
                     }
 
-                    String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, sentTotal, sentUidNext);
+                    String argsHash = ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, highestModSeq, sentTotal, sentUidNext, sentHighestModSeq);
                     List<List<MailMessage>> list = optConversationCache.getCachedConversations(fullName, imapMessageStorage.getAccountId(), argsHash, imapMessageStorage.getSession());
                     if (null != list) {
 
@@ -383,6 +392,7 @@ public final class IMAPConversationWorker {
             // Retrieve from actual folder
             int total = imapMessageStorage.getImapFolder().getMessageCount();
             long uidNext = imapMessageStorage.getImapFolder().getUIDNext();
+            long highestModSeq = supportsCondStore ? imapMessageStorage.getImapFolder().getHighestModSeq() : -1L;
             boolean examineHasAttachmentUserFlags = imapMessageStorage.examineHasAttachmentUserFlags;
             boolean previewSupported = imapMessageStorage.previewSupported;
             FetchProfile fp;
@@ -398,11 +408,13 @@ public final class IMAPConversationWorker {
             // Retrieve from sent folder
             int sentTotal = 0;
             long sentUidNext = 0L;
+            long sentHighestModSeq = -1L;
             if (mergeWithSent) {
                 // Switch folder
                 imapMessageStorage.openReadOnly(sentFullName);
                 sentTotal = imapMessageStorage.getImapFolder().getMessageCount();
                 sentUidNext = imapMessageStorage.getImapFolder().getUIDNext();
+                sentHighestModSeq = supportsCondStore ? imapMessageStorage.getImapFolder().getHighestModSeq() : -1L;
                 // Get sent messages
                 List<MailMessage> sentMessages = Conversations.messagesFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope, examineHasAttachmentUserFlags, previewSupported);
                 if (false == sentMessages.isEmpty()) {
@@ -430,7 +442,7 @@ public final class IMAPConversationWorker {
                 // Switch back folder
                 imapMessageStorage.openReadOnly(fullName);
             }
-            argsHash = body ? null : ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, sentTotal, sentUidNext);
+            argsHash = body ? null : ConversationCache.getArgsHash(sortField, order, lookAhead, mergeWithSent, usedFields, headerNames, total, uidNext, highestModSeq, sentTotal, sentUidNext, sentHighestModSeq);
         }
         // Fold it
         Conversations.fold(conversations);
