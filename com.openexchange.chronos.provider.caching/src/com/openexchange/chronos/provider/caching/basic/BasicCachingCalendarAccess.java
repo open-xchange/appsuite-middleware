@@ -628,11 +628,13 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         Event persistedEvent = eventUpdate.getOriginal();
         Event updatedEvent = eventUpdate.getUpdate();
         /*
-         * update via special 'delta' event so that identifying properties are still available for the storage
+         * update via special 'delta' event so that identifying properties are still available for the storage & update timestamp
          */
-        Set<EventField> updatedFields = eventUpdate.getUpdatedFields();
+        Set<EventField> updatedFields = new HashSet<EventField>(eventUpdate.getUpdatedFields());
         Event deltaEvent = EventMapper.getInstance().copy(persistedEvent, null, (EventField[]) null);
         deltaEvent = EventMapper.getInstance().copy(updatedEvent, deltaEvent, updatedFields.toArray(new EventField[updatedFields.size()]));
+        deltaEvent.setTimestamp(System.currentTimeMillis());
+        updatedFields.add(EventField.TIMESTAMP);
         deltaEvent = new DeltaEvent(deltaEvent, updatedFields);
         calendarStorage.getEventStorage().updateEvent(deltaEvent);
 
