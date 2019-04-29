@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.css;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.util.AbstractMap;
@@ -390,7 +391,7 @@ public final class CSSMatcher {
             return false;
         }
         final int diff = pos - off;
-        LOG.debug("Next '{' is {} characters away -- {}", diff, (diff <= 2048 ? "Continue" : "Abort"));
+        LOG.debug("Next '{' is {} characters away -- {}", I(diff), (diff <= 2048 ? "Continue" : "Abort"));
         return diff <= MAX_ALLOWED_CSS_SELECTOR_SIZE;
     }
 
