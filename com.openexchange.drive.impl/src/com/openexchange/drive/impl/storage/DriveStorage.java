@@ -1047,7 +1047,7 @@ public class DriveStorage {
                         session.trace("Name conflict during folder creation (" + e.getMessage() + "), trying again...");
                         existingFolder = resolveToLeaf(path, false, false);
                         if (null == existingFolder) {
-                            throw e;
+                            throw DriveExceptionCodes.DIRECTORY_ALREADY_EXISTS.create(e, name, currentPath);
                         }
                     } else {
                         throw e;
