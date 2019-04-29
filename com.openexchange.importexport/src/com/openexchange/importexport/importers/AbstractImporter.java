@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.importers;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -74,6 +75,6 @@ public abstract class AbstractImporter implements Importer {
         if (services == null) {
             return 0;
         }
-        return services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).opt(CONTACT_LIMIT, int.class, 0);
+        return services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).opt(CONTACT_LIMIT, int.class, I(0)).intValue();
     }
 }

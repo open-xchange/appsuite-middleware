@@ -81,7 +81,7 @@ public class DeleteMailFilterAction extends AbstractMailFilterAction {
         final Credentials credentials = getCredentials(session, request);
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         final JSONObject json = getJSONBody(request.getData());
-        final int uid = getUniqueId(json);
+        final int uid = getUniqueId(json).intValue();
         mailFilterService.deleteFilterRule(credentials, uid);
         return new AJAXRequestResult();
     }

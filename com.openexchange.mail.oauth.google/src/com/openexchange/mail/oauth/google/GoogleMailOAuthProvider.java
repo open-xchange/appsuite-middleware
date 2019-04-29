@@ -50,6 +50,7 @@
 package com.openexchange.mail.oauth.google;
 
 import static com.openexchange.google.api.client.GoogleApiClients.REFRESH_THRESHOLD;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.gmail.Gmail;
@@ -99,8 +100,8 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
             ImmutableAutoconfig.Builder builder = ImmutableAutoconfig.builder();
             builder.username(email);
-            builder.mailOAuthId(oauthAccount.getId()).mailPort(993).mailProtocol("imap").mailSecure(true).mailServer("imap.gmail.com").mailStartTls(false);
-            builder.transportOAuthId(oauthAccount.getId()).transportPort(587).transportProtocol("smtp").transportSecure(false).transportServer("smtp.gmail.com").transportStartTls(true);
+            builder.mailOAuthId(oauthAccount.getId()).mailPort(I(993)).mailProtocol("imap").mailSecure(Boolean.TRUE).mailServer("imap.gmail.com").mailStartTls(false);
+            builder.transportOAuthId(oauthAccount.getId()).transportPort(I(587)).transportProtocol("smtp").transportSecure(Boolean.FALSE).transportServer("smtp.gmail.com").transportStartTls(true);
             return builder.build();
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());

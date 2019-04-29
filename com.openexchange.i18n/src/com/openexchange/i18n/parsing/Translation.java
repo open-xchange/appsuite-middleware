@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.parsing;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -64,7 +65,7 @@ public class Translation {
     private String context;
     private String id;
     private String idPlural;
-    private Map<Integer, String> messages;
+    private final Map<Integer, String> messages;
 
     public Translation(String context, String id, String idPlural) {
         setContext(context);
@@ -74,26 +75,22 @@ public class Translation {
     }
 
     public String getMessage() {
-        return getMessage(0);
+        return getMessage(I(0));
     }
 
     /**
      * Returns the plural form of the message.
-     * 
+     *
      * @param plural
      * @return The plural form. The singular form if 0.
      */
     public String getMessage(Integer plural) {
-        if (messages.containsKey(plural)) {
-            return messages.get(plural);
-        } else {
-            return messages.get(Collections.max(messages.keySet()));
-        }
+        return messages.containsKey(plural) ? messages.get(plural) : messages.get(Collections.max(messages.keySet()));
     }
 
     /**
      * Sets one message (sinular or plural).
-     * 
+     *
      * @param plural The singular version (0) or one of the plural versions (1..)
      * @param message
      */

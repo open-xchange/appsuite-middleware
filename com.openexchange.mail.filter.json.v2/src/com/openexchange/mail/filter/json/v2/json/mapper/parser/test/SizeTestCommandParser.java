@@ -194,7 +194,7 @@ public class SizeTestCommandParser extends AbstractTestCommandParser {
 
         Object value = command.getArguments().get(1);
         if (value instanceof NumberArgument) {
-            Integer intVal = ((NumberArgument) value).getInteger();
+            int intVal = ((NumberArgument) value).getInteger().intValue();
             int returnVal = 0;
             String type = null;
             if (intVal % 1073741824 == 0) {

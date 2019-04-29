@@ -49,6 +49,7 @@
 
 package com.openexchange.imagetransformation.java.exif;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintStream;
 import javax.imageio.ImageReader;
@@ -93,7 +94,7 @@ public class ExifTool  {
                 try {
                     input = new ByteArrayImageInputStream(exifData, 6, exifData.length - 6); // skip Exif\0_
                     CompoundDirectory exifDirectory = (CompoundDirectory) new EXIFReader().read(input);
-                    Entry entry = exifDirectory.getEntryById(TIFF.TAG_ORIENTATION);
+                    Entry entry = exifDirectory.getEntryById(I(TIFF.TAG_ORIENTATION));
                     if (null != entry && Integer.class.isInstance(entry.getValue())) {
                         return Orientation.valueOf(((Integer) entry.getValue()).intValue());
                     }

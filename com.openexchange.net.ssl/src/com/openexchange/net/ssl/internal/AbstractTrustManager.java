@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.security.MessageDigest;
@@ -349,7 +350,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
         String socketHostname = getHostFromSocket(socket);
         String fingerprint = cacheCertificate(userId, contextId, chain[0], socketHostname, failureResponse.getFailureReason());
-        throw new CertificateException(failureResponse.getSSLExceptionCode().create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, userId, contextId));
+        throw new CertificateException(failureResponse.getSSLExceptionCode().create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, I(userId), I(contextId)));
     }
 
     /**
@@ -368,7 +369,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             Certificate certificate = certificateManagement.get(userId, contextId, socketHostname, fingerprint);
             if (!certificate.isTrusted()) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.NOT_TRUSTED_BY_USER);
-                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, userId, contextId));
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, I(userId), I(contextId)));
             }
 
             if (Strings.isNotEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {

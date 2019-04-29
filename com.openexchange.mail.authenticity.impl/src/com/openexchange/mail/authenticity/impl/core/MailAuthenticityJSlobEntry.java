@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Map;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -66,6 +67,7 @@ import com.openexchange.session.Session;
 public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     private static final String NAME = "features/authenticity";
+
     private final ServiceLookup services;
 
     /**
@@ -76,62 +78,33 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
         this.services = services;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getKey()
-     */
     @Override
     public String getKey() {
         return JSlobKeys.MAIL;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getPath()
-     */
     @Override
     public String getPath() {
         return NAME;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
-     */
     @Override
     public boolean isWritable(Session session) throws OXException {
         return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
-     */
     @Override
     public Object getValue(Session session) throws OXException {
         LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
-        return configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.ENABLED);
+        return B(configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.ENABLED));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
-     */
+
     @Override
     public void setValue(Object value, Session session) throws OXException {
         // not writable
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
-     */
     @Override
     public Map<String, Object> metadata(Session session) throws OXException {
         // nope

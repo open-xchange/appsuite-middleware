@@ -162,7 +162,7 @@ public class OAuthProxyRequest {
 
 	public OAuthAccount getAccount() throws OXException {
 		if (req.isSet("id")) {
-			int id = req.getParameter("id", int.class);
+			int id = req.getParameter("id", int.class).intValue();
 
 			return oauthService.getAccount(session, id);
 		}

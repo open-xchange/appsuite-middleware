@@ -49,6 +49,7 @@
 
 package com.openexchange.management.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -166,7 +167,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                         registry0 = LocateRegistry.getRegistry(jmxPort);
                         registry0.list();
                     } catch (final RemoteException e) {
-                        LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", jmxPort, e);
+                        LOG.debug("No responsive RMI registry found that listens on port {}. A new one is going to be created", I(jmxPort), e);
                         /*
                          * Create a new one
                          */
@@ -175,7 +176,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                     registry = registry0;
                 }
                 registries.put(Integer.valueOf(jmxPort), registry);
-                LOG.info("RMI registry created on port {} and bind address {}", jmxPort, jmxBindAddr == null ? "*" : jmxBindAddr.trim());
+                LOG.info("RMI registry created on port {} and bind address {}", I(jmxPort), jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 // Environment map.
                 //
                 final Map<String, Object> env = new HashMap<String, Object>(4);

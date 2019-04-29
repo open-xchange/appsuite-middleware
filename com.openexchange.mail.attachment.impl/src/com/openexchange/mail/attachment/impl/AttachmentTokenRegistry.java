@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.attachment.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,7 +152,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
 
             }
         }
-        LOG.debug("Cleaned user-sensitive attachment tokens for user {} in context {}", userId, contextId);
+        LOG.debug("Cleaned user-sensitive attachment tokens for user {} in context {}", I(userId), I(contextId));
     }
 
     @Override

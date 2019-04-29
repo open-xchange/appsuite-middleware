@@ -292,7 +292,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
 
         if (exceeds) {
-            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
+            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(I(limit));
         }
         return new DefaultImportResults(results);
     }
@@ -338,7 +338,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
 
     private OXException wrapException(OXException ex, int lineNumber, ServerSession session){
-        return CsvExceptionCodes.NESTED_ERROR.create(lineNumber, ex.getDisplayMessage(session.getUser().getLocale()));
+        return CsvExceptionCodes.NESTED_ERROR.create(I(lineNumber), ex.getDisplayMessage(session.getUser().getLocale()));
     }
 
     public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
