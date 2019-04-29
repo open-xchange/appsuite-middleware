@@ -104,7 +104,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             LOG.error("unable to get subscriptions for service {}", getServiceID(), e);
         }
         if (null != subscriptions && 0 < subscriptions.size()) {
-            List<PayloadPerDevice> payloads = getPayloads(event, subscriptions);
+            List<PayloadPerDevice> payloads = getSilentNotificationPayloads(subscriptions);
             if (0 < payloads.size()) {
                 PushedNotifications notifications = null;
                 try {
@@ -200,6 +200,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
             try {
                 PushNotificationPayload payload = new PushNotificationBigPayload();
                 payload.addCustomDictionary("root", subscription.getRootFolderID());
+                payload.addCustomDictionary("action", "sync");
                 JSONObject apsObject = payload.getPayload().getJSONObject("aps");
                 if (null == apsObject) {
                     apsObject = new JSONObject();

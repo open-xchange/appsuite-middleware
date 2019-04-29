@@ -294,8 +294,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         // Write to JSON structure
         final JSONObject jsonAccount;
         if (null == updatedAccount) {
-            jsonAccount = DefaultMailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
+            MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), contextId);
+            mailAccount = checkSpamInfo(mailAccount, session);
+            jsonAccount = DefaultMailAccountWriter.write(mailAccount);
         } else {
+            updatedAccount = checkSpamInfo(updatedAccount, session);
             jsonAccount = DefaultMailAccountWriter.write(updatedAccount);
         }
 
