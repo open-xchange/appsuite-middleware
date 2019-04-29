@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-10 10:16+0200\n"
+"PO-Revision-Date: 2019-04-29 15:14+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -2834,7 +2834,7 @@ msgstr ""
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:95
 msgid "The token \"%1$s\" is already registered."
-msgstr "Das Token \"%1$s\" ist bereits registriert."
+msgstr "Der Token \"%1$s\" ist bereits registriert."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
 msgid "Empty files indicated for directory \"%1$s\"."
@@ -2850,7 +2850,6 @@ msgstr ""
 "Ein Verzeichnis mit dem Namen \"%1$s\" ist bereits in \"%2$s\" vorhanden."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
-#, fuzzy
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
 "Push über Long polling ist für Benutzer \"%1$s\" im Kontext \"%1$s\" "
@@ -3332,7 +3331,7 @@ msgstr "Die angegebenen Sicherheits-Anmeldedaten sind ungültig."
 #. The provided token is malformed or otherwise invalid.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:110
 msgid "The provided token is malformed or otherwise invalid."
-msgstr "Das angegebene Token ist nicht wohlgeformt oder anderweitig ungültig."
+msgstr "Der angegebene Token ist nicht wohlgeformt oder anderweitig ungültig."
 
 #. Couldn't parse the specified URI.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:113
@@ -3400,7 +3399,7 @@ msgstr "Sie werden zum Bucket umgeleitet, während DNS aktualisiert."
 #. The provided token must be refreshed.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
 msgid "The provided token must be refreshed."
-msgstr "Das angegebene Token muss aktualisiert werden."
+msgstr "Der angegebene Token muss aktualisiert werden."
 
 #. The e-mail address you provided does not match any account on record.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
@@ -5008,7 +5007,6 @@ msgstr ""
 #. * The default name for the multifactor recovery codes
 #.
 #: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
-#, fuzzy
 msgid "My Backup"
 msgstr "Mein Backup"
 
@@ -5032,22 +5030,20 @@ msgstr "Ihr Authentifizierungscode lautet: "
 #. * The default name of the multifactor SMS device
 #.
 #: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
-#, fuzzy
 msgid "My Phone"
-msgstr "Mein Smartphone"
+msgstr "Mein Telefon"
 
 #. *
 #. *  The default name of an Authenticator
 #.
 #: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
 msgid "Authenticator %d"
-msgstr ""
+msgstr "Authentifikator %d"
 
 #. *
 #. * The default name of a U2F device
 #.
 #: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
-#, fuzzy
 msgid "Device %d"
 msgstr "Gerät %d"
 
@@ -5122,13 +5118,12 @@ msgstr "Das Gerät ist bereits registriert"
 
 #. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
-#, fuzzy
 msgid ""
 "This action requires recent multifactor authentication.  Missing multifactor "
 "parameters for this action"
 msgstr ""
-"Diese Aktion erfordert eine neue Multifaktor-Authentifizierung. Fehlende "
-"Multifaktorparameter für diese Aktion"
+"Diese Aktion erfordert eine neue Multifaktor-Authentifizierung. Für diese "
+"Aktion fehlen Multifaktorparameter."
 
 #. * Specified device is not regisiterd
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
@@ -5137,7 +5132,6 @@ msgstr "Dieses Gerät ist nicht registriert"
 
 #. * No devices found for the provider
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
-#, fuzzy
 msgid "No devices in this provider"
 msgstr "Für diesen Anbieter wurden keine Geräte gefunden"
 
@@ -7362,11 +7356,9 @@ msgid "Drafts"
 msgstr "Entwürfe"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Gesendete Objekte"
+msgid "Sent"
+msgstr "Gesendet"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7509,6 +7501,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Sehr geehrte(r) Dame/Herr"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Gesendete Objekte"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10182,22 +10179,20 @@ msgstr "Anhänge dürfen nicht freigegeben werden"
 
 #. A user must not create any new composition spaces
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:81
-#, fuzzy
 msgid ""
 "Maximum number of composition spaces is reached. Please terminate existing "
 "open spaces in order to open new ones."
 msgstr ""
-"Die maximale Anzahl von neu verfassten E-Mails ist erreicht. Bitte schließen "
-"Sie geöffnete Fenster, um neue zu öffnen."
+"Die maximale Anzahl von neu verfassten E-Mails ist erreicht. Bitte beenden "
+"Sie bereits geöffnete Fenster, um neue öffnen zu können."
 
 #. Missing key which is required to decrypt the content of a composition space
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
-#, fuzzy
 msgid ""
 "Found no suitable key for composition space. Please re-compose your E-Mail."
 msgstr ""
-"Es wurde kein geeigneter Schlüssel für das Textfeld gefunden. Bitte "
-"verfassen Sie Ihre E-Mail neu."
+"Es wurde kein geeigneter Schlüssel für die neu verfasste E-Mail gefunden. "
+"Bitte verfassen Sie Ihre E-Mail neu."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -11116,6 +11111,12 @@ msgstr ""
 "Sie haben keine Berechtigung zum Ändern der Berechtigungen des Papierkorb-"
 "Ordners oder seiner Unterordner"
 
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr ""
+"Es gibt bereits einen Ordner mit dem Namen \"%1$s\". Bitte wählen Sie einen "
+"anderen Namen."
+
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
@@ -11263,8 +11264,8 @@ msgid ""
 "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s hat den %2$s \"%3$s\" für Sie freigegeben. Zum Anzeigen des Ordners "
-"geben Sie bitte das Freigabepasswort ein."
+"%1$s hat %2$s \"%3$s\" für Sie freigegeben. Zum Anzeigen geben Sie bitte das "
+"Freigabepasswort ein."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -19207,9 +19208,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Ordner 'Entwürfe'"
-
-#~ msgid "Sent"
-#~ msgstr "Gesendet"
 
 #~ msgid "Spam folder"
 #~ msgstr "Ordner 'Spam'"
