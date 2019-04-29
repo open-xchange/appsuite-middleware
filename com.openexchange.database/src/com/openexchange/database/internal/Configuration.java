@@ -436,9 +436,6 @@ public final class Configuration {
             return false;
         }
         for (Entry<Object, Object> f : p1.entrySet()) {
-            if (false == p2.contains(f.getKey())) {
-                return false;
-            }
             Object p2Value = p2.get(f.getKey());
             if (null == p2Value) {
                 if (null != f.getValue()) {
