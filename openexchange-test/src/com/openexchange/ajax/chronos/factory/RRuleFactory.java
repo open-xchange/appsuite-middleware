@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.chronos.bugs;
+package com.openexchange.ajax.chronos.factory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import java.util.List;
-import org.junit.Test;
-import com.openexchange.ajax.chronos.AbstractChronosTest;
-import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.exception.Category;
-import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
-import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
-import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
+import com.openexchange.ajax.chronos.factory.EventFactory.Weekday;
+import com.openexchange.testing.httpclient.models.DateTimeData;
 
 /**
- * 
- * {@link Bug12444Test}
+ * {@link RRuleFactory}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.3
+ * @since v7.10.2
  */
-public final class Bug12444Test extends AbstractChronosTest {
-
+public class RRuleFactory {
+    
     /**
-     * Default constructor.
-     * 
-     * @param name test name.
+     * Creates a recurrence rule with the given frequency limited by the given amount of occurences
+     *
+     * @param freq The {@link RecurringFrequency}
+     * @param occurences The amount of occurences
+     * @return The recurrence rule
      */
-    public Bug12444Test() {
-        super();
+    public static String getFrequencyWithOccurenceLimit(RecurringFrequency freq, int occurences ) {
+        return "FREQ=" + freq.name() + ";COUNT=" + occurences;
     }
-
-    @Test
-    public void testExternalWithoutEmail() throws Throwable {
-        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug12444Test", folderId);
-        List<Attendee> attendees = event.getAttendees();
-        Attendee externalWithoutEmail = new Attendee();
-        externalWithoutEmail.setCn("External");
-        externalWithoutEmail.setCuType(CuTypeEnum.INDIVIDUAL);
-        attendees.add(externalWithoutEmail);
-        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
-        
-        assertNotNull("Server responded not with expected exception.", response.getError());
-        assertEquals("Wrong exception code.", CalendarExceptionCodes.INVALID_CALENDAR_USER.getPrefix()+"-"+CalendarExceptionCodes.INVALID_CALENDAR_USER.getNumber(), response.getCode());
-        assertEquals("Wrong exception category.", Category.CATEGORY_USER_INPUT.getType().getName(), response.getCategories());
+    
+    /**
+     * Creates a recurrence rule with the given frequency limited by the given until date
+     *
+     * @param freq The {@link RecurringFrequency}
+     * @param until The limiting date
+     * @return The recurrence rule
+     */
+    public static String getFrequencyWithUntilLimit(RecurringFrequency freq, DateTimeData until ) {
+        return getFrequencyWithUntilLimit(freq, until, null);
     }
+    
+    /**
+     * Creates a recurrence rule with the given frequency limited by the given until date. Optionally a BYDAY value can be included as well
+     *
+     * @param freq The {@link RecurringFrequency}
+     * @param until The limiting date
+     * @param optWeekday An optional weekday for the BYDAY value
+     * @return The recurrence rule
+     */
+    public static String getFrequencyWithUntilLimit(RecurringFrequency freq, DateTimeData until, Weekday optWeekday ) {
+        if(optWeekday != null) {
+            return "FREQ=" + freq.name() + ";BYDAY=" + optWeekday.name() + ";UNTIL=" + until.getValue();
+        }
+        return "FREQ=" + freq.name() + ";UNTIL=" + until.getValue();
+    }
+    
+    
 
 }

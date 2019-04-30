@@ -3,7 +3,7 @@ package com.openexchange.ajax.chronos.bugs;
 
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
-import com.openexchange.ajax.chronos.AbstractSecondUserChronosTest;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -16,7 +16,7 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.3
  */
-public class Bug12432Test extends AbstractSecondUserChronosTest {
+public class Bug12432Test extends AbstractChronosTest {
 
     public Bug12432Test() {
         super();
