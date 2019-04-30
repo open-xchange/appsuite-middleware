@@ -14,7 +14,7 @@ import com.openexchange.testing.httpclient.models.EventData.TranspEnum;
  * {@link Bug12432Test}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.2
+ * @since v7.10.3
  */
 public class Bug12432Test extends AbstractSecondUserChronosTest {
 
