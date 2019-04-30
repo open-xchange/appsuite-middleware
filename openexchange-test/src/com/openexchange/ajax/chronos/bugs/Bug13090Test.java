@@ -49,33 +49,42 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static com.openexchange.java.Autoboxing.L;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * 
+ * {@link Bug13090Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug13090Test extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    /**
+     * Initializes a new {@link Bug13090Test}.
+     */
+    public Bug13090Test() {
+        super();
+    }
+
+    @Test
+    public void testSeriesMove() throws Exception {
+        EventData series = EventFactory.createSeriesEvent(getCalendaruser(), "Bug13090Test", 4, folderId);
+        EventData createEvent = eventManager.createEvent(series);
+        try {
+            ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().moveEvent(getSessionId(), folderId, createEvent.getId(), L(eventManager.getLastTimeStamp()), defaultFolderId, Boolean.FALSE, null, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE);
+            eventManager.handleUpdate(response, true);
+        } catch (ChronosApiException e) {
+            assertEquals("Wrong exception code.", CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create().getErrorCode(), e.getErrorCode());
+        }
+    }
 
 }
