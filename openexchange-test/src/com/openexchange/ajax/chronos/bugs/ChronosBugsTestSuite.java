@@ -61,7 +61,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     // @formatter:off
-    Bug58814Test.class,
     Bug10154Test.class,
     Bug10733Test.class,
     Bug10836Test.class,
@@ -70,6 +69,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug12432Test.class,
     Bug12444Test.class,
     Bug12610Test.class,
+    Bug12842Test.class,
+    Bug58814Test.class,
     Bug64836Test.class
     // @formatter:on
 

@@ -867,7 +867,7 @@ public class EventManager extends AbstractManager {
         }
     }
 
-    private JSONObject handleCreation(String response) throws ChronosApiException {
+    public final JSONObject handleCreation(String response) throws ChronosApiException {
         try {
             JSONObject result = extractBody(response);
             JSONArray optJSONArray = result.optJSONArray("conflicts");
@@ -907,7 +907,7 @@ public class EventManager extends AbstractManager {
      * @param createEvent The result
      * @return The created event
      */
-    private EventData handleCreation(ChronosCalendarResultResponse createEvent) {
+    public final EventData handleCreation(ChronosCalendarResultResponse createEvent) {
         CalendarResult result = checkResponse(createEvent.getError(), createEvent.getErrorDesc(), createEvent.getCategories(), createEvent.getData());
         assertEquals("Found unexpected conflicts", 0, result.getConflicts().size());
         EventData event = result.getCreated().get(0);
