@@ -78,7 +78,7 @@ public class RRuleFactory {
      * @param freq The {@link RecurringFrequency}
      * @return The recurrence rule
      */
-    public static String getFrequencyWithOccurenceLimit(RecurringFrequency freq ) {
+    public static String getFrequencyWithoutLimit(RecurringFrequency freq ) {
         return "FREQ=" + freq.name();
     }
     

@@ -232,7 +232,7 @@ public class Bug12842Test extends AbstractChronosTest {
         calendar.set(Calendar.HOUR_OF_DAY, end);
         DateTimeData endDate = DateTimeUtil.getDateTime(calendar);
         EventData event = EventFactory.createSingleEvent(getCalendaruser(), "Bug12842Test", startDate, endDate, folderId);
-        event.setRrule(RRuleFactory.getFrequencyWithOccurenceLimit(freq));
+        event.setRrule(RRuleFactory.getFrequencyWithoutLimit(freq));
         eventManager.createEvent(event, true);
         
         // create second event
