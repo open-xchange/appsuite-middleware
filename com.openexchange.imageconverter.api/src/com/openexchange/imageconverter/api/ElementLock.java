@@ -95,14 +95,26 @@ public class ElementLock extends ReentrantLock {
     /**
      * @return
      */
+    public int incrementUseCount() {
+        return ++m_useCount;
+    }
+
+    /**
+     * @return
+     */
+    public int decrementUseCount() {
+        return --m_useCount;
+    }
+
+    /**
+     * @return
+     */
     public boolean lock(final LockMode lockMode) {
         if (LockMode.TRY_LOCK == lockMode) {
-            if (!super.tryLock()) {
-                return false;
-            }
-        } else {
-            super.lock();
+            return super.tryLock();
         }
+
+        super.lock();
 
         if (LockMode.WAIT_IF_PROCESSED == lockMode) {
             while (m_isProcessing && !Thread.currentThread().isInterrupted()) {
@@ -122,17 +134,17 @@ public class ElementLock extends ReentrantLock {
     }
 
     /**
+     * Calling this method needs to be synchronized by the caller
+     *
      * @return
      */
-    public long unlock(final UnlockMode unlockMode) {
+    public void unlock(final UnlockMode unlockMode) {
         if (m_isProcessing && (UnlockMode.END_PROCESSING == unlockMode)) {
             m_isProcessing = false;
             m_processingFinishedCondition.signalAll();
         }
 
         super.unlock();
-
-        return getHoldCount();
     }
 
     /**
@@ -145,6 +157,8 @@ public class ElementLock extends ReentrantLock {
     // - Members ---------------------------------------------------------------
 
     final private Condition m_processingFinishedCondition = newCondition();
+
+    volatile private int m_useCount = 1;
 
     volatile private boolean m_isProcessing = false;
 }

@@ -85,17 +85,19 @@ public class ElementLocker {
 
                 if (null == elementLock) {
                     m_elementLockMap.put(element, elementLock = new ElementLock());
+                } else {
+                    elementLock.incrementUseCount();
                 }
             }
 
             ret = elementLock.lock(lockMode);
 
             // cleaning up in case of unsuccessful try lock
-            if (!ret && (LockMode.TRY_LOCK == lockMode)) {
+            if (!ret) {
                 // remove element only from map, if no one else
                 // holds the lock and no processing is happening
                 synchronized (m_elementLockMap) {
-                    if ((0 == elementLock.getHoldCount()) && !elementLock.isProcessing()) {
+                    if ((0 == elementLock.decrementUseCount()) && !elementLock.isProcessing()) {
                         m_elementLockMap.remove(element);
                     }
                 }
@@ -120,10 +122,12 @@ public class ElementLocker {
     public static void unlock(final String element, final UnlockMode unlockMode) {
         if (null != element) {
             synchronized (m_elementLockMap) {
-                final ElementLock keyLock = m_elementLockMap.get(element);
+                final ElementLock elementLock = m_elementLockMap.get(element);
 
-                if (null != keyLock) {
-                    if ((0 == keyLock.unlock(unlockMode)) && !keyLock.isProcessing()) {
+                if (null != elementLock) {
+                    elementLock.unlock(unlockMode);
+
+                    if ((0 == elementLock.decrementUseCount()) && !elementLock.isProcessing()) {
                         m_elementLockMap.remove(element);
                     }
                 }
