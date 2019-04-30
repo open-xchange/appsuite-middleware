@@ -94,7 +94,7 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/grizzly.properties
 
 %changelog
 * Thu Mar 28 2019 Marc Arens <marc.arens@open-xchange.com>
