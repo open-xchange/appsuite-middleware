@@ -52,9 +52,11 @@ package com.openexchange.caldav;
 import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
@@ -717,6 +719,53 @@ public class EventPatches {
         }
 
         /**
+         * Restores the participation status in the attendee property matching the event organizer for group scheduled events edited by
+         * the organizer. This is done for the mac OS client who seems to use a fixed participation status of ACCEPTED here.
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void restoreAttendeeForOrganizer(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (false == resource.exists() || null == importedEvent || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) || 
+                false == isGroupScheduled(importedEvent) || false == isOrganizer(resource.getEvent(), resource.getFactory().getUser().getId())) {
+                return; // not applicable
+            }
+            try {
+                new CalendarAccessOperation<Void>(factory) {
+
+                    @Override
+                    protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                        /*
+                         * check organizer's attendee in imported event
+                         */
+                        EventID eventID = getEventID(resource.getEvent());
+                        Attendee updatedAttendee = find(importedEvent.getAttendees(), importedEvent.getOrganizer());
+                        Event originalEvent = access.getEvent(eventID);
+                        Attendee originalAttendee = find(originalEvent.getAttendees(), originalEvent.getOrganizer());
+                        if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
+                            updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                        }
+                        if (null != importedChangeExceptions) {
+                            for (Event importedChangeException : importedChangeExceptions) {
+                                eventID = new EventID(eventID.getFolderID(), eventID.getObjectID(), importedChangeException.getRecurrenceId());
+                                updatedAttendee = find(importedChangeException.getAttendees(), importedChangeException.getOrganizer());
+                                Event originalChangeException = access.getEvent(eventID);
+                                originalAttendee = find(originalChangeException.getAttendees(), originalChangeException.getOrganizer());
+                                if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
+                                    updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                }.execute(factory.getSession());
+            } catch (OXException e) {
+                LOG.warn("Error restoring participation status in organizer's attendee", e);
+            }
+        }
+
+        /**
          * Restores deleted change exception events from the past where the calendar user attendee's participation status was
          * previously set to 'declined'. This is done for the iOS client who sometimes decides to send such updates without user
          * interaction.
@@ -790,6 +839,7 @@ public class EventPatches {
                 adjustAttendeeComments(resource, importedEvent);
                 adjustProposedTimePrefixes(importedEvent);
                 restoreDeclinedDeleteExceptions(resource, importedEvent, importedChangeExceptions);
+                restoreAttendeeForOrganizer(resource, importedEvent, importedChangeExceptions);
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null, null);
                 adjustAppleTravelAdvisory(resource, importedEvent);
