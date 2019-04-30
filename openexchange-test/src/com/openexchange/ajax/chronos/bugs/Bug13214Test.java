@@ -49,34 +49,39 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import java.util.concurrent.TimeUnit;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * 
+ * {@link Bug13214Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug13214Test extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    public Bug13214Test() {
+        super();
+    }
 
+    @Test
+    public void testEndDateBeforeStartDate() throws Exception {
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug13214Test", folderId);
+        EventData createEvent = eventManager.createEvent(event);
+        
+        createEvent.setEndDate(DateTimeUtil.incrementDateTimeData(createEvent.getStartDate(), TimeUnit.HOURS.toMillis(-1)));
+        try {
+            eventManager.updateEvent(createEvent, true, false);
+        } catch (ChronosApiException e) {
+            assertEquals("Wrong exception code.", CalendarExceptionCodes.END_BEFORE_START.create().getErrorCode(), e.getErrorCode());
+        }
+    }
 }
