@@ -1095,6 +1095,11 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         @Override
         public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
+                if (false == participant.isExternal()) {
+                    // Changes done on behalf of an internal organizer
+                    return update(request(participant, null, getStateTypeForStatus(confirmStatus)));
+                }
+                
                 if (onlyMyStateChanged()) {
                     if (confirmStatus == null) {
                         return null;
