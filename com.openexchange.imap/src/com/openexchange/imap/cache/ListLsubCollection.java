@@ -929,7 +929,7 @@ final class ListLsubCollection implements Serializable {
         String command = lsub ? "LSUB" : "LIST";
         String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
 
-        if(protocol == null && responses == null) {
+        if (protocol == null && responses == null) {
             throw new IllegalArgumentException("Unable to perform ListLsubCommand wihtout protocol and responses!");
         }
         Response[] r = null == responses ? performCommand(protocol, sCmd) : responses;
@@ -1034,7 +1034,7 @@ final class ListLsubCollection implements Serializable {
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
-            if(protocol != null) {
+            if (protocol != null) {
                 protocol.notifyResponseHandlers(r);
                 protocol.handleResult(response);
             }
@@ -1192,7 +1192,13 @@ final class ListLsubCollection implements Serializable {
         Response[] r = null == responses ? performCommand(protocol, command) : responses;
 
         if (r.length == 1) {
-            // No LIST response for root folder. Do dummy LSUB and retry...
+            // No LIST response for root folder.
+            if (r[0].isBYE()) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
+                protocol.handleResult(r[0]);
+            }
+
+            // Do dummy LSUB and retry...
             doDummyLsub(protocol);
             r = performCommand(protocol, command);
         }
