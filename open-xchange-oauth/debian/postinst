@@ -19,7 +19,6 @@ set -e
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
-PROTECT="facebookoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
 
 postFix() {
     local version=${1%-*}
@@ -64,6 +63,7 @@ postFix() {
 }
 
 setConfigFilePermissions() {
+    PROTECT="facebookoauth.properties googleoauth.properties msliveconnectoauth.properties twitteroauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT
     do
         ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640

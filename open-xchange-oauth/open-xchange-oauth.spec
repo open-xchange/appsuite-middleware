@@ -60,7 +60,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="facebookoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+    PROTECT="facebookoauth.properties googleoauth.properties msliveconnectoauth.properties twitteroauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
@@ -103,16 +103,17 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) /opt/open-xchange/etc/deferrer.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
-%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
+%config(noreplace) /opt/open-xchange/etc/oauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/twitteroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
-%config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/etc/settings/
-%config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
 * Wed Mar 13 2019 Steffen Templin <marcus.klein@open-xchange.com>
