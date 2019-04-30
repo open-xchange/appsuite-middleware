@@ -818,33 +818,29 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            StringBuilder stmtBuilder = new StringBuilder("SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=?");
-            if (module > 0) {
-                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            StringBuilder stringBuilder = new StringBuilder()
+                .append("SELECT fuid FROM oxfolder_tree ")
+                .append("WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE ")
+                .append(Databases.getCharacterSet(readCon).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin")
+            ;
+            if (0 < module) {
+                ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 if (null != service && service.getBoolProperty("com.openexchange.oxfolder.considerModuleOnDuplicateCheck", false)) {
-                    stmtBuilder.append(" AND module=").append(module);
+                    stringBuilder.append(" AND module=").append(module);
                 }
             }
-            if (folderId > 0) {
-                stmtBuilder.append(" AND fuid!=").append(folderId);
+            if (0 < folderId) {
+                stringBuilder.append(" AND fuid<>").append(folderId);
             }
-            stmt = readCon.prepareStatement(stmtBuilder.toString());
-            stmtBuilder = null;
+            stmt = readCon.prepareStatement(stringBuilder.append(';').toString());
             stmt.setInt(1, ctx.getContextId()); // cid
             stmt.setInt(2, parent); // parent
             stmt.setString(3, folderName); // fname
             rs = executeQuery(stmt);
-            while (rs.next()) {
-                final int fuid = rs.getInt(1);
-                final String fname = rs.getString(2);
-                if (Strings.equalsNormalizedIgnoreCase(folderName, fname)) {
-                    return fuid;
-                }
-            }
+            return rs.next() ? rs.getInt(1) : -1;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-        return -1;
     }
 
     /**
@@ -1594,11 +1590,17 @@ public final class OXFolderSQL {
                     // Acquire lock
                     lock(folder.getParentFolderID(), ctx.getContextId(), writeCon);
 
-                    // Do the insert
-                    stmt = writeCon.prepareStatement("INSERT INTO oxfolder_tree " +
-                        "(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag," +
-                        "default_flag,meta) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL " +
-                        "WHERE NOT EXISTS (SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND parent>?);");
+                    // Do the insert, guarded by an additional check to prevent equally named folders below parent (binary collation, but case insensitive)
+                    String sql = new StringBuilder()
+                        .append("INSERT INTO oxfolder_tree ")
+                        .append("(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,meta) ")
+                        .append("SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL ")
+                        .append("WHERE NOT EXISTS ")
+                        .append("(SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE ")
+                        .append(Databases.getCharacterSet(writeCon).contains("utf8mb4") ? "utf8mb4_bin " : "utf8_bin ")
+                        .append("AND parent>?);")
+                    .toString();
+                    stmt = writeCon.prepareStatement(sql);
                     stmt.setInt(1, newFolderID);
                     stmt.setInt(2, ctx.getContextId());
                     stmt.setInt(3, folder.getParentFolderID());
