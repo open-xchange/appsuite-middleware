@@ -179,6 +179,10 @@ public final class Configuration {
     }
 
     public void readConfiguration(final ConfigurationService service) throws OXException {
+        readConfiguration(service, true);
+    }
+
+    public void readConfiguration(final ConfigurationService service, final boolean logPoolConfig) throws OXException {
         Properties props = propsReference.get();
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
@@ -191,7 +195,7 @@ public final class Configuration {
         readJdbcProps(service);
         separateReadWrite();
         loadDrivers();
-        initPoolConfig();
+        initPoolConfig(logPoolConfig);
     }
 
     private void readJdbcProps(ConfigurationService config) {
@@ -293,7 +297,7 @@ public final class Configuration {
     /**
      * Reads the pooling configuration from the configdb.properties file.
      */
-    private void initPoolConfig() {
+    private void initPoolConfig(boolean logPoolConfig) {
         PoolConfig poolConfig = poolConfigReference.get();
         PoolConfig.Builder poolConfigBuilder = PoolConfig.builder();
         poolConfigBuilder.withMaxIdle(getInt(Property.MAX_IDLE, poolConfig.maxIdle));
@@ -308,6 +312,23 @@ public final class Configuration {
         poolConfigBuilder.withTestThreads(getBoolean(Property.TEST_THREADS, poolConfig.testThreads));
         poolConfig = poolConfigBuilder.build();
         poolConfigReference.set(poolConfig);
+
+        if (logPoolConfig) {
+            doLogCurrentPoolConfig(poolConfig);
+        }
+    }
+
+    /**
+     * Logs the current pool configuration.
+     */
+    public void logCurrentPoolConfig() {
+        doLogCurrentPoolConfig(poolConfigReference.get());
+    }
+
+    private void doLogCurrentPoolConfig(PoolConfig poolConfig) {
+        if (poolConfig == null) {
+            return;
+        }
 
         List<Object> logArgs = new ArrayList<>(24);
         logArgs.add(Strings.getLineSeparator());

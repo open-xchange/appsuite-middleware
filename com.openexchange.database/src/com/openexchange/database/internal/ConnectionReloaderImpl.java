@@ -154,11 +154,12 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
     public void reloadConfiguration(ConfigurationService configService) {
         try {
             Configuration configuration = new Configuration();
-            configuration.readConfiguration(configService);
+            configuration.readConfiguration(configService, false);
             // Check if key store was modified or configuration was changed and we need to notify
             boolean keyStoreUpdate = loadKeyStores(configuration);
             ConfigurationDifference configDifference = this.configuration.getDifferenceTo(configuration);
             if (keyStoreUpdate || configDifference.anythingDifferent()) {
+                configuration.logCurrentPoolConfig();
                 JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
                 notify(keyStoreUpdate, configuration, configDifference);
                 this.configuration = configuration;
