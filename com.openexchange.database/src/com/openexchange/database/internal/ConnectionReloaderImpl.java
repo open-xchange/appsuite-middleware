@@ -52,7 +52,6 @@ package com.openexchange.database.internal;
 import java.security.KeyStore;
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +60,7 @@ import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
 import com.openexchange.database.JdbcProperties;
+import com.openexchange.database.internal.Configuration.ConfigurationDifference;
 import com.openexchange.database.internal.ConfigurationListener.ConfigDBListener;
 import com.openexchange.database.internal.reloadable.ConnectionReloader;
 import com.openexchange.exception.OXException;
@@ -154,12 +154,14 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
     public void reloadConfiguration(ConfigurationService configService) {
         try {
             Configuration configuration = new Configuration();
-            configuration.readConfiguration(configService);
+            configuration.readConfiguration(configService, false);
             // Check if key store was modified or configuration was changed and we need to notify
             boolean keyStoreUpdate = loadKeyStores(configuration);
-            if (keyStoreUpdate || false == this.configuration.equals(configuration)) {
+            ConfigurationDifference configDifference = this.configuration.getDifferenceTo(configuration);
+            if (keyStoreUpdate || configDifference.anythingDifferent()) {
+                configuration.logCurrentPoolConfig();
                 JdbcProperties.getInstance().setJdbcProperties(configuration.getJdbcProps());
-                notify(keyStoreUpdate, configuration);
+                notify(keyStoreUpdate, configuration, configDifference);
                 this.configuration = configuration;
             }
         } catch (OXException e) {
@@ -177,30 +179,14 @@ public class ConnectionReloaderImpl implements ForcedReloadable, ConnectionReloa
      *
      * @param keyStoreUpdate <code>true</code> if a {@link KeyStore} was updated
      * @param configuration The new {@link Configuration}
+     * @param configDifference The detected differences
      */
-    private void notify(boolean keyStoreUpdate, Configuration configuration) {
-        if (keyStoreUpdate || checkForChangedProperties(this.configuration.getJdbcProps(), configuration.getJdbcProps())) {
+    private void notify(boolean keyStoreUpdate, Configuration configuration, ConfigurationDifference configDifference) {
+        if (keyStoreUpdate || configDifference.areJdbcPropsDifferent()) {
             listerners.stream().sorted().forEach(l -> l.notify(configuration));
-        } else if (checkForChangedProperties(this.configuration.getConfigDbReadProps(), configuration.getConfigDbReadProps()) || checkForChangedProperties(this.configuration.getConfigDbWriteProps(), configuration.getConfigDbWriteProps())) {
+        } else if (configDifference.areConfigDbReadPropsDifferent() || configDifference.areConfigDbWritePropsDifferent()) {
             listerners.stream().filter(l -> ConfigDBListener.class.isAssignableFrom(l.getClass())).sorted().forEach(l -> l.notify(configuration));
         }
-    }
-
-    private boolean checkForChangedProperties(Properties oldProperties, Properties newProperties) {
-        if (oldProperties.size() != newProperties.size()) {
-            return true;
-        }
-        for (Entry<Object, Object> property : oldProperties.entrySet()) {
-            String newProperty = newProperties.getProperty(String.valueOf(property.getKey()));
-            if (null == newProperty) {
-                if (null != property.getValue()) {
-                    return true;
-                }
-            } else if (false == newProperty.equals(property.getValue())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

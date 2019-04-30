@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -180,6 +179,10 @@ public final class Configuration {
     }
 
     public void readConfiguration(final ConfigurationService service) throws OXException {
+        readConfiguration(service, true);
+    }
+
+    public void readConfiguration(final ConfigurationService service, final boolean logPoolConfig) throws OXException {
         Properties props = propsReference.get();
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
@@ -192,7 +195,7 @@ public final class Configuration {
         readJdbcProps(service);
         separateReadWrite();
         loadDrivers();
-        initPoolConfig();
+        initPoolConfig(logPoolConfig);
     }
 
     private void readJdbcProps(ConfigurationService config) {
@@ -294,7 +297,7 @@ public final class Configuration {
     /**
      * Reads the pooling configuration from the configdb.properties file.
      */
-    private void initPoolConfig() {
+    private void initPoolConfig(boolean logPoolConfig) {
         PoolConfig poolConfig = poolConfigReference.get();
         PoolConfig.Builder poolConfigBuilder = PoolConfig.builder();
         poolConfigBuilder.withMaxIdle(getInt(Property.MAX_IDLE, poolConfig.maxIdle));
@@ -309,6 +312,23 @@ public final class Configuration {
         poolConfigBuilder.withTestThreads(getBoolean(Property.TEST_THREADS, poolConfig.testThreads));
         poolConfig = poolConfigBuilder.build();
         poolConfigReference.set(poolConfig);
+
+        if (logPoolConfig) {
+            doLogCurrentPoolConfig(poolConfig);
+        }
+    }
+
+    /**
+     * Logs the current pool configuration.
+     */
+    public void logCurrentPoolConfig() {
+        doLogCurrentPoolConfig(poolConfigReference.get());
+    }
+
+    private void doLogCurrentPoolConfig(PoolConfig poolConfig) {
+        if (poolConfig == null) {
+            return;
+        }
 
         List<Object> logArgs = new ArrayList<>(24);
         logArgs.add(Strings.getLineSeparator());
@@ -424,6 +444,47 @@ public final class Configuration {
     }
 
     /**
+     * Checks differences between this configuration and given configuration
+     *
+     * @param other The other configuration to check against
+     * @return The detecetd differences
+     */
+    ConfigurationDifference getDifferenceTo(Configuration other) {
+        boolean bJdbcProps = false;
+        boolean bPoolConfig = false;
+        boolean bProps = false;
+        boolean bConfigDbReadProps = false;
+        boolean bConfigDbWriteProps = false;
+
+        Properties jdbcProps = jdbcPropsReference.get();
+        Properties otherJdbcProps = other.jdbcPropsReference.get();
+        if (!matches(jdbcProps, otherJdbcProps)) {
+            bJdbcProps = true;
+        }
+
+        PoolConfig poolConfig = poolConfigReference.get();
+        if (!poolConfig.equals(other.poolConfigReference.get())) {
+            bPoolConfig = true;
+        }
+
+        Properties props = propsReference.get();
+        Properties otherProps = other.propsReference.get();
+        if (!matches(props, otherProps)) {
+            bProps = true;
+        }
+
+        if (!matches(configDbReadProps, other.configDbReadProps)) {
+            bConfigDbReadProps = true;
+        }
+
+        if (!matches(configDbWriteProps, other.configDbWriteProps)) {
+            bConfigDbWriteProps = true;
+        }
+
+        return new ConfigurationDifference(bJdbcProps, bPoolConfig, bProps, bConfigDbReadProps, bConfigDbWriteProps);
+    }
+
+    /**
      * Matches if two {@link Properties} can be considered equal
      *
      * @param p1 The first {@link Properties}
@@ -435,10 +496,8 @@ public final class Configuration {
         if (p1.size() != p2.size()) {
             return false;
         }
-        for (Entry<Object, Object> f : p1.entrySet()) {
-            if (false == p2.contains(f.getKey())) {
-                return false;
-            }
+
+        for (Map.Entry<Object, Object> f : p1.entrySet()) {
             Object p2Value = p2.get(f.getKey());
             if (null == p2Value) {
                 if (null != f.getValue()) {
@@ -504,4 +563,87 @@ public final class Configuration {
             return propertyName;
         }
     }
+
+    /**
+     * Represents the difference between two <code>Configuration</code> instances.
+     */
+    public static class ConfigurationDifference {
+
+        private final boolean jdbcProps;
+        private final boolean poolConfig;
+        private final boolean props;
+        private final boolean configDbReadProps;
+        private final boolean configDbWriteProps;
+
+        /**
+         * Initializes a new {@link ConfigurationDifference}.
+         */
+        ConfigurationDifference(boolean jdbcProps, boolean poolConfig, boolean props, boolean configDbReadProps, boolean configDbWriteProps) {
+            super();
+            this.jdbcProps = jdbcProps;
+            this.poolConfig = poolConfig;
+            this.props = props;
+            this.configDbReadProps = configDbReadProps;
+            this.configDbWriteProps = configDbWriteProps;
+        }
+
+        /**
+         * Checks if anything is different.
+         *
+         * @return <code>true</code> if anything is different; otherwise <code>false</code> if considered equal
+         */
+        public boolean anythingDifferent() {
+            return jdbcProps || poolConfig || props || configDbReadProps || configDbWriteProps;
+        }
+
+        /**
+         * Checks whether JDBC properties are different.
+         *
+         * @return <code>true</code> if JDBC properties were different; otherwise <code>false</code>
+         */
+        public boolean areJdbcPropsDifferent() {
+            return jdbcProps;
+        }
+
+
+        /**
+         * Checks whether pool config is different.
+         *
+         * @return <code>true</code> if pool config is different; otherwise <code>false</code>
+         */
+        public boolean isPoolConfigDifferent() {
+            return poolConfig;
+        }
+
+
+        /**
+         * Checks whether properties are different.
+         *
+         * @return <code>true</code> if properties were different; otherwise <code>false</code>
+         */
+        public boolean arePropsDifferent() {
+            return props;
+        }
+
+
+        /**
+         * Checks whether configDb-read properties are different.
+         *
+         * @return <code>true</code> if configDb-read properties were different; otherwise <code>false</code>
+         */
+        public boolean areConfigDbReadPropsDifferent() {
+            return configDbReadProps;
+        }
+
+
+        /**
+         * Checks whether configDb-write properties are different.
+         *
+         * @return <code>true</code> if configDb-write properties were different; otherwise <code>false</code>
+         */
+        public boolean areConfigDbWritePropsDifferent() {
+            return configDbWriteProps;
+        }
+    }
+
 }

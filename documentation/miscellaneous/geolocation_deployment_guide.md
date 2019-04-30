@@ -1,13 +1,12 @@
 ---
-title: Geolocation
-classes: toc
+title: Geolocation Deployment Guide
 icon: fa-globe
 tags: Geolocation, Configuration, Installation
 ---
 
 # Installation on OX App Suite
 
-The middleware utilises two geolocation databases for performing country IP checks, namely those provided by [MaxMind](https://dev.maxmind.com/) and [IP2Location](https://lite.ip2location.com/). These geolocation sources are also used for the [session management](https://documentation.open-xchange.com/7.10.2/middleware/login/06_sessionmanagement.html) feature.
+The middleware utilises two geolocation databases for performing country IP checks, namely those provided by [MaxMind](https://dev.maxmind.com/) and [IP2Location](https://lite.ip2location.com/). These geolocation sources are also used for the [session management]({{site.baseurl}}/middleware/login_and_sessions/06_sessionmanagement.html) feature.
 
 To enable country IP check, only one source is required to and can be installed at any given time.
 The respective package names of those geolocation sources are `open-xchange-geoip-maxmind` and `open-xchange-geoip-ip2location`.

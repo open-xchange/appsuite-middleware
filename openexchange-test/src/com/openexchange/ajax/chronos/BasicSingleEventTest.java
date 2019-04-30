@@ -100,6 +100,12 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         super();
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        eventManager.setIgnoreConflicts(true);
+    }
+
     /**
      * Test the creation of a single event
      */

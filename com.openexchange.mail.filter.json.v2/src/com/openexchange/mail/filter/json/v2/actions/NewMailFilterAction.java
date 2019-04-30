@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.filter.json.v2.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -90,7 +91,7 @@ public class NewMailFilterAction extends AbstractMailFilterAction{
         try {
             final Rule rule = ruleParser.parse(getJSONBody(request.getData()), ServerSessionAdapter.valueOf(request.getSession()));
             int id = mailFilterService.createFilterRule(getCredentials(session, request), rule);
-            return new AJAXRequestResult(id);
+            return new AJAXRequestResult(I(id));
         } catch (final SieveException e) {
             throw MailFilterExceptionCode.handleSieveException(e);
         } catch (final JSONException e) {

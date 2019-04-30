@@ -56,6 +56,7 @@ import com.openexchange.version.internal.Numbers;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @deprecated Use {@link VersionService} instead
  */
 @Deprecated
 public class Version {

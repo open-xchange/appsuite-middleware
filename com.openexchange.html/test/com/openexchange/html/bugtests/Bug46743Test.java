@@ -1,5 +1,6 @@
 package com.openexchange.html.bugtests;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
@@ -20,8 +21,8 @@ public class Bug46743Test extends AbstractSanitizing {
             "-->\n"+
     "</style>";
         String test = getHtmlService().sanitize(content, null, true, null, null);
-        assertEquals(true, StringUtils.countMatches(test, "{") == StringUtils.countMatches(test, "}"));
-        assertEquals(true, test.endsWith("--> \n</style>"));
+        assertEquals(Boolean.TRUE, B(StringUtils.countMatches(test, "{") == StringUtils.countMatches(test, "}")));
+        assertEquals(Boolean.TRUE, B(test.endsWith("--> \n</style>")));
     }
 
 }

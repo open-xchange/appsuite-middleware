@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
@@ -319,9 +320,11 @@ public class TasksTest extends AbstractAJAXSession {
 
         final int taskId = ttm.insertTaskOnServer(task).getObjectID();
 
-        GetRequest getRequest = new GetRequest(folderId, taskId);
-        GetResponse response = getClient().execute(getRequest);
-        final Task reload = (Task) response.getData();
+        final Response response = getTask(getClient(), folderId, taskId);
+        assertNull(response.getErrorMessage(), response.getErrorMessage());
+        Object data = response.getData();
+        assertTrue(data instanceof Task);
+        final Task reload = (Task) data;
         assertEquals("Missing reminder.", remind, reload.getAlarm());
         deleteTask(folderId, taskId, response.getTimestamp());
     }

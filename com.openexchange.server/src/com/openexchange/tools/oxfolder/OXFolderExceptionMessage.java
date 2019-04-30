@@ -132,4 +132,6 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     // You are not allowed to change the permissions of the trash folder or any of its subfolders
     public static final String NO_TRASH_PERMISSIONS_CHANGE_ALLOWED_MSG = "You are not allowed to change the permissions of the trash folder or any of its subfolders";
 
+    public static final String DUPLICATE_NAME_MSG = "There is already a folder named \"%1$s\". Please choose another name.";
+
 }

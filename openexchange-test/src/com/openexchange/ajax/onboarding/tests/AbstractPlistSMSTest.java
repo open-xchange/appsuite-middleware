@@ -98,7 +98,7 @@ public class AbstractPlistSMSTest extends AbstractConfigAwareAPIClientSession {
     }
 
     protected void checkException(String code, DisplayableOXExceptionCode exception) {
-        checkException(code, exception.getPrefix(), exception.getNumber(), exception.getDisplayMessage());
+        checkException(code, exception.getPrefix(), exception.getNumber(), exception.getMessage());
     }
 
 }

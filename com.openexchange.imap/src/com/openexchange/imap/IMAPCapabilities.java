@@ -134,6 +134,11 @@ public class IMAPCapabilities extends MailCapabilities {
      */
     public static final String CAP_TEXT_PREVIEW_NEW = "PREVIEW=FUZZY";
 
+    /**
+     * CONDSTORE support according to <a href="https://tools.ietf.org/html/rfc7162">https://tools.ietf.org/html/rfc7162</a>
+     */
+    public static final String CAP_CONDSTORE = "CONDSTORE";
+
     /*-
      * IMAP bit constants
      */

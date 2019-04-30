@@ -88,8 +88,8 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
-        Boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
-        if(copy){
+        boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
+        if (copy){
             argList.add(ArgumentUtil.createTagArgument(RedirectActionField.copy.name()));
         }
 

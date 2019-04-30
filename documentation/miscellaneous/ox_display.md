@@ -1,6 +1,5 @@
 ---
 title: OX Display
-classes: toc
 icon: fa-bullhorn
 tags: Configuration, Installation, Provisioning
 ---

@@ -1043,11 +1043,11 @@ public class DriveStorage {
                 try {
                     existingFolder = createFolder(currentFolder, name);
                 } catch (OXException e) {
-                    if ("FLD-0012".equals(e.getErrorCode())) {
+                    if ("FLD-0012".equals(e.getErrorCode()) || "FLD-0095".equals(e.getErrorCode())) {
                         session.trace("Name conflict during folder creation (" + e.getMessage() + "), trying again...");
                         existingFolder = resolveToLeaf(path, false, false);
                         if (null == existingFolder) {
-                            throw e;
+                            throw DriveExceptionCodes.DIRECTORY_ALREADY_EXISTS.create(e, name, currentPath);
                         }
                     } else {
                         throw e;

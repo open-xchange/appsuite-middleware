@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ abstract class AbstractDateTestCommandParser {
             if (session != null && session.getUser().getTimeZone() != null) {
                 argList.add(ArgumentUtil.createTagArgument("zone"));
                 TimeZone tZone = TimeZone.getTimeZone(session.getUser().getTimeZone());
-                String zone = String.format("%+03d%02d", tZone.getRawOffset() / 3600000, Math.abs((tZone.getRawOffset() / 60000) % 60));
+                String zone = String.format("%+03d%02d", I(tZone.getRawOffset() / 3600000), I(Math.abs((tZone.getRawOffset() / 60000) % 60)));
                 argList.add(CommandParserJSONUtil.stringToList(zone));
             }
         }

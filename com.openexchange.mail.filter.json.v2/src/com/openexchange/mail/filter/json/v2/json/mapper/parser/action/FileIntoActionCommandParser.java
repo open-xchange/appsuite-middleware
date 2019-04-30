@@ -88,7 +88,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws JSONException, SieveException, OXException {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
-        Boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
+        boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
         if (copy || jsonObject.getString("id").equals(SimplifiedAction.COPY.getCommandName())) {
             argList.add(ArgumentUtil.createTagArgument(MoveActionField.copy.name()));
         }

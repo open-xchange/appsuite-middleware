@@ -1,6 +1,5 @@
 ---
 title: Primary Address Header
-classes: toc
 icon: fa-at
 tags: Mail, Configuration
 ---

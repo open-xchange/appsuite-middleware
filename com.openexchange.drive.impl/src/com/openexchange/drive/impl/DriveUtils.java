@@ -321,7 +321,7 @@ public class DriveUtils {
     public static boolean indicatesFailedSave(OXException e) {
         return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) || "RDB-0002".equals(e.getErrorCode()) ||
             "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode()) || "FLD-1014".equals(e.getErrorCode()) ||
-            FileStorageExceptionCodes.DENIED_MIME_TYPE.equals(e);
+            FileStorageExceptionCodes.DENIED_MIME_TYPE.equals(e) || DriveExceptionCodes.DIRECTORY_ALREADY_EXISTS.equals(e);
     }
 
     /**

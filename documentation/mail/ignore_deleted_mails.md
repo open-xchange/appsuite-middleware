@@ -1,6 +1,5 @@
 ---
 title: Ignore Deleted Mails
-classes: toc
 icon: fa-ban
 tags: Mail, Configuration
 ---

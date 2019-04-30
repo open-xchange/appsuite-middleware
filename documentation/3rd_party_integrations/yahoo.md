@@ -1,6 +1,5 @@
 ---
-title: Yahoo! Contacts
-classes: toc
+title: Yahoo
 icon: fa-yahoo
 tags: 3rd Party, Yahoo, Installation, Configuration, Contacts
 ---

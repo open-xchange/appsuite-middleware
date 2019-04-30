@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.filter.json.v2.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,10 +93,10 @@ public class UpdateMailFilterAction extends AbstractMailFilterAction {
         final MailFilterService mailFilterService = services.getService(MailFilterService.class);
         try {
             final JSONObject json = getJSONBody(request.getData());
-            final Integer uid = getUniqueId(json);
+            final int uid = getUniqueId(json).intValue();
             final Rule rule = mailFilterService.getFilterRule(credentials, uid);
             if (rule == null) {
-                throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getRightUsername(), credentials.getContextString());
+                throw MailFilterExceptionCode.NO_SUCH_ID.create(I(uid), credentials.getRightUsername(), credentials.getContextString());
             }
             ruleParser.parse(rule, json, ServerSessionAdapter.valueOf(request.getSession()));
             mailFilterService.updateFilterRule(credentials, rule, uid);

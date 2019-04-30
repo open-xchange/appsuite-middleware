@@ -1,6 +1,5 @@
 ---
 title: Google
-classes: toc
 icon: fa-google
 tags: 3rd Party, Google, Installation, Configuration, Filestore, Calendar, Contacts
 ---
@@ -136,7 +135,7 @@ Note that the contact synchronisation will NOT happen automatically every time a
 
 Also note that this is an one-way sync, i.e. from the third-party provider towards the AppSuite and NOT vice versa.
 
-# Google Calendar
+# Google Calendars
 
 ## Required Permissions
 

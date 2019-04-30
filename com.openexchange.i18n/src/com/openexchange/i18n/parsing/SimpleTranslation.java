@@ -49,6 +49,8 @@
 
 package com.openexchange.i18n.parsing;
 
+import static com.openexchange.java.Autoboxing.I;
+
 /**
  * {@link SimpleTranslation}
  *
@@ -57,11 +59,11 @@ package com.openexchange.i18n.parsing;
  */
 public class SimpleTranslation {
 
-    private Translation delegate;
+    private final Translation delegate;
 
     public SimpleTranslation(String id, String message) {
         delegate = new Translation(null, id, null);
-        delegate.setMessage(0, message);
+        delegate.setMessage(I(0), message);
     }
 
     public String getMessage() {

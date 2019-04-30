@@ -49,6 +49,7 @@
 
 package com.openexchange.hazelcast.upgrade324.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,7 +129,7 @@ public class UpgradedCacheListener implements com.openexchange.caching.events.Ca
         LOG.info("Successfully got reference to cache event topic: {}", topic);
         LOG.info("Publishing legacy cache event: {}", legacyEvent);
         topic.publish(legacyMessage);
-        LOG.info("Successfully published legacy cache event, shutting down client after {}ms...", SHUTDOWN_DELAY);
+        LOG.info("Successfully published legacy cache event, shutting down client after {}ms...", I(SHUTDOWN_DELAY));
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SHUTDOWN_DELAY));
         client.shutdown();
         LOG.info("Client shutdown completed.");

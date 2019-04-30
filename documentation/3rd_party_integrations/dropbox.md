@@ -1,6 +1,5 @@
 ---
 title: Dropbox
-classes: toc
 icon: fa-dropbox
 tags: 3rd Party, Dropbox, Installation, Configuration, Filestore
 ---

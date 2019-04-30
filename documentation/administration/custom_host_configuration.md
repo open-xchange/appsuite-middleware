@@ -1,6 +1,5 @@
 ---
 title: Custom Host Configuration
-classes: toc
 icon: fa-cogs
 tags: Administration, Configuration
 ---
@@ -228,10 +227,11 @@ It is possible to define the basic style of all notification mails for a host. W
 | text  | Boolean  | The footer text can be customized. If no text shall <br>be displayed, omit this key. | text: 'Footer text' |
 
 ## Wildcards
-Whenever the administrator needs to define a set of features for a set of hosts with similar domain names, he can use Regex and '*' wildcards as part of a host parameter and set properties for this set of hosts.
+Whenever the administrator needs to define a set of features for a set of hosts with similar domain names, he can use Regex and `*` wildcards as part of a host parameter and set properties for this set of hosts.
 ```
     host*.mycloud.net:
 	    hostRegex: host.*\.mycloud\.net
 	    someRegexHostKey: someRegexHostValue
 ```
-In the example under the [Content](#Content) chapter, the value of someRegexHostKey would apply to all three following hosts.
+
+In the example under the [Content](#content) chapter, the value of someRegexHostKey would apply to all three following hosts.

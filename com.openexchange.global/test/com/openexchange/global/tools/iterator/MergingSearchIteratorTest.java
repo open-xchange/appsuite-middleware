@@ -49,6 +49,7 @@
 
 package com.openexchange.global.tools.iterator;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -67,11 +68,11 @@ import com.openexchange.tools.iterator.SearchIterator;
 public class MergingSearchIteratorTest {
          @Test
      public void testMerge() throws OXException {
-        final Integer[] a = new Integer[] { 0, 3, 4, 7, 9, 12, 13, 16 };
-        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
-        final Integer[] c = new Integer[] { 1, 6, 8, 11, 14, 20 };
+        final Integer[] a = new Integer[] { I(0), I(3), I(4), I(7), I(9), I(12), I(13), I(16) };
+        final Integer[] b = new Integer[] { I(1), I(2), I(5), I(10), I(18) };
+        final Integer[] c = new Integer[] { I(1), I(6), I(8), I(11), I(14), I(20) };
 
-        final Integer[] expected = new Integer[] { 0, 1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 18, 20 };
+        final Integer[] expected = new Integer[] { I(0), I(1), I(1), I(2), I(3), I(4), I(5), I(6), I(7), I(8), I(9), I(10), I(11), I(12), I(13), I(14), I(16), I(18), I(20) };
 
         final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
@@ -92,7 +93,7 @@ public class MergingSearchIteratorTest {
          @Test
      public void testMergeEmptyWithFull() throws OXException {
         final Integer[] a = new Integer[0];
-        final Integer[] b = new Integer[] { 1, 2, 5, 10, 18 };
+        final Integer[] b = new Integer[] { I(1), I(2), I(5), I(10), I(18) };
 
         final Integer[] expected = b;
 
@@ -116,7 +117,7 @@ public class MergingSearchIteratorTest {
 
         @Override
         public int compare(final Integer o1, final Integer o2) {
-            return o2 - o1;
+            return o2.intValue() - o1.intValue();
         }
 
     }

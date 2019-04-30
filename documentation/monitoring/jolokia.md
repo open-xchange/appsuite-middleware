@@ -1,6 +1,5 @@
 ---
 title: Jolokia
-classes: toc
 icon: fa-leaf
 tags: Monitoring, Configuration, Administration
 ---

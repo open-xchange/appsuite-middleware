@@ -49,6 +49,7 @@
 
 package com.openexchange.icap.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -97,13 +98,13 @@ public abstract class AbstractICAPTest {
 
     /**
      * Setup mocks
-     * 
+     *
      * @throws IOException
      */
     @Before
     public void setUp() throws IOException {
         LeanConfigurationService leanConfigServiceMock = PowerMockito.mock(LeanConfigurationService.class);
-        PowerMockito.when(leanConfigServiceMock.getIntProperty(ICAPClientProperty.SOCKET_TIMEOUT)).thenReturn(10000);
+        PowerMockito.when(I(leanConfigServiceMock.getIntProperty(ICAPClientProperty.SOCKET_TIMEOUT))).thenReturn(I(10000));
 
         ServiceLookup serviceLookupMock = PowerMockito.mock(ServiceLookup.class);
         PowerMockito.when(serviceLookupMock.getService(LeanConfigurationService.class)).thenReturn(leanConfigServiceMock);
@@ -125,7 +126,7 @@ public abstract class AbstractICAPTest {
 
     /**
      * Creates a {@link Socket} to the default {@link ICAPTestProperties#ICAP_SERVER_ADDRESS}
-     * 
+     *
      * @return The {@link Socket}
      * @throws UnknownHostException If the server address cannot be resolved
      * @throws IOException if an I/O error is occurred
@@ -136,7 +137,7 @@ public abstract class AbstractICAPTest {
 
     /**
      * Creates a {@link Socket} to the specified server and port
-     * 
+     *
      * @param server The server address
      * @param port The port
      * @return The new {@link Socket}
@@ -151,7 +152,7 @@ public abstract class AbstractICAPTest {
 
     /**
      * Handles the specified {@link ICAPRequest}.
-     * 
+     *
      * @param requestHandler The {@link ICAPRequestHandler} to handle the request
      * @param request The {@link ICAPRequest} to handle
      * @param mockedResponse The mocked response {@link InputStream} that the server will return (and thus will be handled by the handler)

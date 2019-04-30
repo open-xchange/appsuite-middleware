@@ -80,7 +80,7 @@ public final class MessageTimelineEventHandler implements EventHandler {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
                         // No active session left
-                        MessageTimelineManagement.getInstance().dropFor(userId, contextId);
+                        MessageTimelineManagement.getInstance().dropFor(userId.intValue(), contextId.intValue());
                     }
                 }
             } catch (final Exception e) {

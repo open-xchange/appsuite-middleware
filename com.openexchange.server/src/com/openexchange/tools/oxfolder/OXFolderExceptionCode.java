@@ -580,7 +580,11 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
     /**
      * The permissions of trash folder %1$s must not be changed in context %2$s.
      */
-    NO_TRASH_PERMISSIONS_CHANGE_ALLOWED("The permissions of trash folder %1$s must not be changed in context %2$s.", OXFolderExceptionMessage.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED_MSG, Category.CATEGORY_PERMISSION_DENIED, 94)
+    NO_TRASH_PERMISSIONS_CHANGE_ALLOWED("The permissions of trash folder %1$s must not be changed in context %2$s.", OXFolderExceptionMessage.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED_MSG, Category.CATEGORY_PERMISSION_DENIED, 94),
+    /**
+     * There is already a folder named "%1$s" located below the parent folder with identifier %2$s. Please choose another name.
+     */
+    DUPLICATE_NAME("There is already a folder named \"%1$s\" located below the parent folder with identifier %2$s. Please choose another name.", OXFolderExceptionMessage.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 95),
 
     ;
 

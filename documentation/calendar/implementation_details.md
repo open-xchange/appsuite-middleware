@@ -1,6 +1,5 @@
 ---
 title: Implementation Details 
-classes: toc
 icon: fa-info
 tags: API, Calendar
 ---

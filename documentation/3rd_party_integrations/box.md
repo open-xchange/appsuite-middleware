@@ -1,6 +1,5 @@
 ---
 title: Box
-classes: toc
 icon: fa-archive
 tags: 3rd Party, Box, Installation, Configuration, Filestore
 ---

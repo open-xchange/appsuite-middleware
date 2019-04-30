@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.json.ajax.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -148,7 +149,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
         try {
             final JSONObject json = getJsonBody(request);
-            final int uid = getUniqueId(json);
+            final int uid = getUniqueId(json).intValue();
             mailFilterService.deleteFilterRule(credentials, uid);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
@@ -263,10 +264,10 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
         try {
             final JSONObject json = getJsonBody(request);
-            final Integer uid = getUniqueId(json);
+            final int uid = getUniqueId(json).intValue();
             final Rule rule = mailFilterService.getFilterRule(credentials, uid);
             if (rule == null) {
-                throw MailFilterExceptionCode.NO_SUCH_ID.create(uid, credentials.getRightUsername(), credentials.getContextString());
+                throw MailFilterExceptionCode.NO_SUCH_ID.create(I(uid), credentials.getRightUsername(), credentials.getContextString());
             }
             CONVERTER.parse(rule, json, ServerSessionAdapter.valueOf(request.getSession()));
             mailFilterService.updateFilterRule(credentials, rule, uid);

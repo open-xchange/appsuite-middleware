@@ -1,6 +1,5 @@
 ---
 title: Quota
-classes: toc
 icon: fa-pie-chart
 tags: Limits, Configuration, Installation
 ---

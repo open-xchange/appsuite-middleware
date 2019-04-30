@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.importers;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -157,7 +158,7 @@ public abstract class ContactImporter extends AbstractImporter {
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, contact)) {
                     // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
+                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), I(retryCount), I(MAX_RETRIES), e);
                     continue;
                 }
                 // re-throw
