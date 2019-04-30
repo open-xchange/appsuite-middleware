@@ -139,7 +139,7 @@ public class Bug25160Test extends CalDAVTest {
          */
         props = new DavPropertyNameSet();
         props.add(PropertyNames.OWNER);
-        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + subfolder.getObjectID(), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + encodeFolderID(String.valueOf(subfolder.getObjectID())), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         assertTrue("owner found", response.getPropertyNames(HttpServletResponse.SC_NOT_FOUND).contains(PropertyNames.OWNER));
     }

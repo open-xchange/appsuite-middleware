@@ -385,7 +385,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     private boolean isForeignCopy(CalendarSession session, Event event) throws OXException {
         Attendee userAttendee = session.getEntityResolver().prepareUserAttendee(session.getUserId());
         Attendee originalAttendee = CalendarUtils.find(event.getAttendees(), userAttendee);
-        return false == CalendarUtils.isInternal(originalAttendee);
+        return null != originalAttendee && false == CalendarUtils.isInternal(originalAttendee);
     }
 
     private long timeInMillisWithoutMillis(Calendar cal) {

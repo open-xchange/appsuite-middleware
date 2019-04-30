@@ -127,7 +127,7 @@ public class Bug47121Test extends CalDAVTest {
          */
         DeleteMethod delete = null;
         try {
-            String href = "/caldav/" + sharedFolderID;
+            String href = "/caldav/" + encodeFolderID(sharedFolderID);
             delete = new DeleteMethod(getBaseUri() + href + "/");
             Assert.assertEquals("response code wrong", HttpServletResponse.SC_NO_CONTENT, getWebDAVClient().executeMethod(delete));
         } finally {
