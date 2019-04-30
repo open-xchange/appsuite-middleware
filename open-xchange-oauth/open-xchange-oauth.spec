@@ -134,7 +134,7 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) /opt/open-xchange/etc/oauth.properties
-%config(noreplace) /opt/open-xchange/etc/twitteroauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/twitteroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties

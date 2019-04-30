@@ -95,7 +95,16 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/client-onboarding.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-caldav.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-carddav.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-driveapp.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-eas.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-emclient.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-mail.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-mailapp.properties
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-scenarios.yml
+%config(noreplace) /opt/open-xchange/etc/client-onboarding-syncapp.properties
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %dir /opt/open-xchange/lib/
