@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -74,6 +74,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Apr 30 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.2 release
 * Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
 First preview for 7.10.2 release
 * Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
