@@ -115,12 +115,17 @@ postFix() {
 
 }
 
+setConfigFilePermissions() {
+    ox_update_permissions "/opt/open-xchange/etc/client-onboarding.properties" root:open-xchange 640
+}
+
 case "$1" in
     configure)
         if [ -n "$2" ]; then
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         fi
+        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
