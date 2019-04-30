@@ -52,8 +52,8 @@ package com.openexchange.ajax.chronos.manager;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.java.Autoboxing.NOT;
+import static com.openexchange.java.Autoboxing.l;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -934,6 +934,7 @@ public class EventManager extends AbstractManager {
             throw new ChronosApiException(updateEvent.getCode(), updateEvent.getError());
         }
         CalendarResult calendarResult = checkResponse(updateEvent.getErrorDesc(), updateEvent.getError(), updateEvent.getCategories(), updateEvent.getData());
+        assertEquals("Found unexpected conflicts", 0, calendarResult.getConflicts().size());
         List<EventData> updates = calendarResult.getUpdated();
         assertEquals(1, updates.size());
         setLastTimeStamp(updates.get(0).getTimestamp());
