@@ -78,6 +78,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     private long maxLifeTime;
     private ExhaustedActions exhaustedAction;
     private boolean testOnActivate;
+    private boolean alwaysCheckOnActivate;
     private boolean testOnDeactivate;
     private boolean testOnIdle;
     private boolean testThreads;
@@ -142,6 +143,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             testOnDeactivate = config.testOnDeactivate;
             testOnIdle = config.testOnIdle;
             testThreads = config.testThreads;
+            alwaysCheckOnActivate = config.alwaysCheckOnActivate;
         } finally {
             lock.unlock();
         }
@@ -325,7 +327,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 created = true;
             }
             // LifeCycle
-            if (!lifecycle.activate(retval) || (testOnActivate && !lifecycle.validate(retval))) {
+            if (!lifecycle.activate(retval, alwaysCheckOnActivate) || (testOnActivate && !lifecycle.validate(retval))) {
                 lock.lock();
                 try {
                     data.removeActive(retval);
@@ -546,15 +548,15 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             lock.unlock();
         }
         for (final PooledData<T> metaData : toCheck) {
-            if (!(lifecycle.activate(metaData) && lifecycle.validate(metaData) && lifecycle.deactivate(metaData))) {
-                removed.add(metaData);
-            } else {
+            if (lifecycle.activate(metaData, false) && lifecycle.validate(metaData)) {
                 lock.lock();
                 try {
                     data.addIdle(metaData);
                 } finally {
                     lock.unlock();
                 }
+            } else {
+                removed.add(metaData);
             }
         }
         for (final PooledData<T> metaData : removed) {

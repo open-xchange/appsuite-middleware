@@ -307,6 +307,7 @@ public final class Configuration {
         poolConfigBuilder.withMaxLifeTime(getLong(Property.MAX_LIFE_TIME, poolConfig.maxLifeTime));
         poolConfigBuilder.withExhaustedAction(ExhaustedActions.valueOf(getProperty(Property.EXHAUSTED_ACTION, poolConfig.exhaustedAction.name())));
         poolConfigBuilder.withTestOnActivate(getBoolean(Property.TEST_ON_ACTIVATE, poolConfig.testOnActivate));
+        poolConfigBuilder.withAlwaysCheckOnActivate(getBoolean(Property.ALWAYS_CHECK_ON_ACTIVATE, poolConfig.alwaysCheckOnActivate));
         poolConfigBuilder.withTestOnDeactivate(getBoolean(Property.TEST_ON_DEACTIVATE, poolConfig.testOnDeactivate));
         poolConfigBuilder.withTestOnIdle(getBoolean(Property.TEST_ON_IDLE, poolConfig.testOnIdle));
         poolConfigBuilder.withTestThreads(getBoolean(Property.TEST_THREADS, poolConfig.testThreads));
@@ -551,7 +552,9 @@ public final class Configuration {
         /** Allows to write a warning into the logs if a connection to the master is only used to read data. */
         CHECK_WRITE_CONS("com.openexchange.database.checkWriteCons"),
         /** Specifies the lock mechanism to use. */
-        LOCK_MECH("com.openexchange.database.lockMech");
+        LOCK_MECH("com.openexchange.database.lockMech"),
+        /** Whether connection's validity is always explicitly checked on activate */
+        ALWAYS_CHECK_ON_ACTIVATE("com.openexchange.database.alwaysCheckOnActivate");
 
         private final String propertyName;
 
