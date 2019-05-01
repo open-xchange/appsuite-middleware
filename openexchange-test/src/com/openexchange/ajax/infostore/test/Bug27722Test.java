@@ -138,7 +138,7 @@ public final class Bug27722Test extends AbstractInfostoreTest {
          * execute hard delete request
          */
         itm.deleteAction(objectIDs, folderIDs, itm.getLastResponse().getTimestamp(), Boolean.TRUE);
-        assertNull(itm.getLastResponse().getErrorMessage());
+        assertNull("Error message not null: " + itm.getLastResponse().getException().getMessage(), itm.getLastResponse().getErrorMessage());
         long duration = itm.getLastResponse().getRequestDuration();
         assertTrue("hard deletion took " + duration + "ms, which is too long", 50 * DELETED_ITEMS > duration); // allow 50ms per hard-deleted item
         /*
