@@ -210,11 +210,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             if (retval && (forceValidityCheck || data.getLastPacketDiffFallbackToTimeDiff() > DEFAULT_CHECK_TIME)) {
                 stmt = con.createStatement();
                 result = stmt.executeQuery(TEST_SELECT);
-                if (result.next()) {
-                    retval = result.getInt(1) == 1;
-                } else {
-                    retval = false;
-                }
+                retval = result.next() ? result.getInt(1) == 1 : false;
             }
         } catch (final SQLException e) {
             ConnectionPool.LOG.debug("Test SELECT statement failed", e);
@@ -223,25 +219,6 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             Databases.closeSQLStuff(result, stmt);
         }
         return retval;
-    }
-
-    @Override
-    public Connection create() throws SQLException {
-        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
-        return DriverManager.getConnection(urlAndConnectionArgs.url, urlAndConnectionArgs.connectionArguments);
-    }
-
-    public Connection createWithoutTimeout() throws SQLException {
-        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
-        Properties withoutTimeout = new Properties();
-        withoutTimeout.putAll(urlAndConnectionArgs.connectionArguments);
-        for (Iterator<Object> iter = withoutTimeout.keySet().iterator(); iter.hasNext();) {
-            final Object test = iter.next();
-            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
-                iter.remove();
-            }
-        }
-        return DriverManager.getConnection(urlAndConnectionArgs.url, withoutTimeout);
     }
 
     @Override
@@ -256,27 +233,25 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     }
 
     @Override
-    public void destroy(final Connection obj) {
-        Databases.close(obj);
-    }
-
-    private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
-        if (null != data.getTrace()) {
-            dbe.setStackTrace(data.getTrace());
-        }
-    }
-
-    @Override
-    public boolean validate(final PooledData<Connection> data) {
+    public boolean validate(final PooledData<Connection> data, boolean onActivate) {
         final Connection con = data.getPooled();
         boolean retval = true;
         try {
             MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(con, true);
             if (MysqlUtils.ClosedState.OPEN != closedState) {
-                if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
-                    ConnectionPool.LOG.error("Found closed connection.", new FastThrowable());
-                } else {
-                    ConnectionPool.LOG.error("Found internally closed connection.", new FastThrowable());
+                /*-
+                 * Check whether connection is validated on fetching from pool or on putting it back into the pool.
+                 *
+                 * The latter case should not be logged since a connection may break during usage ("Communications link failure").
+                 * Simply return 'false' as result for the validation to indicate that connection is no more poolable,
+                 * in which case the connection gets closed and is discarded.
+                 */
+                if (onActivate) {
+                    if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
+                        ConnectionPool.LOG.error("Found closed connection.", new FastThrowable());
+                    } else {
+                        ConnectionPool.LOG.error("Found internally closed connection.", new FastThrowable());
+                    }
                 }
                 retval = false;
             } else if (!con.getAutoCommit()) {
@@ -328,6 +303,36 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             active = ((com.mysql.jdbc.Connection) con).getActiveStatementCount();
         }
         return active;
+    }
+
+    @Override
+    public Connection create() throws SQLException {
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        return DriverManager.getConnection(urlAndConnectionArgs.url, urlAndConnectionArgs.connectionArguments);
+    }
+
+    public Connection createWithoutTimeout() throws SQLException {
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        Properties withoutTimeout = new Properties();
+        withoutTimeout.putAll(urlAndConnectionArgs.connectionArguments);
+        for (Iterator<Object> iter = withoutTimeout.keySet().iterator(); iter.hasNext();) {
+            final Object test = iter.next();
+            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
+                iter.remove();
+            }
+        }
+        return DriverManager.getConnection(urlAndConnectionArgs.url, withoutTimeout);
+    }
+
+    @Override
+    public void destroy(final Connection obj) {
+        Databases.close(obj);
+    }
+
+    private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
+        if (null != data.getTrace()) {
+            dbe.setStackTrace(data.getTrace());
+        }
     }
 
     @Override
