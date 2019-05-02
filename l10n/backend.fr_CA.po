@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-26 18:06+0100\n"
-"Last-Translator: Nicolas Ternisien <nicolas@workshop-chapina.com>\n"
+"PO-Revision-Date: 2019-04-27 11:22+0900\n"
+"Last-Translator: sandrine <sandrine@workshop-chapina.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Lokalize 18.12.2\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -222,7 +222,7 @@ msgid ""
 "iCalendar file and try again."
 msgstr ""
 "Aucune donnée d'agenda trouvée dans le fichier fourni. Veuillez utiliser un "
-"fichier iCalendar valable et réessayer."
+"fichier iCalendar valide et réessayer."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:66
 msgid "Error reading calendar data at line %1$d: %2$s"
@@ -243,7 +243,7 @@ msgid ""
 "The given iCalendar source does not contain valid content and cannot be "
 "processed."
 msgstr ""
-"La source iCalendar fournie ne contient pas de contenu valable et ne peut "
+"La source iCalendar fournie ne contient pas de contenu valide et ne peut "
 "donc être traitée."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
@@ -1161,7 +1161,7 @@ msgstr "L'URI du flux est manquante."
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:65
 msgid "The given feed URI is invalid. Please change it and try again."
 msgstr ""
-"L'URI du flux fournie n'est pas valable. Veuillez la modifier et réessayer."
+"L'URI du flux fournie n'est pas valide. Veuillez la modifier et réessayer."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:67
 msgid "Cannot connect to feed with URI: %1$s. Please change it and try again."
@@ -1289,8 +1289,8 @@ msgid ""
 "The remote SchedJoules service is unavailable at the moment. There is "
 "nothing we can do about it. Please try again later."
 msgstr ""
-"Le service distant SchedJoules n'est pas disponible pour le moment. Nous "
-"ne pouvons malheureusement rien y faire. Veuillez réessayer ultérieurement."
+"Le service distant SchedJoules n'est pas disponible pour le moment. Nous ne "
+"pouvons malheureusement rien y faire. Veuillez réessayer ultérieurement."
 
 #. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
@@ -1307,8 +1307,8 @@ msgid ""
 "A remote server error occurred on SchedJoules side. There is nothing we can "
 "do about it."
 msgstr ""
-"Une erreur de serveur distant s'est produite sur le serveur SchedJoules. Nous "
-"ne pouvons malheureusement rien y faire."
+"Une erreur de serveur distant s'est produite sur le serveur SchedJoules. "
+"Nous ne pouvons malheureusement rien y faire."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1444,7 +1444,7 @@ msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr ""
-"Le dossier fourni n'est pas géré. Veuillez sélectionner un dossier valable "
+"Le dossier fourni n'est pas géré. Veuillez sélectionner un dossier valide "
 "et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
@@ -1461,8 +1461,7 @@ msgid ""
 "already exists."
 msgstr ""
 "Les modifications n'ont pas pu être appliquées car il existe déjà une "
-"nouvelle "
-"version du rendez-vous."
+"nouvelle version du rendez-vous."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
@@ -1525,21 +1524,21 @@ msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
 msgstr ""
-"La règle de récurrence fournie n'est pas valable. Veuillez corriger cette "
+"La règle de récurrence fournie n'est pas valide. Veuillez corriger cette "
 "règle et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
-"Le rappel fourni n'est pas valable. Veuillez corriger ce rappel et réessayer."
+"Le rappel fourni n'est pas valide. Veuillez corriger ce rappel et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr ""
-"Le fuseau horaire fourni n'est pas valable. Veuillez sélectionner un fuseau "
+"Le fuseau horaire fourni n'est pas valide. Veuillez sélectionner un fuseau "
 "horaire correct et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
@@ -1547,8 +1546,8 @@ msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr ""
-"La position géographique fournie n'est pas valable. Veuillez sélectionner "
-"des coordonnées valables et réessayer."
+"La position géographique fournie n'est pas valide. Veuillez sélectionner "
+"des coordonnées valides et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
@@ -1572,7 +1571,7 @@ msgid ""
 "a valid recurrence identifier and try again."
 msgstr ""
 "La répétition ciblée ne fait pas partie de la série de rendez-vous. Veuillez "
-"sélectionner un identifiant de répétition valable et réessayer."
+"sélectionner un identifiant de répétition valide et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
@@ -1580,7 +1579,7 @@ msgid ""
 "valid split point and try again."
 msgstr ""
 "Impossible de scinder la série de rendez-vous. Veuillez sélectionner un "
-"point de séparation valable et réessayer."
+"point de séparation valide et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid "Moving an appointment series into another folder is not supported."
@@ -1598,14 +1597,14 @@ msgstr ""
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid "The calendar user \"%1$s\" is invalid."
-msgstr "L'utilisateur de l'agenda « %1$s » n'est pas valable."
+msgstr "L'utilisateur de l'agenda « %1$s » n'est pas valide."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr ""
-"La configuration fournie n'est pas valable. Veuillez corriger cette "
+"La configuration fournie n'est pas valide. Veuillez corriger cette "
 "configuration et réessayer."
 
 #. In order to accomplish the search, %1$d or more characters are required.
@@ -1644,12 +1643,12 @@ msgstr "Le nombre maximal d'inscriptions à l'agenda est atteint."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
-msgstr "La valeur de « %2$s » n'est pas valable et n'a pas été appliquée."
+msgstr "La valeur de « %2$s » n'est pas valide et n'a pas été appliquée."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
 msgid "The value for \"%1$s\" is invalid and cannot be applied."
 msgstr ""
-"La valeur fournie pour \"%1$s\" n'est pas valable et ne peut pas être "
+"La valeur fournie pour \"%1$s\" n'est pas valide et ne peut pas être "
 "appliquée."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
@@ -1732,7 +1731,7 @@ msgstr "Le lien de téléchargement est invalide."
 #. The download link is invalid.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:88
 msgid "The phone number %1$s is invalid."
-msgstr "Le numéro de téléphone %1$s n'est pas valable."
+msgstr "Le numéro de téléphone %1$s n'est pas valide."
 
 #. The display name for Apple platform
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:71
@@ -2794,7 +2793,7 @@ msgstr ""
 msgid ""
 "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
 msgstr ""
-"Le motif « %1$s » n'est pas valable. Veuillez utiliser un motif valable et "
+"Le motif « %1$s » n'est pas valide. Veuillez utiliser un motif valide et "
 "réessayer."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:89
@@ -2860,8 +2859,8 @@ msgstr "Un dossier dénommé \"%1$s\" existe déjà à l'emplacement \"%2$s\"."
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
-"L'envoi push par scrutation longue est désactivé pour l'utilisateur "
-"\"%1$s\" dans le contexte \"%1$s\""
+"L'envoi push par scrutation longue est désactivé pour l'utilisateur \"%1$s\" "
+"dans le contexte \"%1$s\""
 
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
@@ -3515,7 +3514,7 @@ msgstr "Impossible d'analyser « %1$s »."
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
 msgid "The folder id \"%1$s\" is invalid for module \"%2$s\"."
 msgstr ""
-"L'identifiant de dossier « %1$s » n'est pas valable pour le module  « %2$s »."
+"L'identifiant de dossier « %1$s » n'est pas valide pour le module  « %2$s »."
 
 #. The folder type \"%1$s\" is not supported.
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
@@ -4186,7 +4185,7 @@ msgstr ""
 #. Invalid Guard URL: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
 msgid "The provided URL: %1$s is invalid"
-msgstr "L'URL fournie : %1$s n'est pas valable"
+msgstr "L'URL fournie : %1$s n'est pas valide"
 
 #. The Guard resource does not exist: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
@@ -4787,7 +4786,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Paramètre invalide : %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4806,7 +4807,7 @@ msgstr "Vous ne pouvez pas activer ou désactiver la catégorie %1$s."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
-msgstr "L'adresse de redirection « %1$s » n'est pas valable."
+msgstr "L'adresse de redirection « %1$s » n'est pas valide."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:62
 msgid "The redirect address \"%1$s\" has been rejected."
@@ -4815,7 +4816,7 @@ msgstr "L'adresse de redirection « %1$s » a été rejetée."
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
 msgstr ""
-"Règle SIEVE définie non valable. Veuillez vérifier vos règles de filtrage de "
+"Règle SIEVE définie non valide. Veuillez vérifier vos règles de filtrage de "
 "courrier"
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
@@ -4824,7 +4825,7 @@ msgid ""
 "from server: \"%1$s\""
 msgstr ""
 "Veuillez vérifier vos règles de filtrage de courrier car elles ne semblent "
-"pas valables. Réponse du serveur : « %1$s »"
+"pas valides. Réponse du serveur : « %1$s »"
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:68
 msgid "Managing mail filter rules is not available for your account."
@@ -4930,7 +4931,7 @@ msgstr "Le message %1$s n'a pas été trouvé dans le dossier %2$s."
 #. Invalid OAuth account specified.
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
-msgstr "Compte OAuth défini non valable."
+msgstr "Compte OAuth défini non valide."
 
 #. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
@@ -4939,8 +4940,7 @@ msgid ""
 "can do about it. Try again later."
 msgstr ""
 "Une erreur s'est produite au niveau du point de terminaison Microsoft "
-"distant. "
-"Nous ne pouvons malheureusement rien y faire. Veuillez réessayer "
+"distant. Nous ne pouvons malheureusement rien y faire. Veuillez réessayer "
 "ultérieurement."
 
 #. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
@@ -4958,8 +4958,8 @@ msgid ""
 "The copying of file %1$s failed. There is nothing we can do about it. Try "
 "again later."
 msgstr ""
-"La copie du fichier %1$s a échoué. Nous ne "
-"pouvons malheureusement rien y faire. Veuillez réessayer ultérieurement."
+"La copie du fichier %1$s a échoué. Nous ne pouvons malheureusement rien y "
+"faire. Veuillez réessayer ultérieurement."
 
 #. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
@@ -4984,6 +4984,200 @@ msgstr "Il existe déjà un dossier nommé '%1$s' sous le dossier nommé '%2$s'"
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Vous n'êtes pas autorisé à supprimer le dossier racine."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr ""
+"Ce compte est verrouillé. Veuillez patienter %1$d minutes puis réessayer."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr ""
+"Une autre tentative d'authentification est en cours pour cet utilisateur. "
+"Veuillez patienter."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Ma solution de récupération"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr ""
+"Les appareils d'authentification principaux doivent être configurés avant les"
+" appareils de secours."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Votre code d'authentification est :"
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Mon téléphone"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Authentifiant %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Appareil %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Authentification multifacteur incomplète"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Authentification multifacteur non valide"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"Une erreur s'est produite lors de la création ou du calcul du facteur"
+" d'authentification : %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "Erreur JSON : %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Le fournisseur %1$s demandé est inconnu."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Le fournisseur %1$s demandé n'est pas disponible pour cet utilisateur."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr ""
+"L'authentification multifacteur est requise mais l'identifiant d'appareil est"
+" manquant"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "L'appareil demandé est inconnu"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr ""
+"Une erreur inconnue s'est produite durant l'authentification multifacteur : %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr ""
+"L'authentification multifacteur est requise mais le nom du fournisseur est"
+" manquant"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "Erreur SQL : %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Paramètre manquant : %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Cet appareil est déjà enregistré"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Cette action exige une authentification multifacteur récente. Des paramètres "
+"d'authentification multifacteur manquent pour cette action."
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Cet appareil n'est pas enregistré"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Aucun appareil associé à ce fournisseur"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr ""
+"L'argument fourni \"%1$s\" a une longueur %2$s qui dépasse la longueur"
+" maximale autorisée, %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "L'enregistrement a échoué"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Impossible de retirer l'appareil"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "L'authentification a échoué"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "L'authentification a échoué : %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr ""
+"L'authentification a échoué. Un total de %1$d tentatives est "
+"autorisé avant le déclenchement d'un verrouillage temporaire."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5236,7 +5430,7 @@ msgstr "Le compte est invalide, veuillez le recréer."
 #. The account "%1$s" is invalid, please recreate it.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
 msgid "The account \"%1$s\" is invalid, please recreate it."
-msgstr "Le compte « %1$s » n'est pas valable, veuillez le recréer."
+msgstr "Le compte « %1$s » n'est pas valide, veuillez le recréer."
 
 #. Please provide a display name.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
@@ -5261,7 +5455,7 @@ msgstr "Le processus d'authentification OAuth a été annulé."
 #. Could not get a valid response from the associated OAuth provider.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "Could not get a valid response from the associated OAuth provider."
-msgstr "Impossible d'obtenir une réponse valable du fournisseur OAuth associé."
+msgstr "Impossible d'obtenir une réponse valide du fournisseur OAuth associé."
 
 #. There was a problem while creating a connection to the remote service.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
@@ -5837,7 +6031,7 @@ msgstr ""
 "tentatives de connexion peuvent ne pas fonctionner. Veuillez remarquer que "
 "bien que cet avertissement puisse être ignoré en toute sécurité, le compte "
 "POP3 peut ne pas fonctionner si les données de connexion fournies ne sont "
-"pas valables."
+"pas valides."
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
@@ -6067,8 +6261,7 @@ msgid ""
 "about it."
 msgstr ""
 "Une erreur de serveur distant s'est produite sur le serveur '%2$s'. Nous ne "
-"pouvons "
-"malheureusement rien y faire."
+"pouvons malheureusement rien y faire."
 
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
@@ -6764,7 +6957,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
 msgstr ""
-"Adresse électronique non valable : '%s'. Veuillez corriger l'adresse "
+"Adresse électronique non valide : '%s'. Veuillez corriger l'adresse "
 "électronique."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
@@ -6972,7 +7165,7 @@ msgstr "Le motif « %1$s » a été ignoré durant la recherche."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
 msgid "Invalid number of properties for distribution list."
-msgstr "Nombre de propriétés non valable pour la liste de distribution."
+msgstr "Nombre de propriétés non valide pour la liste de distribution."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:145
 msgid ""
@@ -8855,7 +9048,7 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"Le mot de passe actuel n'est pas valable. Veuillez saisir le bon mot de "
+"Le mot de passe actuel n'est pas valide. Veuillez saisir le bon mot de "
 "passe et réessayer."
 
 #. *
@@ -9619,7 +9812,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
 msgstr ""
-"Nom de dossier non valable. Veuillez éviter les caractères suivants : %2$s"
+"Nom de dossier non valide. Veuillez éviter les caractères suivants : %2$s"
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:130
 msgid "No create access on mail folder \"%1$s\"."
@@ -9757,7 +9950,7 @@ msgstr "Échec de validation du serveur %1$s pour la raison suivante : %3$s"
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
 msgid "Validation of server %1$s failed due to invalid credentials"
 msgstr ""
-"Échec de validation du serveur %1$s pour cause d'autorisation non valable"
+"Échec de validation du serveur %1$s pour cause d'autorisation non valide"
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
 msgid "Server %1$s does not support being accessed using a secure connection."
@@ -9819,15 +10012,15 @@ msgstr "Le contenu de ce courriel est trop gros."
 #. Invalid parameter value: %1$s
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:217
 msgid "Invalid parameter value: %1$s"
-msgstr "Valeur de paramètre non valable : %1$s"
+msgstr "Valeur de paramètre non valide : %1$s"
 
 #. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:220
 msgid ""
 "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
 msgstr ""
-"Le nom du drapeau %1$s n'est pas valable. Les drapeaux ne peuvent pas "
-"commencer avec un « \\ »."
+"Le nom du drapeau %1$s n'est pas valide. Les drapeaux ne peuvent pas "
+"commencer par « \\ »."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
 msgid ""
@@ -11020,12 +11213,14 @@ msgstr "fichier"
 msgid "folder"
 msgstr "dossier"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
 msgstr ""
-"%1$s a partagé l'objet %2$s « %3$s » avec vous. Veuillez vous connecter pour "
-"l'afficher."
+"%1$s a partagé le %2$s \"%3$s\" avec vous. Veuillez saisir le mot de passe de"
+" partage pour le consulter."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -11325,7 +11520,7 @@ msgstr "Vous ne pouvez pas créer plus d'un lien par dossier ou élément."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:96
 msgid "The set permissions for the link are invalid."
-msgstr "Les droits définis pour le lien ne sont pas valables."
+msgstr "Les droits définis pour le lien ne sont pas valides."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:98
 msgid ""
@@ -11976,7 +12171,7 @@ msgstr ""
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:71
 msgid "Invalid or harmful image data detected"
-msgstr "Détection de données d'image non valables ou dangereuses"
+msgstr "Détection de données d'image non valides ou dangereuses"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
@@ -12327,7 +12522,7 @@ msgstr "Configuration manquante pour le compte « %1$s »."
 #. E-Mail address is invalid
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:83
 msgid "E-Mail address is invalid"
-msgstr "L'adresse électronique n'est pas valable"
+msgstr "L'adresse électronique n'est pas valide"
 
 #. Already sent an invitation to E-Mail address: \"%1$s\"
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:86
@@ -14534,6 +14729,12 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s a partagé l'objet %2$s « %3$s » avec vous. Veuillez vous connecter "
+#~ "pour l'afficher."
 
 #~ msgid "The operation is forbidden"
 #~ msgstr "L'opération est interdite"
@@ -17712,9 +17913,6 @@ msgstr "Zoulou"
 #~ msgstr ""
 #~ "Impossible de trouver le fournisseur de données pour l'identifiant : %1$s"
 
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Paramètre manquant : %1$s"
-
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Fournisseur inconnu : %1$s"
 
@@ -18584,9 +18782,6 @@ msgstr "Zoulou"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "Le désenregistrement du composant MBean de cohérence a échoué."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "Erreur SQL : %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -20416,9 +20611,6 @@ msgstr "Zoulou"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "Une pièce jointe nuisible a été détectée."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "Erreur JSON : %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Paramètre invalide « %1$s » : %2$s"

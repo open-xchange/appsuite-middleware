@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-12 17:23+0100\n"
+"PO-Revision-Date: 2019-04-27 14:54+0200\n"
 "Last-Translator: Arve Eriksson <sv@workshop-chapina.com>\n"
 "Language-Team: Swedish <ox@workshop-chapina.com>\n"
 "Language: sv_SE\n"
@@ -2734,7 +2734,7 @@ msgstr ""
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:95
 msgid "The token \"%1$s\" is already registered."
-msgstr "Brickan \"%1$s\" är redan registrerad."
+msgstr "Token \"%1$s\" är redan registrerad."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
 msgid "Empty files indicated for directory \"%1$s\"."
@@ -3064,7 +3064,7 @@ msgstr ""
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
 msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr ""
-"Felaktigt eller för gammalt åtkomstbevis. Användaren måste logga in på nytt."
+"Felaktig eller för gammal åtkomst-token. Användaren måste logga in på nytt."
 
 #. Your rate limit has been exceeded and further access is not possible at the moment.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:166
@@ -3188,7 +3188,7 @@ msgstr ""
 #. The provided token has expired.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:95
 msgid "The provided token has expired."
-msgstr "Åtkomstbeviset har gått ut."
+msgstr "Åtkomst-token har gått ut."
 
 #. The AWS Access Key Id you provided does not exist in our records.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:98
@@ -3213,7 +3213,7 @@ msgstr "De angivna säkerhetsrättigheterna är ogiltiga."
 #. The provided token is malformed or otherwise invalid.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:110
 msgid "The provided token is malformed or otherwise invalid."
-msgstr "Åtkomstbeviset är felformaterat eller på annat sätt ogiltig."
+msgstr "Given token är felformaterad eller på annat sätt ogiltig."
 
 #. Couldn't parse the specified URI.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:113
@@ -3281,7 +3281,7 @@ msgstr "Du omdirigeras till hinken medan DNS uppdateras."
 #. The provided token must be refreshed.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
 msgid "The provided token must be refreshed."
-msgstr "Det angivna beviset måste uppdateras."
+msgstr "Den angivna token måste uppdateras."
 
 #. The e-mail address you provided does not match any account on record.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
@@ -4607,7 +4607,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Ogiltig konfiguration: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4796,6 +4798,189 @@ msgstr "En mapp med namnet '%1$s' finns redan i mappen med namnet '%2$s"
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Du har inte tillstånd att radera rotmappen."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr "Det här kontot har låsts. Vänta %1$d minuter och försök igen."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr "Ett annat autentiseringsförsök för den här användaren pågår.  Vänta."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Min backup"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr "Primära autentiseringsenheter måste ställas in innan backup-enheter."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Din autentiseringskod är: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Min telefon"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Autentiseringsmetod %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Enhet %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Saknar multifaktorautentisering"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Ogiltig multifaktorautentisering"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"Ett fel inträffade när autentiseringsfaktorn skapades/beräknades: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "JSON-fel: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Den begärda leverantören %1$s är okänd."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Den begärda leverantören %1$s är inte tillgänglig för användaren."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr "Multifaktorautentisering krävs, men enhetsidentifieraren saknas"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Den begärda enheten är okänd"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr "Ett okänt fel inträffade vid multifaktorautentisering: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Multifaktorautentisering krävs, men leverantörsnamnet saknas"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "SQL-fel: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Parameter saknas: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Enheten är redan registrerad"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Åtgärden kräver en färsk multifaktorautentisering.  Multifaktorparametrar "
+"saknas för den här åtgärden"
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Enheten är inte registrerad"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Inga enheter i den här leverantören"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr ""
+"Det givna argumentet \"%1$s\" med längden %2$s överskred den tillåtna "
+"längden på %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "Registrering misslyckades"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Kunde inte ta bort enheten"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "Autentiseringen misslyckades"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "Autentiseringen misslyckade: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr ""
+"Autentiseringen misslyckades.  Totalt %1$d försök tillåts innan tillfällig "
+"utelåsning."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5111,7 +5296,7 @@ msgid ""
 "Your access token for '%1$s' is invalid. You have to reauthorize your "
 "account."
 msgstr ""
-"Din åtkomstbricka för '%1$s' är ogiltig. Du måste autentisera ditt konto på "
+"Din åtkomst-token för '%1$s' är ogiltig. Du måste autentisera ditt konto på "
 "nytt."
 
 #. You need to explicitly authorise %1$s to subscribe to %2$s
@@ -10610,10 +10795,14 @@ msgstr "filen"
 msgid "folder"
 msgstr "mappen"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr "%1$s har delat %2$s \"%3$s\" med dig. Logga in för att visa den. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
+msgstr ""
+"%1$s har delat %2$sen \"%3$s\" med dig. Ange delningens lösenord för att "
+"visa den."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -10840,7 +11029,7 @@ msgstr "Den begärda delningen finns inte."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
 msgid "The token \"%1$s\" is invalid."
-msgstr "Brickan \"%1$s\" är ogiltig."
+msgstr "Token \"%1$s\" är ogiltig."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
 msgid "The link \"%1$s\" is invalid."
@@ -14076,6 +14265,10 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr "%1$s har delat %2$s \"%3$s\" med dig. Logga in för att visa den. "
+
 #~ msgid "The operation is forbidden"
 #~ msgstr "Åtgärden förbjuden"
 
@@ -17068,9 +17261,6 @@ msgstr "Zulu"
 #~ msgid "Could not find data provider for id: %1$s"
 #~ msgstr "Kunde inte hitta datakälla för ID: %1$s"
 
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Parameter saknas: %1$s"
-
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Okänd leverantör: %1$s"
 
@@ -17881,9 +18071,6 @@ msgstr "Zulu"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "Avregistrering av konsekvens-MBean misslyckades."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "SQL-fel: %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -19580,9 +19767,6 @@ msgstr "Zulu"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "En skadlig bilaga upptäcktes."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "JSON-fel: %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Ogiltig parameter \"%1$s\": %2$s"

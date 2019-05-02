@@ -5,17 +5,19 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-19 14:24+0100\n"
+"PO-Revision-Date: 2019-04-09 09:13+0200\n"
 "Last-Translator: Robert Kratky <robert@workshop-chapina.com>\n"
 "Language-Team: Czech <>\n"
 "Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Lokalize 18.12.2\n"
-"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
 "X-Generator: Lokalize 1.4\n"
+"Plural-Forms: nplurals=3; plural=((n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2);\n"
+"X-Generator: Lokalize 1.4\n"
+"X-Language: cs\n"
+"X-Source-Language: en\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
@@ -1244,8 +1246,8 @@ msgid ""
 "The remote SchedJoules service is unavailable at the moment. There is "
 "nothing we can do about it. Please try again later."
 msgstr ""
-"Služba SchedJoules není v tuto chvíli k dispozici. Nemůžeme s tím nic dělat."
-" Zkuste to, prosím, později."
+"Služba SchedJoules není v tuto chvíli k dispozici. Nemůžeme s tím nic dělat. "
+"Zkuste to, prosím, později."
 
 #. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
@@ -1253,7 +1255,8 @@ msgid ""
 "An internal server error occurred on SchedJoules side. There is nothing we "
 "can do about it."
 msgstr ""
-"Na straně SchedJoules došlo k interní chybě serveru. Nemůžeme s tím nic dělat."
+"Na straně SchedJoules došlo k interní chybě serveru. Nemůžeme s tím nic "
+"dělat."
 
 #. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
@@ -3287,8 +3290,8 @@ msgstr ""
 #. The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
 msgid ""
-"The S3 storage responds with \"Bad Request\". Please check whether com."
-"openexchange.filestore.s3.[filestoreID].signerOverride is properly "
+"The S3 storage responds with \"Bad Request\". Please check whether "
+"com.openexchange.filestore.s3.[filestoreID].signerOverride is properly "
 "configured for this filestore."
 msgstr ""
 "Odpověď úložiště S3 je „Chybný požadavek“. Prosím, zkontrolujte, jestli je "
@@ -4597,7 +4600,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Neplatná konfigurace: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4700,8 +4705,8 @@ msgstr "Neznámý index značek barev: %1$s"
 #. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
 msgid ""
-"A duplicate folder named \"%1$s\" already exists below parent folder \"%2$s"
-"\"."
+"A duplicate folder named \"%1$s\" already exists below parent folder "
+"\"%2$s\"."
 msgstr ""
 "Duplicitní složka pojmenovaná „%1$s“ už existuje v nadřazené složce „%2$s“."
 
@@ -4745,8 +4750,8 @@ msgid ""
 "An error has occurred on the remote Microsoft end-point. There is nothing we "
 "can do about it. Try again later."
 msgstr ""
-"Došlo k chybě na straně Microsoftu. Nemůžeme s tím nic dělat. Zkuste to,"
-" prosím, později."
+"Došlo k chybě na straně Microsoftu. Nemůžeme s tím nic dělat. Zkuste to, "
+"prosím, později."
 
 #. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
@@ -4754,8 +4759,8 @@ msgid ""
 "Unable to retrieve the contact photo for contact with id '%1$s'. There is "
 "nothing we can do about it. Try again later."
 msgstr ""
-"Nepodařilo se stáhnout kontaktní fotku pro ID ‚%1$s‘. Nemůžeme s tím nic"
-" dělat. Zkuste to, prosím, později."
+"Nepodařilo se stáhnout kontaktní fotku pro ID ‚%1$s‘. Nemůžeme s tím nic "
+"dělat. Zkuste to, prosím, později."
 
 #. The copying of file %1$s failed. There is nothing we can do about it. Try again later
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
@@ -4763,8 +4768,8 @@ msgid ""
 "The copying of file %1$s failed. There is nothing we can do about it. Try "
 "again later."
 msgstr ""
-"Kopírování souboru %1$s selhalo. Nemůžeme s tím nic dělat. Zkuste to, prosím,"
-" později. later."
+"Kopírování souboru %1$s selhalo. Nemůžeme s tím nic dělat. Zkuste to, "
+"prosím, později. later."
 
 #. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
@@ -4772,8 +4777,8 @@ msgid ""
 "Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
 "do about it. Try again later."
 msgstr ""
-"Nahrávání souboru ‚%1$s‘ do složky ‚%2$s‘ selhalo. Nemůžeme s tím nic dělat."
-" Zkuste to, prosím, později."
+"Nahrávání souboru ‚%1$s‘ do složky ‚%2$s‘ selhalo. Nemůžeme s tím nic dělat. "
+"Zkuste to, prosím, později."
 
 #. The folder does not exist.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
@@ -4789,6 +4794,190 @@ msgstr "Složka nazvaná ‚%1$s‘ již ve složce ‚%2$s‘ existuje."
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Nemůžete smazat kořenový adresář."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr ""
+"Tento účet byl uzamčen. Počkejte, prosím, %1$d minut a zkuste to znovu."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr ""
+"Probíhá souběžný pokus o přihlášení tohoto uživatele. Počkejte, prosím."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Moje záloha"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr ""
+"Primární autentizační zařízení musí být nastavena před zálohovacími "
+"zařízeními."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Váš autentizační kód je: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Můj telefon"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Authentizátor %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Zařízení %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Chybí vícefaktorová autentizace"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Neplatná vícefaktorová autentizace"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"Došlo k chybě při vytváření (vypočítávání) autentizačního faktoru: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "Chyba JSON: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Požadovaný poskytovatel (%1$s) není známý."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Požadovaný poskytovatel (%1$s) není pro uživatele k dispozici."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr ""
+"Vícefaktorová autentizace je vyžadována, ale chybí identifikátor zařízení"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Požadované zařízení není známé."
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr "Došlo k chybě při vícefaktorové autentizaci: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Vícefaktorová autentizace je vyžadována, ale chybí název poskytovatele"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "Chyba SQL: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Chybí parametr: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Zařízení je již registrováno"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Tato akce vyžaduje čerstvou vícefaktorovou autentizaci, ale chybí parametry "
+"pro tuto akci"
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Zařízení není registrováno"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Poskytovatel nemá žádná zařízení"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr "Zadaný parametr „%1$s“ s délkou %2$s přesahuje povolenou délku %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "Registrace selhala"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Nemohu odstranit zařízení"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "Autentizace selhala"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "Autentizace selhala: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr "Autentizace selhala. Zbývá %1$d pokusů před dočasným uzamčením."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5122,8 +5311,8 @@ msgstr "‚%1$s‘ služba OAuth pro vás není zapnutá."
 msgid ""
 "No password mechanism available for identifier '%s'. Cannot handle password."
 msgstr ""
-"Pro identifikátor ‚%s‘ není k dispozici heslový mechanismus. Heslo není možné"
-" zpracovat."
+"Pro identifikátor ‚%s‘ není k dispozici heslový mechanismus. Heslo není "
+"možné zpracovat."
 
 #. *
 #. * New password too short.
@@ -5327,8 +5516,8 @@ msgstr ""
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:164
 msgid ""
-"POP3 sort failed due to the following reason: %1$s Switching to application-"
-"based sorting"
+"POP3 sort failed due to the following reason: %1$s Switching to "
+"application-based sorting"
 msgstr ""
 "POP3 třídění selhalo z tohoto důvodu: %1$s. Přepínám na třídění v aplikaci"
 
@@ -5809,8 +5998,8 @@ msgid ""
 "The remote '%2$s' service is unavailable at the moment. There is nothing we "
 "can do about it. Please try again later."
 msgstr ""
-"Služba ‚%2$s‘ není v tuto chvíli k dispozici. Nemůžeme s tím nic dělat."
-" Zkuste to, prosím, později."
+"Služba ‚%2$s‘ není v tuto chvíli k dispozici. Nemůžeme s tím nic dělat. "
+"Zkuste to, prosím, později."
 
 #. An internal server error occurred on '%1$s' side. There is nothing we can do about it.
 #: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:67
@@ -5933,8 +6122,8 @@ msgstr "Prohlédnout a změnit nastavení."
 #. The policy you have entered is malformed. It should look like \"condition:action\"
 #: com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:62
 msgid ""
-"The policy you have entered is malformed. It should look like \"condition:"
-"action\""
+"The policy you have entered is malformed. It should look like "
+"\"condition:action\""
 msgstr ""
 "Pravidlo, které jste zadal(a), má chybný formát. Mělo by vypadat takto: "
 "„podmínka:činnost“"
@@ -8982,8 +9171,8 @@ msgstr "Nahraný soubor s id „%1$s“ se nepodařilo nalézt."
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:101
 msgid ""
-"Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
-"\"."
+"Upload file's content type \"%1$s\" does not match given file filter "
+"\"%2$s\"."
 msgstr ""
 "Typ obsahu nahraného souboru „%1$s“ neodpovídá danému souborovému filtru "
 "„%2$s“."
@@ -9457,8 +9646,8 @@ msgid ""
 "can then access the attachments."
 msgstr ""
 "Přílohy k tomuto e-mailu přesahují limit velikosti příloh. Namísto zaslání "
-"příloh s e-mailem budou přílohy sdíleny a odkazy na ně budou přidány k e-"
-"mailu. Příjemce e-mailu pak bude mít k přílohám přístup."
+"příloh s e-mailem budou přílohy sdíleny a odkazy na ně budou přidány k "
+"e-mailu. Příjemce e-mailu pak bude mít k přílohám přístup."
 
 #. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
@@ -9569,16 +9758,16 @@ msgid ""
 "Maximum number of composition spaces is reached. Please terminate existing "
 "open spaces in order to open new ones."
 msgstr ""
-"Bylo dosaženo maximálního počtu oken pro psaní nových zpráv. Chcete-li"
-" otevřít nová okna, uzavřete stávající."
+"Bylo dosaženo maximálního počtu oken pro psaní nových zpráv. Chcete-li "
+"otevřít nová okna, uzavřete stávající."
 
 #. Missing key which is required to decrypt the content of a composition space
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
 msgid ""
 "Found no suitable key for composition space. Please re-compose your E-Mail."
 msgstr ""
-"Pro okno s novou zprávou nebyl nalezen žádný vhodný klíč. Napište, prosím,"
-" zprávu znovu."
+"Pro okno s novou zprávou nebyl nalezen žádný vhodný klíč. Napište, prosím, "
+"zprávu znovu."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10570,12 +10759,13 @@ msgstr "soubor"
 msgid "folder"
 msgstr "složka"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
 msgstr ""
-"%1$s s vámi sdílel(a) %2$s „%3$s“. Přihlaste se, prosím, chcete-li sdílený "
-"obsah zobrazit."
+"%1$s s vámi sdílel(a) %2$s „%3$s“. Zadejte, prosím, heslo pro zobrazení."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -10687,8 +10877,8 @@ msgstr ""
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:108
 msgid ""
 "Access to the file you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue"
-"\"."
+"if you want access again. To view your other shared files, click "
+"\"Continue\"."
 msgstr ""
 "Přístup k souboru, který hledáte, byl odebrán. Kontaktujte, prosím, %1$s, "
 "chcete-li získat přístup. Klikněte, prosím, na „pokračovat“ k prohlédnutí "
@@ -10731,8 +10921,8 @@ msgstr ""
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:120
 msgid ""
 "Access to the share you're looking for has been removed. Please contact %1$s "
-"if you want access again. To view your other shared files, click \"Continue"
-"\"."
+"if you want access again. To view your other shared files, click "
+"\"Continue\"."
 msgstr ""
 "Přístup ke sdílené položce, kterou hledáte, byl odebrán. Kontaktujte, "
 "prosím, %1$s, chcete-li získat přístup. Klikněte, prosím, na „pokračovat“ k "
@@ -14025,6 +14215,12 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s s vámi sdílel(a) %2$s „%3$s“. Přihlaste se, prosím, chcete-li "
+#~ "sdílený obsah zobrazit."
+
 #~ msgid "The operation is forbidden"
 #~ msgstr "Operace je zakázaná"
 
@@ -14206,8 +14402,8 @@ msgstr "Zulu"
 #~ msgstr "Vytváření, úpravy a mazání událostí."
 
 #~ msgid ""
-#~ "Appointments in non-personal folders must not be classified as \"private"
-#~ "\" or \"confidential\"."
+#~ "Appointments in non-personal folders must not be classified as "
+#~ "\"private\" or \"confidential\"."
 #~ msgstr ""
 #~ "Schůzky v jiných než osobních složkách musí být označené jako „soukromé“ "
 #~ "nebo „důvěrné“."
@@ -14432,8 +14628,8 @@ msgstr "Zulu"
 #~ msgstr "Nemáte příslušná oprávnění ke čtení obsahu složky „%1$s“."
 
 #~ msgid ""
-#~ "You do not have the appropriate permissions to edit tasks in folder \"%1$s"
-#~ "\"."
+#~ "You do not have the appropriate permissions to edit tasks in folder "
+#~ "\"%1$s\"."
 #~ msgstr "Nemáte příslušná oprávnění k úpravě úkolů ve složce „%1$s“."
 
 #~ msgid "All attachments"
@@ -14643,8 +14839,8 @@ msgstr "Zulu"
 #~ msgstr "Uživatel „%2$s“ v kontextu „%3$s“ složku „%1$s“ nevidí"
 
 #~ msgid ""
-#~ "The content type you provided is not allowed for the given folder \"%1$s"
-#~ "\"."
+#~ "The content type you provided is not allowed for the given folder "
+#~ "\"%1$s\"."
 #~ msgstr ""
 #~ "Druh obsahu, který jste zadal(a), není pro danou složku („%1$s“) povolený."
 
@@ -14660,9 +14856,9 @@ msgstr "Zulu"
 #~ msgstr "Nemáte příslušná oprávnění ke přesunutí složky „%1$s“."
 
 #~ msgid ""
-#~ "Found two folders named \"%1$s\" located below the parent folder \"%2$s"
-#~ "\". Please rename one of the folders. There should be no two folders with "
-#~ "the same name."
+#~ "Found two folders named \"%1$s\" located below the parent folder "
+#~ "\"%2$s\". Please rename one of the folders. There should be no two "
+#~ "folders with the same name."
 #~ msgstr ""
 #~ "V nadřazené složce „%2$s“ byly nalezeny dvě složky s názvem „%1$s“. "
 #~ "Přejmenujte, prosím, jednu z těchto složek. Není vhodné mít dvě složky se "
@@ -14750,8 +14946,8 @@ msgstr "Zulu"
 #~ msgstr "Nemáte příslušná oprávnění k přesunu všech podsložek složky „%2$s“."
 
 #~ msgid ""
-#~ "You do not have appropriate permissions to delete the shared folder \"%2$s"
-#~ "\"."
+#~ "You do not have appropriate permissions to delete the shared folder "
+#~ "\"%2$s\"."
 #~ msgstr "Nemáte příslušná oprávnění ke smazání sdílené složky „%2$s“."
 
 #~ msgid "The folder \"%2$s\" is a default folder and cannot be deleted."
@@ -16165,11 +16361,11 @@ msgstr "Zulu"
 #~ msgstr "Přístup k souboru zamítnut kvůli oprávněním operačního systému."
 
 #~ msgid ""
-#~ "This template was not whitelisted in 'com.openexchange.templating."
-#~ "templateWhitelist'."
+#~ "This template was not whitelisted in "
+#~ "'com.openexchange.templating.templateWhitelist'."
 #~ msgstr ""
-#~ "Tato šablona není na seznamu povolených v ‚com.openexchange.templating."
-#~ "templateWhitelist‘."
+#~ "Tato šablona není na seznamu povolených v "
+#~ "‚com.openexchange.templating.templateWhitelist‘."
 
 #~ msgid "The consumer key/consumer secret pair is missing in configuration."
 #~ msgstr "V konfiguraci chybí zákaznický klíč/zákaznický tajný pár."
@@ -16321,8 +16517,8 @@ msgstr "Zulu"
 #~ msgid ""
 #~ "The body of your POST request is not well-formed multipart/form-data."
 #~ msgstr ""
-#~ "Tělo vašeho POST požadavku není správně formátované jako multipart/form-"
-#~ "data."
+#~ "Tělo vašeho POST požadavku není správně formátované jako "
+#~ "multipart/form-data."
 
 #~ msgid ""
 #~ "The XML was not well-formed or did not validate against our published "
@@ -16566,8 +16762,8 @@ msgstr "Zulu"
 #~ "The folderid object is null. This is an internal error. Please notify "
 #~ "Open-Xchange."
 #~ msgstr ""
-#~ "Objekt folderid je null. Jde o interní chybu. Uvědomte, prosím, Open-"
-#~ "Xchange."
+#~ "Objekt folderid je null. Jde o interní chybu. Uvědomte, prosím, "
+#~ "Open-Xchange."
 
 #~ msgid ""
 #~ "The search object contains more than one folder id. This is not supported "
@@ -16814,15 +17010,15 @@ msgstr "Zulu"
 #~ "komunikaci („%1$s“)."
 
 #~ msgid ""
-#~ "An external error occured while processing the free/busy request (\"%1$s"
-#~ "\")."
+#~ "An external error occured while processing the free/busy request "
+#~ "(\"%1$s\")."
 #~ msgstr ""
 #~ "Při zpracovávání požadavku na stav volný/zaneprázdněný došlo k externí "
 #~ "chybě („%1$s“)."
 
 #~ msgid ""
-#~ "An internal error occured while processing the free/busy request (\"%1$s"
-#~ "\")."
+#~ "An internal error occured while processing the free/busy request "
+#~ "(\"%1$s\")."
 #~ msgstr ""
 #~ "Při zpracovávání požadavku na stav volný/zaneprázdněný došlo k interní "
 #~ "chybě („%1$s“)."
@@ -16935,8 +17131,8 @@ msgstr "Zulu"
 #~ msgstr "line.separator"
 
 #~ msgid ""
-#~ "Client login IP changed from %1$s to %2$s and is not covered by IP white-"
-#~ "list or netmask."
+#~ "Client login IP changed from %1$s to %2$s and is not covered by IP "
+#~ "white-list or netmask."
 #~ msgstr ""
 #~ "Přihlašovací IP klienta se změnila z %1$s na %2$s, která není na "
 #~ "whitelistu nebo součástí netmask."
@@ -16970,9 +17166,6 @@ msgstr "Zulu"
 
 #~ msgid "Could not find data provider for id: %1$s"
 #~ msgstr "Nepodařilo se najít poskytovatele dat pro id: %1$s"
-
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Chybí parametr: %1$s"
 
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Neznámý poskytovatel: %1$s"
@@ -17025,29 +17218,29 @@ msgstr "Zulu"
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup"
 
 #~ msgid ""
-#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "No lookup access to mail folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující hledání"
 
 #~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "No read access to mail folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující čtení"
 
 #~ msgid ""
-#~ "No delete access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "No delete access to mail folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující mazání"
 
 #~ msgid ""
-#~ "No insert access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "No insert access to mail folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující vkládání."
@@ -17060,11 +17253,11 @@ msgstr "Zulu"
 #~ "(uživatel=%4$s, kontext=%5$s) nemám administrátorský přístup"
 
 #~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) nemám přístup povolující zápis."
+#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
+#~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující zápis."
 
 #~ msgid ""
 #~ "No keep-seen access to mail folder %1$s on server %2$s with login %3$s "
@@ -17093,8 +17286,8 @@ msgstr "Zulu"
 #~ msgid ""
 #~ "The composed rights could not be applied to new folder %1$s due to "
 #~ "missing administer right in its initial rights specified by IMAP server. "
-#~ "However, the folder has been created on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
+#~ "However, the folder has been created on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Poskládaná oprávnění se nepodařilo na novou složku %1$s aplikovat, "
 #~ "protože ve výchozích oprávněních určených IMAP serverem chybí "
@@ -17105,8 +17298,8 @@ msgstr "Zulu"
 #~ "No administer permission specified for folder %1$s on server %2$s with "
 #~ "login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
+#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s "
+#~ "(uživatel=%4$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
 
 #~ msgid ""
 #~ "Default folder %1$s must not be updated on server %2$s with login %3$s "
@@ -17147,8 +17340,8 @@ msgstr "Zulu"
 #~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
 #~ "context=%5$s)"
 #~ msgstr ""
-#~ "Složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) smazat"
+#~ "Složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s "
+#~ "(uživatel=%4$s, kontext=%5$s) smazat"
 
 #~ msgid ""
 #~ "Default folder %1$s cannot be deleted on server %2$s with login %3$s "
@@ -17168,9 +17361,9 @@ msgstr "Zulu"
 #~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
 #~ "(user=%4$s, context=%5$s). Switching to application-based search."
 #~ msgstr ""
-#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na "
-#~ "vyhledávání v aplikaci."
+#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s "
+#~ "(uživatel=%4$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám "
+#~ "na vyhledávání v aplikaci."
 
 #~ msgid ""
 #~ "IMAP sort failed due to reason \"%1$s\" on server %2$s with login %3$s "
@@ -17276,8 +17469,8 @@ msgstr "Zulu"
 #~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
 #~ "with login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
-#~ "%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
+#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s "
+#~ "(uživatel=%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
 
 #~ msgid ""
 #~ "Rename of folder \"%1$s\" to \"%2$s\" failed with \"%3$s\" on server %4$s "
@@ -17287,8 +17480,8 @@ msgstr "Zulu"
 #~ "jménem %5$s (uživatel=%6$s, kontext=%7$s) selhalo s chybou „%3$s“."
 
 #~ msgid ""
-#~ "No rename access to mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "No rename access to mail folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující přejmenovávat"
@@ -17471,9 +17664,9 @@ msgstr "Zulu"
 #~ "Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error "
 #~ "code."
 #~ msgstr ""
-#~ "Došlo k chybě API Facebooku. Chybový kód: %1$s. Chybová zpráva: „%2$s“."
-#~ "Vysvětlení chybového kódu najdete na stránce http://fbdevwiki.com/wiki/"
-#~ "Error_codes"
+#~ "Došlo k chybě API Facebooku. Chybový kód: %1$s. Chybová zpráva: "
+#~ "„%2$s“.Vysvětlení chybového kódu najdete na stránce "
+#~ "http://fbdevwiki.com/wiki/Error_codes"
 
 #~ msgid "Confirmed ham folder"
 #~ msgstr "Složka potvrzené normální pošty"
@@ -17680,8 +17873,8 @@ msgstr "Zulu"
 #~ msgstr "Nepovolený přesun."
 
 #~ msgid ""
-#~ "Missing required capability %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
+#~ "Missing required capability %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Chybí vyžadovaná podpora funkce %1$s na serveru %2$s s přihlašovacím "
 #~ "jménem %3$s (uživatel=%4$s, kontext=%5$s)."
@@ -17779,9 +17972,6 @@ msgstr "Zulu"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "Zrušení registrace neporušenosti MBean selhalo."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "Chyba SQL: %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -17944,8 +18134,8 @@ msgstr "Zulu"
 #~ msgstr "Typ složky „SHARED“ není v této situaci povolen."
 
 #~ msgid ""
-#~ "Unexpected state for deleting a virtual appointment (exception). uid:oid:"
-#~ "position %d:%d:%d"
+#~ "Unexpected state for deleting a virtual appointment (exception). "
+#~ "uid:oid:position %d:%d:%d"
 #~ msgstr ""
 #~ "Neočekávaný stav po vymazání virtuální schůzky (výjimka). uid:oid: pozice "
 #~ "%d:%d:%d"
@@ -17977,8 +18167,8 @@ msgstr "Zulu"
 #~ msgstr "Nemohu vytvořit výjimku, pozici opakování nelze vypočítat."
 
 #~ msgid ""
-#~ "Got an UserParticipant object with an identifier < 1 Identifier:"
-#~ "Folder_Type = %d:%d"
+#~ "Got an UserParticipant object with an identifier < 1 "
+#~ "Identifier:Folder_Type = %d:%d"
 #~ msgstr ""
 #~ "Narazil jsem na objekt UserParticipant s identifikátorem < 1 "
 #~ "Identifikátor: Folder_Type = %d:%d"
@@ -17991,8 +18181,8 @@ msgstr "Zulu"
 #~ "Identifikátor = %d"
 
 #~ msgid ""
-#~ "Got an UserParticipant object with a private folder id in a public "
-#~ "folder : Identifier = %d"
+#~ "Got an UserParticipant object with a private folder id in a public folder "
+#~ ": Identifier = %d"
 #~ msgstr ""
 #~ "Narazil jsem na objekt UserParticipant s id soukromé složky ve veřejné "
 #~ "složce: Identifikátor = %d"
@@ -18672,8 +18862,8 @@ msgstr "Zulu"
 #~ msgstr "Pole zprávy %1$s nelze zpracovat"
 
 #~ msgid ""
-#~ "Message field %1$s cannot be handled on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)"
+#~ "Message field %1$s cannot be handled on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Pole zprávy %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) zpracovat"
@@ -18753,15 +18943,15 @@ msgstr "Zulu"
 #~ msgstr "Neplatná hodnota Content-Disposition: %1$s"
 
 #~ msgid ""
-#~ "A folder named %1$s already exists on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
+#~ "A folder named %1$s already exists on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "Složka s názvem %1$s již na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "existuje (uživatel=%4 $s, kontext=%5$s)."
 
 #~ msgid ""
-#~ "No create access on mail folder %1$s on server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s)."
+#~ "No create access on mail folder %1$s on server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s)."
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující vytvářet."
@@ -18770,8 +18960,8 @@ msgstr "Zulu"
 #~ msgstr "Poštovní složku se nepodařilo nalézt: %1$s."
 
 #~ msgid ""
-#~ "Referenced mail %1$s could not be found in folder %2$s. Therefore reply/"
-#~ "forward operation cannot be performed."
+#~ "Referenced mail %1$s could not be found in folder %2$s. Therefore "
+#~ "reply/forward operation cannot be performed."
 #~ msgstr ""
 #~ "Odkazovanou zprávu %1$s se ve složce %2$s nepodařilo nalézt. Operace "
 #~ "odpověď/přesměrování tedy nemůže být provedena."
@@ -18802,8 +18992,8 @@ msgstr "Zulu"
 #~ "přihlašovacím jménem %3$s (uživatel=%4$s, kontext=%5$s) nalézt."
 
 #~ msgid ""
-#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s). Probably your request took too long."
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s). Probably your request took too long."
 #~ msgstr ""
 #~ "Složka „%1$s“ byla na poštovním serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4 $s, kontext=%5$s) zavřena. Váš požadavek pravděpodobně trval "
@@ -18839,11 +19029,11 @@ msgstr "Zulu"
 #~ msgstr "Neplatný výraz pro vyhledávání: %1$s"
 
 #~ msgid ""
-#~ "Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
-#~ "%4$s)."
+#~ "Connection closed to mail server %1$s with login %2$s (user=%3$s, "
+#~ "context=%4$s)."
 #~ msgstr ""
-#~ "Spojení s poštovním serverem %1$s s přihlašovacím jménem %2$s (uživatel="
-#~ "%3$s, kontext=%4$s) ukončeno."
+#~ "Spojení s poštovním serverem %1$s s přihlašovacím jménem %2$s "
+#~ "(uživatel=%3$s, kontext=%4$s) ukončeno."
 
 #~ msgid "Could not bind connection to local port %1$s"
 #~ msgstr "Nepodařilo se navázat spojení na místní port %1$s"
@@ -18879,8 +19069,8 @@ msgstr "Zulu"
 #~ msgstr "Příkaz odeslaný poštovnímu serveru selhal. Odpověď serveru: %1$s"
 
 #~ msgid ""
-#~ "A command failed on mail server %1$s with login %2$s (user=%3$s, context="
-#~ "%4$s). Server response: %5$s"
+#~ "A command failed on mail server %1$s with login %2$s (user=%3$s, "
+#~ "context=%4$s). Server response: %5$s"
 #~ msgstr ""
 #~ "Selhal příkaz na poštovním serveru %1$s s přihlašovacím jménem %2$s "
 #~ "(uživatel=%3$s, kontext=%4$s). Odpověď serveru: %5$s"
@@ -18892,15 +19082,15 @@ msgstr "Zulu"
 #~ "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 #~ "context=%4$s). Server response: %5$s"
 #~ msgstr ""
-#~ "Poštovní server %1$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext="
-#~ "%4$s) ohlásil neplatný příkaz. Odpověď serveru: %5$s"
+#~ "Poštovní server %1$s s přihlašovacím jménem %2$s (uživatel=%3$s, "
+#~ "kontext=%4$s) ohlásil neplatný příkaz. Odpověď serveru: %5$s"
 
 #~ msgid "Error in mail server protocol. Error message: %1$s"
 #~ msgstr "Chyba v protokolu poštovního serveru. Chybová zpráva: %1$s"
 
 #~ msgid ""
-#~ "Protocol error in data sent to the mail server %1$s with login %2$s (user="
-#~ "%3$s, context=%4$s). Error message: %5$s"
+#~ "Protocol error in data sent to the mail server %1$s with login %2$s "
+#~ "(user=%3$s, context=%4$s). Error message: %5$s"
 #~ msgstr ""
 #~ "Chyba protokolu v datech odeslaných poštovnímu serveru %1$s s "
 #~ "přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4). Chybová zpráva: "
@@ -18997,15 +19187,15 @@ msgstr "Zulu"
 #~ "Password encryption failed for login %1$s on server %2$s (user=%3$s, "
 #~ "context=%4$s)."
 #~ msgstr ""
-#~ "Šifrování hesla pro přihlašovací jméno %1$s na serveru %2$s (uživatel="
-#~ "%3$s, kontext=%4$s) selhalo."
+#~ "Šifrování hesla pro přihlašovací jméno %1$s na serveru %2$s "
+#~ "(uživatel=%3$s, kontext=%4$s) selhalo."
 
 #~ msgid ""
 #~ "Password decryption failed for login %1$s on server %2$s (user=%3$s, "
 #~ "context=%4$s)."
 #~ msgstr ""
-#~ "Dešifrování hesla pro přihlašovací jméno %1$s na serveru %2$s (uživatel="
-#~ "%3$s, kontext=%4$s) selhalo."
+#~ "Dešifrování hesla pro přihlašovací jméno %1$s na serveru %2$s "
+#~ "(uživatel=%3$s, kontext=%4$s) selhalo."
 
 #~ msgid ""
 #~ "The Unified Mail account already exists for user %1$s in context %2$s."
@@ -19107,8 +19297,8 @@ msgstr "Zulu"
 #~ "pro kontrolu neporušenosti dat."
 
 #~ msgid ""
-#~ "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s"
-#~ "\" (current size: %4$d) is invalid."
+#~ "The requested range (offset: %1$d, length: %2$d) for the file \"%3$s\" "
+#~ "(current size: %4$d) is invalid."
 #~ msgstr ""
 #~ "Požadovaný rozsah souboru „%3$s“ není platný (offset: %1$d, délka: %2$d, "
 #~ "aktuální velikost: %4$d)"
@@ -19448,9 +19638,6 @@ msgstr "Zulu"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "Byla zjištěna škodlivá příloha."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "Chyba JSON: %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Neplatný parametr „%1$s“: %2$s"
@@ -19855,8 +20042,8 @@ msgstr "Zulu"
 #~ msgstr "Složka „%1$s“ byla zavřena."
 
 #~ msgid ""
-#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-#~ "%4$s, context=%5$s) ."
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s "
+#~ "(user=%4$s, context=%5$s) ."
 #~ msgstr ""
 #~ "Složka „%1$s“ na poštovním serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) byla zavřena."

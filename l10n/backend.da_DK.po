@@ -4,8 +4,8 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-13 19:20+0100\n"
-"Last-Translator: Nicky Thomassen <nicky@nt-data.dk>\n"
+"PO-Revision-Date: 2019-04-17 08:54+0200\n"
+"Last-Translator: Nicky Thomassen <nicky@workshop-chapina.com>\n"
 "Language-Team: Danish <da@workshop-chapina.com>\n"
 "Language: da_DK\n"
 "MIME-Version: 1.0\n"
@@ -217,8 +217,8 @@ msgid ""
 "No calendar data could be found in the supplied file. Please use a valid "
 "iCalendar file and try again."
 msgstr ""
-"Kunne ikke finde nogle kalenderdata i den leverede fil. Prøv venligst igen "
-"med en gyldig iCalendar-fil."
+"Kunne ikke finde nogle kalenderdata i den leverede fil. Prøv venligst igen med "
+"en gyldig iCalendar-fil."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:66
 msgid "Error reading calendar data at line %1$d: %2$s"
@@ -231,8 +231,7 @@ msgstr "Validering mislykkedes: %1$s"
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:70
 msgid "Not all of the objects could be imported due to a configured limitation."
 msgstr ""
-"Ikke alle objekterne kunne importeres. Dette skyldes en indstillet "
-"begrænsning."
+"Ikke alle objekterne kunne importeres. Dette skyldes en indstillet begrænsning."
 
 #: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:72
 msgid ""
@@ -1179,8 +1178,8 @@ msgid ""
 "Access to this calendar is restricted. Please enter your credentials and try "
 "again."
 msgstr ""
-"Adgang til denne kalender er begrænset. Indtast venligst dine "
-"loginoplysninger og prøv igen."
+"Adgang til denne kalender er begrænset. Indtast venligst dine loginoplysninger "
+"og prøv igen."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
 msgid "Authentication failed. Please enter your credentials and try again."
@@ -1204,8 +1203,8 @@ msgid ""
 "Authentication failed due to a recent credentials change. Please remove the "
 "account and add it again with correct credentials."
 msgstr ""
-"Godkendelse mislykkedes på grund af en nylig ændring af loginoplysninger. "
-"Slet venligst kontoen og tilføj den igen med korrekte loginoplysninger."
+"Godkendelse mislykkedes på grund af en nylig ændring af loginoplysninger. Slet "
+"venligst kontoen og tilføj den igen med korrekte loginoplysninger."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -1559,8 +1558,8 @@ msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for \"%1$s"
 "\" (limit: %2$d, current: %3$d) and try again."
 msgstr ""
-"Nogle indtastede data overskred feltbegrænsningen. Forkort venligst værdien "
-"af \"%1$s\" (grænse: %2$d, nuværende: %3$d) og prøv igen."
+"Nogle indtastede data overskred feltbegrænsningen. Forkort venligst værdien af "
+"\"%1$s\" (grænse: %2$d, nuværende: %3$d) og prøv igen."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The maximum number of calendar subscriptions is exceeded."
@@ -1737,8 +1736,8 @@ msgid ""
 "to automatically configure your device, please download & install the attached "
 "configuration profile \"%1$s\"."
 msgstr ""
-"Download og installér venligst den vedhæftede opsætningsprofil, \"%1$s\", for at "
-"sætte din enhed op automatisk\"."
+"Download og installér venligst den vedhæftede opsætningsprofil, \"%1$s\", for "
+"at sætte din enhed op automatisk\"."
 
 #. The subject of the E-Mail providing the profile attachment
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:77
@@ -2568,8 +2567,7 @@ msgstr "Stien \"%1$s\" blev ikke fundet. Prøv at synkronisere igen."
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:64
 msgid ""
 "The file \"%1$s\" was not found at \"%2$s\". Please retry the synchronization."
-msgstr ""
-"Filen \"%1$s\" blev ikke fundet ved \"%2$s\". Prøv at synkronisere igen."
+msgstr "Filen \"%1$s\" blev ikke fundet ved \"%2$s\". Prøv at synkronisere igen."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:65
 msgid ""
@@ -2582,8 +2580,7 @@ msgstr ""
 msgid ""
 "The file version \"%1$s\" was not found at \"%3$s\". Please retry the "
 "synchronization."
-msgstr ""
-"Filen \"%1$s\" blev ikke fundet ved \"%3$s\". Prøv at synkronisere igen."
+msgstr "Filen \"%1$s\" blev ikke fundet ved \"%3$s\". Prøv at synkronisere igen."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
 msgid "Integrity checks failed for uploaded file \"%2$s\". Please try again."
@@ -2715,8 +2712,8 @@ msgid ""
 "The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please "
 "remove some files and try again."
 msgstr ""
-"Loftet over antallet af filer (%1$d) er overskredet i kataloget \"%2$s\". Fjern "
-"venligst nogle filer og prøv igen."
+"Loftet over antallet af filer (%1$d) er overskredet i kataloget \"%2$s\". "
+"Fjern venligst nogle filer og prøv igen."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:95
 msgid "The token \"%1$s\" is already registered."
@@ -2912,8 +2909,8 @@ msgid ""
 "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into "
 "the account \"%3$s\"."
 msgstr ""
-"Noterne til filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den bliver flyttet "
-"til kontoen \"%3$s\"."
+"Noterne til filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den bliver "
+"flyttet til kontoen \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -2921,8 +2918,8 @@ msgid ""
 "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
 msgstr ""
-"Alle tidligere udgaver af filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den "
-"bliver flyttet til kontoen \"%3$s\"."
+"Alle tidligere udgaver af filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når "
+"den bliver flyttet til kontoen \"%3$s\"."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:107
@@ -2930,8 +2927,8 @@ msgid ""
 "The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost when "
 "moving it into the account \"%3$s\"."
 msgstr ""
-"Kategoriseringen af filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den bliver "
-"flyttet til kontoen \"%3$s\"."
+"Kategoriseringen af filen \"%1$s\" i mappen \"%2$s\" vil gå tabt, når den "
+"bliver flyttet til kontoen \"%3$s\"."
 
 #. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:110
@@ -2957,8 +2954,8 @@ msgid ""
 "The file \"%1$s\" was not updated due to possible data loss. Please review the "
 "warnings for details."
 msgstr ""
-"Filen \"%1$s\" blev ikke opdateret på grund af risiko for datatab. Læs venligst "
-"advarslerne for flere detaljer."
+"Filen \"%1$s\" blev ikke opdateret på grund af risiko for datatab. Læs "
+"venligst advarslerne for flere detaljer."
 
 #. The file(s) were not moved due to possible data loss. Please review the warnings for details.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:119
@@ -2966,8 +2963,8 @@ msgid ""
 "The file(s) were not moved due to possible data loss. Please review the "
 "warnings for details."
 msgstr ""
-"Filerne blev ikke flyttet på grund af muligt datatab. Læs venligst "
-"advarslerne for flere detaljer."
+"Filerne blev ikke flyttet på grund af muligt datatab. Læs venligst advarslerne "
+"for flere detaljer."
 
 #. The %1$s URL does not denote a file: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:122
@@ -4005,8 +4002,7 @@ msgstr "Der opstod en fejl: %1$s"
 #. A Guard error occurred: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
 msgid "A server error occurred with HTTP status code %1$s. Error message: %2$s"
-msgstr ""
-"Der opstod en serverfejl med HTTP-statuskoden %1$s. Fejlmeddelelse: %2$s"
+msgstr "Der opstod en serverfejl med HTTP-statuskoden %1$s. Fejlmeddelelse: %2$s"
 
 #. Invalid Guard URL: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
@@ -4500,16 +4496,15 @@ msgstr "Kunne ikke lave et ordentligt navn til eksportfilen."
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:143
 msgid "Not all of the objects could be imported due to a configured limitation"
 msgstr ""
-"Ikke alle objekterne kunne importeres. Dette skyldes en indstillet "
-"begrænsning."
+"Ikke alle objekterne kunne importeres. Dette skyldes en indstillet begrænsning."
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:145
 msgid ""
 "%1$sd warnings when importing file and not all of the objects could be "
 "imported due to a configured limitation"
 msgstr ""
-"%1$sd advarsler under filimport. Ikke alle objekterne kunne importeres.  "
-"Dette skyldes en indstillet begrænsning."
+"%1$sd advarsler under filimport. Ikke alle objekterne kunne importeres.  Dette "
+"skyldes en indstillet begrænsning."
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:147
 msgid "Could not parse json body parameters for folders and objects."
@@ -4577,7 +4572,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Ugyldig opsætning: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4764,6 +4761,191 @@ msgstr "En mappe med navnet '%1$s' findes allerede i mappen med navnet '%2$s"
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Du kan ikke slette rod-mappen."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr ""
+"Denne konto er blevet låst. Vent venligst %1$d minutter, og prøv så igen."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please wait."
+msgstr ""
+"Det er et andet forsøg på godkendelse i gang for denne bruger. Vent venligst."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Min backup"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr "Primære enheder til godkendelse skal indstilles inden backupenheder."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Din kode til godkendelse er: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Min telefon"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Godkender %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Enhed %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Mangler multifaktor godkendelse"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Ugyldig multifaktor godkendelse"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"Der opstod en fejl ved oprettelse eller beregning af faktor til godkendelse: "
+"%1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "JSON-fejl: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Den valgte udbyder %1$s kendes ikke."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Den valgte udbyder %1$s er ikke til rådighed for denne bruger."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr "Multifaktor godkendelse er krævet, men enheden kan ikke identificeres"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Den forespurgte enhed er ukendt"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr "Der opstod en ukendt fejl under multifaktor godkendelse: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Multifaktor godkendelse er krævet, men udbyderens navn mangler"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "SQL-fejl: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Manglende parameter: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Enheden er allerede registreret"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Denne handling kræver en nylig multifaktor godkendelse. Manglende multifaktor "
+"godkendelse for denne handling"
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Enheden er ikke registreret"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Ingen enheder for denne udbyder"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr ""
+"Det givet argument \"%1$s\" med længden %2$s er længere end den tilladte "
+"længde på %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "Registreringen fejlede"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Enheden kunne ikke fjernes"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "Godkendelse fejlede"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "Godkendelse fejlede: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before temporary "
+"lockout."
+msgstr ""
+"Godkendelse fejlede. Der kan prøves %1$d gange inden adgangen bliver spærret "
+"midlertidigt."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -4970,8 +5152,8 @@ msgid ""
 "You reached the max. number of %3$d possible grants for 3rd party "
 "applications. Please revoke access for the ones you don't longer need."
 msgstr ""
-"Du har nået grænsen på %3$d programmer adgang til din konto. Fjern venligst nogle af "
-"dem du ikke længere har brug for."
+"Du har nået grænsen på %3$d programmer adgang til din konto. Fjern venligst "
+"nogle af dem du ikke længere har brug for."
 
 #. There is no associated OAuth account for identifier %1$s.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
@@ -5089,8 +5271,7 @@ msgstr "Du bliver nødt til eksplicit at autorisere %1$s til at abonnere på %2$
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
 msgid "The scope %1$s is not supported by the provider or has been disabled"
 msgstr ""
-"Rækkevidden %1$s er ikke understøttet af udbyderen, eller er blevet slået "
-"fra."
+"Rækkevidden %1$s er ikke understøttet af udbyderen, eller er blevet slået fra."
 
 #. Thrown in case OAuth for a certain provider access has been disabled for a user
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
@@ -5295,8 +5476,8 @@ msgid ""
 "POP3 search failed due to the following reason: %1$s. Switching to application-"
 "based search"
 msgstr ""
-"POP3-søgning mislykkedes på grund af \"%1$s\". Skifter til "
-"applikationsbaseret søgning"
+"POP3-søgning mislykkedes på grund af \"%1$s\". Skifter til applikationsbaseret "
+"søgning"
 
 #. *
 #. * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
@@ -5513,8 +5694,7 @@ msgstr "Du har ikke lov til at omdøbe POP3-standardmappen, %1$s."
 msgid ""
 "The POP3 storage path is missing for user %1$s. Please provide one and try "
 "again."
-msgstr ""
-"POP3-lagerstien mangler for bruger %1$s. Angiv venligst en og prøv igen."
+msgstr "POP3-lagerstien mangler for bruger %1$s. Angiv venligst en og prøv igen."
 
 #. *
 #. * Illegal move operation.
@@ -5605,8 +5785,8 @@ msgid ""
 "The preview service for MIME type %1$s is currently not available. Please try "
 "again later"
 msgstr ""
-"Forhåndsvisning er i øjeblikket ikke muligt for MIME-typen %1$s. Prøv "
-"venligst igen senere"
+"Forhåndsvisning er i øjeblikket ikke muligt for MIME-typen %1$s. Prøv venligst "
+"igen senere"
 
 #: com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:70
 msgid "Could not load data via proxy."
@@ -5824,8 +6004,7 @@ msgstr "RSS-strømmen er blevet større end den største tilladte størrelse, %1
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
 msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
 msgstr ""
-"Kan ikke forbinde til RSS-strøm på URL: %1$s. Ret venligst URL'en og "
-"prøv igen."
+"Kan ikke forbinde til RSS-strøm på URL: %1$s. Ret venligst URL'en og prøv igen."
 
 #. No appropriate anonymizer available.
 #: com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
@@ -6430,8 +6609,7 @@ msgid ""
 "Cannot create that appointment. An appointment having the same unique "
 "identifier already exists."
 msgstr ""
-"Kan ikke oprette den aftale. Der findes allerede en aftale med samme unikke "
-"ID."
+"Kan ikke oprette den aftale. Der findes allerede en aftale med samme unikke ID."
 
 #. *
 #. * Cannot create that task. A task having the same unique identifier already exists.
@@ -6441,8 +6619,7 @@ msgid ""
 "Cannot create that task. A task having the same unique identifier already "
 "exists."
 msgstr ""
-"Kan ikke oprette den opgave. Der findes allerede en opgave med samme unikke "
-"ID."
+"Kan ikke oprette den opgave. Der findes allerede en opgave med samme unikke ID."
 
 #. Sequence number is outdated.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
@@ -6597,9 +6774,8 @@ msgid ""
 "An E-Mail address is mandatory for external distribution list members. Please "
 "add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
-"En e-mail-adresse er påkrævet for eksterne medlemmer af en "
-"distributionsliste. Tilføj venligst en gyldig e-mail-adresse for kontakten "
-"\"%1$s\"."
+"En e-mail-adresse er påkrævet for eksterne medlemmer af en distributionsliste. "
+"Tilføj venligst en gyldig e-mail-adresse for kontakten \"%1$s\"."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -10519,11 +10695,14 @@ msgstr "fil"
 msgid "folder"
 msgstr "mappe"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password to "
+"view it."
 msgstr ""
-"%1$s har delt en %2$s, »%3$s«, med dig.  Log venligst ind for at se den/det."
+"%1$s her delt %2$s \"%3$s\" med dig. Indtast venligst den delte adgangskode "
+"for at se det."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -13949,6 +14128,10 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s har delt en %2$s, »%3$s«, med dig.  Log venligst ind for at se den/det."
 
 #~ msgid "The operation is forbidden"
 #~ msgstr "Handlingen er ikke tilladt."

@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-21 19:12+0900\n"
+"PO-Revision-Date: 2019-04-20 11:24+0900\n"
 "Last-Translator: Adi David <adi@workshop-chapina.com>\n"
 "Language-Team: Romanian <ro@workshop-chapina.com>\n"
 "Language: ro_RO\n"
@@ -4667,7 +4667,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Configurație incorectă: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4861,6 +4863,198 @@ msgstr "Un dosar denumit '%1$s' există deja sub dosarul cu numele '%2$s"
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Nu aveți permisiunea de a șterge folderul rădăcină."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr ""
+"Acest cont a fost blocat. Așteptați %1$d minute, apoi încercați din nou."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr ""
+"O altă încercare de autentificare pentru acest utilizator este în proces.  "
+"Vă rugăm să așteptați."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Copiile mele de rezervă"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr ""
+"Dispozitivele de autentificare primare trebuie să fie setate înainte de "
+"dispozitivele de copiere de rezervă."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Codul de autentificare este: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Telefonul meu"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Autentificator %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Dispozitiv %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Autentificare multifactor lipsă"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Autentificare multifactor nevalidă"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"A apărut o eroare la crearea/calcularea factorului de autentificare: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "Eroare JSON: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Furnizorul solicitat %1$s nu este cunoscut."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Furnizorul solicitat %1$s nu este disponibil pentru utilizator."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr ""
+"Autentificarea multifactor necesară, dar identificatorul dispozitivului "
+"lipsește"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Dispozitivul solicitat nu este cunoscut"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr ""
+"S-a produs o eroare necunoscută în timpul autentificării multifactor: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr ""
+"Autentificarea multifactor este necesară, dar lipsește numele furnizorului"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "Eroare SQL: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Lipsește parametrul: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Dispozitivul este deja înregistrat"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Această acțiune necesită autentificarea multi-factor recentă.  Parametri "
+"multi-factor lipsă pentru această acțiune"
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Acest dispozitiv nu este înregistrat"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Niciun dispozitiv din acest furnizor"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr ""
+"Argumentul furnizat \"%1$s\" de lungime %2$s a depășit lungimea permisă de "
+"%3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "Înregistrarea nu a reușit"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Imposibil de eliminat dispozitivul"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "Autentificarea a eșuat."
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "Autentificarea a eșuat: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr ""
+"Autentificarea nu a reușit.  Un total de %1$d încercări permise înainte de "
+"blocare temporară."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -10738,12 +10932,14 @@ msgstr "fișier"
 msgid "folder"
 msgstr "dosar"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
 msgstr ""
-"%1$s a partajat %2$s \"%3$s\" cu dumneavoastră. Conectați-vă pentru "
-"vizualizare. "
+"%1$s a partajat %2$s \"%3$s\" cu dvs. Introduceți parola de partajare pentru "
+"vizualizare."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -14215,6 +14411,12 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s a partajat %2$s \"%3$s\" cu dumneavoastră. Conectați-vă pentru "
+#~ "vizualizare. "
+
 #~ msgid "The operation is forbidden"
 #~ msgstr "Operațiunea este interzisă"
 
@@ -17279,9 +17481,6 @@ msgstr "Zulu"
 #~ msgid "Could not find data provider for id: %1$s"
 #~ msgstr "Nu s-a putut găsi furnizorul de date pentru identificatorul: %1$s"
 
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Lipsește parametrul: %1$s"
-
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Furnizor necunoscut: %1$s"
 
@@ -18111,9 +18310,6 @@ msgstr "Zulu"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "Anularea înregistrării componentei de consistență MBean a eșuat."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "Eroare SQL: %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -19865,9 +20061,6 @@ msgstr "Zulu"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "S-a detectat un fișier atașat dăunător."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "Eroare JSON: %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Parametru incorect \"%1$s\": %2$s"
