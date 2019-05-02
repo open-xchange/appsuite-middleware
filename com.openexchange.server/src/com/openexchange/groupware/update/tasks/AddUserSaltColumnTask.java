@@ -63,7 +63,7 @@ import com.openexchange.tools.update.Tools;
  * {@link AddUserSaltColumnTask} Adds the column <code>salt</code> to the <code>user</code> table
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.1
+ * @since v7.10.2
  */
 public class AddUserSaltColumnTask extends UpdateTaskAdapter {
 

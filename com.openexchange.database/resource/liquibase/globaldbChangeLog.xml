@@ -250,6 +250,11 @@
         <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.GuestToUtf8mb4ChangeV2" />
     </changeSet>
 
+    <!-- ******************************************************** -->
+    <!-- ************** Release 7.10.2 starts here ************** -->
+    <!-- ******************************************************** -->
+
+    <!-- has been released with 7.10.2 but was already executed with wrong version id -->
     <changeSet id="7.10.1:guest2context:addSalt" author="martin.schneider@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -266,10 +271,6 @@
             <dropColumn tableName="guest2context" columnName="salt" />
         </rollback>
     </changeSet>
-    
-    <!-- ******************************************************** -->
-    <!-- ************** Release 7.10.2 starts here ************** -->
-    <!-- ******************************************************** -->
     
     <!-- ******************************************************** -->
     <!-- ****************** IP2Location table * ***************** -->
