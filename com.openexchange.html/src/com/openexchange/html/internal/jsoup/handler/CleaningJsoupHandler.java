@@ -426,6 +426,11 @@ public final class CleaningJsoupHandler implements JsoupHandler {
             String cmt = comment.toString();
             if (false == checkMaxContentSize(cmt.length())) {
                 removedNodes.add(comment);
+                return;
+            }
+            if (HtmlServices.containsEventHandler(cmt) || !HtmlServices.isNonJavaScriptURL(cmt, null)) {
+                removedNodes.add(comment);
+                return;
             }
         }
     }
