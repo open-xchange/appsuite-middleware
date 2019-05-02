@@ -108,18 +108,6 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         return openStatementsField;
     }
 
-    static final class FastThrowable extends Throwable {
-
-        FastThrowable() {
-            super("tracked closed connection");
-        }
-
-        @Override
-        public synchronized Throwable fillInStackTrace() {
-            return this;
-        }
-    }
-
     private static class UrlAndConnectionArgs {
 
         final String url;
@@ -201,11 +189,12 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public boolean activate(final PooledData<Connection> data, boolean forceValidityCheck) {
+        final Connection con = data.getPooled();
+
         boolean retval;
         Statement stmt = null;
         ResultSet result = null;
         try {
-            final Connection con = data.getPooled();
             retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
             if (retval && (forceValidityCheck || data.getLastPacketDiffFallbackToTimeDiff() > DEFAULT_CHECK_TIME)) {
                 stmt = con.createStatement();
@@ -213,7 +202,8 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 retval = result.next() ? result.getInt(1) == 1 : false;
             }
         } catch (final SQLException e) {
-            ConnectionPool.LOG.debug("Test SELECT statement failed", e);
+            long connectionId = MysqlUtils.getConnectionId(con);
+            ConnectionPool.LOG.debug("Test SELECT statement failed ({})", L(connectionId), e);
             retval = false;
         } finally {
             Databases.closeSQLStuff(result, stmt);
@@ -247,10 +237,11 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                  * in which case the connection gets closed and is discarded.
                  */
                 if (onActivate) {
+                    long connectionId = MysqlUtils.getConnectionId(con);
                     if (MysqlUtils.ClosedState.EXPLICITLY_CLOSED == closedState) {
-                        ConnectionPool.LOG.error("Found closed connection.", new FastThrowable());
+                        ConnectionPool.LOG.error("Found closed connection ({}).", L(connectionId), new Throwable("tracked closed connection"));
                     } else {
-                        ConnectionPool.LOG.error("Found internally closed connection.", new FastThrowable());
+                        ConnectionPool.LOG.error("Found internally closed connection ({}).", L(connectionId), new Throwable("tracked closed connection"));
                     }
                 }
                 retval = false;
@@ -325,8 +316,12 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
     }
 
     @Override
-    public void destroy(final Connection obj) {
-        Databases.close(obj);
+    public void destroy(final Connection con) {
+        Databases.close(con);
+        if (ConnectionPool.LOG.isDebugEnabled()) { // Guard with if-statement to avoid unnecessary creation of Throwable instance
+            long connectionId = MysqlUtils.getConnectionId(con);
+            ConnectionPool.LOG.debug("Connection ({}) closed", L(connectionId), new Throwable("tracked destroyed connection"));
+        }
     }
 
     private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
