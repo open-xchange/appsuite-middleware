@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -78,11 +77,6 @@ import com.openexchange.pooling.PooledData;
  * Life cycle for database connections.
  */
 class ConnectionLifecycle implements PoolableLifecycle<Connection> {
-
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConnectionLifecycle.class);
-    }
 
     /**
      * SQL command for checking the connection.
@@ -223,7 +217,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 }
             }
         } catch (final SQLException e) {
-            LoggerHolder.LOG.debug("Test SELECT statement failed", e);
+            ConnectionPool.LOG.debug("Test SELECT statement failed", e);
             retval = false;
         } finally {
             Databases.closeSQLStuff(result, stmt);
