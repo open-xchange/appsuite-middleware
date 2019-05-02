@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -77,6 +78,11 @@ import com.openexchange.pooling.PooledData;
  * Life cycle for database connections.
  */
 class ConnectionLifecycle implements PoolableLifecycle<Connection> {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConnectionLifecycle.class);
+    }
 
     /**
      * SQL command for checking the connection.
@@ -132,102 +138,6 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         }
     }
 
-    // ----------------------------------------------------------------------------------------------
-
-    /**
-     * Time between checks if a connection still works.
-     */
-    private static final long DEFAULT_CHECK_TIME = 120000;
-
-    private final AtomicReference<UrlAndConnectionArgs> urlAndConnectionReference;
-
-    /**
-     * Initializes a new {@link ConnectionLifecycle}.
-     *
-     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
-     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
-     */
-    public ConnectionLifecycle(final String url, final Properties connectionArguments) {
-        super();
-        urlAndConnectionReference = new AtomicReference<>(new UrlAndConnectionArgs(url, connectionArguments));
-    }
-
-    /**
-     * Sets the JDBC URL and connection arguments to use.
-     *
-     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
-     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
-     */
-    public void setUrlAndConnectionArgs(String url, Properties connectionArguments) {
-        urlAndConnectionReference.set(new UrlAndConnectionArgs(url, connectionArguments));
-    }
-
-    @Override
-    public boolean activate(final PooledData<Connection> data) {
-        final Connection con = data.getPooled();
-        boolean retval;
-        Statement stmt = null;
-        ResultSet result = null;
-        try {
-            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
-            if (retval && data.getLastPacketDiffFallbackToTimeDiff() > DEFAULT_CHECK_TIME) {
-                stmt = con.createStatement();
-                result = stmt.executeQuery(TEST_SELECT);
-                if (result.next()) {
-                    retval = result.getInt(1) == 1;
-                } else {
-                    retval = false;
-                }
-            }
-        } catch (final SQLException e) {
-            retval = false;
-        } finally {
-            Databases.closeSQLStuff(result, stmt);
-        }
-        return retval;
-    }
-
-    @Override
-    public Connection create() throws SQLException {
-        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
-        return DriverManager.getConnection(urlAndConnectionArgs.url, urlAndConnectionArgs.connectionArguments);
-    }
-
-    public Connection createWithoutTimeout() throws SQLException {
-        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
-        Properties withoutTimeout = new Properties();
-        withoutTimeout.putAll(urlAndConnectionArgs.connectionArguments);
-        for (Iterator<Object> iter = withoutTimeout.keySet().iterator(); iter.hasNext();) {
-            final Object test = iter.next();
-            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
-                iter.remove();
-            }
-        }
-        return DriverManager.getConnection(urlAndConnectionArgs.url, withoutTimeout);
-    }
-
-    @Override
-    public boolean deactivate(final PooledData<Connection> data) {
-        boolean retval = true;
-        try {
-            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);
-        } catch (final SQLException e) {
-            retval = false;
-        }
-        return retval;
-    }
-
-    @Override
-    public void destroy(final Connection obj) {
-        Databases.close(obj);
-    }
-
-    private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
-        if (null != data.getTrace()) {
-            dbe.setStackTrace(data.getTrace());
-        }
-    }
-
     private static volatile Integer usageThreshold;
 
     private static int usageThreshold() {
@@ -265,6 +175,103 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         });
     }
 
+    // ----------------------------------------------------------------------------------------------
+
+    /**
+     * Time between checks if a connection still works.
+     */
+    private static final long DEFAULT_CHECK_TIME = 120000;
+
+    private final AtomicReference<UrlAndConnectionArgs> urlAndConnectionReference;
+
+    /**
+     * Initializes a new {@link ConnectionLifecycle}.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public ConnectionLifecycle(final String url, final Properties connectionArguments) {
+        super();
+        urlAndConnectionReference = new AtomicReference<>(new UrlAndConnectionArgs(url, connectionArguments));
+    }
+
+    /**
+     * Sets the JDBC URL and connection arguments to use.
+     *
+     * @param url A database URL of the form <code> jdbc:<em>subprotocol</em>:<em>subname</em></code>
+     * @param connectionArguments A list of arbitrary string tag/value pairs as connection arguments; normally at least a "user" and "password" property should be included
+     */
+    public void setUrlAndConnectionArgs(String url, Properties connectionArguments) {
+        urlAndConnectionReference.set(new UrlAndConnectionArgs(url, connectionArguments));
+    }
+
+    @Override
+    public boolean activate(final PooledData<Connection> data, boolean forceValidityCheck) {
+        boolean retval;
+        Statement stmt = null;
+        ResultSet result = null;
+        try {
+            final Connection con = data.getPooled();
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(con, true);
+            if (retval && (forceValidityCheck || data.getLastPacketDiffFallbackToTimeDiff() > DEFAULT_CHECK_TIME)) {
+                stmt = con.createStatement();
+                result = stmt.executeQuery(TEST_SELECT);
+                if (result.next()) {
+                    retval = result.getInt(1) == 1;
+                } else {
+                    retval = false;
+                }
+            }
+        } catch (final SQLException e) {
+            LoggerHolder.LOG.debug("Test SELECT statement failed", e);
+            retval = false;
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
+        }
+        return retval;
+    }
+
+    @Override
+    public Connection create() throws SQLException {
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        return DriverManager.getConnection(urlAndConnectionArgs.url, urlAndConnectionArgs.connectionArguments);
+    }
+
+    public Connection createWithoutTimeout() throws SQLException {
+        UrlAndConnectionArgs urlAndConnectionArgs = urlAndConnectionReference.get();
+        Properties withoutTimeout = new Properties();
+        withoutTimeout.putAll(urlAndConnectionArgs.connectionArguments);
+        for (Iterator<Object> iter = withoutTimeout.keySet().iterator(); iter.hasNext();) {
+            final Object test = iter.next();
+            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
+                iter.remove();
+            }
+        }
+        return DriverManager.getConnection(urlAndConnectionArgs.url, withoutTimeout);
+    }
+
+    @Override
+    public boolean deactivate(final PooledData<Connection> data) {
+        boolean retval;
+        try {
+            retval = MysqlUtils.ClosedState.OPEN == MysqlUtils.isClosed(data.getPooled(), true);
+        } catch (final SQLException e) {
+            retval = false;
+        }
+        return retval;
+    }
+
+    @Override
+    public void destroy(final Connection obj) {
+        Databases.close(obj);
+    }
+
+    private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
+        if (null != data.getTrace()) {
+            dbe.setStackTrace(data.getTrace());
+        }
+    }
+
     @Override
     public boolean validate(final PooledData<Connection> data) {
         final Connection con = data.getPooled();
@@ -287,10 +294,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             }
             // Getting number of open statements.
             try {
-                int active = 0;
-                if (con instanceof com.mysql.jdbc.Connection) {
-                    active = ((com.mysql.jdbc.Connection) con).getActiveStatementCount();
-                }
+                int active = getNumberOfActiveStatements(con);
                 if (active > 0) {
                     final OXException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                     addTrace(dbe, data);
@@ -322,6 +326,14 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             retval = false;
         }
         return retval;
+    }
+
+    private int getNumberOfActiveStatements(final Connection con) {
+        int active = 0;
+        if (con instanceof com.mysql.jdbc.Connection) {
+            active = ((com.mysql.jdbc.Connection) con).getActiveStatementCount();
+        }
+        return active;
     }
 
     @Override

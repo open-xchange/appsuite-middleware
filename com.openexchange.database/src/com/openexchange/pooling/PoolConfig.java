@@ -90,6 +90,7 @@ public class PoolConfig implements Cloneable {
         private boolean testOnDeactivate;
         private boolean testOnIdle;
         private boolean testThreads;
+        private boolean alwaysCheckOnActivate;
 
         Builder() {
             super();
@@ -103,6 +104,7 @@ public class PoolConfig implements Cloneable {
             testOnDeactivate = true;
             testOnIdle = false;
             testThreads = false;
+            alwaysCheckOnActivate = false;
         }
 
         Builder(PoolConfig source) {
@@ -117,6 +119,7 @@ public class PoolConfig implements Cloneable {
             testOnDeactivate = source.testOnDeactivate;
             testOnIdle = source.testOnIdle;
             testThreads = source.testThreads;
+            alwaysCheckOnActivate = source.alwaysCheckOnActivate;
         }
 
         public Builder withMaxIdle(int maxIdle) {
@@ -169,8 +172,13 @@ public class PoolConfig implements Cloneable {
             return this;
         }
 
+        public Builder withAlwaysCheckOnActivate(boolean alwaysCheckOnActivate) {
+            this.alwaysCheckOnActivate = alwaysCheckOnActivate;
+            return this;
+        }
+
         public PoolConfig build() {
-            return new PoolConfig(maxIdle, maxIdleTime, maxActive, maxWait, maxLifeTime, exhaustedAction, testOnActivate, testOnDeactivate, testOnIdle, testThreads);
+            return new PoolConfig(maxIdle, maxIdleTime, maxActive, maxWait, maxLifeTime, exhaustedAction, testOnActivate, testOnDeactivate, testOnIdle, testThreads, alwaysCheckOnActivate);
         }
     }
 
@@ -196,9 +204,11 @@ public class PoolConfig implements Cloneable {
 
     public final boolean testThreads;
 
+    public final boolean alwaysCheckOnActivate;
+
     private int hash = 0;
 
-    PoolConfig(int maxIdle, long maxIdleTime, int maxActive, long maxWait, long maxLifeTime, ExhaustedActions exhaustedAction, boolean testOnActivate, boolean testOnDeactivate, boolean testOnIdle, boolean testThreads) {
+    PoolConfig(int maxIdle, long maxIdleTime, int maxActive, long maxWait, long maxLifeTime, ExhaustedActions exhaustedAction, boolean testOnActivate, boolean testOnDeactivate, boolean testOnIdle, boolean testThreads, boolean alwaysCheckOnActivate) {
         super();
         this.maxIdle = maxIdle;
         this.maxIdleTime = maxIdleTime;
@@ -210,6 +220,7 @@ public class PoolConfig implements Cloneable {
         this.testOnDeactivate = testOnDeactivate;
         this.testOnIdle = testOnIdle;
         this.testThreads = testThreads;
+        this.alwaysCheckOnActivate = alwaysCheckOnActivate;
     }
 
     @Override
@@ -238,6 +249,7 @@ public class PoolConfig implements Cloneable {
             h = prime * h + (testOnDeactivate ? 1231 : 1237);
             h = prime * h + (testOnIdle ? 1231 : 1237);
             h = prime * h + (testThreads ? 1231 : 1237);
+            h = prime * h + (alwaysCheckOnActivate ? 1231 : 1237);
             hash = h;
         }
         return h;
@@ -285,6 +297,9 @@ public class PoolConfig implements Cloneable {
         if (testThreads != other.testThreads) {
             return false;
         }
+        if (alwaysCheckOnActivate != other.alwaysCheckOnActivate) {
+            return false;
+        }
         return true;
     }
 
@@ -311,6 +326,8 @@ public class PoolConfig implements Cloneable {
         sb.append(testOnIdle);
         sb.append("\n\tTest threads for bad connection usage (SLOW): ");
         sb.append(testThreads);
+        sb.append("\n\tAlways explicitly check connection validity on activate: ");
+        sb.append(alwaysCheckOnActivate);
         return sb.toString();
     }
 
@@ -326,6 +343,7 @@ public class PoolConfig implements Cloneable {
         .withTestOnDeactivate(true)
         .withTestOnIdle(false)
         .withTestThreads(false)
+        .withAlwaysCheckOnActivate(false)
         .build();
 
 }
