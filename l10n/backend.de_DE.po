@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-29 15:14+0200\n"
+"PO-Revision-Date: 2019-05-02 14:28+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1269,7 +1269,6 @@ msgstr "Interner Kalender"
 
 #. The requested page does not denote to a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-#, fuzzy
 msgid "The requested page does not denote to a calendar."
 msgstr "Die angeforderte Seite bezeichnet keinen Kalender."
 
