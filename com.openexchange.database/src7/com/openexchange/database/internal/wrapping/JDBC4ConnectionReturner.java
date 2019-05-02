@@ -60,6 +60,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLWarning;
 import java.sql.SQLXML;
 import java.sql.Savepoint;
@@ -707,16 +708,16 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
      */
     protected void checkForAlreadyClosed() throws SQLException {
         if (closed.get()) {
-            throw new SQLException("Connection was already closed.");
+            throw new SQLNonTransientConnectionException("Connection was already closed.");
         }
 
         MysqlUtils.ClosedState closedState = MysqlUtils.isClosed(delegate, false);
         if (MysqlUtils.ClosedState.OPEN != closedState) {
             if (MysqlUtils.ClosedState.INTERNALLY_CLOSED == closedState) {
                 // Connection explicitly closed or lost its internal network resources, thus unusable
-                throw new SQLException("Connection is internally closed.");
+                throw new SQLNonTransientConnectionException("Connection is internally closed.");
             }
-            throw new SQLException("Connection is closed.");
+            throw new SQLNonTransientConnectionException("Connection is closed.");
         }
 
         touch();
