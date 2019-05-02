@@ -928,7 +928,7 @@ public class EventManager extends AbstractManager {
      * @return The updated event
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    private EventData handleUpdate(ChronosCalendarResultResponse updateEvent, boolean expectException) throws ChronosApiException {
+    public final EventData handleUpdate(ChronosCalendarResultResponse updateEvent, boolean expectException) throws ChronosApiException {
         if (expectException) {
             assertNotNull("An error was expected", updateEvent.getError());
             throw new ChronosApiException(updateEvent.getCode(), updateEvent.getError());
