@@ -54,7 +54,7 @@ import com.openexchange.ajax.chronos.factory.EventFactory.Weekday;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 
 /**
- * {@link RRuleFactory}
+ * {@link RRuleFactory} provides methods to create basic rules and a builder for more complex rules.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.2
@@ -122,5 +122,147 @@ public class RRuleFactory {
     }
 
 
+    /**
+     *
+     * {@link RRuleBuilder} is a builder for more complex recurrence rules
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.2
+     */
+    public static class RRuleBuilder {
+
+        StringBuilder builder;
+
+        /**
+         * Creates a new {@link RRuleBuilder}
+         *
+         * @return a new {@link RRuleBuilder}
+         */
+        public static RRuleBuilder create() {
+            return new RRuleBuilder();
+        }
+
+        /**
+         * Initializes a new {@link RRuleFactory.RRuleBuilder}.
+         */
+        private RRuleBuilder() {
+            super();
+            builder = new StringBuilder();
+        }
+
+        /**
+         * Adds a frequency to the rule
+         *
+         * @param freq The {@link RecurringFrequency}
+         * @return this
+         */
+        public RRuleBuilder addFrequency(RecurringFrequency freq) {
+            addSemicolon();
+            builder.append("FREQ=").append(freq.name());
+            return this;
+        }
+
+        /**
+         * Adds a count value to the rule
+         *
+         * @param occurences The number of occurences
+         * @return this
+         */
+        public RRuleBuilder addCount(int occurences) {
+            addSemicolon();
+            builder.append("COUNT=").append(occurences);
+            return this;
+        }
+
+        /**
+         * Adds an until value to the rule
+         * 
+         * @param until The until value as a zulu {@link DateTimeData}
+         * @return this
+         */
+        public RRuleBuilder addUntil(DateTimeData until) {
+            addSemicolon();
+            builder.append("UNTIL=").append(until.getValue());
+            return this;
+        }
+
+        /**
+         * Adds an interval value
+         * 
+         * @param interval The interval
+         * @return this
+         */
+        public RRuleBuilder addInterval(int interval) {
+            addSemicolon();
+            builder.append("INTERVAL=").append(interval);
+            return this;
+        }
+
+        /**
+         * Adds a BYSETPOS value to the rule
+         * 
+         * @param position The position
+         * @return this
+         */
+        public RRuleBuilder addBySetPosition(int position) {
+            addSemicolon();
+            builder.append("BYSETPOS=").append(position);
+            return this;
+        }
+
+        /**
+         * Adds a BYMONTH value to the rule
+         * 
+         * @param month the month to add
+         * @return this
+         */
+        public RRuleBuilder addByMonth(int month) {
+            addSemicolon();
+            builder.append("BYMONTH=").append(month);
+            return this;
+        }
+
+        /**
+         * Adds a BYDAY value to the rule
+         * 
+         * @param days The days to add
+         * @return this
+         */
+        public RRuleBuilder addByDay(Weekday... days) {
+            if (days != null && days.length > 0) {
+                addSemicolon();
+                builder.append("BYDAY=");
+                boolean first = true;
+                for (Weekday day : days) {
+                    if(first) {
+                        first = false;
+                    } else {
+                        builder.append(",");
+                    }
+                    builder.append(day.name());
+                }
+            }
+            return this;
+        }
+
+        /**
+         * builds the rrule
+         * 
+         * @return the rrule string
+         */
+        public String build() {
+            return builder.toString();
+        }
+
+        /**
+         * Adds a semicolon before a rule if the rule is not empty
+         */
+        private void addSemicolon() {
+            if (builder.length() != 0) {
+                builder.append(";");
+            }
+        }
+
+    }
 
 }

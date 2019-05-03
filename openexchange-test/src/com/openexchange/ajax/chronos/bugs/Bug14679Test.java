@@ -7,6 +7,9 @@ import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
+import com.openexchange.ajax.chronos.factory.EventFactory.Weekday;
+import com.openexchange.ajax.chronos.factory.RRuleFactory.RRuleBuilder;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -33,10 +36,15 @@ public class Bug14679Test extends AbstractChronosTest {
         Calendar end = Calendar.getInstance();
         end.set(2009, 9, 19, 13, 30, 0);
         event.setEndDate(DateTimeUtil.getDateTime(end));
-        event.setRrule("FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=1;UNTIL=20091230T000000Z");
+
+        Calendar rruleCal = Calendar.getInstance();
+        rruleCal.set(2009, 11, 30, 0, 0, 0);
+        String rrule = RRuleBuilder.create().addFrequency(RecurringFrequency.WEEKLY).addByDay(Weekday.MO, Weekday.WE).addInterval(1).addUntil(DateTimeUtil.getZuluDateTime(rruleCal.getTimeInMillis())).build();
+        event.setRrule(rrule); // "FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=1;UNTIL=20091230T000000Z"
         EventData createEvent = eventManager.createEvent(event);
 
-        createEvent.setRrule("FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=2;UNTIL=20091230T000000Z");
+        String rrule2 = RRuleBuilder.create().addFrequency(RecurringFrequency.WEEKLY).addByDay(Weekday.MO, Weekday.WE).addInterval(2).addUntil(DateTimeUtil.getZuluDateTime(rruleCal.getTimeInMillis())).build();
+        createEvent.setRrule(rrule2); // "FREQ=WEEKLY;BYDAY=MO,WE;INTERVAL=2;UNTIL=20091230T000000Z"
         eventManager.updateEvent(createEvent, false, false);
 
         Calendar from = Calendar.getInstance();

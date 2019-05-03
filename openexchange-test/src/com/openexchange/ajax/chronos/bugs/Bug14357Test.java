@@ -56,6 +56,9 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
+import com.openexchange.ajax.chronos.factory.EventFactory.Weekday;
+import com.openexchange.ajax.chronos.factory.RRuleFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.EventData;
 
@@ -83,7 +86,8 @@ public class Bug14357Test extends AbstractChronosTest {
         event.setStartDate(DateTimeUtil.getDateTime(cal));
         cal.set(2009, 1, 1, 13, 0, 0);
         event.setEndDate(DateTimeUtil.getDateTime(cal));
-        event.setRrule("FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=2;BYMONTH=2");
+        String rrule = RRuleFactory.RRuleBuilder.create().addFrequency(RecurringFrequency.YEARLY).addByDay(Weekday.MO, Weekday.TU, Weekday.WE, Weekday.TH, Weekday.FR).addBySetPosition(2).addByMonth(2).build();
+        event.setRrule(rrule); // "FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=2;BYMONTH=2"
         eventManager.createEvent(event, true);
     }
 
