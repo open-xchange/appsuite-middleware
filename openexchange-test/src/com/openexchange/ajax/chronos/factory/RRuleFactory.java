@@ -60,7 +60,7 @@ import com.openexchange.testing.httpclient.models.DateTimeData;
  * @since v7.10.2
  */
 public class RRuleFactory {
-    
+
     /**
      * Creates a recurrence rule with the given frequency limited by the given amount of occurences
      *
@@ -71,7 +71,19 @@ public class RRuleFactory {
     public static String getFrequencyWithOccurenceLimit(RecurringFrequency freq, int occurences ) {
         return "FREQ=" + freq.name() + ";COUNT=" + occurences;
     }
-    
+
+    /**
+     * Creates a recurrence rule with the given frequency limited by the given amount of occurences
+     *
+     * @param freq The {@link RecurringFrequency}
+     * @param occurences The amount of occurences
+     * @param weekday The byday value
+     * @return The recurrence rule
+     */
+    public static String getFrequencyWithOccurenceLimit(RecurringFrequency freq, int occurences, Weekday weekday) {
+        return "FREQ=" + freq.name() + ";BYDAY=" + weekday.name() + ";COUNT=" + occurences;
+    }
+
     /**
      * Creates a recurrence rule with the given frequency.
      *
@@ -81,8 +93,8 @@ public class RRuleFactory {
     public static String getFrequencyWithoutLimit(RecurringFrequency freq ) {
         return "FREQ=" + freq.name();
     }
-    
-    
+
+
     /**
      * Creates a recurrence rule with the given frequency limited by the given until date
      *
@@ -93,7 +105,7 @@ public class RRuleFactory {
     public static String getFrequencyWithUntilLimit(RecurringFrequency freq, DateTimeData until ) {
         return getFrequencyWithUntilLimit(freq, until, null);
     }
-    
+
     /**
      * Creates a recurrence rule with the given frequency limited by the given until date. Optionally a BYDAY value can be included as well
      *
@@ -108,7 +120,7 @@ public class RRuleFactory {
         }
         return "FREQ=" + freq.name() + ";UNTIL=" + until.getValue();
     }
-    
-    
+
+
 
 }
