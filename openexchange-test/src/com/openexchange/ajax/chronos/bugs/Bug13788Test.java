@@ -49,39 +49,47 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.testing.httpclient.models.DateTimeData;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link Bug13788Test}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug13788Test extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    @Test
+    public void testBug13788() throws Exception {
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "dsd", folderId);
+        long now = System.currentTimeMillis();
+        DateTimeData start = DateTimeUtil.getDateTimeWithoutTimeInformation(now);
+        DateTimeData end = DateTimeUtil.getDateTimeWithoutTimeInformation(now + TimeUnit.DAYS.toMillis(1));
+        event.setStartDate(start);
+        event.setEndDate(end);
+        EventData createEvent = eventManager.createEvent(event, true);
+
+        createEvent.setStartDate(end);
+        createEvent.setEndDate(DateTimeUtil.getDateTimeWithoutTimeInformation(now + TimeUnit.DAYS.toMillis(2)));
+        eventManager.updateEvent(createEvent, false, false);
+
+        EventData getEvent = eventManager.getEvent(folderId, createEvent.getId());
+        Date date = DateTimeUtil.parseAllDay(getEvent.getStartDate());
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        assertEquals(0, cal.get(Calendar.HOUR_OF_DAY));
+        assertEquals(0, cal.get(Calendar.MINUTE));
+        assertEquals(0, cal.get(Calendar.SECOND));
+    }
 
 }
