@@ -49,41 +49,73 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import java.util.Calendar;
+import java.util.List;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link Bug14357Test}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug13942Test.class,
-    Bug14357Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug14357Test extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    public Bug14357Test() {
+        super();
+    }
+
+    @Override
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug14357Test", folderId);
+        Calendar cal = Calendar.getInstance();
+        cal.set(2009, 1, 1, 12, 0, 0);
+        event.setStartDate(DateTimeUtil.getDateTime(cal));
+        cal.set(2009, 1, 1, 13, 0, 0);
+        event.setEndDate(DateTimeUtil.getDateTime(cal));
+        event.setRrule("FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=2;BYMONTH=2");
+        eventManager.createEvent(event, true);
+    }
+
+    @Test
+    public void testBug14357() throws Exception {
+        checkYear(2010, 2);
+        checkYear(2011, 2);
+        checkYear(2012, 2);
+        checkYear(2013, 4);
+        checkYear(2014, 4);
+        checkYear(2015, 3);
+        checkYear(2016, 2);
+        checkYear(2017, 2);
+        checkYear(2018, 2);
+        checkYear(2019, 4);
+    }
+
+    private void checkYear(int year, int expectedDay) throws Exception {
+        Calendar expected = Calendar.getInstance();
+        expected.set(year, 1, expectedDay, 12, 0, 0);
+        expected.set(Calendar.MILLISECOND, 0);
+
+        Calendar from = Calendar.getInstance();
+        from.set(year, 0, 1);
+
+        Calendar end = Calendar.getInstance();
+        end.set(year, 2, 1);
+
+        List<EventData> allEvents = eventManager.getAllEvents(from.getTime(), end.getTime(), true, folderId);
+        assertEquals(1, allEvents.size());
+
+        assertEquals(expected.getTimeInMillis(), DateTimeUtil.parseDateTime(allEvents.get(0).getStartDate()).getTime());
+    }
 
 }
