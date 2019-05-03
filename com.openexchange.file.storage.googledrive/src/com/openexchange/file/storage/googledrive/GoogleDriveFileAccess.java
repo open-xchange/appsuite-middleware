@@ -403,9 +403,9 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                  * prepare Google Drive file
                  */
                 com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-                GoogleDriveUtil.setParentFolder(fileMetadata, toGoogleDriveFolderId(file.getFolderId()));
                 Drive drive = googleDriveAccess.<Drive> getClient().client;
                 if (FileStorageFileAccess.NEW == file.getId()) {
+                    GoogleDriveUtil.setParentFolder(fileMetadata, toGoogleDriveFolderId(file.getFolderId()));
                     try {
                         /*
                          * first check if there is already such a file

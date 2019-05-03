@@ -99,9 +99,10 @@ public interface PoolableLifecycle<T> {
     /**
      * This method checks if the pooled object is still useable.
      * @param data data of the pooled object and the pooled object.
+     * @param onActivate Whether this methods is called on activate or on deactivate
      * @return <code>true</code> if the pooled object is still valid.
      */
-    boolean validate(PooledData<T> data);
+    boolean validate(PooledData<T> data, boolean onActivate);
 
     /**
      * @return a name for the pooled objects that can be used to generate more understandable messages for administrators. E.g.

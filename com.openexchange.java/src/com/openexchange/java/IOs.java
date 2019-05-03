@@ -93,6 +93,20 @@ public class IOs {
     }
 
     /**
+     * Checks if cause of specified exception indicates an unexpected end of file or end of stream during reading input.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if an EOF problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isEOFException(Exception e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.io.EOFException.class);
+    }
+
+    /**
      * Checks if cause of specified exception indicates a connect problem.
      *
      * @param e The exception to examine
@@ -134,6 +148,7 @@ public class IOs {
         return isEitherOf(e, java.net.SocketTimeoutException.class);
     }
 
+    @SafeVarargs
     private static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
         if (null == e || null == classes || 0 == classes.length) {
             return false;

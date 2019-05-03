@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-27 12:01+0100\n"
+"PO-Revision-Date: 2019-04-11 08:44+0200\n"
 "Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.com>\n"
 "Language-Team: Italian <it@workshop-chapina.com>\n"
 "Language: it_IT\n"
@@ -1038,8 +1038,8 @@ msgstr ""
 msgid ""
 "The organizer of the appointment has changed. This operation is not allowed."
 msgstr ""
-"L'organizzatore dell'appuntamento è cambiato. Questa operazione non è"
-" consentita."
+"L'organizzatore dell'appuntamento è cambiato. Questa operazione non è "
+"consentita."
 
 #. *
 #. * The event %s couldn't be deleted: %s
@@ -1268,9 +1268,8 @@ msgid ""
 "The remote SchedJoules service is unavailable at the moment. There is "
 "nothing we can do about it. Please try again later."
 msgstr ""
-"Il servizio remoto SchedJoules non è disponibile al momento. Non possiamo"
-" fare niente "
-"a riguardo. Riprova più tardi."
+"Il servizio remoto SchedJoules non è disponibile al momento. Non possiamo "
+"fare niente a riguardo. Riprova più tardi."
 
 #. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
@@ -1278,9 +1277,8 @@ msgid ""
 "An internal server error occurred on SchedJoules side. There is nothing we "
 "can do about it."
 msgstr ""
-"Si è verificato un errore interno del server lato SchedJoules. Non possiamo"
-" fare "
-"niente a riguardo."
+"Si è verificato un errore interno del server lato SchedJoules. Non possiamo "
+"fare niente a riguardo."
 
 #. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
@@ -1288,9 +1286,8 @@ msgid ""
 "A remote server error occurred on SchedJoules side. There is nothing we can "
 "do about it."
 msgstr ""
-"Si è verificato un errore del server remoto lato SchedJoules. Non possiamo"
-" fare niente "
-"a riguardo."
+"Si è verificato un errore del server remoto lato SchedJoules. Non possiamo "
+"fare niente a riguardo."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1443,9 +1440,8 @@ msgid ""
 "The changes could not be applied because a newer version of the appointment "
 "already exists."
 msgstr ""
-"Le modifiche non possono essere applicate poiché una nuova versione"
-" dell'appuntamento "
-"esiste già."
+"Le modifiche non possono essere applicate poiché una nuova versione "
+"dell'appuntamento esiste già."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
@@ -2600,8 +2596,8 @@ msgid ""
 "Download denied because download limits have been exceeded. Please try again "
 "later."
 msgstr ""
-"Scaricamento negato poiché è stato superato il limite di file "
-"scaricati. Riprova più tardi."
+"Scaricamento negato poiché è stato superato il limite di file scaricati. "
+"Riprova più tardi."
 
 #. %1$s %2$s
 #. E.g. Drive Client 2.4.0
@@ -2764,8 +2760,8 @@ msgstr ""
 msgid ""
 "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\"."
 msgstr ""
-"Il percorso \"%1$s\" è in conflitto con un file con lo stesso nome in \""
-"%2$s\"."
+"Il percorso \"%1$s\" è in conflitto con un file con lo stesso nome in \"%2$s"
+"\"."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:91
 msgid ""
@@ -2784,8 +2780,8 @@ msgid ""
 "remove some directories and try again, or select another root folder."
 msgstr ""
 "Il numero massimo di cartelle sincronizzabili (%1$d) è stato superato. "
-"Rimuovi alcune cartelle e prova ancora oppure seleziona un'altra cartella"
-" radice."
+"Rimuovi alcune cartelle e prova ancora oppure seleziona un'altra cartella "
+"radice."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
 msgid ""
@@ -2814,8 +2810,8 @@ msgstr "Una cartella con nome \"%1$s\" esiste già in \"%2$s\"."
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
-"Il push tramite long polling è disabilitato per l'utente \"%1$s\" nel"
-" contesto \"%1$s\""
+"Il push tramite long polling è disabilitato per l'utente \"%1$s\" nel "
+"contesto \"%1$s\""
 
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
@@ -4719,7 +4715,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Configurazione non valida: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4870,9 +4868,8 @@ msgid ""
 "An error has occurred on the remote Microsoft end-point. There is nothing we "
 "can do about it. Try again later."
 msgstr ""
-"Si è verificato un errore sul terminale remoto Microsoft. Non possiamo fare"
-" niente a riguardo. "
-"Riprova più tardi."
+"Si è verificato un errore sul terminale remoto Microsoft. Non possiamo fare "
+"niente a riguardo. Riprova più tardi."
 
 #. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
@@ -4880,8 +4877,8 @@ msgid ""
 "Unable to retrieve the contact photo for contact with id '%1$s'. There is "
 "nothing we can do about it. Try again later."
 msgstr ""
-"Impossibile recuperare la foto di contatto per il contatto con id '%1$s'. Non "
-"possiamo fare niente a riguardo. Riprova più tardi."
+"Impossibile recuperare la foto di contatto per il contatto con id '%1$s'. "
+"Non possiamo fare niente a riguardo. Riprova più tardi."
 
 #. The copying of file %1$s failed. There is nothing we can do about it. Try again later
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
@@ -4889,9 +4886,8 @@ msgid ""
 "The copying of file %1$s failed. There is nothing we can do about it. Try "
 "again later."
 msgstr ""
-"La copia del file %1$s non è riuscita. Non possiamo fare niente a riguardo."
-" Riprova "
-"più tardi."
+"La copia del file %1$s non è riuscita. Non possiamo fare niente a riguardo. "
+"Riprova più tardi."
 
 #. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
@@ -4899,9 +4895,8 @@ msgid ""
 "Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
 "do about it. Try again later."
 msgstr ""
-"Il caricamento del file '%1$s' nella cartella '%2$s' non è riuscito. Non"
-" possiamo fare niente a riguardo. Riprova "
-"più tardi."
+"Il caricamento del file '%1$s' nella cartella '%2$s' non è riuscito. Non "
+"possiamo fare niente a riguardo. Riprova più tardi."
 
 #. The folder does not exist.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
@@ -4918,6 +4913,199 @@ msgstr ""
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Non ti è consentito eliminare la cartella radice."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr "Questo account è stato bloccato Attendi %1$d minuti e prova ancora."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr ""
+"È in corso un altro tentativo di autenticazione per questo utente. Attendi."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Il mio backup"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr ""
+"I dispositivi primari di autenticazione devono essere configurati prima dei"
+" dispositivi "
+"di backup."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Il tuo codice di autenticazione è: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Il mio telefono"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Autenticatore %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Dispositivo %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Autenticazione multifattore mancante"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Autenticazione multifattore non valida"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"Si è verificato un errore durante la creazione/calcolo del fattore di"
+" autenticazione: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "Errore JSON: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Il fornitore richiesto %1$s è sconosciuto."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Il fornitore richiesto %1$s non è disponibile per l'utente."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr ""
+"Autenticazione multifattore richiesta, ma manca l'identificatore del"
+" dispositivo"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Il dispositivo richiesto è sconosciuto"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr ""
+"Si è verificato un errore sconosciuto durante l'autenticazione multifattore: "
+"%s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Autenticazione multifattore richiesta, ma manca il nome del fornitore"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "Errore SQL: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Parametro mancante: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Il dispositivo è già registrato"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Questa azione richiede la recente autenticazione multifattore. Mancano i"
+" parametri "
+"multifattore per questa azione."
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Questo dispositivo non è registrato"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Nessun dispositivo in questo fornitore"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr ""
+"L'argomento fornito \"%1$s\" di lunghezza %2$s supera la lunghezza consentita"
+" di %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "La registrazione non è riuscita"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Impossibile rimuovere il dispositivo"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "L'autenticazione non è riuscita"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "L'autenticazione non è riuscita: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr ""
+"Autenticazione non riuscita. Un totale di %1$d tentativi consentiti prima "
+"del blocco temporaneo."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5257,8 +5445,8 @@ msgstr "Il servizio OAuth di '%1$s' non è abilitato per te."
 msgid ""
 "No password mechanism available for identifier '%s'. Cannot handle password."
 msgstr ""
-"Nessun meccanismo di password disponibile per l'identificatore '%s'."
-" Impossibile gestire la password."
+"Nessun meccanismo di password disponibile per l'identificatore '%s'. "
+"Impossibile gestire la password."
 
 #. *
 #. * New password too short.
@@ -5557,8 +5745,8 @@ msgid ""
 "Message(s) %1$s in folder %2$s could not be deleted due to the following "
 "error: %3$s"
 msgstr ""
-"I messaggi %1$s nella cartella %2$s non possono essere eliminati "
-"a causa del seguente errore: %3$s"
+"I messaggi %1$s nella cartella %2$s non possono essere eliminati a causa del "
+"seguente errore: %3$s"
 
 #. *
 #. * Not allowed to open folder %1$s due to missing read access
@@ -5959,9 +6147,8 @@ msgid ""
 "The remote '%2$s' service is unavailable at the moment. There is nothing we "
 "can do about it. Please try again later."
 msgstr ""
-"Il servizio remoto '%2$s' non è al momento disponibile. Non possiamo fare"
-" niente a"
-" riguardo. Riprova più tardi."
+"Il servizio remoto '%2$s' non è al momento disponibile. Non possiamo fare "
+"niente a riguardo. Riprova più tardi."
 
 #. An internal server error occurred on '%1$s' side. There is nothing we can do about it.
 #: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:67
@@ -5978,9 +6165,8 @@ msgid ""
 "A remote server error occurred on '%2$s' side. There is nothing we can do "
 "about it."
 msgstr ""
-"Si è verificato un errore del server remoto lato '%2$s'. Non possiamo fare"
-" niente "
-"a riguardo."
+"Si è verificato un errore del server remoto lato '%2$s'. Non possiamo fare "
+"niente a riguardo."
 
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
@@ -6743,8 +6929,8 @@ msgid ""
 "The image you tried to attach is not a valid picture. It may be broken or is "
 "not a valid file."
 msgstr ""
-"L'immagine che stai tentando di allegare non è un'immagine valida. "
-"Potrebbe essere danneggiata o non è un file valido."
+"L'immagine che stai tentando di allegare non è un'immagine valida. Potrebbe "
+"essere danneggiata o non è un file valido."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:93
 msgid "Required  value \"first name\" was not supplied."
@@ -6878,8 +7064,8 @@ msgstr "Numero di proprietà non valido per la lista di distribuzione."
 msgid ""
 "This operation is not allowed in this folder because it has a subscription."
 msgstr ""
-"Questa operazione non è consentita in questa cartella poiché ha una"
-" sottoscrizione."
+"Questa operazione non è consentita in questa cartella poiché ha una "
+"sottoscrizione."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -9022,9 +9208,8 @@ msgid ""
 "The task could not be saved. Please shorten the \"%1$s\" and try again. "
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
-"L'attività non può essere salvata. Riduci il \"%1$s\" e prova ancora. "
-"Durata attuale \"%3$d\" è maggiore della durata consentita di \"%2$d\" "
-"caratteri."
+"L'attività non può essere salvata. Riduci il \"%1$s\" e prova ancora. Durata "
+"attuale \"%3$d\" è maggiore della durata consentita di \"%2$d\" caratteri."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder."
@@ -9313,8 +9498,8 @@ msgstr "La configurazione utente non può essere rimossa dalla cache: \"%1$s\"."
 #: com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:91
 msgid "Mail settings for user \"%1$s\" could not be found in context %2$d."
 msgstr ""
-"Le impostazioni di posta per l'utente \"%1$s\" non possono essere trovate nel "
-"contesto %2$d."
+"Le impostazioni di posta per l'utente \"%1$s\" non possono essere trovate "
+"nel contesto %2$d."
 
 #: com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:63
 msgid ""
@@ -9488,8 +9673,7 @@ msgstr "Il messaggio non può essere analizzato. Dati non validi o incompleti."
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "Mail folder cannot be created/renamed. Empty folder name."
 msgstr ""
-"La cartella di posta non può essere creata/rinominata. Nome cartella "
-"vuoto."
+"La cartella di posta non può essere creata/rinominata. Nome cartella vuoto."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
@@ -9807,8 +9991,8 @@ msgstr ""
 msgid ""
 "The operation cannot be performed because composed message is not a reply"
 msgstr ""
-"L'operazione non può essere eseguita poiché il messaggio composto non è una"
-" risposta"
+"L'operazione non può essere eseguita poiché il messaggio composto non è una "
+"risposta"
 
 #. Found no such attachment %1$s in composition space %2$s
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:75
@@ -9826,17 +10010,16 @@ msgid ""
 "Maximum number of composition spaces is reached. Please terminate existing "
 "open spaces in order to open new ones."
 msgstr ""
-"Il numero massimo di spazi di composizione è stato raggiunto. Termina gli"
-" spazi aperti "
-"esistenti per aprirne di nuovi."
+"Il numero massimo di spazi di composizione è stato raggiunto. Termina gli "
+"spazi aperti esistenti per aprirne di nuovi."
 
 #. Missing key which is required to decrypt the content of a composition space
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
 msgid ""
 "Found no suitable key for composition space. Please re-compose your E-Mail."
 msgstr ""
-"Non è stata trovata una chiave appropriata per lo spazio di composizione."
-" Componi nuovamente il tuo messaggio."
+"Non è stata trovata una chiave appropriata per lo spazio di composizione. "
+"Componi nuovamente il tuo messaggio."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -9974,9 +10157,7 @@ msgstr ""
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:100
 msgid "Mail(s) could not be found in the given folder."
-msgstr ""
-"I messaggi non possono essere trovati nella cartella "
-"specificata."
+msgstr "I messaggi non possono essere trovati nella cartella specificata."
 
 #. *
 #. * The given E-Mail address "%1$s" is invalid.
@@ -10875,10 +11056,14 @@ msgstr "file"
 msgid "folder"
 msgstr "cartella"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr "%1$s ha condiviso la %2$s \"%3$s\" con te. Accedi per visualizzarla. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
+msgstr ""
+"%1$s ha condiviso il/la %2$s \"%3$s\" con te. Digita la password di"
+" condivisione per visualizzarlo/a."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -11304,8 +11489,8 @@ msgid ""
 "%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha condiviso il file \"%3$s\" con te. Fai clic sul pulsante"
-" seguente per visualizzarlo."
+"%1$s (%2$s) ha condiviso il file \"%3$s\" con te. Fai clic sul pulsante "
+"seguente per visualizzarlo."
 
 #. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
@@ -11331,8 +11516,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s images with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$s immagini con te. Fai clic sul pulsante seguente"
-" per visualizzarle."
+"%1$s (%2$s) ha condiviso %3$s immagini con te. Fai clic sul pulsante "
+"seguente per visualizzarle."
 
 #. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
@@ -11340,8 +11525,8 @@ msgid ""
 "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
 "below to view it."
 msgstr ""
-"%1$s (%2$s) ha condiviso l'elemento %3$s con te. Fai clic sul pulsante"
-" seguente per visualizzarlo."
+"%1$s (%2$s) ha condiviso l'elemento %3$s con te. Fai clic sul pulsante "
+"seguente per visualizzarlo."
 
 #. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
@@ -11349,8 +11534,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
 "view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$s elementi con te. Fai clic sul pulsante seguente"
-" per visualizzarli."
+"%1$s (%2$s) ha condiviso %3$s elementi con te. Fai clic sul pulsante "
+"seguente per visualizzarli."
 
 #. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
@@ -11367,8 +11552,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d folders with you. Please click the button below "
 "to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$d cartelle con te. Fai clic sul pulsante seguente"
-" per visualizzarle."
+"%1$s (%2$s) ha condiviso %3$d cartelle con te. Fai clic sul pulsante "
+"seguente per visualizzarle."
 
 #. * $username ($user_email) has shared calendar $folder with you. Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
@@ -11385,8 +11570,8 @@ msgid ""
 "%1$s (%2$s) has shared %3$d calendars with you. Please click the button "
 "below to view them."
 msgstr ""
-"%1$s (%2$s) ha condiviso %3$d calendari con te. Fai clic sul pulsante"
-" seguente per visualizzarli."
+"%1$s (%2$s) ha condiviso %3$d calendari con te. Fai clic sul pulsante "
+"seguente per visualizzarli."
 
 #. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
@@ -14374,6 +14559,11 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s ha condiviso la %2$s \"%3$s\" con te. Accedi per visualizzarla. "
 
 #~ msgid "The operation is forbidden"
 #~ msgstr "L'operazione è vietato"
@@ -17494,9 +17684,6 @@ msgstr "Zulu"
 #~ msgid "Could not find data provider for id: %1$s"
 #~ msgstr "Impossibile trovare il fornitore dati per l'id: %1$s"
 
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Parametro mancante: %1$s"
-
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Fornitore sconosciuto: %1$s"
 
@@ -18336,9 +18523,6 @@ msgstr "Zulu"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "L'interruzione della verifica di coerenza MBean non è riuscita."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "Errore SQL: %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -20122,9 +20306,6 @@ msgstr "Zulu"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "È stato rilevato un allegato potenzialmente pericoloso."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "Errore JSON: %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Parametro non valido \"%1$s\": %2$s"

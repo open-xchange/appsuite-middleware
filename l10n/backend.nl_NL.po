@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-12 00:01+0100\n"
+"PO-Revision-Date: 2019-04-22 08:39+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@workshop-chapina.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -1268,8 +1268,8 @@ msgid ""
 "The remote SchedJoules service is unavailable at the moment. There is "
 "nothing we can do about it. Please try again later."
 msgstr ""
-"De externe SchedJoules dienst is momenteel niet beschikbaar. We kunnen er"
-" niets aan te doen. Probeer het later opnieuw."
+"De externe SchedJoules dienst is momenteel niet beschikbaar. We kunnen er "
+"niets aan te doen. Probeer het later opnieuw."
 
 #. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
@@ -1277,8 +1277,8 @@ msgid ""
 "An internal server error occurred on SchedJoules side. There is nothing we "
 "can do about it."
 msgstr ""
-"Een interne serverfout is ontstaan op de SchedJoules server. We kunnen hier"
-" niets aan doen."
+"Een interne serverfout is ontstaan op de SchedJoules server. We kunnen hier "
+"niets aan doen."
 
 #. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
@@ -1286,8 +1286,8 @@ msgid ""
 "A remote server error occurred on SchedJoules side. There is nothing we can "
 "do about it."
 msgstr ""
-"Een externe serverfout is ontstaan op de SchedJoules server. We kunnen hier"
-" niets aan doen."
+"Een externe serverfout is ontstaan op de SchedJoules server. We kunnen hier "
+"niets aan doen."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1436,8 +1436,8 @@ msgid ""
 "The changes could not be applied because a newer version of the appointment "
 "already exists."
 msgstr ""
-"De veranderingen konden niet toegepast worden omdat een nieuwere versie van"
-" de afspraak reeds bestaat."
+"De veranderingen konden niet toegepast worden omdat een nieuwere versie van "
+"de afspraak reeds bestaat."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
@@ -2812,8 +2812,8 @@ msgstr "Een map met de naam \"%1$s\" bestaat al in \"%2$s\"."
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
 msgstr ""
-"Push notificaties via long polling is uitgeschakeld voor gebruiker \"%1$s\""
-" in context \"%1$s\""
+"Push notificaties via long polling is uitgeschakeld voor gebruiker \"%1$s\" "
+"in context \"%1$s\""
 
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
@@ -4709,7 +4709,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Ongeldige configuratie: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
@@ -4855,8 +4857,8 @@ msgid ""
 "An error has occurred on the remote Microsoft end-point. There is nothing we "
 "can do about it. Try again later."
 msgstr ""
-"Er is een fout ontstaan in het externe Microsoft end-point. We kunnen hier"
-" niets aan doen. Probeer het later opnieuw."
+"Er is een fout ontstaan in het externe Microsoft end-point. We kunnen hier "
+"niets aan doen. Probeer het later opnieuw."
 
 #. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
@@ -4864,8 +4866,8 @@ msgid ""
 "Unable to retrieve the contact photo for contact with id '%1$s'. There is "
 "nothing we can do about it. Try again later."
 msgstr ""
-"Het is niet mogelijk de contactfoto op te halen voor het contact met id '"
-"%1$s'. We kunnen er niets aan doen. Probeer het later nog eens."
+"Het is niet mogelijk de contactfoto op te halen voor het contact met id "
+"'%1$s'. We kunnen er niets aan doen. Probeer het later nog eens."
 
 #. The copying of file %1$s failed. There is nothing we can do about it. Try again later
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
@@ -4873,8 +4875,8 @@ msgid ""
 "The copying of file %1$s failed. There is nothing we can do about it. Try "
 "again later."
 msgstr ""
-"Het kopiëren van het bestand %1$s is mislukt. We kunnen er niets aan doen."
-" Probeer het later opnieuw."
+"Het kopiëren van het bestand %1$s is mislukt. We kunnen er niets aan doen. "
+"Probeer het later opnieuw."
 
 #. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
@@ -4882,8 +4884,8 @@ msgid ""
 "Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
 "do about it. Try again later."
 msgstr ""
-"Het uploaden van het bestand '%1$s' naar de map '%2$s' is mislukt. We kunnen"
-" er niets aan doen. Probeer het later nog een keer."
+"Het uploaden van het bestand '%1$s' naar de map '%2$s' is mislukt. We kunnen "
+"er niets aan doen. Probeer het later nog een keer."
 
 #. The folder does not exist.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
@@ -4900,6 +4902,197 @@ msgstr ""
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "U heeft geen toestemming om de hoofdmap te verwijderen."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr ""
+"Dit account is geblokkeerd. Wacht alstublieft %1$d minuten en probeer opnieuw."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr ""
+"Er is een andere aanmeldpogingen voor deze gebruiker actief. Wacht"
+" alstublieft."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Mijn Reservekopie"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr ""
+"Primaire authenticatie apparaten moeten ingesteld worden voordat backup"
+" apparaten ingesteld kunnen worden."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Uw authenticatiecode is:"
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Mijn Telefoon"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Authenticator %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Apparaat %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Ontbrekende multifactor authenticatie"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Ongeldige multifactor authenticatie"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr ""
+"Er is een fout ontstaan tijdens aanmaken/berekenen van de"
+" authenticatiefactor: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "JSON-fout: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "De gevraagde dienst %1$s is onbekend."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "De gevraagde dienst %1$s is niet beschikbaar voor de gebruiker."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr ""
+"Multifactor authenticatie is nodig maar apparaat-identificatie ontbreekt"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Het gevraagde apparaat is onbekend"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr ""
+"Een onbekende fout is ontstaan tijdens de multifactor authenticatie: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Multifactor authenticatie is gevraagd maar er is geen dienst gekozen"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "SQL-fout: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Ontbrekende parameter: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Het apparaat is reeds geregistreerd"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr ""
+"Deze actie vereist een recente multifactor authenticatie. Ontbrekende"
+" multifactor parameters voor deze actie"
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Dit apparaat is niet geregistreerd."
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Geen apparaten gevonden voor deze dienstverlener"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr ""
+"Het gegeven argument \"%1$s\" met de lengte %2$s is groter dan de toegestane"
+" lengte voor %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "Het registreren is mislukt"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Het is niet mogelijk het apparaat te verwijderen"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "De authenticatie is mislukt"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "De authenticatie is mislukt: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr ""
+"De authenticatie is mislukt. Er zijn totaal %1$d pogingen toegestaan voordat"
+" u tijdelijk wordt uitgesloten."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -5245,8 +5438,8 @@ msgstr "'%1$s' OAuth dienst is niet voor u ingeschakeld."
 msgid ""
 "No password mechanism available for identifier '%s'. Cannot handle password."
 msgstr ""
-"Er is geen wachtwoordmechanisme beschikbaar voor id '%s'. Kan geen wachtwoord"
-" verwerken."
+"Er is geen wachtwoordmechanisme beschikbaar voor id '%s'. Kan geen "
+"wachtwoord verwerken."
 
 #. *
 #. * New password too short.
@@ -5943,8 +6136,8 @@ msgid ""
 "The remote '%2$s' service is unavailable at the moment. There is nothing we "
 "can do about it. Please try again later."
 msgstr ""
-"De externe '%2$s' server is momenteel niet beschikbaar. We kunnen hier niets"
-" aan doen. Probeer het alstublieft later opnieuw."
+"De externe '%2$s' server is momenteel niet beschikbaar. We kunnen hier niets "
+"aan doen. Probeer het alstublieft later opnieuw."
 
 #. An internal server error occurred on '%1$s' side. There is nothing we can do about it.
 #: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:67
@@ -5952,8 +6145,8 @@ msgid ""
 "An internal server error occurred on '%2$s' side. There is nothing we can do "
 "about it."
 msgstr ""
-"Een interne serverfout is ontstaan op de '%2$s' server. We kunnen hier niets"
-" aan doen."
+"Een interne serverfout is ontstaan op de '%2$s' server. We kunnen hier niets "
+"aan doen."
 
 #. A remote server error occurred on '%1$s' side. There is nothing we can do about it.
 #: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:69
@@ -5961,8 +6154,8 @@ msgid ""
 "A remote server error occurred on '%2$s' side. There is nothing we can do "
 "about it."
 msgstr ""
-"Een externe serverfout is ontstaan op de '%2$s' server. We kunnen hier niets"
-" aan doen."
+"Een externe serverfout is ontstaan op de '%2$s' server. We kunnen hier niets "
+"aan doen."
 
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
@@ -9828,7 +10021,8 @@ msgstr ""
 msgid ""
 "The operation cannot be performed because composed message is not a reply"
 msgstr ""
-"De actie kan niet uitgevoerd worden omdat het gemaakte bericht geen reactie is"
+"De actie kan niet uitgevoerd worden omdat het gemaakte bericht geen reactie "
+"is"
 
 #. Found no such attachment %1$s in composition space %2$s
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:75
@@ -9846,16 +10040,16 @@ msgid ""
 "Maximum number of composition spaces is reached. Please terminate existing "
 "open spaces in order to open new ones."
 msgstr ""
-"Het maximum aantal compositieruimtes is bereikt. Sluit bestaande ruimtes af"
-" alvorens u nieuwe kan openen."
+"Het maximum aantal compositieruimtes is bereikt. Sluit bestaande ruimtes af "
+"alvorens u nieuwe kan openen."
 
 #. Missing key which is required to decrypt the content of a composition space
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
 msgid ""
 "Found no suitable key for composition space. Please re-compose your E-Mail."
 msgstr ""
-"Geen geschikte sleutel gevonden voor de compositieruimte. Maak uw"
-" e-mailbericht alstublieft opnieuw."
+"Geen geschikte sleutel gevonden voor de compositieruimte. Maak uw e-"
+"mailbericht alstublieft opnieuw."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10877,12 +11071,14 @@ msgstr "bestand"
 msgid "folder"
 msgstr "map"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
 msgstr ""
-"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Meld u alstublieft aan om deze "
-"te zien."
+"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Geef het gedeelde wachtwoord om"
+" deze te zien."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -14375,6 +14571,12 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zoeloe"
 
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s heeft het %2$s \"%3$s\" met u gedeeld. Meld u alstublieft aan om "
+#~ "deze te zien."
+
 #~ msgid "The operation is forbidden"
 #~ msgstr "De actie is niet toegestaan"
 
@@ -17433,9 +17635,6 @@ msgstr "Zoeloe"
 #~ msgid "Could not find data provider for id: %1$s"
 #~ msgstr "Kan de gegevensbron niet vinden voor id: %1$s"
 
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Ontbrekende parameter: %1$s"
-
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Onbekende dienstverlener: %1$s"
 
@@ -18263,9 +18462,6 @@ msgstr "Zoeloe"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "Afmelden van controle MBean is mislukt."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "SQL-fout: %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -19990,9 +20186,6 @@ msgstr "Zoeloe"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "Er is een schadelijk aanhangsel gevonden."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "JSON-fout: %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Ongeldige parameter \"%1$s\": %2$s"

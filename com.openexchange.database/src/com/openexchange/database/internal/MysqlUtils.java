@@ -331,4 +331,14 @@ public class MysqlUtils {
         }
     }
 
+    /**
+     * Gets the connection identifier.
+     *
+     * @param con The connection
+     * @return The connection identifier or <code>0</code> (zero)
+     */
+    public static long getConnectionId(Connection con) {
+        return (con instanceof com.mysql.jdbc.MySQLConnection) ? ((com.mysql.jdbc.MySQLConnection) con).getId() : 0L;
+    }
+
 }

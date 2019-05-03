@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.ArrayUtils;
+import org.slf4j.Logger;
 import com.google.common.collect.Lists;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.config.admin.HideAdminService;
@@ -85,6 +86,8 @@ import com.openexchange.user.UserService;
  */
 public class HideAdminServiceImpl implements HideAdminService {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HideAdminServiceImpl.class);
+
     private final LeanConfigurationService leanConfigurationService;
     private final ContextService contextService;
     private final UserService userService;
@@ -108,38 +111,74 @@ public class HideAdminServiceImpl implements HideAdminService {
         return contextId > 0 ? leanConfigurationService.getBooleanProperty(-1, contextId, HideAdminProperty.SHOW_ADMIN_ENABLED) : true;
     }
 
-    private int getAdminUserId(int contextId) throws OXException {
-        return contextService.getContext(contextId).getMailadmin();
+    /**
+     * Returns the user id from the administrator of the given context or -1 if an error occurred.
+     *
+     * @param contextId The context id
+     * @return int user id of the administrator or -1 in case of an error
+     */
+    private int getAdminUserId(int contextId) {
+        try {
+            return contextService.getContext(contextId).getMailadmin();
+        } catch (OXException e) {
+            LOG.info("Unable to retrieve user id for admin.", e);
+            return -1;
+        }
     }
 
-    private int getAdminContactId(int contextId) throws OXException {
+    /**
+     * Returns the contact id from the administrator of the given context or -1 if an error occurred.
+     *
+     * @param contextId The context id
+     * @return int contact id of the administrator or -1 in case of an error
+     */
+    private int getAdminContactId(int contextId) {
         int adminUserId = getAdminUserId(contextId);
-        return userService.getUser(adminUserId, contextId).getContactId();
+        if (adminUserId < 0) {
+            return adminUserId;
+        }
+        try {
+            return userService.getUser(adminUserId, contextId).getContactId();
+        } catch (OXException e) {
+            LOG.info("Unable to retrieve contact id for admin.", e);
+            return -1;
+        }
     }
 
     @Override
-    public SearchIterator<Contact> removeAdminFromContacts(int contextId, @Nullable SearchIterator<Contact> searchIterator) throws OXException {
+    public SearchIterator<Contact> removeAdminFromContacts(int contextId, @Nullable SearchIterator<Contact> searchIterator) {
         if (searchIterator == null || searchIterator.size() == 0 || showAdmin(contextId)) {
             return searchIterator;
         }
 
         int adminContactId = getAdminContactId(contextId);
-        return new FilteringSearchIterator<Contact>(searchIterator) {
+        if (adminContactId < 0) {
+            return searchIterator;
+        }
+        try {
+            return new FilteringSearchIterator<Contact>(searchIterator) {
 
-            @Override
-            public boolean accept(Contact thing) {
-                return thing.getObjectID() != adminContactId;
-            }
-        };
+                @Override
+                public boolean accept(Contact thing) {
+                    return thing.getObjectID() != adminContactId;
+                }
+            };
+        } catch (OXException e) {
+            LOG.info("Unable to initialize the SearchIterator.", e);
+        }
+        return searchIterator;
     }
 
     @Override
-    public Group[] removeAdminFromGroupMemberList(int contextId, @Nullable Group[] groupList) throws OXException {
+    public Group[] removeAdminFromGroupMemberList(int contextId, @Nullable Group[] groupList) {
         if (groupList == null || groupList.length == 0 || showAdmin(contextId)) {
             return groupList;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return groupList;
+        }
 
         for (int i = 0; i < groupList.length; i++) {
             Group group = groupList[i];
@@ -154,12 +193,15 @@ public class HideAdminServiceImpl implements HideAdminService {
     }
 
     @Override
-    public int[] addAdminToGroupMemberList(int contextId, @Nullable int[] originalGroupMember, @Nullable int[] updatedGroupMember) throws OXException {
+    public int[] addAdminToGroupMemberList(int contextId, @Nullable int[] originalGroupMember, @Nullable int[] updatedGroupMember) {
         if (originalGroupMember == null || originalGroupMember.length == 0 || updatedGroupMember == null || showAdmin(contextId)) {
             return updatedGroupMember;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return updatedGroupMember;
+        }
         int[] newGroupMember = ArrayUtils.clone(updatedGroupMember);
         if (ArrayUtils.contains(newGroupMember, adminUserId)) {
             return newGroupMember;
@@ -173,12 +215,15 @@ public class HideAdminServiceImpl implements HideAdminService {
     }
 
     @Override
-    public UserizedFolder[] removeAdminFromFolderPermissions(int contextId, @Nullable UserizedFolder[] folderList) throws OXException {
+    public UserizedFolder[] removeAdminFromFolderPermissions(int contextId, @Nullable UserizedFolder[] folderList) {
         if (folderList == null || folderList.length == 0 || showAdmin(contextId)) {
             return folderList;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return folderList;
+        }
 
         List<PermissionFilterUserizedFolderImpl> copy = Lists.newArrayList();
         for (UserizedFolder folder : folderList) {
@@ -190,12 +235,15 @@ public class HideAdminServiceImpl implements HideAdminService {
     }
 
     @Override
-    public Permission[] addAdminToFolderPermissions(int contextId, @Nullable Permission[] originalPermissions, @Nullable Permission[] updatedPermissions) throws OXException {
+    public Permission[] addAdminToFolderPermissions(int contextId, @Nullable Permission[] originalPermissions, @Nullable Permission[] updatedPermissions) {
         if (originalPermissions == null || originalPermissions.length == 0 || updatedPermissions == null || showAdmin(contextId)) {
             return updatedPermissions;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return updatedPermissions;
+        }
         List<Permission> newPermissions = new ArrayList<>(Arrays.asList(updatedPermissions));
         Optional<Permission> adminInUpdate = newPermissions.stream().filter(x -> x.getEntity() == adminUserId).findFirst();
         if (adminInUpdate.isPresent()) {
@@ -211,66 +259,92 @@ public class HideAdminServiceImpl implements HideAdminService {
     }
 
     @Override
-    public User[] removeAdminFromUsers(int contextId, @Nullable User[] userList) throws OXException {
+    public User[] removeAdminFromUsers(int contextId, @Nullable User[] userList) {
         if (userList == null || userList.length == 0 || showAdmin(contextId)) {
             return userList;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return userList;
+        }
         return Arrays.stream(userList).filter(x -> x.getId() != adminUserId).toArray(User[]::new);
     }
 
     @Override
-    public int[] removeAdminFromUserIds(int contextId, @Nullable int[] userIds) throws OXException {
+    public int[] removeAdminFromUserIds(int contextId, @Nullable int[] userIds) {
         if (userIds == null || userIds.length == 0 || showAdmin(contextId)) {
             return userIds;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return userIds;
+        }
         return Arrays.stream(userIds).filter(x -> x != adminUserId).toArray();
     }
 
     @Override
-    public List<ObjectPermission> removeAdminFromObjectPermissions(int contextId, @Nullable List<ObjectPermission> objectPermissions) throws OXException {
+    public List<ObjectPermission> removeAdminFromObjectPermissions(int contextId, @Nullable List<ObjectPermission> objectPermissions) {
         if (objectPermissions == null || objectPermissions.isEmpty() || showAdmin(contextId)) {
             return objectPermissions;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return objectPermissions;
+        }
         return objectPermissions.stream().filter(x -> x.getEntity() != adminUserId).collect(Collectors.toList());
     }
 
     @Override
-    public TimedResult<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable final TimedResult<DocumentMetadata> documents) throws OXException {
+    public TimedResult<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable final TimedResult<DocumentMetadata> documents) {
         if (documents == null || showAdmin(contextId)) {
             return documents;
         }
-        return new CustomizableTimedResult<DocumentMetadata>(documents, new PermissionFilterDocumentCustomizer(getAdminUserId(contextId)));
+        int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return documents;
+        }
+        return new CustomizableTimedResult<DocumentMetadata>(documents, new PermissionFilterDocumentCustomizer(adminUserId));
     }
 
     @Override
-    public SearchIterator<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable SearchIterator<DocumentMetadata> searchIterator) throws OXException {
+    public SearchIterator<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable SearchIterator<DocumentMetadata> searchIterator) {
         if (searchIterator == null || searchIterator.size() == 0 || showAdmin(contextId)) {
             return searchIterator;
         }
-        return new CustomizableSearchIterator<>(searchIterator, new PermissionFilterDocumentCustomizer(getAdminUserId(contextId)));
+        int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return searchIterator;
+        }
+
+        return new CustomizableSearchIterator<>(searchIterator, new PermissionFilterDocumentCustomizer(adminUserId));
     }
 
     @Override
-    public Delta<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable Delta<DocumentMetadata> delta) throws OXException {
+    public Delta<DocumentMetadata> removeAdminFromObjectPermissions(int contextId, @Nullable Delta<DocumentMetadata> delta) {
         if (delta == null || showAdmin(contextId)) {
             return delta;
         }
-        return new CustomizableDelta<>(delta, new PermissionFilterDocumentCustomizer(getAdminUserId(contextId)));
+        int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return delta;
+        }
+        return new CustomizableDelta<>(delta, new PermissionFilterDocumentCustomizer(adminUserId));
     }
 
     @Override
-    public List<ObjectPermission> addAdminToObjectPermissions(int contextId, @Nullable List<ObjectPermission> originalPermissions, @Nullable List<ObjectPermission> updatedPermissions) throws OXException {
+    public List<ObjectPermission> addAdminToObjectPermissions(int contextId, @Nullable List<ObjectPermission> originalPermissions, @Nullable List<ObjectPermission> updatedPermissions) {
         if (originalPermissions == null || originalPermissions.isEmpty() || updatedPermissions == null || showAdmin(contextId)) {
             return updatedPermissions;
         }
 
         int adminUserId = getAdminUserId(contextId);
+        if (adminUserId < 0) {
+            return updatedPermissions;
+        }
+
         List<ObjectPermission> newPermissions = new ArrayList<>(updatedPermissions);
         Optional<ObjectPermission> adminInUpdate = newPermissions.stream().filter(x -> x.getEntity() == adminUserId).findFirst();
         if (adminInUpdate.isPresent()) {

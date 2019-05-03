@@ -51,6 +51,8 @@ package com.openexchange.file.storage.googledrive;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.java.Strings;
 
 /**
@@ -65,7 +67,7 @@ public final class GoogleDriveUtil {
     /**
      * Parses the exception code from the given {@link IOException} <p>
      * The errors message is expected to look like
-     * <pre> 
+     * <pre>
      * 400 Bad Request
      * {
      *  "code" : 400,
@@ -79,7 +81,7 @@ public final class GoogleDriveUtil {
      *  "message" : "Invalid field selection id.parents"
      * }
      * </pre>
-     * 
+     *
      * @param e The {@link IOException}
      * @return The status code or <code>-1</code> if no code can be parsed
      */
@@ -87,8 +89,7 @@ public final class GoogleDriveUtil {
     public static int getStatusCode(IOException e) {
         if (null != e && Strings.isNotEmpty(e.getMessage())) {
             try {
-                Integer status = Strings.isEmpty(e.getMessage()) ? Integer.valueOf(-1) : Integer.valueOf(e.getMessage().substring(0, 3));
-                return null == status ? -1 : status.intValue();
+                return Strings.isEmpty(e.getMessage()) ? -1 : Integer.parseInt(e.getMessage().substring(0, 3));
             } catch (NumberFormatException nfe) {
                 // Ignore and fall through
             }
@@ -98,22 +99,33 @@ public final class GoogleDriveUtil {
 
     /**
      * Sets parent folders to a {@link com.google.api.services.drive.model.File}
-     * 
+     *
      * @param file The file to set the parent in
      * @param parentIds The identifier of the parent folder
      * @see <a href="https://developers.google.com/drive/api/v3/reference/files/copy">Files: copy</a>
      */
     public static void setParentFolder(com.google.api.services.drive.model.File file, String... parentIds) {
-        ArrayList<String> parents = new ArrayList<>(parentIds.length);
-        for (String parent : parentIds) {
-            parents.add(parent);
+        if (parentIds == null) {
+            return;
         }
-        file.setParents(parents);
+        int length = parentIds.length;
+        if (length <= 0) {
+            return;
+        }
+        if (length == 1) {
+            file.setParents(Collections.singletonList(parentIds[0]));
+        } else {
+            List<String> parents = new ArrayList<>(length);
+            for (String parent : parentIds) {
+                parents.add(parent);
+            }
+            file.setParents(parents);
+        }
     }
 
     /**
      * Get the parents of the given file
-     * 
+     *
      * @param file The file to get the parents from
      * @return Parents as comma separated list
      */

@@ -191,6 +191,18 @@ public final class Configuration {
         if (props.isEmpty()) {
             throw DBPoolingExceptionCodes.MISSING_CONFIGURATION.create();
         }
+        if (!props.containsKey(Property.REPLICATION_MONITOR.getPropertyName())) {
+            boolean replicationMonitor = service.getBoolProperty(Property.REPLICATION_MONITOR.getPropertyName(), true);
+            props.put(Property.REPLICATION_MONITOR.getPropertyName(), replicationMonitor ? "true" : "false");
+        }
+        if (!props.containsKey(Property.CHECK_WRITE_CONS.getPropertyName())) {
+            boolean alwaysCheckOnActivate = service.getBoolProperty(Property.CHECK_WRITE_CONS.getPropertyName(), false);
+            props.put(Property.CHECK_WRITE_CONS.getPropertyName(), alwaysCheckOnActivate ? "true" : "false");
+        }
+        if (!props.containsKey(Property.ALWAYS_CHECK_ON_ACTIVATE.getPropertyName())) {
+            boolean alwaysCheckOnActivate = service.getBoolProperty(Property.ALWAYS_CHECK_ON_ACTIVATE.getPropertyName(), false);
+            props.put(Property.ALWAYS_CHECK_ON_ACTIVATE.getPropertyName(), alwaysCheckOnActivate ? "true" : "false");
+        }
         propsReference.set(props);
         readJdbcProps(service);
         separateReadWrite();

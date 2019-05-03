@@ -64,6 +64,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.database.GeneralDatabaseConnectionListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.IOs;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pooling.PoolingException;
 
@@ -194,6 +195,10 @@ public class ReplicationMonitor {
                         LOG.warn("", e);
                         clientTransaction = -1;
                     } else {
+                        if (IOs.isEOFException(e)) {
+                            // Communications link failure: connection to database was unexpectedly lost
+                            LOG.warn("Unexpectedly lost connection to database", e);
+                        }
                         try {
                             retval.close();
                         } catch (final SQLException e1) {
@@ -201,7 +206,7 @@ public class ReplicationMonitor {
                             LOG.error("", e2);
                         }
                         retval = null;
-                        // Wait with expontential back-off
+                        // Wait with exponential back-off
                         long nanosToWait = TimeUnit.NANOSECONDS.convert((tries * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
                         LockSupport.parkNanos(nanosToWait);
                     }

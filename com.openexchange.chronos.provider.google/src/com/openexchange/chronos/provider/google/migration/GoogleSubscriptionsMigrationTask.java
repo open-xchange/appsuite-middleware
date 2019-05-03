@@ -246,7 +246,14 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables", "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask" };
+        return new String[] { 
+            "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", 
+            "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", 
+            "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask", 
+            "com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables", 
+            "com.openexchange.tools.oxfolder.property.sql.CreateFolderUserPropertyTask", 
+            "com.openexchange.groupware.update.tasks.AddUserSaltColumnTask" 
+        };
     }
 
     @Override

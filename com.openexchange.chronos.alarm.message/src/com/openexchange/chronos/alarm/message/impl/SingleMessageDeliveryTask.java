@@ -279,11 +279,11 @@ class SingleMessageDeliveryTask implements Runnable {
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
         this.rateLimitFactory = rateLimitFactory;
         this.recurrenceService = recurrenceService;
-
     }
 
     @Override
     public void run() {
+        LOG.trace("Started SingleMessageDeliveryTask for event {} and alarm {} in context {}", trigger.getEventId(), I(alarm.getId()), I(ctx.getContextId()));
         Connection writeCon = null;
         boolean isReadOnly = true;
         boolean processFinished = false;
@@ -317,13 +317,14 @@ class SingleMessageDeliveryTask implements Runnable {
                 writeCon.commit();
             }
         } catch (OXException | SQLException e) {
+            LOG.error("Unable to send message.", e);
             if (writeCon != null) {
                 // rollback the last transaction
                 Databases.rollback(writeCon);
                 // if the error occurred during the process retry the hole operation once
                 if (processFinished == false) {
                     try {
-                        LOG.debug("Unable to send message. Retrying operation...", e);
+                        LOG.debug("Retrying operation...");
                         writeCon.setAutoCommit(false);
                         // do the delivery and update the db entries (e.g. like setting the acknowledged field)
                         Event event = prepareEvent(writeCon);
@@ -338,8 +339,9 @@ class SingleMessageDeliveryTask implements Runnable {
                             checkEvent(writeCon, event);
                             writeCon.commit();
                         }
-                    } catch (@SuppressWarnings("unused") SQLException | OXException e1) {
+                    } catch (SQLException | OXException e1) {
                         // Nothing that can be done. Do a rollback and reset the processed value if necessary
+                        LOG.trace(e1.getMessage(), e1);
                         Databases.rollback(writeCon);
                         if (processFinished == false) {
                             try {
@@ -352,6 +354,9 @@ class SingleMessageDeliveryTask implements Runnable {
                     }
                 }
             }
+        } catch(Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+            throw ex;
         } finally {
             callback.remove(new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             Databases.autocommit(writeCon);

@@ -171,7 +171,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         boolean poolable;
         if (running) {
             if (testOnDeactivate) {
-                poolable = lifecycle.validate(metaData);
+                poolable = lifecycle.validate(metaData, false);
             } else {
                 poolable = lifecycle.deactivate(metaData);
             }
@@ -327,7 +327,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 created = true;
             }
             // LifeCycle
-            if (!lifecycle.activate(retval, alwaysCheckOnActivate) || (testOnActivate && !lifecycle.validate(retval))) {
+            if (!lifecycle.activate(retval, alwaysCheckOnActivate) || (testOnActivate && !lifecycle.validate(retval, true))) {
                 lock.lock();
                 try {
                     data.removeActive(retval);
@@ -507,9 +507,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
     public void run() {
         final long startTime = System.currentTimeMillis();
         LOG.trace("Starting cleaner run.");
-        final List<PooledData<T>> toCheck = new ArrayList<PooledData<T>>();
-        final List<PooledData<T>> removed = new ArrayList<PooledData<T>>();
-        final List<PooledData<T>> notReturned = new ArrayList<PooledData<T>>();
+        List<PooledData<T>> toCheck = null;
+        List<PooledData<T>> removed = null;
+        List<PooledData<T>> notReturned = null;
         lock.lock();
         try {
             int idleSize = data.numIdle();
@@ -525,11 +525,17 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 if (remove) {
                     data.removeIdle(index);
                     idleSize = data.numIdle();
+                    if (removed == null) {
+                        removed = new ArrayList<PooledData<T>>();
+                    }
                     removed.add(metaData);
                 } else if (testOnIdle) {
                     // Validation check must be done outside lock.
                     data.removeIdle(index);
                     idleSize = data.numIdle();
+                    if (toCheck == null) {
+                        toCheck = new ArrayList<PooledData<T>>();
+                    }
                     toCheck.add(metaData);
                 } else {
                     index++;
@@ -539,6 +545,9 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
             while (iter.hasNext()) {
                 final PooledData<T> metaData = iter.next();
                 if (metaData.getTimeDiff() > maxIdleTime) {
+                    if (notReturned == null) {
+                        notReturned = new ArrayList<PooledData<T>>();
+                    }
                     notReturned.add(metaData);
                     iter.remove();
                     idleAvailable.signal();
@@ -547,36 +556,44 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } finally {
             lock.unlock();
         }
-        for (final PooledData<T> metaData : toCheck) {
-            if (lifecycle.activate(metaData, false) && lifecycle.validate(metaData)) {
-                lock.lock();
-                try {
-                    data.addIdle(metaData);
-                } finally {
-                    lock.unlock();
+        if (toCheck != null ) {
+            for (PooledData<T> metaData : toCheck) {
+                if (lifecycle.activate(metaData, false) && lifecycle.validate(metaData, true)) {
+                    lock.lock();
+                    try {
+                        data.addIdle(metaData);
+                    } finally {
+                        lock.unlock();
+                    }
+                } else {
+                    if (removed == null) {
+                        removed = new ArrayList<PooledData<T>>();
+                    }
+                    removed.add(metaData);
                 }
-            } else {
-                removed.add(metaData);
             }
         }
-        for (final PooledData<T> metaData : removed) {
-            lifecycle.destroy(metaData.getPooled());
+        if (removed != null) {
+            for (final PooledData<T> metaData : removed) {
+                lifecycle.destroy(metaData.getPooled());
+            }
         }
-        StringBuilder sb = null;
-        for (final PooledData<T> metaData : notReturned) {
-            if (null == sb) {
-                sb = new StringBuilder(64);
-            } else {
-                sb.setLength(0);
+        if (notReturned != null) {
+            StringBuilder sb = new StringBuilder(64);
+            for (final PooledData<T> metaData : notReturned) {
+                if (sb.length() > 0) {
+                    sb.setLength(0);
+                }
+                sb.append(lifecycle.getObjectName());
+                sb.append(" object has not been returned to the pool. Check further messages to make sure the object was terminated.");
+                sb.append(" UseTime: ").append(metaData.getTimeDiff());
+                sb.append(" Object: ").append(metaData.getPooled());
+                final PoolingException e = new PoolingException(sb.toString());
+                if (testThreads && null != metaData.getTrace()) {
+                    e.setStackTrace(metaData.getTrace());
+                }
+                LOG.error(e.getMessage(), e);
             }
-            sb.append(lifecycle.getObjectName()).append(" object has not been returned to the pool. Check further messages to make sure the object was terminated.");
-            sb.append(" UseTime: ").append(metaData.getTimeDiff());
-            sb.append(" Object: ").append(metaData.getPooled());
-            final PoolingException e = new PoolingException(sb.toString());
-            if (testThreads && null != metaData.getTrace()) {
-                e.setStackTrace(metaData.getTrace());
-            }
-            LOG.error(e.getMessage(), e);
         }
         LOG.trace("Clean run ending. Time: {}", L(getWaitTime(startTime)));
     }

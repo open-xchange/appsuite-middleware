@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-03-05 13:33+0100\n"
+"PO-Revision-Date: 2019-04-09 09:16+0200\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
 "Language: ru_RU\n"
@@ -1218,7 +1218,9 @@ msgstr "Удаленный сервис SchedJoules недоступен. Пов
 msgid ""
 "An internal server error occurred on SchedJoules side. There is nothing we "
 "can do about it."
-msgstr "SchedJoules вернул внутреннюю ошибку сервера. К сожалению, мы ничего не можем сделать."
+msgstr ""
+"SchedJoules вернул внутреннюю ошибку сервера. К сожалению, мы ничего не "
+"можем сделать."
 
 #. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
@@ -2683,7 +2685,9 @@ msgstr "Каталог с именем «%1$s» уже существует в �
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
 msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
-msgstr "Для пользователя \"%1$s\" в контексте \"%1$s\" push-функция через long polling отключена."
+msgstr ""
+"Для пользователя \"%1$s\" в контексте \"%1$s\" push-функция через long "
+"polling отключена."
 
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
@@ -4484,7 +4488,9 @@ msgid "Invalid configuration: %1$s"
 msgstr "Неверная конфигурация: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
+#. * A service is not available
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid "The required service %1$s is temporary not available. Please try again later."
 msgstr "Обязательная служба %1$s временно недоступна. Повторите попытку позже."
 
@@ -4532,6 +4538,7 @@ msgstr ""
 #: com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
 msgid "Maximum number of messages already stored for client %1$s"
 msgstr "Достигнуто максимальное число сообщений для клиента %1$s."
+
 
 #. No client identifier associated with session %1$s
 #: com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:66
@@ -4621,14 +4628,18 @@ msgstr "Недопустимая учетная запись OAuth."
 msgid ""
 "An error has occurred on the remote Microsoft end-point. There is nothing we "
 "can do about it. Try again later."
-msgstr "Произошла ошибка на удаленной точке Microsoft. К сожалению, мы ничего не можем сделать."
+msgstr ""
+"Произошла ошибка на удаленной точке Microsoft. К сожалению, мы ничего не "
+"можем сделать."
 
 #. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
 msgid ""
 "Unable to retrieve the contact photo for contact with id '%1$s'. There is "
 "nothing we can do about it. Try again later."
-msgstr "Не удалось получить фотографию контакта с идентификатором \"%1$s\" . Повторите попытку позже."
+msgstr ""
+"Не удалось получить фотографию контакта с идентификатором \"%1$s\" . "
+"Повторите попытку позже."
 
 #. The copying of file %1$s failed. There is nothing we can do about it. Try again later
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
@@ -4642,7 +4653,9 @@ msgstr "При копировании файла %1$s произошла оши�
 msgid ""
 "Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
 "do about it. Try again later."
-msgstr "Не удалось загрузить файл \"%1$s\" в папку \"%2$s\" сбой. Повторите попытку позже."
+msgstr ""
+"Не удалось загрузить файл \"%1$s\" в папку \"%2$s\" сбой. Повторите попытку "
+"позже."
 
 #. The folder does not exist.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
@@ -4658,6 +4671,180 @@ msgstr "Папка \"%1$s\" уже есть в папке \"%2$s\"."
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
 msgid "You are not allowed to delete the root folder."
 msgstr "Вы не можете удалить корневую папку."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid "This account has been locked out. Please wait %1$d minutes then try again."
+msgstr "Этот аккаунт был заблокирован. Подождите %1$d мин. и повторите попытку.ююжж"
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr "В данный момент осуществляется другая попытка аутентификации этого пользователя. Пожалуйста, подождите..."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Мои резервные коды"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr "Сначала необходимо настроить основные, а уже затем резервные устройства аутентифиации."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "Ваш код аутентификации: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Мой телефон"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "Аутентификатор %d"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "Устройство %d"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Отсутствует многофакторная аутентификация"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Недопустимая многофакторная аутентификация"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid "An error occured while creating/calculating the authentication factor: %1$s."
+msgstr "Во время создания/расчета фактора аутентификации произошла ошибка: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "Ошибка JSON: %s."
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "Неизвестный провайдер: %1$s"
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "Провайдер %1$s для этого пользователя недоступен."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr "Требуется многофакторная аутентификация, но отсутствует идентификатор устройства."
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "Запрашивается неизвестное устройство"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr "Неизвестная ошибка многофакторной аутентификации: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Требуется многофакторная аутентификация, но отсутствует имя провайдера."
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "Ошибка SQL: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Отсутствует параметр %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "Устройство уже зарегистрировано"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr "Для выполнения этой операции необходимо, чтобы недавно была выполнена многофакторная аутентификация. Отсутствуют параметры для этой операции."
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Это устройство не зарегистрировано"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Нет устройств для этого провайдера"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr "Длина аргумента \"%1$s\" составляет %2$s, что превышает максимально допустимую длину %3$s"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "Ошибка регистрации"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Не удалось удалить устройство"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "Сбой аутентификации"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "Сбой аутентификации: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr "Сбой аутентификации. У вас еть %1$d попытки, прежде чем аккаунт будет заблокирован."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -4974,6 +5161,7 @@ msgstr "Вам следует явно авторизовать %1$s, чтобы
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+
 msgid "The scope %1$s is not supported by the provider or has been disabled"
 msgstr "%1$s отключен или не поддерживается провайдером."
 
@@ -4984,7 +5172,9 @@ msgstr "Сервис OAuth «%1$s» не был подключен."
 
 #: com.openexchange.password.mechanism/src/com/openexchange/password/mechanism/exceptions/PasswordMechMessages.java:63
 msgid "No password mechanism available for identifier '%s'. Cannot handle password."
-msgstr "Для идентификатора \"%s\" механизм паролей недоступен. Работа с паролем невозможна."
+msgstr ""
+"Для идентификатора \"%s\" механизм паролей недоступен. Работа с паролем "
+"невозможна."
 
 #. *
 #. * New password too short.
@@ -5637,14 +5827,18 @@ msgstr "Удаленный сервис \"%2$s\" недоступен. Повт�
 msgid ""
 "An internal server error occurred on '%2$s' side. There is nothing we can do "
 "about it."
-msgstr "\"%2$s\" вернул внутреннюю ошибку сервера. К сожалению, мы ничего не можем сделать."
+msgstr ""
+"\"%2$s\" вернул внутреннюю ошибку сервера. К сожалению, мы ничего не можем "
+"сделать."
 
 #. A remote server error occurred on '%1$s' side. There is nothing we can do about it.
 #: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:69
 msgid ""
 "A remote server error occurred on '%2$s' side. There is nothing we can do "
 "about it."
-msgstr "\"%2$s\" вернул ошибку удаленного сервера. К сожалению, мы ничего не можем сделать."
+msgstr ""
+"\"%2$s\" вернул ошибку удаленного сервера. К сожалению, мы ничего не можем "
+"сделать."
 
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
@@ -6189,7 +6383,6 @@ msgstr "Недостаточно разрешений для чтения объ
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:168
 msgid "You do not have the appropriate permissions to create an object."
 msgstr "Недостаточно разрешений для создания объекта."
-
 
 #. *
 #. * You are trying to create a new recurring appointment from an exception. This is not possible.
@@ -6798,7 +6991,6 @@ msgstr "Unified mail"
 msgid ""
 "A new appointment was created by [created_by].\n"
 "You can check this appointment in your calendar:\n"
-""
 "[link]\n"
 "\n"
 "Appointment\n"
@@ -8272,6 +8464,7 @@ msgstr "Недопустимая длина пароля. Максимальна
 #. *
 #. * The parameter %s for this user is missing.
 #.
+
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:143
 msgid "The parameter \"%s\" for this user is missing."
 msgstr "Отсутствует параметр «%s» для этого пользователя."
@@ -9313,12 +9506,16 @@ msgstr "Вы не можете открыть общий доступ к вло�
 msgid ""
 "Maximum number of composition spaces is reached. Please terminate existing "
 "open spaces in order to open new ones."
-msgstr "Достигнуто максимальное количество открытых окон. Закройте некоторые окна, чтобы открыть новые."
+msgstr ""
+"Достигнуто максимальное количество открытых окон. Закройте некоторые окна, "
+"чтобы открыть новые."
 
 #. Missing key which is required to decrypt the content of a composition space
 #: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
 msgid "Found no suitable key for composition space. Please re-compose your E-Mail."
-msgstr "Не найден подходящий ключ для пространства составления письма. Создайте письмо заново."
+msgstr ""
+"Не найден подходящий ключ для пространства составления письма. Создайте "
+"письмо заново."
 
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -10282,12 +10479,12 @@ msgstr "файл"
 msgid "folder"
 msgstr "папка"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr ""
-"%1$s предоставляет вам доступ к %2$s «%3$s». Для просмотра необходимо "
-"авторизоваться. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
+msgstr "%1$s предоставляет вам доступ к %2$s «%3$s». Для просмотра необходимо ввести пароль."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -12653,7 +12850,6 @@ msgstr "Азия/Иркутск"
 msgid "Asia/Istanbul"
 msgstr "Азия/Стамбул"
 
-
 #: TimeZones.java:273
 msgid "Asia/Jakarta"
 msgstr "Азия/Джакарта"
@@ -12875,6 +13071,7 @@ msgid "Asia/Vientiane"
 msgstr "Азия/Вьентьян"
 
 #: TimeZones.java:328
+
 msgid "Asia/Vladivostok"
 msgstr "Азия/Владивосток"
 
@@ -13678,7 +13875,6 @@ msgstr "США/Индиана-Старк"
 msgid "US/Michigan"
 msgstr "США/Мичиган"
 
-
 #: TimeZones.java:529
 msgid "US/Mountain"
 msgstr "США/Горная часть"
@@ -13702,6 +13898,12 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Зулу"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s предоставляет вам доступ к %2$s «%3$s». Для просмотра необходимо "
+#~ "авторизоваться. "
 
 #~ msgid "The operation is forbidden"
 #~ msgstr "Операция запрещена"
@@ -14140,7 +14342,6 @@ msgstr "Зулу"
 
 #~ msgid ""
 #~ "The maximum allowed size of '%1$s' for an image in the signature is "
-
 #~ "reached."
 #~ msgstr ""
 #~ "Размер изображения в подписи превышает максимально допустимый (%1$s)."
@@ -14214,7 +14415,6 @@ msgstr "Зулу"
 
 #~ msgid "Your IMAP settings"
 #~ msgstr "Настройки IMAP"
-
 
 #~ msgid "The Apple platform"
 #~ msgstr "Платформа Apple"
