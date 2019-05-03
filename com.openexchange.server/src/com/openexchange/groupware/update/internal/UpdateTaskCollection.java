@@ -172,7 +172,7 @@ class UpdateTaskCollection {
         }
         // And sort them. Sorting this way prerequisites that every blocking task can be executed before any background task is scheduled.
         // Said in other words: Blocking tasks can not depend on background tasks.
-        retval = new UpdateTaskSorter().sort(schema.getExecutedList(), retval);
+        retval = new UpdateTaskSorter().sort(schema.getExecutedList(true), retval);
         return retval;
     }
 

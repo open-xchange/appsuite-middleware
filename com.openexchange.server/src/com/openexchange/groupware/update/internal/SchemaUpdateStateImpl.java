@@ -107,6 +107,14 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
 
     @Override
     public String[] getExecutedList() {
+        return getExecutedList(false);
+    }
+
+    @Override
+    public String[] getExecutedList(boolean successfulOnly) {
+        if (successfulOnly) {
+            return successfullyExecutedTasks.toArray((new String[successfullyExecutedTasks.size()]));
+        }
         Set<String> executedTasks = new HashSet<String>(successfullyExecutedTasks.size() + failedExecutedTasks.size());
         executedTasks.addAll(successfullyExecutedTasks);
         executedTasks.addAll(failedExecutedTasks);
