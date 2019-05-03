@@ -176,7 +176,7 @@ public class RRuleFactory {
 
         /**
          * Adds an until value to the rule
-         * 
+         *
          * @param until The until value as a zulu {@link DateTimeData}
          * @return this
          */
@@ -188,7 +188,7 @@ public class RRuleFactory {
 
         /**
          * Adds an interval value
-         * 
+         *
          * @param interval The interval
          * @return this
          */
@@ -200,7 +200,7 @@ public class RRuleFactory {
 
         /**
          * Adds a BYSETPOS value to the rule
-         * 
+         *
          * @param position The position
          * @return this
          */
@@ -211,8 +211,20 @@ public class RRuleFactory {
         }
 
         /**
+         * Adds a BYMONTHDAY value to the rule
+         *
+         * @param day The day of the month
+         * @return this
+         */
+        public RRuleBuilder addByMonthDay(int day) {
+            addSemicolon();
+            builder.append("BYMONTHDAY=").append(day);
+            return this;
+        }
+
+        /**
          * Adds a BYMONTH value to the rule
-         * 
+         *
          * @param month the month to add
          * @return this
          */
@@ -224,7 +236,7 @@ public class RRuleFactory {
 
         /**
          * Adds a BYDAY value to the rule
-         * 
+         *
          * @param days The days to add
          * @return this
          */
@@ -247,7 +259,7 @@ public class RRuleFactory {
 
         /**
          * builds the rrule
-         * 
+         *
          * @return the rrule string
          */
         public String build() {

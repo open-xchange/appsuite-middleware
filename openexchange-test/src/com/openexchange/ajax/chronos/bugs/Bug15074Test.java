@@ -49,43 +49,56 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
+import com.openexchange.ajax.chronos.factory.RRuleFactory.RRuleBuilder;
+import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link Bug15074Test}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug13942Test.class,
-    Bug14357Test.class,
-    Bug14679Test.class,
-    Bug15074Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug15074Test extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    /**
+     * Initializes a new {@link Bug15074Test}.
+     */
+    public Bug15074Test() {
+        super();
+    }
+
+    @Test
+    public void testBug() throws Exception {
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug15074Test", folderId);
+        Calendar start = Calendar.getInstance();
+        start.set(2007, Calendar.DECEMBER, 7, 0, 0, 0);
+        event.setStartDate(DateTimeUtil.getDateTime(start));
+
+        Calendar end = Calendar.getInstance();
+        end.set(2007, Calendar.DECEMBER, 8, 0, 0, 0);
+        event.setEndDate(DateTimeUtil.getDateTime(end));
+
+        String rrule = RRuleBuilder.create().addFrequency(RecurringFrequency.YEARLY).addInterval(1).addByMonth(Calendar.DECEMBER).addByMonthDay(7).build();
+        event.setRrule(rrule);
+        EventData createEvent = eventManager.createEvent(event, true);
+
+        Calendar cal = Calendar.getInstance();
+        Date from = cal.getTime();
+        cal.add(Calendar.YEAR, 1);
+        Date until = cal.getTime();
+        List<EventData> allEvents = eventManager.getAllEvents(from, until, true, folderId);
+        assertEquals(1, allEvents.size());
+        assertEquals(createEvent.getId(), allEvents.get(0).getId());
+    }
 
 }
