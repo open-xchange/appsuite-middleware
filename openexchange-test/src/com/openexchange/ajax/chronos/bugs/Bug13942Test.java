@@ -49,40 +49,53 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import java.util.Collections;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractSecondUserChronosTest;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
+import com.openexchange.ajax.chronos.factory.AttendeeFactory;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.ajax.chronos.factory.ICalFacotry.PartStat;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link Bug13942Test}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug13942Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug13942Test extends AbstractSecondUserChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    @Test
+    public void testBug13942() throws Exception {
+        // Create event and invite other user
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testBug13942", folderId);
+        Attendee attendee = AttendeeFactory.createAttendee(userApi2.getCalUser(), CuTypeEnum.INDIVIDUAL);
+        event.getAttendees().add(attendee);
+        EventData createEvent = eventManager.createEvent(event, true);
+
+        // As user B first accept event and then add an alarm
+        eventManager2.getEvent(defaultFolderId2, createEvent.getId());
+        AttendeeAndAlarm attendeeAndAlarm = new AttendeeAndAlarm();
+        attendee.setPartStat(PartStat.ACCEPTED.name());
+        attendeeAndAlarm.setAttendee(attendee);
+        eventManager2.updateAttendee(createEvent.getId(), attendeeAndAlarm, false);
+
+        attendeeAndAlarm.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT10M")));
+        eventManager2.updateAttendee(createEvent.getId(), attendeeAndAlarm, false);
+
+
+        EventData getEvent = eventManager.getEvent(folderId, createEvent.getId());
+
+        for (Attendee att : getEvent.getAttendees()) {
+            assertEquals(PartStat.ACCEPTED.name(), att.getPartStat());
+        }
+
+    }
 
 }
