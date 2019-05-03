@@ -1,3 +1,9 @@
+open-xchange-pop3 (7.6.3-46) stable; urgency=medium
+
+  * Build for patch 2019-05-13 (5231)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 May 2019 08:24:47 +0200
+
 open-xchange-pop3 (7.6.3-45) stable; urgency=medium
 
   * Build for patch 2019-03-12 (5165)
