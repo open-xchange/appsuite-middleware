@@ -49,44 +49,41 @@
 
 package com.openexchange.ajax.chronos.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractChronosTest;
+import com.openexchange.ajax.chronos.factory.EventFactory;
+import com.openexchange.testing.httpclient.models.CalendarResult;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.ChronosConflictDataRaw;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
- * {@link ChronosBugsTestSuite}
+ * {@link Bug15585Test}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    Bug10154Test.class,
-    Bug10733Test.class,
-    Bug10836Test.class,
-    Bug11250Test.class,
-    Bug12099Test.class,
-    Bug12432Test.class,
-    Bug12444Test.class,
-    Bug12610Test.class,
-    Bug12842Test.class,
-    Bug13090Test.class,
-    Bug13214Test.class,
-    Bug13447Test.class,
-    Bug13501Test.class,
-    Bug13505Test.class,
-    Bug13625Test.class,
-    Bug13788Test.class,
-    Bug13942Test.class,
-    Bug14357Test.class,
-    Bug14679Test.class,
-    Bug15074Test.class,
-    Bug15585Test.class,
-    Bug58814Test.class,
-    Bug64836Test.class
-    // @formatter:on
+public class Bug15585Test extends AbstractChronosTest {
 
-})
-public class ChronosBugsTestSuite {
+    public Bug15585Test() {
+        super();
+    }
 
+    @Test
+    public void testConflictTitle() throws Throwable {
+        EventData event = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "Bug15585Test", folderId);
+        eventManager.createEvent(event, true);
+
+        ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().createEvent(getSessionId(), folderId, event, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE, null);
+        assertNull(response.getErrorDesc(), response.getError());
+        assertNotNull(response.getData());
+        CalendarResult data = response.getData();
+        assertNotNull(data.getConflicts());
+        assertEquals(1, data.getConflicts().size());
+        ChronosConflictDataRaw conflict = data.getConflicts().get(0);
+        assertNotNull(conflict.getEvent());
+        assertNotNull(conflict.getEvent().getSummary());
+    }
 }
