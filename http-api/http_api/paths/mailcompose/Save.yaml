@@ -14,6 +14,8 @@
     responses:
       200:
         description: The path to the mail.
+        schema:
+          type: string
       400:
         description: Bad request, response contains error message.
       401:
