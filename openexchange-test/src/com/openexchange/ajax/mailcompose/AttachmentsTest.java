@@ -94,7 +94,7 @@ public class AttachmentsTest extends AbstractMailComposeTest {
 
         assertNotNull("Expected attachments.", response.getData().getAttachments());
         assertEquals("Expected one attachment.", 1, response.getData().getAttachments().size());
-        assertEquals("Wrong attachment name.", attachment.getName(), response.getData().getAttachments().get(0).getName()); // Still under the same name?
+        assertEquals("Wrong attachment name.", attachment2.getName(), response.getData().getAttachments().get(0).getName());
         assertTrue("Empty file.", l(response.getData().getAttachments().get(0).getSize()) > 0L);
         assertNotEquals("Expected different file size.", size1, response.getData().getAttachments().get(0).getSize());
     }
