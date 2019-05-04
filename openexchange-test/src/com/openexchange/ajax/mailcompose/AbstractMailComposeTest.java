@@ -66,6 +66,7 @@ import com.openexchange.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.MailComposeGetResponse;
 import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
@@ -130,6 +131,11 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
         attachment = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         attachment2 = new File(TestInit.getTestProperty("provisioningFile"));
+
+        MailComposeGetResponse allSpaces = api.getMailCompose(getSessionId(), null);
+        for (MailComposeMessageModel model : allSpaces.getData()) {
+            api.deleteMailComposeById(getSessionId(), model.getId());
+        }
     }
 
     @Override

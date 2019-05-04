@@ -87,10 +87,6 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         model.setContent(UUID.randomUUID().toString());
         api.postMailComposeSend(getSessionId(), model.getId(), model.toJson());
         loaded = api.getMailComposeById(getSessionId(), model.getId());
-        // TODO: Remove
-        if (loaded.getData() != null) {
-            System.out.println("\t\tOriginal: " + model.getId() + "\tLoaded: " + loaded.getData().getId());
-        }
         assertEquals("Error expected.", "MSGCS-0007", loaded.getCode());
         assertNull("No data expected", loaded.getData());
     }
