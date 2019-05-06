@@ -1,3 +1,9 @@
+open-xchange-datamining (7.10.0-30) stable; urgency=medium
+
+  * Build for patch 2019-05-13 (5234)
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Mon, 06 May 2019 11:07:07 +0200
+
 open-xchange-datamining (7.10.0-29) stable; urgency=medium
 
   * Build for patch 2019-04-29 (5210)
