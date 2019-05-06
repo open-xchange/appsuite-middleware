@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
@@ -186,7 +187,9 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
         } else {
             result = storage.getEventStorage().loadException(eventId, recurrenceId, null);
         }
-        return storage.getUtilities().loadAdditionalEventData(account.getUserId(), result, null);
+        result = storage.getUtilities().loadAdditionalEventData(account.getUserId(), result, null);
+        result.setFolderId(CalendarUtils.getFolderView(result, account.getUserId()));
+        return result;
     }
 
     /**
