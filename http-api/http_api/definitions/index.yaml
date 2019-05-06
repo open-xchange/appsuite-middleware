@@ -517,6 +517,10 @@ MailComposeAttachmentPostResponse:
   $ref: ./mailcompose/MailComposeAttachmentPostResponse.yaml
 MailComposeAttachment:
   $ref: ./mailcompose/Attachment.yaml
+MailComposeSendResponse:
+  $ref: ./mailcompose/SendResponse.yaml
+MailComposeSaveResponse:
+  $ref: ./mailcompose/SaveResponse.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml
