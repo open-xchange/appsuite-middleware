@@ -223,12 +223,12 @@ public final class UpdateExecutor {
                 long startNanos;
                 long durMillis;
                 for (final UpdateTaskV2 task : scheduled) {
+                    checkDependencies(task, state);
                     final String taskName = task.getClass().getName();
                     boolean success = false;
                     startNanos = System.nanoTime();
                     try {
                         LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
-                        checkDependencies(task, state);
                         ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
                         PerformParameters params = new PerformParametersImpl(state, connectionProvider, optContextId, logger);
                         task.perform(params);
