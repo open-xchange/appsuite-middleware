@@ -68,6 +68,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import org.json.JSONException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -96,6 +98,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -1766,21 +1769,31 @@ public final class OXFolderSQL {
 
     private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
 
-    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
-        Connection writeCon = writeConArg;
+    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx) throws SQLException, OXException {
+        Connection writeCon = DBPool.pickupWriteable(ctx);
+        try {
+            updateFolderSQL(userId, folder, lastModified, ctx, writeCon);
+        } finally {
+            DBPool.closeWriterSilent(ctx, writeCon);
+        }
+    }
+
+    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
+        if (writeCon == null) {
+            updateFolderSQL(userId, folder, lastModified, ctx);
+            return;
+        }
+
         /*
          * Update Folder
          */
         int permissionFlag = determinePermissionFlag(folder);
-        boolean closeWriteCon = false;
-        try {
-            if (writeCon == null) {
-                writeCon = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            final boolean startedTransaction = writeCon.getAutoCommit();
-            if (startedTransaction) {
+        DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+        do {
+            int rollback = 0;
+            if (writeCon.getAutoCommit()) {
                 writeCon.setAutoCommit(false);
+                rollback = 1;
             }
             PreparedStatement stmt = null;
             InputStream metaStream = null;
@@ -1904,34 +1917,46 @@ public final class OXFolderSQL {
                 executeBatch(stmt);
                 stmt.close();
                 stmt = null;
-            } catch (final SQLException e) {
-                if (startedTransaction) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
+                /*
+                 * Commit
+                 */
+                if (rollback > 0) {
+                    writeCon.commit();
+                    rollback = 2;
                 }
-                throw e;
-            } catch (final JSONException e) {
-                if (startedTransaction) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
+            } catch (SQLException e) {
+                if (rollback == 0) {
+                    // Transaction was already initialized. Cannot retry...
+                    throw e;
                 }
+
+                if (!condition.isFailedTransactionRollback(e)) {
+                    throw e;
+                }
+            } catch (JSONException e) {
                 throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
             } finally {
-                if (stmt != null) {
-                    stmt.close();
-                    stmt = null;
+                Databases.closeSQLStuff(stmt);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(writeCon);
+                    }
+                    Databases.autocommit(writeCon);
                 }
                 Streams.close(metaStream);
             }
-            if (startedTransaction) {
-                writeCon.commit();
-                writeCon.setAutoCommit(true);
-            }
-        } finally {
-            if (closeWriteCon && writeCon != null) {
-                DBPool.closeWriterSilent(ctx, writeCon);
-            }
+        } while (retryUpdate(condition));
+    }
+
+    private static boolean retryUpdate(DBUtils.TransactionRollbackCondition condition) throws SQLException {
+        boolean retry = condition.checkRetry();
+        if (retry) {
+            // Wait with exponential backoff
+            int retryCount = condition.getCount();
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
         }
+        return retry;
     }
 
     private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? " +
