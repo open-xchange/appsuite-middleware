@@ -540,7 +540,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             return;
         }
         try {
-            ITipEventUpdate update = new ITipEventUpdate(mail.getOriginal(), mail.getEvent(), false, (EventField[]) null);
+            ITipEventUpdate update = new ITipEventUpdate(mail.getOriginal(), mail.getEvent(), true, (EventField[]) null);
             if (update.getAttachmentUpdates() != null && !update.getAttachmentUpdates().isEmpty()) {
 
                 mail.setAttachmentUpdate(true);
