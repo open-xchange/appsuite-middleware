@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -167,6 +167,8 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Mon May 06 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2019-05-13 (5235)
 * Wed Apr 24 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-04-29 (5211)
 * Tue Mar 26 2019 Thorben Betten <thorben.betten@open-xchange.com>
