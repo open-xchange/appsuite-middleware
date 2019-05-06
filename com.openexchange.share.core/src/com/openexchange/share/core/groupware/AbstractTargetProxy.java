@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.openexchange.share.groupware.TargetPermission;
@@ -179,6 +180,12 @@ public abstract class AbstractTargetProxy implements TargetProxy {
         }
 
         return newPermissions;
+    }
+    
+   
+    @Override
+    public String getLocalizedTitle(Locale locale){
+        return getTitle();
     }
 
 }
