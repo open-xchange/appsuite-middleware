@@ -50,6 +50,7 @@
 package com.openexchange.ajax.mailcompose;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -57,9 +58,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.models.MailComposeGetResponse;
 import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 
 /**
  * {@link CompositionSpaceTest}
@@ -85,7 +88,9 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         model.setTo(getRecipient());
         model.setSubject(UUID.randomUUID().toString());
         model.setContent(UUID.randomUUID().toString());
-        api.postMailComposeSend(getSessionId(), model.getId(), model.toJson());
+        MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(getSessionId(), model.getId(), model.toJson());
+        assertTrue(postMailComposeSend.getErrorDesc(), Strings.isEmpty(postMailComposeSend.getError()));
+        System.out.println("\n\n\t" + postMailComposeSend);
         loaded = api.getMailComposeById(getSessionId(), model.getId());
         assertEquals("Error expected.", "MSGCS-0007", loaded.getCode());
         assertNull("No data expected", loaded.getData());
@@ -98,7 +103,8 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         assertEquals("Wrong Composition Space loaded.", model.getId(), loaded.getData().getId());
         assertNotNull(loaded);
         String id = model.getId();
-        api.getSave(getSessionId(), id);
+        MailComposeSendResponse mailPath = api.getSave(getSessionId(), id);
+        assertTrue(mailPath.getErrorDesc(), Strings.isEmpty(mailPath.getError()));
         loaded = api.getMailComposeById(getSessionId(), model.getId());
         assertEquals("Error expected.", "MSGCS-0007", loaded.getCode());
         assertNull("No data expected", loaded.getData());
