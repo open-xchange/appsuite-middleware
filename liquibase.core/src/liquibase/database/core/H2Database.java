@@ -21,7 +21,7 @@ public class H2Database extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public H2Database() {
-        super.unquotedObjectsAreUppercased=true;
+        super.unquotedObjectsAreUppercased=Boolean.TRUE;
         super.setCurrentDateTimeFunction("NOW()");
         this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
         super.sequenceNextValueFunction = "NEXTVAL('%s')";
@@ -35,7 +35,7 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public Integer getDefaultPort() {
-        return 8082;
+        return Integer.valueOf(8082);
     }
 
     @Override

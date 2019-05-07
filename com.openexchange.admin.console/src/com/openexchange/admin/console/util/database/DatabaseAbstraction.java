@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.console.util.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import com.openexchange.admin.console.AdminParser;
@@ -234,7 +235,7 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
         dbid = (String) parser.getOptionValue(this.databaseIdOption);
         if (null != dbid) {
-            db.setId(Integer.parseInt(dbid));
+            db.setId(Integer.valueOf(dbid));
         }
     }
 
@@ -279,14 +280,14 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     private void parseAndSetPoolmax(final AdminParser parser, final Database db) {
         final String pool_max = (String) parser.getOptionValue(this.poolMaxOption);
         if (pool_max != null) {
-            db.setPoolMax(Integer.parseInt(pool_max));
+            db.setPoolMax(Integer.valueOf(pool_max));
         }
     }
 
     private void parseAndSetPoolInitial(final AdminParser parser, final Database db) {
         final String pool_initial = (String) parser.getOptionValue(this.poolInitialOption);
         if (null != pool_initial) {
-            db.setPoolInitial(Integer.parseInt(pool_initial));
+            db.setPoolInitial(Integer.valueOf(pool_initial));
         }
     }
 
@@ -296,14 +297,14 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
             if (!pool_hard_limit.matches("true|false")) {
                 throw new InvalidDataException("Only true or false are allowed for " + OPT_NAME_POOL_HARDLIMIT_LONG);
             }
-            db.setPoolHardLimit(Boolean.parseBoolean(pool_hard_limit) ? 1 : 0);
+            db.setPoolHardLimit(I(Boolean.parseBoolean(pool_hard_limit) ? 1 : 0));
         }
     }
 
     private void parseAndSetMaxUnits(final AdminParser parser, final Database db) {
         final String maxunits = (String) parser.getOptionValue(this.maxUnitsOption);
         if (maxunits != null) {
-            db.setMaxUnits(Integer.parseInt(maxunits));
+            db.setMaxUnits(Integer.valueOf(maxunits));
         }
     }
 
@@ -325,19 +326,19 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         Boolean ismaster = null;
         final String databaseismaster = (String) parser.getOptionValue(this.databaseIsMasterOption);
         if (databaseismaster != null) {
-            ismaster = Boolean.parseBoolean(databaseismaster);
+            ismaster = Boolean.valueOf(databaseismaster);
             db.setMaster(ismaster);
         }
         final String databasemasterid = (String) parser.getOptionValue(this.databaseMasterIDOption);
-        if (null != ismaster && false == ismaster) {
+        if (null != ismaster && false == ismaster.booleanValue()) {
             if (databasemasterid != null) {
-                db.setMasterId(Integer.parseInt(databasemasterid));
+                db.setMasterId(Integer.valueOf(databasemasterid));
             } else {
                 printError(null, null, "master id must be set if this database isn't the master", parser);
                 parser.printUsage();
                 sysexit(SYSEXIT_MISSING_OPTION);
             }
-        } else if (null == ismaster || true == ismaster) {
+        } else if (null == ismaster || true == ismaster.booleanValue()) {
             if (databasemasterid != null) {
                 throw new InvalidDataException("Master ID can only be set if this is a slave.");
             }

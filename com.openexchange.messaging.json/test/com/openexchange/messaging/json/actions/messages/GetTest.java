@@ -93,7 +93,7 @@ public class GetTest extends AbstractMessagingActionTest {
         final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals("theID", args[1]);
-        assertEquals(false, args[2]);
+        assertEquals(Boolean.FALSE, args[2]);
     }
 
          @Test
@@ -115,7 +115,7 @@ public class GetTest extends AbstractMessagingActionTest {
         final Object[] args = call.getArgs();
         assertEquals("theFolderID", args[0]);
         assertEquals("theID", args[1]);
-        assertEquals(true, args[2]);
+        assertEquals(Boolean.TRUE, args[2]);
     }
 
     // Error Cases
