@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry exported="true" kind="lib" path="lib/failureaccess-1.0.1.jar" sourcepath="lib/source/failureaccess-1.0.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-27.1-jre.jar" sourcepath="lib/source/guava-27.1-jre-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/animal-sniffer-annotations-1.17.jar" sourcepath="lib/source/animal-sniffer-annotations-1.17-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/checker-qual-2.5.2.jar" sourcepath="lib/source/checker-qual-2.5.2-sources.jar"/>
