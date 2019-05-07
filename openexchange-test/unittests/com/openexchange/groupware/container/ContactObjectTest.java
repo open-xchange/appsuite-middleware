@@ -2,6 +2,8 @@
 package com.openexchange.groupware.container;
 
 import static com.openexchange.groupware.container.Contact.*;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -222,6 +224,7 @@ public class ContactObjectTest extends CommonObjectTest {
 
     }
 
+    @Override
     @Test
     public void testAttrAccessors() {
         Contact object = new Contact();
@@ -323,9 +326,9 @@ public class ContactObjectTest extends CommonObjectTest {
 
         // NUMBER_OF_IMAGES
         object.setNumberOfImages(-12);
-        assertEquals(-12, object.get(NUMBER_OF_IMAGES));
+        assertEquals(I(-12), object.get(NUMBER_OF_IMAGES));
 
-        object.set(NUMBER_OF_IMAGES, 12);
+        object.set(NUMBER_OF_IMAGES, I(12));
         assertEquals(12, object.getNumberOfImages());
 
         // IMAGE1_CONTENT_TYPE
@@ -911,9 +914,9 @@ public class ContactObjectTest extends CommonObjectTest {
         object.setContextId(-12);
         assertTrue(object.contains(CONTEXTID));
         assertTrue(object.containsContextId());
-        assertEquals(-12, object.get(CONTEXTID));
+        assertEquals(I(-12), object.get(CONTEXTID));
 
-        object.set(CONTEXTID, 12);
+        object.set(CONTEXTID, I(12));
         assertEquals(12, object.getContextId());
 
         object.remove(CONTEXTID);
@@ -943,9 +946,9 @@ public class ContactObjectTest extends CommonObjectTest {
         object.setInternalUserId(-12);
         assertTrue(object.contains(INTERNAL_USERID));
         assertTrue(object.containsInternalUserId());
-        assertEquals(-12, object.get(INTERNAL_USERID));
+        assertEquals(I(-12), object.get(INTERNAL_USERID));
 
-        object.set(INTERNAL_USERID, 12);
+        object.set(INTERNAL_USERID, I(12));
         assertEquals(12, object.getInternalUserId());
 
         object.remove(INTERNAL_USERID);
@@ -1167,9 +1170,9 @@ public class ContactObjectTest extends CommonObjectTest {
         object.setDefaultAddress(-12);
         assertTrue(object.contains(DEFAULT_ADDRESS));
         assertTrue(object.containsDefaultAddress());
-        assertEquals(-12, object.get(DEFAULT_ADDRESS));
+        assertEquals(I(-12), object.get(DEFAULT_ADDRESS));
 
-        object.set(DEFAULT_ADDRESS, 12);
+        object.set(DEFAULT_ADDRESS, I(12));
         assertEquals(12, object.getDefaultAddress());
 
         object.remove(DEFAULT_ADDRESS);
@@ -1791,10 +1794,10 @@ public class ContactObjectTest extends CommonObjectTest {
         object.setMarkAsDistributionlist(true);
         assertTrue(object.contains(MARK_AS_DISTRIBUTIONLIST));
         assertTrue(object.containsMarkAsDistributionlist());
-        assertEquals(true, object.get(MARK_AS_DISTRIBUTIONLIST));
+        assertEquals(Boolean.TRUE, object.get(MARK_AS_DISTRIBUTIONLIST));
 
-        object.set(MARK_AS_DISTRIBUTIONLIST, false);
-        assertEquals(false, object.getMarkAsDistribtuionlist());
+        object.set(MARK_AS_DISTRIBUTIONLIST, Boolean.FALSE);
+        assertEquals(Boolean.FALSE, B(object.getMarkAsDistribtuionlist()));
 
         object.remove(MARK_AS_DISTRIBUTIONLIST);
         assertFalse(object.contains(MARK_AS_DISTRIBUTIONLIST));
