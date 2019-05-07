@@ -179,7 +179,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                         } else if (columnConfig.getType() != null) {
                             ColumnConfig valueConfig = new ColumnConfig();
                             if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
-                                valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
+                                valueConfig.setValueBoolean(Boolean.valueOf(value.toString().toLowerCase()));
                             } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
                                 valueConfig.setValueNumeric(value.toString());
                             } else if (columnConfig.getType().toLowerCase().contains("date") ||columnConfig.getType().toLowerCase().contains("time")) {
@@ -216,7 +216,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         } catch (UnexpectedLiquibaseException ule) {
                 if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
                     Logger log = LogFactory.getLogger();
-                    log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());        
+                    log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());
                     return new SqlStatement[0];
                 } else {
                     throw ule;

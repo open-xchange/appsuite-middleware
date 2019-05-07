@@ -178,11 +178,11 @@ public class LockServiceImpl implements LockService {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;
                 if (lockedValue instanceof Number) {
-                    locked = ((Number) lockedValue).intValue() == 1;
+                    locked = ((Number) lockedValue).intValue() == 1 ? Boolean.TRUE : Boolean.FALSE;
                 } else {
                     locked = (Boolean) lockedValue;
                 }
-                if (locked != null && locked) {
+                if (locked != null && locked.booleanValue()) {
                     allLocks.add(new DatabaseChangeLogLock(((Number) columnMap.get("ID")).intValue(), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
                 }
             }

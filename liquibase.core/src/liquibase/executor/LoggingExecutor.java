@@ -24,8 +24,8 @@ import liquibase.util.StreamUtil;
 @LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor implements Executor {
 
-    private Writer output;
-    private Executor delegatedReadExecutor;
+    private final Writer output;
+    private final Executor delegatedReadExecutor;
 
     public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         this.output = output;
@@ -116,7 +116,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     @Override
     public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
-            return false;
+            return Boolean.FALSE;
         }
         return delegatedReadExecutor.queryForObject(sql, requiredType);
     }

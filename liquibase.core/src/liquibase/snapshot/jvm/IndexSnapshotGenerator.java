@@ -249,14 +249,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
                     indexName = "_generated_index_" + indexName.substring(1);
                 }
-                short type = row.getShort("TYPE");
+                short type = row.getShort("TYPE").shortValue();
                 //                String tableName = rs.getString("TABLE_NAME");
                 Boolean nonUnique = row.getBoolean("NON_UNIQUE");
                 if (nonUnique == null) {
-                    nonUnique = true;
+                    nonUnique = Boolean.TRUE;
                 }
                 String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
-                short position = row.getShort("ORDINAL_POSITION");
+                short position = row.getShort("ORDINAL_POSITION").shortValue();
                 /*
                 * TODO maybe bug in jdbc driver? Need to investigate.
                 * If this "if" is commented out ArrayOutOfBoundsException is thrown
@@ -288,7 +288,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex = new Index();
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
-                    returnIndex.setUnique(!nonUnique);
+                    returnIndex.setUnique(!nonUnique.booleanValue() ? Boolean.TRUE : Boolean.FALSE);
                     returnIndex.setFilterCondition(filterCondition);
                     foundIndexes.put(indexName, returnIndex);
                 }

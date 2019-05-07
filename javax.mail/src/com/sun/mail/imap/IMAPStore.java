@@ -693,7 +693,7 @@ public class IMAPStore extends Store
     s = session.getProperty("mail." + name + ".failOnNOFetch");
     if (s != null) {
         failOnNOFetch = Boolean.parseBoolean(s.trim());
-        logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch);
+        logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch ? Boolean.TRUE : Boolean.FALSE);
     }
 
 	guid = session.getProperty("mail." + name + ".yahoo.guid");
