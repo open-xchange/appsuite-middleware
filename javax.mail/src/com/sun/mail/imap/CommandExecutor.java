@@ -49,16 +49,17 @@
 
 package com.sun.mail.imap;
 
-import java.io.IOException;
-import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.Response;
 
 /**
- * {@link CommandListener} - Receives call-backs before and after every issued command to IMAP store.
+ * {@link CommandExecutor} - Receives call-backs before an issued command to IMAP store and is responsible for executing it.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface CommandListener extends ProtocolListener {
+public interface CommandExecutor {
 
     /**
      * Called when an IMAP command is about to be issued
@@ -67,9 +68,16 @@ public interface CommandListener extends ProtocolListener {
      *
      * @param event The event providing command details
      * @return <code>true</code> if this command listener is applicable; otherwise <code>false</code>
-     * @throws IOException If an I/O error occurs
-     * @throws ProtocolException If handling the event fails
      */
-    boolean onBeforeCommandIssued(CommandEvent event) throws IOException, ProtocolException;
+    boolean onBeforeCommandIssued(CommandEvent event);
 
+    /**
+     * Executes given command with given arguments using specified protocol instance.
+     *
+     * @param command The command
+     * @param args The arguments
+     * @param protocol The protocol instance
+     * @return The response array
+     */
+    Response[] executeCommand(String command, Argument args, Protocol protocol);
 }

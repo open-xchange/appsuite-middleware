@@ -55,46 +55,46 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * {@link ProtocolListenerCollection} - A collection for {@code ProtocolListener} instances.
+ * {@link CommandExecutorCollection} - A collection for {@code ProtocolListener} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public abstract class ProtocolListenerCollection implements Iterable<ProtocolListener> {
+public abstract class CommandExecutorCollection implements Iterable<CommandExecutor> {
 
     /**
-     * Creates a new {@code ProtocolListenerCollection} instance.
+     * Creates a new {@code CommandExecutorCollection} instance.
      *
-     * @param protocolListener The initial protocol listener to add
+     * @param commandExecutor The initial executor to add
      * @return The new collection
      */
-    public static ProtocolListenerCollection newCollection(ProtocolListener protocolListener) {
-        return new ConcurrentProtocolListenerCollection(protocolListener);
+    public static CommandExecutorCollection newCollection(CommandExecutor commandExecutor) {
+        return new ConcurrentCommandExecutorCollection(commandExecutor);
     }
 
     // ----------------------------------------------------------------------------------------------------------------
 
     /**
-     * Initializes a new {@link ProtocolListenerCollection}.
+     * Initializes a new {@link CommandExecutorCollection}.
      */
-    protected ProtocolListenerCollection() {
+    protected CommandExecutorCollection() {
         super();
     }
 
     /**
-     * Adds specified  protocol listener to this collection.
+     * Adds specified executor to this collection.
      *
-     * @param protocolListener The protocol listener to add
+     * @param commandExecutor The executor to add
      */
-    public abstract void add(ProtocolListener protocolListener);
+    public abstract void add(CommandExecutor commandExecutor);
 
     /**
-     * Removes specified  protocol listener from this collection.
+     * Removes specified executor from this collection.
      *
-     * @param protocolListener The protocol listener to remove
-     * @return <code>true</code> if last protocol listener has been removed (and thus this collection is empty now); otherwise <code>false</code>
+     * @param commandExecutor The executor to remove
+     * @return <code>true</code> if last executor has been removed (and thus this collection is empty now); otherwise <code>false</code>
      */
-    public abstract boolean remove(ProtocolListener protocolListener);
+    public abstract boolean remove(CommandExecutor commandExecutor);
 
     /**
      * Checks if this collection is empty.
@@ -104,8 +104,8 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
     public abstract boolean isEmpty();
 
     @Override
-    public Iterator<ProtocolListener> iterator() {
-        return protocolListeners();
+    public Iterator<CommandExecutor> iterator() {
+        return commandExecutors();
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
      *
      * @return The iterator
      */
-    public abstract Iterator<ProtocolListener> protocolListeners();
+    public abstract Iterator<CommandExecutor> commandExecutors();
 
     /**
      * Creates a snapshot from this collection.
@@ -122,87 +122,87 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
      *
      * @return The snapshot
      */
-    public abstract ProtocolListenerCollection snapshot();
+    public abstract CommandExecutorCollection snapshot();
 
     // ------------------------------------------------ Implementations ------------------------------------------------
 
-    private static class ConcurrentProtocolListenerCollection extends ProtocolListenerCollection {
+    private static class ConcurrentCommandExecutorCollection extends CommandExecutorCollection {
 
-        private final List<ProtocolListener> protocolListeners;
+        private final List<CommandExecutor> commandExecutors;
 
         /**
-         * Initializes a new {@link ProtocolListenerCollection}.
+         * Initializes a new {@link CommandExecutorCollection}.
          *
-         * @param protocolListener The initial protocol listener to add
+         * @param commandExecutor The initial executor to add
          */
-        ConcurrentProtocolListenerCollection(ProtocolListener protocolListener) {
+        ConcurrentCommandExecutorCollection(CommandExecutor commandExecutor) {
             super();
-            protocolListeners = new CopyOnWriteArrayList<>(new ProtocolListener[] { protocolListener });
+            commandExecutors = new CopyOnWriteArrayList<>(new CommandExecutor[] { commandExecutor });
         }
 
         @Override
-        public void add(ProtocolListener protocolListener) {
-            protocolListeners.add(protocolListener);
+        public void add(CommandExecutor commandExecutor) {
+            commandExecutors.add(commandExecutor);
         }
 
         @Override
-        public boolean remove(ProtocolListener protocolListener) {
-            boolean removed = protocolListeners.remove(protocolListener);
-            return removed && protocolListeners.isEmpty();
+        public boolean remove(CommandExecutor commandExecutor) {
+            boolean removed = commandExecutors.remove(commandExecutor);
+            return removed && commandExecutors.isEmpty();
         }
 
         @Override
         public boolean isEmpty() {
-            return protocolListeners.isEmpty();
+            return commandExecutors.isEmpty();
         }
 
         @Override
-        public Iterator<ProtocolListener> protocolListeners() {
-            return protocolListeners.iterator();
+        public Iterator<CommandExecutor> commandExecutors() {
+            return commandExecutors.iterator();
         }
 
         @Override
-        public ProtocolListenerCollection snapshot() {
-            return new SnapshotProtocolListenerCollection(protocolListeners);
+        public CommandExecutorCollection snapshot() {
+            return new SnapshotCommandExecutorCollection(commandExecutors);
         }
     }
 
-    private static class SnapshotProtocolListenerCollection extends ProtocolListenerCollection {
+    private static class SnapshotCommandExecutorCollection extends CommandExecutorCollection {
 
-        private final List<ProtocolListener> protocolListeners;
+        private final List<CommandExecutor> commandExecutors;
 
         /**
          * Initializes a new {@link SnapshotProtocolListenerCollection}.
          */
-        SnapshotProtocolListenerCollection(List<ProtocolListener> protocolListeners) {
+        SnapshotCommandExecutorCollection(List<CommandExecutor> commandExecutors) {
             super();
-            this.protocolListeners = new ArrayList<>(protocolListeners);
+            this.commandExecutors = new ArrayList<>(commandExecutors);
         }
 
         @Override
-        public void add(ProtocolListener protocolListener) {
-            protocolListeners.add(protocolListener);
+        public void add(CommandExecutor commandExecutor) {
+            commandExecutors.add(commandExecutor);
         }
 
         @Override
-        public boolean remove(ProtocolListener protocolListener) {
-            boolean removed = protocolListeners.remove(protocolListener);
-            return removed && protocolListeners.isEmpty();
+        public boolean remove(CommandExecutor commandExecutor) {
+            boolean removed = commandExecutors.remove(commandExecutor);
+            return removed && commandExecutors.isEmpty();
         }
 
         @Override
         public boolean isEmpty() {
-            return protocolListeners.isEmpty();
+            return commandExecutors.isEmpty();
         }
 
         @Override
-        public Iterator<ProtocolListener> protocolListeners() {
-            return protocolListeners.iterator();
+        public Iterator<CommandExecutor> commandExecutors() {
+            return commandExecutors.iterator();
         }
 
         @Override
-        public ProtocolListenerCollection snapshot() {
-            return new SnapshotProtocolListenerCollection(protocolListeners);
+        public CommandExecutorCollection snapshot() {
+            return new SnapshotCommandExecutorCollection(commandExecutors);
         }
     }
 

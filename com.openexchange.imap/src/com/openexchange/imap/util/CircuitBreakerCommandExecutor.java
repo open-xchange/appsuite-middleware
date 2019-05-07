@@ -54,57 +54,31 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
 import org.fishwife.jrugged.CircuitBreaker;
 import org.fishwife.jrugged.CircuitBreakerException;
 import org.fishwife.jrugged.CircuitBreakerExceptionMapper;
 import org.fishwife.jrugged.PercentErrPerTimeFailureInterpreter;
 import org.fishwife.jrugged.RequestCounter;
-import org.fishwife.jrugged.Status;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.java.Strings;
-import com.sun.mail.iap.ProtocolException;
+import com.openexchange.net.HostList;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.Response;
 import com.sun.mail.imap.CommandEvent;
-import com.sun.mail.imap.CommandListener;
+import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ResponseEvent;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 
 /**
- * {@link CircuitBreakerCommandListener}
+ * {@link CircuitBreakerCommandExecutor}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class CircuitBreakerCommandListener implements CommandListener {
-
-    private static class FailingCallable implements Callable<Void> {
-
-        private final Exception byeException;
-
-        FailingCallable(Exception byeException) {
-            super();
-            this.byeException = byeException;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            throw byeException;
-        }
-    }
-
-    private static final Callable<Void> SUCCESS = new Callable<Void>() {
-
-        @Override
-        public Void call() {
-            return null;
-        }
-    };
-
-    private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
-        com.sun.mail.iap.ByeIOException.class,
-        java.net.SocketTimeoutException.class,
-        java.io.EOFException.class
-    );
+public class CircuitBreakerCommandExecutor implements CommandExecutor {
 
     private static Set<String> lowerCaseSetFor(Set<String> set) {
         ImmutableSet.Builder<String> builder = ImmutableSet.builder();
@@ -117,22 +91,22 @@ public class CircuitBreakerCommandListener implements CommandListener {
     // ------------------------------------------------------------------------------------------------------------------------
 
     private final CircuitBreaker circuitBreaker;
-    private final Set<String> hosts;
+    private final HostList hostList;
     private final Set<Integer> ports;
 
     /**
-     * Initializes a new {@link CircuitBreakerCommandListener}.
+     * Initializes a new {@link CircuitBreakerCommandExecutor}.
      *
-     * @param hosts The host names to consider
+     * @param hostList The hosts to consider
      * @param optPorts The optional ports to consider
      * @param percent The whole number percentage of failures that will be tolerated (i.e. the percentage of failures has to be strictly greater than this number in order to trip the breaker).
-     *                For example, if the percentage is <code>3</code>, any calculated failure percentage above that number during the window will cause the breaker to trip.
+     *            For example, if the percentage is <code>3</code>, any calculated failure percentage above that number during the window will cause the breaker to trip.
      * @param windowMillis The length of the window in milliseconds
      * @throws IllegalArgumentException If invalid/arguments are passed
      */
-    public CircuitBreakerCommandListener(Set<String> hosts, Set<Integer> optPorts, int percent, long windowMillis) {
+    public CircuitBreakerCommandExecutor(HostList hostList, Set<Integer> optPorts, int percent, long windowMillis) {
         super();
-        if (null == hosts || hosts.isEmpty()) {
+        if (null == hostList) {
             throw new IllegalArgumentException("hosts must not be null or empty.");
         }
         if (percent < 0 || percent > 100) {
@@ -141,9 +115,9 @@ public class CircuitBreakerCommandListener implements CommandListener {
         if (windowMillis <= 0) {
             throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
         }
-        this.hosts = lowerCaseSetFor(hosts);
+        this.hostList = hostList;
         this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;
-        CircuitBreaker circuitBreaker = new CircuitBreaker("IMAP Circuit Breaker for " + hosts.toString());
+        CircuitBreaker circuitBreaker = new CircuitBreaker("IMAP Circuit Breaker for " + hostList.getHostString());
         PercentErrPerTimeFailureInterpreter failureInterpreter = new PercentErrPerTimeFailureInterpreter(new RequestCounter(), percent, windowMillis);
         circuitBreaker.setFailureInterpreter(failureInterpreter);
         CircuitBreakerExceptionMapper<IOException> exceptionMapper = new CircuitBreakerExceptionMapper<IOException>() {
@@ -151,13 +125,10 @@ public class CircuitBreakerCommandListener implements CommandListener {
             @Override
             public IOException map(CircuitBreaker breaker, CircuitBreakerException e) {
                 Throwable tripException = breaker.getTripException();
-                if (null != tripException) {
-                    if (tripException instanceof IOException) {
-                        return (IOException) tripException;
-                    }
-                    return new IOException(tripException.getMessage(), tripException);
+                if (null == tripException) {
+                    return new java.net.SocketTimeoutException("Read timed out");
                 }
-                return new java.net.SocketTimeoutException("Read timed out");
+                return (tripException instanceof IOException) ? (IOException) tripException : new IOException(tripException.getMessage(), tripException);
             }
         };
         circuitBreaker.setExceptionMapper(exceptionMapper);
@@ -165,82 +136,75 @@ public class CircuitBreakerCommandListener implements CommandListener {
     }
 
     private boolean isApplicable(CommandEvent event) {
-        return hosts.contains(Strings.asciiLowerCase(event.getHost())) && (null == ports || ports.contains(Integer.valueOf(event.getPort())));
+        return hostList.contains(event.getHost()) && (null == ports || ports.contains(Integer.valueOf(event.getPort())));
     }
 
     @Override
-    public void onResponse(ResponseEvent event) throws ProtocolException {
-        StatusResponse statusResponse = event.getStatusResponse();
-        if (ResponseEvent.Status.BYE != statusResponse.getStatus()) {
-            // Command succeeded. Signal success to circuit breaker
-            try {
-                advertiseSuccess();
-            } catch (IOException e) {
-                // Should not occur since circuit breaker was passed before
-                throw new ProtocolException(e.getMessage(), e);
-            }
-            return;
-        }
-
-        // Command failed. Check if for a synthetic BYE response providing the causing I/O error
-        Exception byeException = statusResponse.getResponse().getByeException();
-        if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
-            // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
-            try {
-                circuitBreaker.invoke(new FailingCallable(byeException));
-            } catch (@SuppressWarnings("unused") Exception e) {
-                // Ignore...
-            }
-        } else {
-            // Command failed for any other reason than a network communication error
-            try {
-                advertiseSuccess();
-            } catch (IOException e) {
-                // Should not occur since circuit breaker was passed before
-                throw new ProtocolException(e.getMessage(), e);
-            }
-        }
-    }
-
-    @Override
-    public boolean onBeforeCommandIssued(CommandEvent event) throws IOException, ProtocolException {
-        if (false == isApplicable(event)) {
-            // Not applicable for current IMAP host/port
-            return false;
-        }
-
-        // Check circuit breaker's status
-        Status status = circuitBreaker.getServiceStatus().getStatus();
-        if (Status.DOWN == status) {
-            // Circuit breaker is still open
-            Throwable tripException = circuitBreaker.getTripException();
-            if (null != tripException) {
-                if (tripException instanceof IOException) {
-                    throw (IOException) tripException;
-                }
-                throw new IOException(tripException.getMessage(), tripException);
-            }
-            throw new java.net.SocketTimeoutException("Read timed out");
-        }
-
-        // Otherwise an attempt is permitted
-        return true;
-    }
-
-    /**
-     * Attempts to advertise success to the circuit breaker.
-     *
-     * @throws IOException If circuit breaker is open
-     */
-    private void advertiseSuccess() throws IOException {
+    public Response[] executeCommand(String command, Argument args, Protocol protocol) {
+        AtomicReference<Response[]> responeReference = new AtomicReference<>(null);
         try {
-            circuitBreaker.invoke(SUCCESS);
-        } catch (IOException e) {
-            // Expected in case breaker is open
-            throw e;
+            return circuitBreaker.invoke(new CircuitBreakerCommandCallable(command, args, protocol, responeReference));
         } catch (Exception e) {
-            // Invocation failed for any other reason. Should not occur.
-            throw new IOException(e.getMessage(), e);
+            // Check if exception occurred because circuit breaker was tripped or not
+            Response[] responses = responeReference.get();
+            if (responses != null) {
+                return responses;
+            }
+
+            // Exception occurred because circuit breaker was tripped (OPEN)
+            return new Response[] { Response.byeResponse(e) };
+        }
+    }
+
+    @Override
+    public boolean onBeforeCommandIssued(CommandEvent event) {
+        return isApplicable(event);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------
+
+    private static class CircuitBreakerCommandCallable implements Callable<Response[]> {
+
+        private static final List<Class<? extends Exception>> NETWORK_COMMUNICATION_ERRORS = ImmutableList.of(
+            com.sun.mail.iap.ByeIOException.class,
+            java.net.SocketTimeoutException.class,
+            java.io.EOFException.class);
+
+        private final String command;
+        private final Argument args;
+        private final Protocol protocol;
+        private final AtomicReference<Response[]> responeReference;
+
+        /**
+         * Initializes a new {@link CircuitBreakerCommandCallable}.
+         */
+        CircuitBreakerCommandCallable(String command, Argument args, Protocol protocol, AtomicReference<Response[]> responeReference) {
+            super();
+            this.command = command;
+            this.args = args;
+            this.protocol = protocol;
+            this.responeReference = responeReference;
+        }
+
+        @Override
+        public Response[] call() throws Exception {
+            Response[] responses = protocol.executeCommand(command, args);
+            StatusResponse statusResponse = ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]);
+            if (ResponseEvent.Status.BYE != statusResponse.getStatus()) {
+                // Command succeeded.
+                return responses;
+            }
+
+            // Command failed. Check if for a synthetic BYE response providing the causing I/O error
+            responeReference.set(responses);
+            Exception byeException = statusResponse.getResponse().getByeException();
+            if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
+                // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
+                throw byeException;
+            }
+
+            // Command failed for any other reason than a network communication error
+            return responses;
         }
     }
 
