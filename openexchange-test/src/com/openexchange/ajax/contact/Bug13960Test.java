@@ -68,7 +68,6 @@ import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
@@ -82,7 +81,6 @@ public class Bug13960Test extends AbstractAJAXSession {
 
     private static final int[] COLUMNS = { Contact.OBJECT_ID, Contact.DEFAULT_ADDRESS, Contact.FILE_AS, Contact.NUMBER_OF_IMAGES };
 
-    private AJAXClient client;
     private TimeZone timeZone;
     private Contact contact;
 
@@ -90,10 +88,10 @@ public class Bug13960Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         timeZone = getClient().getValues().getTimeZone();
         contact = new Contact();
         contact.setParentFolderID(getClient().getValues().getPrivateContactFolder());
@@ -101,6 +99,7 @@ public class Bug13960Test extends AbstractAJAXSession {
         response.fillObject(contact);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

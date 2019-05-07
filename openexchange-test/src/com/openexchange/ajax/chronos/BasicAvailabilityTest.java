@@ -71,6 +71,7 @@ import com.openexchange.testing.httpclient.modules.ChronosApi;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicAvailabilityTest extends AbstractChronosTest {
 
+    @SuppressWarnings("hiding")
     private ChronosApi chronosApi;
 
     @Override

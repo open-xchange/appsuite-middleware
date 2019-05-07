@@ -6,6 +6,7 @@
 
 package com.openexchange.admin.soap.reseller.group.reseller.soap;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1488,7 +1489,7 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
         soapUser.setId(user.getId());
         soapUser.setImapLogin(user.getImapLogin());
         soapUser.setImapServer(user.getImapServer());
-        soapUser.setImapPort(user.getImapPort());
+        soapUser.setImapPort(I(user.getImapPort()));
         soapUser.setImapServerString(user.getImapServerString());
         soapUser.setImapSchema(user.getImapSchema());
         soapUser.setInfo(user.getInfo());
@@ -1523,7 +1524,7 @@ public class OXResellerGroupServicePortTypeImpl implements OXResellerGroupServic
         soapUser.setRoomNumber(user.getRoom_number());
         soapUser.setSalesVolume(user.getSales_volume());
         soapUser.setSmtpServer(user.getSmtpServer());
-        soapUser.setSmtpPort(user.getSmtpPort());
+        soapUser.setSmtpPort(I(user.getSmtpPort()));
         soapUser.setSmtpServerString(user.getSmtpServerString());
         soapUser.setSmtpSchema(user.getSmtpSchema());
         soapUser.setSpouseName(user.getSpouse_name());

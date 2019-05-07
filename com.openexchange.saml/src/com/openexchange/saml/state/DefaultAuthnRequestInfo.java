@@ -67,6 +67,8 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
 
     private String client;
 
+    private String uriFragment;
+
     @Override
     public String getRequestId() {
         return requestId;
@@ -87,6 +89,11 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         return client;
     }
 
+    @Override
+    public String getUriFragment() {
+        return uriFragment;
+    }
+
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
@@ -103,6 +110,10 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         this.client = client;
     }
 
+    public void setUriFragment(String uriFragment) {
+        this.uriFragment = uriFragment;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -111,6 +122,7 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
         result = prime * result + ((loginPath == null) ? 0 : loginPath.hashCode());
         result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
+        result = prime * result + ((uriFragment == null) ? 0 : uriFragment.hashCode());
         return result;
     }
 
@@ -143,12 +155,18 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
                 return false;
         } else if (!requestId.equals(other.requestId))
             return false;
+        if (uriFragment == null) {
+            if (other.uriFragment != null)
+                return false;
+        } else if (!uriFragment.equals(other.uriFragment))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName + ", loginPath=" + loginPath + ", client=" + client + "]";
+        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName
+            + ", loginPath=" + loginPath + ", client=" + client + ", uriFragment=" + uriFragment + "]";
     }
 
 }

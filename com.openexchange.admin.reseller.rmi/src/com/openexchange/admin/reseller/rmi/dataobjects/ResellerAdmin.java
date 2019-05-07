@@ -108,7 +108,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
     public ResellerAdmin(final int id) {
         super();
         init();
-        setId(id);
+        setId(Integer.valueOf(id));
     }
 
     /**
@@ -122,7 +122,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /**
      * Initializes a new {@link ResellerAdmin}.
-     * 
+     *
      * @param id
      * @param name
      */
@@ -166,7 +166,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPassword()
      */
     @Override
@@ -176,7 +176,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#getPasswordMech()
      */
     @Override
@@ -290,7 +290,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.rmi.dataobjects.PasswordMechObject#setPasswordMech(java.lang.String)
      */
     @Override
@@ -383,7 +383,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -411,7 +411,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -511,7 +511,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.rmi.dataobjects.ExtendableDataObject#clone()
      */
     @Override

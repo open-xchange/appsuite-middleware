@@ -50,9 +50,9 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.Calendar;
@@ -196,8 +196,8 @@ public class Bug33242Test extends AbstractAJAXSession {
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getDeleteException());
         assertNotNull(groupMemberAppointment.getDeleteException());
-        assertSame(creatorAppointment.getDeleteException().length, 1);
-        assertSame(groupMemberAppointment.getDeleteException().length, 1);
+        assertEquals(creatorAppointment.getDeleteException().length, 1);
+        assertEquals(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getChangeException());
         assertNull(groupMemberAppointment.getChangeException());
     }
@@ -216,14 +216,14 @@ public class Bug33242Test extends AbstractAJAXSession {
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
         assertNotNull(groupMemberAppointment.getDeleteException());
-        assertSame(creatorAppointment.getChangeException().length, 1);
-        assertSame(groupMemberAppointment.getDeleteException().length, 1);
+        assertEquals(creatorAppointment.getChangeException().length, 1);
+        assertEquals(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getDeleteException());
         assertNull(groupMemberAppointment.getChangeException());
 
         List<Appointment> checkAppointment = catm.getChangeExceptions(getClient().getValues().getPrivateAppointmentFolder(), series.getObjectID(), Appointment.ALL_COLUMNS);
         assertNotNull(checkAppointment);
-        assertSame(checkAppointment.size(), 1);
+        assertEquals(checkAppointment.size(), 1);
         boolean found = false;
         for (Participant p : checkAppointment.get(0).getParticipants()) {
             if (p.getIdentifier() == getClient().getValues().getUserId()) {
@@ -248,8 +248,8 @@ public class Bug33242Test extends AbstractAJAXSession {
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getDeleteException());
         assertNotNull(groupMemberAppointment.getDeleteException());
-        assertSame(creatorAppointment.getDeleteException().length, 1);
-        assertSame(groupMemberAppointment.getDeleteException().length, 1);
+        assertEquals(creatorAppointment.getDeleteException().length, 1);
+        assertEquals(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getChangeException());
         assertNull(groupMemberAppointment.getChangeException());
     }
@@ -270,8 +270,8 @@ public class Bug33242Test extends AbstractAJAXSession {
         series.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         assertNotNull(creatorAppointment.getChangeException());
         assertNotNull(groupMemberAppointment.getDeleteException());
-        assertSame(creatorAppointment.getChangeException().length, 1);
-        assertSame(groupMemberAppointment.getDeleteException().length, 1);
+        assertEquals(creatorAppointment.getChangeException().length, 1);
+        assertEquals(groupMemberAppointment.getDeleteException().length, 1);
         assertNull(creatorAppointment.getDeleteException());
         assertNull(groupMemberAppointment.getChangeException());
 

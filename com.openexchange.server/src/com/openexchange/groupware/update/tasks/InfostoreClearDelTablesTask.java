@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -112,7 +113,7 @@ public class InfostoreClearDelTablesTask extends UpdateTaskAdapter {
 
             stmt = con.prepareStatement(query);
             int cleared = stmt.executeUpdate();
-            LOG.info("Cleared {} rows in 'del_infostore_document'.", cleared);
+            LOG.info("Cleared {} rows in 'del_infostore_document'.", I(cleared));
             con.commit();
             rollback = 2;
         } catch (SQLException e) {

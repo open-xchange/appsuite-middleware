@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
@@ -85,7 +86,7 @@ public class UpdateTest extends FileActionTest {
         file.setFolderId("12");
         file.setTitle("nice title");
 
-        fileAccess().expectCall("saveFileMetadata", file, 1337l, Arrays.asList(File.Field.FOLDER_ID, File.Field.TITLE, File.Field.ID));
+        fileAccess().expectCall("saveFileMetadata", file, L(1337l), Arrays.asList(File.Field.FOLDER_ID, File.Field.TITLE, File.Field.ID));
 
         perform();
 

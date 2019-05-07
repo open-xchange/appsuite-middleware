@@ -63,7 +63,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.GetRequest;
@@ -132,7 +131,7 @@ public final class SendTest extends AbstractMailTest {
          */
         final SendResponse response = Executor.execute(getSession(), new SendRequest(mailObject_25kb));
         assertNull(response.getErrorMessage(), response.getErrorMessage());
-        assertNotNull(response.getFolderAndID());
+        assertNotNull("Response should contain a folder and a id but only contained: " + response.getData(), response.getFolderAndID());
         assertTrue("No mail in the sent folder", response.getFolderAndID().length > 0);
         /*
          * Clean everything
@@ -143,7 +142,7 @@ public final class SendTest extends AbstractMailTest {
     }
 
     @Test
-    public void testSendWithManager() throws OXException, IOException, SAXException, JSONException {
+    public void testSendWithManager() throws OXException, IOException, JSONException {
         UserValues values = getClient().getValues();
 
         TestMail mail = new TestMail();
@@ -195,19 +194,17 @@ public final class SendTest extends AbstractMailTest {
         final String[] folderAndID = response.getFolderAndID();
         assertTrue("Send request failed", folderAndID != null && folderAndID.length > 0);
 
-        if (null != folderAndID) {
-            final GetResponse getResponse = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
+        final GetResponse getResponse = Executor.execute(getSession(), new GetRequest(folderAndID[0], folderAndID[1]));
 
-            final String content = getResponse.getAttachments().getJSONObject(0).getString("content").replaceAll(Pattern.quote("&nbsp;"), " ");
-            assertTrue("Content is empty", null != content && content.length() > 0);
+        final String content = getResponse.getAttachments().getJSONObject(0).getString("content").replaceAll(Pattern.quote("&nbsp;"), " ");
+        assertTrue("Content is empty", null != content && content.length() > 0);
 
-            int pos = content.indexOf("Pile of poo ");
-            assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
+        int pos = content.indexOf("Pile of poo ");
+        assertTrue("Content not found: \"Pile of poo \" -- Content:\n" + content, pos >= 0);
 
-            pos += s.length();
-            assertEquals("Missing \\uD83D unicode", (int) '\uD83D', (int) content.charAt(pos++));
-            assertEquals("Missing \\uDCA9 unicode", (int) '\uDCA9', (int) content.charAt(pos++));
-        }
+        pos += s.length();
+        assertEquals("Missing \\uD83D unicode", '\uD83D', content.charAt(pos++));
+        assertEquals("Missing \\uDCA9 unicode", '\uDCA9', content.charAt(pos++));
         /*
          * Clean everything
          */

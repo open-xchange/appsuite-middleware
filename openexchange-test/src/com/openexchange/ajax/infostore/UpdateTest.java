@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -12,7 +13,6 @@ import java.io.InputStream;
 import java.util.Date;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.google.common.collect.Iterables;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -36,7 +36,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         file.setColorLabel(1);
 
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.TITLE, com.openexchange.file.storage.File.Field.COLOR_LABEL }, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
         assertNotNull(itm.getLastResponse().getTimestamp());
 
         com.openexchange.file.storage.File object = itm.getAction(id);
@@ -63,7 +63,7 @@ public class UpdateTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File file = itm.getAction(origId);
         file.setDescription(desc);
         itm.updateAction(file, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.DESCRIPTION }, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
         assertNotNull(itm.getLastResponse().getTimestamp());
 
         com.openexchange.file.storage.File obj = itm.getAction(origId);
@@ -79,7 +79,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
 
@@ -104,14 +104,14 @@ public class UpdateTest extends InfostoreAJAXTest {
     }
 
     @Test
-    public void testUploadEmptyFile() throws IOException, JSONException, SAXException, OXException {
+    public void testUploadEmptyFile() throws IOException, JSONException, OXException {
         final File emptyFile = File.createTempFile("infostore-new-test", ".txt");
 
         final String id = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, emptyFile, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("2", obj.getVersion());
@@ -129,7 +129,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File org = itm.getAction(id);
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse("Expected no error but has one: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
+        checkResponse();
 
         final String id2 = itm.createFileOnServer(folderId, "otherFile", "text/javascript").getId();
 
@@ -182,27 +182,31 @@ public class UpdateTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File org = itm.getAction(id);
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V2
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V3
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
 
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE)); // V4
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
 
         com.openexchange.file.storage.File org2 = itm.getAction(id);
         org2.setVersion("2");
 
-        itm.updateAction(org2, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, org2.getLastModified());
-        assertFalse(itm.getLastResponse().hasError());
+        itm.updateAction(org2, new com.openexchange.file.storage.File.Field[] { com.openexchange.file.storage.File.Field.VERSION }, itm.getLastResponse().getTimestamp());
+        checkResponse();
 
         com.openexchange.file.storage.File obj = itm.getAction(id);
         assertEquals("Version does not match.", "2", obj.getVersion());
 
         itm.versions(id, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION });
-        assertFalse(itm.getLastResponse().hasError());
+        checkResponse();
 
-        VersionsTest.assureVersions(new Integer[] { 1, 2, 3, 4 }, itm.getLastResponse(), 2);
+        VersionsTest.assureVersions(new Integer[] { I(1), I(2), I(3), I(4) }, itm.getLastResponse(), I(2));
+    }
+
+    private void checkResponse() {
+        assertFalse("Expected no error but has one: " + itm.getLastResponse().getErrorMessage(), itm.getLastResponse().hasError());
     }
 
     @Test

@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.availability.json.mapper;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.EnumMap;
 import org.dmfs.rfc5545.DateTime;
@@ -120,7 +122,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
     @Override
     protected EnumMap<AvailableField, ? extends JsonMapping<? extends Object, Available>> createMappings() {
         EnumMap<AvailableField, JsonMapping<? extends Object, Available>> mappings = new EnumMap<AvailableField, JsonMapping<? extends Object, Available>>(AvailableField.class);
-        mappings.put(AvailableField.id, new IntegerMapping<Available>("id", DataObject.OBJECT_ID) {
+        mappings.put(AvailableField.id, new IntegerMapping<Available>("id", I(DataObject.OBJECT_ID)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -129,7 +131,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
 
             @Override
             public void set(Available object, Integer value) throws OXException {
-                object.setId(Integer.toString(value));
+                object.setId(Integer.toString(value.intValue()));
             }
 
             @Override
@@ -143,7 +145,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
             }
 
         });
-        mappings.put(AvailableField.user, new IntegerMapping<Available>("user", Appointment.ORGANIZER_ID) {
+        mappings.put(AvailableField.user, new IntegerMapping<Available>("user", I(Appointment.ORGANIZER_ID)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -152,12 +154,12 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
 
             @Override
             public void set(Available object, Integer value) throws OXException {
-                object.setCalendarUser(value);
+                object.setCalendarUser(value.intValue());
             }
 
             @Override
             public Integer get(Available object) {
-                return object.getCalendarUser();
+                return I(object.getCalendarUser());
             }
 
             @Override
@@ -165,7 +167,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
                 object.removeCalendarUser();
             }
         });
-        mappings.put(AvailableField.uid, new StringMapping<Available>("uid", Appointment.UID) {
+        mappings.put(AvailableField.uid, new StringMapping<Available>("uid", I(Appointment.UID)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -188,7 +190,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
             }
 
         });
-        mappings.put(AvailableField.dtstart, new DateTimeMapping<Available>("start", Appointment.START_DATE) {
+        mappings.put(AvailableField.dtstart, new DateTimeMapping<Available>("start", I(Appointment.START_DATE)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -211,7 +213,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
             }
 
         });
-        mappings.put(AvailableField.dtend, new DateTimeMapping<Available>("end", Appointment.END_DATE) {
+        mappings.put(AvailableField.dtend, new DateTimeMapping<Available>("end", I(Appointment.END_DATE)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -233,7 +235,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
                 object.removeEndTime();
             }
         });
-        mappings.put(AvailableField.created, new LongMapping<Available>("created", Appointment.CREATION_DATE) {
+        mappings.put(AvailableField.created, new LongMapping<Available>("created", I(Appointment.CREATION_DATE)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -248,7 +250,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
             @Override
             public Long get(Available object) {
                 Date created = object.getCreated();
-                return created == null ? null : created.getTime();
+                return created == null ? null : L(created.getTime());
             }
 
             @Override
@@ -256,7 +258,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
                 object.removeCreated();
             }
         });
-        mappings.put(AvailableField.lastModified, new LongMapping<Available>("modified", Appointment.LAST_MODIFIED) {
+        mappings.put(AvailableField.lastModified, new LongMapping<Available>("modified", I(Appointment.LAST_MODIFIED)) {
 
             @Override
             public boolean isSet(Available object) {
@@ -265,12 +267,12 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
 
             @Override
             public void set(Available object, Long value) throws OXException {
-                object.setLastModified(value == null ? null : new Date(value));
+                object.setLastModified(value == null ? null : new Date(value.longValue()));
             }
 
             @Override
             public Long get(Available object) {
-                return object.getLastModified().getTime();
+                return L(object.getLastModified().getTime());
             }
 
             @Override
@@ -278,7 +280,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
                 object.removeLastModified();
             }
         });
-        mappings.put(AvailableField.rrule, new StringMapping<Available>("rrule", Appointment.RECURRENCE_TYPE) {
+        mappings.put(AvailableField.rrule, new StringMapping<Available>("rrule", I(Appointment.RECURRENCE_TYPE)) {
 
             @Override
             public boolean isSet(Available object) {

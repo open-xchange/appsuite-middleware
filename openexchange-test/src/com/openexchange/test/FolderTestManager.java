@@ -49,6 +49,7 @@
 
 package com.openexchange.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ public class FolderTestManager implements TestManager {
     public void setClient(AJAXClient client) {
         this.client = client;
     }
-    
+
     public AJAXClient getClient() {
         return client;
     }
@@ -199,18 +200,18 @@ public class FolderTestManager implements TestManager {
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(final FolderObject folderToDelete) throws OXException, IOException, SAXException, JSONException {
+    public void deleteFolderOnServer(final FolderObject folderToDelete) throws OXException, IOException, JSONException {
         deleteFolderOnServer(folderToDelete, Boolean.FALSE);
     }
 
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(final FolderObject folderToDelete, Boolean hardDelete) throws OXException, IOException, SAXException, JSONException {
+    public void deleteFolderOnServer(final FolderObject folderToDelete, Boolean hardDelete) throws OXException, IOException, JSONException {
         final DeleteRequest request = new DeleteRequest(EnumAPI.OX_OLD, folderToDelete);
         request.setHardDelete(hardDelete);
         setLastResponse(client.execute(request));
-        if (hardDelete) {
+        if (hardDelete != null && hardDelete.booleanValue()) {
             removeFolderFromCleanupList(folderToDelete);
         }
     }
@@ -218,7 +219,7 @@ public class FolderTestManager implements TestManager {
     /**
      * Deletes a folder via HTTP-API
      */
-    public void deleteFolderOnServer(final int folderID, final Date lastModified) throws OXException, IOException, SAXException, JSONException {
+    public void deleteFolderOnServer(final int folderID, final Date lastModified) throws OXException, IOException, JSONException {
         final FolderObject fo = new FolderObject();
         fo.setObjectID(folderID);
         fo.setLastModified(lastModified);
@@ -342,7 +343,7 @@ public class FolderTestManager implements TestManager {
                 deleteFolderOnServer(folder, Boolean.TRUE);
 
                 if (getLastResponse().hasError()) {
-                    org.slf4j.LoggerFactory.getLogger(FolderTestManager.class).warn("Unable to delete the folder with id {} in folder {} with name '{}': {}", folder.getObjectID(), folder.getParentFolderID(), folder.getFolderName(), getLastResponse().getException().getMessage());
+                    org.slf4j.LoggerFactory.getLogger(FolderTestManager.class).warn("Unable to delete the folder with id {} in folder {} with name '{}': {}", I(folder.getObjectID()), I(folder.getParentFolderID()), folder.getFolderName(), getLastResponse().getException().getMessage());
                 }
 
             }

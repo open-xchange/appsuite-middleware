@@ -90,7 +90,7 @@ public class ListTest extends AppointmentTest {
     }
 
     @Test
-    public void testList() throws Exception {
+    public void testList() {
         final Appointment appointmentObj = createAppointmentObject("testList");
         appointmentObj.setIgnoreConflicts(true);
         final Appointment appointmentObj2 = createAppointmentObject("testList");
@@ -115,7 +115,7 @@ public class ListTest extends AppointmentTest {
     }
 
     @Test
-    public void testListWithNoEntries() throws Exception {
+    public void testListWithNoEntries() {
         final Appointment appointmentObj = createAppointmentObject("testList");
         appointmentObj.setIgnoreConflicts(true);
         final Appointment appointmentObj2 = createAppointmentObject("testList");
@@ -123,9 +123,9 @@ public class ListTest extends AppointmentTest {
         final Appointment appointmentObj3 = createAppointmentObject("testList");
         appointmentObj3.setIgnoreConflicts(true);
 
-        final Appointment id1 = catm.insert(appointmentObj);
-        final Appointment id2 = catm.insert(appointmentObj2);
-        final Appointment id3 = catm.insert(appointmentObj3);
+        catm.insert(appointmentObj);
+        catm.insert(appointmentObj2);
+        catm.insert(appointmentObj3);
 
         ListIDs listIDs = new ListIDs();
         listIDs.add(new ListIDInt(appointmentFolderId, 0));
@@ -195,9 +195,7 @@ public class ListTest extends AppointmentTest {
     }
 
     @Test
-    public void testListWithRecurrencePosition() throws Exception {
-        final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.TITLE, Appointment.CREATED_BY, Appointment.FOLDER_ID, Appointment.USERS, Appointment.RECURRENCE_POSITION };
-
+    public void testListWithRecurrencePosition() {
         final FolderObject folderObj = new FolderObject();
         folderObj.setFolderName("testListWithRecurrencePosition" + System.currentTimeMillis());
         folderObj.setParentFolderID(FolderObject.PUBLIC);
@@ -253,27 +251,6 @@ public class ListTest extends AppointmentTest {
         appointmentList[2] = new Appointment();
         appointmentList[2].setObjectID(appointment2.getObjectID());
         appointmentList[2].setParentFolderID(appointmentFolderId);
-
-        //FIXME no corresponding method in calendartestmanager
-//        List<Appointment> appointmentArray = ctm.all(publicFolderId, null, null, false);
-//
-//        assertEquals("3 elements expected", 3, appointmentArray.length);
-//
-//        boolean found1 = false;
-//        boolean found2 = false;
-//        boolean found3 = false;
-//
-//        for (int a = 0; a < appointmentArray.length; a++) {
-//            if (appointmentArray[a].getObjectID() == appointment1.getObjectID() && appointmentArray[a].getRecurrencePosition() == 2) {
-//                found1 = true;
-//            } else if (appointmentArray[a].getObjectID() == appointment1.getObjectID() && appointmentArray[a].getRecurrencePosition() == 3) {
-//                found2 = true;
-//            } else if (appointmentArray[a].getObjectID() == appointment2.getObjectID()) {
-//                found3 = true;
-//            }
-//        }
-//
-//        assertTrue("not all objects in response : " + found1 + ":" + found2 + ":" + found3, (found1 && found2 && found3));
     }
 
     // Node 2652    @Test

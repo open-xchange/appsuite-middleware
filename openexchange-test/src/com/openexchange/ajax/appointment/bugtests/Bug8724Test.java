@@ -13,10 +13,7 @@ import com.openexchange.groupware.container.FolderChildObject;
 
 public class Bug8724Test extends AppointmentTest {
 
-    private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE
-    };
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug8724Test.class);
+    private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE };
 
     /**
      * This test checks if the list action return an object not found exception
@@ -34,7 +31,7 @@ public class Bug8724Test extends AppointmentTest {
 
         catm.list(new ListIDs(appointmentFolderId, objectId + 1000), _appointmentFields);
 
-        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        catm.get(appointmentFolderId, objectId);
     }
 
     /**
@@ -59,6 +56,6 @@ public class Bug8724Test extends AppointmentTest {
         foldersAndIds.add(new ListIDInt(appointmentFolderId, objectId + 1001));
         catm.list(foldersAndIds, _appointmentFields);
 
-        final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
+        catm.get(appointmentFolderId, objectId);
     }
 }

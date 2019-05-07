@@ -67,8 +67,8 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
     }
 
     @Override
-    public Fixtures<Messaging> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new MessagingFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<Messaging> createFixture(final Map<String, Map<String, String>> entries) {
+        return new MessagingFixtures(entries, fixtureLoader);
     }
 
     private class MessagingFixtures extends DefaultFixtures<Messaging> implements Fixtures<Messaging> {
@@ -76,7 +76,7 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Messaging>> messagings = new HashMap<String, Fixture<Messaging>>();
 
-        public MessagingFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
+        public MessagingFixtures(final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Messaging.class, entries, fixtureLoader);
             this.entries = entries;
         }

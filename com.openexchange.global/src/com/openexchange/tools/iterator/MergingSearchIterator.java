@@ -68,6 +68,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     private boolean ascending = true;
     private boolean hasNext;
 
+    @SafeVarargs
     public MergingSearchIterator(final Comparator<T> criterion, boolean ascending, final SearchIterator<T>... iterators) throws OXException {
         this(criterion, ascending, Arrays.asList(iterators));
     }

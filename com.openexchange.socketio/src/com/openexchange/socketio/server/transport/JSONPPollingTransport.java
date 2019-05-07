@@ -67,7 +67,7 @@ public abstract class JSONPPollingTransport extends AbstractHttpTransport {
         try {
             //TODO: Use string constant for request parameter name "j"
             //TODO: Do we really need to enforce "j" to be an integer?
-            session.setAttribute(FRAME_ID, Integer.parseInt(request.getParameter(EngineIOProtocol.JSONP_INDEX)));
+            session.setAttribute(FRAME_ID, Integer.valueOf(request.getParameter(EngineIOProtocol.JSONP_INDEX)));
         } catch (NullPointerException | NumberFormatException e) {
             throw new SocketIOProtocolException("Missing or invalid 'j' parameter. It suppose to be integer");
         }

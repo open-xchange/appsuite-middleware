@@ -118,13 +118,7 @@ public class RMIUtility {
         try {
             Field field = r.getClass().getField("RMI_NAME");
             return (String) field.get(r);
-        } catch (SecurityException e) {
-            return r.getClass().getSimpleName();
-        } catch (NoSuchFieldException e) {
-            return r.getClass().getSimpleName();
-        } catch (IllegalArgumentException e) {
-            return r.getClass().getSimpleName();
-        } catch (IllegalAccessException e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return r.getClass().getSimpleName();
         }
     }

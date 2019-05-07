@@ -189,12 +189,12 @@ public class InternalImportResult extends InternalCalendarResult {
     }
 
     @Override
-    public InternalCalendarResult addPlainUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    public InternalCalendarResult addPlainUpdate(Event originalEvent, Event updatedEvent) {
         return delegate.addPlainUpdate(originalEvent, updatedEvent);
     }
 
     @Override
-    public InternalCalendarResult addUserizedUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    public InternalCalendarResult addUserizedUpdate(Event originalEvent, Event updatedEvent) {
         return delegate.addUserizedUpdate(originalEvent, updatedEvent);
     }
 

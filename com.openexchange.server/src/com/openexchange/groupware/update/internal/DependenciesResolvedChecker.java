@@ -73,7 +73,7 @@ public class DependenciesResolvedChecker implements DependencyChecker {
         return true;
     }
 
-    private boolean dependencyFulfilled(String dependency, String[] executed, UpdateTaskV2[] enqueued) {
+    boolean dependencyFulfilled(String dependency, String[] executed, UpdateTaskV2[] enqueued) {
         for (String taskName : executed) {
             if (taskName.equals(dependency)) {
                 return true;

@@ -62,7 +62,7 @@ public enum AntiVirusProperty implements Property {
      * Defines whether the Anti-Virus capability is enabled
      * Default: false
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
     /**
      * Defines the address of the server.
      * Default: localhost
@@ -72,7 +72,7 @@ public enum AntiVirusProperty implements Property {
      * Defines the port at which the C-ICAP server is running
      * Default: 1344
      */
-    port(1344),
+    port(Integer.valueOf(1344)),
     /**
      * Defines the anti-virus service's name
      * Default: avscan
@@ -85,7 +85,7 @@ public enum AntiVirusProperty implements Property {
      * data stream will have to be fetched from the storage twice (one
      * for scanning and one for delivering to the end-point-client).
      * The streaming mode is still at an experimental phase.
-     * 
+     *
      * Default: double-fetch
      */
     mode("double-fetch"),
@@ -93,10 +93,10 @@ public enum AntiVirusProperty implements Property {
      * Defines the maximum file size (in MB) that is acceptable for the underlying
      * Anti-Virus service to scan. Files larger than that size will NOT be scanned
      * and an appropriate warning will be displayed to the user.
-     * 
+     *
      * Default: 100
      */
-    maxFileSize(100);
+    maxFileSize(Integer.valueOf(100));
 
     private final Object defaultValue;
     private static final String PREFIX = "com.openexchange.antivirus.";
@@ -110,7 +110,7 @@ public enum AntiVirusProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getFQPropertyName()
      */
     @Override
@@ -120,7 +120,7 @@ public enum AntiVirusProperty implements Property {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.lean.Property#getDefaultValue()
      */
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.storecache;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.AbstractQueue;
 import java.util.Collection;
 import java.util.Iterator;
@@ -120,7 +121,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         IMAPStoreWrapper imapStoreWrapper = availableQueue.poll();
         if (null == imapStoreWrapper) {
             IMAPStore imapStore = newStore(server, port, login, pw, imapSession, session);
-            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), I(imapStore.hashCode()));
             return imapStore;
         }
 
@@ -130,7 +131,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         if (checkConnectivityIfPolled && (false == imapStore.isConnected())) {
             // IMAPStore instance is no more connected
             imapStore = newStore(server, port, login, pw, imapSession, session);
-            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+            LOG.debug("UnboundedIMAPStoreContainer.getStore(): Returning newly established IMAPStore instance. {} -- {}", imapStore.toString(), I(imapStore.hashCode()));
             return imapStore;
         }
 
@@ -147,14 +148,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             }
         }
         java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
-        if (null != remoteAddress) {            
+        if (null != remoteAddress) {
             LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
         }
 
         // Should we set properties from passed session?
         // imapStore.getServiceSession().getProperties().putAll(imapSession.getProperties());
         // imapStore.setPropagateClientIpAddress(imapSession.getProperty("mail.imap.propagate.clientipaddress"));
-        LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), imapStore.hashCode());
+        LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance. {} -- {}", imapStore.toString(), I(imapStore.hashCode()));
         return imapStore;
     }
 
@@ -170,13 +171,13 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         } else {
             // System.out.println("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache." + imapStore.toString() + " -- " +
             // imapStore.hashCode());
-            LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache. {} -- {}", imapStore.toString(), imapStore.hashCode());
+            LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache. {} -- {}", imapStore.toString(), I(imapStore.hashCode()));
         }
     }
 
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
-        LOG.debug("IMAPStoreContainer.closeElapsed(): {} IMAPStore instances in queue for {}:{}", availableQueue.size(), server, port);
+        LOG.debug("IMAPStoreContainer.closeElapsed(): {} IMAPStore instances in queue for {}:{}", I(availableQueue.size()), server, I(port));
         IMAPStoreWrapper imapStoreWrapper;
         do {
             imapStoreWrapper = availableQueue.pollIfElapsed(stamp);
@@ -194,7 +195,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                     debugBuilder.setLength(0);
                     LOG.debug(debugBuilder.append("IMAPStoreContainer.closeElapsed(): Closed elapsed IMAP store: ").append(info).toString());
                 }
-            } catch (final IllegalStateException e) {
+            } catch (@SuppressWarnings("unused") final IllegalStateException e) {
                 // Ignore
             }
         } while (true);
@@ -333,28 +334,28 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
          * @return <code>true</code> if an element arrived in queue before time elapsed; otherwise <code>false</code> to signal time out
          * @throws InterruptedException If interrupted while waiting
          */
-        public boolean awaitNotEmpty(final long timeout, final TimeUnit unit) throws InterruptedException {
-            long nanos = unit.toNanos(timeout);
-            final ReentrantLock lock = this.lock;
-            lock.lockInterruptibly();
-            try {
-                while (q.size() == 0) {
-                    try {
-                        nanos = notEmpty.awaitNanos(nanos);
-                    } catch (final InterruptedException ie) {
-                        notEmpty.signal(); // propagate to non-interrupted thread
-                        throw ie;
-                    }
-                    if (nanos <= 0L) {
-                        // A value less than or equal to zero indicates that no time remains.
-                        return false;
-                    }
-                }
-            } finally {
-                lock.unlock();
-            }
-            return true;
-        }
+//        public boolean awaitNotEmpty(final long timeout, final TimeUnit unit) throws InterruptedException {
+//            long nanos = unit.toNanos(timeout);
+//            final ReentrantLock lock = this.lock;
+//            lock.lockInterruptibly();
+//            try {
+//                while (q.size() == 0) {
+//                    try {
+//                        nanos = notEmpty.awaitNanos(nanos);
+//                    } catch (final InterruptedException ie) {
+//                        notEmpty.signal(); // propagate to non-interrupted thread
+//                        throw ie;
+//                    }
+//                    if (nanos <= 0L) {
+//                        // A value less than or equal to zero indicates that no time remains.
+//                        return false;
+//                    }
+//                }
+//            } finally {
+//                lock.unlock();
+//            }
+//            return true;
+//        }
 
         @Override
         public IMAPStoreWrapper poll(final long timeout, final TimeUnit unit) throws InterruptedException {

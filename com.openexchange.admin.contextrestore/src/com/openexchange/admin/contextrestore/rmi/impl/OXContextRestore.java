@@ -238,13 +238,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
          * @param cid The context identifier
          * @param fileName The name of the MySQL dump file
          * @param optConfigDbName The optional name of the ConfigDB schema
-         * @param schema TODO
+         * @param schema The database schema
          * @return The information object for parsed MySQL dump file
          * @throws IOException If an I/O error occurs
          * @throws OXContextRestoreException If a context restore error occurs
          */
         @SuppressWarnings("synthetic-access")
         public PoolIdSchemaAndVersionInfo start(final int cid, final String fileName, final String optConfigDbName, String schema, final Map<String, File> tempfilemap) throws IOException, OXContextRestoreException {
+            String scheema = schema;
             int c;
             int state = 0;
             int oldstate = 0;
@@ -287,7 +288,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             if (dbmatcher.matches()) {
                                 // Database found
                                 final String databasename = dbmatcher.group(1);
-                                if (getConfigDbName(optConfigDbName).equals(databasename) || (null != schema && schema.equals(databasename))) {
+                                if (getConfigDbName(optConfigDbName).equals(databasename) || (null != scheema && scheema.equals(databasename))) {
                                     furthersearch = true;
                                     LOG.info("Database: {}", databasename);
                                     if (null != bufferedWriter) {
@@ -354,7 +355,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         continue;
                     } else if (4 == state && c == '(') {
                         cidpos = cidsearch(in);
-                        LOG.info("Cid pos: {}", cidpos);
+                        LOG.info("Cid pos: {}", Integer.valueOf(cidpos));
                         state = 0;
                         continue;
                     } else if (5 == state && c == 'I') {
@@ -364,7 +365,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                         oldstate = 5;
                         state = 1;
                     } else if (6 == state && c == '(') {
-                        LOG.info("Insert found and cid={}", cidpos);
+                        LOG.info("Insert found and cid={}", Integer.valueOf(cidpos));
                         // Now we search for matching cids and write them to the tmp file
                         if (searchcontext && null != bufferedWriter) {
                             final String value[] =
@@ -375,7 +376,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 } catch (final NumberFormatException e) {
                                     throw new OXContextRestoreException(Code.COULD_NOT_CONVERT_POOL_VALUE);
                                 }
-                                schema = value[2];
+                                scheema = value[2];
                                 // } else if (searchdbpool) {
                                 // final String value[] = searchAndWriteMatchingCidValues(in, bufferedWriter, 1, Integer.toString(pool_id),
                                 // table_name, true, false);
@@ -407,7 +408,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             //if (null == updateTaskInformation) {
             //    throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
             // }
-            return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, updateTaskInformation);
+            return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, scheema, updateTaskInformation);
         }
 
         private final static String REGEX_VALUE = "([^\\),]*)";

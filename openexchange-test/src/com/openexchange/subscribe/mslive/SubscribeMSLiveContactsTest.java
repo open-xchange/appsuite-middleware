@@ -50,13 +50,10 @@
 package com.openexchange.subscribe.mslive;
 
 import static org.junit.Assert.assertEquals;
-import java.io.IOException;
-import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -68,12 +65,14 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
 
     protected static final String CONTACT_SOURCE_ID = "com.openexchange.subscribe.mslive.contact";
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MSLiveSubscribeTestEnvironment.getInstance().init();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -88,11 +87,11 @@ public class SubscribeMSLiveContactsTest extends AbstractAJAXSession {
     }
 
     private int getTestFolderID(final String id) {
-        return MSLiveSubscribeTestEnvironment.getInstance().getTestFolders().get(id);
+        return MSLiveSubscribeTestEnvironment.getInstance().getTestFolders().get(id).intValue();
     }
 
     @Test
-    public void testSubscribe() throws OXException, IOException, JSONException, Exception {
+    public void testSubscribe() {
         Contact[] contacts = cotm.allAction(getContactTestFolderID(), Contact.ALL_COLUMNS);
 
         // represents a full supported contact mapping

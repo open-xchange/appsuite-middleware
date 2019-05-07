@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -98,6 +99,7 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     protected PositiveAssertionOnDeleteException positiveAssertionOnDeleteException;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -120,25 +122,25 @@ public abstract class ManagedAppointmentTest extends AppointmentTest {
 
     protected Appointment generateDailyAppointment() {
         Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
-        app.set(Appointment.INTERVAL, 1);
+        app.set(Appointment.RECURRENCE_TYPE, I(Appointment.DAILY));
+        app.set(Appointment.INTERVAL, I(1));
         return app;
     }
 
     protected Appointment generateMonthlyAppointment() {
         Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
+        app.set(Appointment.RECURRENCE_TYPE, I(Appointment.MONTHLY));
+        app.set(Appointment.INTERVAL, I(1));
+        app.set(Appointment.DAY_IN_MONTH, I(1));
         return app;
     }
 
     protected Appointment generateYearlyAppointment() {
         Appointment app = AbstractAssertion.generateDefaultAppointment(folder.getObjectID());
-        app.set(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
-        app.set(Appointment.INTERVAL, 1);
-        app.set(Appointment.DAY_IN_MONTH, 1);
-        app.set(Appointment.MONTH, Calendar.JANUARY);
+        app.set(Appointment.RECURRENCE_TYPE, I(Appointment.YEARLY));
+        app.set(Appointment.INTERVAL, I(1));
+        app.set(Appointment.DAY_IN_MONTH, I(1));
+        app.set(Appointment.MONTH, I(Calendar.JANUARY));
         return app;
     }
 

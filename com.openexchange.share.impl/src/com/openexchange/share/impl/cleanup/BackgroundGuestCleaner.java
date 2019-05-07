@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.cleanup;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class BackgroundGuestCleaner implements Runnable {
                     LOG.debug("Starting cleanup task {}.", task);
                     long start = System.currentTimeMillis();
                     task.call();
-                    LOG.debug("Guest cleanup task {} finished after {}ms.", task, (System.currentTimeMillis() - start));
+                    LOG.debug("Guest cleanup task {} finished after {}ms.", task, L((System.currentTimeMillis() - start)));
                 } else {
                     task.call();
                 }

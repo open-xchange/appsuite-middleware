@@ -150,24 +150,20 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
     private boolean mandatoryMembersSet(final String[] members) throws EnforceableDataObjectException {
         this.unset_members.clear();
 
+        if (members == null || members.length <= 0) {
+            return true;
+        }
+
         try {
-            if (members != null && members.length > 0) {
-                for (final String m : members) {
-                    Field f = this.getClass().getDeclaredField(m);
-                    f.setAccessible(true);
-                    Object val = f.get(this);
-                    if (val == null || (val instanceof String && ((String) val).equals(""))) {
-                        this.unset_members.add(m);
-                    }
+            for (final String m : members) {
+                Field f = this.getClass().getDeclaredField(m);
+                f.setAccessible(true);
+                Object val = f.get(this);
+                if (val == null || (val instanceof String && ((String) val).equals(""))) {
+                    this.unset_members.add(m);
                 }
-                if (this.unset_members.size() > 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return true;
             }
+            return this.unset_members.isEmpty();
         } catch (final SecurityException e) {
             throw new EnforceableDataObjectException(e);
         } catch (final NoSuchFieldException e) {
@@ -283,7 +279,7 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
                 sb.append("set");
                 final Method isset = this.getClass().getMethod(sb.toString(), (Class[])null);
                 final Object getresult = getter.invoke(this, (Object[])null);
-                final boolean issetresult = (Boolean)isset.invoke(this, (Object[])null);
+                final boolean issetresult = ((Boolean)isset.invoke(this, (Object[])null)).booleanValue();
                 if (issetresult && null == getresult) {
                     throw new InvalidDataException("Field \"" + name + "\" is a mandatory field and can't be set to null.");
                 }

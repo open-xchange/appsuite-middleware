@@ -67,7 +67,7 @@ public class Bug8317Test extends AppointmentTest {
      * TODO: Create a dynamic date/time in the future for testing.
      */
     @Test
-    public void testBug8317() throws Exception {
+    public void testBug8317() {
         final Calendar calendar = Calendar.getInstance(TimeZones.UTC);
         calendar.setTimeInMillis(startTime);
         calendar.add(Calendar.DATE, 5);
@@ -89,7 +89,7 @@ public class Bug8317Test extends AppointmentTest {
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = catm.insert(appointmentObj).getObjectID();
+        catm.insert(appointmentObj).getObjectID();
 
         calendar.setTimeZone(timeZone);
         calendar.set(year, month, day, 0, 30, 0);

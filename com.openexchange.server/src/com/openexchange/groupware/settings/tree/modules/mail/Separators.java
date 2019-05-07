@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
@@ -167,7 +168,7 @@ public class Separators implements PreferencesItemService, ConfigTreeEquivalent 
                 }
             }
 
-            private Character getSeparator(final int accountId, final Session session) throws OXException {
+            private Character getSeparator(final int accountId, final Session session) {
                 final MailSessionCache sessionCache = MailSessionCache.getInstance(session);
                 Character sep = (Character) sessionCache.getParameter(accountId, MailSessionParameterNames.getParamSeparator());
                 if (null == sep) {
@@ -180,7 +181,7 @@ public class Separators implements PreferencesItemService, ConfigTreeEquivalent 
                     } catch (final Exception x) {
                         // Ignore
                         final Logger logger = org.slf4j.LoggerFactory.getLogger(Separators.class);
-                        logger.debug("Failed determining separator character for mail account {} of user {} in context {}", accountId, session.getUserId(), session.getContextId(), x);
+                        logger.debug("Failed determining separator character for mail account {} of user {} in context {}", I(accountId), I(session.getUserId()), I(session.getContextId()), x);
                     } finally {
                         if (null != ma) {
                             ma.close(true);

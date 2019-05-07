@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.categories.impl;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -585,8 +587,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             EventAdmin eventAdmin = Services.optService(EventAdmin.class);
             if (eventAdmin != null) {
                 Dictionary<String, Object> dic = new Hashtable<>(2);
-                dic.put(PROP_USER_ID, session.getUserId());
-                dic.put(PROP_CONTEXT_ID, session.getContextId());
+                dic.put(PROP_USER_ID, I(session.getUserId()));
+                dic.put(PROP_CONTEXT_ID, I(session.getContextId()));
                 Event event = new Event(TOPIC_REORGANIZE, dic);
                 eventAdmin.postEvent(event);
             }
@@ -744,7 +746,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     }
                 }
             }
-            return success;
+            return B(success);
         }
 
     }

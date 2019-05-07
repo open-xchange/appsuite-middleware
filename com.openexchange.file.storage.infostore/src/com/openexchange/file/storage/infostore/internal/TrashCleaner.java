@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -120,7 +122,7 @@ public class TrashCleaner implements Runnable {
         try {
             UserizedFolder trashFolder = getTrashFolder();
             if (null == trashFolder) {
-                LOG.debug("No default trash folder found for user {} in context {}, aborting.", session.getUserId(), session.getContextId());
+                LOG.debug("No default trash folder found for user {} in context {}, aborting.", I(session.getUserId()), Integer.valueOf(session.getContextId()));
                 return;
             }
             /*
@@ -129,9 +131,9 @@ public class TrashCleaner implements Runnable {
             deletedFiles = cleanupFiles(trashFolder);
             deletedFolders = cleanupFolders(trashFolder);
         } catch (Exception e) {
-            LOG.warn("Unexpected error during trash cleanup run for user {} in context {}:", session.getUserId(), session.getContextId(), e.getMessage(), e);
+            LOG.warn("Unexpected error during trash cleanup run for user {} in context {}:", I(session.getUserId()), Integer.valueOf(session.getContextId()), e.getMessage(), e);
         }
-        LOG.debug("{} finished after {}ms, purged {} folders and {} files.", this, (System.currentTimeMillis() - start), deletedFolders, deletedFiles);
+        LOG.debug("{} finished after {}ms, purged {} folders and {} files.", this, L(System.currentTimeMillis() - start), I(deletedFolders), I(deletedFiles));
     }
 
     private int cleanupFolders(UserizedFolder folder) throws OXException {
@@ -196,7 +198,7 @@ public class TrashCleaner implements Runnable {
             List<IDTuple> notRemoved = infostore.removeDocument(deletableDocuments, sequenceNumber, session);
             if (null != notRemoved && 0 < notRemoved.size()) {
                 LOG.debug("Failed to cleanup the following files for user {} in context {}: {}",
-                    session.getUserId(), session.getContext(), notRemoved);
+                    I(session.getUserId()), I(session.getContextId()), notRemoved);
                 return deletableDocuments.size() - notRemoved.size();
             }
             return deletableDocuments.size();

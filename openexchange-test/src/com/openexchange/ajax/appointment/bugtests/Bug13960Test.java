@@ -70,7 +70,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -86,7 +85,6 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug13960Test extends AbstractAJAXSession {
 
     private static final int[] COLUMNS = { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION };
-    private AJAXClient client;
     private TimeZone timeZone;
     private Appointment appointment;
 
@@ -98,7 +96,6 @@ public class Bug13960Test extends AbstractAJAXSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 13960");

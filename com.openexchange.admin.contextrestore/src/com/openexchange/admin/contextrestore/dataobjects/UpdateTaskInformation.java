@@ -49,15 +49,11 @@
 
 package com.openexchange.admin.contextrestore.dataobjects;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * {@link UpdateTaskInformation} - Update task information.
@@ -66,6 +62,8 @@ import java.util.regex.Pattern;
  */
 public final class UpdateTaskInformation {
 
+    /*-
+     *
     private final static String REGEX_VALUE = "([^\\),]*)";
     private final static Pattern insertIntoUpdateTaskValues = Pattern.compile("\\((?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)" + REGEX_VALUE + "\\)");
 
@@ -101,6 +99,8 @@ public final class UpdateTaskInformation {
         }
         return updateTaskInformation;
     }
+     *
+     */
 
     private final Map<String, List<UpdateTaskEntry>> entries;
 

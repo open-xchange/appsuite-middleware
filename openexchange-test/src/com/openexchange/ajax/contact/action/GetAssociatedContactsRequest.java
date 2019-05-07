@@ -111,7 +111,7 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
 
             @Override
             public GetAssociatedContactsResponse createResponse(final Response response) {
-                return new GetAssociatedContactsResponse(response, tz);
+                return new GetAssociatedContactsResponse(response);
             }
         };
     }

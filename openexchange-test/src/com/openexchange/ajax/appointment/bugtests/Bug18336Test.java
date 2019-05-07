@@ -85,6 +85,7 @@ public class Bug18336Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -130,6 +131,7 @@ public class Bug18336Test extends AbstractAJAXSession {
         assertEquals("Wrong end date", updateAppointment.getEndDate(), loadedAppointment.getEndDate());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

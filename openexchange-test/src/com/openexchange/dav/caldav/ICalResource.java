@@ -73,6 +73,7 @@ public class ICalResource {
 
     private String eTag;
     private String href;
+    private String scheduleTag;
     private final Component vCalendar;
 
     public ICalResource(String iCalString, String href, String eTag) throws IOException, SimpleICalException {
@@ -135,6 +136,14 @@ public class ICalResource {
 
     public void setEtag(String eTag) {
         this.eTag = eTag;
+    }
+
+    public String getScheduleTag() {
+        return scheduleTag;
+    }
+
+    public void setScheduleTag(String scheduleTag) {
+        this.scheduleTag = scheduleTag;
     }
 
     /**

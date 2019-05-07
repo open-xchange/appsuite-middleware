@@ -95,6 +95,18 @@ public class ITipRequestTests extends AbstractITipTest {
         });
     }
 
+    /**
+     * Initializes a new {@link ITipRequestTests}.
+     * 
+     * @param identifier The test identifier
+     * @param event The event to to actions on
+     * 
+     */
+    public ITipRequestTests(String identifier, EventData event) {
+        super();
+        this.event = event;
+    }
+
     public Map<PartStat, Function<ConversionDataSource, ActionResponse>> map = new HashMap<>(3);
     {
         map.put(PartStat.ACCEPTED, (ConversionDataSource body) -> {
@@ -127,18 +139,6 @@ public class ITipRequestTests extends AbstractITipTest {
     private EventData event;
 
     private Attendee organizer;
-
-    /**
-     * Initializes a new {@link ITipRequestTests}.
-     * 
-     * @param identifier The test identifier
-     * @param event The event to to actions on
-     * 
-     */
-    public ITipRequestTests(String identifier, EventData event) {
-        super();
-        this.event = event;
-    }
 
     @Override
     public void setUp() throws Exception {
@@ -177,14 +177,14 @@ public class ITipRequestTests extends AbstractITipTest {
     }
 
     @Test
-    public void testAllRequest() throws Exception {
+    public void testAllRequest() {
         for (Entry<PartStat, Function<ConversionDataSource, ActionResponse>> entry : map.entrySet()) {
             validateEvent(entry.getValue().apply(constructBody(mailData.getId())), entry.getKey());
         }
     }
 
     @Test
-    public void testChangeOnAcknowlegedRequest() throws Exception {
+    public void testChangeOnAcknowlegedRequest() {
         int i = Math.random() <= 0.5 ? 1 : 2;
         Iterator<Entry<PartStat, Function<ConversionDataSource, ActionResponse>>> iterator = map.entrySet().iterator();
         Entry<PartStat, Function<ConversionDataSource, ActionResponse>> entry = iterator.next();

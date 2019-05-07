@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
@@ -24,7 +23,6 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.appointment.action.UpdatesRequest;
 import com.openexchange.ajax.contact.action.ContactUpdatesResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.AbstractColumnsResponse;
 import com.openexchange.ajax.framework.CommonAllResponse;
@@ -44,8 +42,6 @@ import com.openexchange.groupware.tasks.Task;
  */
 
 public class Bug16292Test extends AbstractAJAXSession {
-
-    private AJAXClient client;
 
     private int appointmentFolder;
 
@@ -67,10 +63,10 @@ public class Bug16292Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         appointmentFolder = getClient().getValues().getPrivateAppointmentFolder();
         taskFolder = getClient().getValues().getPrivateTaskFolder();
         contactFolder = getClient().getValues().getPrivateContactFolder();
@@ -112,7 +108,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final ListRequest appointmentListReq = new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), appFields, false);
         final CommonListResponse appointmentListResp = getClient().execute(appointmentListReq);
 
-        assertNOANotNull(appointmentListResp, "Appointment", "ListRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS, appointment.getObjectID());
+        assertNOANotNull(appointmentListResp, "Appointment", "ListRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -122,7 +118,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final com.openexchange.ajax.task.actions.ListRequest taskListReq = new com.openexchange.ajax.task.actions.ListRequest(ids, taskFields, false);
         final CommonListResponse taskListResp = getClient().execute(taskListReq);
 
-        assertNOANotNull(taskListResp, "Task", "ListRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, task.getObjectID());
+        assertNOANotNull(taskListResp, "Task", "ListRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -131,7 +127,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final com.openexchange.ajax.contact.action.ListRequest contactListReq = new com.openexchange.ajax.contact.action.ListRequest(new ListIDs(contactFolder, contact.getObjectID()), conFields);
         final CommonListResponse contactListResp = getClient().execute(contactListReq);
 
-        assertNOANotNull(contactListResp, "Contact", "ListRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, contact.getObjectID());
+        assertNOANotNull(contactListResp, "Contact", "ListRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -140,7 +136,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final AllRequest appointmentAllReq = new AllRequest(appointmentFolder, appFields, appointment.getStartDate(), appointment.getEndDate(), tz);
         final CommonAllResponse appointmentAllResp = getClient().execute(appointmentAllReq);
 
-        assertNOANotNull(appointmentAllResp, "Appointment", "AllRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS, appointment.getObjectID());
+        assertNOANotNull(appointmentAllResp, "Appointment", "AllRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -149,7 +145,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final com.openexchange.ajax.task.actions.AllRequest taskAllReq = new com.openexchange.ajax.task.actions.AllRequest(taskFolder, taskFields, Task.START_DATE, Order.ASCENDING);
         final CommonAllResponse taskAllResp = getClient().execute(taskAllReq);
 
-        assertNOANotNull(taskAllResp, "Task", "AllRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, task.getObjectID());
+        assertNOANotNull(taskAllResp, "Task", "AllRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -158,7 +154,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final com.openexchange.ajax.contact.action.AllRequest contactAllReq = new com.openexchange.ajax.contact.action.AllRequest(contactFolder, contactFields);
         final CommonAllResponse contactAllResp = getClient().execute(contactAllReq);
 
-        assertNOANotNull(contactAllResp, "Contact", "AllRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, contact.getObjectID());
+        assertNOANotNull(contactAllResp, "Contact", "AllRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -167,7 +163,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final UpdatesRequest appointmentUpdatesRequest = new UpdatesRequest(appointmentFolder, appFields, new Date(appointment.getLastModified().getTime() - 1), false);
         final AppointmentUpdatesResponse appointmentUpdatesResp = getClient().execute(appointmentUpdatesRequest);
 
-        assertNOANotNull(appointmentUpdatesResp, "Appointment", "UpdatesRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS, appointment.getObjectID());
+        assertNOANotNull(appointmentUpdatesResp, "Appointment", "UpdatesRequest", Appointment.OBJECT_ID, Appointment.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -176,7 +172,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         final com.openexchange.ajax.task.actions.UpdatesRequest taskUpdatesReq = new com.openexchange.ajax.task.actions.UpdatesRequest(taskFolder, taskFields, Task.START_DATE, Order.ASCENDING, new Date(task.getLastModified().getTime() - 1));
         final TaskUpdatesResponse taskUpdatesResp = getClient().execute(taskUpdatesReq);
 
-        assertNOANotNull(taskUpdatesResp, "Task", "UpdatesRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS, task.getObjectID());
+        assertNOANotNull(taskUpdatesResp, "Task", "UpdatesRequest", Task.OBJECT_ID, Task.NUMBER_OF_ATTACHMENTS);
     }
 
     @Test
@@ -185,21 +181,22 @@ public class Bug16292Test extends AbstractAJAXSession {
         final com.openexchange.ajax.contact.action.UpdatesRequest contactUpdatesReq = new com.openexchange.ajax.contact.action.UpdatesRequest(contactFolder, contactFields, Contact.OBJECT_ID, Order.DESCENDING, new Date(contact.getLastModified().getTime() - 1));
         final ContactUpdatesResponse contactUpdatesResp = getClient().execute(contactUpdatesReq);
 
-        assertNOANotNull(contactUpdatesResp, "Contact", "UpdatesRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS, contact.getObjectID());
+        assertNOANotNull(contactUpdatesResp, "Contact", "UpdatesRequest", Contact.OBJECT_ID, Contact.NUMBER_OF_ATTACHMENTS);
     }
 
-    private void assertNOANotNull(final AbstractColumnsResponse resp, final String type, final String reqType, final int objIdColumn, final int noaColumn, final int objId) {
+    private void assertNOANotNull(final AbstractColumnsResponse resp, final String type, final String reqType, final int objIdColumn, final int noaColumn) {
         final Iterator<Object> it = resp.iterator(objIdColumn);
         int i = 0;
         while (it.hasNext()) {
-            final int actual = (Integer) it.next();
-            if (actual == appointment.getObjectID()) {
+            final Integer actual = (Integer) it.next();
+            if (actual != null && actual.intValue() == appointment.getObjectID()) {
                 assertNotNull(type + ": Number of attachments is null after " + reqType, resp.getValue(i, noaColumn));
             }
             i++;
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -216,7 +213,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         }
     }
 
-    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, JSONException {
         final Calendar cal = (Calendar) calendar.clone();
         final Appointment appointmentObj = new Appointment();
 
@@ -238,7 +235,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         return appointmentObj;
     }
 
-    private Task createTask() throws OXException, IOException, SAXException, JSONException {
+    private Task createTask() throws OXException, IOException, JSONException {
         final Calendar cal = (Calendar) calendar.clone();
         final Task taskObj = new Task();
 
@@ -260,7 +257,7 @@ public class Bug16292Test extends AbstractAJAXSession {
         return taskObj;
     }
 
-    private Contact createContact() throws OXException, IOException, SAXException, JSONException {
+    private Contact createContact() throws OXException, IOException, JSONException {
         final Contact contactObj = new Contact();
 
         contactObj.setSurName("Meier");

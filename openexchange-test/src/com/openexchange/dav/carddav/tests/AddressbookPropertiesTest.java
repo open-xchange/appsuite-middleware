@@ -58,7 +58,6 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link AddressbookPropertiesTest}
@@ -70,13 +69,13 @@ import com.openexchange.exception.OXException;
  */
 public class AddressbookPropertiesTest extends CardDAVTest {
 
-    public AddressbookPropertiesTest() throws OXException {
+    public AddressbookPropertiesTest() {
         super();
     }
 
     /**
      * Checks if the CardDAV server reports some information about the address book.
-     * 
+     *
      * @throws Exception
      */
     @Test

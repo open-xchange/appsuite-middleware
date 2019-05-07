@@ -92,6 +92,7 @@ public class Bug24502Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -130,6 +131,7 @@ public class Bug24502Test extends AbstractAJAXSession {
         assertTrue("Appointment should be deleted completely.", getResponse.getErrorMessage().contains("not found"));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

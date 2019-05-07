@@ -53,6 +53,7 @@ import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
@@ -200,7 +201,7 @@ public class Context2UserFilestoreDataMover extends FilestoreDataMover {
             user.setFilestoreId(dstFilestore.getId());
             user.setFilestore_name(FileStorages.getNameForUser(userId, contextId));
             user.setFilestoreOwner(user.getId());
-            user.setMaxQuota(maxQuota);
+            user.setMaxQuota(L(maxQuota));
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(user, ctx);

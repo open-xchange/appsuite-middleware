@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.lockoutService.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -125,7 +126,7 @@ public class LockoutServiceImpl implements MultifactorLockoutService {
     @Override
     public void checkLockedOut(int userId, int contextId) throws OXException {
         if (rateLimiterFactory.createLimiter(REGION_NAME, createRate(userId, contextId), userId, contextId).exceeded()) {
-            throw MultifactorLockoutExceptionCodes.MISSING_AUTHENTICATION_LOCKOUT.create(getLockoutTime(userId, contextId));
+            throw MultifactorLockoutExceptionCodes.MISSING_AUTHENTICATION_LOCKOUT.create(I(getLockoutTime(userId, contextId)));
         }
     }
 

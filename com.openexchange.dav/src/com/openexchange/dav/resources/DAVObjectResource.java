@@ -313,9 +313,9 @@ public abstract class DAVObjectResource<T> extends DAVResource {
     protected AttachmentMetadata addAttachment(AttachmentBase attachments, InputStream inputStream, T targetObject, String contentType, String fileName, long size) throws OXException {
         return AttachmentUtils.addAttachment(attachments, parent, inputStream, getId(parent), parseId(getId(targetObject)), contentType, fileName, size);
     }
-    
+
     private int parseId(String id) {
-        return id == null ? null : Integer.parseInt(id);
+        return id == null ? 0 : Integer.parseInt(id);
     }
 
 }

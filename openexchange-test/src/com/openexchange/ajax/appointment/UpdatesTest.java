@@ -20,13 +20,13 @@ public class UpdatesTest extends AppointmentTest {
     private final static int[] _appointmentFields = { DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.LAST_MODIFIED_UTC, DataObject.MODIFIED_BY, FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, Appointment.LOCATION, CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.INTERVAL, CalendarObject.RECURRENCE_COUNT, CalendarObject.PARTICIPANTS, CalendarObject.USERS, CalendarObject.ALARM, CalendarObject.NOTIFICATION, Appointment.SHOWN_AS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.RECURRENCE_START };
 
     @Test
-    public void testModified() throws Exception {
+    public void testModified() {
         catm.updates(appointmentFolderId, _appointmentFields, new Date(System.currentTimeMillis() - (dayInMillis * 7)), false);
         assertFalse(catm.getLastResponse().hasError());
     }
 
     @Test
-    public void testDeleted() throws Exception {
+    public void testDeleted() {
         catm.updates(appointmentFolderId, _appointmentFields, new Date(System.currentTimeMillis() - (dayInMillis * 7)), false, Ignore.CHANGED, null, null);
         assertFalse(catm.getLastResponse().hasError());
     }

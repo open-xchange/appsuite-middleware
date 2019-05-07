@@ -137,10 +137,10 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
             rollback = 1;
 
             if (!mailUUIDExists) {
-                createTable("mailUUID", getCreateMailUUIDTable(), con);
+                createTable(getCreateMailUUIDTable(), con);
             }
             if (!headersAsBlobExists) {
-                createTable("headersAsBlob", getCreateHeaderBlobTable(), con);
+                createTable(getCreateHeaderBlobTable(), con);
             }
 
             con.commit();
@@ -159,7 +159,7 @@ public final class HeaderCacheCreateTableTask extends AbstractCreateTableImpl im
         }
     }
 
-    private void createTable(String tablename, String sqlCreate, Connection con) throws OXException {
+    private void createTable(String sqlCreate, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(sqlCreate);

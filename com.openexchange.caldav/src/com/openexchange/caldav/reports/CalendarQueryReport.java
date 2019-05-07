@@ -111,7 +111,7 @@ public class CalendarQueryReport extends PROPFINDAction {
         final Filter filter = new FilterParser().parse(filterDef);
         try {
             return ((FilteringResource) req.getResource()).filter(filter);
-        } catch (final ClassCastException x) {
+        } catch (@SuppressWarnings("unused") final ClassCastException x) {
             throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }

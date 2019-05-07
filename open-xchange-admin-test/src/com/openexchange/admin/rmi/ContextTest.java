@@ -53,10 +53,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -74,13 +72,6 @@ import com.openexchange.admin.rmi.factory.ContextFactory;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ContextTest extends AbstractRMITest {
-
-    /**
-     * Initialises a new {@link ContextTest}.
-     */
-    public ContextTest() {
-        super();
-    }
 
     /**
      * Tests getting the admin id for a newly created context
@@ -319,25 +310,17 @@ public class ContextTest extends AbstractRMITest {
      */
     @Test
     public void testDuplicateLoginMappingsThrowReadableError() throws Exception {
-        List<Context> clean = new ArrayList<Context>();
-
         Context ctx1 = ContextFactory.createContext(5000);
         ctx1.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
 
         getContextManager().create(ctx1, contextAdminCredentials);
-        clean.add(ctx1);
         try {
             Context ctx2 = ContextFactory.createContext(5000);
             ctx2.setLoginMappings(new HashSet<String>(Arrays.asList("foo")));
             getContextManager().create(ctx2, contextAdminCredentials);
-            clean.add(ctx2);
             fail("Could add Context");
         } catch (Exception x) {
             assertEquals("Cannot map 'foo' to the newly created context. This mapping is already in use.", x.getMessage());
-        } finally {
-            for (Context context : clean) {
-                getContextManager().delete(context);
-            }
         }
     }
 

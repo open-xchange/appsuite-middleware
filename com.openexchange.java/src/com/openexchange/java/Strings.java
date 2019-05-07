@@ -253,8 +253,8 @@ public class Strings {
 
     /**
      * High speed test for whitespace! Faster than the java one (from some testing).
-     * 
-     * @param c The character to check 
+     *
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isWhitespace(final char c) {
@@ -279,9 +279,42 @@ public class Strings {
     }
 
     /**
+     * Gets the character for given digit (between 0 inclusive and 10 exclusive).
+     *
+     * @param digit The digit
+     * @return The digit's character representation
+     */
+    public static char charForDigit(int digit) {
+        switch (digit) {
+            case 0:
+                return '0';
+            case 1:
+                return '1';
+            case 2:
+                return '2';
+            case 3:
+                return '3';
+            case 4:
+                return '4';
+            case 5:
+                return '5';
+            case 6:
+                return '6';
+            case 7:
+                return '7';
+            case 8:
+                return '8';
+            case 9:
+                return '9';
+            default:
+                throw new IllegalArgumentException("Digit needs to be between 0 (inclusive) and 10 (exclusive)");
+        }
+    }
+
+    /**
      * High speed test for ASCII numbers!
      *
-     * @param c The character to check  
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isDigit(final char c) {
@@ -305,7 +338,7 @@ public class Strings {
     /**
      * High speed test for punctuation character!
      *
-     * @param c The character to check 
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
      */
     public static boolean isPunctuation(char c) {
@@ -352,7 +385,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter!
      *
-     * @param c The character to check  
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
      */
     public static boolean isAsciiLetter(final char c) {
@@ -362,7 +395,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter or digit!
      *
-     * @param c The character to check 
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is an ASCII letter or digit; otherwise <code>false</code>
      */
     public static boolean isAsciiLetterOrDigit(final char c) {
@@ -1012,8 +1045,8 @@ public class Strings {
     private static final byte[][] BYTE_ORDER_MARKS = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
     /**
      * Removes byte order marks from UTF8 strings.
-     * 
-     * @param str The string to remove byte marks on 
+     *
+     * @param str The string to remove byte marks on
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
@@ -1229,7 +1262,7 @@ public class Strings {
 
     /**
      * ASCII-wise to upper-case
-     * 
+     *
      * @param chars The {@link CharSequence} to transform
      * @return A new String with upper case characters
      */
@@ -1259,7 +1292,7 @@ public class Strings {
 
     /**
      * ASCII-wise to lower-case
-     * 
+     *
      * @param chars The {@link CharSequence} to transform
      * @return A new String with lower case characters
      */
@@ -1819,14 +1852,24 @@ public class Strings {
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
-    public static String asHex(final byte[] hash) {
+    public static char[] asHexChars(final byte[] hash) {
         final int length = hash.length;
         final char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
         }
-        return new String(buf);
+        return buf;
+    }
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    public static String asHex(final byte[] hash) {
+        return new String(asHexChars(hash));
     }
 
     /**

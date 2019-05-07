@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching;
 
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -130,7 +131,7 @@ public class AlarmHelper {
      * <p/>
      * In case alarms are set, also the event's {@link EventField#TIMESTAMP} property is adjusted dynamically so that the maximum of the
      * timestamps is returned implicitly. Similarly, the event's {@link EventField#FLAGS} property is adjusted, too.
-     * 
+     *
      * @param event The event to load and apply the alarm data for
      * @return The event, enhanced with the loaded alarm data
      */
@@ -351,18 +352,15 @@ public class AlarmHelper {
                  * (re)-schedule any alarm triggers & return appropriate update result
                  */
                 List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(event, account.getUserId());
-                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(
-                    event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
-                if (null != originalAlarms && 0 < originalAlarms.size()) {
-                    storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
-                }
+                Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = Collections.singletonMap(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
+                storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
                 storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
 
                 return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(updated, newAlarms));
             }
         }.executeUpdate();
     }
-    
+
     /**
      * <i>Touches</i> an event in the storage by setting it's last modification timestamp and modified-by property to the current
      * timestamp and calendar user.
@@ -434,14 +432,14 @@ public class AlarmHelper {
             @Override
             protected Long call(CalendarStorage storage) throws OXException {
                 AlarmStorage alarmStorage = storage.getAlarmStorage();
-                return alarmStorage.getLatestTimestamp(userId);
+                return L(alarmStorage.getLatestTimestamp(userId));
             }
-        }.executeQuery();
+        }.executeQuery().longValue();
     }
 
     /**
      * Updates (recreates) the alarm triggers for the given event
-     * 
+     *
      * @param storage The {@link CalendarStorage} to use
      * @param event The event to update the alarms for
      * @throws OXException
@@ -502,7 +500,7 @@ public class AlarmHelper {
             }
             storage.getAlarmStorage().insertAlarms(event, account.getUserId(), newAlarms);
         }
-        
+
         return true;
     }
 

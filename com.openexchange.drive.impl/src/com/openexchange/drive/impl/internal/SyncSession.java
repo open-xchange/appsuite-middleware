@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -291,7 +292,7 @@ public class SyncSession {
         List<File> files = getStorage().getFilesInFolder(folder.getId());
         int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory(getServerSession().getContextId(), getServerSession().getUserId());
         if (-1 != maxFilesPerDirectory && files.size() > maxFilesPerDirectory) {
-            throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
+            throw DriveExceptionCodes.TOO_MANY_FILES.create(I(maxFilesPerDirectory), path);
         }
         StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server files in path \"").append(path).append("\":\n") : null;
         List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folder.getId(), files);
@@ -299,13 +300,13 @@ public class SyncSession {
         for (int i = 0; i < files.size(); i++) {
             ServerFileVersion fileVersion = new ServerFileVersion(files.get(i), checksums.get(i));
             serverFiles.add(fileVersion);
-            if (isTraceEnabled()) {
+            if (stringBuilder != null) {
                 stringBuilder.append(" [").append(fileVersion.getFileChecksum().getFileID()).append("] ")
                     .append(fileVersion.getName()).append(" | ").append(fileVersion.getChecksum())
                     .append(" (").append(fileVersion.getFileChecksum().getSequenceNumber()).append(")\n");
             }
         }
-        if (isTraceEnabled()) {
+        if (stringBuilder != null) {
             trace(stringBuilder);
         }
         return serverFiles;
@@ -335,12 +336,12 @@ public class SyncSession {
      * @param limit The maximum number of directories to add before throwing an exception, or <code>-1</code> for no limitations
      * @return The server directory versions
      */
-    private List<ServerDirectoryVersion> getServerDirectoryVersions(int limit) throws OXException {
+    List<ServerDirectoryVersion> getServerDirectoryVersions(int limit) throws OXException {
         Map<String, FileStorageFolder> folders;
         if (-1 != limit) {
             folders = getStorage().getFolders(limit + 1);
             if (folders.size() > limit) {
-                throw DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(limit);
+                throw DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(limit));
             }
         } else {
             folders = getStorage().getFolders();
@@ -413,7 +414,7 @@ public class SyncSession {
         ServerSession serverSession = session.getServerSession();
         if (null != session.getClientType() && session.getClientType().isDesktop()) {
             return DriveConfig.getInstance().getOptimisticSaveThresholdDesktop(serverSession.getContextId(), serverSession.getUserId());
-        } 
+        }
         return DriveConfig.getInstance().getOptimisticSaveThresholdMobile(serverSession.getContextId(), serverSession.getUserId());
     }
 

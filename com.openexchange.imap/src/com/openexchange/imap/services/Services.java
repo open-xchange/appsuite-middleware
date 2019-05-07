@@ -50,6 +50,7 @@
 package com.openexchange.imap.services;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -99,6 +100,23 @@ public final class Services {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.imap\" not started?");
         }
         return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Safely gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     * @throws OXException In case the service is missing
+     */
+    public static <S extends Object> S getServiceSafe(final Class<? extends S> clazz) throws OXException {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.imap\" not started?");
+        }
+        return serviceLookup.getServiceSafe(clazz);
     }
 
     /**

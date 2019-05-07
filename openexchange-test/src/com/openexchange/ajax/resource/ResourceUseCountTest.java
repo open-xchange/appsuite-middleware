@@ -51,6 +51,7 @@ package com.openexchange.ajax.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
@@ -77,6 +78,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
     private ResourcesApi resourceApi;
     private Integer[] resourceIds;
     private Long timestamp;
+    private String uuid;
     /**
      * Initializes a new {@link ResourceUseCountTest}.
      */
@@ -87,9 +89,10 @@ public class ResourceUseCountTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        this.uuid = UUID.randomUUID().toString();
         resourceApi = new ResourcesApi(getApiClient());
         ResourceData resourceData = new ResourceData();
-        resourceData.setDisplayName("Test1");
+        resourceData.setDisplayName(uuid + "-1");
         resourceData.setName("Test1");
         resourceData.setMailaddress("test1@oxdb.local");
         ResourceUpdateResponse response = resourceApi.createResource(getSessionId(), resourceData);
@@ -97,7 +100,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         resourceIds = new Integer[2];
         resourceIds[0] = response.getData().getId();
         resourceData = new ResourceData();
-        resourceData.setDisplayName("Test2");
+        resourceData.setDisplayName(uuid + "-2");
         resourceData.setName("Test2");
         resourceData.setMailaddress("test2@oxdb.local");
         response = resourceApi.createResource(getSessionId(), resourceData);
@@ -124,7 +127,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
     @Test
     public void testUseCount() throws ApiException {
         ResourceSearchBody body = new ResourceSearchBody();
-        body.setPattern("Test");
+        body.setPattern(uuid);
         ResourcesResponse response = resourceApi.searchResources(getSessionId(), body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         List<ResourceData> resources = response.getData();
@@ -136,7 +139,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
         }
 
         // use resource 2
-        EventData eventData = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testUseCount", folderId);
+        EventData eventData = EventFactory.createSingleTwoHourEvent(getCalendaruser(), "testUseCount", folderId);
         Attendee att = new Attendee();
         att.setEntity(resourceIds[1]);
         att.setCuType(CuTypeEnum.RESOURCE);
@@ -145,7 +148,7 @@ public class ResourceUseCountTest extends AbstractChronosTest {
 
         // Check order again
         body = new ResourceSearchBody();
-        body.setPattern("Test");
+        body.setPattern(uuid);
         response = resourceApi.searchResources(getSessionId(), body);
         Assert.assertNull(response.getError(), response.getErrorDesc());
         resources = response.getData();

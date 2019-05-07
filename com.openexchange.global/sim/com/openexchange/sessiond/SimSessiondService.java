@@ -127,7 +127,7 @@ public class SimSessiondService implements SessiondService {
     @Override
     public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
         for (Integer contextId : contextIds) {
-            removeContextSessions(contextId);
+            removeContextSessions(contextId.intValue());
         }
     }
 

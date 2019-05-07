@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.properties;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 import com.openexchange.mailfilter.MailFilterService;
 
@@ -92,7 +93,7 @@ public enum MailFilterProperty implements Property {
      * <code>4190</code> is the new one used with most recent Linux and IMAP implementations.
      * Please check your system's default port defined at <code>/etc/services</code>.</p>
      */
-    port(4190),
+    port(I(4190)),
 
     /**
      * If you want the script to be generated with another script name change it here.
@@ -114,7 +115,7 @@ public enum MailFilterProperty implements Property {
     /**
      * Whether to use TLS if available
      */
-    tls(true),
+    tls(Boolean.TRUE),
 
     /**
      * Specify here if vacation messages should only be sent to specific domains
@@ -126,13 +127,13 @@ public enum MailFilterProperty implements Property {
     /**
      * Specifies when the connection should time out (value in milliseconds)
      */
-    connectionTimeout(30000),
+    connectionTimeout(I(30000)),
 
     /**
      * Specifies when the connection should time out (value in milliseconds) when performing
      * SASL authentication against Sieve end-point. Default is 6000
      */
-    authTimeout(6000, true),
+    authTimeout(I(6000), true),
 
     /**
      * <p>Set the password source; meaning which source is taken to determine a user's
@@ -161,19 +162,19 @@ public enum MailFilterProperty implements Property {
      * property set to "0". Thus moving mails with the 'fileinto' command will properly
      * work for mailbox names that contain non-ascii characters</p>
      */
-    useUTF7FolderEncoding(false),
+    useUTF7FolderEncoding(Boolean.FALSE),
 
     /**
      * Enable punycode encoding for the username used in authentication
      * against the managesieve server
      */
-    punycode(false),
+    punycode(Boolean.FALSE),
 
     /**
      * Interpret SIEVE Response Codes, see https://tools.ietf.org/html/rfc5804#section-1.3
      * in most cases, this option must be kept to false
      */
-    useSIEVEResponseCodes(false),
+    useSIEVEResponseCodes(Boolean.FALSE),
 
     /**
      * Specify a comma-separated list of domains (wild-card syntax supported) that are allowed
@@ -195,7 +196,7 @@ public enum MailFilterProperty implements Property {
      * Specifies the time out (value in milliseconds) how long a Sieve end-point is supposed to be considered as down
      * once a connect timeout occurred
      */
-    tempDownTimeout(10000, true),
+    tempDownTimeout(I(10000), true),
     ;
 
     private static final String EMPTY = "";

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -566,7 +567,7 @@ public final class MessagingFolderWriter {
             final MessagingFolderFieldWriter mffw = WRITERS_MAP.get(curField);
             if (mffw == null) {
                 if (!additionalFields.knows(curField)) {
-                    LOG.warn("Unknown folder field: {}", curField);
+                    LOG.warn("Unknown folder field: {}", I(curField));
                 }
 
                 final AdditionalFolderField folderField = additionalFields.get(curField);

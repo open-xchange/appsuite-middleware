@@ -49,6 +49,7 @@
 
 package com.openexchange.database.tombstone.cleanup;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.Date;
 import java.util.HashMap;
@@ -116,7 +117,7 @@ public class TombstoneCleanerWorker implements Runnable {
                 Integer writePoolId = schema.getValue();
                 String schemaName = schema.getKey();
                 try {
-                    UpdateStatus status = Updater.getInstance().getStatus(schemaName, writePoolId);
+                    UpdateStatus status = Updater.getInstance().getStatus(schemaName, writePoolId.intValue());
                     if (!status.isExecutedSuccessfully(com.openexchange.database.tombstone.cleanup.update.InitialTombstoneCleanupUpdateTask.class.getName()) || status.blockingUpdatesRunning() || status.needsBlockingUpdates()) {
                         //skip update for the schema
                         iterator.remove();
@@ -141,10 +142,10 @@ public class TombstoneCleanerWorker implements Runnable {
                 Map<String, Integer> cleanedTables = schemaCleaner.cleanup(timestamp);
                 schemaCleaner.logResults(schema.getKey(), cleanedTables);
                 long afterSchema = System.currentTimeMillis();
-                LOG.info("Successfully purged {} tombstone records on schema {} ({} seconds elapsed).", cleanedTables.values().stream().filter(x -> x.intValue() > 0).collect(Collectors.summingInt(x -> x)), schema.getKey(), TimeUnit.MILLISECONDS.toSeconds(afterSchema - beforeSchema));
+                LOG.info("Successfully purged {} tombstone records on schema {} ({} seconds elapsed).", cleanedTables.values().stream().filter(x -> x.intValue() > 0).collect(Collectors.summingInt(x -> x.intValue())), schema.getKey(), L(TimeUnit.MILLISECONDS.toSeconds(afterSchema - beforeSchema)));
             }
             long after = System.currentTimeMillis();
-            LOG.info("Finished daily cleanup of tombstone tables in schemas {}. Processing took {}ms.", Strings.concat(",", schemata.keySet()), after - before);
+            LOG.info("Finished daily cleanup of tombstone tables in schemas {}. Processing took {}ms.", Strings.concat(",", schemata.keySet()), L(after - before));
         } catch (Exception e) {
             LOG.error("Error during periodic tombstone cleanup task: {}", e.getMessage(), e);
         }

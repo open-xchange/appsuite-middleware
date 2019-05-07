@@ -90,6 +90,7 @@ public class ListTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -144,7 +145,7 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Default email folder not found.", defaultIMAPFolder);
-        @SuppressWarnings("null") boolean subFolders = defaultIMAPFolder.hasSubfolders();
+        boolean subFolders = defaultIMAPFolder.hasSubfolders();
         assertTrue("Default email folder has no subfolders.", subFolders);
         request = new ListRequest(EnumAPI.OX_NEW, defaultIMAPFolder.getFullName());
         response = client.execute(request);
@@ -158,7 +159,7 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
-        @SuppressWarnings("null") GetRequest request2 = new GetRequest(EnumAPI.OX_NEW, inboxFolder.getFullName(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
+        GetRequest request2 = new GetRequest(EnumAPI.OX_NEW, inboxFolder.getFullName(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         GetResponse response2 = client.execute(request2);
         assertFalse("Get failed.", response2.hasError());
     }
@@ -222,7 +223,7 @@ public class ListTest extends AbstractAJAXSession {
         }
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
-        @SuppressWarnings("null") ListRequest request2 = new ListRequest(EnumAPI.OX_NEW, foundUserShared.getFullName());
+        ListRequest request2 = new ListRequest(EnumAPI.OX_NEW, foundUserShared.getFullName());
         response = client.execute(request2);
         iter = response.getFolder();
         FolderObject foundShared = null;

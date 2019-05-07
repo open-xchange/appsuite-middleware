@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -84,7 +85,7 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
         catm.insert(app);
 
         changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, exceptionPosition);
+        changes.put(Appointment.RECURRENCE_POSITION, I(exceptionPosition));
         changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
 
@@ -97,8 +98,8 @@ public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
     @Test
     public void testShouldNotAllowTurningAChangeExceptionIntoASeries() {
         Changes secondChange = new Changes();
-        secondChange.put(Appointment.RECURRENCE_TYPE, Appointment.DAILY);
-        secondChange.put(Appointment.INTERVAL, 1);
+        secondChange.put(Appointment.RECURRENCE_TYPE, I(Appointment.DAILY));
+        secondChange.put(Appointment.INTERVAL, I(1));
 
         Appointment secondUpdate = new Appointment();
         secondUpdate.setParentFolderID(update.getParentFolderID());

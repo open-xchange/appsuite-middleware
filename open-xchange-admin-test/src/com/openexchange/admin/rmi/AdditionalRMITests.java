@@ -73,7 +73,6 @@ import com.openexchange.admin.rmi.factory.GroupFactory;
 import com.openexchange.admin.rmi.factory.ResourceFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 import com.openexchange.admin.rmi.util.AssertUtil;
-import com.openexchange.admin.user.copy.rmi.TestTool;
 
 /**
  * {@link AdditionalRMITests}
@@ -87,7 +86,6 @@ public class AdditionalRMITests extends AbstractRMITest {
     public String myDisplayName = "Thorben Betten";
 
     private Context context;
-    private User user;
     private Resource testResource;
 
     @Override
@@ -96,15 +94,15 @@ public class AdditionalRMITests extends AbstractRMITest {
         setupContexts();
     }
 
-    public final void setupContexts() throws Exception {
-        context = TestTool.createContext(getContextManager(), "AdditionalCtx_", contextAdmin, "all", superAdminCredentials);
-
-        user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
+    private void setupContexts() throws Exception {
+        context = getContextManager().create(ContextFactory.createContext(1000L), contextAdminCredentials);
+        
+        User user = UserFactory.createUser("thorben.betten", "secret", myDisplayName, "Thorben", "Betten", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");
 
-        user = getUserManager().create(context, user, contextAdminCredentials);
+        getUserManager().create(context, user, contextAdminCredentials);
     }
 
     /**
@@ -219,20 +217,15 @@ public class AdditionalRMITests extends AbstractRMITest {
      */
     @Test
     public void testCreateFirstUser() throws Exception {
-        Context newContext = ContextFactory.createContext(((int) (Math.random() * 1000)), "newContext");
+        Context newContext = ContextFactory.createContext("newContext");
 
         User newAdmin = UserFactory.createUser("new_admin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
-        try {
-            newContext = getContextManager().create(newContext, newAdmin);// required line for test
-            Credentials newAdminCredentials = new Credentials();
-            newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
-            newAdminCredentials.setLogin(newAdmin.getName());
-            newAdminCredentials.setPassword("secret");
-            assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
-        } finally {
-            // no need to delete the admin account. Actually, it is not possible at all.
-            getContextManager().delete(newContext);
-        }
+        newContext = getContextManager().create(newContext, newAdmin);// required line for test
+        Credentials newAdminCredentials = new Credentials();
+        newAdmin.setId(Integer.valueOf(2));// has to be hardcoded, because it cannot be looked up easily.
+        newAdminCredentials.setLogin(newAdmin.getName());
+        newAdminCredentials.setPassword("secret");
+        assertUserWasCreatedProperly(newAdmin, newContext, newAdminCredentials);
     }
 
     @Test
@@ -432,7 +425,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     @Test
     public void testContextExistsException() throws Exception {
         boolean contextCreated = false;
-        Context newContext = ContextFactory.createContext(666, "newContext");
+        Context newContext = ContextFactory.createContext("newContext");
         User newAdmin = UserFactory.createUser("oxadmin", "secret", "New Admin", "New", "Admin", "newadmin@ox.invalid");
         try {
             newContext = getContextManager().create(newContext, newAdmin);

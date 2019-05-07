@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.lockoutService.config;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.Property;
 
 /**
@@ -62,12 +63,12 @@ public enum LockoutStringProperty implements Property {
     /**
      * Defines maximum number of bad attempts before a lockout.
      */
-    maxBadAttempts(6),
+    maxBadAttempts(I(6)),
 
     /**
      * Defines number of minutes an account would be locked out
      */
-    lockoutTime(5);
+    lockoutTime(I(5));
 
     private static final String PREFIX = "com.openexchange.multifactor.";
     private Object defaultValue;
@@ -76,17 +77,11 @@ public enum LockoutStringProperty implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;

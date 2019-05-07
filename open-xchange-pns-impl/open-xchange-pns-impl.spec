@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -41,12 +41,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-. /opt/open-xchange/lib/oxfunctions.sh
-
-# prevent bash from expanding, see bug 13316
-GLOBIGNORE='*'
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -57,9 +51,18 @@ GLOBIGNORE='*'
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-apns_http2-options.yml
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-apns-options.yml
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-gcm-options.yml
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-wns-options.yml
+/opt/open-xchange/etc/pns-apns-options-defaults.yml
+/opt/open-xchange/etc/pns-apns_http2-options-defaults.yml
+/opt/open-xchange/etc/pns-gcm-options-defaults.yml
+/opt/open-xchange/etc/pns-wns-options-defaults.yml
 
 %changelog
+* Tue Apr 30 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Second preview for 7.10.2 release
 * Thu Mar 28 2019 Thorben Betten <thorben.betten@open-xchange.com>
 First preview for 7.10.2 release
 * Thu Oct 18 2018 Thorben Betten <thorben.betten@open-xchange.com>

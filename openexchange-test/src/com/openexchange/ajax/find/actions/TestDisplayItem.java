@@ -58,6 +58,11 @@ import com.openexchange.find.facet.DisplayItemVisitor;
  */
 public class TestDisplayItem implements DisplayItem {
 
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 7081613085203483974L;
+
     private final String name;
 
     private final String detail;

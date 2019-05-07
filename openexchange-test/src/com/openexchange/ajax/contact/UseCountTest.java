@@ -125,6 +125,7 @@ public class UseCountTest extends ContactTest {
             }
             Thread.sleep(500);
         } while (System.currentTimeMillis() < until);
+        assertNotNull("Missing contact", firstResult);
         assertEquals(address, firstResult.getEmail1());
     }
     

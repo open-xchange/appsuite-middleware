@@ -205,7 +205,7 @@ public final class Parser {
 
                 break;
             default:
-                LOG.error("Can't parse column: {}", column);
+                LOG.error("Can't parse column: {}", Integer.valueOf(column));
         }
     }
 }

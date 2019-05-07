@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -100,10 +101,10 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
                 folderTargets.add(target);
             } else {
                 int module = target.getModule();
-                List<ShareTarget> targetList = objectsByModule.get(module);
+                List<ShareTarget> targetList = objectsByModule.get(I(module));
                 if (targetList == null) {
                     targetList = new LinkedList<ShareTarget>();
-                    objectsByModule.put(module, targetList);
+                    objectsByModule.put(I(module), targetList);
                 }
 
                 targetList.add(target);

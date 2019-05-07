@@ -86,6 +86,7 @@ public final class SearchTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -102,6 +103,7 @@ public final class SearchTest extends AbstractMailTest {
         mailObject_25kb = createSelfAddressed25KBMailObject().toString();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

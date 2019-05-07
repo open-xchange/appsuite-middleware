@@ -57,7 +57,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.servlet.http.sim.SimHttpServletRequest;
@@ -113,7 +112,7 @@ public class ImageComparingTest {
     private final String TEST_DATA_DIR = "testconf/";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(com.openexchange.imagetransformation.java.osgi.Services.class);
 
@@ -128,7 +127,7 @@ public class ImageComparingTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ServerServiceRegistry.getInstance().removeService(HtmlService.class);
     }
 
@@ -283,7 +282,7 @@ public class ImageComparingTest {
     }
 
     @Test
-    public void testReadImageWithCMYKProfile_Bug28082() throws IOException {
+    public void testReadImageWithCMYKProfile_Bug28082() {
         final File file = new File(TEST_DATA_DIR, "28082.jpg");
         final FileHolder fileHolder = new FileHolder(file);
         {

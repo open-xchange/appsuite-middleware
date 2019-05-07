@@ -65,11 +65,9 @@ import org.apache.http.client.HttpClient;
 public final class POSTResponse extends AbstractResponse {
 
     private final URI redirectLocation;
-    private final POSTRequest request;
 
-    POSTResponse(POSTRequest request, HttpResponse response) throws IOException {
+    POSTResponse(HttpResponse response) throws IOException {
         super(response);
-        this.request = request;
         String location = getHeader(HttpHeaders.LOCATION);
         if (location == null) {
             redirectLocation = null;

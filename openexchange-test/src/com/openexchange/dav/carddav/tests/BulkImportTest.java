@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.UUID;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -114,7 +115,7 @@ public class BulkImportTest extends CardDAVTest {
         super.delete(uid2);
 
         // Import first contacts (ignore similarity)
-        String xmlResponse = super.postVCard(uid, vCard1, 0);
+        String xmlResponse = super.postVCard(vCard1, 0);
         Document xmlDoc = loadXMLFromString(xmlResponse);
         NodeList list = xmlDoc.getElementsByTagName("D:href");
         assertEquals("Unexpected href count", 1, list.getLength());
@@ -124,7 +125,7 @@ public class BulkImportTest extends CardDAVTest {
         assertTrue("Response does not contain a href", !hrefContent.isEmpty());
 
         // Import contacts 2 and 3
-        xmlResponse = super.postVCard(uid, vCard, 1);
+        xmlResponse = super.postVCard(vCard, 1);
         xmlDoc = loadXMLFromString(xmlResponse);
         list = xmlDoc.getElementsByTagName("D:href");
         assertEquals("Unexpected href count", 3, list.getLength());
@@ -175,6 +176,37 @@ public class BulkImportTest extends CardDAVTest {
         assertEquals("FN wrong", firstName2 + " " + lastName2, card2.getFN());
 
         assertNotContains(uid3, addressData);
+    }
+    
+    /**
+     * Test-case for bug 61873
+     *
+     * @throws Exception
+     */
+    public void testBulkImportWithTooBigVCard() throws Exception {
+        final String firstName = "test";
+        final String lastName = "horst";
+        final String uid = UUID.nameUUIDFromBytes((firstName + lastName + "_bulk_contact").getBytes()).toString();
+        final String firstName2 = RandomStringUtils.randomAlphabetic(3000000);
+        final String lastName2 = "horst2";
+        final String uid2 = UUID.nameUUIDFromBytes((firstName2 + lastName2 + "_bulk_contact").getBytes()).toString();
+        
+        final String email1 = uid + "@domain.com";
+        final String email2 = uid2 + "@domain.com";
+        final String vCard1 = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName + ";" + firstName + ";;;" + "\r\n" + "FN:" + firstName + " " + lastName + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email1 + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
+        final String vCard2 = "BEGIN:VCARD" + "\r\n" + "VERSION:3.0" + "\r\n" + "N:" + lastName2 + ";" + firstName2 + ";;;" + "\r\n" + "FN:" + firstName2 + " " + lastName2 + "\r\n" + "ORG:test3;" + "\r\n" + "EMAIL;type=INTERNET;type=WORK;type=pref:" + email2 + "\r\n" + "TEL;type=WORK;type=pref:24235423" + "\r\n" + "TEL;type=CELL:352-3534" + "\r\n" + "TEL;type=HOME:346346" + "\r\n" + "UID:" + uid2 + "\r\n" + "REV:" + super.formatAsUTC(new Date()) + "\r\n" + "PRODID:-//Apple Inc.//AddressBook 6.0//EN" + "\r\n" + "END:VCARD" + "\r\n";
+
+        final String vCard = vCard1 + vCard2;
+
+        // Delete existing contacts
+        super.delete(uid);
+        super.delete(uid2);
+
+        // Import contacts 1 and 2
+        String xmlResponse = super.postVCard(vCard, 1);
+        Document xmlDoc = loadXMLFromString(xmlResponse);
+        NodeList list = xmlDoc.getElementsByTagName("D:href");
+        assertEquals("Unexpected href count", 2, list.getLength());
     }
 
     private static Document loadXMLFromString(String xml) throws Exception {

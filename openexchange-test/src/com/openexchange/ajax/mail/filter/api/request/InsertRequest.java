@@ -79,11 +79,12 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
     /**
      * Should the parser fail on error in server response.
      */
+    @SuppressWarnings("hiding")
     final boolean failOnError;
 
     /**
      * Initialises a new {@link InsertRequest}.
-     * 
+     *
      * @param rule The {@link Rule} to insert
      */
     public InsertRequest(Rule rule) {
@@ -92,7 +93,7 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
 
     /**
      * Initialises a new {@link InsertRequest}.
-     * 
+     *
      * @param rule The {@link Rule} to insert
      * @param failOnError The fail on error flag
      */
@@ -124,16 +125,17 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
 
     /*
      * @Override(non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
+    @Override
     public Object getBody() throws JSONException {
         return convert(rule);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -143,7 +145,7 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -158,7 +160,7 @@ public class InsertRequest extends AbstractMailFilterRequest<InsertResponse> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override

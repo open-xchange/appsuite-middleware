@@ -49,8 +49,10 @@
 
 package com.openexchange.user.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -184,7 +186,7 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(context, created, interceptors);
+        afterCreate(context, created, interceptors, UserServiceInterceptor.EMPTY_PROPS);
         return userId;
     }
 
@@ -196,7 +198,7 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(con, context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(context, created, interceptors);
+        afterCreate(context, created, interceptors, Collections.singletonMap(UserServiceInterceptor.PROP_CONNECTION, con));
         return userId;
     }
 
@@ -301,7 +303,7 @@ public final class UserServiceImpl implements UserService {
     public boolean authenticate(final User user, final String password) throws OXException {
         PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
         if (passwordMech == null) {
-            throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), user.getId());
+            throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), I(user.getId()));
         }
         return passwordMech.check(password, user.getUserPassword(), user.getSalt());
     }
@@ -314,11 +316,11 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) {
+    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors, Map<String, Object> properties) {
         if (!user.isGuest()) {
             for (UserServiceInterceptor interceptor : interceptors) {
                 try {
-                    interceptor.afterCreate(context, user, null);
+                    interceptor.afterCreate(context, user, null, properties);
                 } catch (OXException e) {
                     LOG.error("Error while calling interceptor.", e);
                 }

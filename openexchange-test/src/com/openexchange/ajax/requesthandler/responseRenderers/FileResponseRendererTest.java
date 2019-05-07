@@ -122,7 +122,7 @@ public class FileResponseRendererTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         ServerServiceRegistry.getInstance().removeService(HtmlService.class);
     }
 
@@ -530,7 +530,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testTikaShouldDetectCorrectContenType_Bug26153() throws IOException, OXException {
+    public void testTikaShouldDetectCorrectContenType_Bug26153() throws IOException {
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("Rotate_90CW.jpg", "application/octet-stream", Delivery.view, Disposition.inline, "Rotate");
 
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
@@ -549,7 +549,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testUnquoteContentTypeAndDisposition_Bug26153() throws IOException, OXException {
+    public void testUnquoteContentTypeAndDisposition_Bug26153() throws IOException {
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("Rotate_90CW.jpg", "\"image/jpeg\"", Delivery.view, Disposition.inline, "Rotate_90CW.jpg");
         fileHolder.setDisposition("\"inline\"");
         fileHolder.setDelivery("\"view\"");
@@ -573,7 +573,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testSanitizingUrlParameter() throws IOException, OXException {
+    public void testSanitizingUrlParameter() throws IOException {
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("XSSFile.html", null, Delivery.view, Disposition.inline, "XSSFile.html");
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
         final AJAXRequestData requestData = new AJAXRequestData();
@@ -718,7 +718,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testResourceCacheIsDisabled() throws Exception {
+    public void testResourceCacheIsDisabled() {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
@@ -744,7 +744,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testResourceCacheIsDisabled2() throws Exception {
+    public void testResourceCacheIsDisabled2() {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
@@ -770,7 +770,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testNoCachingOnCheapTransformations() throws Exception {
+    public void testNoCachingOnCheapTransformations() {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
@@ -795,7 +795,7 @@ public class FileResponseRendererTest {
     }
 
     @Test
-    public void testCachingOnExpensiveTransformations() throws Exception {
+    public void testCachingOnExpensiveTransformations() {
         byte[] bytes = FileResponseRendererTools.newByteArray(2048);
 
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(bytes, "image/jpeg", Delivery.view, Disposition.inline, "someimage.jpg");
@@ -910,9 +910,9 @@ public class FileResponseRendererTest {
 
     private static final class TestableImageTransformations implements ImageTransformations {
 
-        private final byte[] imageData;
+        final byte[] imageData;
 
-        private final int expenses;
+        final int expenses;
 
         public TestableImageTransformations(byte[] imageData, int expenses) {
             super();

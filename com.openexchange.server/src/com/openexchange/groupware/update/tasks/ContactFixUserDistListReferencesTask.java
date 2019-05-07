@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -95,10 +96,10 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
 
             LOG.info("Trying to auto-correct wrong contact references in 'prg_dlist'...");
             int corrected = correctWrongReferences(connection);
-            LOG.info("Auto-corrected {} contact references.", corrected);
+            LOG.info("Auto-corrected {} contact references.", I(corrected));
             LOG.info("Deleting remaining wrong contact references in 'prg_dlist'...");
             int deleted = deleteWrongReferences(connection);
-            LOG.info("Deleted {} contact references.", deleted);
+            LOG.info("Deleted {} contact references.", I(deleted));
 
             connection.commit();
             rollback = 2;

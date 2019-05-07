@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.spamfilter;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
@@ -83,7 +84,7 @@ public class SpamFilterUserAttributeChangers extends AbstractAttributeChangers {
         }
 
         OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-        Context ctx = new Context(contextId);
+        Context ctx = new Context(I(contextId));
         if (spam_filter_enabled.booleanValue()) {
             tool.setUserSettingMailBit(ctx, userData, UserSettingMail.INT_SPAM_ENABLED, connection);
             return Collections.singleton("spam filter enabled");

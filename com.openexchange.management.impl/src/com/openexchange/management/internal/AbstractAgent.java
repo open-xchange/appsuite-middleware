@@ -49,6 +49,7 @@
 
 package com.openexchange.management.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
@@ -357,7 +358,7 @@ public abstract class AbstractAgent {
             }
             Registry registry = LocateRegistry.createRegistry(port, null, rmiSocketFactory);
             registries.put(Integer.valueOf(port), registry);
-            LOG.info("RMI registry created on port {} and bind address {}", port, bindAddr);
+            LOG.info("RMI registry created on port {} and bind address {}", I(port), bindAddr);
         } catch (final UnknownHostException e) {
             throw ManagementExceptionCode.UNKNOWN_HOST_ERROR.create(e, e.getMessage());
         } catch (final RemoteException e) {

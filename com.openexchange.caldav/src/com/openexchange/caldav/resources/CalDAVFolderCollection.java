@@ -117,7 +117,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> implements FilteringResource {
 
-    protected final GroupwareCaldavFactory factory;
+    protected final GroupwareCaldavFactory caldavFactory;
     protected final MinDateTime minDateTime;
     protected final MaxDateTime maxDateTime;
 
@@ -131,25 +131,25 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
      */
     protected CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
-        this.factory = factory;
+        this.caldavFactory = factory;
         this.minDateTime = new MinDateTime(factory);
         this.maxDateTime = new MaxDateTime(factory);
         includeProperties(
-            minDateTime, 
-            maxDateTime, 
-            new SupportedReportSet(), 
-            new ManagedAttachmentsServerURL(), 
-            new ScheduleDefaultCalendarURL(factory), 
+            minDateTime,
+            maxDateTime,
+            new SupportedReportSet(),
+            new ManagedAttachmentsServerURL(),
+            new ScheduleDefaultCalendarURL(factory),
             new ScheduleDefaultTasksURL(factory)
         );
         if (null != folder) {
             includeProperties(
-                new CurrentUserPrivilegeSet(folder.getOwnPermission()), 
-                new Invite(factory, this), 
-                new AllowedSharingModes(this), 
+                new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+                new Invite(factory, this),
+                new AllowedSharingModes(this),
                 new CalendarOwner(this),
-                new Organizer(this), 
-                new CalendarColor(this), 
+                new Organizer(this),
+                new CalendarColor(this),
                 new CalendarTimezone(factory, this)
             );
             if (NO_ORDER != order) {
@@ -165,7 +165,7 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
 
     @Override
     public GroupwareCaldavFactory getFactory() {
-        return factory;
+        return caldavFactory;
     }
 
     @Override
@@ -333,7 +333,7 @@ public abstract class CalDAVFolderCollection<T> extends FolderCollection<T> impl
     }
 
     private static Date toDate(Object object) {
-        long tstamp = (Long) object;
+        long tstamp = ((Long) object).longValue();
         if (tstamp == -1) {
             return null;
         }

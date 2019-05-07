@@ -98,7 +98,7 @@ public abstract class OXCommonImpl {
 
     protected void setIdOrGetIDFromNameAndIdObject(final Context ctx, final NameAndIdObject nameandid) throws StorageException, InvalidDataException, NoSuchObjectException {
         final Integer id = nameandid.getId();
-        if (null == id || 0 == id) {
+        if (null == id || 0 == id.intValue()) {
             final String name = nameandid.getName();
             if (null != name) {
                 if (nameandid instanceof User) {

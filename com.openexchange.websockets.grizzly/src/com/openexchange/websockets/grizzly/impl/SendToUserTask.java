@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.slf4j.Logger;
 import com.openexchange.threadpool.AbstractTask;
 
@@ -97,7 +98,7 @@ public class SendToUserTask extends AbstractTask<Void> {
         try {
             application.sendToUser(message, sourceToken, pathFilter, remote, userId, contextId);
         } catch (Exception e) {
-            LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
+            LOG.error("Failed to send message to user {} in context {}", I(userId), I(contextId), e);
         }
         return null;
     }

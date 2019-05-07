@@ -49,6 +49,8 @@
 
 package com.openexchange.guest.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -180,7 +182,7 @@ public class DefaultGuestService implements GuestService {
             long guestId = GuestStorage.getInstance().getGuestId(mailAddress, groupId, connectionHelper.getConnection());
 
             if (GuestStorage.getInstance().isAssignmentExisting(guestId, contextId, userId, connectionHelper.getConnection())) {
-                LOG.info("Guest with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, contextId, userId);
+                LOG.info("Guest with mail address '{}' in context {} with id {} already existing. Will not add him to mapping as a new guest.", mailAddress, I(contextId), I(userId));
                 return;
             }
 
@@ -216,7 +218,7 @@ public class DefaultGuestService implements GuestService {
             final long relatedGuestId = GuestStorage.getInstance().getGuestId(user.getMail(), groupId, connectionHelper.getConnection()); // this has to happen before guest assignment is removed!
 
             if (relatedGuestId == GuestStorage.NOT_FOUND) {
-                LOG.info("Guest with context {} and user id {} cannot be removed! No internal guest to remove found.", contextId, userId);
+                LOG.info("Guest with context {} and user id {} cannot be removed! No internal guest to remove found.", I(contextId), I(userId));
                 return;
             }
 
@@ -292,7 +294,8 @@ public class DefaultGuestService implements GuestService {
      */
     protected void check(String mailAddress) throws OXException {
         try {
-            new QuotedInternetAddress(mailAddress, true);
+            @SuppressWarnings("unused")
+            QuotedInternetAddress tmp = new QuotedInternetAddress(mailAddress, true);
         } catch (final AddressException e) {
             throw GuestExceptionCodes.INVALID_EMAIL_ADDRESS.create(e, mailAddress);
         }
@@ -510,7 +513,7 @@ public class DefaultGuestService implements GuestService {
             return user;
         }
 
-        LOG.warn("Unable to find guest user with context id {} and user id {} in storage. Cannot create copy.", existingAssignment.getContextId(), existingAssignment.getUserId());
+        LOG.warn("Unable to find guest user with context id {} and user id {} in storage. Cannot create copy.", I(existingAssignment.getContextId()), I(existingAssignment.getUserId()));
         return null;
     }
 
@@ -540,7 +543,7 @@ public class DefaultGuestService implements GuestService {
             return contactCopy;
         }
 
-        LOG.warn("Unable to find guest contact with context id {} and user id {} in storage. Cannot create copy.", existingAssignment.getContextId(), existingAssignment.getUserId());
+        LOG.warn("Unable to find guest contact with context id {} and user id {} in storage. Cannot create copy.", I(existingAssignment.getContextId()), I(existingAssignment.getUserId()));
         return null;
     }
 
@@ -569,7 +572,7 @@ public class DefaultGuestService implements GuestService {
 
             guestAssignments.addAll(GuestStorage.getInstance().getGuestAssignments(guestId, connectionHelper.getConnection()));
             if (guestAssignments.size() == 0) {
-                LOG.error("No assignment for the guest with mail address {} in group {} found. This might indicate incosistences as there is a guest existing without assignments. Guest id: {}.", mailAddress, groupId, guestId);
+                LOG.error("No assignment for the guest with mail address {} in group {} found. This might indicate incosistences as there is a guest existing without assignments. Guest id: {}.", mailAddress, groupId, L(guestId));
                 throw GuestExceptionCodes.GUEST_WITHOUT_ASSIGNMENT_ERROR.create(mailAddress, Long.toString(guestId));
             }
         } finally {

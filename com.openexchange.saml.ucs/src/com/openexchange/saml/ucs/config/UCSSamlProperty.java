@@ -61,7 +61,7 @@ public enum UCSSamlProperty implements Property {
     /**
      * If UCS SAML should be enabled or disabled
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
 
     /**
      * The id inside the saml authnResponse which holds the userinformation

@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.util;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -496,9 +497,9 @@ public final class POP3CapabilityCache {
                         capabilities = sb.toString();
                     } else {
                         if (Character.isDefined(pre)) {
-                            LOG.warn("Unexpected CAPA response start: {}", pre);
+                            LOG.warn("Unexpected CAPA response start: {}", Character.valueOf(pre));
                         } else {
-                            LOG.warn("Invalid unicode character: {}", ((int) pre));
+                            LOG.warn("Invalid unicode character: {}", I(pre));
                         }
                         return new Capabilities(DEFAULT_CAPABILITIES);
                     }

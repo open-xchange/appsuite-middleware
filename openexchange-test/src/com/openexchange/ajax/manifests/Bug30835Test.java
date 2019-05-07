@@ -77,6 +77,7 @@ public class Bug30835Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -106,6 +107,13 @@ public class Bug30835Test extends AbstractAJAXSession {
     }
 
     private class JSONComparator implements Comparator<JSONArray> {
+
+        /**
+         * Initializes a new {@link JSONComparator}.
+         */
+        public JSONComparator() {
+            super();
+        }
 
         @Override
         public int compare(JSONArray o1, JSONArray o2) {

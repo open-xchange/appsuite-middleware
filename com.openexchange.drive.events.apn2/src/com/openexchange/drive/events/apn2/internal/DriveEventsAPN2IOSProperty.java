@@ -66,7 +66,7 @@ public enum DriveEventsAPN2IOSProperty implements Property {
      * valid configuration for the APNS certificate and keys.
      * Default: false
      */
-    enabled(false),
+    enabled(Boolean.FALSE),
 
     /**
      * Configures the apps's topic, which is typically the bundle ID of the app.
@@ -79,7 +79,7 @@ public enum DriveEventsAPN2IOSProperty implements Property {
      * A value of "true" will use the production service, a value of "false" the sandbox service.
      * Default: true
      */
-    production(true),
+    production(Boolean.TRUE),
 
     /**
      * Specifies the authentication type to use for the APNS HTTP/2 push.

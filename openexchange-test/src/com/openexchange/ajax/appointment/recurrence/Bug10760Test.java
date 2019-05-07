@@ -19,7 +19,7 @@ import com.openexchange.groupware.container.Appointment;
 public class Bug10760Test extends AbstractRecurrenceTest {
 
     @Test
-    public void testBug10760() throws Exception {
+    public void testBug10760() {
         final String title = "testBug10760";
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle(title);

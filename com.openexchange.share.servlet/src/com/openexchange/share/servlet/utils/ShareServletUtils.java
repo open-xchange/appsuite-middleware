@@ -52,6 +52,7 @@ package com.openexchange.share.servlet.utils;
 import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
 import static com.openexchange.ajax.LoginServlet.configureCookie;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -181,7 +182,7 @@ public final class ShareServletUtils {
         LoginResult loginResult = AutoLoginTools.tryGuestAutologin(guest, loginConfig, request, response);
         if (null != loginResult) {
             LOG.debug("Successful autologin for share {} with guest user {} in context {}, using session {}.",
-                guest.getBaseToken(), guest.getGuestID(), guest.getContextID(), loginResult.getSession().getSessionID());
+                guest.getBaseToken(), I(guest.getGuestID()), I(guest.getContextID()), loginResult.getSession().getSessionID());
             return loginResult;
         }
         /*
@@ -201,7 +202,7 @@ public final class ShareServletUtils {
             return null;
         }
         LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.",
-            guest.getBaseToken(), guest.getGuestID(), guest.getContextID(), loginResult.getSession().getSessionID());
+            guest.getBaseToken(), I(guest.getGuestID()), I(guest.getContextID()), loginResult.getSession().getSessionID());
         loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
     }

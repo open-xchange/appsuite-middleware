@@ -49,6 +49,7 @@
 
 package com.openexchange.nosql.cassandra.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.datastax.driver.core.PoolingOptions;
 import com.datastax.driver.core.SocketOptions;
 import com.datastax.driver.core.exceptions.NoHostAvailableException;
@@ -76,7 +77,7 @@ public enum CassandraProperty implements Property {
      * <p/>
      * Defaults to <code>9042</code>
      */
-    port(9042),
+    port(I(9042)),
     /**
      * Defines load balancing policy to use for the cluster. There are three
      * load balancing policies to choose from:
@@ -107,13 +108,13 @@ public enum CassandraProperty implements Property {
      * <p/>
      * Defaults to <code>false</code>
      */
-    logRetryPolicy(false),
+    logRetryPolicy(Boolean.FALSE),
     /**
      * Enables the query logger which logs all executed statements
      * <p/>
      * Defatuls to <code>false</code>
      */
-    enableQueryLogger(false),
+    enableQueryLogger(Boolean.FALSE),
     /**
      * Defines the latency threshold in milliseconds beyond which queries are considered 'slow'
      * and logged as such by the Cassandra service. Used in conjunction with the 'enableQueryLogger'
@@ -121,7 +122,7 @@ public enum CassandraProperty implements Property {
      * <p/>
      * Defaults to <code>5000</code> msec.
      */
-    queryLatencyThreshold(5000),
+    queryLatencyThreshold(I(5000)),
     /**
      * Defines the amount of time (in seconds) for connection keepalive in the form of a heartbeat.
      * When a connection has been idle for the given amount of time, the Cassandra service will
@@ -131,7 +132,7 @@ public enum CassandraProperty implements Property {
      * <p/>
      * Defaults to 30 seconds
      */
-    poolingHeartbeat(30),
+    poolingHeartbeat(I(30)),
     /**
      * The Cassandra service's connection pools have a variable size, which gets adjusted automatically
      * depending on the current load. There will always be at least a minimum number of connections, and
@@ -142,10 +143,10 @@ public enum CassandraProperty implements Property {
      * Defaults to minimum 4 and maximum 10 for local nodes (i.e. in the same datacenter) and minimum 2 and
      * maximum 4 for remote nodes
      */
-    minimumLocalConnectionsPerNode(4),
-    maximumLocalConnectionsPerNode(10),
-    minimumRemoteConnectionsPerNode(2),
-    maximumRemoteConnectionsPerNode(4),
+    minimumLocalConnectionsPerNode(I(4)),
+    maximumLocalConnectionsPerNode(I(10)),
+    minimumRemoteConnectionsPerNode(I(2)),
+    maximumRemoteConnectionsPerNode(I(4)),
     /**
      * When activity goes down, the driver will "trash" connections if the maximum number of requests
      * in a 10 second time period can be satisfied by less than the number of connections opened. Trashed
@@ -155,7 +156,7 @@ public enum CassandraProperty implements Property {
      * <p/>
      * Defaults to 120 seconds
      */
-    idleConnectionTrashTimeout(120),
+    idleConnectionTrashTimeout(I(120)),
     /**
      * Defines the throttling of concurrent requests per connection on local (on the same datacenter)
      * and remote nodes (on a different datacenter).
@@ -172,8 +173,8 @@ public enum CassandraProperty implements Property {
      * Note that that high values will give clients more bandwidth and therefore put more pressure on
      * the cluster. This might require some tuning, especially with many clients.
      */
-    maximumRequestsPerLocalConnection(1024),
-    maximumRequestsPerRemoteConnection(256),
+    maximumRequestsPerLocalConnection(I(1024)),
+    maximumRequestsPerRemoteConnection(I(256)),
     /**
      * When the {@link CassandraService} tries to send a request to a host, it will first try to acquire
      * a connection from this host's pool. If the pool is busy (i.e. all connections are already handling
@@ -187,15 +188,15 @@ public enum CassandraProperty implements Property {
      * <p/>
      * If all hosts are busy with a full queue, the request will fail with a {@link NoHostAvailableException}.
      */
-    acquisitionQueueMaxSize(256),
+    acquisitionQueueMaxSize(I(256)),
     /**
      * The connection timeout in milliseconds.
      */
-    connectTimeout(SocketOptions.DEFAULT_CONNECT_TIMEOUT_MILLIS),
+    connectTimeout(I(SocketOptions.DEFAULT_CONNECT_TIMEOUT_MILLIS)),
     /**
      * The read timeout in milliseconds.
      */
-    readTimeout(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS),
+    readTimeout(I(SocketOptions.DEFAULT_READ_TIMEOUT_MILLIS)),
     ;
 
     private final Object defaultValue;

@@ -174,7 +174,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             shareToken = new ShareToken(contextID, guestUser);
         } catch (OXException e) {
             if (ShareExceptionCodes.INVALID_TOKEN.equals(e)) {
-                LOG.info("Found invalid guest entity {} in context {} without a valid base token. Guest user will be deleted...", guestID, contextID);
+                LOG.info("Found invalid guest entity {} in context {} without a valid base token. Guest user will be deleted...", I(guestID), I(contextID));
                 deleteGuest(connectionHelper.getConnection(), context, guestID);
                 return;
             }
@@ -215,7 +215,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
                      * guest user not touched for configured interval, proceed with deletion
                      */
                     LOG.debug("No shares for {} remaining and not touched for {} days, deleting guest user.",
-                        guestInfo, TimeUnit.MILLISECONDS.toDays(guestExpiry));
+                        guestInfo, L(TimeUnit.MILLISECONDS.toDays(guestExpiry)));
                     deleteGuest(connectionHelper.getConnection(), context, guestUser.getId());
                 }
             } else {
@@ -253,7 +253,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
                     modules, guestInfo, updatedPermissionBits);
             } else {
                 LOG.debug("Shares in modules {} still available for {}, left permission bits unchanged at {}.",
-                    modules, guestID, requiredPermissionBits);
+                    modules, I(guestID), I(requiredPermissionBits));
             }
             /*
              * remove last-modified marker if set to reset counter
@@ -295,7 +295,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
                 throw e;
             }
         }
-        LOG.info("Guest user {} in context {} deleted.", guestID, context.getContextId());
+        LOG.info("Guest user {} in context {} deleted.", I(guestID), I(context.getContextId()));
     }
 
     @Override

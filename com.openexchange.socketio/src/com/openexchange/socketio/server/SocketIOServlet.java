@@ -26,6 +26,7 @@
 
 package com.openexchange.socketio.server;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -188,7 +189,7 @@ public abstract class SocketIOServlet extends SessionServlet {
         }
 
         try {
-            LOGGER.debug("Request from {}:{}, transport: {}, EIO protocol version:{}", request.getRemoteHost(), request.getRemotePort(), request.getParameter(EngineIOProtocol.TRANSPORT), request.getParameter(EngineIOProtocol.VERSION));
+            LOGGER.debug("Request from {}:{}, transport: {}, EIO protocol version:{}", request.getRemoteHost(), I(request.getRemotePort()), request.getParameter(EngineIOProtocol.TRANSPORT), request.getParameter(EngineIOProtocol.VERSION));
             transportProvider.getTransport(request).handle(request, response, socketIOManager);
         } catch (SocketIOProtocolException e) {
             LOGGER.warn("{} parameter missing", EngineIOProtocol.TRANSPORT, e);

@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -217,11 +218,11 @@ public class MultifactorAuthenticator {
      */
     public Challenge beginAuthorization(MultifactorRequest multifactorRequest, String deviceId) throws OXException {
         lockoutService.checkLockedOut(multifactorRequest);
-        if (multifactorProvider.isEnabled(multifactorRequest)) {
-            return multifactorProvider.beginAuthentication(multifactorRequest, deviceId);
-        } else {
+        if (!multifactorProvider.isEnabled(multifactorRequest)) {
             throw MultifactorExceptionCodes.PROVIDER_NOT_AVAILABLE.create(multifactorProvider.getName());
         }
+
+        return multifactorProvider.beginAuthentication(multifactorRequest, deviceId);
     }
 
     /**
@@ -247,7 +248,7 @@ public class MultifactorAuthenticator {
                 if (MultifactorExceptionCodes.AUTHENTICATION_FAILED.equals(e)) {
                     int maxCount = lockoutService.getMaxBadAttempts(multifactorRequest.getUserId(), multifactorRequest.getContextId());
                     if (maxCount > 0) {
-                        throw MultifactorExceptionCodes.AUTHENTICATION_FAILED_WITH_LOCKOUT.create(maxCount);
+                        throw MultifactorExceptionCodes.AUTHENTICATION_FAILED_WITH_LOCKOUT.create(I(maxCount));
                     }
                     throw e;
                 }

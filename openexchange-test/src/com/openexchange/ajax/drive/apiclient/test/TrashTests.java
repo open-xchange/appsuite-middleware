@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.drive.apiclient.test;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -94,12 +96,12 @@ public class TrashTests extends AbstractAPIClientSession {
 
         FoldersResponse rootFolders = folderApi.getFoldersApi().getRootFolders(folderApi.getSession(), "1,319", null, "infostore");
         rootId = getFolderId("Infostore", rootFolders);
-        FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(folderApi.getSession(), rootId, "1,319", 1, "0", "infostore", null, false);
+        FoldersResponse subFolders = folderApi.getFoldersApi().getSubFolders(folderApi.getSession(), rootId, "1,319", I(1), "0", "infostore", null, Boolean.FALSE);
         String trashId = getFolderId("Trash", subFolders);
         driveApi = new DriveApi(client);
         driveApi.emptyTrash(folderApi.getSession(), rootId);
         byte[] body = new byte[4];
-        DriveActionsResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, null, null, 1, "text/plain", 0l, new Long(4), null, null, null, null, null);
+        DriveActionsResponse uploadFile = driveApi.uploadFile(folderApi.getSession(), trashId, "/", "test.txt", getChecksum(body), body, null, null, I(1), "text/plain", L(0), new Long(4), null, null, null, null, null);
         assertNull(uploadFile.getErrorDesc(), uploadFile.getError());
 
         folderManager.createFolder(trashId, "trashedFolder", "infostore");

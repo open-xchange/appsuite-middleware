@@ -67,8 +67,8 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
     }
 
     @Override
-    public Fixtures<Subscription> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new SubscriptionFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<Subscription> createFixture(final Map<String, Map<String, String>> entries) {
+        return new SubscriptionFixtures(entries, fixtureLoader);
     }
 
     private class SubscriptionFixtures extends DefaultFixtures<Subscription> implements Fixtures<Subscription> {
@@ -76,7 +76,7 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Subscription>> subscriptions = new HashMap<String, Fixture<Subscription>>();
 
-        public SubscriptionFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
+        public SubscriptionFixtures(final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Subscription.class, entries, fixtureLoader);
             this.entries = entries;
         }

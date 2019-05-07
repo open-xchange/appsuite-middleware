@@ -294,7 +294,7 @@ public class RdbSettingStorage extends SettingStorage {
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);
-            } catch (final SQLException e) {
+            } catch (@SuppressWarnings("unused") final SQLException e) {
                 return false;
             }
         } finally {

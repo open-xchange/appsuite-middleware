@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.nio.serialization.Portable;
@@ -76,8 +77,9 @@ import com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExce
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.serialization.FilteringObjectInputStream;
-import com.openexchange.serialization.FilteringObjectStreamBlacklistProvider;
+import com.openexchange.serialization.BundleClassResolver;
+import com.openexchange.serialization.ClassResolver;
+import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
  * {@link PortableStanzaDispatcher}
@@ -225,9 +227,11 @@ public class PortableStanzaDispatcher implements Callable<IDMap<OXException>>, C
      *             accessible
      * @throws OXException
      */
-    private static Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException, OXException {
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
-        try (ObjectInputStream objectInputStream = new FilteringObjectInputStream(byteArrayInputStream, Services.getService(FilteringObjectStreamBlacklistProvider.class).blacklist())) {
+    private Stanza getStanza(byte[] stanzaBytes) throws IOException, ClassNotFoundException, OXException {
+        BundleContext bundleContext = Services.getBundleContext();
+        ClassResolver bundleClassResolver = bundleContext == null ? null : new BundleClassResolver(bundleContext);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(stanzaBytes);
+        try (ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream, this, bundleClassResolver)) {
             return Stanza.class.cast(objectInputStream.readObject());
         }
     }

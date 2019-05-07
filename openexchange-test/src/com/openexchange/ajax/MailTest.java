@@ -100,7 +100,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSendSimpleMail() throws IOException, SAXException, Exception {
+    public void testSendSimpleMail() throws IOException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -122,7 +122,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSendMailWithMultipleAttachment() throws IOException, SAXException, JSONException, Exception {
+    public void testSendMailWithMultipleAttachment() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -142,9 +142,8 @@ public class MailTest extends AbstractAJAXSession {
         assertFalse(mtm.getLastResponse().hasError());
     }
 
-    @SuppressWarnings("deprecation")
     @Test
-    public void testForwardMail() throws IOException, SAXException, JSONException, Exception {
+    public void testForwardMail() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -163,7 +162,6 @@ public class MailTest extends AbstractAJAXSession {
          */
         TestMail forwardMe = new TestMail(mailObj);
         mtm.forwardAndSendBefore(forwardMe);
-        AbstractAJAXResponse jResp = mtm.getLastResponse();
         /*
          * Get forward mail for display
          */
@@ -172,7 +170,7 @@ public class MailTest extends AbstractAJAXSession {
     }
 
     @Test
-    public void testSendForwardMailWithAttachments() throws IOException, SAXException, JSONException, Exception {
+    public void testSendForwardMailWithAttachments() throws IOException, JSONException, Exception {
         final JSONObject mailObj = new JSONObject();
         mailObj.put("from", testUser2.getLogin());
         mailObj.put("to", testUser.getLogin());
@@ -261,11 +259,10 @@ public class MailTest extends AbstractAJAXSession {
 
         mailObj.put("attachments", attachments);
 
-        TestMail mail = mtm.send(new TestMail(mailObj));
+        mtm.send(new TestMail(mailObj));
         jResp = mtm.getLastResponse();
         assertFalse(jResp.hasError());
 
-        final String mailidentifier = mail.getId();
         List<Parameter> additional = new ArrayList<>();
         additional.add(new Parameter(Mail.PARAMETER_SHOW_SRC, "true"));
         int[] columns = new int[] { MailListField.ID.getField() };

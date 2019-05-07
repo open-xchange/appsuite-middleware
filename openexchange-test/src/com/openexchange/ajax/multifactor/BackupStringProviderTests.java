@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.multifactor;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
@@ -122,7 +123,7 @@ public class BackupStringProviderTests extends AbstractMultifactorProviderTest {
     @Override
     protected MultifactorStartRegistrationResponseData doStartRegistration() throws Exception {
         //Register a new BACK_STRING device
-        final boolean isBackup = true;
+        final Boolean isBackup = Boolean.TRUE;
         return startRegistration(BACKUP_STRING_PROVIDER, null, null, isBackup);
     }
 
@@ -140,12 +141,12 @@ public class BackupStringProviderTests extends AbstractMultifactorProviderTest {
     @Override
     protected void validateRegisteredDevice(MultifactorDevice device) throws Exception {
         //The registered device must be a backup device
-        assertThat(device.getBackup(), is(true));
+        assertThat(device.getBackup(), is(Boolean.TRUE));
     }
 
     @Override
     protected void validateStartAuthenticationResponse(MultifactorStartAuthenticationResponseData data) {
-        assertThat(data.getChallenge().getBackupStringLength(), is(greaterThan(0)));
+        assertThat(data.getChallenge().getBackupStringLength(), is(greaterThan(I(0))));
     }
 
     @Override

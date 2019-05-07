@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -222,7 +223,7 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
 
         final int minCorePoolSize = Runtime.getRuntime().availableProcessors() + 1;
         if (desiredCorePoolSize < minCorePoolSize) {
-            LOG.warn("\n\n\tConfigured pool size of {} through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: {} (number of CPUs) + 1 = {}. Using {} as core pool size.\n", corePoolSize, Runtime.getRuntime().availableProcessors(), minCorePoolSize, minCorePoolSize);
+            LOG.warn("\n\n\tConfigured pool size of {} through property \"com.openexchange.threadpool.corePoolSize\" does not obey the rule\n\tfor minimum core pool size: {} (number of CPUs) + 1 = {}. Using {} as core pool size.\n", corePoolSize, I(Runtime.getRuntime().availableProcessors()), I(minCorePoolSize), I(minCorePoolSize));
             return minCorePoolSize;
         }
         return desiredCorePoolSize;

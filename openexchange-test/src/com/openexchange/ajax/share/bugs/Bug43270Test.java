@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.bugs;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -102,6 +103,7 @@ public class Bug43270Test extends ShareTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -109,6 +111,7 @@ public class Bug43270Test extends ShareTest {
         client2 = new AJAXClient(testContext.acquireUser());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -328,7 +331,7 @@ public class Bug43270Test extends ShareTest {
         Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());
+        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(I(client2.getValues().getContextId()));
         UserModuleAccess moduleAccess = userInterface.getModuleAccess(context, user, credentials);
         moduleAccess.setReadCreateSharedFolders(readCreateSharedFolders);
         userInterface.changeModuleAccess(context, user, moduleAccess, credentials);
@@ -346,7 +349,7 @@ public class Bug43270Test extends ShareTest {
         Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());
+        com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(I(client2.getValues().getContextId()));
         if (null == value) {
             userInterface.changeCapabilities(context, user, Collections.<String> emptySet(), Collections.<String> emptySet(), Collections.singleton(capability), credentials);
         } else if (Boolean.TRUE.equals(value)) {

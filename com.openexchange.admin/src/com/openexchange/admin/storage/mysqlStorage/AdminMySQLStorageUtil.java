@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +72,7 @@ class AdminMySQLStorageUtil {
 
     /**
      * Leases a read-only {@link Connection} for the configuration database
-     * 
+     *
      * @param cache The {@link AdminCache}
      * @return The leased {@link Connection}
      * @throws StorageException if a pool error is occurred
@@ -87,7 +88,7 @@ class AdminMySQLStorageUtil {
 
     /**
      * Leases a read/write {@link Connection} for the specified context
-     * 
+     *
      * @param contextId the context identifier
      * @param cache The {@link AdminCache}
      * @return The leased {@link Connection}
@@ -105,7 +106,7 @@ class AdminMySQLStorageUtil {
     /**
      * Leases a read/write {@link Connection} for the specified context. This connection will not have a
      * connection timeout to support long running update tasks.
-     * 
+     *
      * @param contextId The context identifier
      * @param cache The {@link AdminCache}
      * @return The leased {@link Connection}
@@ -124,7 +125,7 @@ class AdminMySQLStorageUtil {
 
     /**
      * Releases the specified {@link Connection}
-     * 
+     *
      * @param connection The {@link Connection} to release
      * @param cache The {@link AdminCache}
      */
@@ -141,7 +142,7 @@ class AdminMySQLStorageUtil {
 
     /**
      * Releases the specified write {@link Connection} for the specified {@link Context}
-     * 
+     *
      * @param connection The {@link Connection} to release
      * @param context The {@link Context}
      * @param cache The {@link AdminCache}
@@ -154,13 +155,13 @@ class AdminMySQLStorageUtil {
         try {
             cache.pushConnectionForContext(contextId, connection);
         } catch (PoolException e) {
-            LOG.error("Error pushing write connection to pool for context {}!", contextId, e);
+            LOG.error("Error pushing write connection to pool for context {}!", I(contextId), e);
         }
     }
 
     /**
      * Releases the specified {@link Connection} for the specified {@link Context} after performing a read
-     * 
+     *
      * @param connection The {@link Connection}
      * @param contextId The context identifier
      * @param cache The {@link AdminCache}
@@ -178,7 +179,7 @@ class AdminMySQLStorageUtil {
 
     /**
      * Releases the specified {@link Connection} for the specified {@link Context}
-     * 
+     *
      * @param connection The {@link Connection} to release
      * @param context The {@link Context}
      * @param cache The {@link AdminCache}

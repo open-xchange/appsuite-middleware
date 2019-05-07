@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RedirectActionCommandParser}
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
@@ -88,7 +88,7 @@ public class RedirectActionCommandParser extends AbstractActionCommandParser {
     public ActionCommand parse(JSONObject jsonObject, ServerSession session) throws SieveException, OXException {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
-        Boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
+        boolean copy = jsonObject.optBoolean(RedirectActionField.copy.name(), false);
         if (copy) {
             argList.add(ArgumentUtil.createTagArgument(RedirectActionField.copy.name()));
         }

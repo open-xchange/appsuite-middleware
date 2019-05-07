@@ -49,6 +49,7 @@
 
 package com.openexchange.pgp.core;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -111,8 +112,8 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
     @Parameters(name = "{index} - Ascii-armored: {0}")
     public static Iterable parameters() {
         return Arrays.asList(new Object[][] {
-            { true /* Runs the tests in ASCII-Armored mode */},
-            { false /* Runs the tests in Binary-Mode */}
+            { Boolean.TRUE /* Runs the tests in ASCII-Armored mode */},
+            { Boolean.FALSE /* Runs the tests in Binary-Mode */}
         });
     }
 
@@ -184,7 +185,7 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
         PGPDecryptionResult result = symmetricDecrypter.decrypt(new ByteArrayInputStream(encryptedTestData), decryptedData);
         List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
-        assertNotNull("Verification results should be empty for non signed data", verifyResults.isEmpty());
+        assertNotNull("Verification results should be empty for non signed data", B(verifyResults.isEmpty()));
         assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
 
         //-------------------------------------------------------------------------------------------------------------

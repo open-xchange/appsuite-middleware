@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.impl.tests;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -398,7 +399,7 @@ public class OIDCWebSSoProviderImplTest {
 
     @Test
     public void getLogoutRedirectRequest_viaSSOLogoutTest() throws Exception {
-        Mockito.when(mockedBackendConfig.isSSOLogout()).thenReturn(true);
+        Mockito.when(B(mockedBackendConfig.isSSOLogout())).thenReturn(B(true));
         Session mockedSession = Mockito.mock(Session.class);
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(ArgumentMatchers.any(HttpServletRequest.class));
         String logoutRequest = "firstRequest";
@@ -417,7 +418,7 @@ public class OIDCWebSSoProviderImplTest {
     @Test
     public void getLogoutRedirectRequest_NoSSOLogoutTest() throws Exception {
         String logoutRequest = "correctLogoutRequest";
-        Mockito.when(mockedBackendConfig.isSSOLogout()).thenReturn(false);
+        Mockito.when(B(mockedBackendConfig.isSSOLogout())).thenReturn(B(false));
         PowerMockito.doReturn(mockedSession).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "extractSessionFromRequest", HttpServletRequest.class)).withArguments(mockedRequest);
         PowerMockito.doReturn(logoutRequest).when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "getRedirectForLogoutFromOXServer", Session.class, HttpServletRequest.class, HttpServletResponse.class, LogoutRequestInfo.class)).withArguments(mockedSession, mockedRequest, mockedResponse, null);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);

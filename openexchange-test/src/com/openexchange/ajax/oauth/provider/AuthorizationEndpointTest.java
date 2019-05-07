@@ -132,12 +132,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithMissingReferer() throws Exception {
-        testPOSTWithMissingOrInvalidReferer(true);
-    }
-
-    @Test
-    public void testPOSTWithInvalidReferer() throws Exception {
-        testPOSTWithMissingOrInvalidReferer(false);
+        testPOSTWithMissingOrInvalidReferer();
     }
 
     /**
@@ -152,7 +147,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         assertEquals("SAMEORIGIN", frameOptions);
     }
 
-    private void testPOSTWithMissingOrInvalidReferer(boolean omit) throws Exception {
+    private void testPOSTWithMissingOrInvalidReferer() throws Exception {
         GETRequest getLoginForm = new GETRequest().setHostname(hostname).setClientId(getClientId()).setRedirectURI(getRedirectURI()).setState(csrfState).setScope(getScope().toString());
         GETResponse loginFormResponse = getLoginForm.execute(client);
         POSTRequest loginRequest = loginFormResponse.preparePOSTRequest().setLogin(testUser.getLogin()).setPassword(testUser.getPassword()).setHeader(HttpHeaders.REFERER, null);

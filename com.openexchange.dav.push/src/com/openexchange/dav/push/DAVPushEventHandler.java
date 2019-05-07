@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.push;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Date;
@@ -127,7 +128,7 @@ public class DAVPushEventHandler implements EventHandler {
         List<PushNotification> pushNotifications = new ArrayList<PushNotification>();
         String rootTopic = DAVPushUtility.getRootTopic(clientId);
         Long timestamp = Long.valueOf(getTimestamp(event).getTime());
-        Integer priority = determinePriority(event);
+        Integer priority = I(determinePriority(event));
         String clientToken = determineClientToken(event);
         int contextId = event.getContextId();
         for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
@@ -210,7 +211,7 @@ public class DAVPushEventHandler implements EventHandler {
         //TODO
         // - is user attendee?
         // - is event in past or far in future?
-        return Integer.valueOf(50);
+        return 50;
     }
 
     private static String determineClientToken(CommonEvent event) {

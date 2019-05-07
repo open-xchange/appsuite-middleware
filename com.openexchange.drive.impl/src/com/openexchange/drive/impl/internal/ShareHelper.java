@@ -427,18 +427,18 @@ public class ShareHelper {
 
     private static Entities filterFileEntities(int[] entityIDs, List<FileStorageObjectPermission> permissions) throws OXException {
         Entities entities = new Entities();
-        for (Integer entityID : entityIDs) {
+        for (int entityID : entityIDs) {
             FileStorageObjectPermission matchingPermission = null;
             if (null != permissions) {
                 for (FileStorageObjectPermission permission : permissions) {
-                    if (permission.getEntity() == entityID.intValue()) {
+                    if (permission.getEntity() == entityID) {
                         matchingPermission = permission;
                         break;
                     }
                 }
             }
             if (null == matchingPermission) {
-                throw OXException.notFound(entityID.toString());
+                throw OXException.notFound(Integer.toString(entityID));
             }
             if (matchingPermission.isGroup()) {
                 entities.addGroup(matchingPermission.getEntity(), PermissionType.OBJECT, matchingPermission.getPermissions());
@@ -451,18 +451,18 @@ public class ShareHelper {
 
     private static Entities filterFolderEntities(int[] entityIDs, List<FileStoragePermission> permissions) throws OXException {
         Entities entities = new Entities();
-        for (Integer entityID : entityIDs) {
+        for (int entityID : entityIDs) {
             FileStoragePermission matchingPermission = null;
             if (null != permissions) {
                 for (FileStoragePermission permission : permissions) {
-                    if (permission.getEntity() == entityID.intValue()) {
+                    if (permission.getEntity() == entityID) {
                         matchingPermission = permission;
                         break;
                     }
                 }
             }
             if (null == matchingPermission) {
-                throw OXException.notFound(entityID.toString());
+                throw OXException.notFound(Integer.toString(entityID));
             }
             int permissionBits = Permissions.createPermissionBits(matchingPermission.getFolderPermission(), matchingPermission.getReadPermission(),
                 matchingPermission.getWritePermission(), matchingPermission.getDeletePermission(), matchingPermission.isAdmin());

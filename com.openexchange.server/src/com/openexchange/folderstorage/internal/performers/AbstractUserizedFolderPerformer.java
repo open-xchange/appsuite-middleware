@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -702,7 +703,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 /*
                  * check guest permission
                  */
-                GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
                 if (isAnonymous(guestInfo)) {
@@ -739,7 +740,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 /*
                  * check guest permission
                  */
-                GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
             }
@@ -849,7 +850,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @return A suitable invalid permission exception
      */
     private static OXException invalidPermissions(Folder folder, Permission permission) {
-        return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(permission), permission.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
+        return FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(I(Permissions.createPermissionBits(permission)), I(permission.getEntity()), folder.getID() == null ? folder.getName() : folder.getID());
     }
 
     private static void checkReadOnly(Folder folder, Permission p) throws OXException {

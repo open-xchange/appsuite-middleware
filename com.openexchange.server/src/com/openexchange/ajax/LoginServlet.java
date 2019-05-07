@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -488,7 +489,7 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", I(context.getContextId()), I(user.getId()));
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -497,7 +498,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -660,7 +661,7 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", I(context.getContextId()), I(user.getId()));
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -669,7 +670,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -1120,7 +1121,7 @@ public class LoginServlet extends AJAXServlet {
         } else {
             shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
         }
-        boolean shareTransientSessions = Boolean.valueOf(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
+        boolean shareTransientSessions = Boolean.parseBoolean(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
         return new ShareLoginConfiguration(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
 }

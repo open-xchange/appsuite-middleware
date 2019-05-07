@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.internal.solver;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class DeleteAttachmentSolver implements ProblemSolver {
                 final int[] numbers = attachments.removeAttachment(identifier, entity.getContext());
                 attachments.commit();
                 if (numbers[0] == 1) {
-                    LOG.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, entity.getContext().getContextId()));
+                    LOG.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, I(entity.getContext().getContextId())));
                 }
                 if (numbers[1] == 1) {
                     LOG.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));

@@ -50,6 +50,7 @@
 package com.openexchange.dav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -251,7 +252,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVObjectRe
                     factory.getSession(), attachment.getFolderId(), attachment.getAttachedId(), attachment.getModuleId(), attachment.getId(),
                     factory.getContext(), factory.getUser(), factory.getUserConfiguration());
                 if (null != object && object.getObjectID() == originalMetadata.getAttachedId()) {
-                    LOG.debug("Skipping copy of already existing master attachment {} for exception of object {}.", attachment.getId(), object.getObjectID());
+                    LOG.debug("Skipping copy of already existing master attachment {} for exception of object {}.", I(attachment.getId()), I(object.getObjectID()));
                 } else {
                     copyAttachment(attachments, originalMetadata, updatedObject);
                     timestamp = updatedObject.getLastModified();

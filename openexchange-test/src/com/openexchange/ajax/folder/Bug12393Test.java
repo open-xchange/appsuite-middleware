@@ -99,6 +99,7 @@ public class Bug12393Test extends AbstractAJAXSession {
     int parentFolderId;
     List<OCLPermission> originalSubFolderPermissions;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -136,6 +137,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         subFolderId = subFolderObject.getObjectID();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

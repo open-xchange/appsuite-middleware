@@ -202,7 +202,7 @@ public class DistributionlistMapping extends AbstractMapping {
         return null;
     }
 
-    private static DistributionListEntryObject importLegacyMember(Email member, VCardParameters parameters, List<OXException> warnings) {
+    private static DistributionListEntryObject importLegacyMember(Email member, @SuppressWarnings("unused") VCardParameters parameters, List<OXException> warnings) {
         String email = member.getValue();
         if (null != email) {
             DistributionListEntryObject entry = new DistributionListEntryObject();
@@ -217,7 +217,7 @@ public class DistributionlistMapping extends AbstractMapping {
         return null;
     }
 
-    private static String extractEMailAddress(String uriString, VCardParameters parameters, List<OXException> warnings) {
+    private static String extractEMailAddress(String uriString, @SuppressWarnings("unused") VCardParameters parameters, List<OXException> warnings) {
         if (Strings.isEmpty(uriString)) {
             return null;
         }
@@ -232,7 +232,7 @@ public class DistributionlistMapping extends AbstractMapping {
         }
         if (null != email) {
             try {
-                new InternetAddress(email);
+                @SuppressWarnings("unused") InternetAddress parsedAddress = new InternetAddress(email);
                 return email;
             } catch (AddressException e) {
                 addConversionWarning(warnings, e, "MEMBER", e.getMessage());
@@ -241,7 +241,7 @@ public class DistributionlistMapping extends AbstractMapping {
         return null;
     }
 
-    private static Member exportMember(DistributionListEntryObject entry, VCardParameters parameters, List<OXException> warnings) {
+    private static Member exportMember(DistributionListEntryObject entry, @SuppressWarnings("unused") VCardParameters parameters, List<OXException> warnings) {
         String email = entry.getEmailaddress();
         if (null != email) {
             String uriString = null;

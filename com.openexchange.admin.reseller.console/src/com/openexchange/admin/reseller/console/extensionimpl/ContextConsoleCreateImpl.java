@@ -237,10 +237,9 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
      *
      * @param addres
      * @return might return null
-     * @throws InvalidDataException
      * @throws OXResellerException
      */
-    private HashSet<Restriction> getRestrictions(final HashSet<Restriction> addres) throws InvalidDataException, OXResellerException {
+    private HashSet<Restriction> getRestrictions(final HashSet<Restriction> addres) throws OXResellerException {
         HashSet<Restriction> restrictions = null;
         if (!addres.isEmpty()) {
             final HashSet<Restriction> dbres = new HashSet<Restriction>();

@@ -90,6 +90,10 @@ public class UpdateTaskSorter {
             }
         }
         if (!toExecute.isEmpty()) {
+            for (UpdateTaskV2 task : toExecute) {
+                OXException e = UpdateExceptionCodes.UNMET_DEPENDENCY.create(task.getClass().getName(), Strings.join(task.getDependencies(), ","));
+                org.slf4j.LoggerFactory.getLogger(UpdateTaskSorter.class).warn(e.getMessage());
+            }
             throw UpdateExceptionCodes.UNRESOLVABLE_DEPENDENCIES.create(Strings.join(executed, ","), Strings.join(retval, ","), Strings.join(toExecute, ","));
         }
         return retval;

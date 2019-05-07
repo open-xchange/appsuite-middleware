@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.modules.model.Metadata;
 import com.openexchange.modules.storage.sql.engines.ResultSetHandler;
 import com.openexchange.sql.grammar.NOTNULL;
@@ -81,10 +82,10 @@ public class UserWidgetSQLStorage extends WidgetSQLStorage {
 
             @Override
             public Boolean handle(final ResultSet rs) throws SQLException, OXException {
-                return rs.next();
+                return Autoboxing.valueOf(rs.next());
             }
 
-        });
+        }).booleanValue();
     }
 
 }

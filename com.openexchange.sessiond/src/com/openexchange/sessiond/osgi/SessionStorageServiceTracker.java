@@ -86,7 +86,9 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
         if (!sessionControls.isEmpty()) {
             final List<SessionImpl> sessions = new ArrayList<SessionImpl>(sessionControls.size());
             for (final SessionControl sessionControl : sessionControls) {
-                sessions.add(sessionControl.getSession());
+                if (false == sessionControl.getSession().isTransient()) {
+                    sessions.add(sessionControl.getSession());
+                }
             }
             SessionHandler.storeSessions(sessions, service);
         }

@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
@@ -84,10 +86,10 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public SessiondConfigImpl(ConfigurationService conf) {
         super();
         maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", 50000);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession={}", maxSession);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession={}", I(maxSession));
 
         maxSessionsPerClient = conf.getIntProperty("com.openexchange.sessiond.maxSessionPerClient", 0);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient={}", maxSessionsPerClient);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.maxSessionPerClient={}", I(maxSessionsPerClient));
 
         long sessionShortLifeTime = conf.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", ((int) (60L * 60L * 1000L)));
         String tmp = conf.getProperty("com.openexchange.sessiond.sessionLongLifeTime", "1W");
@@ -103,12 +105,12 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         }
         this.sessionShortLifeTime = sessionShortLifeTime;
         this.longLifeTime = longLifeTime;
-        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime={}", this.sessionShortLifeTime);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime={}", this.longLifeTime);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionDefaultLifeTime={}", L(this.sessionShortLifeTime));
+        LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime={}", L(this.longLifeTime));
 
         tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", Integer.toString(30000));
         randomTokenTimeout = ConfigTools.parseTimespan(tmp);
-        LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout={}", randomTokenTimeout);
+        LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout={}", L(randomTokenTimeout));
 
         tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
         autoLogin = Boolean.parseBoolean(tmp.trim());

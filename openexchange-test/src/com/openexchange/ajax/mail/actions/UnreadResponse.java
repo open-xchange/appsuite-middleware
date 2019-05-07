@@ -65,7 +65,7 @@ public class UnreadResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link UnreadResponse}.
-     * 
+     *
      * @param response
      */
     protected UnreadResponse(Response response) {
@@ -75,7 +75,7 @@ public class UnreadResponse extends AbstractAJAXResponse {
 
     public int getUnreadCount(String categoryId) throws Exception {
         if (data instanceof JSONObject) {
-            return (int) ((JSONObject) data).get(categoryId);
+            return ((Integer) ((JSONObject) data).get(categoryId)).intValue();
         }
         throw new Exception("Unable to retrieve unread count!");
     }

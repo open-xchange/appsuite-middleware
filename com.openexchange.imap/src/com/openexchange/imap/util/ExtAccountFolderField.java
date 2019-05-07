@@ -191,7 +191,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                 jResult.put("externalAccount", folderInfo.externalAccount);
             }
             return jResult;
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return null;
         }
     }
@@ -305,7 +305,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                                 String alias = null;
 
                                 while (index < length) {
-                                    String name = metadatas[index++];
+                                    @SuppressWarnings("null") String name = metadatas[index++]; // Cannot be null
                                     if ("/shared/vendor/vendor.dovecot/ext-account".equals(name)) {
                                         String value = metadatas[index++];
                                         if (!"NIL".equalsIgnoreCase(value)) {

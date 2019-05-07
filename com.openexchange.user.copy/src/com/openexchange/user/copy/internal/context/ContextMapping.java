@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.context;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.user.copy.internal.IntegerToObjectMapping;
 
@@ -64,7 +65,7 @@ public class ContextMapping extends IntegerToObjectMapping<Context> {
      */
     @Override
     public Context getDestination(final Context source) {
-        return getDestinationById(source.getContextId());
+        return getDestinationById(I(source.getContextId()));
     }
 
 }

@@ -1,5 +1,5 @@
 /chronos?action=move:
-  put:
+  post:
     operationId: moveEvent
     tags:
       - Chronos

@@ -86,6 +86,7 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -119,6 +120,7 @@ public class WeirdRecurrencePatternTest extends AbstractAJAXSession {
         assertEquals("Wrong end date.", D("06.01.2015 16:30", tz), loaded.getEndDate());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

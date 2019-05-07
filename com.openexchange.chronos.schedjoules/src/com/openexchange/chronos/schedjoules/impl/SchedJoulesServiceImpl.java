@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -198,8 +200,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
                 int rootPageItemId = itemData.getInt("item_id");
 
                 pagesCache.put(new SchedJoulesCachedItemKey(contextId, rootPageItemId, locale), rootPage);
-                return rootPageItemId;
-            });
+                return I(rootPageItemId);
+            }).intValue();
             return getPage(contextId, itemId, locale, filteredFields);
         } catch (ExecutionException e) {
             throw handleExecutionException(e);
@@ -314,10 +316,15 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
             return content;
         }
         try {
-            long startTime = System.currentTimeMillis();
-            removeBlackListedItems(content);
-            filterJSONObject(content, filteredFields);
-            LOG.trace("Filtered content in {} msec.", System.currentTimeMillis() - startTime);
+            if (LOG.isTraceEnabled()) {
+                long startTime = System.currentTimeMillis();
+                removeBlackListedItems(content);
+                filterJSONObject(content, filteredFields);
+                LOG.trace("Filtered content in {} msec.", L(System.currentTimeMillis() - startTime));
+            } else {
+                removeBlackListedItems(content);
+                filterJSONObject(content, filteredFields);
+            }
             return content;
         } catch (JSONException e) {
             throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e);

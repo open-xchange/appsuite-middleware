@@ -79,7 +79,7 @@ public abstract class OXAutoCIDStorageInterface {
                 inst = instance;
                 if (null == inst) {
                     Class<? extends OXAutoCIDStorageInterface> implementingClass;
-                    AdminCacheExtended cache = ClientAdminThreadExtended.cache;
+                    AdminCacheExtended cache = ClientAdminThreadExtended.autocontextidCache;
                     PropertyHandler prop = cache.getProperties();
                     final String className = prop.getProp(PropertyHandlerExtended.AUTOCID_STORAGE, null);
                     if (null != className) {

@@ -367,9 +367,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             this.updateLastUpdated(System.currentTimeMillis());
             account.getInternalConfiguration().remove("lastError");
 
-            LOG.debug("Updated cache for calendar account {} of user {} in context {}.", account.getAccountId(), session.getUserId(), session.getContextId());
+            LOG.debug("Updated cache for calendar account {} of user {} in context {}.", I(account.getAccountId()), I(session.getUserId()), I(session.getContextId()));
         } catch (OXException e) {
-            LOG.info("Unable to update cache for account {}: {}", account.getAccountId(), e.getMessage(), e);
+            LOG.info("Unable to update cache for account {}: {}", I(account.getAccountId()), e.getMessage(), e);
             warnings.add(e);
 
             handleInternally(e);
@@ -628,11 +628,13 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         Event persistedEvent = eventUpdate.getOriginal();
         Event updatedEvent = eventUpdate.getUpdate();
         /*
-         * update via special 'delta' event so that identifying properties are still available for the storage
+         * update via special 'delta' event so that identifying properties are still available for the storage & update timestamp
          */
-        Set<EventField> updatedFields = eventUpdate.getUpdatedFields();
+        Set<EventField> updatedFields = new HashSet<EventField>(eventUpdate.getUpdatedFields());
         Event deltaEvent = EventMapper.getInstance().copy(persistedEvent, null, (EventField[]) null);
         deltaEvent = EventMapper.getInstance().copy(updatedEvent, deltaEvent, updatedFields.toArray(new EventField[updatedFields.size()]));
+        deltaEvent.setTimestamp(System.currentTimeMillis());
+        updatedFields.add(EventField.TIMESTAMP);
         deltaEvent = new DeltaEvent(deltaEvent, updatedFields);
         calendarStorage.getEventStorage().updateEvent(deltaEvent);
 
@@ -777,7 +779,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                 int accountId = account.getAccountId();
                 account = accountService.getAccount(session.getContextId(), session.getUserId(), accountId);
                 if (null == account) {
-                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
                 }
             }
             caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
@@ -1123,7 +1125,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return new DefaultCalendarEvent(session.getContextId(),
             account.getAccountId(),
             account.getUserId(),
-            Collections.singletonMap(account.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+            Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
             null,
             null,
             deletions,
@@ -1147,7 +1149,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return new DefaultCalendarEvent(session.getContextId(),
             account.getAccountId(),
             account.getUserId(),
-            Collections.singletonMap(account.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+            Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
             creations,
             null,
             null,
@@ -1172,7 +1174,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return new DefaultCalendarEvent(session.getContextId(),
             account.getAccountId(),
             account.getUserId(),
-            Collections.singletonMap(account.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+            Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
             null,
             updates,
             null,
@@ -1227,7 +1229,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         notificationService.notifyHandlers(new DefaultCalendarEvent(    session.getContextId(),
                                                                         account.getAccountId(),
                                                                         session.getUserId(),
-                                                                        Collections.singletonMap(session.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+                                                                        Collections.singletonMap(I(session.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
                                                                         result.getCreations(),
                                                                         result.getUpdates(),
                                                                         result.getDeletions(),

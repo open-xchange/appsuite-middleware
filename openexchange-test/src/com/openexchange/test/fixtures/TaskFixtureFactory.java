@@ -81,8 +81,8 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
     }
 
     @Override
-    public Fixtures<Task> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new TaskFixtures(fixtureName, entries, fixtureLoader, groupResolver);
+    public Fixtures<Task> createFixture(final Map<String, Map<String, String>> entries) {
+        return new TaskFixtures(entries, fixtureLoader, groupResolver);
     }
 
     private class TaskFixtures extends DefaultFixtures<Task> implements Fixtures<Task> {
@@ -91,9 +91,10 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
 
         private final Map<String, Fixture<Task>> tasks = new HashMap<String, Fixture<Task>>();
 
+        @SuppressWarnings("hiding")
         private final GroupResolver groupResolver;
 
-        public TaskFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
+        public TaskFixtures(final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
             super(Task.class, entries, fixtureLoader);
             this.entries = entries;
             this.groupResolver = groupResolver;

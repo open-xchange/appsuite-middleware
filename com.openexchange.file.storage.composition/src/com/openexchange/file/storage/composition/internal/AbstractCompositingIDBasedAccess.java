@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -360,7 +361,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         } catch (OXException e) {
             // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
             if (e.equalsCode(4, "OAUTH") || OXExceptions.containsCommunicationError(e)) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountAccess.getAccountId(), accountAccess.getService().getId(), session.getUserId(), session.getContextId());
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountAccess.getAccountId(), accountAccess.getService().getId(), I(session.getUserId()), I(session.getContextId()));
             }
             throw e;
         }

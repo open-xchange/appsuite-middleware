@@ -60,6 +60,11 @@ import com.openexchange.config.lean.Property;
 public enum MultifactorProperties implements Property {
 
     /**
+     * Allow multiple primary multifactor devices
+     */
+    allowMultiple(Boolean.TRUE),
+
+    /**
      * WARNING: This puts the multifactor framework into demo mode.
      * This is for testing only!
      * DO NOT SET TO TRUE IN A PRODUCTIVE ENVIRONMENT!
@@ -88,23 +93,14 @@ public enum MultifactorProperties implements Property {
         this.defaultValue = defaultValue;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getFQPropertyName()
-     */
     @Override
     public String getFQPropertyName() {
         return PREFIX + name();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.config.lean.Property#getDefaultValue()
-     */
     @Override
     public Object getDefaultValue() {
         return defaultValue;
     }
+
 }

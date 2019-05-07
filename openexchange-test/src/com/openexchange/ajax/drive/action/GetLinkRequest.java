@@ -63,8 +63,8 @@ import com.openexchange.drive.DriveShareTarget;
  */
 public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
 
-    private boolean failOnError;
-    private DriveShareTarget target;
+    private final boolean failOnError;
+    private final DriveShareTarget target;
 
     public GetLinkRequest(Integer root, DriveShareTarget target) {
         this(root, target, true);
@@ -83,7 +83,7 @@ public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink"), new Parameter("root", root)
+        return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "getLink"), new Parameter("root", root.intValue())
         };
     }
 

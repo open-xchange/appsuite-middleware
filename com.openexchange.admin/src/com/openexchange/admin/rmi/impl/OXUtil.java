@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.File;
 import java.net.URI;
@@ -130,13 +132,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         if (null == fstore.getSize()) {
-            fstore.setSize(DEFAULT_STORE_SIZE);
-        } else if (fstore.getSize() == -1) {
+            fstore.setSize(L(DEFAULT_STORE_SIZE));
+        } else if (fstore.getSize().longValue() == -1) {
             throw new InvalidDataException("Invalid store size -1");
         }
 
         if (null == fstore.getMaxContexts()) {
-            fstore.setMaxContexts(DEFAULT_STORE_MAX_CTX);
+            fstore.setMaxContexts(I(DEFAULT_STORE_MAX_CTX));
         }
 
         if (tool.existsStore(fstore.getUrl())) {
@@ -157,7 +159,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             }
         }
 
-        final int response = oxutil.registerFilestore(fstore);
+        Integer response = I(oxutil.registerFilestore(fstore));
         log.debug("RESPONSE {}", response);
         return new Filestore(response);
 
@@ -180,7 +182,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Invalid store url " + fstore.getUrl());
         }
 
-        if (!tool.existsStore(fstore.getId())) {
+        if (!tool.existsStore(fstore.getId().intValue())) {
             throw new InvalidDataException("No such store " + fstore.getUrl());
         }
 
@@ -229,14 +231,14 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         log.debug(store.toString());
 
-        if (!tool.existsStore(store.getId())) {
+        if (!tool.existsStore(store.getId().intValue())) {
             throw new InvalidDataException("No such store");
         }
 
-        if (tool.storeInUse(store.getId())) {
+        if (tool.storeInUse(store.getId().intValue())) {
             throw new InvalidDataException("Store " + store + " in use");
         }
-        oxutil.unregisterFilestore(store.getId());
+        oxutil.unregisterFilestore(store.getId().intValue());
     }
 
     @Override
@@ -259,7 +261,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new InvalidDataException("Reason already exists!");
         }
 
-        return new MaintenanceReason(oxutil.createMaintenanceReason(reason));
+        return new MaintenanceReason(I(oxutil.createMaintenanceReason(reason)));
     }
 
     public MaintenanceReason[] listMaintenanceReasons(Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException {
@@ -350,15 +352,15 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         if (null == db.getMaxUnits()) {
-            db.setMaxUnits(DEFAULT_MAXUNITS);
+            db.setMaxUnits(I(DEFAULT_MAXUNITS));
         }
 
         if (null == db.getPoolInitial()) {
-            db.setPoolInitial(DEFAULT_POOL_INITIAL);
+            db.setPoolInitial(I(DEFAULT_POOL_INITIAL));
         }
 
         if (null == db.getPoolMax()) {
-            db.setPoolMax(DEFAULT_POOL_MAX);
+            db.setPoolMax(I(DEFAULT_POOL_MAX));
         }
 
         if (null == db.getLogin()) {
@@ -366,7 +368,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         }
 
         if (null == db.getPoolHardLimit()) {
-            db.setPoolHardLimit(DEFAULT_POOL_HARD_LIMIT ? 1 : 0);
+            db.setPoolHardLimit(I(DEFAULT_POOL_HARD_LIMIT ? 1 : 0));
         }
 
         if (null == db.getUrl()) {
@@ -379,8 +381,9 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public String[] createSchemas(Database db, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
+    public String[] createSchemas(Database database, Integer optNumberOfSchemas, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        Database db = database;
         try {
             doNullCheck(db);
         } catch (final InvalidDataException e1) {
@@ -419,17 +422,21 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         basicauth.doAuthentication(auth);
 
-        Database existing = null == db ? null : tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
+        Database existing;
+        if (null == db) {
+            existing = null;
+        } else {
+            existing = tool.loadDatabaseById(db.getId().intValue()); // Implicitly checks existence
+            if (null != db.getScheme()) {
+                existing.setScheme(db.getScheme());
 
-        if (null != db && null != db.getScheme()) {
-            existing.setScheme(db.getScheme());
+                if (false == OXUtilMySQLStorageCommon.existsDatabase(existing)) {
+                    throw new StorageException("Schema \"" + db.getScheme() + "\" does not exist in database " + db.getId());
+                }
 
-            if (false == OXUtilMySQLStorageCommon.existsDatabase(existing)) {
-                throw new StorageException("Schema \"" + db.getScheme() + "\" does not exist in database " + db.getId());
-            }
-
-            if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
-                throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+                if (tool.schemaInUse(db.getId().intValue(), db.getScheme())) {
+                    throw new StorageException("Schema \"" + db.getScheme() + "\" of database " + db.getId() + " is in use");
+                }
             }
         }
 
@@ -467,7 +474,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
 
         final Server sr = new Server();
         sr.setName(srv.getName());
-        sr.setId(oxutil.registerServer(srv.getName()));
+        sr.setId(I(oxutil.registerServer(srv.getName())));
         return sr;
     }
 
@@ -517,14 +524,14 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         } catch (NoSuchObjectException e) {
             throw new InvalidDataException(e);
         }
-        if (!tool.existsServer(server.getId())) {
+        if (!tool.existsServer(server.getId().intValue())) {
             throw new InvalidDataException("No such server " + server);
         }
-        if (tool.serverInUse(server.getId())) {
+        if (tool.serverInUse(server.getId().intValue())) {
             throw new StorageException("Server " + server + " is in use");
         }
 
-        oxutil.unregisterServer(server.getId());
+        oxutil.unregisterServer(server.getId().intValue());
     }
 
     /*
@@ -554,10 +561,10 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         } catch (NoSuchObjectException e) {
             throw new InvalidDataException(e);
         }
-        if (!tool.existsServer(server.getId())) {
+        if (!tool.existsServer(server.getId().intValue())) {
             throw new InvalidDataException("No such server " + server);
         }
-        oxutil.changeServer(server.getId(), schemaName);
+        oxutil.changeServer(server.getId().intValue(), schemaName);
     }
 
     @Override
@@ -691,7 +698,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new NoSuchDatabaseException(e);
         }
         final Integer id = db.getId();
-        if (!tool.existsDatabase(id)) {
+        if (!tool.existsDatabase(id.intValue())) {
             throw new NoSuchDatabaseException("No such database with id " + id);
         }
 
@@ -746,7 +753,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
             throw new StorageException(e);
         }
         final Integer id = db.getId();
-        if (!tool.existsDatabase(id)) {
+        if (!tool.existsDatabase(id.intValue())) {
             throw new InvalidDataException("No such database with id " + id);
         }
 
@@ -771,7 +778,7 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         log.debug(Arrays.toString(reasons));
 
         for (final MaintenanceReason element : reasons) {
-            if (!tool.existsReason(element.getId())) {
+            if (!tool.existsReason(element.getId().intValue())) {
                 throw new InvalidDataException("Reason with id " + element + " does not exists");
             }
         }

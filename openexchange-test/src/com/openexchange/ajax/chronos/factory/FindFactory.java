@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos.factory;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.testing.httpclient.models.FindActiveFacet;
 import com.openexchange.testing.httpclient.models.FindActiveFacetFilter;
 import com.openexchange.testing.httpclient.models.FindOptionsData;
@@ -83,14 +84,14 @@ public class FindFactory {
         q.setValue(query);
 
         FindOptionsData options = new FindOptionsData();
-        options.setAdmin(false);
+        options.setAdmin(Boolean.FALSE);
         options.setTimezone("UTC");
 
         FindQueryBody queryBody = new FindQueryBody();
         queryBody.addFacetsItem(facetsItem);
         queryBody.addFacetsItem(q);
-        queryBody.setStart(0);
-        queryBody.setSize(101);
+        queryBody.setStart(I(0));
+        queryBody.setSize(I(101));
         queryBody.setOptions(options);
 
         return queryBody;

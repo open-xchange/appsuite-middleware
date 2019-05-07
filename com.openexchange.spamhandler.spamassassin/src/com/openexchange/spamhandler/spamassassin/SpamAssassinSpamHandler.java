@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.spamassassin;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.asciiLowerCase;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -253,7 +254,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         if (null == mailService) {
             throw SpamhandlerSpamassassinExceptionCode.MAILSERVICE_MISSING.create();
         }
-        LOGGER.debug("Handle spam for messages {} from folder {} in account {} (user={}, context={})", Arrays.toString(mailIDs), fullName, accountId, session.getUserId(), session.getContextId());
+        LOGGER.debug("Handle spam for messages {} from folder {} in account {} (user={}, context={})", Arrays.toString(mailIDs), fullName, I(accountId), I(session.getUserId()), I(session.getContextId()));
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
@@ -261,7 +262,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             if (isCreateConfirmedSpam(session)) {
                 final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
                 mailAccess.getMessageStorage().copyMessages(fullName, confirmedSpamFullname, mailIDs, true);
-                LOGGER.debug("Spam messages {} from folder {} in account {} copied to confirmed-spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullName, accountId, confirmedSpamFullname, session.getUserId(), session.getContextId());
+                LOGGER.debug("Spam messages {} from folder {} in account {} copied to confirmed-spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullName, I(accountId), confirmedSpamFullname, I(session.getUserId()), I(session.getContextId()));
             }
 
             SpamdSettings spamdSettings = getSpamdSettings(session);
@@ -276,7 +277,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                  */
                 final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
                 mailAccess.getMessageStorage().moveMessages(fullName, spamFullname, mailIDs, true);
-                LOGGER.debug("Spam messages {} from folder {} in account {} moved to spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullName, accountId, spamFullname, session.getUserId(), session.getContextId());
+                LOGGER.debug("Spam messages {} from folder {} in account {} moved to spam folder {} (user={}, context={})", Arrays.toString(mailIDs), fullName, I(accountId), spamFullname, I(session.getUserId()), I(session.getContextId()));
             }
         } finally {
             if (null != mailAccess) {
@@ -371,13 +372,13 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                 int port = getPropertyFor(session, "com.openexchange.spamhandler.spamassassin.port", Integer.valueOf(783), Integer.class).intValue();
                 String userName = getUsername(session);
                 spamdSettings = new SpamdSettings(hostName, port, userName);
-                LOGGER.debug("Fetched SpamAssassin configuration from properties (user={}, context={}): {}", session.getUserId(), session.getContextId(), spamdSettings.toString());
+                LOGGER.debug("Fetched SpamAssassin configuration from properties (user={}, context={}): {}", I(session.getUserId()), I(session.getContextId()), spamdSettings.toString());
             } else {
                 // We have a special service providing login information, so we use that one...
                 try {
                     SpamdProvider provider = spamdservice.getProvider(session);
                     spamdSettings = new SpamdSettings(provider.getHostname(), provider.getPort(), provider.getUsername());
-                    LOGGER.debug("Fetched SpamAssassin configuration from SpamdService instance {} (user={}, context={}): {}", spamdservice.getClass().getSimpleName(), session.getUserId(), session.getContextId(), spamdSettings.toString());
+                    LOGGER.debug("Fetched SpamAssassin configuration from SpamdService instance {} (user={}, context={}): {}", spamdservice.getClass().getSimpleName(), I(session.getUserId()), I(session.getContextId()), spamdSettings.toString());
                 } catch (final OXException e) {
                     throw SpamhandlerSpamassassinExceptionCode.ERROR_GETTING_SPAMD_PROVIDER.create(e, e.getMessage());
                 }
@@ -409,14 +410,14 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
             spamc.setTimeout(getPropertyFor(session, "com.openexchange.spamhandler.spamassassin.timeout", Long.valueOf(10), Long.class).longValue());
 
             // Provide message as spam/ham
-            LOGGER.debug("Going to send {} message {} from folder {} in account {} to SpamAssassin service {} (user={}, context={})", spam ? "spam" : "ham", mailId, fullName, accountId, spamdsettings.getHostname(), session.getUserId(), session.getContextId());
+            LOGGER.debug("Going to send {} message {} from folder {} in account {} to SpamAssassin service {} (user={}, context={})", spam ? "spam" : "ham", mailId, fullName, I(accountId), spamdsettings.getHostname(), I(session.getUserId()), I(session.getContextId()));
             final SpamdResponse resp = spamc.tell(source, spam, true, true, false, false);
 
             // Examine response code
             final int responseCode = resp.getResponseCode();
-            LOGGER.debug("SpamAssassin service {} response code {} for {} message {} from folder {} in account {} (user={}, context={})", spamdsettings.getHostname(), responseCode, spam ? "spam" : "ham", mailId, fullName, accountId, session.getUserId(), session.getContextId());
+            LOGGER.debug("SpamAssassin service {} response code {} for {} message {} from folder {} in account {} (user={}, context={})", spamdsettings.getHostname(), I(responseCode), spam ? "spam" : "ham", mailId, fullName, I(accountId), I(session.getUserId()), I(session.getContextId()));
             if (Spamc.ExitCodes.EX_OK != responseCode) {
-                throw SpamhandlerSpamassassinExceptionCode.WRONG_SPAMD_EXIT.create(responseCode);
+                throw SpamhandlerSpamassassinExceptionCode.WRONG_SPAMD_EXIT.create(I(responseCode));
             }
         } catch (final IllegalArgumentException e) {
             throw SpamhandlerSpamassassinExceptionCode.WRONG_TELL_CMD_ARGS.create(e, e.getMessage());

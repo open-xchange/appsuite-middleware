@@ -49,9 +49,9 @@
 
 package com.openexchange.admin.user.copy.rmi;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 import com.openexchange.admin.rmi.factory.UserFactory;
 
 /**
@@ -72,32 +73,22 @@ public class UserCopyTest extends AbstractRMITest {
     private Context srcCtx;
     private Context dstCtx;
 
-    /**
-     * Initialises a new {@link UserCopyTest}.
-     */
-    public UserCopyTest() {
-        super();
-    }
-
     @Before
-    public final void setupContexts() throws Exception {
-        srcCtx = TestTool.createContext(getContextManager(), "UserCopySourceCtx_", contextAdmin, "all", superAdminCredentials);
-        dstCtx = TestTool.createContext(getContextManager(), "UserCopyDestinationCtx_", contextAdmin, "all", superAdminCredentials);
-    }
-
-    @After
-    public final void tearDownContexts() throws Exception {
-        getContextManager().cleanUp();
+    public void setupContexts() throws Exception {
+        srcCtx = getContextManager().create(ContextFactory.createContext(1000L), contextAdminCredentials);
+        dstCtx = getContextManager().create(ContextFactory.createContext(1000L), contextAdminCredentials);
     }
 
     @Test
-    public final void testMoveUser() throws Throwable {
+    public void testMoveUser() throws Exception {
         User srcUser = createUser(srcCtx);
-        getUserManager().copy(srcUser, srcCtx, dstCtx);
+        User copiedUser = getUserManager().copy(srcUser, srcCtx, dstCtx);
+
+        assertNotNull(copiedUser);
     }
 
     @Test
-    public final void testMoveUserNoUser() throws Throwable {
+    public void testMoveUserNoUser() throws Exception {
         try {
             getUserManager().copy(null, srcCtx, dstCtx);
             Assert.fail("No error message thrown");
@@ -107,7 +98,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     @Test
-    public final void testMoveUserNoUserId() throws Throwable {
+    public void testMoveUserNoUserId() throws Exception {
         final User user = new User();
         try {
             getUserManager().copy(user, srcCtx, dstCtx);
@@ -118,7 +109,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     @Test
-    public final void testMoveUserNoSrcContext() throws Throwable {
+    public void testMoveUserNoSrcContext() throws Exception {
         final User user = new User(1);
         final Context src = null;
         try {
@@ -130,7 +121,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     @Test
-    public final void testMoveUserNoSrcContextId() throws Throwable {
+    public void testMoveUserNoSrcContextId() throws Exception {
         final User user = new User(1);
         final Context src = new Context();
         try {
@@ -142,7 +133,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     @Test
-    public final void testMoveUserNoDestContext() throws Throwable {
+    public void testMoveUserNoDestContext() throws Exception {
         final User user = new User(1);
         final Context dest = null;
         try {
@@ -154,7 +145,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     @Test
-    public final void testMoveUserNoDestContextId() throws Throwable {
+    public void testMoveUserNoDestContextId() throws Exception {
         final User user = new User(1);
         final Context dest = new Context();
         try {
@@ -166,7 +157,7 @@ public class UserCopyTest extends AbstractRMITest {
     }
 
     @Test
-    public final void testUserExists() throws Exception {
+    public void testUserExists() throws Exception {
         final User srcUser = createUser(srcCtx);
         createUser(dstCtx);
         try {
@@ -174,12 +165,11 @@ public class UserCopyTest extends AbstractRMITest {
             fail("No exception thrown");
         } catch (Exception e) {
             assertTrue("No UserExistsException thrown.", e instanceof UserExistsException);
-
         }
     }
 
     private User createUser(Context ctx) throws Exception {
-        User user = UserFactory.createUser("user", "secret", "Test User", "Test", "User", "oxuser@example.com");
+        User user = UserFactory.createUser("user", contextAdminCredentials.getPassword(), "Test User", "Test", "User", "oxuser@example.com");
         user.setImapServer("example.com");
         user.setImapLogin("oxuser");
         user.setSmtpServer("example.com");

@@ -49,6 +49,7 @@
 
 package com.openexchange.xing;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.asciiLowerCase;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -97,6 +98,9 @@ import com.openexchange.xing.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class XingAPI<S extends Session> {
+
+    private static final List<Integer> EXPECTED_201_CREATED = Arrays.asList(I(XingServerException._201_CREATED));
+    private static final List<Integer> EXPECTED_204_NO_CONTENT = Arrays.asList(I(XingServerException._204_NO_CONTENT));
 
     private static final int MAX_LIMIT = 100;
     private static final int DEFAULT_LIMIT = 10;
@@ -841,7 +845,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._201_CREATED));
+                EXPECTED_201_CREATED);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -987,7 +991,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 null,
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT));
+                EXPECTED_204_NO_CONTENT);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1073,7 +1077,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._201_CREATED));
+                EXPECTED_201_CREATED);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1144,7 +1148,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 null,
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT));
+                EXPECTED_204_NO_CONTENT);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1173,7 +1177,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._201_CREATED));
+                EXPECTED_201_CREATED);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1197,7 +1201,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 null,
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT));
+                EXPECTED_204_NO_CONTENT);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1221,7 +1225,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 null,
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT));
+                EXPECTED_204_NO_CONTENT);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1342,7 +1346,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT));
+                EXPECTED_204_NO_CONTENT);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1370,7 +1374,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._204_NO_CONTENT));
+                EXPECTED_204_NO_CONTENT);
         } catch (final RuntimeException e) {
             throw new XingException(e);
         }
@@ -1398,7 +1402,7 @@ public class XingAPI<S extends Session> {
                 VERSION,
                 params.toArray(new String[0]),
                 session,
-                Arrays.asList(XingServerException._201_CREATED)).toObject();
+                EXPECTED_201_CREATED).toObject();
             return response.asMap();
         } catch (final RuntimeException e) {
             throw new XingException(e);
@@ -1460,7 +1464,7 @@ public class XingAPI<S extends Session> {
                 url,
                 jLeadDesc,
                 session,
-                Arrays.asList(XingServerException._201_CREATED)).toObject();
+                EXPECTED_201_CREATED).toObject();
             return jResponse.asMap();
         } catch (final XingApiException e) {
             if ("INVALID".equals(e.getErrorName())) {

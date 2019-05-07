@@ -72,7 +72,7 @@ public abstract class AbstractMailComposeMethodHandler extends AbstractMethodHan
      * @return The module identifier
      */
     @Override
-    protected String getModule() {
+    public String getModule() {
         return MailComposeActionFactory.getModule();
     }
 

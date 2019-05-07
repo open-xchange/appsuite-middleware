@@ -59,7 +59,7 @@ import com.openexchange.config.lean.Property;
  * @since v7.10.0
  */
 public enum OptionsProperty implements Property {
-        allowNestedTests(true)
+        allowNestedTests(Boolean.TRUE)
     ;
 
     private static final String PREFIX = "com.openexchange.mail.filter.options.";

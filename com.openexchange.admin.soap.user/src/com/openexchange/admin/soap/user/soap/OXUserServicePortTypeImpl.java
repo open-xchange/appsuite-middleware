@@ -5,6 +5,7 @@
 
 package com.openexchange.admin.soap.user.soap;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -683,7 +684,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             excludeUsers = Boolean.FALSE;
         }
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listAll(soap2Context(ctx), soap2Credentials(auth), includeGuests, excludeUsers);
+            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listAll(soap2Context(ctx), soap2Credentials(auth), includeGuests.booleanValue(), excludeUsers.booleanValue());
             if (null == users) {
                 return Collections.emptyList();
             }
@@ -1114,8 +1115,8 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                 soap2Context(ctx),
                 com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
                 soap2Credentials(auth),
-                includeGuests,
-                excludeUsers);
+                includeGuests.booleanValue(),
+                excludeUsers.booleanValue());
             if (null == users) {
                 return Collections.emptyList();
             }
@@ -2201,7 +2202,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setId(user.getId());
         soapUser.setImapLogin(user.getImapLogin());
         soapUser.setImapServer(user.getImapServer());
-        soapUser.setImapPort(user.getImapPort());
+        soapUser.setImapPort(I(user.getImapPort()));
         soapUser.setImapServerString(user.getImapServerString());
         soapUser.setImapSchema(user.getImapSchema());
         soapUser.setInfo(user.getInfo());
@@ -2236,7 +2237,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setRoomNumber(user.getRoom_number());
         soapUser.setSalesVolume(user.getSales_volume());
         soapUser.setSmtpServer(user.getSmtpServer());
-        soapUser.setSmtpPort(user.getSmtpPort());
+        soapUser.setSmtpPort(I(user.getSmtpPort()));
         soapUser.setSmtpServerString(user.getSmtpServerString());
         soapUser.setSmtpSchema(user.getSmtpSchema());
         soapUser.setSpouseName(user.getSpouse_name());

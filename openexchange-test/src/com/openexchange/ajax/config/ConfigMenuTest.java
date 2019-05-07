@@ -140,12 +140,12 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest getRequest = new GetRequest(Tree.Beta);
         GetResponse getResponse = getClient().execute(getRequest);
         final boolean beta = getResponse.getBoolean();
-        final boolean testBeta = false;
-        SetRequest setRequest = new SetRequest(Tree.Beta, B(testBeta));
+        final Boolean testBeta = Boolean.FALSE;
+        SetRequest setRequest = new SetRequest(Tree.Beta, testBeta);
         try {
             getClient().execute(setRequest);
             getResponse = getClient().execute(getRequest);
-            assertEquals("Written beta attribute isn't returned from server.", testBeta, getResponse.getBoolean());
+            assertTrue("Written beta attribute isn't returned from server.", testBeta.booleanValue() == getResponse.getBoolean());
         } finally {
             setRequest = new SetRequest(Tree.Beta, B(beta));
             getClient().execute(setRequest);

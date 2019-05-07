@@ -114,7 +114,7 @@ public class LookForScriptsListener implements BundleListener {
                 if (r != null) {
                     r.close();
                 }
-			} catch (IOException e) {
+			} catch (@SuppressWarnings("unused") IOException e) {
 				// Ignore
 			}
 			Context.exit();

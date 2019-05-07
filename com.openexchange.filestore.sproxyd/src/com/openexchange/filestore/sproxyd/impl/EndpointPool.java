@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.sproxyd.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -216,7 +217,7 @@ public class EndpointPool {
                     return;
                 }
 
-                LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, blacklist.size());
+                LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, I(blacklist.size()));
                 for (String endpoint : blacklist) {
                     if (Utils.endpointUnavailable(endpoint, httpClient)) {
                         LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);

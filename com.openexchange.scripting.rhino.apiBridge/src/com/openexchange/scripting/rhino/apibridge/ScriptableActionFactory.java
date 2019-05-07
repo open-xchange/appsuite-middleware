@@ -91,17 +91,18 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 	}
 
 	public static AJAXRequestResult adapt(Object object) throws OXException {
-		if (object == Undefined.instance) {
+	    Object obj = object;
+		if (obj == Undefined.instance) {
 			return new AJAXRequestResult(null, "native");
 		}
-		if (object instanceof Wrapper) {
-			object = ((Wrapper)object).unwrap();
+		if (obj instanceof Wrapper) {
+			obj = ((Wrapper)obj).unwrap();
 		}
-		if (object instanceof AJAXRequestResult) {
-			return (AJAXRequestResult) object;
+		if (obj instanceof AJAXRequestResult) {
+			return (AJAXRequestResult) obj;
 		}
-		if (object instanceof String) {
-			return new AJAXRequestResult(object, "string");
+		if (obj instanceof String) {
+			return new AJAXRequestResult(obj, "string");
 		}
 		// Next try JSON Serialization
 		try {
@@ -109,15 +110,15 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 			final Scriptable privateScope = cx.newObject(SharedScope.SHARED_SCOPE);
 			privateScope.setParentScope(null);
 			privateScope.setPrototype(SharedScope.SHARED_SCOPE);
-			ScriptableObject.putProperty(privateScope, "obj", object);
+			ScriptableObject.putProperty(privateScope, "obj", obj);
 			final String json = (String) cx.evaluateString(privateScope, "JSON.stringify(obj);", "<serialize>", 1, null);
 			final Object jsonResult = new JSONObject("{a : "+json+"}").get("a");
 			return new AJAXRequestResult(jsonResult, "json");
 
 		} catch (final JSONException e) {
-			throw new OXException();
-		} catch (final ClassCastException e) {
-			return new AJAXRequestResult(object.toString(), "string");
+			throw new OXException(e);
+		} catch (@SuppressWarnings("unused") final ClassCastException e) {
+			return new AJAXRequestResult(obj.toString(), "string");
 		} finally {
 			Context.exit();
 		}

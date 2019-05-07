@@ -92,7 +92,7 @@ public class SchemaMoveActivator extends HousekeepingActivator {
         // Register RMI
         Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
         serviceProperties.put("RMI_NAME", SchemaMoveRemote.RMI_NAME);
-        registerService(Remote.class, new SchemaMoveRemoteImpl(this.context, schemaMoveImpl), serviceProperties);
+        registerService(Remote.class, new SchemaMoveRemoteImpl(schemaMoveImpl), serviceProperties);
 
         logger.info("Successfully started bundle {}", context.getBundle().getSymbolicName());
     }

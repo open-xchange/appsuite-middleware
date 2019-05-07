@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.plugin.hosting.tools.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -208,7 +209,7 @@ public class DataFetcherMysql implements DataFetcher {
                     Databases.closeSQLStuff(columns_res);
                 }
             }
-            log.debug("####### Found -> {} tables", tableObjects.size());
+            log.debug("####### Found -> {} tables", I(tableObjects.size()));
         } finally {
             Databases.closeSQLStuff(rs2);
         }

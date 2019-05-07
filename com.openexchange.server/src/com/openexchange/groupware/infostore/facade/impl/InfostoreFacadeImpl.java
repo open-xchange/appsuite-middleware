@@ -242,7 +242,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
                 int maxCallerCount = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.groupware.infostore.media.maxCallerRunsCount", defaultValue, view);
                 return maxCallerCount <= 0 ? defaultValue : maxCallerCount;
-            } catch (Exception e) {
+            } catch (@SuppressWarnings("unused") Exception e) {
                 // Ignore
             }
         }
@@ -869,8 +869,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (FolderObject.INFOSTORE != folderPermission.getPermission().getFolderModule()) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
         }
-        if (false == folderPermission.canCreateObjects()) {
-            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        if (false == folderPermission.isFolderVisible()) {
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         return getFileQuotaFor(session);
     }
@@ -896,8 +896,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (FolderObject.INFOSTORE != folderPermission.getPermission().getFolderModule()) {
             throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
         }
-        if (false == folderPermission.canCreateObjects()) {
-            throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        if (false == folderPermission.isFolderVisible()) {
+            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
 
         int folderOwner = folderPermission.getFolderOwner();
@@ -1550,6 +1550,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         document.setModifiedBy(session.getUserId());
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
+
+        if (null == document.getLastModified() || false == updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
+            document.setLastModified(new Date());
+            updatedCols.add(Metadata.LAST_MODIFIED_LITERAL);
+        }
 
         CheckSizeSwitch.checkSizes(document, this, context);
         DocumentMetadata oldDocument;
@@ -3116,7 +3121,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param shouldTriggerMediaDataExtraction <code>true</code> to trigger extraction of media metadata; otherwise <code>false</code>
      * @return The enhanced search results
      */
-    @SuppressWarnings("resource")
     private SearchIterator<DocumentMetadata> postProcessSearch(ServerSession session, SearchIterator<DocumentMetadata> searchIterator, Metadata[] fields, final Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID, boolean shouldTriggerMediaDataExtraction) throws OXException {
         /*
          * check requested metadata

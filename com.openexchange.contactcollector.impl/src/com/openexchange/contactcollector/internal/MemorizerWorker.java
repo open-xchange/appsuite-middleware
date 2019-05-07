@@ -49,8 +49,10 @@
 
 package com.openexchange.contactcollector.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -336,7 +338,11 @@ public final class MemorizerWorker {
         }
 
         // Strip by well-known aliases
-        final Set<InternetAddress> addresses = new LinkedHashSet<InternetAddress>(memorizerTask.getAddresses());
+        final Set<InternetAddress> addresses;
+        {
+            Collection<InternetAddress> tmp = memorizerTask.getAddresses();
+            addresses = tmp instanceof Set ? (Set<InternetAddress>) tmp : new LinkedHashSet<InternetAddress>(tmp);
+        }
         try {
             UserService userService = services.getOptionalService(UserService.class);
             if (null == userService) {
@@ -533,7 +539,7 @@ public final class MemorizerWorker {
             try {
                 useCountService.incrementObjectUseCount(session, new IncrementArguments.Builder(objectId, folderId).build());
             } catch (Exception e) {
-                LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", objectId, folderId, session.getUserId(), session.getContextId(), e);
+                LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", I(objectId), I(folderId), I(session.getUserId()), I(session.getContextId()), e);
             }
         }
     }
@@ -555,7 +561,7 @@ public final class MemorizerWorker {
 
                 useCountService.incrementObjectUseCount(session, builder.build());
             } catch (Exception e) {
-                LOG.warn("Failed to batch increment use count for user {} in context {}", session.getUserId(), session.getContextId(), e);
+                LOG.warn("Failed to batch increment use count for user {} in context {}", I(session.getUserId()), I(session.getContextId()), e);
             }
         }
     }

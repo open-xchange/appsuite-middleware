@@ -55,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.UpdateSubscriptionResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
@@ -74,7 +73,7 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
     }
 
     @Test
-    public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws OXException, IOException, SAXException, JSONException {
+    public void testUpdatingAnExistingValueWithinAnOMXFSubscription() throws OXException, IOException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         DynamicFormDescription formDescription = generateFormDescription();
@@ -102,7 +101,7 @@ public class UpdateSubscriptionTest extends AbstractSubscriptionTest {
     }
 
     @Test
-    public void testUpdatingAnOMXFSubscriptionWithANewValue() throws OXException, IOException, SAXException, JSONException {
+    public void testUpdatingAnOMXFSubscriptionWithANewValue() throws OXException, IOException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         DynamicFormDescription formDescription = generateFormDescription();

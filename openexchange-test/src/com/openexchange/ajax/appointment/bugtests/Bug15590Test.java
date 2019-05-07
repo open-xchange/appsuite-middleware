@@ -44,6 +44,7 @@ public class Bug15590Test extends AbstractAJAXSession {
 
     UserValues secondUserValues;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -104,6 +105,7 @@ public class Bug15590Test extends AbstractAJAXSession {
         assertEquals(movedAppointment.getParentFolderID(), moveAppointment.getParentFolderID());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

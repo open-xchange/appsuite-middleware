@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.reseller.rmi.dataobjects;
 
-
 /**
  * {@link CustomField}
  *
@@ -58,9 +57,9 @@ package com.openexchange.admin.reseller.rmi.dataobjects;
  */
 public class CustomField {
 
-    private final String customId;
-    private final long createTimestamp;
-    private final long modifyTimestamp;
+    private String customId;
+    private long createTimestamp;
+    private long modifyTimestamp;
 
     /**
      * Initializes a new {@link CustomField}.
@@ -101,6 +100,33 @@ public class CustomField {
      */
     public long getModifyTimestamp() {
         return modifyTimestamp;
+    }
+
+    /**
+     * Sets the custom identifier
+     *
+     * @param customId The custom identifier to set
+     */
+    public void setCustomId(String customId) {
+        this.customId = customId;
+    }
+
+    /**
+     * Sets the create time stamp.
+     *
+     * @param createTimestamp The create time stamp to set
+     */
+    public void setCreateTimestamp(long createTimestamp) {
+        this.createTimestamp = createTimestamp;
+    }
+
+    /**
+     * Sets the modified time stamp.
+     *
+     * @param modifyTimestamp The modified time stamp to set
+     */
+    public void setModifyTimestamp(long modifyTimestamp) {
+        this.modifyTimestamp = modifyTimestamp;
     }
 
 }

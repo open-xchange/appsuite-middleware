@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -62,7 +63,6 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.configuration.TestConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -118,9 +118,9 @@ public class ProvisioningSetup {
                 TestContextPool.startWatcher();
 
                 initialized.compareAndSet(false, true);
-                LOG.info("Finished initialization for {} contexts.", TestContextPool.getAllTimeAvailableContexts().size());
+                LOG.info("Finished initialization for {} contexts.", I(TestContextPool.getAllTimeAvailableContexts().size()));
             } else {
-                LOG.warn("Pool already initialized! Please do not try to remember users/pools multiple times as this will cause unexpected behavior within test execution.");
+                LOG.debug("Pool already initialized! Please do not try to remember users/pools multiple times as this will cause unexpected behavior within test execution.");
             }
         }
     }
@@ -238,7 +238,7 @@ public class ProvisioningSetup {
             throw ConfigurationExceptionCodes.FILE_NOT_FOUND.create(propFile.getAbsolutePath(), e);
         } catch (final IOException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(propFile.getAbsolutePath(), e);
-        } 
+        }
         return props;
     }
 }

@@ -51,23 +51,20 @@ package com.openexchange.sessionstorage.hazelcast.serialization;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.URLCodec;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.hazelcast.nio.serialization.VersionedPortable;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAppender;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
@@ -83,28 +80,8 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
 
     private static final long serialVersionUID = -2346327568417617677L;
 
-    /**
-     * BitSet of www-form-url safe characters.
-     */
-    protected static final BitSet BIT_SET_PARAMS;
-
-    // Static initializer for BIT_SET_PARAMS
-    static {
-        final BitSet bitSet = new BitSet(256);
-
-        // Exclude ':' and '%' from printable ASCII characters
-        for (int i = 32; i < 37; i++) {
-            bitSet.set(i);
-        }
-        for (int i = 38; i < 58; i++) {
-            bitSet.set(i);
-        }
-        for (int i = 59; i < 127; i++) {
-            bitSet.set(i);
-        }
-
-        BIT_SET_PARAMS = bitSet;
-    }
+    /** Simple class to delay initialization until needed */
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
 
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 1;
@@ -115,7 +92,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
      * This number should be incremented whenever fields are added;
      * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
      */
-    public static final int CLASS_VERSION = 3;
+    public static final int CLASS_VERSION = 4;
 
     public static final String PARAMETER_LOGIN_NAME = "loginName";
     public static final String PARAMETER_PASSWORD = "password";
@@ -134,8 +111,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
     public static final String PARAMETER_USER_AGENT = "userAgent";
     public static final String PARAMETER_LOGIN_TIME = "loginTime";
     public static final String PARAMETER_LOCAL_LAST_ACTIVE = "localLastActive";
-    public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
-    public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
+    public static final String PARAMETER_REMOTE_PARAMETERS = "remoteParameters";
     public static final String PARAMETER_ORIGIN = "origin";
 
     /** The class definition for PortableSession */
@@ -157,14 +133,13 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         .addUTFField(PARAMETER_USER_AGENT)
         .addLongField(PARAMETER_LOGIN_TIME)
         .addLongField(PARAMETER_LOCAL_LAST_ACTIVE)
-        .addUTFField(PARAMETER_REMOTE_PARAMETER_NAMES)
-        .addUTFField(PARAMETER_REMOTE_PARAMETER_VALUES)
+        .addUTFField(PARAMETER_REMOTE_PARAMETERS)
         .addUTFField(PARAMETER_ORIGIN)
         .build();
 
     // -------------------------------------------------------------------------------------------------
 
-    private final Set<String> remoteParameterNames;
+    private Set<String> remoteParameterNames;
     private Long localLastActive;
 
     /**
@@ -181,13 +156,15 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
      *
      * @param session The underlying session
      */
-    public PortableSession(final Session session) {
+    public PortableSession(Session session) {
         super(session);
         localLastActive = null;
         Collection<String> configuredRemoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames(userId, contextId);
         Set<String> remoteParameterNames = new LinkedHashSet<>(configuredRemoteParameterNames.size() + 2); // Keep order
+
         // Add static remote parameters
         remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
+
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);
         this.remoteParameterNames = remoteParameterNames;
@@ -270,32 +247,39 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
-            StringAppender names = null;
-            StringAppender values = null;
+            JSONObject jRemoteParameters = null;
             for (String parameterName : remoteParameterNames) {
                 Object value = parameters.get(parameterName);
-                if (null != value) {
-                    if (isSerializablePojo(value)) {
-                        String sValue = value.toString();
-                        if (null == names) {
-                            int capacity = remoteParameterNames.size() << 4;
-                            names = new StringAppender(':', capacity);
-                            values = new StringAppender(':', capacity);
-                        }
-                        names.append(parameterName);
-                        values.append(getSafeValue(sValue));
+                if (isSerializablePojo(value)) {
+                    if (jRemoteParameters == null) {
+                        jRemoteParameters = new JSONObject(remoteParameterNames.size());
+                    }
+                    if (value instanceof Boolean) {
+                        // Boolean
+                        jRemoteParameters.putSafe(parameterName, value);
+                    } else if (value instanceof Integer) {
+                        // Integer
+                        jRemoteParameters.putSafe(parameterName, value);
+                    } else if (value instanceof Long) {
+                        // Long
+                        jRemoteParameters.putSafe(parameterName, value);
                     } else {
-                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                        logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
+                        // Enforce String representation
+                        jRemoteParameters.putSafe(parameterName, value.toString());
+                    }
+                    LOG.debug("Put remote parameter '{}' with value '{}' into portable session {} ({}@{})", parameterName, value, sessionId, Integer.valueOf(userId), Integer.valueOf(contextId));
+                } else {
+                    if (value == null) {
+                        LOG.warn("No value available for remote parameter name '{}' in session {}.", parameterName, sessionId);
+                    } else {
+                        LOG.warn("Denied remote parameter name '{}' in session {}. Seems to be no ordinary Java object: {}", parameterName, sessionId, value.getClass().getName());
                     }
                 }
             }
-            if (null == names || null == values) {
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
+            if (null == jRemoteParameters) {
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETERS, null);
             } else {
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
-                writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
+                writer.writeUTF(PARAMETER_REMOTE_PARAMETERS, jRemoteParameters.toString(true));
             }
         }
     }
@@ -349,96 +333,28 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
         }
         {
-            String sNames = reader.readUTF(PARAMETER_REMOTE_PARAMETER_NAMES);
-            if (null != sNames) {
-                List<String> names = parseColonString(sNames);
-                List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
-                for (int i = 0, size = names.size(); i < size; i++) {
-                    try {
-                        Object value = parseToSerializablePojo(decodeSafeValue(values.get(i)));
-                        parameters.put(names.get(i), value);
-                    } catch (DecoderException e) {
-                        // Ignore
+            String sRemoteParameters = reader.readUTF(PARAMETER_REMOTE_PARAMETERS);
+            if (null != sRemoteParameters) {
+                try {
+                    JSONObject jRemoteParameters = new JSONObject(sRemoteParameters);
+                    Set<String> remoteParameterNames = new LinkedHashSet<>(jRemoteParameters.length()); // Keep order
+                    for (Map.Entry<String,Object> entry : jRemoteParameters.entrySet()) {
+                        String name = entry.getKey();
+                        parameters.put(name, entry.getValue());
+                        remoteParameterNames.add(name);
                     }
+                    this.remoteParameterNames = remoteParameterNames;
+                } catch (JSONException je) {
+                    LOG.warn("Failed to decode remote parameters from session {}.", sessionId, je);
                 }
             }
         }
-    }
-
-    private static List<String> parseColonString(String str) {
-        List<String> retval = new ArrayList<String>();
-        int length = str.length();
-        {
-            int prev = 0;
-            int pos;
-            while (prev < length && (pos = str.indexOf(':', prev)) >= 0) {
-                if (pos > 0) {
-                    retval.add(str.substring(prev, pos));
-                }
-                prev = pos + 1;
-            }
-            if (prev < length) {
-                retval.add(str.substring(prev));
-            }
-        }
-        return retval;
-    }
-
-    private static String getSafeValue(String sValue) {
-        return sValue.indexOf(':') < 0 && sValue.indexOf('%') < 0 ? sValue : Charsets.toAsciiString(URLCodec.encodeUrl(BIT_SET_PARAMS, sValue.getBytes(Charsets.UTF_8)));
-    }
-
-    private static String decodeSafeValue(String value) throws DecoderException {
-        return value.indexOf('%') < 0 ? value : new String(URLCodec.decodeUrl(Charsets.toAsciiBytes(value)), Charsets.UTF_8);
     }
 
     private static final String POJO_PACKAGE = "java.lang.";
 
     private static boolean isSerializablePojo(Object obj) {
         return null == obj ? false : ((obj instanceof Serializable) && obj.getClass().getName().startsWith(POJO_PACKAGE));
-    }
-
-    private static Object parseToSerializablePojo(String value) {
-        if ("true".equalsIgnoreCase(value)) {
-            return Boolean.TRUE;
-        }
-        if ("false".equalsIgnoreCase(value)) {
-            return Boolean.FALSE;
-        }
-
-        try {
-            int i = Integer.parseInt(value, 10);
-            return Integer.valueOf(i);
-        } catch (Exception e) {
-            // Ignore...
-        }
-
-        try {
-            long l = Long.parseLong(value, 10);
-            return Long.valueOf(l);
-        } catch (Exception e) {
-            // Ignore...
-        }
-
-        /*-
-         *
-        try {
-            float f = Float.parseFloat(value);
-            return new Float(f);
-        } catch (Exception e) {
-            // Ignore...
-        }
-
-        try {
-            double d = Double.parseDouble(value);
-            return new Double(d);
-        } catch (Exception e) {
-            // Ignore...
-        }
-         *
-         */
-
-        return value;
     }
 
 }

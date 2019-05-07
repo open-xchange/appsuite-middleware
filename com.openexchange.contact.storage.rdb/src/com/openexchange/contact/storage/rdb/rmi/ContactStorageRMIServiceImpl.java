@@ -49,10 +49,10 @@
 
 package com.openexchange.contact.storage.rdb.rmi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.Collection;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.contact.storage.rdb.internal.Deduplicator;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
@@ -79,7 +79,7 @@ public class ContactStorageRMIServiceImpl implements ContactStorageRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.contact.storage.rdb.rmi.ContactStorageRMIService#deduplicateContacts(int, int, long, boolean)
      */
     @Override
@@ -88,7 +88,7 @@ public class ContactStorageRMIServiceImpl implements ContactStorageRMIService {
         try {
             objectIDs = Deduplicator.deduplicateContacts(contextID, folderID, limit, dryRun);
         } catch (OXException e) {
-            LoggerHolder.LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}", folderID, contextID, dryRun ? " [dry-run]" : "", e.getMessage(), e);
+            LoggerHolder.LOG.error("Error de-duplicating contacts in folder {} of context {}{}: {}", I(folderID), I(contextID), dryRun ? " [dry-run]" : "", e.getMessage(), e);
         }
         return null != objectIDs ? Autoboxing.I2i(objectIDs) : null;
     }

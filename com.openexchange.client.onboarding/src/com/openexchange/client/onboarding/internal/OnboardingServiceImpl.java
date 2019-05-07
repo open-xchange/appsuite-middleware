@@ -60,7 +60,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilityService;
@@ -110,7 +109,6 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final ServiceLookup services;
     private final ConcurrentMap<String, OnboardingProvider> providers;
     private final AtomicReference<Map<String, ConfiguredScenario>> configuredScenariosReference;
-    private final AtomicBoolean warningLogged;
 
     /**
      * Initializes a new {@link OnboardingServiceImpl}.
@@ -120,7 +118,6 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.services = services;
         providers = new ConcurrentHashMap<String, OnboardingProvider>(32, 0.9F, 1);
         configuredScenariosReference = new AtomicReference<>(null);
-        warningLogged = new AtomicBoolean(false);
     }
 
     /**

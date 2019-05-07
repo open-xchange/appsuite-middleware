@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,11 +67,10 @@ import com.openexchange.testing.httpclient.models.FolderCheckLimitsResponse;
  */
 public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
 
-    private static final long FILE_SIZE_SMALL = 9437184L; // 9MB
-    private static final long FILE_SIZE_MEDIUM = 31457280L; // 30MB
-    private static final long FILE_SIZE_LARGE = 115343360L;
+    private static final Long FILE_SIZE_SMALL = L(9437184); // 9MB
+    private static final Long FILE_SIZE_MEDIUM = L(31457280); // 30MB
+    private static final Long FILE_SIZE_LARGE = L(115343360);
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_noLimitExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_SMALL));
@@ -79,7 +79,6 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         assertEquals(0, checkLimits.getData().getErrors().size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_maxUploadExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
@@ -121,7 +120,6 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_unknownType_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
@@ -131,7 +129,6 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         assertNull(checkLimits.getData());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_unknownFolder_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));

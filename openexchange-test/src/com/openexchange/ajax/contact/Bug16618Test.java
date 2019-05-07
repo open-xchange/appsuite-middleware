@@ -51,7 +51,6 @@ package com.openexchange.ajax.contact;
 
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
-import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +59,6 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.ListRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
@@ -75,13 +73,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug16618Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
-    private TimeZone tz;
-
     private Contact contact;
-
-    private int contextId;
 
     private int contactId;
 
@@ -93,8 +85,6 @@ public class Bug16618Test extends AbstractAJAXSession {
 
     private Contact createContactWithImage() throws Exception {
         final Contact contact = new Contact();
-        contextId = getClient().getValues().getContextId();
-        // contact.setContextId(contextId);
         contact.setTitle("Herr");
         contact.setSurName("Abba");
         contact.setGivenName("Baab");
@@ -121,14 +111,14 @@ public class Bug16618Test extends AbstractAJAXSession {
         return contact;
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
-        tz = getClient().getValues().getTimeZone();
         contact = createContactWithImage();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

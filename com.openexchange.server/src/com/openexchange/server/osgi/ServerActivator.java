@@ -147,6 +147,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.alias.UserAliasStorage;
+import com.openexchange.groupware.alias.impl.AliasCacheDeleteListener;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -640,7 +641,7 @@ public final class ServerActivator extends HousekeepingActivator {
         /*
          * User Alias Service
          */
-        UserAliasStorage aliasStorage;
+        CachingAliasStorage aliasStorage;
         {
             String regionName = "UserAlias";
             byte[] ccf = (  "jcs.region." + regionName + "=LTCP\n" +
@@ -655,6 +656,7 @@ public final class ServerActivator extends HousekeepingActivator {
             getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
 
             aliasStorage = new CachingAliasStorage(new RdbAliasStorage());
+            registerService(DeleteListener.class, new AliasCacheDeleteListener(aliasStorage));
             ServerServiceRegistry.getInstance().addService(UserAliasStorage.class, aliasStorage);
         }
 

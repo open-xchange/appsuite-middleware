@@ -26,6 +26,7 @@
 
 package com.openexchange.socketio.server;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -488,7 +489,7 @@ public class Session implements DisconnectListener {
         }
 
         try {
-            ACKListener listener = ack_listeners.get(packet.getId());
+            ACKListener listener = ack_listeners.get(I(packet.getId()));
             unsubscribeACK(packet.getId());
             if (listener != null) {
                 listener.onACK(packet.getArgs());

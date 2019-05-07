@@ -50,6 +50,7 @@
 package com.openexchange.snippet.rdb;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
 import java.io.Closeable;
@@ -498,7 +499,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
             if (amountQuota.isExceeded() || amountQuota.willExceed(1)) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
             }
         }
 

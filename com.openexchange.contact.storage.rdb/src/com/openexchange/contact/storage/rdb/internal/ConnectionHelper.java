@@ -139,20 +139,16 @@ public class ConnectionHelper {
 
     /**
      * Backs all acquired database connections to the pool if needed.
-     *
-     * @throws OXException
      */
-    public void back() throws OXException {
+    public void back() {
         backReadOnly();
         backWritable();
     }
 
     /**
      * Backs an acquired read-only connection to the pool if needed.
-     *
-     * @throws OXException
      */
-    public void backReadOnly() throws OXException {
+    public void backReadOnly() {
         if (null != readOnlyConnection && backReadOnly) {
             databaseService.backReadOnly(session.getContextId(), readOnlyConnection);
             readOnlyConnection = null;
@@ -161,10 +157,8 @@ public class ConnectionHelper {
 
     /**
      * Backs an acquired writable connection to the pool if needed, rolling back the transaction automatically if not yet committed.
-     *
-     * @throws OXException
      */
-    public void backWritable() throws OXException {
+    public void backWritable() {
         if (null != writableConnection) {
             if (false == committed) {
                 Databases.rollback(writableConnection);
@@ -179,10 +173,8 @@ public class ConnectionHelper {
 
     /**
      * Backs an acquired writable connection to the pool if needed, rolling back the transaction automatically if not yet committed.
-     *
-     * @throws OXException
      */
-    public void backWritableAfterReading() throws OXException {
+    public void backWritableAfterReading() {
         if (null != writableConnection) {
             if (false == committed) {
                 Databases.rollback(writableConnection);

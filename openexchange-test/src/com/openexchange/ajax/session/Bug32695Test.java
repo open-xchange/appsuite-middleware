@@ -73,10 +73,11 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug32695Test extends AbstractAJAXSession {
-    
+
     private AJAXClient client;
     private TestUser acquireUser;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -1,5 +1,6 @@
 package com.openexchange.principleusecount.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -75,19 +76,19 @@ class PrincipalUseCountTask extends AbstractTask<Void> {
                         stmt.setInt(index++, session.getUserId());
                         stmt.setInt(index++, principal);
                         stmt.executeUpdate();
-                        LOG.debug("Removed principal use count for user {}, principal {} in context {}.", session.getUserId(), principal, session.getContextId(), value);
+                        LOG.debug("Removed principal use count for user {}, principal {} in context {}.", I(session.getUserId()), I(principal), I(session.getContextId()), value);
                     } catch (SQLException e) {
                         throw PrincipalUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
                     }
                     break;
                 case SET:
                     try (PreparedStatement stmt = con.prepareStatement(SQL_SET)) {
-                        stmt.setInt(index++, value);
+                        stmt.setInt(index++, value.intValue());
                         stmt.setInt(index++, session.getContextId());
                         stmt.setInt(index++, session.getUserId());
                         stmt.setInt(index++, principal);
                         stmt.executeUpdate();
-                        LOG.debug("Changed principal use count for user {}, principal {} in context {} to value {}.", session.getUserId(), principal, session.getContextId(), value);
+                        LOG.debug("Changed principal use count for user {}, principal {} in context {} to value {}.", I(session.getUserId()), I(principal), I(session.getContextId()), value);
                     } catch (SQLException e) {
                         throw PrincipalUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
                     }
@@ -99,7 +100,7 @@ class PrincipalUseCountTask extends AbstractTask<Void> {
                         stmt.setInt(index++, session.getUserId());
                         stmt.setInt(index++, principal);
                         stmt.executeUpdate();
-                        LOG.debug("Incremented principal use count for user {}, principal {} in context {}.", session.getUserId(), principal, session.getContextId());
+                        LOG.debug("Incremented principal use count for user {}, principal {} in context {}.", I(session.getUserId()), I(principal), I(session.getContextId()));
                     } catch (SQLException e) {
                         throw PrincipalUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
                     }

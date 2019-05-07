@@ -16,16 +16,18 @@ public class Bug19543Test_DeletingContactsInDistributionList extends AbstractMan
 
     private static final int MAX_ATTEMPTS = 5;
 
-    public Bug19543Test_DeletingContactsInDistributionList(String name) {
+    public Bug19543Test_DeletingContactsInDistributionList() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         cotm.setSleep(0);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

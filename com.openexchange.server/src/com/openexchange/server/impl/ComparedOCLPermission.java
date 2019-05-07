@@ -49,6 +49,7 @@
 
 package com.openexchange.server.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -133,9 +134,9 @@ public abstract class ComparedOCLPermission<P> {
                 continue;
             }
             if (isGroupPermission(permission)) {
-                newGroups.put(getEntityId(permission), permission);
+                newGroups.put(I(getEntityId(permission)), permission);
             } else {
-                newUsers.put(getEntityId(permission), permission);
+                newUsers.put(I(getEntityId(permission)), permission);
             }
         }
 
@@ -151,9 +152,9 @@ public abstract class ComparedOCLPermission<P> {
                 }
 
                 if (isGroupPermission(permission)) {
-                    oldGroups.put(getEntityId(permission), permission);
+                    oldGroups.put(I(getEntityId(permission)), permission);
                 } else {
-                    oldUsers.put(getEntityId(permission), permission);
+                    oldUsers.put(I(getEntityId(permission)), permission);
                 }
             }
         }
@@ -180,17 +181,17 @@ public abstract class ComparedOCLPermission<P> {
          */
         for (P newPermission : newUsers.values()) {
             int entityId = getEntityId(newPermission);
-            P oldPermission = oldUsers.get(entityId);
+            P oldPermission = oldUsers.get(I(entityId));
             if (!areEqual(newPermission, oldPermission)) {
                 permissionsChanged = true;
                 if (oldPermission == null) {
-                    addedUsers.put(entityId, newPermission);
+                    addedUsers.put(I(entityId), newPermission);
                 }
             }
         }
 
         for (P newPermission : newGroups.values()) {
-            P oldPermission = oldGroups.get(getEntityId(newPermission));
+            P oldPermission = oldGroups.get(I(getEntityId(newPermission)));
             if (!areEqual(newPermission, oldPermission)) {
                 permissionsChanged = true;
                 addedGroups.add(newPermission);

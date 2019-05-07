@@ -77,7 +77,7 @@ public final class Capabilities {
 
     private ArrayList<String> sasl = null;
 
-    private final Map<String, Object> extendedProperties = new HashMap<>();;
+    private final Map<String, Object> extendedProperties = new HashMap<>();
 
     public List<String> getSasl() {
         return sasl;

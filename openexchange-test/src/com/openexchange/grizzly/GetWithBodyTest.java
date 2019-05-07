@@ -49,6 +49,7 @@
 
 package com.openexchange.grizzly;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import java.util.Map;
 import org.json.JSONObject;
@@ -83,7 +84,7 @@ public class GetWithBodyTest extends AbstractSimpleClientTest {
 
     /**
      * Tests that the body of the method is consumed completely.
-     * 
+     *
      * @throws Exception
      */
     @Test
@@ -94,8 +95,8 @@ public class GetWithBodyTest extends AbstractSimpleClientTest {
         Map<String, Object> payloadData = (Map<String, Object>) objectData.get("payload");
         Object responseValue1 = payloadData.get(key1);
         Object responseValue2 = payloadData.get(key2);
-        assertEquals(responseValue1, value1);
-        assertEquals(responseValue2, value2);
+        assertEquals(responseValue1, I(value1));
+        assertEquals(responseValue2, I(value2));
     }
 
 }

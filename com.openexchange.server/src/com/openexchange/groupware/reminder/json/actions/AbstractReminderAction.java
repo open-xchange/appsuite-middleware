@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.reminder.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.ArrayList;
 import java.util.Date;
@@ -138,16 +139,16 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         List<Integer> result = new ArrayList<>(splitByCommaNotInQuotes.length);
         for (String str : splitByCommaNotInQuotes) {
             try {
-                int module = Integer.valueOf(str);
+                int module = Integer.parseInt(str);
                 if (module >= 0) {
-                    result.add(module);
+                    result.add(I(module));
                 }
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 int module = AJAXServlet.getModuleInteger(str);
                 if (module >= 0) {
                     int typesConstant = getTypesConstant(module);
                     if (typesConstant >= 0) {
-                        result.add(typesConstant);
+                        result.add(I(typesConstant));
                         continue;
                     }
                 }
@@ -160,7 +161,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     /**
      * Translates a FolderObject value to a Types value.
      */
-    public static int getTypesConstant(final int folderObjectConstant) throws OXException {
+    public static int getTypesConstant(final int folderObjectConstant) {
         switch (folderObjectConstant) {
             case FolderObject.CONTACT:
                 return Types.CONTACT;
@@ -249,14 +250,14 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     protected static void deleteReminderSafe(Session session, ReminderObject reminder, int userId, ReminderService reminderService) {
         try {
             reminderService.deleteReminder(session, reminder.getTargetId(), userId, reminder.getModule());
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore
         }
     }
 
     protected void convertAlarmTrigger2Reminder(CalendarSession calendarSession, AlarmTrigger trigger, ReminderWriter reminderWriter, JSONArray jsonResponseArray) throws OXException, JSONException {
         ReminderObject reminder = new ReminderObject();
-        reminder.setDate(new Date(trigger.getTime()));
+        reminder.setDate(new Date(trigger.getTime().longValue()));
         EventID eventId = null;
         if(trigger.containsRecurrenceId()){
             eventId = new EventID(trigger.getFolder(), trigger.getEventId(), trigger.getRecurrenceId());
@@ -265,11 +266,11 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         }
         Event event = calendarSession.getCalendarService().getEvent(calendarSession, trigger.getFolder(), eventId);
         reminder.setLastModified(event.getLastModified());
-        reminder.setFolder(Integer.valueOf(trigger.getFolder()));
+        reminder.setFolder(Integer.parseInt(trigger.getFolder()));
         reminder.setModule(Types.APPOINTMENT);
-        reminder.setUser(trigger.getUserId());
-        reminder.setObjectId(trigger.getAlarm()); // Store the alarm id instead of the reminder id
-        reminder.setTargetId(Integer.valueOf(event.getId()));
+        reminder.setUser(trigger.getUserId().intValue());
+        reminder.setObjectId(trigger.getAlarm().intValue()); // Store the alarm id instead of the reminder id
+        reminder.setTargetId(Integer.parseInt(event.getId()));
 
         if (CalendarUtils.isSeriesMaster(event) && null != eventId.getRecurrenceID()) {
             int pos = Event2Appointment.getRecurrencePosition(calendarSession.getRecurrenceService(), new DefaultRecurrenceData(event), eventId.getRecurrenceID());

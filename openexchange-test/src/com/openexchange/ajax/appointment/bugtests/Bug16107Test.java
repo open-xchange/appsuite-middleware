@@ -68,10 +68,11 @@ public class Bug16107Test extends ManagedAppointmentTest {
 
     private Appointment updateAppointment;
 
-    public Bug16107Test() throws Exception {
+    public Bug16107Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

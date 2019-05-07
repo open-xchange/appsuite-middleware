@@ -49,6 +49,7 @@
 
 package com.openexchange.monitoring;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -204,7 +205,7 @@ public class MonitoringInfo {
             retval = getCounter(connectionType).getCount();
             break;
         default:
-            LOG.error("MonitoringInfo.getNumberOfConnections(): Unknown connection type: {}", connectionType);
+            LOG.error("MonitoringInfo.getNumberOfConnections(): Unknown connection type: {}", I(connectionType));
         }
         return retval;
     }
@@ -253,7 +254,7 @@ public class MonitoringInfo {
             // Nothing to do
             break;
         default:
-            LOG.info("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: {}", connectionType);
+            LOG.info("MonitoringInfo.changeNumberOfConnections(): Unknown connection type: {}", I(connectionType));
         }
     }
 

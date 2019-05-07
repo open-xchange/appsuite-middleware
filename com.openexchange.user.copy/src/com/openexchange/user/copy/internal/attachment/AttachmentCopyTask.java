@@ -166,8 +166,8 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
         try {
-            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId, Info.general());
-            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId, Info.general());
+            srcFileStorage = qfsf.getQuotaFileStorage(srcCtxId.intValue(), Info.general());
+            dstFileStorage = qfsf.getQuotaFileStorage(dstCtxId.intValue(), Info.general());
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
         }
@@ -180,8 +180,8 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         final List<Integer> taskIds = new ArrayList<>(taskMapping.getSourceKeys());
         final List<Attachment> attachments = loadAttachmentsFromDB(srcCon, i(srcCtxId), appointmentIds, contactIds, taskIds);
         copyFiles(attachments, srcFileStorage, dstFileStorage);
-        exchangeIds(dstCon, attachments, appointmentMapping, contactMapping, taskMapping, i(dstUsrId), i(dstCtxId));
-        writeAttachmentsToDB(dstCon, attachments, dstCtxId);
+        exchangeIds(attachments, appointmentMapping, contactMapping, taskMapping, i(dstUsrId), dstCtx);
+        writeAttachmentsToDB(dstCon, attachments, dstCtxId.intValue());
 
         return null;
     }
@@ -216,7 +216,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         }
     }
 
-    void exchangeIds(final Connection con, final List<Attachment> attachments, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<Integer> contactMapping, final ObjectMapping<Integer> taskMapping, final int uid, final int cid) throws OXException {
+    void exchangeIds(final List<Attachment> attachments, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<Integer> contactMapping, final ObjectMapping<Integer> taskMapping, final int uid, final Context context) throws OXException {
         for (final Attachment attachment : attachments) {
             final int oldAttachedId = attachment.getAttachedId();
             final int module = attachment.getModuleId();
@@ -240,13 +240,13 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             }
 
             if (mapping == null) {
-                LOG.warn("Unknown module {} for attachment ({}). Skipping ID exchange!", module, attachment.getId());
+                LOG.warn("Unknown module {} for attachment ({}). Skipping ID exchange!", I(module), I(attachment.getId()));
                 continue;
             }
 
             try {
                 final int newAttachedId = i(mapping.getDestination(I(oldAttachedId)));
-                final int newId = IDGenerator.getId(cid, Types.ATTACHMENT, con);
+                final int newId = IDGenerator.getId(context, Types.ATTACHMENT);
                 attachment.setId(newId);
                 attachment.setCreatedBy(uid);
                 attachment.setAttachedId(newAttachedId);
@@ -263,7 +263,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             try {
                 is = srcFileStorage.getFile(attachment.getFileId());
                 if (is == null) {
-                    LOG.warn("Did not find file for attachment {} ({}).", attachment.getId(), attachment.getFileId());
+                    LOG.warn("Did not find file for attachment {} ({}).", I(attachment.getId()), attachment.getFileId());
                     continue;
                 }
 

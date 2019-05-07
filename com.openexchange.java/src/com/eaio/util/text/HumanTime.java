@@ -1,23 +1,23 @@
 /*
  * HumanTime.java
- * 
+ *
  * Created on 06.10.2008
- * 
+ *
  * Copyright (c) 2008 Johann Burkard (<mailto:jb@eaio.com>) <http://eaio.com>
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
  * Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * 
+ *
  */
 package com.eaio.util.text;
 
@@ -58,7 +58,7 @@ import java.util.Iterator;
  * languages like OGNL. See {@link #getApproximately()} and {@link #getExactly()}.</li>
  * <li>To keep things simple, a year consists of 365 days.</li>
  * </ul>
- * 
+ *
  * @author <a href="mailto:jb@eaio.com">Johann Burkard</a>
  * @version $Id: HumanTime.java 3906 2011-05-21 13:56:05Z johann $
  * @see #eval(CharSequence)
@@ -146,7 +146,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Parses a {@link CharSequence} argument and returns a {@link HumanTime} instance.
-     * 
+     *
      * @param s the char sequence, may not be <code>null</code>
      * @return an instance, never <code>null</code>
      */
@@ -165,28 +165,23 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
             /**
              * @see java.lang.Iterable#iterator()
              */
+            @Override
             public Iterator<Character> iterator() {
                 return new Iterator<Character>() {
 
                     private int p = 0;
 
-                    /**
-                     * @see java.util.Iterator#hasNext()
-                     */
+                    @Override
                     public boolean hasNext() {
                         return p < s.length();
                     }
 
-                    /**
-                     * @see java.util.Iterator#next()
-                     */
+                    @Override
                     public Character next() {
-                        return s.charAt(p++);
+                        return Character.valueOf(s.charAt(p++));
                     }
 
-                    /**
-                     * @see java.util.Iterator#remove()
-                     */
+                    @Override
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
@@ -220,7 +215,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * Parses and formats the given char sequence, preserving all data.
      * <p>
      * Equivalent to <code>eval(in).getExactly()</code>
-     * 
+     *
      * @param in the char sequence, may not be <code>null</code>
      * @return a formatted String, never <code>null</code>
      */
@@ -232,7 +227,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * Formats the given time delta, preserving all data.
      * <p>
      * Equivalent to <code>new HumanTime(in).getExactly()</code>
-     * 
+     *
      * @param l the time delta
      * @return a formatted String, never <code>null</code>
      */
@@ -244,7 +239,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * Formats the given time delta, preserving all data.
      * <p>
      * Equivalent to <code>new HumanTime(in).getExactly()</code>
-     * 
+     *
      * @param l the time delta
      * @param compress <code>true</code> to append a compressed representation; otherwise <code>false</code>
      * @return a formatted String, never <code>null</code>
@@ -258,7 +253,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * understand.
      * <p>
      * Equivalent to <code>eval(in).getApproximately()</code>
-     * 
+     *
      * @param in the char sequence, may not be <code>null</code>
      * @return a formatted String, never <code>null</code>
      */
@@ -270,7 +265,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * Formats the given time delta, preserving all data.
      * <p>
      * Equivalent to <code>new HumanTime(l).getApproximately()</code>
-     * 
+     *
      * @param l the time delta
      * @return a formatted String, never <code>null</code>
      */
@@ -294,7 +289,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Constructor for HumanTime.
-     * 
+     *
      * @param delta the initial time delta, interpreted as a positive number
      */
     public HumanTime(long delta) {
@@ -341,7 +336,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds one year to the time delta.
-     * 
+     *
      * @return this HumanTime object
      */
     public HumanTime y() {
@@ -350,7 +345,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds n years to the time delta.
-     * 
+     *
      * @param n n
      * @return this HumanTime object
      */
@@ -361,7 +356,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds one day to the time delta.
-     * 
+     *
      * @return this HumanTime object
      */
     public HumanTime d() {
@@ -370,7 +365,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds n days to the time delta.
-     * 
+     *
      * @param n n
      * @return this HumanTime object
      */
@@ -381,7 +376,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds one hour to the time delta.
-     * 
+     *
      * @return this HumanTime object
      */
     public HumanTime h() {
@@ -390,7 +385,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds n hours to the time delta.
-     * 
+     *
      * @param n n
      * @return this HumanTime object
      */
@@ -401,7 +396,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds one month to the time delta.
-     * 
+     *
      * @return this HumanTime object
      */
     public HumanTime m() {
@@ -410,7 +405,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds n months to the time delta.
-     * 
+     *
      * @param n n
      * @return this HumanTime object
      */
@@ -421,7 +416,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds one second to the time delta.
-     * 
+     *
      * @return this HumanTime object
      */
     public HumanTime s() {
@@ -430,7 +425,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds n seconds to the time delta.
-     * 
+     *
      * @param n seconds
      * @return this HumanTime object
      */
@@ -441,7 +436,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds one millisecond to the time delta.
-     * 
+     *
      * @return this HumanTime object
      */
     public HumanTime ms() {
@@ -450,7 +445,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Adds n milliseconds to the time delta.
-     * 
+     *
      * @param n n
      * @return this HumanTime object
      */
@@ -461,7 +456,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Returns a human-formatted representation of the time delta.
-     * 
+     *
      * @return a formatted representation of the time delta, never <code>null</code>
      */
     public String getExactly() {
@@ -470,7 +465,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Returns a human-formatted representation of the time delta.
-     * 
+     *
      * @param compress <code>true</code> to append a compressed representation; otherwise <code>false</code>
      * @return a formatted representation of the time delta, never <code>null</code>
      */
@@ -480,7 +475,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Appends a human-formatted representation of the time delta to the given {@link Appendable} object.
-     * 
+     *
      * @param <T> the return type
      * @param a the Appendable object, may not be <code>null</code>
      * @return the given Appendable object, never <code>null</code>
@@ -491,7 +486,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Appends a human-formatted representation of the time delta to the given {@link Appendable} object.
-     * 
+     *
      * @param <T> the return type
      * @param compress <code>true</code> to append a compressed representation; otherwise <code>false</code>
      * @param a the Appendable object, may not be <code>null</code>
@@ -578,7 +573,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Returns an approximate, human-formatted representation of the time delta.
-     * 
+     *
      * @return a formatted representation of the time delta, never <code>null</code>
      */
     public String getApproximately() {
@@ -587,7 +582,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Appends an approximate, human-formatted representation of the time delta to the given {@link Appendable} object.
-     * 
+     *
      * @param <T> the return type
      * @param a the Appendable object, may not be <code>null</code>
      * @return the given Appendable object, never <code>null</code>
@@ -756,7 +751,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Returns the time delta.
-     * 
+     *
      * @return the time delta
      */
     public long getDelta() {
@@ -766,6 +761,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
     /**
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -778,9 +774,10 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Returns a 32-bit representation of the time delta.
-     * 
+     *
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return (int) (delta ^ (delta >> 32));
     }
@@ -789,11 +786,12 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * Returns a String representation of this.
      * <p>
      * The output is identical to {@link #getExactly()}.
-     * 
+     *
      * @see java.lang.Object#toString()
      * @see #getExactly()
      * @return a String, never <code>null</code>
      */
+    @Override
     public String toString() {
         return getExactly();
     }
@@ -802,7 +800,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
      * Returns a String representation of this.
      * <p>
      * The output is identical to {@link #getExactly()}.
-     * 
+     *
      * @see java.lang.Object#toString()
      * @see #getExactly(boolean)
      * @return a String, never <code>null</code>
@@ -813,20 +811,22 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
 
     /**
      * Compares this HumanTime to another HumanTime.
-     * 
+     *
      * @param t the other instance, may not be <code>null</code>
      * @return which one is greater
      */
+    @Override
     public int compareTo(HumanTime t) {
         return delta == t.delta ? 0 : (delta < t.delta ? -1 : 1);
     }
 
     /**
      * Deep-clones this object.
-     * 
+     *
      * @see java.lang.Object#clone()
      * @throws CloneNotSupportedException
      */
+    @Override
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
     }
@@ -834,6 +834,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
     /**
      * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
      */
+    @Override
     public void readExternal(ObjectInput in) throws IOException {
         delta = in.readLong();
     }
@@ -841,6 +842,7 @@ public class HumanTime implements Externalizable, Comparable<HumanTime>, Cloneab
     /**
      * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
      */
+    @Override
     public void writeExternal(ObjectOutput out) throws IOException {
         out.writeLong(delta);
     }

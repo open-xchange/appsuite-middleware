@@ -64,7 +64,6 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
@@ -140,7 +139,7 @@ public class CalendarTestManager implements TestManager {
 
         try {
             timezone = client.getValues().getTimeZone();
-        } catch (OXException | IOException | JSONException e) {
+        } catch (@SuppressWarnings("unused") OXException | IOException | JSONException e) {
             // wait for finally block
         } finally {
             if (timezone == null) {
@@ -204,7 +203,7 @@ public class CalendarTestManager implements TestManager {
         return lastModification;
     }
 
-    public int getPrivateFolder() throws OXException, IOException, SAXException, JSONException {
+    public int getPrivateFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getPrivateAppointmentFolder();
     }
 
@@ -216,7 +215,7 @@ public class CalendarTestManager implements TestManager {
         for (Appointment appointment : new ArrayList<Appointment>(createdEntities)) {
             delete(appointment, true);
             if (getLastResponse().hasError()) {
-                org.slf4j.LoggerFactory.getLogger(CalendarTestManager.class).warn("Unable to delete the appointment with id {} in folder {} with name '{}': {}", appointment.getObjectID(), appointment.getParentFolderID(), appointment.getTitle(), getLastResponse().getException().getMessage());
+                org.slf4j.LoggerFactory.getLogger(CalendarTestManager.class).warn("Unable to delete the appointment with id {} in folder {} with name '{}': {}", I(appointment.getObjectID()), I(appointment.getParentFolderID()), appointment.getTitle(), getLastResponse().getException().getMessage());
             }
         }
         setFailOnError(old);

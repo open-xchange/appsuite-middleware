@@ -76,25 +76,16 @@ public class MultifactorProviderMapper extends DefaultJsonMapper<MultifactorProv
         return INSTANCE;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tools.mappings.Factory#newInstance()
-     */
     @Override
     public MultifactorProvider newInstance() {
         throw new UnsupportedOperationException();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tools.mappings.ArrayFactory#newArray(int)
-     */
     @Override
     public MultifactorProviderField[] newArray(int size) {
         return new MultifactorProviderField[size];
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper#createMappings()
-     */
     @Override
     protected EnumMap<MultifactorProviderField, ? extends JsonMapping<? extends Object, MultifactorProvider>> createMappings() {
         EnumMap<MultifactorProviderField, JsonMapping<? extends Object, MultifactorProvider>> mappings =
@@ -137,7 +128,7 @@ public class MultifactorProviderMapper extends DefaultJsonMapper<MultifactorProv
 
             @Override
             public Boolean get(MultifactorProvider object) {
-                return object.isBackupProvider();
+                return (object.isBackupProvider() ? Boolean.TRUE : Boolean.FALSE);
             }
 
             @Override
@@ -160,7 +151,7 @@ public class MultifactorProviderMapper extends DefaultJsonMapper<MultifactorProv
 
             @Override
             public Boolean get(MultifactorProvider object) {
-                return object.isBackupOnlyProvider();
+                return object.isBackupOnlyProvider() ? Boolean.TRUE : Boolean.FALSE;
             }
 
             @Override

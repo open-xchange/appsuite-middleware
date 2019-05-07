@@ -77,7 +77,7 @@ public class InsertTest extends AbstractTaskTest {
 
     /**
      * Tests inserting a private task.
-     * 
+     *
      * @throws Throwable if an error occurs.
      */
     @Test
@@ -88,7 +88,7 @@ public class InsertTest extends AbstractTaskTest {
         final Task task = Create.createTask();
         task.setParentFolderID(folderId);
         final InsertResponse insertR = client.execute(new InsertRequest(task, timeZone));
-        final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
+        final GetResponse getR = client.execute(new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
         client.execute(new DeleteRequest(reload));
@@ -96,7 +96,7 @@ public class InsertTest extends AbstractTaskTest {
 
     /**
      * Tests inserting a private task.
-     * 
+     *
      * @throws Throwable if an error occurs.
      */
     public void _testInsertTonnenTasks() throws Throwable {

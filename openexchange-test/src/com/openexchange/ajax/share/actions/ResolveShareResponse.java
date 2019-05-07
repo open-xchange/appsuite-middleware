@@ -165,7 +165,7 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     public int getUserId() {
         String id = parameters.get("user_id");
         if (Strings.isNotEmpty(id)) {
-            return Integer.valueOf(id);
+            return Integer.valueOf(id).intValue();
         }
         return 0;
     }
@@ -175,7 +175,7 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     }
 
     public boolean isStore() {
-        return Boolean.valueOf(parameters.get("store"));
+        return Boolean.valueOf(parameters.get("store")).booleanValue();
     }
 
     public String getModule() {

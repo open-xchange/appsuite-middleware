@@ -73,6 +73,8 @@ public class PortableAuthnRequestInfo extends AbstractCustomPortable {
 
     private static final String CLIENT = "client";
 
+    private static final String DEEP_LINK = "deepLink";
+
     private AuthnRequestInfo delegate;
 
     public PortableAuthnRequestInfo() {
@@ -103,6 +105,7 @@ public class PortableAuthnRequestInfo extends AbstractCustomPortable {
         writer.writeUTF(DOMAIN_NAME, delegate.getDomainName());
         writer.writeUTF(LOGIN_PATH, delegate.getLoginPath());
         writer.writeUTF(CLIENT, delegate.getClientID());
+        writer.writeUTF(DEEP_LINK, delegate.getUriFragment());
     }
 
     @Override
@@ -112,6 +115,7 @@ public class PortableAuthnRequestInfo extends AbstractCustomPortable {
         dari.setRequestId(reader.readUTF(REQUEST_ID));
         dari.setLoginPath(reader.readUTF(LOGIN_PATH));
         dari.setClientID(reader.readUTF(CLIENT));
+        dari.setUriFragment(reader.readUTF(DEEP_LINK));
         setDelegate(dari);
     }
 

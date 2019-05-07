@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONArray;
@@ -78,15 +79,15 @@ public class AccountConfiguration {
     }
 
     public void addFolderConfiguration(int itemId, String locale, int refreshInterval) throws JSONException {
-        folderConfiguration.put(itemId, createFolder(itemId, locale, refreshInterval));
+        folderConfiguration.put(I(itemId), createFolder(itemId, locale, refreshInterval));
     }
 
     public void removeFolderConfiguration(int itemId) {
-        folderConfiguration.remove(itemId);
+        folderConfiguration.remove(I(itemId));
     }
     
     public void renameFolder(int itemId, String name) throws JSONException {
-        JSONObject jsonObject = folderConfiguration.get(itemId);
+        JSONObject jsonObject = folderConfiguration.get(I(itemId));
         if (jsonObject == null) {
             return;
         }
@@ -105,17 +106,6 @@ public class AccountConfiguration {
         configuration.put("configuration", foldersConfiguration);
 
         return configuration;
-    }
-
-    /**
-     * Creates a calendar folder configuration with the specified item id
-     * 
-     * @param itemId The item id
-     * @return The folder configuration
-     * @throws JSONException if a JSON error is occurred
-     */
-    private JSONObject createFolder(int itemId) throws JSONException {
-        return createFolder(itemId, null, -1);
     }
 
     /**

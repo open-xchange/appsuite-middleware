@@ -109,7 +109,7 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
                                         resultSet.getString("name"),
                                         resultSet.getString("phone"),
                                         resultSet.getBoolean("backup"));
-        device.enable(resultSet.getBoolean("enabled"));
+        device.enable(resultSet.getBoolean("enabled") ? Boolean.TRUE : Boolean.FALSE);
         return device;
     }
 
@@ -139,11 +139,15 @@ public class RdbSMSMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setString(index++, device.getName());
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
-            statement.setBoolean(index++, device.isEnabled());
+            statement.setBoolean(index++, device.isEnabled().booleanValue());
             statement.setBoolean(index++, device.isBackup());
             statement.setString(index++, device.getPhoneNumber());
             statement.executeUpdate();
         } catch (final SQLException e) {
+            if(e.getSQLState() != null && e.getSQLState().startsWith("23") /*Class Code 23: Constraint Violation*/ &&
+               e.getMessage() != null && e.getMessage().contains("Duplicate entry")) {
+                throw MultifactorExceptionCodes.DEVICE_ALREADY_REGISTERED.create();
+            }
             throw MultifactorExceptionCodes.SQL_EXCEPTION.create(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(statement);

@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.tools;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -193,7 +194,7 @@ public class PropertyHandler {
         if ( this.groupPropValues != null && this.groupPropValues.containsKey( key ) ) {
             retBool = Boolean.parseBoolean( this.groupPropValues.get( key ).toString() );
         } else {
-            log.debug("Property '{}' not found in file 'Group.properties'! Using fallback :{}", key, fallBack );
+            log.debug("Property '{}' not found in file 'Group.properties'! Using fallback :{}", key, Boolean.valueOf(fallBack));
         }
 
         return retBool;
@@ -230,7 +231,7 @@ public class PropertyHandler {
             final String val = this.userPropValues.get( key ).toString();
             retBool = Boolean.parseBoolean( val );
         } else {
-            log.debug("Property ''{}'' not found in file ''AdminUser.properties''! Using fallback :{}", key, fallBack);
+            log.debug("Property ''{}'' not found in file ''AdminUser.properties''! Using fallback :{}", key, Boolean.valueOf(fallBack));
         }
 
         return retBool;
@@ -301,7 +302,7 @@ public class PropertyHandler {
         if ( this.resPropValues != null && this.resPropValues.containsKey( key ) ) {
             retBool = Boolean.parseBoolean( this.resPropValues.get( key ).toString() );
         } else {
-            log.debug("Property ''{}'' not found in file ''Resource.properties''! Using fallback :{}", key, fallBack);
+            log.debug("Property ''{}'' not found in file ''Resource.properties''! Using fallback :{}", key, Boolean.valueOf(fallBack));
         }
 
         return retBool;
@@ -338,7 +339,7 @@ public class PropertyHandler {
         if ( this.rmiPropValues != null && this.rmiPropValues.containsKey( key ) ) {
             retInt = Integer.parseInt( this.rmiPropValues.get( key ).toString() );
         } else {
-            log.debug("Property ''{}'' not found in file ''RMI.properties''! Using fallback :{1", key, fallBack);
+            log.debug("Property ''{}'' not found in file ''RMI.properties''! Using fallback :{1", key, I(fallBack));
         }
 
         return retInt;
@@ -390,7 +391,8 @@ public class PropertyHandler {
                 final Enumeration<?> enuma = customprops.propertyNames();
                 Hashtable<String, String> custconfig = new Hashtable<String, String>();
                 if ( this.allPropValues.containsKey( param + "_CONFIG" ) ) {
-                    custconfig = (Hashtable<String, String>)this.allPropValues.get( param + "_CONFIG" );
+                    @SuppressWarnings("unchecked") Hashtable<String, String> ht = (Hashtable<String, String>) this.allPropValues.get( param + "_CONFIG" );
+                    custconfig = ht;
                 }
                 while ( enuma.hasMoreElements() ){
                     final String param_ = (String)enuma.nextElement();

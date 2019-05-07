@@ -78,7 +78,7 @@ public class GenericAppOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new GenericAppOnboardingProvider(this));
+        registerService(OnboardingProvider.class, new GenericAppOnboardingProvider());
     }
 
 }

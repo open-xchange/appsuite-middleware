@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.mail;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -104,7 +105,7 @@ public class MailDriveFileStorageAccountManager implements FileStorageAccountMan
         if (DEFAULT_ID.equals(id)) {
             return new MailDriveFileStorageAccount(service, session);
         }
-        throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, MailDriveConstants.ID, session.getUserId(), session.getContextId());
+        throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, MailDriveConstants.ID, I(session.getUserId()), I(session.getContextId()));
     }
 
     @Override

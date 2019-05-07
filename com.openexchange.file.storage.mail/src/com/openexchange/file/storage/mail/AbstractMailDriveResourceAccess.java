@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.mail;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
@@ -160,7 +161,7 @@ public abstract class AbstractMailDriveResourceAccess {
     protected FullName checkFolderId(String folderId) throws OXException {
         FullName fullName = optFolderId(folderId);
         if (null == fullName) {
-            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
+            throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, I(session.getUserId()), I(session.getContextId()));
         }
         return fullName;
     }

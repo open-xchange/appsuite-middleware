@@ -49,7 +49,7 @@
 
 package com.openexchange.contactcollector.internal;
 
-import java.util.List;
+import java.util.Collection;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
@@ -79,11 +79,11 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     @Override
-    public void memorizeAddresses(List<InternetAddress> addresses, boolean incrementUseCount, Session session) {
+    public void memorizeAddresses(Collection<InternetAddress> addresses, boolean incrementUseCount, Session session) {
         memorizeAddresses(addresses, incrementUseCount, session, true);
     }
 
-    public void memorizeAddresses(List<InternetAddress> addresses, boolean incrementUseCount, Session session, boolean background) {
+    public void memorizeAddresses(Collection<InternetAddress> addresses, boolean incrementUseCount, Session session, boolean background) {
         MemorizerTask memorizerTask = new MemorizerTask(addresses, incrementUseCount, session);
         if (!background) {
             // Run with current thread

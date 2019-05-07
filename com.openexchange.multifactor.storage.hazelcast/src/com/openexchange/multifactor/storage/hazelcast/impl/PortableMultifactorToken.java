@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.storage.hazelcast.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -92,20 +93,14 @@ public class PortableMultifactorToken extends AbstractCustomPortable {
         return lifeTime;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.hazelcast.serialization.CustomPortable#getClassId()
-     */
     @Override
     public int getClassId() {
         return CLASS_ID;
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.nio.serialization.Portable#writePortable(com.hazelcast.nio.serialization.PortableWriter)
-     */
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        long lifeTime = this.lifeTime.map( l -> l.toMillis()).orElse(0L);
+        long lifeTime = this.lifeTime.map( l -> L(l.toMillis())).orElse(L(0L)).longValue();
         writer.writeLong(FIELD_NAME_LIFE_TIME, lifeTime);
 
         try(ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -116,15 +111,13 @@ public class PortableMultifactorToken extends AbstractCustomPortable {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.hazelcast.nio.serialization.Portable#readPortable(com.hazelcast.nio.serialization.PortableReader)
-     */
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         long lifeTimeValue = reader.readLong(FIELD_NAME_LIFE_TIME);
         this.lifeTime = lifeTimeValue > 0 ? Optional.of(Duration.ofMillis(lifeTimeValue)) : Optional.empty();
 
         ByteArrayInputStream input = new ByteArrayInputStream(reader.readByteArray(FIELD_NAME_VALUE));
-        this.tokenValueData = new ObjectInputStream(input);;
+        this.tokenValueData = new ObjectInputStream(input);
     }
+
 }

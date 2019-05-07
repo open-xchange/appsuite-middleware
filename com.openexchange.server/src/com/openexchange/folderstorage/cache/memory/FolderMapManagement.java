@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.cache.memory;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -140,7 +141,7 @@ public final class FolderMapManagement {
         if (notify) {
             fireInvalidateCacheEvent(contextId);
         }
-        LOG.debug("Cleaned user-sensitive folder cache for context {}", contextId);
+        LOG.debug("Cleaned user-sensitive folder cache for context {}", I(contextId));
     }
 
     /**
@@ -168,7 +169,7 @@ public final class FolderMapManagement {
         if (notify) {
             fireInvalidateCacheEvent(userId, contextId);
         }
-        LOG.debug("Cleaned user-sensitive folder cache for user {} in context {}", userId, contextId);
+        LOG.debug("Cleaned user-sensitive folder cache for user {} in context {}", I(userId), I(contextId));
     }
 
     /**

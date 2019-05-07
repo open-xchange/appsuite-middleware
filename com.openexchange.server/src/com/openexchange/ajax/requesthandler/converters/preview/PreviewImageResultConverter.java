@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
@@ -219,7 +220,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                     // Apply result
                     result.setResultObject(responseFileHolder, "file");
-                    LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), contentType, eTag, session.getUserId(), session.getContextId());
+                    LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), contentType, eTag, I(session.getUserId()), I(session.getContextId()));
                     return;
                 }
             }

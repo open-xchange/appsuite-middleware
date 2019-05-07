@@ -76,6 +76,7 @@ public class Bug44002Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -117,10 +118,9 @@ public class Bug44002Test extends AbstractAJAXSession {
     }
 
     /**
-     * @throws Exception
      */
     @Test
-    public void testBug44002() throws Exception {
+    public void testBug44002() {
         boolean old = false; // Switch to old UI behaviour for debugging purposes
         if (old) {
             series.setRecurrenceType(Appointment.NO_RECURRENCE);

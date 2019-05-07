@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,7 +133,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
 
             res.testMandatoryCreateFieldsNull();
 
-            final int resource_ID = res.getId();
+            final int resource_ID = res.getId().intValue();
 
             checkContextAndSchema(ctx);
 
@@ -264,7 +265,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
         }
 
         final int retval = oxRes.create(ctx, res);
-        res.setId(retval);
+        res.setId(I(retval));
         final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
         // Trigger plugin extensions
@@ -325,7 +326,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             }
             LOGGER.debug("{} - {} - {}", ctx, res, auth);
             checkContextAndSchema(ctx);
-            if (!tool.existsResource(ctx, res.getId())) {
+            if (!tool.existsResource(ctx, res.getId().intValue())) {
                 throw new NoSuchResourceException("Resource with this id does not exist");
             }
         } catch (final StorageException e) {
@@ -397,12 +398,11 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
             throw new NoSuchResourceException(e);
         }
 
-        final int resource_id = res.getId().intValue();
-
-        LOGGER.debug("{} - {} - {}", ctx, resource_id, auth);
+        LOGGER.debug("{} - {} - {}", ctx, res.getId(), auth);
 
         checkContextAndSchema(ctx);
 
+        final int resource_id = res.getId().intValue();
         if (!tool.existsResource(ctx, resource_id)) {
             throw new NoSuchResourceException("resource with with this id does not exist");
         }
@@ -455,14 +455,14 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
                 }
                 if (resource.getName() == null && resource.getId() == null) {
                     throw new InvalidDataException("Resourcename and resourceid missing!Cannot resolve resource data");
-                } else {
-                    if (resource.getName() == null) {
-                        // resolv name by id
-                        resource.setName(tool.getResourcenameByResourceID(ctx, resource.getId().intValue()));
-                    }
-                    if (resource.getId() == null) {
-                        resource.setId(tool.getResourceIDByResourcename(ctx, resource.getName()));
-                    }
+                }
+
+                if (resource.getName() == null) {
+                    // resolv name by id
+                    resource.setName(tool.getResourcenameByResourceID(ctx, resource.getId().intValue()));
+                }
+                if (resource.getId() == null) {
+                    resource.setId(I(tool.getResourceIDByResourcename(ctx, resource.getName())));
                 }
             }
         } catch (final InvalidDataException e) {

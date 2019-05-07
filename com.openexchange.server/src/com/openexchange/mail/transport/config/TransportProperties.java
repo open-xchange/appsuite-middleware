@@ -184,7 +184,7 @@ public final class TransportProperties implements ITransportProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.transport.removeMimeVersionInSubParts", "false").trim();
             removeMimeVersionInSubParts = Boolean.parseBoolean(tmp);
             logBuilder.append("    Remove \"MIME-Version\" header in sub-parts: {}{}");
-            args.add(removeMimeVersionInSubParts);
+            args.add(removeMimeVersionInSubParts ? Boolean.TRUE : Boolean.FALSE);
             args.add(lineSeparator);
         }
 

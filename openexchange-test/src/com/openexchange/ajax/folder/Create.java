@@ -51,7 +51,6 @@ package com.openexchange.ajax.folder;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -73,7 +72,7 @@ public final class Create {
     /**
      * This method creates a public folder object. Everyone gets full object
      * permissions on this folder.
-     * 
+     *
      * @param name name of the folder.
      * @param type PIM type of the folder.
      * @param admin user identifier of the admin.
@@ -100,23 +99,22 @@ public final class Create {
 
     /**
      * This method creates a public folder
-     * 
+     *
      * @param client
      * @param name
      * @param module the module (e.g. CONTACT) from FolderObject.java
      * @return
      * @throws OXException
      * @throws IOException
-     * @throws SAXException
      * @throws JSONException
      */
-    public static FolderObject createPublicFolder(final AJAXClient client, final String name, final int module) throws OXException, IOException, SAXException, JSONException {
+    public static FolderObject createPublicFolder(final AJAXClient client, final String name, final int module) throws OXException, IOException, JSONException {
         return createPublicFolder(client, name, module, true);
     }
 
     /**
      * This method creates a public folder
-     * 
+     *
      * @param client
      * @param name
      * @param module the module (e.g. CONTACT) from FolderObject.java
@@ -124,10 +122,9 @@ public final class Create {
      * @return
      * @throws OXException
      * @throws IOException
-     * @throws SAXException
      * @throws JSONException
      */
-    public static FolderObject createPublicFolder(final AJAXClient client, final String name, final int module, boolean failOnError) throws OXException, IOException, SAXException, JSONException {
+    public static FolderObject createPublicFolder(final AJAXClient client, final String name, final int module, boolean failOnError) throws OXException, IOException, JSONException {
         final FolderObject folder = setupPublicFolder(name, module, client.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         final InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, failOnError);
@@ -139,7 +136,7 @@ public final class Create {
     /**
      * This method creates a private folder object. Admin user gets full access
      * permissions.
-     * 
+     *
      * @param name name of the folder.
      * @param module PIM module of the folder.
      * @param admin user identifier of the admin.

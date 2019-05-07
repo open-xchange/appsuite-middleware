@@ -50,6 +50,7 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.security.SecureRandom;
@@ -939,7 +940,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     try {
                         msgs[i] = inbox.getMessage(msgno);
                     } catch (final MessagingException inner) {
-                        LOG.warn("Retrieval of POP3 message {} failed.", msgno, inner);
+                        LOG.warn("Retrieval of POP3 message {} failed.", I(msgno), inner);
                         msgs[i] = null;
                     }
                 }
@@ -957,7 +958,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                         mm.setMailId(seqnum2uidl.get(msgno));
                         toAppend.add(mm);
                     } catch (final Exception e) {
-                        LOG.warn("POP3 message #{} could not be fetched from POP3 server.", msgno, e);
+                        LOG.warn("POP3 message #{} could not be fetched from POP3 server.", I(msgno), e);
                     }
                 }
             }

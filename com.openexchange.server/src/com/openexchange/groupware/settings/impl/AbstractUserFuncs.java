@@ -109,6 +109,7 @@ public abstract class AbstractUserFuncs implements IValueHandler {
      * @param originalUser The original user fetched from storage
      * @throws OXException If writing of the value fails.
      */
+    @SuppressWarnings("unused")
     protected void setValue(UserImpl newUser, String value, User originalUser) throws OXException {
         // Can be overwritten.
     }

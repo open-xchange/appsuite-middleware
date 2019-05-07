@@ -100,6 +100,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         types = new int[4];
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -145,7 +146,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
     public void testDelete() throws Exception {
         for (int folderId : folders) {
             DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, folderId, new Date());
-            deleteRequest.setHardDelete(true);
+            deleteRequest.setHardDelete(Boolean.TRUE);
             CommonDeleteResponse deleteResponse = getClient().execute(deleteRequest);
             JSONArray json = (JSONArray) deleteResponse.getData();
             assertEquals("Wrong array size in response.", 1, json.length());
@@ -219,7 +220,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
             if (subfolderId > 0) {
                 folder.setLastModified(new Date());
                 DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, false, folder);
-                deleteRequest.setHardDelete(true);
+                deleteRequest.setHardDelete(Boolean.TRUE);
                 getClient().execute(deleteRequest);
             }
         }
@@ -259,7 +260,7 @@ public class DefaultMediaFoldersTest extends AbstractAJAXSession {
         } finally {
             if (subfolderId > 0) {
                 DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OX_NEW, false, folder);
-                deleteRequest.setHardDelete(true);
+                deleteRequest.setHardDelete(Boolean.TRUE);
                 getClient().execute(deleteRequest);
             }
         }

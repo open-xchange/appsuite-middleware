@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jericho;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -219,8 +220,9 @@ public final class JerichoParser {
         if (checkSize) {
             int maxLength = HtmlServices.htmlThreshold();
             if (maxLength > 0 && html.length() > maxLength) {
-                LOG.info("HTML content is too big: max. '{}', but is '{}'.", maxLength, html.length());
-                throw HtmlExceptionCodes.TOO_BIG.create(maxLength, html.length());
+                Integer iMaxLength = I(maxLength); Integer iLength = I(html.length());
+                LOG.info("HTML content is too big: max. '{}', but is '{}'.", iMaxLength, iLength);
+                throw HtmlExceptionCodes.TOO_BIG.create(iMaxLength, iLength);
             }
         }
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);

@@ -246,7 +246,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
         for (SessionServletInterceptor interceptor : SessionServletInterceptorRegistry.getInstance().getInterceptors()) {
             try {
                 interceptor.intercept(session, request, resp);
-            } catch (OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 // Session is not valid anymore.
                 sessiond.removeSession(sessionID);
                 SessionUtility.removeOXCookies(request, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash));

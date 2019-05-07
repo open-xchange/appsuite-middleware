@@ -234,19 +234,19 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         args.add(Strings.getLineSeparator());
 
         sb.append("    ENABLE_SHARED_FOLDER_CACHING={}{}");
-        args.add(enableSharedFolderCaching);
+        args.add(enableSharedFolderCaching ? Boolean.TRUE : Boolean.FALSE);
         args.add(Strings.getLineSeparator());
 
         sb.append("    ENABLE_DB_GROUPING={}{}");
-        args.add(enableDBGrouping);
+        args.add(enableDBGrouping ? Boolean.TRUE : Boolean.FALSE);
         args.add(Strings.getLineSeparator());
 
         sb.append("    ENABLE_FOLDER_CACHE={}{}");
-        args.add(enableFolderCache);
+        args.add(enableFolderCache ? Boolean.TRUE : Boolean.FALSE);
         args.add(Strings.getLineSeparator());
 
         sb.append("   ENABLE_INTERNAL_USER_EDIT={}{}");
-        args.add(enableInternalUsersEdit);
+        args.add(enableInternalUsersEdit ? Boolean.TRUE : Boolean.FALSE);
         args.add(Strings.getLineSeparator());
 
         /*-

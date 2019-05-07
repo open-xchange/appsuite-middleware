@@ -48,6 +48,7 @@
  */
 package com.openexchange.unifiedinbox.converters;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import org.junit.Before;
@@ -78,25 +79,25 @@ import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 public class UnifiedInboxFolderConverterTest {
 
     private final int accountId = 1;
-    
+
     @Mock
     private IMailFolderStorage folderStorage;
     @Mock
     private Session session;
-    
-    
+
+
     @Before
     public void setUp() throws OXException {
         MockitoAnnotations.initMocks(this);
     }
-    
-    
+
+
     @Test
     public void testMergeAccountDefaultFolders_AccountFoldersEmpty() {
         MailFolder[] folders = UnifiedInboxFolderConverter.mergeAccountDefaultFolders(new ArrayList<int[][]>(), new String[0], new String[0]);
         assertTrue("Folders are not empty",folders.length == 0);
     }
-    
+
     @Test
     public void testMergeAccountDefaultFolders_OneAccountFolderEmpty() {
         ArrayList<int[][]> accountFolders = new ArrayList<int[][]>();
@@ -112,7 +113,7 @@ public class UnifiedInboxFolderConverterTest {
         assertTrue("Wrong message count", folder.getMessageCount() == secondFolder[0][0] && folder.getUnreadMessageCount() == secondFolder[0][1] && folder.getDeletedMessageCount() == secondFolder[0][2] && folder.getNewMessageCount() == secondFolder[0][3]);
         assertTrue("Wrong fullname", folder.getDefaultFolderType().equals(DefaultFolderType.INBOX));
     }
-    
+
     @Test
     public void testMergeAccountDefaultFolders_OneAccount() {
         ArrayList<int[][]> accountFolders = new ArrayList<int[][]>();
@@ -126,7 +127,7 @@ public class UnifiedInboxFolderConverterTest {
         assertTrue("Wrong message count", folder.getMessageCount() == storedFolder[0][0] && folder.getUnreadMessageCount() == storedFolder[0][1] && folder.getDeletedMessageCount() == storedFolder[0][2] && folder.getNewMessageCount() == storedFolder[0][3]);
         assertTrue("Wrong fullname", folder.getDefaultFolderType().equals(DefaultFolderType.NONE));
     }
-    
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test
     public void testGetAccountDefaultFolders_MissingFolders() throws Exception {
@@ -138,11 +139,11 @@ public class UnifiedInboxFolderConverterTest {
         String[] FULLNAMES = {
             UnifiedInboxAccess.INBOX, UnifiedInboxAccess.DRAFTS, UnifiedInboxAccess.SENT, UnifiedInboxAccess.SPAM, UnifiedInboxAccess.TRASH };
         PowerMockito.when(mailAccess.getFolderStorage()).thenReturn(folderStorage);
-        PowerMockito.when(folderStorage.exists(UnifiedInboxAccess.INBOX)).thenReturn(true);
-        PowerMockito.when(folderStorage.exists(UnifiedInboxAccess.DRAFTS)).thenReturn(false);
-        PowerMockito.when(folderStorage.exists(UnifiedInboxAccess.SENT)).thenReturn(false);
-        PowerMockito.when(folderStorage.exists(UnifiedInboxAccess.SPAM)).thenReturn(false);
-        PowerMockito.when(folderStorage.exists(UnifiedInboxAccess.TRASH)).thenReturn(true);
+        PowerMockito.when(B(folderStorage.exists(UnifiedInboxAccess.INBOX))).thenReturn(Boolean.TRUE);
+        PowerMockito.when(B(folderStorage.exists(UnifiedInboxAccess.DRAFTS))).thenReturn(Boolean.FALSE);
+        PowerMockito.when(B(folderStorage.exists(UnifiedInboxAccess.SENT))).thenReturn(Boolean.FALSE);
+        PowerMockito.when(B(folderStorage.exists(UnifiedInboxAccess.SPAM))).thenReturn(Boolean.FALSE);
+        PowerMockito.when(B(folderStorage.exists(UnifiedInboxAccess.TRASH))).thenReturn(Boolean.TRUE);
         PowerMockito.when(folderStorage.getTrashFolder()).thenReturn(UnifiedInboxAccess.TRASH);
         MailFolder inbox = new MailFolder();
         inbox.setMessageCount(1);
@@ -159,7 +160,7 @@ public class UnifiedInboxFolderConverterTest {
         int[][] folders = UnifiedInboxFolderConverter.getAccountDefaultFolders(1, session, FULLNAMES);
         assertTrue("Wrong number of default folders.", notNullLength(folders) == 2);
     }
-    
+
     private int notNullLength(int[][] array) {
         int length = 0;
         for (int[] is : array) {

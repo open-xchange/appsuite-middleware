@@ -102,7 +102,7 @@ public abstract class AbstractSmtpAJAXSession extends AbstractAJAXSession {
     }
 
     @AfterClass
-    public static void afterClass() throws Exception {
+    public static void afterClass() {
         synchronized (AbstractSmtpAJAXSession.class) {
             int get = counter.decrementAndGet();
             if (get == 0) {

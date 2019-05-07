@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -212,7 +213,7 @@ public class OnboardingUtility {
             transportProvider.createNewNoReplyTransport(contextId);
             return true;
         } catch (OXException e) {
-            LOG.debug("\"no reply\" transport is not available for context {}", contextId, e);
+            LOG.debug("\"no reply\" transport is not available for context {}", I(contextId), e);
             return false;
         }
     }
@@ -589,7 +590,7 @@ public class OnboardingUtility {
         try {
             String value = property.get();
             return Strings.isEmpty(value) ? defaultValue : Integer.valueOf(value.trim());
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -616,7 +617,7 @@ public class OnboardingUtility {
         try {
             String value = property.get();
             return Strings.isEmpty(value) ? defaultValue : Integer.valueOf(value.trim());
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -741,7 +742,7 @@ public class OnboardingUtility {
             MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
             return new DefaultIcon(imageBytes, null == mimeTypeMap ? null : mimeTypeMap.getContentType(imageName));
         } catch (java.io.FileNotFoundException e) {
-            LOG.warn("Icon image {} does not exist in path {}.", imageName, templatesPath);
+            LOG.warn("Icon image {} does not exist in path {}.", imageName, templatesPath, e);
             return null;
         } catch (IOException e) {
             LOG.warn("Could not load icon image {} from path {}.", imageName, templatesPath, e);
@@ -891,7 +892,7 @@ public class OnboardingUtility {
         Map<String, String> attributes = userService.getUser(userId, contextId).getAttributes();
         String login = attributes.get("loginnamerecorder/user_login");
         if (null == login) {
-            LOG.warn("No login user attribute for user {} in context {}.", userId, contextId);
+            LOG.warn("No login user attribute for user {} in context {}.", I(userId), I(contextId));
             return null;
         }
         return login;

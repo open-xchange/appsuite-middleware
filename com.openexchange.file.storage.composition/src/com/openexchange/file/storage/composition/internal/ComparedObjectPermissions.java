@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -158,7 +159,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
      * @param guestInfo The guest info
      */
     public void rememberGuestInfo(GuestInfo guestInfo) {
-        guestInfos.put(guestInfo.getGuestID(), guestInfo);
+        guestInfos.put(I(guestInfo.getGuestID()), guestInfo);
     }
 
     /**
@@ -169,13 +170,13 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
      * @throws OXException If loading the guest info fails
      */
     public GuestInfo getGuestInfo(int guestId) throws OXException {
-        GuestInfo guestInfo = guestInfos.get(guestId);
+        GuestInfo guestInfo = guestInfos.get(I(guestId));
         if (guestInfo == null) {
             guestInfo = getShareService().getGuestInfo(session, guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }
-            guestInfos.put(guestId, guestInfo);
+            guestInfos.put(I(guestId), guestInfo);
         }
 
         if (guestInfo == NO_GUEST) {

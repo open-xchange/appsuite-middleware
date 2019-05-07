@@ -49,6 +49,7 @@
 
 package com.openexchange.jsieve.export;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Charsets.UTF_8;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -63,6 +64,7 @@ import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -264,7 +266,7 @@ public class SieveHandler {
      */
     private void measureEnd(final String method) {
         long end = System.currentTimeMillis();
-        log.debug("SieveHandler.{}() took {}ms to perform", method, (end - this.mStart));
+        log.debug("SieveHandler.{}() took {}ms to perform", method, L(end - this.mStart));
     }
 
     /**
@@ -548,7 +550,7 @@ public class SieveHandler {
                 try {
                     configuredPreferredSASLMechanism = PreferredSASLMech.valueOf(psm);
                 } catch (IllegalArgumentException e) {
-                    log.warn("Invalid property '{}' for '{}' found in mailfilter.properties.", psm, MailFilterProperty.preferredSaslMech.getFQPropertyName());
+                    log.warn("Invalid property '{}' for '{}' found in mailfilter.properties.", psm, MailFilterProperty.preferredSaslMech.getFQPropertyName(), e);
                 }
             }
             if (null == configuredPreferredSASLMechanism) {
@@ -883,14 +885,27 @@ public class SieveHandler {
     }
 
     /**
-     * Get the list of active sieve scripts
+     * Gets the name of the currently active sieve script.
      *
-     * @return List of scripts, or null if no script is active
+     * @return The name of the active script, or <code>null</code> if no script is active
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
      */
     public String getActiveScript() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        return getActiveScript(null);
+    }
+
+    /**
+     * Gets the name of the currently active sieve script.
+     *
+     * @param optExpectedName The optional expected name or <code>null</code>
+     * @return The name of the active script, or <code>null</code> if no script is active
+     * @throws IOException
+     * @throws UnsupportedEncodingException
+     * @throws OXSieveHandlerException
+     */
+    public String getActiveScript(String optExpectedName) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (!(AUTH)) {
             throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
         }
@@ -901,7 +916,7 @@ public class SieveHandler {
 
         String scriptname = null;
         while (true) {
-            final String temp = bis_sieve.readLine();
+            String temp = bis_sieve.readLine();
             if (null == temp) {
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
             }
@@ -912,11 +927,96 @@ public class SieveHandler {
                 throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
             }
 
-            if (temp.matches(".*ACTIVE")) {
-                scriptname = temp.substring(temp.indexOf('\"') + 1, temp.lastIndexOf('\"'));
+            int count = -1;
+            if (temp.startsWith("{")) {
+                count = Integer.parseInt(temp.substring(1, temp.lastIndexOf('}')));
+                temp = bis_sieve.readLine();
+                if (null == temp) {
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                }
+            }
+
+            if (temp.endsWith(" ACTIVE")) {
+                if (count >= 0) {
+                    // Literal
+                    scriptname = temp.substring(0, count);
+                } else if (temp.startsWith("\"")) {
+                    // QuotedString
+                    scriptname = temp.substring(1, temp.lastIndexOf('\"'));
+                } else {
+                    // Atom
+                    scriptname = readAtom(temp);
+                }
+                if (optExpectedName != null && !scriptname.equals(optExpectedName)) {
+                    throw new OXSieveHandlerException("Currently active script \"" + scriptname + "\" is not the expected one \"" + optExpectedName + '\"', sieve_host, sieve_host_port, null);
+                }
             }
         }
+    }
 
+    /**
+     * Lists the scripts the user has on the server.
+     *
+     * @return The listed scripts
+     * @throws OXSieveHandlerException
+     * @throws UnsupportedEncodingException
+     * @throws IOException
+     */
+    public List<SieveScript> listScripts() throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        if (!(AUTH)) {
+            throw new OXSieveHandlerException("List scripts not possible. Auth first.", sieve_host, sieve_host_port, null);
+        }
+
+        bos_sieve.write(SIEVE_LIST.getBytes(UTF_8));
+        bos_sieve.flush();
+
+        List<SieveScript> scrips = null;
+        while (true) {
+            String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+            }
+            if (temp.startsWith(SIEVE_OK)) {
+                return scrips == null ? Collections.emptyList() : scrips;
+            }
+            if (temp.startsWith(SIEVE_NO)) {
+                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+            }
+
+            String scriptName;
+            if (temp.startsWith("\"")) {
+                // QuotedString
+                scriptName = temp.substring(1, temp.lastIndexOf('\"'));
+            } else if (temp.startsWith("{")) {
+                // Literal
+                int count = Integer.parseInt(temp.substring(1, temp.lastIndexOf('}')));
+                temp = bis_sieve.readLine();
+                if (null == temp) {
+                    throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+                }
+                scriptName = temp.substring(0, count);
+            } else {
+                // Atom
+                scriptName = readAtom(temp);
+            }
+
+            boolean active = temp.endsWith(" ACTIVE");
+            if (scrips == null) {
+                scrips = new ArrayList<SieveScript>(4);
+            }
+            scrips.add(new SieveScript(scriptName, active));
+        }
+    }
+
+    private static String ASTRING_CHAR_DELIM = " (){%*\"\\";
+
+    private static String readAtom(String line) {
+        int end = 0;
+        char c;
+        while (end < line.length() && (c = line.charAt(end)) >= ' ' && ASTRING_CHAR_DELIM.indexOf(c) < 0 && c != 0x7F) {
+            end++;
+        }
+        return line.substring(0, end);
     }
 
     /**
@@ -993,7 +1093,7 @@ public class SieveHandler {
         }
     }
 
-    private boolean authXOAUTH2(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean authXOAUTH2(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException {
         if (Strings.isEmpty(oauthToken)) {
             return false;
         }
@@ -1028,7 +1128,7 @@ public class SieveHandler {
         }
     }
 
-    private boolean authOAUTHBEARER(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean authOAUTHBEARER(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException {
         if (Strings.isEmpty(oauthToken)) {
             return false;
         }
@@ -1063,7 +1163,7 @@ public class SieveHandler {
         }
     }
 
-    private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
+    private boolean authGSSAPI() throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String authname = getRightEncodedString(sieve_auth, "authname");
 
         final HashMap<String, String> saslProps = new HashMap<String, String>();
@@ -1283,10 +1383,9 @@ public class SieveHandler {
                 if (group.startsWith("{")) {
                     // Multi line, use the multiline parsed before here
                     return new SieveResponse(code, multiline);
-                } else {
-                    // Single line
-                    return new SieveResponse(code, group);
                 }
+                // Single line
+                return new SieveResponse(code, group);
             }
         }
         return null;
@@ -1382,7 +1481,7 @@ public class SieveHandler {
             try {
                 switch (auth_mech) {
                     case GSSAPI:
-                        return authGSSAPI(commandBuilder);
+                        return authGSSAPI();
                     case LOGIN:
                         return authLOGIN(commandBuilder);
                     case OAUTHBEARER:
@@ -1428,7 +1527,7 @@ public class SieveHandler {
         try {
             keyword = WelcomeKeyword.valueOf(token);
         } catch (IllegalArgumentException e) {
-            log.debug("Unknown keyword '{}'", token);
+            log.debug("Unknown keyword '{}'", token, e);
             return;
         }
 
@@ -1451,7 +1550,7 @@ public class SieveHandler {
                 try {
                     capa.addExtendedProperty(keyword.name(), Integer.valueOf(unquoted));
                 } catch (NumberFormatException ex) {
-                    log.error("Unable to parse '{}' capability value: {}", keyword, unquoted);
+                    log.error("Unable to parse '{}' capability value: {}", keyword, unquoted, ex);
                 }
                 return;
             case SASL: {
@@ -1482,9 +1581,8 @@ public class SieveHandler {
      * @param actualline
      * @return
      * @throws IOException
-     * @throws OXSieveHandlerException
      */
-    private String parseError(final String actualline) throws IOException, OXSieveHandlerException {
+    private String parseError(final String actualline) throws IOException {
         final StringBuilder sb = new StringBuilder();
         final String answer = actualline.substring(3);
         final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
@@ -1499,12 +1597,11 @@ public class SieveHandler {
                 sb.append(buf, 0, octetsRead);
             }
             return sb.toString();
-        } else {
-            return parseQuotedErrorMessage(answer);
         }
+        return parseQuotedErrorMessage(answer);
     }
 
-    private String parseQuotedErrorMessage(final String answer) throws IOException, OXSieveHandlerException {
+    private String parseQuotedErrorMessage(final String answer) throws IOException {
         StringBuilder inputBuilder = new StringBuilder();
         String line = answer;
         while (line != null) {

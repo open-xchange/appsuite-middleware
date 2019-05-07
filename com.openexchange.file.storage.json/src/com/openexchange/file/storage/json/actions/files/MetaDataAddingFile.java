@@ -497,7 +497,7 @@ public class MetaDataAddingFile implements DelegatingFile {
 
     @Override
     public void setCameraFocalLength(double focalLength) {
-        file.setCameraFocalLength(focalLength);;
+        file.setCameraFocalLength(focalLength);
     }
 
     @Override

@@ -49,6 +49,9 @@
 
 package com.openexchange.plist.xml;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
@@ -304,7 +307,7 @@ public final class StaxUtils {
                 }
             }
         }
-        setProperty(factory, XMLInputFactory.IS_NAMESPACE_AWARE, nsAware);
+        setProperty(factory, XMLInputFactory.IS_NAMESPACE_AWARE, B(nsAware));
         setProperty(factory, XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
         setProperty(factory, XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
         setProperty(factory, XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
@@ -326,7 +329,7 @@ public final class StaxUtils {
     private static boolean setRestrictionProperties(final XMLInputFactory factory) {
         // For now, we can only support Woodstox 4.2.x and newer as none of the other
         // stax parsers support these settings
-        if (setProperty(factory, "com.ctc.wstx.maxAttributesPerElement", maxAttributeCount) && setProperty(factory, "com.ctc.wstx.maxAttributeSize", maxAttributeSize) && setProperty(factory, "com.ctc.wstx.maxChildrenPerElement", innerElementCountThreshold) && setProperty(factory, "com.ctc.wstx.maxElementCount", maxElementCount) && setProperty(factory, "com.ctc.wstx.maxElementDepth", innerElementLevelThreshold) && setProperty(factory, "com.ctc.wstx.maxCharacters", maxXMLCharacters) && setProperty(factory, "com.ctc.wstx.maxTextLength", maxTextLength)) {
+        if (setProperty(factory, "com.ctc.wstx.maxAttributesPerElement", I(maxAttributeCount)) && setProperty(factory, "com.ctc.wstx.maxAttributeSize", I(maxAttributeSize)) && setProperty(factory, "com.ctc.wstx.maxChildrenPerElement", I(innerElementCountThreshold)) && setProperty(factory, "com.ctc.wstx.maxElementCount", L(maxElementCount)) && setProperty(factory, "com.ctc.wstx.maxElementDepth", I(innerElementLevelThreshold)) && setProperty(factory, "com.ctc.wstx.maxCharacters", L(maxXMLCharacters)) && setProperty(factory, "com.ctc.wstx.maxTextLength", I(maxTextLength))) {
             return true;
         }
         return false;

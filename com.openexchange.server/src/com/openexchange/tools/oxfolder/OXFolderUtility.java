@@ -238,55 +238,63 @@ public final class OXFolderUtility {
             throw OXFolderExceptionCode.INVALID_DATA.create(result);
         }
         try {
-            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parentFolderID) {
-                TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, module, connection, context);
-                /*
-                 * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
-                 */
-                OXFolderAccess folderAccess = new OXFolderAccess(connection, context);
-                for (int fuid : folders.toArray()) {
-                    if (folderID == fuid) {
-                        continue;
-                    }
-                    FolderObject toCheck = folderAccess.getFolderObject(fuid);
-                    if (toCheck.getCreatedBy() == createdBy) {
+            switch (parentFolderID) {
+                case FolderObject.SYSTEM_PRIVATE_FOLDER_ID:
+                    TIntList folders = OXFolderSQL.lookUpFolders(parentFolderID, folderName, module, connection, context);
+                    if (!folders.isEmpty()) {
                         /*
-                         * User is already owner of a private folder with the same name located below system's private folder
+                         * Check if the user is owner of one of these folders. In this case throw a duplicate folder exception
                          */
-                        throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
-                    }
-                }
-            } else if (FolderObject.SYSTEM_PUBLIC_FOLDER_ID == parentFolderID) {
-                /*
-                 * check localized names below public folder
-                 */
-                checki18nString(parentFolderID, folderName, user.getLocale(), context);
-            } else {
-                /*
-                 * by default, check for equally named folder on same level
-                 */
-                int existingFolderID = OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context);
-                if (-1 != existingFolderID) {
-                    /*
-                     * double-check if cached parent folder lists the existing folder as subfolder, otherwise invalidate
-                     */
-                    FolderCacheManager manager = FolderCacheManager.getInstance();
-                    FolderObject cachedParentFolder = manager.getFolderObject(parentFolderID, context);
-                    if (null != cachedParentFolder) {
-                        List<Integer> cachedSubfolderIDs = null;
-                        try {
-                            cachedSubfolderIDs = cachedParentFolder.getSubfolderIds();
-                        } catch (OXException e) {
-                            if (false == OXFolderExceptionCode.ATTRIBUTE_NOT_SET.equals(e)) {
-                                throw e;
+                        OXFolderAccess folderAccess = null;
+                        for (int fuid : folders.toArray()) {
+                            if (folderID != fuid) {
+                                if (folderAccess == null) {
+                                    folderAccess = new OXFolderAccess(connection, context);
+                                }
+                                FolderObject toCheck = folderAccess.getFolderObject(fuid);
+                                if (toCheck.getCreatedBy() == createdBy) {
+                                    /*
+                                     * User is already owner of a private folder with the same name located below system's private folder
+                                     */
+                                    throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
+                                }
                             }
                         }
-                        if (null != cachedSubfolderIDs && false == cachedSubfolderIDs.contains(Integer.valueOf(existingFolderID))) {
-                            manager.removeFolderObject(parentFolderID, context);
-                        }
                     }
-                    throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
-                }
+                    break;
+                case FolderObject.SYSTEM_PUBLIC_FOLDER_ID:
+                    /*
+                     * check localized names below public folder
+                     */
+                    checki18nString(parentFolderID, folderName, user.getLocale(), context);
+                    break;
+                default:
+                    /*
+                     * by default, check for equally named folder on same level
+                     */
+                    int existingFolderID = OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context);
+                    if (-1 != existingFolderID) {
+                        /*
+                         * double-check if cached parent folder lists the existing folder as subfolder, otherwise invalidate
+                         */
+                        FolderCacheManager manager = FolderCacheManager.getInstance();
+                        FolderObject cachedParentFolder = manager.getFolderObject(parentFolderID, context);
+                        if (null != cachedParentFolder) {
+                            List<Integer> cachedSubfolderIDs = null;
+                            try {
+                                cachedSubfolderIDs = cachedParentFolder.getSubfolderIds();
+                            } catch (OXException e) {
+                                if (false == OXFolderExceptionCode.ATTRIBUTE_NOT_SET.equals(e)) {
+                                    throw e;
+                                }
+                            }
+                            if (null != cachedSubfolderIDs && false == cachedSubfolderIDs.contains(Integer.valueOf(existingFolderID))) {
+                                manager.removeFolderObject(parentFolderID, context);
+                            }
+                        }
+                        throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
+                    }
+                    break;
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

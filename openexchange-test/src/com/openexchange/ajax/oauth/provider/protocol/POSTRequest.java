@@ -66,6 +66,7 @@ import com.openexchange.ajax.oauth.provider.EndpointTest;
  */
 public class POSTRequest extends AbstractRequest<POSTRequest> {
 
+    @SuppressWarnings("hiding")
     String sessionId;
     String login;
     String password;
@@ -118,7 +119,7 @@ public class POSTRequest extends AbstractRequest<POSTRequest> {
             }
 
             request.setEntity(new UrlEncodedFormEntity(params));
-            return new POSTResponse(this, client.execute(request));
+            return new POSTResponse(client.execute(request));
         } catch (URISyntaxException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

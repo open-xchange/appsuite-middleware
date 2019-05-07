@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.rmi.Naming;
 import java.util.List;
@@ -109,11 +110,15 @@ public class OAuthServiceTest {
         user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", "false");
         Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(client2.getValues().getContextId()), user, credentials);
+        iface.change(getContext(client2), user, credentials);
         client2.logout();
 
         TestUser user1 = testContext.acquireUser();
         client = new AJAXClient(user1);
+    }
+
+    private Context getContext(AJAXClient client) throws OXException, IOException, JSONException {
+        return new Context(I(client.getValues().getContextId()));
     }
 
     @After
@@ -128,7 +133,7 @@ public class OAuthServiceTest {
             user.setUserAttribute("config", "com.openechange.oauth.testservice.enabled", null);
             Credentials credentials = new Credentials(oxadmin.getUser(), oxadmin.getPassword());
             OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-            iface.change(new Context(client2.getValues().getContextId()), user, credentials);
+            iface.change(getContext(client2), user, credentials);
             client2.logout();
         } finally {
             TestContextPool.backContext(testContext);

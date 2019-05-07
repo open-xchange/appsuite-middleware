@@ -327,7 +327,7 @@ public class AutoLoginTools {
         /*
          * wrap valid session into login result & return
          */
-        LOG.debug("Auto-login successful for session {} of user {} in context {}.", sessionID, user.getId(), context.getContextId());
+        LOG.debug("Auto-login successful for session {} of user {} in context {}.", sessionID, I(user.getId()), I(context.getContextId()));
         return new LoginResultImpl(session, context, user);
     }
 

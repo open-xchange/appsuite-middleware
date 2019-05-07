@@ -49,6 +49,7 @@
 
 package com.openexchange.share.core.tools;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.slf4j.LoggerFactory.getLogger;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -112,7 +113,7 @@ public class ShareLinks {
     public static String generateInternal(HostData hostData, ShareTarget target) throws OXException {
         Module module = Module.getForFolderConstant(target.getModule());
         if(null==module){
-            throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(target.getModule());
+            throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(I(target.getModule()));
         }
         String moduleStr = module.getName();
         String folder = target.getFolder();

@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -126,7 +127,7 @@ public class CompositingFileStorageTest {
      public void testDeleteWithoutPrefix() throws Exception {
 
         SimBuilder builder = new SimBuilder();
-        builder.expectCall("deleteFile", "ab/cd/ef/12345").andReturn(true);
+        builder.expectCall("deleteFile", "ab/cd/ef/12345").andReturn(Boolean.TRUE);
 
         CompositingFileStorage cStore = new CompositingFileStorage(builder.getSim(FileStorage.class), null, mapFor("hash", new SimBuilder().getSim(FileStorage.class)));
 
@@ -139,7 +140,7 @@ public class CompositingFileStorageTest {
      public void testDeleteWithPrefix() throws OXException {
 
         SimBuilder builder = new SimBuilder();
-        builder.expectCall("deleteFile", "ab/cd/ef/12345").andReturn(true);
+        builder.expectCall("deleteFile", "ab/cd/ef/12345").andReturn(Boolean.TRUE);
 
         CompositingFileStorage cStore = new CompositingFileStorage(new SimBuilder().getSim(FileStorage.class), null, mapFor("hash", builder.getSim(FileStorage.class)));
 
@@ -157,7 +158,7 @@ public class CompositingFileStorageTest {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
                 assertEquals("ab/cd/ef/54321", arg0[1]);
 
-                remember(true);
+                remember(Boolean.TRUE);
 
                 return new HashSet<String>(Arrays.asList("ab/cd/ef/12345"));
             }
@@ -169,7 +170,7 @@ public class CompositingFileStorageTest {
                 assertEquals("ab/cd/ef/12345", arg0[0]);
                 assertEquals("ab/cd/ef/54321", arg0[1]);
 
-                remember(true);
+                remember(Boolean.TRUE);
 
                 return new HashSet<String>(Arrays.asList("ab/cd/ef/54321"));
             }
@@ -191,7 +192,7 @@ public class CompositingFileStorageTest {
      public void testGetFileSizeWithoutPrefix() throws OXException {
 
         SimBuilder builder = new SimBuilder();
-        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(12L);
+        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(L(12L));
 
         CompositingFileStorage cStore = new CompositingFileStorage(builder.getSim(FileStorage.class), null, mapFor("hash", new SimBuilder().getSim(FileStorage.class)));
 
@@ -206,7 +207,7 @@ public class CompositingFileStorageTest {
      public void testGetFileSizeWithPrefix() throws OXException {
 
         SimBuilder builder = new SimBuilder();
-        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(12L);
+        builder.expectCall("getFileSize", "ab/cd/ef/12345").andReturn(L(12L));
 
         CompositingFileStorage cStore = new CompositingFileStorage(new SimBuilder().getSim(FileStorage.class), null, mapFor("hash", builder.getSim(FileStorage.class)));
 
@@ -273,10 +274,10 @@ public class CompositingFileStorageTest {
      public void testIsStateFileCorrect() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
-        prefixedBuilder.expectCall("stateFileIsCorrect").andReturn(false);
+        prefixedBuilder.expectCall("stateFileIsCorrect").andReturn(Boolean.FALSE);
 
         SimBuilder standardBuilder = new SimBuilder();
-        standardBuilder.expectCall("stateFileIsCorrect").andReturn(true);
+        standardBuilder.expectCall("stateFileIsCorrect").andReturn(Boolean.TRUE);
 
         CompositingFileStorage cStore = new CompositingFileStorage(standardBuilder.getSim(FileStorage.class), null, mapFor("hash", prefixedBuilder.getSim(FileStorage.class)));
 
@@ -293,10 +294,10 @@ public class CompositingFileStorageTest {
      public void testIsStateFileCorrect2() throws OXException {
 
         SimBuilder prefixedBuilder = new SimBuilder();
-        prefixedBuilder.expectCall("stateFileIsCorrect").andReturn(true);
+        prefixedBuilder.expectCall("stateFileIsCorrect").andReturn(Boolean.TRUE);
 
         SimBuilder standardBuilder = new SimBuilder();
-        standardBuilder.expectCall("stateFileIsCorrect").andReturn(true);
+        standardBuilder.expectCall("stateFileIsCorrect").andReturn(Boolean.TRUE);
 
         CompositingFileStorage cStore = new CompositingFileStorage(standardBuilder.getSim(FileStorage.class), null, mapFor("hash", prefixedBuilder.getSim(FileStorage.class)));
 

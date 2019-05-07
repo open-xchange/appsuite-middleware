@@ -13,16 +13,12 @@ import com.openexchange.groupware.container.Appointment;
 
 public class DeleteTest extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteTest.class);
-
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         final Appointment appointmentObj = createAppointmentObject("testDelete");
         appointmentObj.setIgnoreConflicts(true);
-        final int id = catm.insert(appointmentObj).getObjectID();
-
+        catm.insert(appointmentObj).getObjectID();
         catm.delete(appointmentObj, false, false);
-
         catm.delete(appointmentObj, false, true);
         assertTrue(catm.getLastResponse().hasError());
     }

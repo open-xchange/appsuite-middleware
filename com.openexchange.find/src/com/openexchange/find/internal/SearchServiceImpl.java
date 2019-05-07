@@ -49,6 +49,7 @@
 
 package com.openexchange.find.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
@@ -107,7 +108,7 @@ public class SearchServiceImpl implements SearchService {
     private ModuleSearchDriver requireDriver(ServerSession session, Module module, LookUpInfo lookUpInfo) throws OXException {
         ModuleSearchDriver determined = driverManager.determineDriver(session, module, lookUpInfo, true);
         if (determined == null) {
-            throw FindExceptionCode.MISSING_DRIVER.create(module.getIdentifier(), session.getUserId(), session.getContextId());
+            throw FindExceptionCode.MISSING_DRIVER.create(module.getIdentifier(), I(session.getUserId()), I(session.getContextId()));
         }
         return determined;
     }

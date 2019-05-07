@@ -55,7 +55,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * 
+ *
  * {@link SMTPInitResponse}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -69,13 +69,13 @@ public class SMTPInitResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link SMTPInitResponse}.
-     * 
+     *
      * @param response
      * @throws JSONException
      */
     protected SMTPInitResponse(Response response) throws JSONException {
         super(response);
-        
+
         if (!response.hasError()) {
             JSONObject jsonObject = new JSONObject(response.getData().toString());
             this.ok = jsonObject.getBoolean("ok");
@@ -88,15 +88,15 @@ public class SMTPInitResponse extends AbstractAJAXResponse {
         }
     }
 
-    public boolean ok() throws JSONException {
+    public boolean ok() {
         return ok;
     }
 
-    public String getHostname() throws JSONException {
+    public String getHostname() {
         return hostname;
     }
 
-    public int getPort() throws JSONException {
+    public int getPort() {
         return port;
     }
 }

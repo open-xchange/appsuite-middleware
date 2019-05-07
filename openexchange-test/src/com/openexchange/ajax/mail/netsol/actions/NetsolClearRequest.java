@@ -54,7 +54,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.mail.actions.AbstractMailRequest;
 
@@ -64,7 +63,7 @@ import com.openexchange.ajax.mail.actions.AbstractMailRequest;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class NetsolClearRequest implements AJAXRequest {
+public final class NetsolClearRequest implements AJAXRequest<NetsolClearResponse> {
 
     private final String folderId;
 
@@ -118,17 +117,4 @@ public final class NetsolClearRequest implements AJAXRequest {
 
     }
 
-    public final static class NetsolClearResponse extends AbstractAJAXResponse {
-
-        public NetsolClearResponse(final Response response) {
-            super(response);
-        }
-
-        /**
-         * @return JSON array containing failed
-         */
-        public JSONArray getFailed() {
-            return (JSONArray) getData();
-        }
-    }
 }

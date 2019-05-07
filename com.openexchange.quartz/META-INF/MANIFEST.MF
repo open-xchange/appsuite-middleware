@@ -13,6 +13,7 @@ Bundle-ClassPath: lib/quartz-2.1.5.jar,
  .
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.osgi,
  javax.mail,
  javax.mail.event,

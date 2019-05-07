@@ -67,7 +67,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.multifactor.Challenge;
@@ -90,7 +89,7 @@ import com.openexchange.multifactor.storage.impl.MemoryMultifactorDeviceStorage;
 import com.openexchange.multifactor.util.DeviceNaming;
 import com.openexchange.multifactor.util.MultifactorFormatter;
 import com.openexchange.sms.PhoneNumberParserService;
-import com.openexchange.sms.SMSServiceSPI; 
+import com.openexchange.sms.SMSServiceSPI;
 
 /**
  * {@link SMSMultifactorProvider} - A multifactor provider which sends a secret token to a user's phone via SMS
@@ -155,12 +154,12 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
         }
         return demoMode.booleanValue();
     }
-    
+
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         demoMode = Boolean.valueOf(configService.getBoolProperty(MultifactorProperties.demo.getFQPropertyName(), MultifactorProperties.demo.getDefaultValue(Boolean.class).booleanValue()));
     }
-    
+
     @Override
     public Interests getInterests() {
         return DefaultInterests.builder().propertiesOfInterest(MultifactorProperties.demo.getFQPropertyName()).build();
@@ -192,12 +191,15 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
             phoneNumber = "+" + phoneNumber;
         }
 
+        if (isPhoneNumberRegistered(multifactorRequest, phoneNumber)) {
+            throw MultifactorExceptionCodes.DEVICE_ALREADY_REGISTERED.create();
+        }
+
         DeviceNaming.applyName(sourceDevice, () -> getDefaultName(multifactorRequest));
         if (sourceDevice.getName() != null && sourceDevice.getName().isEmpty() && (phoneNumber.length() > 4)) {
             sourceDevice.setName("*" + phoneNumber.substring(phoneNumber.length() - 4));
         }
-
-        return new SMSMultifactorDevice(newUid(), sourceDevice.getName(), phoneNumber, Autoboxing.B(sourceDevice.isBackup()));
+        return new SMSMultifactorDevice(newUid(), sourceDevice.getName(), phoneNumber, sourceDevice.isBackup());
     }
 
     /**
@@ -320,6 +322,22 @@ public class MultifactorSMSProvider implements MultifactorProvider, Reloadable{
      */
     private boolean isDeviceRegistered(MultifactorRequest multifactorRequest, String deviceId) throws OXException {
         return getDevice(multifactorRequest, deviceId).isPresent();
+    }
+
+    /**
+     * Internal method to check if a device with a specific phone number is registered for a user
+     *
+     * @param multifactorRequest The request to specifying the user
+     * @param phoneNumber The phone number to check
+     * @return <code>true</code>, if a device with the given phone number is already registered for the given {@link MultifactorRequest}, <code>false</code> otherwise
+     * @throws OXException
+     */
+    private boolean isPhoneNumberRegistered(MultifactorRequest multifactorRequest, String phoneNumber) throws OXException {
+        Collection<SMSMultifactorDevice> devices = getStorageSave().getDevices(multifactorRequest.getContextId(), multifactorRequest.getUserId());
+        if (!devices.isEmpty()) {
+            return devices.stream().filter(d -> d.getPhoneNumber().equals(phoneNumber)).count() > 0;
+        }
+        return false;
     }
 
     /**

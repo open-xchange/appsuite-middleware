@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
  */
 public class SearchIteratorAdapter<T> implements SearchIterator<T> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchIteratorAdapter.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchIteratorAdapter.class);
 
     private static final class EmptySearchIterator<T> implements SearchIterator<T> {
 
@@ -112,7 +112,8 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
         }
     }
 
-    private static final SearchIterator EMPTY = new EmptySearchIterator();
+    @SuppressWarnings("rawtypes")
+    private static final SearchIterator EMPTY = new EmptySearchIterator<>();
 
     private final Iterator<T> delegate;
 
@@ -198,7 +199,8 @@ public class SearchIteratorAdapter<T> implements SearchIterator<T> {
      * @return An empty iterator
      */
     public static <T> SearchIterator<T> emptyIterator() {
-        return EMPTY;
+        @SuppressWarnings("unchecked") SearchIterator<T> i = EMPTY;
+        return i;
     }
 
     /**

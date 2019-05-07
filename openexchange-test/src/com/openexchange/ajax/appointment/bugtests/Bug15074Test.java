@@ -82,11 +82,7 @@ public class Bug15074Test extends AbstractAJAXSession {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXSession#setUp()
-     */
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -108,11 +104,7 @@ public class Bug15074Test extends AbstractAJAXSession {
         appointmentInsertResponse.fillAppointment(appointment);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.framework.AbstractAJAXSession#tearDown()
-     */
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -134,7 +126,7 @@ public class Bug15074Test extends AbstractAJAXSession {
         Object[][] objects = allResponse.getArray();
         boolean found = false;
         for (Object[] object : objects) {
-            if ((Integer) object[0] == appointment.getObjectID()) {
+            if (((Integer) object[0]).intValue() == appointment.getObjectID()) {
                 found = true;
                 break;
             }

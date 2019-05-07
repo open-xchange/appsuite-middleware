@@ -68,8 +68,8 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
     }
 
     @Override
-    public Fixtures<InfoItem> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new InfoItemFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<InfoItem> createFixture(final Map<String, Map<String, String>> entries) {
+        return new InfoItemFixtures(entries, fixtureLoader);
     }
 
     private class InfoItemFixtures extends DefaultFixtures<InfoItem> implements Fixtures<InfoItem> {
@@ -77,7 +77,7 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<InfoItem>> knownInfoitems = new HashMap<String, Fixture<InfoItem>>();
 
-        public InfoItemFixtures(final String fixtureName, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+        public InfoItemFixtures(final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
             super(InfoItem.class, values, fixtureLoader);
             this.entries = values;
             super.addTransformator(new DocumentsTransformator(fixtureLoader), "versions");

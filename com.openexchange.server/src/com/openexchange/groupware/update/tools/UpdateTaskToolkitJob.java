@@ -84,7 +84,7 @@ public class UpdateTaskToolkitJob<V> extends FutureTask<V> {
         // Await permit
         try {
             latch.await();
-        } catch (InterruptedException e) {
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
             Thread.currentThread().interrupt();
             return;
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.threadsort;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,12 +111,12 @@ final class ThreadSortParser {
             // Parse list of threads.
             int pos = 0;
             do {
-                LOG.debug("Position: {}", pos);
+                LOG.debug("Position: {}", I(pos));
                 final int closingBracket = findMatchingBracket(threadList.substring(pos));
                 if (closingBracket == -1) {
                     throw IMAPException.create(IMAPException.Code.THREAD_SORT_PARSING_ERROR, "Closing parenthesis not found.");
                 }
-                    LOG.debug("Closing bracket: {}{}", pos, closingBracket);
+                    LOG.debug("Closing bracket: {}{}", I(pos), I(closingBracket));
                 final String subList = threadList.substring(pos + 1, pos + closingBracket);
                 if (subList.charAt(0) == '(') {
                         LOG.debug("Parsing childs of thread with no parent.");

@@ -104,7 +104,7 @@ public class CopyTest extends InfostoreAJAXTest {
         //FIXME Bug 4120
         com.openexchange.file.storage.File reload = itm.getAction(id);
         reload.setFileName("other.properties");
-        
+
         final String objectId = Iterables.get(itm.getCreatedEntities(), 0).getId();
         itm.copyAction(objectId, Integer.toString(folderId), reload);
         final String copyId = reload.getId();
@@ -160,13 +160,12 @@ public class CopyTest extends InfostoreAJAXTest {
 
     @Test
     public void testUploadCopy() throws Exception {
-        final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
         final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
 
         com.openexchange.file.storage.File org = itm.getAction(origId);
         org.setTitle("copy");
         org.setFileMIMEType("text/plain");
-        itm.copyAction(origId, String.valueOf(folderId), org, upload);
+        itm.copyAction(origId, String.valueOf(folderId), org);
         final String copyId = org.getId();
 
         com.openexchange.file.storage.File copy = itm.getAction(copyId);
@@ -190,7 +189,7 @@ public class CopyTest extends InfostoreAJAXTest {
             final String origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
             com.openexchange.file.storage.File file = itm.getAction(origId);
             file.setFolderId("" + folderId);
-            
+
             itm.copyAction(origId, Integer.toString(folderId), file);
             AbstractAJAXResponse resp = itm.getLastResponse();
             assertTrue(resp.hasError());

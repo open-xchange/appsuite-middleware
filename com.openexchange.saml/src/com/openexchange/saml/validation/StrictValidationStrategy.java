@@ -306,6 +306,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * @return The determined bearer assertion
      * @throws ValidationException If no bearer assertion could be determined
      */
+    @SuppressWarnings("unused")
     protected Assertion determineAssertion(Binding binding, Response response, List<Assertion> assertions) throws ValidationException {
         /*
          * We'll select the first contained assertion that
@@ -400,6 +401,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * @return The {@link AuthnRequestInfo} according to the response based on possibly set InResponseTo attributes or <code>null</code> if InResponseTo is not set
      * @throws ValidationException If any validation step fails
      */
+    @SuppressWarnings("unused")
     protected void validateBearerAssertion(Binding binding, Response response, AuthnRequestInfo requestInfo, Assertion bearerAssertion) throws ValidationException {
         /*
          * At lease one bearer <SubjectConfirmation> element MUST contain a
@@ -479,7 +481,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
          * If response is signed, we need to verify the signature
          */
         responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredentials(), false));
-        
+
 
         /*
          * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
@@ -584,6 +586,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
      * @param response The response
      * @return The list of {@link AssertionValidator}s used to validate every single assertion
      */
+    @SuppressWarnings("unused")
     protected List<AssertionValidator> getAssertionValidators(Binding binding, Response response) {
         List<AssertionValidator> assertionValidators = new LinkedList<AssertionValidator>();
         /*
@@ -593,7 +596,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
          */
         boolean enforceSignature = (binding == Binding.HTTP_POST);
         assertionValidators.add(new AssertionSignatureValidator(credentialProvider.getValidationCredentials(), enforceSignature));
-        
+
 
         /*
          * Check the assertions issuers

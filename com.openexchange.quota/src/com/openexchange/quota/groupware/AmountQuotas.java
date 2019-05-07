@@ -49,6 +49,7 @@
 
 package com.openexchange.quota.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -219,7 +220,7 @@ public class AmountQuotas {
         try {
             return Long.parseLong(property.get().trim());
         } catch (final RuntimeException e) {
-            LOG.warn("Couldn't detect quota for {} (user={}, context={})", moduleID, session.getUserId(), session.getContextId(), e);
+            LOG.warn("Couldn't detect quota for {} (user={}, context={})", moduleID, I(session.getUserId()), I(session.getContextId()), e);
             return defaultValue;
         }
     }
@@ -265,7 +266,7 @@ public class AmountQuotas {
         try {
             return Long.parseLong(property.get().trim());
         } catch (final RuntimeException e) {
-            LOG.warn("Couldn't detect quota from property {} (user={}, context={})", propName, session.getUserId(), session.getContextId(), e);
+            LOG.warn("Couldn't detect quota from property {} (user={}, context={})", propName, I(session.getUserId()), I(session.getContextId()), e);
             return defaultValue;
         }
     }

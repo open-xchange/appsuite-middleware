@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose;
 
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.mail.compose.Message.ContentType;
 import com.openexchange.mail.compose.Message.Priority;
@@ -152,6 +153,17 @@ public class MessageDescription {
         return this;
     }
 
+    public MessageDescription addTo(List<Address> to) {
+        if (this.to == null) {
+            return setTo(to);
+        }
+
+        if (to != null) {
+            this.to.addAll(to);
+        }
+        return this;
+    }
+
     public boolean containsTo() {
         return bTo;
     }
@@ -166,8 +178,19 @@ public class MessageDescription {
     }
 
     public MessageDescription setCc(List<Address> cc) {
-        this.cc = cc;
+        this.cc = null == cc ? cc : new LinkedList<>(cc);
         bCc = true;
+        return this;
+    }
+
+    public MessageDescription addCc(List<Address> cc) {
+        if (this.cc == null) {
+            return setCc(cc);
+        }
+
+        if (cc != null) {
+            this.cc.addAll(cc);
+        }
         return this;
     }
 
@@ -187,6 +210,17 @@ public class MessageDescription {
     public MessageDescription setBcc(List<Address> bcc) {
         this.bcc = bcc;
         bBcc = true;
+        return this;
+    }
+
+    public MessageDescription addBcc(List<Address> bcc) {
+        if (this.bcc == null) {
+            return setBcc(bcc);
+        }
+
+        if (bcc != null) {
+            this.bcc.addAll(bcc);
+        }
         return this;
     }
 

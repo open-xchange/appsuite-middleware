@@ -245,8 +245,9 @@ public class ApnsHttp2DriveEventsActivator extends HousekeepingActivator {
         String result = optProperty(properties, prop);
         if (result == null) {
             // This should never happen as long as the shipped fragment contains a proper properties file
-            LOG.error("Missing required property from fragment: {}", prop.getFQPropertyName());
-            throw OXException.general("Missing property: " + prop.getFQPropertyName());
+            String propertyName = prop.getFQPropertyName();
+            LOG.error("Missing required property from fragment: {}", propertyName);
+            throw OXException.general("Missing property: " + propertyName);
         }
         return result;
     }

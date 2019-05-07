@@ -55,7 +55,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -108,7 +107,7 @@ public class Bug12212Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testMovingExceptionTwiceShouldNeitherCrashNorDuplicate() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testMovingExceptionTwiceShouldNeitherCrashNorDuplicate() throws OXException, IOException, JSONException, OXException {
         final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateAppointmentFolder();
         final TimeZone tz = client.getValues().getTimeZone();

@@ -2,6 +2,7 @@
 package com.openexchange.ajax.appointment;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,7 +28,7 @@ public class AllTest extends AppointmentTest {
     private static final int[] SIMPLE_COLUMNS = new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.TITLE, Appointment.START_DATE, Appointment.END_DATE };
 
     @Test
-    public void testShouldListAppointmentsInPrivateFolder() throws Exception {
+    public void testShouldListAppointmentsInPrivateFolder() {
         catm.setTimezone(TimeZones.UTC);
         final Appointment appointment = new Appointment();
         appointment.setStartDate(D("24/02/1998 12:00"));
@@ -103,7 +104,7 @@ public class AllTest extends AppointmentTest {
         Appointment[] all = catm.all(appointmentFolderId, D("01/01/1999 00:00"), D("01/01/2000 00:00"), SIMPLE_COLUMNS);
 
         // Verify appointments are included in response
-        final JSONArray data = (JSONArray) catm.getLastResponse().getData();
+        catm.getLastResponse().getData();
 
         assertNotInResponse(all, appointment);
         assertInResponse(all, anotherAppointment);
@@ -113,8 +114,8 @@ public class AllTest extends AppointmentTest {
         final Set<Integer> expectedIds = new HashSet<Integer>();
         final Map<Integer, Appointment> id2appointment = new HashMap<Integer, Appointment>();
         for (final Appointment appointment : appointments) {
-            expectedIds.add(appointment.getObjectID());
-            id2appointment.put(appointment.getObjectID(), appointment);
+            expectedIds.add(I(appointment.getObjectID()));
+            id2appointment.put(I(appointment.getObjectID()), appointment);
         }
         for (Appointment appointment : data) {
             final int id = appointment.getObjectID();
@@ -123,8 +124,8 @@ public class AllTest extends AppointmentTest {
             final long startDate = appointment.getStartDate().getTime();
             final long endDate = appointment.getEndDate().getTime();
 
-            final Appointment expectedAppointment = id2appointment.get(id);
-            expectedIds.remove(id);
+            final Appointment expectedAppointment = id2appointment.get(I(id));
+            expectedIds.remove(I(id));
 
             if (expectedAppointment != null) {
                 assertEquals(folderId, expectedAppointment.getParentFolderID());
@@ -139,17 +140,17 @@ public class AllTest extends AppointmentTest {
     private void assertNotInResponse(final Appointment[] data, final Appointment... appointments) {
         final Set<Integer> ids = new HashSet<Integer>();
         for (final Appointment appointment : appointments) {
-            ids.add(appointment.getObjectID());
+            ids.add(I(appointment.getObjectID()));
         }
         for (int i = 0, size = data.length; i < size; i++) {
             Appointment app = data[i];
 
-            assertFalse(ids.contains(app.getObjectID()));
+            assertFalse(ids.contains(I(app.getObjectID())));
         }
     }
 
     @Test
-    public void testShowAppointmentsBetween() throws Exception {
+    public void testShowAppointmentsBetween() {
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 7));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 7));
 
@@ -159,7 +160,7 @@ public class AllTest extends AppointmentTest {
     }
 
     @Test
-    public void testShowAllAppointmentWhereIAmParticipant() throws Exception {
+    public void testShowAllAppointmentWhereIAmParticipant() {
         final Date start = new Date(System.currentTimeMillis() - (dayInMillis * 7));
         final Date end = new Date(System.currentTimeMillis() + (dayInMillis * 7));
 
@@ -169,7 +170,7 @@ public class AllTest extends AppointmentTest {
     }
 
     @Test
-    public void testShowFullTimeAppointments() throws Exception {
+    public void testShowFullTimeAppointments() {
         final int cols[] = new int[] { Appointment.OBJECT_ID };
 
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
@@ -238,7 +239,7 @@ public class AllTest extends AppointmentTest {
 
     // Bug 12171
     @Test
-    public void testShowOcurrences() throws Exception {
+    public void testShowOcurrences() {
         final int cols[] = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_COUNT };
 
         final Appointment appointmentObj = createAppointmentObject("testShowOcurrences");
@@ -267,7 +268,7 @@ public class AllTest extends AppointmentTest {
         appointmentObj.setStartDate(new Date());
         appointmentObj.setEndDate(new Date(System.currentTimeMillis() + 60 * 60 * 1000));
         appointmentObj.setIgnoreConflicts(true);
-        final int objectId = catm.insert(appointmentObj).getObjectID();
+        catm.insert(appointmentObj).getObjectID();
         final AllRequest req = new AllRequest(appointmentFolderId, cols, new Date(0), new Date(Long.MAX_VALUE), TimeZone.getTimeZone("UTC"));
 
         final CommonAllResponse response = Executor.execute(getClient(), req);

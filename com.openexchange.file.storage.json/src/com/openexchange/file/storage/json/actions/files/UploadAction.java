@@ -108,7 +108,7 @@ public class UploadAction extends AbstractWriteAction {
         if (offset == null) {
             newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
         } else {
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), offset);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), offset.longValue());
         }
 
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());

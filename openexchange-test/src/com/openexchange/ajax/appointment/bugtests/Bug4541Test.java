@@ -11,8 +11,6 @@ import com.openexchange.test.FolderTestManager;
 
 public class Bug4541Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug4541Test.class);
-
     @Test
     public void testBug4541() throws Exception {
         final FolderObject folderObj = new FolderObject();
@@ -33,8 +31,7 @@ public class Bug4541Test extends AppointmentTest {
         appointmentObj.setIgnoreConflicts(true);
 
         final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[1];
-        participants[0] = new UserParticipant();
-        participants[0].setIdentifier(userId);
+        participants[0] = new UserParticipant(userId);
 
         appointmentObj.setParticipants(participants);
 

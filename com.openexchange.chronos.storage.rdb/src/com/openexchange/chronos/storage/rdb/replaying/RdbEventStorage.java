@@ -134,6 +134,11 @@ public class RdbEventStorage implements EventStorage {
     }
 
     @Override
+    public List<Event> loadEvents(List<String> eventIds, EventField[] fields) throws OXException {
+        return delegate.loadEvents(eventIds, fields);
+    }
+
+    @Override
     public Event loadException(String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws OXException {
         return delegate.loadException(seriesId, recurrenceId, fields);
     }

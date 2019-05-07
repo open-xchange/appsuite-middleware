@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -106,16 +107,12 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
     }
 
     protected boolean eq(final Object o1, final Object o2) {
-        if (o1 == null || o2 == null) {
-            return false;
-        } else {
-            return o1.equals(o2);
-        }
+        return o1 == null || o2 == null ? false : o1.equals(o2);
     }
 
     @Override
     public void closeSession(final Object session) throws OXException {
-
+        // Nothing
     }
 
     @Override
@@ -130,13 +127,13 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         final ArrayList<Integer> filteredColumns = new ArrayList<Integer>();
         for (int i = 0; i < columns.length; i++) {
             if (columns[i] != DataObject.LAST_MODIFIED_UTC) {
-                filteredColumns.add(columns[i]);
+                filteredColumns.add(I(columns[i]));
             }
         }
         columns = new int[filteredColumns.size()];
         int counter = 0;
         for (final Integer integer : filteredColumns) {
-            columns[counter] = integer;
+            columns[counter] = integer.intValue();
             counter++;
         }
         SearchIterator<Task> tasksInFolder = null;
@@ -172,14 +169,14 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
     }
 
     private Object getFromSession(final int key, final Object session) {
-        return ((Map<Integer, Object>) session).get(key);
+        return ((Map<Integer, Object>) session).get(I(key));
     }
 
     @Override
     public Object startSession(final TargetFolderDefinition target) throws OXException {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
-        userInfo.put(SQL_INTERFACE, new TasksSQLImpl(new TargetFolderSession(target)));
-        userInfo.put(TARGET, target);
+        userInfo.put(I(SQL_INTERFACE), new TasksSQLImpl(new TargetFolderSession(target)));
+        userInfo.put(I(TARGET), target);
         return userInfo;
     }
 

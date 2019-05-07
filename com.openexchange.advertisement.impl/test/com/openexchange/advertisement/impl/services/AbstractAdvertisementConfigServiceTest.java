@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement.impl.services;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -96,8 +97,8 @@ public class AbstractAdvertisementConfigServiceTest {
     public void setUp() throws Exception{
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
-        PowerMockito.when(session.getContextId()).thenReturn(contextId);
-        PowerMockito.when(session.getUserId()).thenReturn(userId);
+        PowerMockito.when(I(session.getContextId())).thenReturn(I(contextId));
+        PowerMockito.when(I(session.getUserId())).thenReturn(I(userId));
 
         PowerMockito.when(Services.getService(CacheService.class)).thenReturn(cacheService);
         PowerMockito.when(cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION)).thenReturn(userCache);
@@ -126,7 +127,7 @@ public class AbstractAdvertisementConfigServiceTest {
     public void getConfigTest_withoutCacheUserInternal() throws Exception {
         PowerMockito.when(Services.getService(CacheService.class)).thenReturn(null);
         JSONValue result = new JSONObject();
-        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(result);;
+        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(result);
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
@@ -135,8 +136,8 @@ public class AbstractAdvertisementConfigServiceTest {
     public void getConfigTest_withoutCacheInternal() throws Exception {
         PowerMockito.when(Services.getService(CacheService.class)).thenReturn(null);
         JSONValue result = new JSONObject();
-        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(null);;
-        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigInternal", Session.class, String.class, String.class)).toReturn(result);;
+        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(null);
+        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigInternal", Session.class, String.class, String.class)).toReturn(result);
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
@@ -155,7 +156,7 @@ public class AbstractAdvertisementConfigServiceTest {
         PowerMockito.when(userCache.newCacheKey(contextId, userId)).thenReturn(cacheKey);
         JSONValue result = new JSONObject();
         PowerMockito.when(userCache.get(cacheKey)).thenReturn(null);
-        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(result);;
+        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(result);
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }
@@ -169,7 +170,7 @@ public class AbstractAdvertisementConfigServiceTest {
         PowerMockito.when(userCache.get(cacheKey)).thenReturn(null);
         PowerMockito.when(userCache.get(cacheKey2)).thenReturn(result);
         PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigByUserInternal", Session.class)).toReturn(null);
-        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigInternal", Session.class, String.class, String.class)).toReturn(result);;
+        PowerMockito.stub(PowerMockito.method(AbstractAdvertisementConfigService.class , "getConfigInternal", Session.class, String.class, String.class)).toReturn(result);
         JSONValue config = configService.getConfig(session);
         assertTrue(config != null);
     }

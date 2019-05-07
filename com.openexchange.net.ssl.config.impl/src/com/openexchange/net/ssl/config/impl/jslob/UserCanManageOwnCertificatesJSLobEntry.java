@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.config.impl.jslob;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlobEntry;
@@ -78,7 +79,7 @@ public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#getKey()
      */
     @Override
@@ -88,7 +89,7 @@ public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#getPath()
      */
     @Override
@@ -98,7 +99,7 @@ public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
      */
     @Override
@@ -108,17 +109,17 @@ public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
      */
     @Override
     public Object getValue(Session session) throws OXException {
-        return userAwareSSLConfigurationService.canManageCertificates(session.getUserId(), session.getContextId());
+        return B(userAwareSSLConfigurationService.canManageCertificates(session.getUserId(), session.getContextId()));
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
      */
     @Override
@@ -128,7 +129,7 @@ public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
      */
     @Override

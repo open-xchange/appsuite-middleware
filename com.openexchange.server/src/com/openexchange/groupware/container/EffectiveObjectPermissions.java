@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -108,7 +109,7 @@ public class EffectiveObjectPermissions {
         int[] tmp = user.getGroups();
         if (tmp != null) {
             for (int group : tmp) {
-                groups.add(group);
+                groups.add(I(group));
             }
         }
 
@@ -117,7 +118,7 @@ public class EffectiveObjectPermissions {
             boolean checkAndSet = false;
             int entity = permission.getEntity();
             if (permission.isGroup()) {
-                if (groups.contains(entity)) {
+                if (groups.contains(I(entity))) {
                     checkAndSet = true;
                 }
             } else if (entity == userId) {
@@ -320,15 +321,15 @@ public class EffectiveObjectPermissions {
                 int folderId = rs.getInt(1);
                 int objectId = rs.getInt(2);
                 int bits = rs.getInt(3);
-                Map<Integer, EffectiveObjectPermission> permissionsInFolder = gatheredPermissions.get(folderId);
+                Map<Integer, EffectiveObjectPermission> permissionsInFolder = gatheredPermissions.get(I(folderId));
                 if (permissionsInFolder == null) {
                     permissionsInFolder = new HashMap<Integer, EffectiveObjectPermission>();
-                    gatheredPermissions.put(folderId, permissionsInFolder);
+                    gatheredPermissions.put(I(folderId), permissionsInFolder);
                 }
 
-                EffectiveObjectPermission permission = permissionsInFolder.get(objectId);
+                EffectiveObjectPermission permission = permissionsInFolder.get(I(objectId));
                 if (permission == null || bits > permission.getPermission().getPermissions()) {
-                    permissionsInFolder.put(objectId, new EffectiveObjectPermission(module, folderId, objectId, new ObjectPermission(rs.getInt(4), rs.getBoolean(5), bits), permissionBits));
+                    permissionsInFolder.put(I(objectId), new EffectiveObjectPermission(module, folderId, objectId, new ObjectPermission(rs.getInt(4), rs.getBoolean(5), bits), permissionBits));
                 }
             }
         } catch (SQLException e) {

@@ -93,12 +93,13 @@ public class ResourceCacheTest extends AbstractAJAXSession {
 
     private static final String DB = "DB";
 
-    private String current = FS;
+    String current = FS;
 
     public ResourceCacheTest() {
         super();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -342,12 +343,12 @@ public class ResourceCacheTest extends AbstractAJAXSession {
         return new int[] { quota, perDocument };
     }
 
-    private <T extends AbstractAJAXResponse> T executeTyped(AbstractResourceCacheRequest<T> request, String cacheType) throws OXException, IOException, JSONException {
+    <T extends AbstractAJAXResponse> T executeTyped(AbstractResourceCacheRequest<T> request, String cacheType) throws OXException, IOException, JSONException {
         request.setCacheType(cacheType);
         return getClient().execute(request);
     }
 
-    private byte[] prepareFile(int length) {
+    byte[] prepareFile(int length) {
         Random r = new Random();
         byte file[] = new byte[length];
         r.nextBytes(file);

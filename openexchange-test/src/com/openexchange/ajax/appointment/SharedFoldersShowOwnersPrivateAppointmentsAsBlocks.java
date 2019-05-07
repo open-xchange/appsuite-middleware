@@ -58,7 +58,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AllRequest;
 import com.openexchange.ajax.appointment.action.AppointmentUpdatesResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -185,7 +184,7 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     }
 
     @Test
-    public void testShouldNotAnonymizeOwnPrivateAppointments() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldNotAnonymizeOwnPrivateAppointments() throws OXException, IOException, JSONException {
         CommonListResponse response = client1.execute(new ListRequest(ListIDs.l(new int[] { sharedFolder.getObjectID(), publicAppointmentID }, new int[] { sharedFolder.getObjectID(), privateAppointmentID }), COLUMNS, true));
         int namePos = response.getColumnPos(Appointment.TITLE);
         Object[][] objects = response.getArray();
@@ -213,6 +212,6 @@ public class SharedFoldersShowOwnersPrivateAppointmentsAsBlocks extends ManagedA
     }
 
     @Test
-    public void testShouldShowRecurrences() throws Exception {}
+    public void testShouldShowRecurrences() {}
 
 }

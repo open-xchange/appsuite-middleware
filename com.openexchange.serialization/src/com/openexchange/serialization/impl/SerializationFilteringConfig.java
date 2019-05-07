@@ -49,9 +49,9 @@
 
 package com.openexchange.serialization.impl;
 
+import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -97,29 +97,33 @@ public class SerializationFilteringConfig {
         Document doc = dBuilder.parse(configFile);
         doc.getDocumentElement().normalize();
 
-        // load blacklist
-        List<Pattern> patterns = new ArrayList<>();
+        // Load blacklist
         NodeList regexList = ((Element) doc.getElementsByTagName("blacklist").item(0)).getElementsByTagName("regexp");
-        for (int x = 0; x < regexList.getLength(); x++) {
-            Node item = regexList.item(x);
-            try {
-                patterns.add(Pattern.compile(item.getTextContent()));
-            } catch (PatternSyntaxException e) {
-                LOG.error("Unable to parse java deserialization filter config. Please check serialkiller.xml for errors.");
-                blacklist = Collections.unmodifiableList(Collections.emptyList());
-                return;
+        int length = regexList.getLength();
+        if (length <= 0) {
+            blacklist = Collections.emptyList();
+        } else {
+            ImmutableList.Builder<Pattern> patterns = ImmutableList.builderWithExpectedSize(length);
+            for (int x = 0; x < length; x++) {
+                Node item = regexList.item(x);
+                try {
+                    patterns.add(Pattern.compile(item.getTextContent()));
+                } catch (PatternSyntaxException e) {
+                    LOG.error("Unable to parse java deserialization filter config. Please check serialkiller.xml for errors.", e);
+                    blacklist = Collections.unmodifiableList(Collections.emptyList());
+                    return;
+                }
             }
+            blacklist = patterns.build();
         }
-
-        blacklist = Collections.unmodifiableList(patterns);
     }
 
     /**
-     * Gets the blacklist
-     * 
-     * @return An {@link Iterable} of regex {@link Pattern}
+     * Gets the blacklist; a list of {@link Pattern regular expressions} for class names, which are not allowed being serialized/deserialized.
+     *
+     * @return The blacklist
      */
-    Iterable<Pattern> blacklist() {
+    List<Pattern> getBlacklist() {
         return blacklist;
     }
 

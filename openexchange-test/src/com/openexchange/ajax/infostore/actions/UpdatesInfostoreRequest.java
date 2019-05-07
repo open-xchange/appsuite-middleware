@@ -78,7 +78,7 @@ public class UpdatesInfostoreRequest extends AbstractUpdatesRequest<UpdatesInfos
 
     @Override
     public UpdatesInfostoreParser getParser() {
-        return new UpdatesInfostoreParser(isFailOnError(), getColumns());
+        return new UpdatesInfostoreParser(isFailOnError());
     }
 
 }

@@ -91,7 +91,7 @@ public class SearchResponse extends CommonAllResponse {
             } else if (columns[i] == 601) {
                 message.setFolder((String) mailAsArray.get(i));
             } else if (columns[i] == 602) {
-                message.setHasAttachment((Boolean) mailAsArray.get(i));
+                message.setHasAttachment(((Boolean) mailAsArray.get(i)).booleanValue());
             } else if (columns[i] == 603) {
                 handleInnerArrays(mailAsArray, message, i, "from");
             } else if (columns[i] == 604) {
@@ -103,7 +103,7 @@ public class SearchResponse extends CommonAllResponse {
             } else if (columns[i] == 607) {
                 message.setSubject((String) mailAsArray.get(i));
             } else if (columns[i] == 608) {
-                message.setSize((Integer) mailAsArray.get(i));
+                message.setSize(((Integer) mailAsArray.get(i)).intValue());
                 // Sent date
                 // else if (columns[i] == 609) message.setSentDate(new Date((Long)mailAsArray.get(i)));
                 // Received date

@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -214,6 +215,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         requestInfo.setDomainName(domainName);
         requestInfo.setLoginPath(httpRequest.getParameter("loginPath"));
         requestInfo.setClientID(httpRequest.getParameter("client"));
+        requestInfo.setUriFragment(httpRequest.getParameter("hash"));
 
         String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
@@ -259,7 +261,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
 
             Assertion bearerAssertion = validationResult.getBearerAssertion();
             AuthenticationInfo authInfo = backend.resolveAuthnResponse(response, bearerAssertion, requestInfo);
-            LOG.debug("User {} in context {} is considered authenticated", authInfo.getUserId(), authInfo.getContextId());
+            LOG.debug("User {} in context {} is considered authenticated", I(authInfo.getUserId()), I(authInfo.getContextId()));
 
             enhanceAuthInfo(authInfo, bearerAssertion);
             Map<String, String> properties = authInfo.getProperties();
@@ -289,6 +291,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             String clientID = requestInfo.getClientID();
             if (clientID != null) {
                 redirectLocation.setParameter(LoginFields.CLIENT_PARAM, clientID);
+            }
+
+            String uriFragment = requestInfo.getUriFragment();
+            if (uriFragment != null) {
+                redirectLocation.setParameter(SAMLLoginTools.PARAM_URI_FRAGMENT, uriFragment);
             }
 
             Tools.disableCaching(httpResponse);
@@ -525,7 +532,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         spssoDescriptor.addSupportedProtocol(SAMLConstants.SAML20P_NS);
 
         AssertionConsumerService acs = openSAML.buildSAMLObject(AssertionConsumerService.class);
-        acs.setIndex(1);
+        acs.setIndex(I(1));
         acs.setIsDefault(Boolean.TRUE);
         acs.setBinding(SAMLConstants.SAML2_POST_BINDING_URI);
         acs.setLocation(config.getAssertionConsumerServiceURL());
@@ -635,11 +642,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                     throw SAMLExceptionCode.UNMARSHALLING_ERROR.create("Not a valid BaseID or NameID: " + subjectID);
                 }
             } catch (ClassCastException e) {
-                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(subjectID);
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(e, subjectID);
             } catch (XMLParserException e) {
-                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(subjectID);
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(e, subjectID);
             } catch (UnmarshallingException e) {
-                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(subjectID);
+                throw SAMLExceptionCode.UNMARSHALLING_ERROR.create(e, subjectID);
             }
         }
 
@@ -759,7 +766,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             }
 
             Collection<String> sessionIds = sessiondService.removeSessionsGlobally(SessionFilter.create(filterString));
-            LOG.debug("Removed {} sessions for {} indexes", sessionIds.size(), numIndexes);
+            LOG.debug("Removed {} sessions for {} indexes", I(sessionIds.size()), I(numIndexes));
             removedAnySession = sessionIds.size() > 0;
         } else {
             int contextId = logoutInfo.getContextId();
@@ -767,7 +774,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             if (contextId > 0 && userId > 0) {
                 sessiondService.removeUserSessionsGlobally(userId, contextId);
                 removedAnySession = true;
-                LOG.debug("Removed sessions globally for user {} in context {}", userId, contextId);
+                LOG.debug("Removed sessions globally for user {} in context {}", I(userId), I(contextId));
             } else {
                 LOG.warn("LogoutRequest contained no session indexes but no valid user and context were determined. Cannot invalidate any session...");
             }
@@ -1006,9 +1013,8 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             if (binding == Binding.HTTP_REDIRECT) {
                 // bytes are deflated in redirect binding
                 return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes), new Inflater(true)));
-            } else {
-                return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
             }
+            return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
         } catch (XMLParserException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
         }
@@ -1058,9 +1064,8 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             if (binding == Binding.HTTP_REDIRECT) {
                 // bytes are deflated in redirect binding
                 return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes), new Inflater(true)));
-            } else {
-                return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
             }
+            return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
         } catch (XMLParserException e) {
             throw SAMLExceptionCode.DECODING_ERROR.create(e, e.getMessage());
         }

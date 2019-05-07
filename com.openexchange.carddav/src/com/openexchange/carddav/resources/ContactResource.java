@@ -50,6 +50,8 @@
 package com.openexchange.carddav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -159,7 +161,7 @@ public class ContactResource extends CommonResource<Contact> {
                 return Long.valueOf(vCardResource.getVCard().getLength());
             }
         }
-        return 0L;
+        return L(0L);
     }
 
     @Override
@@ -360,6 +362,9 @@ public class ContactResource extends CommonResource<Contact> {
              * import vCard as new contact
              */
             vCardImport = vCardService.importVCard(inputStream, null, parameters);
+            if (null == vCardImport || null == vCardImport.getContact()) {
+                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
         } else {
             /*
              * import vCard and merge with existing contact, ensuring that some important properties don't change
@@ -379,16 +384,16 @@ public class ContactResource extends CommonResource<Contact> {
                 contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
                 contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
                 vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
+                if (null == vCardImport || null == vCardImport.getContact()) {
+                    throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
                 vCardImport.getContact().setUid(uid);
-                vCardImport.getContact().setParentFolderID(parentFolderID);;
-                vCardImport.getContact().setContextId(contextID);;
+                vCardImport.getContact().setParentFolderID(parentFolderID);
+                vCardImport.getContact().setContextId(contextID);
                 vCardImport.getContact().setLastModified(lastModified);
                 vCardImport.getContact().setObjectID(objectID);
                 vCardImport.getContact().setVCardId(vCardID);
             }
-        }
-        if (null == vCardImport || null == vCardImport.getContact()) {
-            throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
@@ -564,7 +569,7 @@ public class ContactResource extends CommonResource<Contact> {
                     LOG.debug("{}: saved vCard in '{}'.", getUrl(), vCardID);
                     return vCardID;
                 } catch (OXException | IOException e) {
-                    LOG.warn("Error storing vCard in context {}.", contextID, e);
+                    LOG.warn("Error storing vCard in context {}.", I(contextID), e);
                 }
             }
         }
@@ -585,7 +590,7 @@ public class ContactResource extends CommonResource<Contact> {
                 try {
                     return vCardStorage.getVCard(vCardID, contextID);
                 } catch (OXException e) {
-                    LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, contextID, e);
+                    LOG.warn("Error retrieving vCard with id {} in context {} from storage.", vCardID, I(contextID), e);
                 }
             }
         }
@@ -607,9 +612,9 @@ public class ContactResource extends CommonResource<Contact> {
                     return vCardStorage.deleteVCard(vCardID, contextID);
                 } catch (OXException e) {
                     if ("FLS-0017".equals(e.getErrorCode())) {
-                        LOG.debug("vCard file with id {} in context {} no longer found in storage.", vCardID, contextID, e);
+                        LOG.debug("vCard file with id {} in context {} no longer found in storage.", vCardID, I(contextID), e);
                     } else {
-                        LOG.warn("Error while deleting vCard with id {} in context {} from storage.", vCardID, contextID, e);
+                        LOG.warn("Error while deleting vCard with id {} in context {} from storage.", vCardID, I(contextID), e);
                     }
                 }
             }

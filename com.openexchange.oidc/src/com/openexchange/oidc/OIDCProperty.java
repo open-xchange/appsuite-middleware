@@ -61,11 +61,11 @@ public enum OIDCProperty implements Property {
     /**
      * enabled - Switch to enable disable the core OpenID feature.
      */
-    enabled(OIDCProperty.PREFIX, false),
+    enabled(OIDCProperty.PREFIX, Boolean.FALSE),
     /**
      * startDefaultBackend - Start the default core OpenID backend.
      */
-    startDefaultBackend(OIDCProperty.PREFIX, false);
+    startDefaultBackend(OIDCProperty.PREFIX, Boolean.FALSE);
 
 
     public static final String EMPTY = "";

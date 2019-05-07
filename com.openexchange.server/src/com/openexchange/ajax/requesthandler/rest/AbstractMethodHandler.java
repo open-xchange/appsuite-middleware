@@ -49,13 +49,13 @@
 
 package com.openexchange.ajax.requesthandler.rest;
 
+import static com.openexchange.ajax.requesthandler.rest.AbstractRestServlet.splitPath;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractMethodHandler} - The abstract method handler responsible for modifying <code>AJAXRequestData</code> instance.
@@ -71,6 +71,25 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         super();
     }
 
+    private static final String ATTR_ACTION = "__ajax.rest.action";
+
+    /**
+     * Gets the action identifier dependent n given extra path information.
+     *
+     * @param restPathElements The extra path information or <code>null</code>
+     * @param restRequest The REST request
+     * @return The action identifier
+     */
+    @Override
+    public String getAction(String[] restPathElements, HttpServletRequest restRequest) {
+        String action = (String) restRequest.getAttribute(ATTR_ACTION);
+        if (action == null) {
+            action = doGetAction(restPathElements, restRequest);
+            restRequest.setAttribute(ATTR_ACTION, action);
+        }
+        return action;
+    }
+
     @Override
     public AJAXRequestData modifyRequest(AJAXRequestData requestData, HttpServletRequest restRequest) throws IOException, OXException {
         // Set the module
@@ -82,20 +101,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         requestData.putParameter(AJAXServlet.PARAM_PLAIN_JSON, "true"); // Avoid JavaScript call-backs
 
         // Split path
-        String[] pathElements;
-        {
-            String pathInfo = restRequest.getPathInfo();
-            if (Strings.isEmpty(pathInfo)) {
-                // No extra path information available
-                pathElements = null;
-            } else {
-                if (pathInfo.charAt(0) == '/') {
-                    // Drop starting slash character
-                    pathInfo = pathInfo.substring(1);
-                }
-                pathElements = Strings.splitBy(pathInfo, '/', false);
-            }
-        }
+        String[] pathElements = splitPath(restRequest);
 
         // Invoke...
         modifyByPathInfo(requestData, pathElements, restRequest);
@@ -111,13 +117,6 @@ public abstract class AbstractMethodHandler implements MethodHandler {
     }
 
     /**
-     * Gets the module identifier.
-     *
-     * @return The module identifier
-     */
-    protected abstract String getModule();
-
-    /**
      * Modifies given AJAX request data by specified REST path info, which is the extra path information following the servlet path but
      * preceding the query string (without starting <code>"/"</code> character).
      *
@@ -127,6 +126,15 @@ public abstract class AbstractMethodHandler implements MethodHandler {
      * @param restRequest The REST request
      */
     protected abstract void modifyByPathInfo(AJAXRequestData requestData, String[] restPathElements, HttpServletRequest restRequest) throws IOException, OXException;
+
+    /**
+     * Gets the action identifier dependent n given extra path information.
+     *
+     * @param restPathElements The extra path information or <code>null</code>
+     * @param restRequest The REST request
+     * @return The action identifier
+     */
+    protected abstract String doGetAction(String[] restPathElements, HttpServletRequest restRequest);
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 

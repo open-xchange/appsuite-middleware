@@ -74,7 +74,7 @@ public class NamespaceFolder extends IMAPFolder {
      * @param separator The folder's separator
      */
     public NamespaceFolder(final IMAPStore store, final String name, final char separator) {
-        super(name, separator, store, true);
+        super(name, separator, store, Boolean.TRUE);
         exists = true; // of course
         type = HOLDS_FOLDERS; // obviously
         this.separator = separator;
@@ -94,6 +94,8 @@ public class NamespaceFolder extends IMAPFolder {
 
     @Override
     public Folder[] list(final String pattern) throws MessagingException {
+        String fullName = this.fullName;
+        char separator = getSeparator();
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
             @Override
@@ -113,6 +115,8 @@ public class NamespaceFolder extends IMAPFolder {
 
     @Override
     public Folder[] listSubscribed(final String pattern) throws MessagingException {
+        String fullName = this.fullName;
+        char separator = getSeparator();
         final ListInfo[] li = (ListInfo[]) doCommand(new ProtocolCommand() {
 
             @Override

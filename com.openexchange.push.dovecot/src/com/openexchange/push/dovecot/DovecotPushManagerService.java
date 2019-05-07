@@ -316,7 +316,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 entry.getValue().unregister(false);
             } catch (Exception e) {
                 SimpleKey key = entry.getKey();
-                LOGGER.warn("Failed to stop listener for user {} in context {}", key.userId, key.contextId);
+                LOGGER.warn("Failed to stop listener for user {} in context {}", I(key.userId), I(key.contextId));
             }
         }
         listeners.clear();

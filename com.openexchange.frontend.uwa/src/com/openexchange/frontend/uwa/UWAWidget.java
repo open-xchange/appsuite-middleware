@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.modules.model.AbstractModel;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Metadata;
@@ -65,11 +66,18 @@ import com.openexchange.modules.model.Metadata;
  */
 public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
 
+    private static final long serialVersionUID = -2197679662094962986L;
+
     private String adj;
-
     private boolean autorefresh, standalone, visible, prot;
-
     private String title, url, parameters, id;
+
+    /**
+     * Initializes a new {@link UWAWidget}.
+     */
+    public UWAWidget() {
+        super();
+    }
 
     public void setADJ(String adj) {
         this.adj = adj;
@@ -159,9 +167,9 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         PROTECTED(Boolean.class),
         PARAMETERS(String.class);
 
-        private final Class type;
+        private final Class<?> type;
 
-        Field(Class type) {
+        Field(Class<?> type) {
             this.type = type;
         }
 
@@ -169,13 +177,13 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         public Object get(UWAWidget thing) {
             switch(this) {
             case ADJ: return thing.getADJ();
-            case AUTOREFRESH: return thing.isAutorefresh();
+            case AUTOREFRESH: return Autoboxing.valueOf(thing.isAutorefresh());
             case ID: return thing.getId();
-            case STANDALONE: return thing.isStandalone();
+            case STANDALONE: return Autoboxing.valueOf(thing.isStandalone());
             case TITLE: return thing.getTitle();
-            case VISIBLE: return thing.isVisible();
+            case VISIBLE: return Autoboxing.valueOf(thing.isVisible());
             case URL: return thing.getURL();
-            case PROTECTED: return thing.isProtected();
+            case PROTECTED: return Autoboxing.valueOf(thing.isProtected());
             case PARAMETERS: return thing.getParameters();
             }
             return null;
@@ -215,7 +223,7 @@ public class UWAWidget extends AbstractModel<UWAWidget> implements Serializable{
         }
 
         @Override
-        public Class getType() {
+        public Class<?> getType() {
             return type;
         }
     }

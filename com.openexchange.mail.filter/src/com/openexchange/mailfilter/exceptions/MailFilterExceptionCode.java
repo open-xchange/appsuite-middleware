@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.exceptions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
@@ -358,7 +359,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
         }
 
         if (e.isAuthTimeoutError()) {
-            return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), e.getSieveHostPort(), saneMessage(e.getMessage()));
+            return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), I(e.getSieveHostPort()), saneMessage(e.getMessage()));
         }
 
         return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());

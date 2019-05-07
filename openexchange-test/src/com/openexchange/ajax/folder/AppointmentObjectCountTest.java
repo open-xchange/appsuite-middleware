@@ -71,6 +71,7 @@ import com.openexchange.test.FolderTestManager;
  */
 public class AppointmentObjectCountTest extends AbstractObjectCountTest {
 
+    @SuppressWarnings("hiding")
     private FolderTestManager ftm;
 
     private CalendarTestManager ctm1;

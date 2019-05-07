@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.actions;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,7 +111,7 @@ public class ShareWriter {
 
     public static void writeAnonymousRecipient(AnonymousRecipient recipient, JSONObject jRecipient) throws JSONException {
         jRecipient.put("password", recipient.getPassword());
-        jRecipient.put("expiry_date", recipient.getExpiryDate() == null ? null : recipient.getExpiryDate().getTime());
+        jRecipient.put("expiry_date", recipient.getExpiryDate() == null ? null : L(recipient.getExpiryDate().getTime()));
     }
 
     public static void writeInternalRecipient(InternalRecipient recipient, JSONObject jRecipient) throws JSONException {

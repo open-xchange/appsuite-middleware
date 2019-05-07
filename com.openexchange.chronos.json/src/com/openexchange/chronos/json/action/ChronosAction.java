@@ -511,7 +511,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
     private void incrementGroupUseCount(Session session, PrincipalUseCountService principalUseCountService, String[] groups) {
         for (String group : groups) {
             try {
-                principalUseCountService.increment(session, Integer.valueOf(group));
+                principalUseCountService.increment(session, Integer.parseInt(group));
             } catch (NumberFormatException e) {
                 LOG.warn("Unable to parse group id: {}", e.getMessage());
                 continue;

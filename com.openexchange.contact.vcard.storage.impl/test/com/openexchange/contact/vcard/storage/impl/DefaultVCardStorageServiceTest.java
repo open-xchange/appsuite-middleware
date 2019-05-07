@@ -139,7 +139,7 @@ public class DefaultVCardStorageServiceTest {
 
     @Test
     public void testDeleteVCard_fileStorageReturnsFalse_returnFalse() throws OXException {
-        Mockito.doReturn(false).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
+        Mockito.doReturn(Boolean.FALSE).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
 
         boolean deleteVCard = service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
         assertFalse(deleteVCard);
@@ -147,7 +147,7 @@ public class DefaultVCardStorageServiceTest {
 
     @Test
     public void testDeleteVCard_fileStorageReturnsTrue_returnTrue() throws OXException {
-        Mockito.doReturn(true).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
+        Mockito.doReturn(Boolean.TRUE).when(quotaFileStorage).deleteFile(ArgumentMatchers.anyString());
 
         boolean deleteVCard = service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
         assertTrue(deleteVCard);

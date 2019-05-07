@@ -66,10 +66,12 @@ import org.dmfs.rfc5545.Duration;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -331,7 +333,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             if (false == changeExceptionDates.equals(originalMasterEvent.getChangeExceptionDates())) {
                 eventUpdate.setChangeExceptionDates(changeExceptionDates);
             }
-            eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+            if (CalendarUtils.isInternal(originalMasterEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+                eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+            }
             Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());

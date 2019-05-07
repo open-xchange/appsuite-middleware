@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.infostore.apiclient;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -82,7 +84,6 @@ import com.openexchange.testing.httpclient.modules.ConfigApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.InfostoreApi;
 import com.openexchange.tools.io.IOTools;
-import net.fortuna.ical4j.model.Date;
 
 /**
  *
@@ -127,11 +128,11 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     @After
     public void tearDown() throws Exception {
         if(!fileIds.isEmpty()) {
-            infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp, fileIds, true, null);
+            infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp, fileIds, Boolean.TRUE, null);
         }
         if (!folders.isEmpty()) {
             FoldersApi folderApi = new FoldersApi(getApiClient());
-            folderApi.deleteFolders(getApiClient().getSession(), folders, "1", new Date().getTime(), null, true, true, false, null);
+            folderApi.deleteFolders(getApiClient().getSession(), folders, "1", L(new Date().getTime()), null, Boolean.TRUE, Boolean.TRUE, Boolean.FALSE, null);
         }
         super.tearDown();
     }
@@ -152,7 +153,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
         String name = filename==null ? file.getName() : filename;
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, filesize, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset, null);
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
         Assert.assertNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         Assert.assertNotNull(uploadInfoItem.getData());
         timestamp = uploadInfoItem.getTimestamp();
@@ -171,7 +172,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
     protected InfoItemUpdateResponse uploadInfoItemWithError(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize, String filename) throws ApiException {
         String name = filename == null ? file.getName() : filename;
-        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, filesize, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, false, false, offset, null);
+        InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(), folderId, name, bytes, timestamp, id, name, mimeType, null, null, null, null, versionComment, null, null, filesize == null ? Long.valueOf(bytes.length) : filesize, Boolean.FALSE, Boolean.FALSE, offset, null);
         Assert.assertNotNull(uploadInfoItem.getErrorDesc(), uploadInfoItem.getError());
         timestamp = uploadInfoItem.getTimestamp();
         return uploadInfoItem;
@@ -203,16 +204,16 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         folder.setModule(Module.INFOSTORE.getName());
         folder.setSummary(title);
         folder.setTitle(folder.getSummary());
-        folder.setSubscribed(true);
+        folder.setSubscribed(Boolean.TRUE);
         folder.setPermissions(null);
         body.setFolder(folder);
         FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getApiClient().getSession(), body, "1", null, null);
         return checkResponse(folderUpdateResponse);
     }
 
-    protected void deleteFolder(String folderId, boolean hardDelete) throws ApiException {
+    protected void deleteFolder(String folderId, Boolean hardDelete) throws ApiException {
         FoldersApi folderApi = new FoldersApi(getApiClient());
-        FoldersCleanUpResponse deleteFolderResponse = folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, hardDelete, true, false, null);
+        FoldersCleanUpResponse deleteFolderResponse = folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, hardDelete, Boolean.TRUE, Boolean.FALSE, null);
         Assert.assertNull(deleteFolderResponse.getErrorDesc(), deleteFolderResponse.getError());
         Assert.assertNotNull(deleteFolderResponse.getData());
         Assert.assertEquals(0, deleteFolderResponse.getData().size());
@@ -245,8 +246,8 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
         return resp.getData();
     }
 
-    protected void deleteInfoItems(List<InfoItemListElement> toDelete, boolean hardDelete) throws ApiException {
-        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp == null ? System.currentTimeMillis() : timestamp, toDelete, hardDelete, null);
+    protected void deleteInfoItems(List<InfoItemListElement> toDelete, Boolean hardDelete) throws ApiException {
+        InfoItemsResponse deleteInfoItems = infostoreApi.deleteInfoItems(getApiClient().getSession(), timestamp == null ? L(System.currentTimeMillis()) : timestamp, toDelete, hardDelete, null);
         Assert.assertNull(deleteInfoItems.getError());
         Assert.assertNotNull(deleteInfoItems.getData());
         timestamp = deleteInfoItems.getTimestamp();

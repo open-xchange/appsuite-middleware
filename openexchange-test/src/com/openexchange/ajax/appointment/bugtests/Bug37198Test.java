@@ -68,6 +68,7 @@ public class Bug37198Test extends AbstractAJAXSession {
     private Appointment app;
     private TimeZone utc;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -86,7 +87,7 @@ public class Bug37198Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug37198() throws Exception {
+    public void testBug37198() {
         catm.insert(app);
 
         Appointment update = new Appointment();

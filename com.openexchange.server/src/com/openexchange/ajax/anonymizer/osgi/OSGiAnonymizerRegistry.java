@@ -78,6 +78,7 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
         anonymizers = new ConcurrentHashMap<Module, AnonymizerChain<?>>(8, 0.9f, 1);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public AnonymizerService<?> addingService(ServiceReference<AnonymizerService<?>> reference) {
         AnonymizerService<Object> service = (AnonymizerService<Object>) context.getService(reference);
@@ -99,6 +100,7 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void removedService(ServiceReference<AnonymizerService<?>> reference, AnonymizerService<?> service) {
         AnonymizerChain<Object> chain = (AnonymizerChain<Object>) anonymizers.get(service.getModule());
@@ -113,6 +115,7 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
         return getAnonymizerFor(Module.moduleFor(name));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <E> AnonymizerService<E> getAnonymizerFor(Module module) throws OXException {
         return (null == module ? null : (AnonymizerService<E>) anonymizers.get(module));
@@ -139,7 +142,7 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
                 } else {
                     try {
                         ranking = Integer.parseInt(oRanking.toString().trim());
-                    } catch (NumberFormatException e) {
+                    } catch (@SuppressWarnings("unused") NumberFormatException e) {
                         ranking = defaultRanking;
                     }
                 }

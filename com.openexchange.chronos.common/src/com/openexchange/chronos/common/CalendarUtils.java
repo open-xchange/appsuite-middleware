@@ -68,6 +68,7 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -328,6 +329,8 @@ public class CalendarUtils {
     /**
      * Gets a value indicating whether one calendar user equals another, by comparing all properties of the calendar users, after the
      * identifying properties (<i>entity</i> and <i>uri</i>) do match based on {@link #matches(CalendarUser, CalendarUser)}.
+     * <p/>
+     * A possibly set calendar user in <i>sent-by</i> is ignored implicitly.
      *
      * @param user1 The first calendar user to check
      * @param user2 The second calendar user to check
@@ -355,13 +358,6 @@ public class CalendarUtils {
                 return false;
             }
         } else if (!user1.getEMail().equals(user2.getEMail())) {
-            return false;
-        }
-        if (user1.getSentBy() == null) {
-            if (user2.getSentBy() != null) {
-                return false;
-            }
-        } else if (!user1.getSentBy().equals(user2.getSentBy())) {
             return false;
         }
         return true;
@@ -692,10 +688,23 @@ public class CalendarUtils {
      * the properties {@link EventField#ID} and {@link EventField#SERIES_ID}.
      *
      * @param event The event to check
-     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
+     * @return <code>true</code> if the event is an exceptional event of a recurring series, <code>false</code>, otherwise
      */
     public static boolean isSeriesException(Event event) {
-        return null != event && null != event.getSeriesId() && false == event.getSeriesId().equals(event.getId());
+        return isSeriesEvent(event) && false == event.getSeriesId().equals(event.getId());
+    }
+    
+    /**
+     * Gets a value indicating whether the supplied event is an element of a recurring series or not, based on 
+     * the property {@link EventField#SERIES_ID}. 
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event is part of an recurring series, <code>false</code> otherwise
+     * @see #isSeriesMaster(Event) 
+     * @see #isSeriesException(Event)
+     */
+    public static boolean isSeriesEvent(Event event) {
+        return null != event && null != event.getSeriesId();
     }
 
     /**
@@ -1824,6 +1833,32 @@ public class CalendarUtils {
         return matchingProperties;
     }
 
+    /**
+     * Removes all extended properties with a specific name. Wildcards are supported in the name, e.g. <code>X-MOZ-SNOOZE-TIME*</code>.
+     *
+     * @param extendedProperties The extended properties
+     * @param name The property name to match
+     * @return <code>true</code> if the properties were changed as a result of the call, <code>false</code>, otherwise
+     */
+    public static boolean removeExtendedProperties(ExtendedProperties extendedProperties, String name) {
+        if (null == extendedProperties || extendedProperties.isEmpty()) {
+            return false;
+        }
+        if (-1 == name.indexOf('*') && -1 == name.indexOf('?')) {
+            return extendedProperties.removeAll(name);
+        }
+        boolean removed = false;
+        Pattern pattern = Pattern.compile(Strings.wildcardToRegex(name));
+        for (Iterator<ExtendedProperty> iterator = extendedProperties.iterator(); iterator.hasNext();) {
+            ExtendedProperty property = iterator.next();
+            if (null != property.getName() && pattern.matcher(property.getName()).matches()) {
+                iterator.remove();
+                removed = true;
+            }
+        }
+        return removed;
+    }
+
     protected static ExtendedProperty optExtendedProperty(ExtendedProperties extendedProperties, String name) {
         return null != extendedProperties ? extendedProperties.get(name) : null;
     }
@@ -1905,7 +1940,7 @@ public class CalendarUtils {
      * @param updatedAttendees The updated attendees
      * @return The collection update
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) {
         return getAttendeeUpdates(originalAttendees, updatedAttendees, true, (AttendeeField[]) null);
     }
 
@@ -1919,7 +1954,7 @@ public class CalendarUtils {
      * @return The collection update
      * @throws OXException In case mapping fails
      */
-    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) throws OXException {
+    public static AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees, boolean considerUnset, AttendeeField... ignoredFields) {
         return new AbstractCollectionUpdate<Attendee, AttendeeField>(AttendeeMapper.getInstance(), originalAttendees, updatedAttendees, considerUnset, ignoredFields) {
 
             @Override
@@ -1940,7 +1975,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, EventField... fieldsToMatch) {
         return getEventUpdates(originalEvents, updatedEvents, true, (EventField[]) null, fieldsToMatch);
     }
 
@@ -1957,7 +1992,7 @@ public class CalendarUtils {
      * @return The event updates
      * @see EventMapper#equalsByFields(Event, Event, EventField...)
      */
-    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) throws OXException {
+    public static EventUpdates getEventUpdates(List<Event> originalEvents, List<Event> updatedEvents, boolean considerUnset, EventField[] ignoredFields, final EventField... fieldsToMatch) {
         return new AbstractEventUpdates(originalEvents, updatedEvents, considerUnset, ignoredFields) {
 
             @Override
@@ -2254,32 +2289,32 @@ public class CalendarUtils {
         if (isAttendeeSchedulingResource(event, calendarUser)) {
             flags.add(calendarUser == user ? EventFlag.ATTENDEE : EventFlag.ATTENDEE_ON_BEHALF);
         }
-        if (Classification.CONFIDENTIAL.equals(event.getClassification())) {
+        if (Classification.CONFIDENTIAL.matches(event.getClassification())) {
             flags.add(EventFlag.CONFIDENTIAL);
-        } else if (Classification.PRIVATE.equals(event.getClassification())) {
+        } else if (Classification.PRIVATE.matches(event.getClassification())) {
             flags.add(EventFlag.PRIVATE);
         }
         if (false == isOpaqueTransparency(event)) {
             flags.add(EventFlag.TRANSPARENT);
         }
-        if (EventStatus.CONFIRMED.equals(event.getStatus())) {
+        if (EventStatus.CONFIRMED.matches(event.getStatus())) {
             flags.add(EventFlag.EVENT_CONFIRMED);
-        } else if (EventStatus.CANCELLED.equals(event.getStatus())) {
+        } else if (EventStatus.CANCELLED.matches(event.getStatus())) {
             flags.add(EventFlag.EVENT_CANCELLED);
-        } else if (EventStatus.TENTATIVE.equals(event.getStatus())) {
+        } else if (EventStatus.TENTATIVE.matches(event.getStatus())) {
             flags.add(EventFlag.EVENT_TENTATIVE);
         }
         Attendee attendee = find(event.getAttendees(), calendarUser);
         if (null != attendee) {
-            if (ParticipationStatus.ACCEPTED.equals(attendee.getPartStat())) {
+            if (ParticipationStatus.ACCEPTED.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.ACCEPTED);
-            } else if (ParticipationStatus.DECLINED.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.DECLINED.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.DECLINED);
-            } else if (ParticipationStatus.DELEGATED.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.DELEGATED.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.DELEGATED);
-            } else if (ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.NEEDS_ACTION.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.NEEDS_ACTION);
-            } else if (ParticipationStatus.TENTATIVE.equals(attendee.getPartStat())) {
+            } else if (ParticipationStatus.TENTATIVE.matches(attendee.getPartStat())) {
                 flags.add(EventFlag.TENTATIVE);
             }
         }

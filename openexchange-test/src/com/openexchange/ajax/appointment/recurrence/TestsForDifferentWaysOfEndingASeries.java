@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.junit.Test;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
@@ -72,7 +73,7 @@ public class TestsForDifferentWaysOfEndingASeries extends ManagedAppointmentTest
     public void testShouldNotSetUntilIfOccurrencesIsUsed() throws Exception {
         Appointment app = generateDailyAppointment();
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_COUNT, 7);
+        changes.put(Appointment.RECURRENCE_COUNT, I(7));
         changes.put(Appointment.RECURRENCE_TYPE, app.get(Appointment.RECURRENCE_TYPE));
         changes.put(Appointment.INTERVAL, app.get(Appointment.INTERVAL));
 

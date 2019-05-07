@@ -104,7 +104,7 @@ public class SchemaCleanupTask extends AbstractTask<Map<Integer, List<GuestClean
             return cleanSchema();
         } catch (OXException e) {
             if ("CTX-0002".equals(e.getErrorCode())) {
-                LOG.debug("Context {} no longer found, cancelling cleanup.", representativeContextId, e);
+                LOG.debug("Context {} no longer found, cancelling cleanup.", I(representativeContextId), e);
                 return Collections.emptyMap();
             }
             throw e;

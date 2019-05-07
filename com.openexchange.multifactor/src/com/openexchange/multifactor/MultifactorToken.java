@@ -113,8 +113,8 @@ public class MultifactorToken<T> {
      */
     public boolean isExpired() {
        return endOfLife.map(
-           eol -> Instant.now().isAfter(eol)
-       ).orElse(false);
+           eol -> Instant.now().isAfter(eol) ? Boolean.TRUE : Boolean.FALSE
+       ).orElse(Boolean.FALSE).booleanValue();
     }
 
     /**

@@ -63,7 +63,8 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
-import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link DefaultEventUpdate}
@@ -175,7 +176,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
          *
          * @return The new event update instance
          */
-        public EventUpdate build() throws OXException {
+        public EventUpdate build() {
             return new DefaultEventUpdate(originalEvent, updatedEvent, ignoredEventFields, ignoredAttendeeFields, considerUnset, ignoreDefaults);
         }
     }
@@ -192,7 +193,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      * @param ignoredFields Fields to ignore when determining the differences
      */
-    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
+    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) {
         this(originalEvent, updatedEvent, ignoredFields, null, considerUnset, false);
     }
 
@@ -205,7 +206,7 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param ignoredAttendeeFields The {@link AttendeeField}s to ignore when determining the differences
      * @param ignoredFields Fields to ignore when determining the differences
      */
-    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, Set<AttendeeField> ignoredAttendeeFields, EventField... ignoredFields) throws OXException {
+    public DefaultEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, Set<AttendeeField> ignoredAttendeeFields, EventField... ignoredFields) {
         this(originalEvent, updatedEvent, ignoredFields, null != ignoredAttendeeFields ? ignoredAttendeeFields.toArray(new AttendeeField[ignoredAttendeeFields.size()]) : null, considerUnset, false);
     }
 
@@ -219,15 +220,49 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
      * @param ignoreDefaults <code>true</code> to also consider default values of enumerated properties for not <i>set</i> fields of the update, <code>false</code>, otherwise
      * @param considerUnset <code>true</code> to also consider comparison with not <i>set</i> fields of the original, <code>false</code>, otherwise
      */
-    protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) throws OXException {
-        super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults, ignoredEventFields));
-        alarmUpdates = AlarmUtils.getAlarmUpdates(
-            null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
-        attendeeUpdates = CalendarUtils.getAttendeeUpdates(
-            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, considerUnset, ignoredAttendeeFields);
-        attachmentUpdates = CalendarUtils.getAttachmentUpdates(
-            null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
+    protected DefaultEventUpdate(Event originalEvent, Event updatedEvent, EventField[] ignoredEventFields, AttendeeField[] ignoredAttendeeFields, boolean considerUnset, boolean ignoreDefaults) {
+        super(originalEvent, updatedEvent, getDifferentFields(EventMapper.getInstance(), originalEvent, updatedEvent, considerUnset, ignoreDefaults, 
+            extendIgnoredFields(ignoredEventFields, EventField.ALARMS, EventField.ATTACHMENTS, EventField.ATTENDEES)));
+        if (considerCollectionUpdate(EventField.ALARMS, originalEvent, updatedEvent, ignoredEventFields, considerUnset)) {
+            alarmUpdates = AlarmUtils.getAlarmUpdates(
+                null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
+        } else {
+            alarmUpdates = AbstractCollectionUpdate.emptyUpdate();
+        }
+        if (considerCollectionUpdate(EventField.ATTENDEES, originalEvent, updatedEvent, ignoredEventFields, considerUnset)) {
+            attendeeUpdates = CalendarUtils.getAttendeeUpdates(
+                null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, considerUnset, ignoredAttendeeFields);
+        } else {
+            attendeeUpdates = AbstractCollectionUpdate.emptyUpdate();
+        }
+        if (considerCollectionUpdate(EventField.ATTACHMENTS, originalEvent, updatedEvent, ignoredEventFields, considerUnset)) {
+            attachmentUpdates = CalendarUtils.getAttachmentUpdates(
+                null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
+        } else {
+            attachmentUpdates = AbstractCollectionUpdate.emptyUpdate();
+        }
     }
+    
+    private static EventField[] extendIgnoredFields(EventField[] ignoredFields, EventField...additionals) {
+        if (null == ignoredFields) {
+            return additionals;
+        }
+        if (null == additionals || 0 == additionals.length) {
+            return ignoredFields;
+        }
+        return Arrays.add(ignoredFields, additionals);
+    }
+    
+    private static boolean considerCollectionUpdate(EventField field, Event original, Event update, EventField[] ignoredFields, boolean considerUnset) {
+        if (null == ignoredFields || false == Arrays.contains(ignoredFields, field)) {
+            Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(field);
+            if (null != mapping && null != update && mapping.isSet(update) && 
+                (considerUnset || null != original && mapping.isSet(original))) {
+                return true;
+            }
+        }
+        return false;
+    }   
 
     @Override
     public CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates() {

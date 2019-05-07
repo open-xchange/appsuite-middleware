@@ -70,6 +70,7 @@ import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.user.AbstractUserServiceInterceptor;
+import com.openexchange.user.UserServiceInterceptor;
 
 /**
  * {@link UserFolderNameInterceptor} - Ensures unique folder name under {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID}
@@ -95,13 +96,19 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
 
     @Override
     public void afterCreate(Context context, User user, Contact contactData) throws OXException {
-        handle(context, user, contactData);
+        handle(context, user, contactData, UserServiceInterceptor.EMPTY_PROPS);
         super.afterCreate(context, user, contactData);
     }
 
     @Override
+    public void afterCreate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
+        handle(context, user, contactData, properties);
+        super.afterCreate(context, user, contactData, properties);
+    }
+
+    @Override
     public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        handle(context, user, contactData);
+        handle(context, user, contactData, properties);
         super.afterUpdate(context, user, contactData, properties);
     }
 
@@ -113,7 +120,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
      * @param contactData The {@link Contact} that was created or updated
      * @throws OXException
      */
-    private void handle(Context context, User user, Contact contactData) throws OXException {
+    private void handle(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
         String displayName = null;
         int userId = -1;
 
@@ -145,13 +152,17 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
         /*
          * Acquire connection and update folder name
          */
-        Connection connection = null;
+        Connection connection = getConnection(properties);
         DatabaseService databaseService = serviceLookup.getServiceSafe(DatabaseService.class);
         Context loadedContext = serviceLookup.getServiceSafe(ContextService.class).getContext(context.getContextId());
         int rollback = 0;
+        boolean close = false;
         try {
-            connection = databaseService.getWritable(loadedContext);
-            connection.setAutoCommit(false);
+            if (null == connection) {
+                connection = databaseService.getWritable(loadedContext);
+                connection.setAutoCommit(false);
+                close = true;
+            }
             rollback = 1;
             propagateDisplayNameModification(loadedContext, userId, displayName, connection);
             rollback = 2;
@@ -165,7 +176,7 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
                 Databases.autocommit(connection);
             }
 
-            if (null != connection) {
+            if (close) {
                 databaseService.backWritable(context, connection);
             }
         }
@@ -249,6 +260,22 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
         if (null != result) {
             throw OXFolderExceptionCode.INVALID_DATA.create(result);
         }
+    }
+
+    /**
+     * Does a lookup if the caller provided a connection
+     *
+     * @param properties A map with properties
+     * @return The {@link Connection} or <code>null</code> if not provided
+     */
+    private Connection getConnection(Map<String, Object> properties) {
+        if (null != properties && false == properties.isEmpty() && properties.containsKey(UserServiceInterceptor.PROP_CONNECTION)) {
+            Object object = properties.get(UserServiceInterceptor.PROP_CONNECTION);
+            if (object instanceof Connection) {
+                return (Connection) object;
+            }
+        }
+        return null;
     }
 
 }

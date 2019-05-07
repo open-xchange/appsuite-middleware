@@ -188,7 +188,7 @@ public class CircuitBreakerCommandListener implements CommandListener {
             // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
             try {
                 circuitBreaker.invoke(new FailingCallable(byeException));
-            } catch (Exception e) {
+            } catch (@SuppressWarnings("unused") Exception e) {
                 // Ignore...
             }
         } else {

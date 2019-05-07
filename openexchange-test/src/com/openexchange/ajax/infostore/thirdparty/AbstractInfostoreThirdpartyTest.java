@@ -67,7 +67,7 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AbstractInfostoreThirdpartyTest}.
-     * 
+     *
      * @param name
      */
     public AbstractInfostoreThirdpartyTest() {
@@ -103,7 +103,7 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
             }
         }
 
-        if (providerIds == null || providerIds.isEmpty()) {
+        if (providerIds.isEmpty()) {
             throw new Exception("Could not find file storage for provider: ");
         }
 

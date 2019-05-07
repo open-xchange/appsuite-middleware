@@ -88,13 +88,13 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
     private final BundleContext bundleContext;
     private MBeanServer server;
 
-    private VersionService versionService;
+    private final VersionService versionService;
 
     /**
      * Initializes a new {@link GeneralControl}.
      *
      * @param bundleContext The associated bundle context
-     * @param versionService 
+     * @param versionService
      * @throws NotCompliantMBeanException
      */
     public GeneralControl(final BundleContext bundleContext, VersionService versionService) throws NotCompliantMBeanException {
@@ -310,7 +310,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
         LOG.info("control command: services");
         final List<Map<String, Object>> serviceList = new ArrayList<Map<String, Object>>();
 
-        ServiceReference[] services;
+        ServiceReference<?>[] services;
         try {
             /*
              * Null parameters to get all services from BundleContext.getServiceReferences(String clazz, String filter);
@@ -324,7 +324,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
                     for (int j = 0; j < size; j++) {
                         final Map<String, Object> hashMap = new HashMap<String, Object>();
 
-                        final ServiceReference service = services[j];
+                        final ServiceReference<?> service = services[j];
 
                         hashMap.put("service", service.toString());
                         hashMap.put("registered_by", service.getBundle().toString());
@@ -437,7 +437,7 @@ public class GeneralControl extends StandardMBean implements GeneralControlMBean
     }
 
     protected static void freshPackages(final BundleContext bundleContext) {
-        final ServiceReference serviceReference = bundleContext.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
+        final ServiceReference<?> serviceReference = bundleContext.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
         final PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
         packageAdmin.refreshPackages(null);
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.share.servlet.osgi;
 
+import java.nio.charset.StandardCharsets;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
@@ -110,7 +111,7 @@ public class ShareServletActivator extends HousekeepingActivator {
             registerService(Reloadable.class, registerer);
         }
         {
-            byte[] hashSalt = getService(ConfigurationService.class).getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+            byte[] hashSalt = getService(ConfigurationService.class).getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes(StandardCharsets.ISO_8859_1);
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
             PasswordResetServletRegisterer registerer = new PasswordResetServletRegisterer(context, hashSalt);
             track(filter, registerer);

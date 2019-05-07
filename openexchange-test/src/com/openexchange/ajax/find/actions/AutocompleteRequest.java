@@ -202,7 +202,7 @@ public class AutocompleteRequest extends AbstractFindRequest<AutocompleteRespons
                 }
                 facet = builder.build();
             }
-
+            assertNotNull("Facet should not be null", facet);
             JSONArray jFlags = jFacet.getJSONArray("flags");
             for (int i = 0; i < jFlags.length(); i++) {
                 facet.addFlag(jFlags.getString(i));

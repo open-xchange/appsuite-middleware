@@ -1154,9 +1154,9 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr ""
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr ""
 
 #. You have no access to this calendar.
@@ -6606,10 +6606,8 @@ msgid "Drafts"
 msgstr ""
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
+msgid "Sent"
 msgstr ""
 
 #. The alternative internationalized name for the sent mail folder
@@ -6737,6 +6735,11 @@ msgstr ""
 #. "Dear Sir or Madam Jane Doe"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
+msgstr ""
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
 msgstr ""
 
 #. The name for "Unified Mail" root folder
@@ -9606,6 +9609,10 @@ msgstr ""
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
+msgstr ""
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
 msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62

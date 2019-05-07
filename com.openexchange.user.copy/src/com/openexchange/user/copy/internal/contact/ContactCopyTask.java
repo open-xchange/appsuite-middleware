@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.contact;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
 import static com.openexchange.user.copy.internal.CopyTools.setBinaryOrNull;
@@ -74,6 +75,7 @@ import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -171,15 +173,15 @@ public class ContactCopyTask implements CopyUserTaskService {
         final IntegerMapping mapping = new IntegerMapping();
 
         if (!contacts.isEmpty()) {
-            loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId);
-            exchangeIds(contacts, folderMapping, dstCon, i(dstCtxId), i(srcUsrId), i(dstUsrId));
+            loadAdditionalContentsFromDB(contacts, srcCon, srcCtxId.intValue());
+            exchangeIds(contacts, folderMapping, copyTools.getDestinationContext(), i(srcUsrId), i(dstUsrId));
             writeContactsToDB(contacts, contactFields, dstCon, i(dstCtxId), i(dstUsrId));
             writeAdditionalContentsToDB(contacts, dstCon, i(dstCtxId));
 
             for (Map.Entry<Integer, Contact> entry : contacts.entrySet()) {
                 Integer contactId = entry.getKey();
                 Contact contact = entry.getValue();
-                mapping.addMapping(contactId, contact.getObjectID());
+                mapping.addMapping(contactId, I(contact.getObjectID()));
             }
         }
 
@@ -286,10 +288,10 @@ public class ContactCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final Map<Integer, Contact> contacts, final ObjectMapping<FolderObject> folderMapping, final Connection con, final int cid, final int oldUid, final int newUid) throws OXException {
+    private void exchangeIds(final Map<Integer, Contact> contacts, final ObjectMapping<FolderObject> folderMapping, final Context context, final int oldUid, final int newUid) throws OXException {
         for (Contact contact : contacts.values()) {
             try {
-                final int newContactId = IDGenerator.getId(cid, com.openexchange.groupware.Types.CONTACT, con);
+                final int newContactId = IDGenerator.getId(context, com.openexchange.groupware.Types.CONTACT);
                 contact.setObjectID(newContactId);
 
                 final int oldParentFolder = contact.getParentFolderID();
@@ -318,7 +320,7 @@ public class ContactCopyTask implements CopyUserTaskService {
 
                 contact.setCreatedBy(newUid);
                 contact.setModifiedBy(newUid);
-                contact.setContextId(cid);
+                contact.setContextId(context.getContextId());
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
@@ -334,7 +336,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                          * This list entry refers to an existing contact.
                          * If this contact isn't visible to the moved user, the entry becomes an external member.
                          */
-                        final Contact dlistContact = contacts.get(entryId);
+                        final Contact dlistContact = contacts.get(I(entryId));
                         if (dlistContact == null) {
                             entry.setEntryID(-1);
                             entry.setEmailfield(-1);
@@ -406,10 +408,10 @@ public class ContactCopyTask implements CopyUserTaskService {
                 entry.setFirstname(rs.getString(i++));
                 entry.setEmailaddress(rs.getString(i++));
 
-                List<DistributionListEntryObject> list = dlistMap.get(contactId);
+                List<DistributionListEntryObject> list = dlistMap.get(I(contactId));
                 if (list == null) {
                     list = new ArrayList<DistributionListEntryObject>();
-                    dlistMap.put(contactId, list);
+                    dlistMap.put(I(contactId), list);
                 }
 
                 list.add(entry);
@@ -453,7 +455,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                     }
                 }
 
-                contacts.put(contact.getObjectID(), contact);
+                contacts.put(I(contact.getObjectID()), contact);
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

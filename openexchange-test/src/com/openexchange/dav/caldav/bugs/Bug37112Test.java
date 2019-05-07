@@ -75,6 +75,7 @@ public class Bug37112Test extends CalDAVTest {
     private FolderObject publicFolder = null;
     private String publicFolderID = null;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

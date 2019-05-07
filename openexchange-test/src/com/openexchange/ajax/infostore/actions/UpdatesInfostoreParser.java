@@ -66,7 +66,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
  */
 public class UpdatesInfostoreParser extends AbstractAJAXParser<UpdatesInfostoreResponse> {
 
-    public UpdatesInfostoreParser(boolean failOnError, int[] columns) {
+    public UpdatesInfostoreParser(boolean failOnError) {
         super(failOnError);
     }
 

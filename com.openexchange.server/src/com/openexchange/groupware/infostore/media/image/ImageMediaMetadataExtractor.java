@@ -164,6 +164,11 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
         return MimeType2ExtMap.getContentType(fileName, null);
     }
 
+    private boolean fileTypeIndicatesImage(FileType fileType) {
+        String mimeType = fileType == null ? null : fileType.getMimeType();
+        return (mimeType != null && Strings.asciiLowerCase(mimeType).startsWith("image/"));
+    }
+
     @Override
     public boolean isApplicable(DocumentMetadata document) throws OXException {
         return indicatesImage(document);
@@ -188,6 +193,10 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
 
         if (FileType.Unknown == detectedFileType) {
             LOGGER.warn("Failed to estimate effort for extraction of image metadata from document {} with version {}. File type is unknown.", I(document.getId()), I(document.getVersion()));
+            return Effort.NOT_APPLICABLE;
+        }
+
+        if (false == fileTypeIndicatesImage(detectedFileType)) {
             return Effort.NOT_APPLICABLE;
         }
 
@@ -237,6 +246,10 @@ public class ImageMediaMetadataExtractor implements MediaMetadataExtractor {
 
             if (FileType.Unknown == detectedFileType) {
                 LOGGER.warn("Failed to extract image metadata from document {} with version {}. File type is unknown.", I(document.getId()), I(document.getVersion()));
+                return ExtractorResult.NONE;
+            }
+
+            if (false == fileTypeIndicatesImage(detectedFileType)) {
                 return ExtractorResult.NONE;
             }
 

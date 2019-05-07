@@ -52,6 +52,7 @@ package com.openexchange.oauth.impl.internal;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
+import static com.openexchange.java.Autoboxing.I;
 import java.net.ConnectException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -109,7 +110,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccountStorageSQLImpl.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(OAuthAccountStorageSQLImpl.class);
 
     private final DBProvider provider;
     private final IDGeneratorService idGenerator;
@@ -147,7 +149,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
         // Execute INSERT command
         executeUpdate(contextId, insert, values);
-        LOG.info("Created new {} account with ID {} for user {} in context {}", account.getMetaData().getDisplayName(), account.getId(), user, contextId);
+        LOG.info("Created new {} account with ID {} for user {} in context {}", account.getMetaData().getDisplayName(), I(account.getId()), I(user), I(contextId));
         return account.getId();
     }
 
@@ -200,7 +202,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             final Map<String, Object> properties = new HashMap<>(2);
             // Hint to not update the scopes since it's an oauth account deletion
             // This hint has to be passed via the delete listener
-            properties.put(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, false);
+            properties.put(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, Boolean.FALSE);
 
             deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, con);
             stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
@@ -212,7 +214,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
 
             con.commit(); // COMMIT
             rollback = 2;
-            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, userId, contextId);
+            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", I(accountId), I(userId), I(contextId));
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -310,7 +312,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @Override
     public void updateAccount(Session session, int accountId, Map<String, Object> arguments) throws OXException {
-        final List<Setter> list = setterFrom(arguments);
+        final List<Setter> list = setterFrom(arguments, accountId);
         if (list.isEmpty()) {
             return;
         }
@@ -375,7 +377,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     throw e;
                 }
 
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, I(accountId));
             }
 
             account.setMetaData(registry.getService(rs.getString(5), userId, contextId));
@@ -823,7 +825,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.setInt(pos, accountId);
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, userId, contextId);
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId), I(userId), I(contextId));
             }
         } finally {
             closeSQLStuff(stmt);
@@ -867,7 +869,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                     throw e;
                 }
 
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, I(accountId));
+            }
+
+            if (Strings.isEmpty(account.getSecret())) {
+                LOG.debug("The account {} of user {} in context {} has an empty secret", I(accountId), I(session.getUserId()), I(session.getContextId()));
             }
 
             account.setMetaData(registry.getService(rs.getString(4), userId, contextId));
@@ -1014,11 +1020,12 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     /**
      *
      * @param arguments
+     * @param accountId // FIXME: remove when TEMP is removed
      * @return
      * @throws OXException
      */
     @SuppressWarnings("unchecked")
-    private List<Setter> setterFrom(final Map<String, Object> arguments) throws OXException {
+    private List<Setter> setterFrom(final Map<String, Object> arguments, int accountId) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -1059,6 +1066,9 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
                 public int set(final int pos, final PreparedStatement stmt) throws SQLException {
                     stmt.setString(pos, sToken);
                     stmt.setString(pos + 1, secret);
+                    if (Strings.isEmpty(secret)) {
+                        LOG.debug("Setting empty OAuth secret for account '{}' of user '{}' in context '{}'", I(accountId), I(session.getUserId()), I(session.getContextId()));
+                    }
                     return pos + 2;
                 }
 

@@ -1,6 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Filter
+Automatic-Module-Name: com.openexchange.mail.filter
 Bundle-SymbolicName: com.openexchange.mail.filter
 Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH

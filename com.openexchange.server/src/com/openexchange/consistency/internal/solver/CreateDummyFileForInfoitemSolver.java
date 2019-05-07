@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.internal.solver;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
 import com.openexchange.exception.OXException;
@@ -97,7 +98,7 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
                 int fsOwner = database.getDocumentHolderFor(old_identifier, context);
 
                 if (fsOwner < 0) {
-                    LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", old_identifier, context.getContextId());
+                    LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", old_identifier, I(context.getContextId()));
                     fsOwner = admin.getId();
                 }
 
@@ -107,7 +108,7 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
                 int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", context);
                 database.commit();
                 if (changed == 1) {
-                    LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, context.getContextId(), identifier);
+                    LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, I(context.getContextId()), identifier);
                 }
             } catch (final OXException e) {
                 LOG.error("{}", e.getMessage(), e);

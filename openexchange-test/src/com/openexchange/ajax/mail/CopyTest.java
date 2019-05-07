@@ -56,7 +56,6 @@ import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.AllResponse;
@@ -78,6 +77,7 @@ public class CopyTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -96,7 +96,7 @@ public class CopyTest extends AbstractMailTest {
     }
 
     @Test
-    public void testCopyingOneFolder() throws IOException, SAXException, JSONException, AddressException, OXException {
+    public void testCopyingOneFolder() throws IOException, JSONException, AddressException, OXException {
         String destinationFolderID = getDraftsFolder();
 
         /*

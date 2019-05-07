@@ -49,6 +49,7 @@
 
 package com.openexchange.icap;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ import java.util.Map;
 /**
  * {@link ICAPStatusCode} - Defines the ICAP status codes as described in
  * <a href="https://tools.ietf.org/html/rfc3507#section-4.3.3">RFC-3507, Section 4.3.3</a>
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
@@ -124,10 +125,11 @@ public enum ICAPStatusCode {
     static {
         Map<Integer, ICAPStatusCode> m = new HashMap<>();
         for (ICAPStatusCode code : ICAPStatusCode.values()) {
-            m.put(code.getCode(), code);
+            m.put(I(code.getCode()), code);
         }
         reverseIndex = Collections.unmodifiableMap(m);
     }
+
     private final int code;
     private final String message;
 
@@ -159,13 +161,13 @@ public enum ICAPStatusCode {
 
     /**
      * Parses the specified status code into an {@link ICAPStatusCode}
-     * 
+     *
      * @param statusCode The status code to parse
      * @return The {@link ICAPStatusCode}
      * @throws IllegalArgumentException if the specified status code is unknown
      */
     public static ICAPStatusCode parseStatusCode(int statusCode) {
-        ICAPStatusCode icapStatusCode = reverseIndex.get(statusCode);
+        ICAPStatusCode icapStatusCode = reverseIndex.get(I(statusCode));
         if (icapStatusCode == null) {
             throw new IllegalArgumentException("Unknown status code '" + statusCode + "'");
         }

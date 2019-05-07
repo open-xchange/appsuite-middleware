@@ -84,6 +84,7 @@ public class Bug16163Test extends AbstractAJAXSession {
     private AJAXClient client2;
     private int appointmentFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -102,6 +103,7 @@ public class Bug16163Test extends AbstractAJAXSession {
         testFolder.setLastModified(new Date());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

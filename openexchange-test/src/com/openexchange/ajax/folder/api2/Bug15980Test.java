@@ -82,6 +82,7 @@ public class Bug15980Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,6 +99,7 @@ public class Bug15980Test extends AbstractAJAXSession {
         testFolder.setLastModified(new Date());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

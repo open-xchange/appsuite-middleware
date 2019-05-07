@@ -74,7 +74,7 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXLogin.class);
 
-    public OXLogin() throws RemoteException, StorageException {
+    public OXLogin() {
         super();
         LOGGER.info("Class loaded: {}", this.getClass().getName());
     }

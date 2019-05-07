@@ -90,6 +90,11 @@ public class SAMLLoginTools {
     public static final String PARAM_SHARD = "shard";
 
     /**
+     * The <code>uriFragment</code> parameter name.
+     */
+    public static final String PARAM_URI_FRAGMENT = "uriFragment";
+
+    /**
      * The <code>samlLogin</code> login action.
      */
     public static final String ACTION_SAML_LOGIN = "samlLogin";
@@ -109,13 +114,23 @@ public class SAMLLoginTools {
      *
      * @param session The session
      * @param uiWebPath The path to use
+     * @param uriFragment The requested uri fragment to add after the session parameter or <code>null</code>
      */
-    public static String buildFrontendRedirectLocation(Session session, String uiWebPath) {
+    public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String uriFragment) {
         String retval = uiWebPath;
-
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
+
+        uriFragment = uriFragment == null ? "" : uriFragment;
+        while (uriFragment.length() > 0 && (uriFragment.charAt(0) == '#' || uriFragment.charAt(0) == '&' || uriFragment.charAt(0) == '!')) {
+            uriFragment = uriFragment.substring(1);
+        }
+
+        if (uriFragment.length() > 0) {
+            retval = retval + "&" + uriFragment;
+        }
+
         return retval;
     }
 
@@ -153,7 +168,7 @@ public class SAMLLoginTools {
      * @param loginConfiguration The login configuration
      * @throws {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
-    public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, LoginConfiguration loginConfiguration) throws OXException {
+    public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, @SuppressWarnings("unused") LoginConfiguration loginConfiguration) throws OXException {
         // IP check
         SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
 

@@ -169,7 +169,7 @@ public interface Snippet {
      * Allowed is any object returned by:
      *
      * <pre>
-     * String sJson = &quot;...&quot;; // Any JSON representation
+     * String sJson = &quot;...&quot; // Any JSON representation
      * new org.json.JSONTokener(sJson).nextValue();
      * </pre>
      *

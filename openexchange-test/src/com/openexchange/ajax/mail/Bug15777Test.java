@@ -11,7 +11,6 @@ import org.junit.Test;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.mail.actions.DeleteRequest;
@@ -28,8 +27,6 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class Bug15777Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
-
     private String folder;
 
     private String address;
@@ -44,10 +41,10 @@ public class Bug15777Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         values = getClient().getValues();
         folder = values.getInboxFolder();
         address = values.getSendAddress();
@@ -81,6 +78,7 @@ public class Bug15777Test extends AbstractAJAXSession {
         assertTrue("Flag 'answered' is missing", MailFlag.transform(getMovedMailResp.getMail(TimeZone.getDefault()).getFlags()).contains(MailFlag.ANSWERED));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

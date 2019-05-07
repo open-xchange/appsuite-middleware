@@ -261,7 +261,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
          */
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(NAME, Strings.isNotEmpty(settings.getName()) ? settings.getName() : "Calendar");
-        internalConfig.putSafe("subscribed", settings.isSubscribed());
+        internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
         String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
         if (Strings.isNotEmpty(color)) {
             internalConfig.putSafe("color", color);
@@ -277,7 +277,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
                 if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
                     throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
                 }
-                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync));
             }
         }
         return internalConfig;
@@ -335,7 +335,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
             changed = true;
         }
         if (settings.containsSubscribed() && settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
-            internalConfig.putSafe("subscribed", settings.isSubscribed());
+            internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
             changed = true;
         }
         return changed ? internalConfig : null;

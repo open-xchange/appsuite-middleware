@@ -52,6 +52,7 @@ package com.openexchange.frontend.uwa.internal;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import com.openexchange.exception.OXException;
 import com.openexchange.frontend.uwa.UWAWidget;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
@@ -111,7 +112,7 @@ public final class UWAUtility {
             }
             try {
                 final String dummyUrl = "http://localhost" + sUrl.substring(2);
-                new java.net.URL(dummyUrl);
+                @SuppressWarnings("unused") URL url = new java.net.URL(dummyUrl);
             } catch (final MalformedURLException e1) {
                 throw UWAWidgetExceptionCodes.INVALID_URL.create(e, new Object[0]);
             }
@@ -120,7 +121,7 @@ public final class UWAUtility {
 
     private static boolean isUri(final String s) {
         try {
-            new URI(s);
+            @SuppressWarnings("unused") URI uri = new URI(s);
             return true;
         } catch (final URISyntaxException e) {
             return false;

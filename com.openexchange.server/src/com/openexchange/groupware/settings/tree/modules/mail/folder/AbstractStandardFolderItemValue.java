@@ -83,7 +83,6 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractStandardFolderItemValue.class);
 
     private static volatile Boolean failOnError;
-
     private static boolean failOnError() {
         Boolean tmp = failOnError;
         if (null == tmp) {
@@ -106,6 +105,7 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
     static {
         MailReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 failOnError = null;
@@ -141,7 +141,7 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
     private int trySetReadTimeout(int readTimeout, Store messageStore) {
         try {
             return messageStore.setAndGetReadTimeout(readTimeout);
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore
         }
         return -1;

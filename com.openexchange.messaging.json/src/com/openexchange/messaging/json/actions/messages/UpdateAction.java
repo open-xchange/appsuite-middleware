@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -76,7 +77,7 @@ public class UpdateAction extends AbstractMessagingAction {
 
     @Override
     protected AJAXRequestResult doIt(final MessagingRequestData messagingRequestData, final ServerSession session) throws JSONException, IOException, OXException {
-        return new AJAXRequestResult(1);
+        return new AJAXRequestResult(I(1));
     }
 
 }

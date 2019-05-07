@@ -99,10 +99,10 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         if (null != values) {
             iCalFacotry.addValueMap(values);
         }
-        analyze(iCalFacotry, analysisValidator, values);
+        analyze(iCalFacotry, analysisValidator);
     }
 
-    protected void analyze(ICalFacotry iCalFacotry, Consumer<Analysis> analysisValidator, Map<String, Object> values) throws Exception {
+    protected void analyze(ICalFacotry iCalFacotry, Consumer<Analysis> analysisValidator) throws Exception {
         String eml = new ITipMailFactory(userResponseC2.getData().getEmail1(), userResponseC1.getData().getEmail1(), iCalFacotry.build()).build();
         mailData = createMailInInbox(eml);
         Assert.assertThat("No mail created.", mailData.getId(), notNullValue());
@@ -115,9 +115,10 @@ public abstract class AbstractITipAnalyzeTest extends AbstractITipTest {
         Assert.assertThat("Only one event should have been analyzed", Integer.valueOf(data.size()), is(Integer.valueOf(1)));
 
         if (null == analysisValidator) {
-            analysisValidator = CustomConsumers.ACTIONS.getConsumer();
+            CustomConsumers.ACTIONS.getConsumer().accept(data.get(0));
+        } else {
+            analysisValidator.accept(data.get(0));
         }
-        analysisValidator.accept(data.get(0));
     }
 
     public enum CustomConsumers {

@@ -129,7 +129,8 @@ public class ExecuteAction extends AbstractOnboardingAction {
             Object data = requestData.getData();
             if (data instanceof JSONObject) {
                 JSONObject jFormContent = (JSONObject) data;
-                input = (Map<String, Object>) JSONCoercion.coerceToNative(jFormContent);
+                @SuppressWarnings("unchecked") Map<String, Object> map = (Map<String, Object>) JSONCoercion.coerceToNative(jFormContent);
+                input = map;
             }
         }
 

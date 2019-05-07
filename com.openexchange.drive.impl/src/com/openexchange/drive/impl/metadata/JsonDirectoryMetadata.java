@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.metadata;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -91,7 +92,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class);
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JsonDirectoryMetadata.class);
     }
 
     private final FileStorageFolder folder;
@@ -235,7 +236,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         return jsonArray;
     }
 
-    private JSONObject getJSONPermission(FileStoragePermission permission) throws JSONException, OXException {
+    private JSONObject getJSONPermission(FileStoragePermission permission) throws JSONException {
         JSONObject jsonObject = new JSONObject(4);
         jsonObject.put("bits", createPermissionBits(permission));
         jsonObject.put("entity", permission.getEntity());
@@ -254,7 +255,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         } else {
             User user = session.getPermissionResolver().getUser(permission.getEntity());
             if (null == user) {
-                LoggerHolder.LOGGER.debug("Can't resolve user entity {} for folder {}", permission.getEntity(), folder);
+                LoggerHolder.LOGGER.debug("Can't resolve user entity {} for folder {}", I(permission.getEntity()), folder);
             } else if (user.isGuest()) {
                 GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
                 if (guest == null) {

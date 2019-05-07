@@ -49,6 +49,7 @@
 
 package com.openexchange.userfeedback.starrating.v1;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
@@ -123,7 +124,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
             }
             long scoreInt = Long.valueOf(score).longValue();
             if (scoreInt < 1) {
-                throw StarRatingExceptionCodes.INVALID_SCORE_VALUE.create(scoreInt);
+                throw StarRatingExceptionCodes.INVALID_SCORE_VALUE.create(L(scoreInt));
             }
         } catch (JSONException e) {
             LOG.error("Unable to retrieve 'score' from feedback.", e);
@@ -136,7 +137,7 @@ public class StarRatingV1 extends AbstractFeedbackType {
 
     /**
      * Limits the data column to have at most 21000 UTF-8 characters as the blob column is able to take 65535 bytes and an UTF-8 character can be up to 3 bytes. Therefor values will be cut off after defined lengths.
-     * 
+     *
      * @param jsonFeedback
      */
     protected JSONObject ensureSizeLimits(JSONObject jsonFeedback) {
@@ -245,17 +246,17 @@ public class StarRatingV1 extends AbstractFeedbackType {
             int x = 1;
             for (FeedbackMetaData meta : feedbackMetaData) {
                 stmt.setLong(x++, meta.getTypeId());
-                feedbacks.put(meta.getTypeId(), Feedback.builder(meta).build());
+                feedbacks.put(L(meta.getTypeId()), Feedback.builder(meta).build());
             }
             rs = stmt.executeQuery();
 
             while (rs.next()) {
                 long id = rs.getLong(1);
                 try {
-                    Feedback current = feedbacks.get(id);
+                    Feedback current = feedbacks.get(L(id));
                     enrichContent(new AsciiReader(rs.getBinaryStream(2)), current);
                 } catch (JSONException e) {
-                    LOG.error("Unable to read feedback with id {}. Won't return it.", id, e);
+                    LOG.error("Unable to read feedback with id {}. Won't return it.", L(id), e);
                 }
             }
             SortedSet<Feedback> sorted = sort(feedbacks.values());

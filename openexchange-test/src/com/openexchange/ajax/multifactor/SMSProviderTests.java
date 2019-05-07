@@ -107,7 +107,7 @@ public class SMSProviderTests extends AbstractMultifactorProviderTest {
 
     @Override
     protected MultifactorStartRegistrationResponseData doStartRegistration() throws Exception {
-        final boolean backupDevice = false;
+        final Boolean backupDevice = Boolean.FALSE;
         final String noDeviceName = null;
         return startRegistration(SMS_PROVIDER_NAME, noDeviceName, DEMO_PHONE_NUMBER, backupDevice);
     }

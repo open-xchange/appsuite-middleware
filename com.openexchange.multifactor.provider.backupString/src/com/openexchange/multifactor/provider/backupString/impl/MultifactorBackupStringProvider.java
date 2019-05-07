@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.backupString.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -149,18 +150,19 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
     }
 
     /**
-     * Generate a salted hash from value
+     * Generate a salted hash from the given value
      *
-     * @param salt Salt to use
-     * @param value Value to be hashed
-     * @return Hash
+     * @param salt The salt to append at the end of the given value before hashing
+     * @param value The value to be hashed
+     * @return The hash = h(value || salt)
      * @throws OXException
      */
     private String hashValue(String salt, String value) throws OXException {
         try {
             final MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(salt.getBytes(StandardCharsets.UTF_8));
-            final byte[] digest = md.digest(value.getBytes(StandardCharsets.UTF_8));
+            md.update(value.getBytes(StandardCharsets.UTF_8));
+            //Adding the salt at the end to prevent potential length extension attacks
+            final byte[] digest = md.digest(salt.getBytes(StandardCharsets.UTF_8));
             return toHex(digest);
         } catch (final NoSuchAlgorithmException e) {
             throw MultifactorExceptionCodes.ERROR_CREATING_FACTOR.create(e, e.getMessage());
@@ -206,7 +208,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
 
     @Override
     public Collection<MultifactorDevice> getEnabledDevices(MultifactorRequest multifactorRequest) throws OXException {
-        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled()).collect(Collectors.toList());
+        return getDevices(multifactorRequest).stream().filter(d -> d.isEnabled().booleanValue()).collect(Collectors.toList());
     }
 
     @Override
@@ -237,7 +239,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
             inputDevice.getName(),
             hashValue(deviceId, newSharedSecret) /*we do only persist the hashed representation of the secret*/,
             newSharedSecret.length());
-        device.enable(true);
+        device.enable(Boolean.TRUE);
 
         // Just add device here, no finishRegistration action needed.
         deviceStorage.registerDevice(multifactorRequest.getContextId(), multifactorRequest.getUserId(), device);
@@ -280,7 +282,7 @@ public class MultifactorBackupStringProvider implements MultifactorProvider {
 
             @Override
             public Map<String, Object> getChallenge() {
-                return Collections.singletonMap(BackupStringMultifactorDevice.BACKUP_STRING_LENGTH_PARAMETER, device.get().getSecretLength());
+                return Collections.singletonMap(BackupStringMultifactorDevice.BACKUP_STRING_LENGTH_PARAMETER, I(device.get().getSecretLength()));
             }
 
         };

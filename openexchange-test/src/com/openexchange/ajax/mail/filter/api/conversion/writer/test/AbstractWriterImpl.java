@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 
+import static org.junit.Assert.fail;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,13 +79,14 @@ abstract class AbstractWriterImpl<T extends TestArgument> implements TestWriter 
     }
 
     /**
-     * 
+     *
      * @param test
      * @param arguments
      * @param jsonObject
      * @return
      * @throws JSONException
      */
+    @SuppressWarnings("null")
     JSONObject write(Test<TestArgument> test, Set<T> arguments, JSONObject jsonObject) throws JSONException {
         jsonObject.put(CommonTestArgument.id.name(), test.getTestCommand().name().toLowerCase());
 
@@ -93,6 +95,9 @@ abstract class AbstractWriterImpl<T extends TestArgument> implements TestWriter 
         if (comparison != null) {
             final MatchType matchType = comparison.getMatchType();
             final ComparisonWriter compWriter = ComparisonWriterRegistry.getWriter(matchType);
+            if (compWriter == null) {
+                fail("Missing ComparisonWriter for matchtype '" + matchType + "'");
+            }
             compWriter.write((Comparison<ComparisonArgument>) comparison, jsonObject);
         }
 

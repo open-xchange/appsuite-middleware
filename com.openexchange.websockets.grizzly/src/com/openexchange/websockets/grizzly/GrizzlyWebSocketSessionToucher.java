@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
@@ -113,7 +114,7 @@ public class GrizzlyWebSocketSessionToucher<S extends SessionBoundWebSocket> imp
         int value;
         if (null == configService) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
-            logger.warn("Unable to determine \"com.openexchange.sessiond.sessionDefaultLifeTime\", falling back to {}.", defaultValue);
+            logger.warn("Unable to determine \"com.openexchange.sessiond.sessionDefaultLifeTime\", falling back to {}.", I(defaultValue));
             value = defaultValue;
         } else {
             value = configService.getIntProperty("com.openexchange.sessiond.sessionDefaultLifeTime", defaultValue);

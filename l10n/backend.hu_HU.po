@@ -1,12 +1,12 @@
 # Gabor Kelemen <gabor@workshop-chapina.com>, 2011, 2012, 2013, 2014.
-# Kalman Kemenczy <kalman@workshop-chapina.com>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018.
+# Kalman Kemenczy <kalman@workshop-chapina.com>, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019.
 # Antje Faber, 2012.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-11-08 14:36+0100\n"
+"PO-Revision-Date: 2019-04-09 09:15+0200\n"
 "Last-Translator: Kalman Kemenczy <kalman@workshop-chapina.com>\n"
 "Language-Team: Hungarian <hu@workshop-chapina.com>\n"
 "Language: hu_HU\n"
@@ -235,6 +235,10 @@ msgid ""
 "The given iCalendar source does not contain valid content and cannot be "
 "processed."
 msgstr "A megadott iCalendar forrás nem rendelkezik érvényes tartalommal, és nem dolgozható fel."
+
+#: com.openexchange.chronos.ical/src/com/openexchange/chronos/ical/ICalExceptionMessages.java:74
+msgid "The given iCal file contains too many entities."
+msgstr "A megadott iCal fájl túl sok elemet tartalmaz."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -955,6 +959,21 @@ msgid ""
 msgstr "Egy olyan levelet kapott, amelyben egy válasz található egy olyan találkozóra, amelyet nem Ön szervezett. Legjobb figyelmen kívül hagyni."
 
 #. *
+#. * The organizer of the appointment has changed. New organizer is: %1$s
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:315
+msgid "The organizer of the appointment has changed. New organizer is: %1$s"
+msgstr "A találkozó szervezője megváltozott. Ez a új szervező: %1$s."
+
+#. *
+#. * The organizer of the appointment has changed. This operation is not allowed.
+#.
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:320
+msgid ""
+"The organizer of the appointment has changed. This operation is not allowed."
+msgstr "A találkozó szervezője megváltozott. Ez a művelet nem megengedett."
+
+#. *
 #. * The event %s couldn't be deleted: %s
 #.
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
@@ -1088,19 +1107,19 @@ msgstr "Sajnos az adott URI forrást nem lehet feldolgozni a várt módon."
 msgid ""
 "The remote service is unavailable at the moment. There is nothing we can do "
 "about it. Please try again later."
-msgstr "A távoli szolgáltatás jelenleg nem érhető el. Semmit nem tehetünk, hogy ez megoldódjon. Próbálja újra később."
+msgstr "A távoli szolgáltatás jelenleg nem érhető el. Ennek működésére nincs ráhatásunk. Próbálja újra később."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:81
 msgid ""
 "An internal server error occurred on the feed provider side. There is "
 "nothing we can do about it."
-msgstr "Belső kiszolgálóhiba történt a hírcsatorna szolgáltató oldalán. Semmit nem tehetünk, hogy ez megoldódjon."
+msgstr "Belső kiszolgálóhiba történt a hírcsatorna szolgáltató oldalán. Ennek működésére nincs ráhatásunk."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:83
 msgid ""
 "A remote server error occurred on the feed provider side. There is nothing "
 "we can do about it."
-msgstr "Távoli kiszolgálóhiba történt a hírcsatorna szolgáltató oldalán. Semmit nem tehetünk, hogy ez megoldódjon."
+msgstr "Távoli kiszolgálóhiba történt a hírcsatorna szolgáltató oldalán. Ennek működésére nincs ráhatásunk."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:85
 msgid ""
@@ -1134,6 +1153,43 @@ msgstr "A hitelesítés nem sikerült a hitelesítő adatok legutóbbi módosít
 #: com.openexchange.chronos.provider.internal/src/com/openexchange/chronos/provider/internal/InternalCalendarStrings.java:65
 msgid "Internal Calendar"
 msgstr "Belső naptár"
+
+#. The requested page does not denote to a calendar.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
+msgid "The requested page does not denote to a calendar."
+msgstr "A lekért oldal mutat naotárra."
+
+#. You have no access to this calendar.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
+msgid "You have no access to this calendar."
+msgstr "Nincs hozzáférése ehhez a naptárhoz."
+
+#. The requested page was not found.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:66
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:63
+msgid "The requested page was not found."
+msgstr "A kért oldal nem található."
+
+#. The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:68
+msgid ""
+"The remote SchedJoules service is unavailable at the moment. There is "
+"nothing we can do about it. Please try again later."
+msgstr "A távoli SchedJoules szolgáltatás jelenleg nem érhető el. Ennek működésére nincs ráhatásunk. Kérjük, próbáld újra később."
+
+#. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
+msgid ""
+"An internal server error occurred on SchedJoules side. There is nothing we "
+"can do about it."
+msgstr "Belső kiszolgálóhiba történt a hírcsatorna szolgáltató oldalán. Ennek működésére nincs ráhatásunk."
+
+#. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
+#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
+msgid ""
+"A remote server error occurred on SchedJoules side. There is nothing we can "
+"do about it."
+msgstr "A távoli SchedJoules kiszolgálón hiba történt. Ennek működésére nincs ráhatásunk."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1249,131 +1305,141 @@ msgid "Organizer must also be an attendee."
 msgstr "A szervezőnek is részt kell vennie."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:84
+msgid "All appointments of a series must contain the same organizer."
+msgstr "A sorozat minden találkozójának a szervezője ugyanannak kell lennie."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
 msgid "The operation could not be completed due to missing capabilities."
 msgstr "A műveletet nem sikerült befejezni a hiányzó funkciók miatt."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:86
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr "A mellékelt mappa nem támogatott. Kérjük, válasszon ki egy érvényes mappát, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid ""
 "The operation could not be completed due to a concurrent modification. "
 "Please reload the data and try again."
 msgstr "A művelet az egyidejű módosítások miatt nem fejeződött be. Töltse újra az adatokat, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+msgid ""
+"The changes could not be applied because a newer version of the appointment "
+"already exists."
+msgstr "A módosításokat nem lehetett elmenteni, mert a találkozó újabb verziója már létezik."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
 "The appointment could not be created due to another conflicting appointment "
 "with the same unique identifier."
 msgstr "A találkozót nem lehetett létrehozni egy másik, azonos azonosítóval rendelkező ütköző találkozó miatt."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid "The appointment conflicts with one or more other appointments."
 msgstr "A találkozó ütközik egy vagy több más találkozóval."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
 "The field \"%1$s\" is mandatory. Please supply a valid value and try again."
 msgstr "A(z) \"%1$s\" mező kitöltése kötelező. Kérjük, adjon meg érvényes értéket, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
 msgid ""
 "The end date lies before the start date. Please correct the appointment "
 "times and try again."
 msgstr "A befejezés időpontja a kezdő dátum előtt van. Kérjük, javítsa ki a találkozó időpontját, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
 "Appointments in non-personal folders must not be classified as \"private\" "
 "or \"secret\"."
 msgstr "A nem személyes mappákban lévő találkozók nem minősíthetők \"privátnak\" vagy \"titkosnak\"."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
 msgid "Appointments with resources must not be classified as \"secret\"."
 msgstr "Az erőforrásokkal való találkozókat nem szabad \"titkosnak\" minősíteni."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
 msgid ""
 "Appointments classified as \"private\" or \"secret\" cannot be moved to this "
 "type of folder."
 msgstr "A \"privát\" vagy \"titkos\" találkozók nem helyezhetők át ebbe a mappába."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr "A találkozósorozat találkozóit nem szabad különbözőképpen sorolni."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied recurrence rule is invalid. Please correct the rule and try "
 "again."
 msgstr "A megadott visszatérési szabály érvénytelen. Kérjük, javítsa ki a szabályt, és próbálja újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:108
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
 msgid ""
 "The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr "A megadott emlékeztető érvénytelen. Kérjük, javítsa ki az emlékeztetőt, és próbálja újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
 "The supplied timezone is invalid. Please select a valid timezone and try "
 "again."
 msgstr "A megadott időzóna érvénytelen. Kérjük, válasszon egy érvényes időzónát, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr "A megadott földrajzi hely érvénytelen. Kérjük, válasszon érvényes koordinátákat, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
 "the appointment times and try again."
 msgstr "A megadott kezdési és befejező dátum típusok nem kompatibilisek. Kérjük, javítsa ki a találkozó időpontját, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
 "The supplied recurrence rule is not supported. Please use adjust the rule "
 "and try again."
 msgstr "A megadott visszatérési szabály nem támogatott. Kérjük, használja a szabály módosítását, és próbálja újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
 "The targeted occurrence is not part of the appointment series. Please select "
 "a valid recurrence identifier and try again."
 msgstr "A megcélzott esemény nem része a találkozósorozatnak. Kérjük, válasszon ki egy érvényes ismétlődő azonosítót, és próbálja újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
 msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
 msgstr "A találkozósorozat szétválasztása nem végezhető el. Kérjük, válasszon egy érvényes szétválasztási pontot, és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid "Moving an appointment series into another folder is not supported."
 msgstr "A találkozósorozat egy másik mappába történő áthelyezése nem támogatott."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:124
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
 msgid ""
 "Moving an occurrence of an appointment series into another folder is not "
 "supported."
 msgstr "A találkozósorozat egy találkozójának egy másik mappába történő áthelyezése nem támogatott."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
 msgid "The calendar user \"%1$s\" is invalid."
 msgstr "A(z) \"%1$s\" naptár felhasználó érvénytelen."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:128
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
 msgid ""
 "The supplied configuration is invalid. Please correct the configuration and "
 "try again."
 msgstr "A megadott beállítás érvénytelen. Kérjük, javítsa ki a beállítást, és próbálja újra."
 
 #. In order to accomplish the search, %1$d or more characters are required.
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:130
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
@@ -1383,7 +1449,7 @@ msgid ""
 "In order to accomplish the search, %1$d or more characters are required."
 msgstr "A keresés végrehajtásához legalább %1$d karakter szükséges."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:132
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:137
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:130
 msgid ""
@@ -1391,55 +1457,59 @@ msgid ""
 "problematic character and try again."
 msgstr "A(z) \"%2$s\" mezőben lévő \"%1$s\" karaktert nem lehet elmenteni. Távolítsa el a problémás karaktert és próbálja újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:134
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
 msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
 msgstr "Egyes beírt adatok meghaladták a mező korlátját. Kérjük, rövidítse le a \"%1$s\" értéket (méretkorlát: %2$d, aktuális méret: %3$d), és próbálkozzon újra."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:136
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
 msgid "The maximum number of calendar subscriptions is exceeded."
-msgstr "A naptárbejegyzések maximális száma túllépve."
+msgstr "A naptárra feliratkozók száma elérte a maximumot."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:138
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
 msgid "The value for \"%2$s\" is invalid and wasn't applied."
 msgstr "A(z) \"%2$s\" érték érvénytelen, és nem alkalmazható."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+msgid "The value for \"%1$s\" is invalid and cannot be applied."
+msgstr "A megadott \"%1$s\" érték érvénytelen, és nem alkalmazható."
+
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
 msgid "The value for \"%2$s\" is not supported and wasn't applied."
 msgstr "A(z) \"%2$s\" érték nem támogatott, és nem alkalmazható."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:142
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
 msgid "The '%1$s' is either not an internal user or does not exist."
 msgstr "A (z) '%1$s' nem belső felhasználó, vagy nem létezik."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:144
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
 msgid "Authentication failed."
 msgstr "A hitelesítés nem sikerült."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
 msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr "Nem sikerült fiókot létrehozni. Problémák adódtak a megadott hitelesítéssel."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr "A (z) \"%1$s\" fiókhoz tartozó kvóta a(z) \"%2$s\" kontextusban túllépte a korlátot."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The requested attachment was not found."
 msgstr "A keresett melléklet nem található."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:152
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
 msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr "Túl sok találkozót lett lekérdezve. Kérjük, válasszon rövidebb időkeretet."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:154
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:160
 msgid "The appointment contains too many participants."
 msgstr "A találkozó túl sok résztvevőt tartalmaz."
 
-#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
+#: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:162
 msgid "The appointment contains too many reminders."
 msgstr "A találkozó túl sok emlékeztető tartalmaz."
 
@@ -1537,10 +1607,13 @@ msgstr "Levél sikeresen elküldve"
 msgid "SMS successfully sent"
 msgstr "SMS sikeresen elküldve"
 
+#. *
+#. * To set up your device, click following link:
+#.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:69
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:71
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
-#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:74
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:79
+#: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:84
 msgid "To set up your device, click following link: "
 msgstr "A készülék beállításához kattintson az alábbi hivatkozásra: "
 
@@ -1968,9 +2041,6 @@ msgstr "3. e-mail"
 
 #: com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:130
 #: com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:67
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:61
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:61
 msgid "URL"
 msgstr "URL"
 
@@ -2533,13 +2603,15 @@ msgstr "Már létezik \"%1$s\" nevű fájl a(z) \"%2$s\" könyvtárban."
 msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
 msgstr "Már létezik \"%1$s\" nevű könyvtár a(z) \"%2$s\" könyvtárban."
 
+#: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:99
+msgid "Push via long polling is disabled for user \"%1$s\" in context \"%1$s\""
+msgstr "A(z) \"%1$s\" felhasználó a(z) \"%1$s\" kontextusban a long-polling push le van tiltva."
+
 #: com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
-#: com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
 #: com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
-#: com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 #: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
 msgstr "Válasszon egy létező fiókot"
@@ -3063,7 +3135,7 @@ msgstr "Nincs következő rész ehhez: %1$s"
 #. Signals that an end of stream has been reached unexpectedly during reading input.
 #: com.openexchange.filestore/src/com/openexchange/filestore/FileStorageStrings.java:71
 msgid "The connected client closed the connection unexpectedly"
-msgstr "A kapcsolódott kliens váratlanul lezárta a kapcsolatot"
+msgstr "A csatlakoztatott kliens váratlanul bezárta a kapcsolatot"
 
 #. * The allowed Quota is reached.
 #: com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
@@ -3280,7 +3352,7 @@ msgstr "hamis"
 #: com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
 #: com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:96
 msgid "Contact"
-msgstr "Kapcsolatok"
+msgstr "Kapcsolat"
 
 #. Context: Searching in contacts.
 #. Displayed as: [Search for] 'user input' in names.
@@ -3763,7 +3835,7 @@ msgstr "A erőforrás nem létezik"
 
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:82
 msgid "A JSON error occurred: %1$s"
-msgstr "JSON hiba történt: %1$s"
+msgstr "JSON-hiba történt: %1$s"
 
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.
 #: com.openexchange.halo/src/com/openexchange/halo/HaloExceptionMessages.java:63
@@ -4266,34 +4338,36 @@ msgid "The E-Mail address %1$s is invalid."
 msgstr "A(z) %1$s e-mail cím hibás."
 
 #. Reorganizing of mails failed. Please try again later.
-#: com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
+#: com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:68
 msgid "Reorganizing of mails failed. Please try again later."
 msgstr "A levelek átrendezése meghiúsult. Próbálja újra később."
 
 #. The user category %1$s does not exist.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:68
 msgid "The user category %1$s does not exist."
 msgstr "A(z) %1$s felhasználói kategória nem létezik."
 
 #. Invalid configuration: %1$s
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:71
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:74
 msgid "Invalid configuration: %1$s"
-msgstr "Érvénytelen beállítás: %1$s"
+msgstr "Érvénytelen konfiguráció: %1$s"
 
 #. The required service %1$s is temporary not available. Please try again later.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
+#. * A service is not available
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:77
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr "A(z) %1$s szolgáltatás jelenleg nem érhető el. Próbálja újra később."
 
 #. You are not allowed to change the name of the category %1$s.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:80
 msgid "You are not allowed to change the name of the category %1$s."
 msgstr "Nem módosíthatja a(z) %1$s kategória nevét."
 
 #. You are not allowed to enable or disable the category %1$s.
-#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+#: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:83
 msgid "You are not allowed to enable or disable the category %1$s."
 msgstr "Nem tilthatja le vagy engedélyezheti a(z) %1$s kategóriát."
 
@@ -4410,6 +4484,225 @@ msgstr "A(z) %1$s üzenet nem található meg a(z) %2$s mappában."
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
 msgstr "Érvénytelen OAuth felhasználói fiók lett megadva."
+
+#. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
+msgid ""
+"An error has occurred on the remote Microsoft end-point. There is nothing we "
+"can do about it. Try again later."
+msgstr "Hiba történt a távoli Microsoft-végponton. Ennek működésére nincs ráhatásunk. Próbálja újra később."
+
+#. Unable to retrieve the contact photo for contact with id '%1$s'. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphContactClientExceptionMessages.java:63
+msgid ""
+"Unable to retrieve the contact photo for contact with id '%1$s'. There is "
+"nothing we can do about it. Try again later."
+msgstr "Nem sikerült lekérni a(z) '%1$s' azonosítóhoz tartozó fényképet. Ennek működésére nincs ráhatásunk. Próbálja újra később."
+
+#. The copying of file %1$s failed. There is nothing we can do about it. Try again later
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:63
+msgid ""
+"The copying of file %1$s failed. There is nothing we can do about it. Try "
+"again later."
+msgstr "A% 1$s fájl másolása sikertelen. Ennek működésére nincs ráhatásunk. Próbálja újra később."
+
+#. Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can do about it. Try again later.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphDriveClientExceptionMessages.java:65
+msgid ""
+"Uploading the file '%1$s' in folder '%2$s' failed. There is nothing we can "
+"do about it. Try again later."
+msgstr "A(z) '%1$s' fájl feltöltése a '%2$s' mappába sikertelen. Ennek működésére nincs ráhatásunk. Próbálja újra később."
+
+#. The folder does not exist.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:63
+msgid "The folder does not exist."
+msgstr "A mappa nem létezik."
+
+#. A folder named '%1$s' already exists under the folder with name '%2$s
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:65
+msgid "A folder named '%1$s' already exists under the folder with name '%2$s"
+msgstr "A(z) '%1$s' nevű mappa már létezik a(z) '%2$s' nevű mappa alatt"
+
+#. You are not allowed to delete the root folder.
+#: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/onedrive/exception/MicrosoftGraphDriveServiceExceptionMessages.java:67
+msgid "You are not allowed to delete the root folder."
+msgstr "A gyökérmappa nem törölhető."
+
+#. *
+#. * The user is locked out of the account for specified minutes
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:65
+msgid ""
+"This account has been locked out. Please wait %1$d minutes then try again."
+msgstr "Ez a fiók le van zárva. Várjon %1$d percet, majd próbálja újra."
+
+#. *
+#. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
+#.
+#: com.openexchange.multifactor.lockoutService/src/com/openexchange/multifactor/lockoutService/exceptions/MultifactorLockoutExceptionMessages.java:69
+msgid ""
+"There is another authentication attempt for this user in process.  Please "
+"wait."
+msgstr "Ennek a felhasználónak egy másik hitelesítési kísérlete folyamatban van. Kis türelmet."
+
+#. *
+#. * The default name for the multifactor recovery codes
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:65
+msgid "My Backup"
+msgstr "Saját biztonsági mentés"
+
+#. *
+#. * Error message. Primary authentication devices must be set up before backup devices.
+#.
+#: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
+msgid "Primary authentication devices must be set up before backup devices."
+msgstr "Az elsődleges hitelesítő eszközöket a biztonsági mentési eszközök előtt kell beállítani."
+
+#. *
+#. * The text message sent to the user for providing him the authentication code
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:65
+msgid "Your authentication code is: "
+msgstr "A hitelesítési kód: "
+
+#. *
+#. * The default name of the multifactor SMS device
+#.
+#: com.openexchange.multifactor.provider.sms/src/com/openexchange/multifactor/provider/sms/impl/MultifactorSMSStrings.java:70
+msgid "My Phone"
+msgstr "Telefon"
+
+#. *
+#. *  The default name of an Authenticator
+#.
+#: com.openexchange.multifactor.provider.totp/src/com/openexchange/multifactor/provider/totp/impl/TotpStrings.java:65
+msgid "Authenticator %d"
+msgstr "%d hitelesítő"
+
+#. *
+#. * The default name of a U2F device
+#.
+#: com.openexchange.multifactor.provider.u2f/src/com/openexchange/multifactor/provider/u2f/impl/U2FStrings.java:65
+msgid "Device %d"
+msgstr "%d eszköz"
+
+#. * The client did not perform multifactor authentication but it is requried
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:63
+msgid "Missing multifactor authentication"
+msgstr "Hiányzó többfaktoros hitelesítés"
+
+#. * This multifactor authentication was invalid / wrong
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:66
+msgid "Invalid multifactor authentication"
+msgstr "Érvénytelen többfaktoros hitelesítés"
+
+#. * Error occurred when creating the authentication
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:69
+msgid ""
+"An error occured while creating/calculating the authentication factor: %1$s."
+msgstr "Hiba történt a hitelesítési tényező létrehozása/kiszámítása közben: %1$s."
+
+#. * Data format error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
+msgid "JSON error: %s"
+msgstr "JSON hiba: %s"
+
+#. * The type of multifactor provider is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
+msgid "The requested provider %1$s is unknown."
+msgstr "A kért %1$s szolgáltató ismeretlen."
+
+#. * This multifactor provider is not available for the user
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
+msgid "The requested provider %1$s is not available for the user."
+msgstr "A kért %1$s szolgáltató nem érhető el a felhasználó számára."
+
+#. * Multifactor is required, but the device identifier is missing
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
+msgid "Multifactor authentication required but device identifier is missing"
+msgstr "A többfaktoros hitelesítés szükséges, de az eszközazonosító hiányzik"
+
+#. * The specified device is not known
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
+msgid "The requested device is unknown"
+msgstr "A kért eszköz ismeretlen"
+
+#. * Unknown error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
+msgid "An unknown error occured during multifactor authentication: %s"
+msgstr "Ismeretlen hiba történt a multifaktor hitelesítés közben: %s"
+
+#. * The provider type is not specified
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
+msgid "Multifactor authentication required but provider name is missing"
+msgstr "Többfaktoros hitelesítés szükséges, de a szolgáltató neve hiányzik"
+
+#. * Database error
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
+msgid "SQL error: %1$s"
+msgstr "SQL hiba: %1$s"
+
+#. * Missing a parameter for this call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:99
+msgid "Missing parameter: %1$s"
+msgstr "Hiányzó paraméter: %1$s"
+
+#. * This device is already registered
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:102
+msgid "The device is already registered"
+msgstr "A készülék már regisztrált"
+
+#. * This action requires a recent multifactor authentication.  Multifactor parameters are missing from the call
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:105
+msgid ""
+"This action requires recent multifactor authentication.  Missing multifactor "
+"parameters for this action"
+msgstr "Ez a művelet többfaktoros hitelesítést igényel. Ehhez a művelethez a hiányzó multifaktor-paraméterei hiányoznak"
+
+#. * Specified device is not regisiterd
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
+msgid "This device isn't registered"
+msgstr "Ez az eszköz nincs regisztrálva"
+
+#. * No devices found for the provider
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:111
+msgid "No devices in this provider"
+msgstr "Ebben a szolgáltatóban nincsenek eszközök"
+
+#. * Argument exceeded the allowed length
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:114
+msgid ""
+"The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
+"%3$s"
+msgstr "A megadott \"%1$s\" argumentum hossza %2$s, elérte megengedett %3$s hosszúságot"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
+msgid "The registration failed"
+msgstr "A regisztráció sikertelen"
+
+#. * The registration failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:120
+msgid "Unable to remove the device"
+msgstr "Nem lehet eltávolítani az eszközt"
+
+#. * The authentication failed
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:123
+msgid "The authentication failed"
+msgstr "A hitelesítés sikertelen"
+
+#. * The authentication failed with details
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:126
+msgid "The authentication failed: %1$s"
+msgstr "A hitelesítés sikertelen: %1$s"
+
+#. * The authentication failed.  Specified attempts allowed before lockout
+#: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:129
+msgid ""
+"The authentication failed.  A total of %1$d attempts allowed before "
+"temporary lockout."
+msgstr "A hitelesítés sikertelen. Összesen %1$d kísérlet engedélyezett az ideiglenes zárolás előtt."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -4716,6 +5009,11 @@ msgstr "A(z) %1$s tartományt nem támogatja a szolgáltató vagy le van tiltva"
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
 msgid "'%1$s' OAuth service is not enabled for you."
 msgstr "A(z) '%1$s' OAuth szolgáltatás nincs engedélyezve."
+
+#: com.openexchange.password.mechanism/src/com/openexchange/password/mechanism/exceptions/PasswordMechMessages.java:63
+msgid ""
+"No password mechanism available for identifier '%s'. Cannot handle password."
+msgstr "Az '%s' azonosítóhoz nem áll rendelkezésre jelszómechanizmus. A jelszót nem lehet kezelni."
 
 #. *
 #. * New password too short.
@@ -5191,75 +5489,6 @@ msgstr "Az előnézeti szolgáltatás a(z) %1$s MIME-típushoz jelenleg nem érh
 msgid "Could not load data via proxy."
 msgstr "Az adatok nem tölthetők be proxyn keresztül."
 
-#. The operation is forbidden
-#: com.openexchange.publish.json/src/com/openexchange/publish/json/PublicationJSONErrorDisplayMessage.java:71
-msgid "The operation is forbidden"
-msgstr "Tiltott művelet."
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:61
-msgid "Site"
-msgstr "Weboldal"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:63
-msgid "Apply a template (optional)"
-msgstr "Sablon alkalmazása (opcionális)"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:65
-msgid "Add cipher code"
-msgstr "Titkosító kód hozzáadása"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:69
-msgid "Shared contacts"
-msgstr "Megosztott kapcsolatok"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/FormStrings.java:71
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
-msgid "Shared files"
-msgstr "Megosztott fájlok"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:61
-msgid ""
-"Privacy:\n"
-"The data and any references contained in this webpage are shared with you "
-"under the assumption that the owner of the data was entitled to make them "
-"available to you. Neither %s, nor any of its subsidiaries or affiliates "
-"shall be liable for its publication or re-publication.\n"
-"Any unauthorized use or dissemination of this data is prohibited. If you "
-"intend to store, process, or pass on this data, please make sure that you "
-"have the right to do so.\n"
-"If you are one of the people listed or responsible for a resource listed on "
-"this page and you don't agree with the publication, please send an email "
-"containing the URL (the link) to this webpage to %s and the publisher of the "
-"data:\n"
-"Data published by %s on %s\n"
-msgstr "Adatvédelem: \nA weboldalon található adatok és hivatkozások azzal a feltételezéssel kerülnek megosztásra, hogy ezek tulajdonosai lehetővé teszik ezt. Sem %s, sem annak leányvállalatai nem felelnek ezek közzétételéért vagy újra megjelentetéséért.\nEzen adatok jogosulatlan terjesztése tilos. Amennyiben ezeket tárolni, feldolgozni vagy továbbadni kívánja, győződjön meg arról, hogy ehhez megfelelő jogokkal rendelkezik.\nAmennyiben Ön az egyik felsorolt vagy megnevezett személy az adott weboldalon, és nem ért egyet annak közzétételével, akkor kérjük küldjön egy levelet, amely tartalmazza a weboldal URL-jét (hivatkozását) a következő címre: %s, valamint az adatot közzétevő számára:\nAz adatot közzétette: %s, %s\n"
-
-#: com.openexchange.publish.microformats/src/com/openexchange/publish/microformats/MicroformatStrings.java:73
-msgid "the hoster"
-msgstr "a szolgáltató"
-
-#: com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
-msgid "Publish Infostore document"
-msgstr "InfoStore dokumentum közzététele"
-
-#. Cannot find the requested publication site.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
-msgid "Cannot find the requested publication site."
-msgstr "Nem található a kért közzétételi oldal."
-
-#. You do not have the appropriate permissions to perform the chosen action.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:66
-msgid ""
-"You do not have the appropriate permissions to perform the chosen action."
-msgstr "Nincs jogosultsága a kiválasztott művelet végrehajtásához"
-
-#. The published document has been deleted in the meantime and therefore is no longer available.
-#: com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:69
-msgid ""
-"The published document has been deleted in the meantime and therefore is no "
-"longer available."
-msgstr "A közreadott dokumentum időközben törölve lett, így már nem érhető el."
-
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:62
 msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
@@ -5380,6 +5609,27 @@ msgstr "Váratlan hiba: %1$s"
 msgid "Invalid ID. Resource identifier is missing."
 msgstr "Érvénytelen azonosító. Az erőforrás-azonosító hiányzik."
 
+#. The remote '%1$s' service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:65
+msgid ""
+"The remote '%2$s' service is unavailable at the moment. There is nothing we "
+"can do about it. Please try again later."
+msgstr "A távoli '%2$s' szolgáltatás jelenleg nem érhető el. Ennek működésére nincs ráhatásunk. Próbálja újra később."
+
+#. An internal server error occurred on '%1$s' side. There is nothing we can do about it.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:67
+msgid ""
+"An internal server error occurred on '%2$s' side. There is nothing we can do "
+"about it."
+msgstr "Belső kiszolgálóhiba történt a(z) '%2$s' oldalán. Ennek működésére nincs ráhatásunk."
+
+#. A remote server error occurred on '%1$s' side. There is nothing we can do about it.
+#: com.openexchange.rest.client/src/com/openexchange/rest/client/exception/RESTExceptionMessages.java:69
+msgid ""
+"A remote server error occurred on '%2$s' side. There is nothing we can do "
+"about it."
+msgstr "Távoli kiszolgálóhiba történt a(z) '%2$s' oldalán. Ennek működésére nincs ráhatásunk."
+
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
@@ -5487,6 +5737,11 @@ msgid ""
 "The policy you have entered is malformed. It should look like \"condition:"
 "action\""
 msgstr "A megadott irányelv rosszul formázott. Az irányelvek megfelelő formátuma: \"condition:action\""
+
+#. The policy '%s' you have specified is unknonw/unsupported.
+#: com.openexchange.server/src/com/openexchange/consistency/ConsistencyExceptionMessages.java:65
+msgid "The policy '%s' you have specified is unknonw/unsupported."
+msgstr "A megadott '%s' irányelv ismeretlen vagy nem támogatott."
 
 #. Unable to convert task status "%1$s".
 #: com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:69
@@ -6142,7 +6397,7 @@ msgstr "Az e-mail cím megadása szükséges a külső disztribúciós lista tag
 msgid ""
 "The object identifier is mandatory for distribution list members referencing "
 "existing contacts."
-msgstr "Az objektumazonosító kötelező a meglévő névjegyekre hivatkozó terjesztésilista-tagokhoz."
+msgstr "Az objektumazonosító kötelező a meglévő névjegyekre hivatkozó disztribúciós lista tagjaihoz."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:123
 msgid "User contacts can not be deleted."
@@ -6183,6 +6438,11 @@ msgstr "A(z) \"%1$s\" minta a keresés alatt figyelmen kívül marad."
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
 msgid "Invalid number of properties for distribution list."
 msgstr "Érvénytelen számú tulajdonság a disztribúciós listához."
+
+#: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:145
+msgid ""
+"This operation is not allowed in this folder because it has a subscription."
+msgstr "Ez a művelet nem engedélyezett ebben a mappában, mert feliratkozókkal rendelkezik."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
@@ -6280,6 +6540,10 @@ msgstr "Fájljaim"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
 msgstr "Drive"
+
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:106
+msgid "Shared files"
+msgstr "Megosztott fájlok"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -8536,6 +8800,36 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr "A(z) %2$s levelezőfiók levélküldése hitelesítési okokból letiltásra került. Az újraengedélyezéshez végezze el a(z) %5$s felhasználói fiókját hitelesítését."
 
+#. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
+#. which is only applicable in case a reply is generated, but in-compose message is not a reply
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:72
+msgid ""
+"The operation cannot be performed because composed message is not a reply"
+msgstr "A műveletet nem lehet végrehajtani, mert a megírt üzenet nem válasz"
+
+#. Found no such attachment %1$s in composition space %2$s
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:75
+msgid "No such attachment"
+msgstr "Nincs ilyen melléklet"
+
+#. Attachments must not be shared
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:78
+msgid "Attachments must not be shared"
+msgstr "A mellékleteket nem szabad megosztani"
+
+#. A user must not create any new composition spaces
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:81
+msgid ""
+"Maximum number of composition spaces is reached. Please terminate existing "
+"open spaces in order to open new ones."
+msgstr "Elérte a maximális szerkesztési felületek számát. Zárja a szerkesztési felületeket, ha újat szeretne nyitni."
+
+#. Missing key which is required to decrypt the content of a composition space
+#: com.openexchange.server/src/com/openexchange/mail/compose/CompositionSpaceExceptionMessages.java:84
+msgid ""
+"Found no suitable key for composition space. Please re-compose your E-Mail."
+msgstr "Nincs megfelelő kulcsot a szerkesztési felülethez. Kérjük, írja újra a levelet."
+
 #. The default name for a file
 #: com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -9444,10 +9738,12 @@ msgstr "fájl"
 msgid "folder"
 msgstr "mappa"
 
-#. John Doe has shared the folder "Photos" with you. Please log in to view it.
+#. John Doe has shared the folder "Photos" with you. Please enter the share password to view it.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:69
-msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
-msgstr "%1$s megosztott %2$s \"%3$s\" Önnel. Jelentkezzen be és tekintse meg őket. "
+msgid ""
+"%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
+"to view it."
+msgstr "%1$s megosztott %2$s \"%3$s\" Önnel. Megtekintéséhez adja meg a megosztáshoz használt jelszót."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -10197,13 +10493,13 @@ msgstr "Nincs megfelelő jogosultsága a megosztáshoz kapcsolódó értesítés
 msgid ""
 "You have exceeded the maximum number of sms allowed. Please try again after "
 "%1$s hours"
-msgstr "Túllépte a maximálisan megengedett SMS-ek számát. Próbálja meg újra %1$s óra múlva"
+msgstr "Túllépte a megengedett maximális SMS számot. Próbálja újra %1$s óra után"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
 msgid ""
 "SMS limits apply. You can only send one more message in the next %1$s hours"
-msgstr "Elérte az elküldhető SMS-ek számát. A következő %1$s órában még egy SMS-t küldhet."
+msgstr "Az SMS-korlátozások érvényesek. A következő %1$s órában még egy üzenetet küldhet"
 
 #. Could not parse phone number %1$s
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
@@ -10272,45 +10568,6 @@ msgstr "A kért feliratkozás ismeretlen."
 msgid "The operation is forbidden."
 msgstr "Tiltott művelet."
 
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
-msgid "OXMF Contacts"
-msgstr "OXMF kapcsolatok"
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:65
-msgid "OXMF Infostore"
-msgstr "OXMF InfoStore"
-
-#. A parsing error occurred: %1$s.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:62
-msgid "A parsing error occurred: %1$s."
-msgstr "Feldolgozási hiba történt: %1$s."
-
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:63
-msgid "Provide well-formed HTML."
-msgstr "Megfelelően formázott HTML-t adjon meg."
-
-#. Can only post to external subscription sources.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:66
-msgid "You can only post to external subscription sources."
-msgstr "Csak küldeni lehet a külső feliratkozási forrásokra."
-
-#. Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:69
-msgid ""
-"Could not fetch site at %1$s. Please check the spelling or whether you can "
-"reach the site in your browser."
-msgstr "Nem kérhető le az oldal innen: %1$s. Ellenőrizze, hogy nem gépelte-e el, és hogy az oldalt el tudja-e érni böngészőjéből."
-
-#. The string cannot be parsed to a valid URL.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
-msgid "You provided an invalid URL."
-msgstr "Érvénytelen URL-t adott meg."
-
-#. No URL was provided.
-#: com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-msgid "You provided no URL."
-msgstr "Nem adott meg URL-t."
-
 #: com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
 msgid "The OAuth Account to use"
@@ -10369,12 +10626,12 @@ msgid ""
 "The service provider asked for an identity confirmation. This happens for "
 "some accounts and cannot fixed by us. It is in the provider's "
 "responsibility. For this reason, the subscription cannot be completed."
-msgstr "A szolgáltató a személyazonosság ellenőrzését kéri. Ez előfordul néhány esetben és teljes mértékben a szolgáltató felelőssége. Ezen okból az előfizetést nem lehet befejezni."
+msgstr "A szolgáltató a személyazonosság ellenőrzését kéri. Ez előfordul néhány esetben és teljes mértékben a szolgáltató felelőssége. Ezen okból az feliratkozást nem lehet befejezni."
 
 #. You already have such a subscription.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
-msgstr "Már rendelkezik ilyen előfizetéssel."
+msgstr "Már rendelkezik ilyen feliratkozással."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
@@ -11106,7 +11363,7 @@ msgstr "Amerika/Ensenada"
 
 #: TimeZones.java:113
 msgid "America/Fort Nelson"
-msgstr "America/Fort Nelson"
+msgstr "Amerika/Fort Nelson"
 
 #: TimeZones.java:114
 msgid "America/Fort Wayne"
@@ -12791,6 +13048,103 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
+#~ msgstr ""
+#~ "%1$s megosztott %2$s \"%3$s\" Önnel. Jelentkezzen be és tekintse meg "
+#~ "őket. "
+
+#~ msgid "The operation is forbidden"
+#~ msgstr "Tiltott művelet."
+
+#~ msgid "Site"
+#~ msgstr "Weboldal"
+
+#~ msgid "Apply a template (optional)"
+#~ msgstr "Sablon alkalmazása (opcionális)"
+
+#~ msgid "Add cipher code"
+#~ msgstr "Titkosító kód hozzáadása"
+
+#~ msgid "Shared contacts"
+#~ msgstr "Megosztott kapcsolatok"
+
+#~ msgid ""
+#~ "Privacy:\n"
+#~ "The data and any references contained in this webpage are shared with you "
+#~ "under the assumption that the owner of the data was entitled to make them "
+#~ "available to you. Neither %s, nor any of its subsidiaries or affiliates "
+#~ "shall be liable for its publication or re-publication.\n"
+#~ "Any unauthorized use or dissemination of this data is prohibited. If you "
+#~ "intend to store, process, or pass on this data, please make sure that you "
+#~ "have the right to do so.\n"
+#~ "If you are one of the people listed or responsible for a resource listed "
+#~ "on this page and you don't agree with the publication, please send an "
+#~ "email containing the URL (the link) to this webpage to %s and the "
+#~ "publisher of the data:\n"
+#~ "Data published by %s on %s\n"
+#~ msgstr ""
+#~ "Adatvédelem: \n"
+#~ "A weboldalon található adatok és hivatkozások azzal a feltételezéssel "
+#~ "kerülnek megosztásra, hogy ezek tulajdonosai lehetővé teszik ezt. Sem %s, "
+#~ "sem annak leányvállalatai nem felelnek ezek közzétételéért vagy újra "
+#~ "megjelentetéséért.\n"
+#~ "Ezen adatok jogosulatlan terjesztése tilos. Amennyiben ezeket tárolni, "
+#~ "feldolgozni vagy továbbadni kívánja, győződjön meg arról, hogy ehhez "
+#~ "megfelelő jogokkal rendelkezik.\n"
+#~ "Amennyiben Ön az egyik felsorolt vagy megnevezett személy az adott "
+#~ "weboldalon, és nem ért egyet annak közzétételével, akkor kérjük küldjön "
+#~ "egy levelet, amely tartalmazza a weboldal URL-jét (hivatkozását) a "
+#~ "következő címre: %s, valamint az adatot közzétevő számára:\n"
+#~ "Az adatot közzétette: %s, %s\n"
+
+#~ msgid "the hoster"
+#~ msgstr "a szolgáltató"
+
+#~ msgid "Publish Infostore document"
+#~ msgstr "InfoStore dokumentum közzététele"
+
+#~ msgid "Cannot find the requested publication site."
+#~ msgstr "Nem található a kért közzétételi oldal."
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to perform the chosen action."
+#~ msgstr "Nincs jogosultsága a kiválasztott művelet végrehajtásához"
+
+#~ msgid ""
+#~ "The published document has been deleted in the meantime and therefore is "
+#~ "no longer available."
+#~ msgstr ""
+#~ "A közreadott dokumentum időközben törölve lett, így már nem érhető el."
+
+#~ msgid "OXMF Contacts"
+#~ msgstr "OXMF kapcsolatok"
+
+#~ msgid "OXMF Infostore"
+#~ msgstr "OXMF InfoStore"
+
+#~ msgid "A parsing error occurred: %1$s."
+#~ msgstr "Feldolgozási hiba történt: %1$s."
+
+#~ msgid "Provide well-formed HTML."
+#~ msgstr "Megfelelően formázott HTML-t adjon meg."
+
+#~ msgid "You can only post to external subscription sources."
+#~ msgstr "Csak küldeni lehet a külső feliratkozási forrásokra."
+
+#~ msgid ""
+#~ "Could not fetch site at %1$s. Please check the spelling or whether you "
+#~ "can reach the site in your browser."
+#~ msgstr ""
+#~ "Nem kérhető le az oldal innen: %1$s. Ellenőrizze, hogy nem gépelte-e el, "
+#~ "és hogy az oldalt el tudja-e érni böngészőjéből."
+
+#~ msgid "You provided an invalid URL."
+#~ msgstr "Érvénytelen URL-t adott meg."
+
+#~ msgid "You provided no URL."
+#~ msgstr "Nem adott meg URL-t."
 
 #~ msgid "The DoveAdm resource does not exist"
 #~ msgstr "A DoveAdm erőforrás nem létezik"
@@ -15690,9 +16044,6 @@ msgstr "Zulu"
 #~ msgid "Could not find data provider for id: %1$s"
 #~ msgstr "Nem található adatszolgáltató ehhez az azonosítóhoz: %1$s"
 
-#~ msgid "Missing parameter: %1$s"
-#~ msgstr "Hiányzó paraméter: %1$s"
-
 #~ msgid "Unknown provider: %1$s"
 #~ msgstr "Ismeretlen szolgáltató: %1$s"
 
@@ -16518,9 +16869,6 @@ msgstr "Zulu"
 
 #~ msgid "Unregistration of consistency MBean failed."
 #~ msgstr "A konzisztencia MBean regisztrálásának törlése sikertelen."
-
-#~ msgid "SQL error: %1$s"
-#~ msgstr "SQL-hiba: %1$s"
 
 #~ msgid ""
 #~ "No appropriate folder storage for tree identifier \"%1$s\" and folder "
@@ -18253,9 +18601,6 @@ msgstr "Zulu"
 
 #~ msgid "A harmful attachment was detected."
 #~ msgstr "Ártalmas melléklet észlelve."
-
-#~ msgid "JSON error: %s"
-#~ msgstr "JSON hiba: %s"
 
 #~ msgid "Invalid parameter \"%1$s\": %2$s"
 #~ msgstr "Érvénytelen paraméter („%1$s”): %2$s"

@@ -49,6 +49,7 @@
 
 package com.openexchange.push.malpoll;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -244,7 +245,7 @@ public final class MALPollPushListener implements PushListener {
             /*
              * Still in process...
              */
-            LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
+            LOG.debug("Listener still in process for user {} in context {}. Return immediately.", I(userId), I(contextId));
             return;
         }
         try {

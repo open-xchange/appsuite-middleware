@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 
 /**
@@ -119,7 +120,7 @@ public abstract class FolderChildObject extends DataObject {
     public Object get(int field) {
         switch (field) {
         case FOLDER_ID:
-            return getParentFolderID();
+            return I(getParentFolderID());
         default:
             return super.get(field);
         }

@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.protocol.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -230,12 +232,12 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	@Override
     public Long getLength() throws WebdavProtocolException {
-		return length;
+		return L(length);
 	}
 
 	@Override
     public void setLength(final Long length) throws WebdavProtocolException {
-		this.length = length;
+		this.length = length.longValue();
 	}
 
 	@Override
@@ -351,13 +353,13 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 
 	@Override
 	public void putBody(final InputStream data, final boolean guessLength) throws WebdavProtocolException {
-		eTag = String.valueOf(Integer.valueOf(eTag)+1);
+		eTag = Integer.toString(Integer.parseInt(eTag)+1);
 		final List<Integer> bytes = new ArrayList<Integer>();
 
 		int b = 0;
 		try {
 			while((b = data.read()) != -1) {
-				bytes.add(b);
+				bytes.add(I(b));
 			}
 		} catch (final IOException e) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

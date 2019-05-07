@@ -49,6 +49,7 @@
 
 package com.openexchange.multifactor.provider.totp;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -72,7 +73,7 @@ import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
 public class QRCodeGenerator {
 
     private static final String FORMAT_PNG = "PNG";
-    private final QRCodeWriter qrwrite = new QRCodeWriter();;
+    private final QRCodeWriter qrwrite = new QRCodeWriter();
 
     /**
      * Generates a QR code including the given string/URL
@@ -86,7 +87,7 @@ public class QRCodeGenerator {
             final Map<EncodeHintType, Object> encodingHints = new HashMap<>();
             encodingHints.put(EncodeHintType.CHARACTER_SET, "UTF-8");
             encodingHints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
-            encodingHints.put(EncodeHintType.MARGIN, 4);
+            encodingHints.put(EncodeHintType.MARGIN, I(4));
             final BitMatrix bitMatrix = qrwrite.encode(url, BarcodeFormat.QR_CODE, 300, 300, encodingHints);
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             MatrixToImageWriter.writeToStream(bitMatrix, FORMAT_PNG, out);

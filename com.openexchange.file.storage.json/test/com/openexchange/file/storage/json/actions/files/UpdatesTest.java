@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -85,7 +86,7 @@ public class UpdatesTest extends FileActionTest {
             .param("timestamp", "" + D("Yesterday at 12:00").getTime()).param("sort", "700").param("order", "desc").param("ignore", "deleted").param("timezone", "Europe/Berlin");
 
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("getDelta", "12", D("Yesterday at 12:00").getTime(), columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta());
+        fileAccess().expectCall("getDelta", "12", L(D("Yesterday at 12:00").getTime()), columns, File.Field.TITLE, SortDirection.DESC, Boolean.TRUE).andReturn(Results.emptyDelta());
 
         perform();
 
@@ -99,7 +100,7 @@ public class UpdatesTest extends FileActionTest {
             .param("sort", "700").param("order", "desc").param("ignore", "deleted").param("timezone", "Europe/Berlin");
 
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("getDelta", "12", FileStorageFileAccess.DISTANT_PAST, columns, File.Field.TITLE, SortDirection.DESC, true).andReturn(Results.emptyDelta());
+        fileAccess().expectCall("getDelta", "12", L(FileStorageFileAccess.DISTANT_PAST), columns, File.Field.TITLE, SortDirection.DESC, Boolean.TRUE).andReturn(Results.emptyDelta());
 
         perform();
 

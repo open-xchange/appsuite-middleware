@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.test;
 
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.ajax.mail.filter.api.dao.TestCommand;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument;
@@ -63,61 +64,36 @@ public class CurrentDateTest extends AbstractTest implements Test<CurrentDateTes
 
     /**
      * Initialises a new {@link AllOfTest}.
-     * 
+     *
      * @param testCommand
      */
     public CurrentDateTest(String datePart, String comparison, long dateValue) {
         super(TestCommand.CURRENTDATE);
-        setTestArgument(CurrentDateTestArgument.datevalue, new Object[] { dateValue });
+        setTestArgument(CurrentDateTestArgument.datevalue, new Object[] { L(dateValue) });
         setTestArgument(CurrentDateTestArgument.datepart, datePart);
         setTestArgument(CurrentDateTestArgument.comparison, comparison);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestCommand()
-     */
     @Override
     public TestCommand getTestCommand() {
         return TestCommand.CURRENTDATE;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setComparison(com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison)
-     */
     @Override
     public void setComparison(Comparison<? extends ComparisonArgument> comparison) {
         this.comparison = comparison;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getComparison()
-     */
     @Override
     public Comparison<? extends ComparisonArgument> getComparison() {
         return comparison;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#setTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument, java.lang.Object)
-     */
     @Override
     public void setTestArgument(CurrentDateTestArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.test.Test#getTestArgument(com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument)
-     */
     @Override
     public Object getTestArgument(CurrentDateTestArgument argument) {
         return getArguments().get(argument);

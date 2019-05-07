@@ -226,7 +226,9 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
         String paramHdr = unfold(paramHdrArg.trim());
         if (paramHdr.indexOf('%') >= 0) {
             // Possibly encoded
-            paramHdr = decodeUrl(paramHdr);
+            if (!RFC2231Tools.containsRFC2231Value(paramHdr)) {
+                paramHdr = decodeUrl(paramHdr);
+            }
         }
         if (paramHdr.indexOf("=?") >= 0) {
             // Possibly mail-safe encoded

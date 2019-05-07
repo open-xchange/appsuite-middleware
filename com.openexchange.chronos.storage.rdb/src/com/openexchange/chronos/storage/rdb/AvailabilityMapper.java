@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -137,7 +139,7 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
 
             @Override
             public void set(Availability object, Integer value) throws OXException {
-                object.setId(Integer.toString(value));
+                object.setId(value.toString());
             }
 
             @Override
@@ -183,12 +185,12 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
 
             @Override
             public void set(Availability object, Integer value) throws OXException {
-                object.setCalendarUser(value);
+                object.setCalendarUser(value.intValue());
             }
 
             @Override
             public Integer get(Availability object) {
-                return object.getCalendarUser();
+                return I(object.getCalendarUser());
             }
 
             @Override
@@ -257,7 +259,7 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
             @Override
             public Long get(Availability object) {
                 Date created = object.getCreated();
-                return created == null ? null : created.getTime();
+                return created == null ? null : L(created.getTime());
             }
 
             @Override
@@ -275,7 +277,6 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
             @Override
             public void set(Availability object, String value) throws OXException {
                 object.setDescription(value);
-                ;
             }
 
             @Override
@@ -377,12 +378,12 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
 
             @Override
             public void set(Availability object, Long value) throws OXException {
-                object.setLastModified(value == null ? null : new Date(value));
+                object.setLastModified(value == null ? null : new Date(value.longValue()));
             }
 
             @Override
             public Long get(Availability object) {
-                return object.getLastModified().getTime();
+                return L(object.getLastModified().getTime());
             }
 
             @Override
@@ -446,12 +447,12 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
 
             @Override
             public void set(Availability object, Integer value) throws OXException {
-                object.setPriority(value);
+                object.setPriority(value.intValue());
             }
 
             @Override
             public Integer get(Availability object) {
-                return object.getPriority();
+                return I(object.getPriority());
             }
 
             @Override
@@ -468,12 +469,12 @@ public class AvailabilityMapper extends DefaultDbMapper<Availability, Availabili
 
             @Override
             public void set(Availability object, Integer value) throws OXException {
-                object.setSequence(value == null ? 0 : value);
+                object.setSequence(value == null ? 0 : value.intValue());
             }
 
             @Override
             public Integer get(Availability object) {
-                return object.getSequence();
+                return I(object.getSequence());
             }
 
             @Override

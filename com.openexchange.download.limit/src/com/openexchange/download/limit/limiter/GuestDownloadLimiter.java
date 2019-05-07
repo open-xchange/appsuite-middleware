@@ -49,6 +49,8 @@
 
 package com.openexchange.download.limit.limiter;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Date;
@@ -91,10 +93,10 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
 
     protected void throwIfExceeded(FileAccess limit, FileAccess used) throws OXException {
         if (FileAccess.isCountExceeded(limit, used)) {
-            throw DownloadLimitedExceptionCode.COUNT_EXCEEDED.create(limit.getUserId(), limit.getContextId(), limit.getCount());
+            throw DownloadLimitedExceptionCode.COUNT_EXCEEDED.create(I(limit.getUserId()), I(limit.getContextId()), I(limit.getCount()));
         }
         if (FileAccess.isSizeExceeded(limit, used)) {
-            throw DownloadLimitedExceptionCode.LIMIT_EXCEEDED.create(limit.getUserId(), limit.getContextId(), limit.getSize(), used.getSize());
+            throw DownloadLimitedExceptionCode.LIMIT_EXCEEDED.create(I(limit.getUserId()), I(limit.getContextId()), L(limit.getSize()), L(used.getSize()));
         }
     }
 
@@ -109,16 +111,16 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         if (!user.isGuest()) {
             return;
         }
-        Long start = null;
+        long start;
         ConfigView view = this.configViewFactory.getView(0, contextId);
         if (Strings.isEmpty(user.getMail())) { // anonymous guest
-            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.getInstance().timeFrameLinks());
+            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, I(LimitConfig.getInstance().timeFrameLinks()));
             long now = new Date().getTime();
-            start = now - timeWindow;
+            start = now - timeWindow.intValue();
         } else {
-            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.getInstance().timeFrameGuests());
+            Integer timeWindow = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, I(LimitConfig.getInstance().timeFrameGuests()));
             long now = new Date().getTime();
-            start = now - timeWindow;
+            start = now - timeWindow.intValue();
         }
         ConnectionHelper connectionHelper = new ConnectionHelper(contextId);
         try {
@@ -142,28 +144,28 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
         }
         try {
             ConfigView view = configViewFactory.getView(0, contextId);
-            Boolean enabled = view.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE);
+            boolean enabled = view.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE).booleanValue();
             if (!enabled) {
                 return null;
             }
             if (Strings.isEmpty(user.getMail())) { // anonymous guest
-                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, LimitConfig.getInstance().sizeLimitLinks());
-                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, LimitConfig.getInstance().countLimitLinks());
-                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, LimitConfig.getInstance().timeFrameLinks());
+                Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, L(LimitConfig.getInstance().sizeLimitLinks()));
+                Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, I(LimitConfig.getInstance().countLimitLinks()));
+                Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, I(LimitConfig.getInstance().timeFrameLinks()));
                 long now = new Date().getTime();
-                long start = now - userLimitTimeFrame;
+                long start = now - userLimitTimeFrame.intValue();
 
-                return new FileAccess(contextId, user.getId(), start, now, userCountLimit, userSizeLimit);
+                return new FileAccess(contextId, user.getId(), start, now, userCountLimit.intValue(), userSizeLimit.longValue());
             }
-            Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, LimitConfig.getInstance().sizeLimitGuests());
-            Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, LimitConfig.getInstance().countLimitGuests());
-            Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, LimitConfig.getInstance().timeFrameGuests());
+            Long userSizeLimit = view.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, L(LimitConfig.getInstance().sizeLimitGuests()));
+            Integer userCountLimit = view.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, I(LimitConfig.getInstance().countLimitGuests()));
+            Integer userLimitTimeFrame = view.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, I(LimitConfig.getInstance().timeFrameGuests()));
             long now = new Date().getTime();
-            long start = now - userLimitTimeFrame;
+            long start = now - userLimitTimeFrame.intValue();
 
-            return new FileAccess(contextId, user.getId(), start, now, userCountLimit, userSizeLimit);
+            return new FileAccess(contextId, user.getId(), start, now, userCountLimit.intValue(), userSizeLimit.longValue());
         } catch (OXException e) {
-            LOG.warn("Unable to retrieve configured limits for user {} in context {}: {}", user.getId(), contextId, e.getMessage());
+            LOG.warn("Unable to retrieve configured limits for user {} in context {}: {}", I(user.getId()), I(contextId), e.getMessage());
         }
         return null;
     }
@@ -187,7 +189,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
                 connectionHelper.backReadOnly();
             }
         } catch (OXException e) {
-            LOG.warn("Unable to retrieve usage for user {} in context {}: {}", userId, contextId, e.getMessage());
+            LOG.warn("Unable to retrieve usage for user {} in context {}: {}", I(userId), I(contextId), e.getMessage());
         }
         return null;
     }
@@ -245,7 +247,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
             dropObsoleteAccesses(session.getUser(), contextId);
         } catch (OXException e) {
             int userId = session.getUserId();
-            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", userId, contextId, e);
+            LOG.info("Unable to delete obsolete entries for user {} in context {}. As this is just for cleanup reasons these entries won't be considered within further processings.", I(userId), I(contextId), e);
         }
     }
 
@@ -285,7 +287,7 @@ public abstract class GuestDownloadLimiter extends ActionBoundDispatcherListener
                 RdbFileAccessStorage.getInstance().addAccess(contextId, userId, length, writable);
                 connectionHelper.commit();
             } catch (OXException oxException) {
-                LOG.error("Unable to execute post execution check and add access for user {} in context {}: {}", userId, contextId, oxException.getMessage());
+                LOG.error("Unable to execute post execution check and add access for user {} in context {}: {}", I(userId), I(contextId), oxException.getMessage());
             } finally {
                 if (connectionHelper != null) {
                     connectionHelper.back();

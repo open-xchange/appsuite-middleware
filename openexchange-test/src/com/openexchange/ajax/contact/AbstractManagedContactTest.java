@@ -71,6 +71,7 @@ public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
     protected String folderName1;
     protected String folderName2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

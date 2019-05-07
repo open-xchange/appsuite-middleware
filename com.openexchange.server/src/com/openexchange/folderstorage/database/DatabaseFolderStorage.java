@@ -964,7 +964,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         try {
             final Connection con = provider.getConnection();
             final DatabaseFolder retval = loadFolder(folderIdentifier, storageType, storageParameters, con, treeId);
-            
+
             if (storageParameters.getUser().isAnonymousGuest()) {
                 handleAnonymousUser(retval, treeId, storageType, storageParameters, con);
             }
@@ -1025,11 +1025,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         retval.setTreeID(treeId);
         return retval;
     }
-    
+
     /**
      * Adjusts the parent folder and subfolders of the given folder. Only folder ids of folders for which the user has
      * non system permissions will be present.
-     * 
+     *
      * @param folder - The folder to adjust
      * @param treeId - The tree id, needed to load folders
      * @param storageType - The storage type to use
@@ -1052,7 +1052,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     /**
      * Get the parent Folder for the given folder that references a system folder, a default folder or the next higher
      * folder for which the user has a non system permission.
-     * 
+     *
      * @param folder - The folder to adjust
      * @param treeId - The tree id, needed to load folders
      * @param storageType - The storage type to use
@@ -1069,11 +1069,11 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         }
         return parentFolder;
     }
-    
+
     /**
-     * Get the subfolders for the given folder, for which 
+     * Get the subfolders for the given folder, for which
      * the current user has not only visible but other non system permissions.
-     * 
+     *
      * @param folder - The folder to start with
      * @param treeId - The tree id, needed to load folders
      * @param storageType - The storage type to use
@@ -1090,12 +1090,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             SortableId[] sortableIds = getSubfolders(treeId, folder.getID(), storageParameters);
             subfolderIDs = new String[sortableIds.length];
             for (int i = 0; i < sortableIds.length; i++) {
-                subfolderIDs[i] = sortableIds[i].getId();                    
-            }                
-        } 
+                subfolderIDs[i] = sortableIds[i].getId();
+            }
+        }
         if (0 == subfolderIDs.length) {
             return Collections.emptyList();
-        }        
+        }
         /*
          * collect all non-hidden subfolders recursively
          */
@@ -1103,8 +1103,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         for (Folder subfolder : getFolders(treeId, Arrays.asList(folder.getSubfolderIDs()), storageType, storageParameters)) {
             if (DatabaseFolder.class.isInstance(subfolder) && ((DatabaseFolder) subfolder).isHidden()) {
                 /*
-                 * this subfolder is hidden, recursively collect remaining non-hidden folders from subtree  
-                 */   
+                 * this subfolder is hidden, recursively collect remaining non-hidden folders from subtree
+                 */
                 if (((DatabaseFolder) subfolder).isVisibleThroughSystemPermissions()) {
                     resultingSubfolders.addAll(getNonHiddenSubfolders(subfolder, treeId, storageType, storageParameters));
                 }
@@ -2168,7 +2168,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
         if (Boolean.TRUE.equals(ignoreCache)) {
             FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
             Boolean do_not_cache = storageParameters.getParameter(FolderType.GLOBAL, "DO_NOT_CACHE");
-            if (null == do_not_cache || !do_not_cache) {
+            if (null == do_not_cache || !do_not_cache.booleanValue()) {
                 cacheManager.putFolderObject(fo, ctx, true, null);
             }
             return fo;

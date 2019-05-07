@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.rmi.factory;
 
-import java.util.UUID;
+import java.util.Random;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 
@@ -68,10 +68,11 @@ public class ContextFactory {
      * @return The new {@link Context} object
      */
     public static Context createContext(long maxQuota) {
-        Context context = new Context();
-        context.setName("Name-" + UUID.randomUUID().toString());
-        context.setMaxQuota(maxQuota);
-        return context;
+        return createContext(getRandomContextId(), maxQuota);
+    }
+
+    public static Context createContext(String name) {
+        return createContext(getRandomContextId(), name);
     }
 
     /**
@@ -83,7 +84,7 @@ public class ContextFactory {
      * @return The new {@link Context} object
      */
     public static Context createContext(int contextId, long maxQuota) {
-        Context context = createContext(maxQuota);
+        Context context = new Context(Integer.valueOf(contextId));
         context.setMaxQuota(maxQuota);
         return context;
     }
@@ -97,13 +98,18 @@ public class ContextFactory {
      * @return The new {@link Context} object
      */
     public static Context createContext(int contextId, String name) {
-        Context newContext = new Context();
+        Context newContext = new Context(Integer.valueOf(contextId));
         Filestore filestore = new Filestore();
         filestore.setSize(Long.valueOf(128l));
         newContext.setFilestoreId(filestore.getId());
         newContext.setName(name);
         newContext.setMaxQuota(filestore.getSize());
-        newContext.setId(Integer.valueOf(contextId));
         return newContext;
     }
+
+    public static int getRandomContextId() {
+        Random r = new Random();
+        return r.ints(11, (10000000 + 1)).findFirst().getAsInt();
+    }
+
 }

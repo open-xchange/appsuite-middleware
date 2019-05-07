@@ -74,6 +74,7 @@ public class YomiTest extends AbstractAJAXSession {
 
     private Contact updateContact;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -128,6 +129,7 @@ public class YomiTest extends AbstractAJAXSession {
         assertEquals("Wrong Yomi Last name", "\u3059\u305a\u304d", loadedUpdatedContact.getYomiLastName());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

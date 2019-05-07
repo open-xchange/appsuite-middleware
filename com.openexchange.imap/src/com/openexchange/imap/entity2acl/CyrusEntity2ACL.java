@@ -120,7 +120,7 @@ public final class CyrusEntity2ACL extends Entity2ACL {
         try {
             return MailConfig.getMailLogin(storageService.getMailAccount(((Integer) args[0]).intValue(), userId, ctx.getContextId()), userLoginInfo, userId, ctx.getContextId());
         } catch (final OXException e) {
-            throw Entity2ACLExceptionCode.UNKNOWN_USER.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
+            throw Entity2ACLExceptionCode.UNKNOWN_USER.create(e, Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()), args[1].toString());
         }
     }
 

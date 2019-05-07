@@ -115,7 +115,7 @@ public class RdbU2FMultifactorDeviceStorage extends MultifactorStorageCommon imp
             resultSet.getObject("publicKey").toString(),
             resultSet.getInt("counter"),
             resultSet.getBoolean("compromised"));
-        device.enable(resultSet.getBoolean("enabled"));
+        device.enable(resultSet.getBoolean("enabled") ? Boolean.TRUE : Boolean.FALSE);
         device.setName(resultSet.getString("name"));
         return device;
     }
@@ -147,7 +147,7 @@ public class RdbU2FMultifactorDeviceStorage extends MultifactorStorageCommon imp
             statement.setString(index++, device.getName());
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
-            statement.setBoolean(index++, device.isEnabled());
+            statement.setBoolean(index++, device.isEnabled().booleanValue());
             statement.setString(index++, device.getKeyHandle());
             statement.setString(index++, device.getPublicKey());
             statement.setString(index++, device.getAttestationCertificate());

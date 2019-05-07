@@ -69,7 +69,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 public class Bug28185Test extends AbstractManagedContactTest {
 
     @Test
-    public void testWrongMemberReference() throws OXException {
+    public void testWrongMemberReference() {
         /*
          * try and create a distribution list, using a wrong entry id reference and no e-mail address
          */
@@ -111,7 +111,7 @@ public class Bug28185Test extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testNoObjectIDReference() throws OXException {
+    public void testNoObjectIDReference() {
         /*
          * try and create a distribution list, using a specific mail-field, but no entry id
          */

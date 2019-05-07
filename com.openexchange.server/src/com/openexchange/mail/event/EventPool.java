@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.event;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -316,7 +317,7 @@ public final class EventPool implements Runnable {
         } else {
             eventAdmin.sendEvent(event);
         }
-        LOG.debug("{}Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isRemote() ? "(Remotely) " : "", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), pooledEvent.getAccountId(), pooledEvent.getUserId(), pooledEvent.getContextId());
+        LOG.debug("{}Notified {}-wise changed folder \"{}\" in account {} of user {} in context {}", pooledEvent.isRemote() ? "(Remotely) " : "", pooledEvent.isContentRelated() ? "content-related" : "hierarchical", pooledEvent.getFullname(), I(pooledEvent.getAccountId()), I(pooledEvent.getUserId()), I(pooledEvent.getContextId()));
     }
 
 }

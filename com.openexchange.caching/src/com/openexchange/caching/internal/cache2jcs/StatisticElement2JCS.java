@@ -60,8 +60,6 @@ import com.openexchange.caching.StatisticElement;
  */
 public final class StatisticElement2JCS implements StatisticElement {
 
-    private static final long serialVersionUID = -6503006024903685218L;
-
     private final IStatElement statElement;
 
     /**

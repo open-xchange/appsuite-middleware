@@ -49,6 +49,7 @@
 
 package com.openexchange.microsoft.graph.api.client;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpHeaders;
@@ -93,7 +94,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
     /**
      * Executes the specified {@link MicrosoftGraphRequest} and examines the response body.
-     * 
+     *
      * @param request The {@link MicrosoftGraphRequest} to execute
      * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
@@ -104,7 +105,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
     /**
      * Executes the specified {@link HttpRequest} and examines the response body.
-     * 
+     *
      * @param request The {@link HttpRequest} to execute
      * @return The {@link RESTResponse}
      * @throws OXException if an error is occurred
@@ -162,7 +163,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
     /**
      * Try and parse the specified response body as a {@link JSONValue}
-     * 
+     *
      * @param responseBody The response body to parse
      * @return The response body as a {@link JSONValue} or <code>null</code> if the body could not be parsed
      */
@@ -184,7 +185,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
 
     /**
      * Prepares an {@link HttpRequestBase} from the specified {@link MicrosoftGraphRequest}
-     * 
+     *
      * @param request The {@link MicrosoftGraphRequest} to prepare
      * @return The prepared {@link HttpRequestBase} ready for execution
      * @throws OXException if an invalid URI is specified
@@ -206,7 +207,7 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     /**
      * Checks whether the specified response contains any API errors and if
      * it does throws the appropriate exception.
-     * 
+     *
      * @param response the {@link JSONObject} response body
      * @throws OXException The appropriate API exception if an error is detected
      */
@@ -226,13 +227,13 @@ public class MicrosoftGraphRESTClient extends AbstractRESTClient {
     /**
      * Asserts the status code of the specified {@link RESTResponse}
      * and throws the appropriate exception if necessary.
-     * 
+     *
      * @param restResponse The {@link RESTResponse}
      * @throws OXException if an error is detected
      */
     private void assertStatusCode(RESTResponse restResponse) throws OXException {
         int statusCode = restResponse.getStatusCode();
-        LOG.debug("Check for status code '{}'", statusCode);
+        LOG.debug("Check for status code '{}'", I(statusCode));
         // All good
         if (statusCode < 400) {
             return;

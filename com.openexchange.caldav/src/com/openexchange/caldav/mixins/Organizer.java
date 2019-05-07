@@ -71,9 +71,8 @@ public class Organizer extends SingleXMLPropertyMixin {
      * Initializes a new {@link Organizer}.
      *
      * @param collection The collection to get the owner from.
-     * @throws OXException
      */
-    public Organizer(FolderCollection<?> collection) throws OXException {
+    public Organizer(FolderCollection<?> collection) {
         super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "organizer");
         this.collection = collection;
     }

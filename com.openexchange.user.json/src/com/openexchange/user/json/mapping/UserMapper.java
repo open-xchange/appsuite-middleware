@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -133,7 +134,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 		final EnumMap<UserField, JsonMapping<? extends Object, User>> mappings = new
 				EnumMap<UserField, JsonMapping<? extends Object, User>>(UserField.class);
 
-		mappings.put(UserField.ID, new IntegerMapping<User>("id", 1) {
+		mappings.put(UserField.ID, new IntegerMapping<User>("id", I(1)) {
 
 			@Override
 			public boolean isSet(User object) {
@@ -162,7 +163,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 		});
 
-		mappings.put(UserField.ALIASES, new ArrayMapping<String, User>("aliases", 610) {
+		mappings.put(UserField.ALIASES, new ArrayMapping<String, User>("aliases", I(610)) {
 
 			@Override
 			public boolean isSet(User object) {
@@ -204,7 +205,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 		});
 
-		mappings.put(UserField.TIME_ZONE, new StringMapping<User>("timezone", 611) {
+		mappings.put(UserField.TIME_ZONE, new StringMapping<User>("timezone", I(611)) {
 
 			@Override
 			public boolean isSet(User object) {
@@ -233,7 +234,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 		});
 
-		mappings.put(UserField.LOCALE, new DefaultJsonMapping<Locale, User>("locale", 612) {
+		mappings.put(UserField.LOCALE, new DefaultJsonMapping<Locale, User>("locale", I(612)) {
 
 			@Override
 			public void deserialize(JSONObject from, User to) throws JSONException, OXException {
@@ -272,7 +273,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
             }
 		});
 
-		mappings.put(UserField.GROUPS, new DefaultJsonMapping<int[], User>("groups", 613) {
+		mappings.put(UserField.GROUPS, new DefaultJsonMapping<int[], User>("groups", I(613)) {
 
 			@Override
 			public void deserialize(JSONObject from, User to) throws JSONException, OXException {
@@ -313,7 +314,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 		});
 
-		mappings.put(UserField.CONTACT_ID, new IntegerMapping<User>("contact_id", 614) {
+		mappings.put(UserField.CONTACT_ID, new IntegerMapping<User>("contact_id", I(614)) {
 
 			@Override
 			public boolean isSet(User object) {
@@ -336,7 +337,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			}
 		});
 
-        mappings.put(UserField.LOGIN_INFO, new StringMapping<User>("login_info", 615) {
+        mappings.put(UserField.LOGIN_INFO, new StringMapping<User>("login_info", I(615)) {
 
             @Override
             public boolean isSet(User object) {
@@ -359,7 +360,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
             }
         });
 
-        mappings.put(UserField.GUEST_CREATED_BY, new IntegerMapping<User>("guest_created_by", 616) {
+        mappings.put(UserField.GUEST_CREATED_BY, new IntegerMapping<User>("guest_created_by", I(616)) {
 
             @Override
             public boolean isSet(User object) {
@@ -392,9 +393,8 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
      *
      * @param localeStr The locale string to parse
      * @return The parsed instance of {@link Locale} or <code>null</code>
-     * @throws OXException If locale string is invalid
      */
-    static Locale parseLocaleString(final String localeStr) throws OXException {
+    static Locale parseLocaleString(final String localeStr) {
         if (null == localeStr) {
             return null;
         }

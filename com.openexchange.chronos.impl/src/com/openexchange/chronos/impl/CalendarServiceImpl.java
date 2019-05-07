@@ -53,27 +53,21 @@ import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.trackAttendeeUsage;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UnmodifiableEvent;
-import com.openexchange.chronos.common.AlarmUtils;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.impl.performer.AlarmTriggersPerformer;
 import com.openexchange.chronos.impl.performer.AllPerformer;
 import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.ChangeOrganizerPerformer;
@@ -119,7 +113,6 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class CalendarServiceImpl implements CalendarService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CalendarServiceImpl.class.getName());
     private final CalendarEventNotificationService notificationService;
     
     /**
@@ -383,7 +376,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID()))
+                return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID(), false))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, L(clientTimestamp));
 
             }
@@ -493,45 +486,13 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(CalendarSession session, Set<String> actions) throws OXException {
-        List<AlarmTrigger> triggers = new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
+        return new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
 
             @Override
             protected List<AlarmTrigger> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                List<AlarmTrigger> result = storage.getAlarmTriggerStorage().loadTriggers(session.getUserId(), session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class));
-
-                // Check whether if the event still exists and if the user can see the event and also is an attendee.
-                Iterator<AlarmTrigger> iterator = result.iterator();
-                while (iterator.hasNext()) {
-                    AlarmTrigger trigger = iterator.next();
-                    try {
-                        Event loadEvent = storage.getEventStorage().loadEvent(trigger.getEventId(), new EventField[] { EventField.ID, EventField.ORGANIZER });
-                        loadEvent = storage.getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, new EventField[] { EventField.ATTENDEES });
-                        if(loadEvent==null) {
-                            dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), "Event not found.");
-                            continue;
-                        }
-                        if(!Utils.isVisible(Utils.getFolder(session, trigger.getFolder(), true), loadEvent)) {
-                            dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), "Folder or event not visible.");
-                            continue;
-                        }
-                        if (!(loadEvent.getAttendees() == null && loadEvent.getOrganizer() != null && loadEvent.getOrganizer().getEntity() == session.getUserId()) && !CalendarUtils.isAttendee(loadEvent, session.getUserId())) {
-                            dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), "User is not an attendee.");
-                            continue;
-                        }
-                    } catch (OXException e) {
-                        dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), e.getMessage());
-                    }
-                }
-                return result;
+                return new AlarmTriggersPerformer(session, storage).perform(actions);
             }
         }.executeQuery();
-
-        return AlarmUtils.filter(triggers, actions.toArray(new String[actions.size()]));
-    }
-
-    void dropCurrentEntry(Iterator<AlarmTrigger> iterator, String id, String reason) {
-        LOG.debug("Dropped alarm trigger for alarm with id {}. Reason: {}", id, reason);
-        iterator.remove();
     }
 
     @Override

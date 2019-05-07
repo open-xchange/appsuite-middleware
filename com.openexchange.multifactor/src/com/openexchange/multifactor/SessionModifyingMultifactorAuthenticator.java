@@ -49,7 +49,7 @@
 
 package com.openexchange.multifactor;
 
-import java.util.Date;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Objects;
 import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.listener.MultifactorListenerChain;
@@ -91,8 +91,8 @@ public class SessionModifyingMultifactorAuthenticator extends MultifactorAuthent
 
     @Override
     protected void authenticationPerformed() throws OXException {
-        session.setParameter(Session.MULTIFACTOR_AUTHENTICATED, true);
-        session.setParameter(Session.MULTIFACTOR_LAST_VERIFIED, new Date().getTime());
+        session.setParameter(Session.MULTIFACTOR_AUTHENTICATED, Boolean.TRUE);
+        session.setParameter(Session.MULTIFACTOR_LAST_VERIFIED, L(System.currentTimeMillis()));
         sessiondService.storeSession(session.getSessionID());
     }
 

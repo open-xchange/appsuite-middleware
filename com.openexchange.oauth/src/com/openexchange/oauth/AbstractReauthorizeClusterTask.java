@@ -49,9 +49,12 @@
 
 package com.openexchange.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import org.scribe.model.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -63,6 +66,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractReauthorizeClusterTask {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractReauthorizeClusterTask.class);
 
     private final String taskName;
     private final Session session;
@@ -184,6 +189,9 @@ public abstract class AbstractReauthorizeClusterTask {
             return dbAccount;
         }
 
+        /// TEMP ///
+        checkForEmptySecrets();
+
         // Perform the actual re-authorise
         Token token = reauthorize();
 
@@ -202,6 +210,16 @@ public abstract class AbstractReauthorizeClusterTask {
 
         // Reload
         return oAuthService.getAccount(session, accountId);
+    }
+
+    /// TEMP ///
+    private void checkForEmptySecrets() {
+        if (Strings.isEmpty(cachedAccount.getSecret())) {
+            LOG.debug("The cached account {} of user {} in context {} has an empty secret", I(cachedAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+        }
+        if (Strings.isEmpty(dbAccount.getSecret())) {
+            LOG.debug("The DB account {} of user {} in context {} has an empty secret", I(dbAccount.getId()), I(session.getUserId()), I(session.getContextId()));
+        }
     }
 
     /**

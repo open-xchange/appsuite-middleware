@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.find.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -125,20 +126,21 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
     private UserValues userB;
 
     /** List of Lists with filters */
-    private List<List<ActiveFacet>> facets = new ArrayList<List<ActiveFacet>>();
+    private final List<List<ActiveFacet>> facets = new ArrayList<List<ActiveFacet>>();
 
     private enum Status {
         NOT_STARTED, IN_PROGRESS, DONE, WAITING, DEFERRED
     };
 
-    private Set<Integer> tasksToFind = new HashSet<Integer>();
+    private final Set<Integer> tasksToFind = new HashSet<Integer>();
 
     private final static UUID trackingID = UUID.randomUUID();
 
-    private Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
+    private final Map<String, List<Integer>> rootTasks = new HashMap<String, List<Integer>>();
 
-    private Map<Integer, Task> tasks = new HashMap<Integer, Task>();
-    
+    private final Map<Integer, Task> tasks = new HashMap<Integer, Task>();
+
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -151,12 +153,12 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
             LOG.error("Exception while setting up FindTasksTestEnvironment.", e);
             fail(e.getMessage());
         }
-    }    
+    }
 
     /**
      * Initialize the users
      */
-    private final void initUsers() throws Exception {
+    private final void initUsers() {
         userA = getClient().getValues();
         userB = getClient2().getValues();
     }
@@ -234,7 +236,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
         try {
             //share read only folder to userA
-            FolderTools.shareFolder(getClient2(), EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);           
+            FolderTools.shareFolder(getClient2(), EnumAPI.OX_NEW, userBsharedTestFolderRO.getObjectID(), userA.getUserId(), OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
         } catch (OXException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -305,13 +307,13 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         if (userBpublicTestFolder.getObjectID() == 0) {
             userBpublicTestFolder.setObjectID(foldersB.get(userBPublicTaskFolder).getObjectID());
         }
-        
+
 //        fttm.setClient2(getClient2());
     }
 
     /**
      * Get the folder structure of the specified folder
-     * 
+     *
      * @param client
      * @param folderID
      * @return
@@ -357,7 +359,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      * - 1 task with 2 participants (1int,1ext) in user's A private folder
      * - 1 task with 2 participants (2int) in user's B shared folder (series)
      * Total: 36 tasks
-     * 
+     *
      * @throws Exception
      */
     private final void createAndInsertTasks() throws Exception {
@@ -412,7 +414,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
         list.add(usrPartA);
         list.add(extPart);
         insertTask(getClient(), FolderType.PRIVATE, Status.NOT_STARTED, userAprivateTestFolder.getObjectID(), list, true, false);
-        
+
         ttm.setClient2(getClient2());
     }
 
@@ -424,23 +426,23 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      * @throws IOException
      */
     private final String readFile(String fileName) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + fileName));
-        StringBuilder sb = new StringBuilder();
-        String line = br.readLine();
+        try (BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + fileName))) {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
 
-        while (line != null) {
-            sb.append(line);
-            sb.append("\n");
-            line = br.readLine();
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+
+            return sb.toString();
         }
-        if (br != null)
-            br.close();
-        return sb.toString();
     }
 
     /**
      * Remember tasks
-     * 
+     *
      * @param u
      * @param t
      * @throws OXException
@@ -449,9 +451,10 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
      */
     private final void rememberTask(UserValues u, Task t) throws OXException, IOException, JSONException {
         List<Integer> list = rootTasks.get(u.getDefaultAddress());
-        if (list == null)
+        if (list == null) {
             list = new ArrayList<Integer>();
-        list.add(t.getObjectID());
+        }
+        list.add(I(t.getObjectID()));
         rootTasks.put(u.getDefaultAddress(), list);
     }
 
@@ -496,12 +499,13 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
         client.execute(new com.openexchange.ajax.task.actions.InsertRequest(t, client.getValues().getTimeZone())).fillTask(t);
 
-        if (attachment)
+        if (attachment) {
             client.execute(new AttachRequest(t, "my cool attachment", new ByteArrayInputStream(readFile("attachment.base64").getBytes()), "image/jpeg"));
+        }
 
         t = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folder, t.getObjectID())).getTask(client.getValues().getTimeZone());
 
-        tasks.put(t.getObjectID(), t);
+        tasks.put(I(t.getObjectID()), t);
         ttm.addEntities(t);
 
         return t;
@@ -544,7 +548,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
     /**
      * Create a single filter
-     * 
+     *
      * @param name
      * @param value
      * @return
@@ -554,23 +558,8 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
     }
 
     /**
-     * Clean up the root tasks
-     * 
-     * @param client
-     * @param map
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
-     */
-    private final void cleanRootTasks(AJAXClient client, List<Integer> list) throws OXException, IOException, JSONException {
-        for (Integer i : list) {
-            client.execute(new com.openexchange.ajax.task.actions.DeleteRequest(client.getValues().getPrivateTaskFolder(), i, new Date((System.currentTimeMillis() + 7300)))); //cheat and set a future last modified
-        }
-    }
-
-    /**
      * Get the List of Lists of active facets
-     * 
+     *
      * @return the List of Lists of active facets
      */
     public List<List<ActiveFacet>> getLoActiveFacets() {
@@ -579,7 +568,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
     /**
      * Set of task ids to find
-     * 
+     *
      * @return
      */
     public final Set<Integer> getTasksToFind() {
@@ -588,7 +577,7 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
     /**
      * Get the tracking id for this test run
-     * 
+     *
      * @return
      */
     public static final String getTrackingID() {
@@ -611,11 +600,11 @@ public class FindTasksTestEnvironment extends AbstractFindTest {
 
     /**
      * Get a task
-     * 
+     *
      * @param id
      * @return
      */
     public Task getTask(int id) {
-        return tasks.get(id);
+        return tasks.get(I(id));
     }
 }

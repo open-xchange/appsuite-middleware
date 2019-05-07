@@ -74,7 +74,7 @@ public class Activator extends HousekeepingActivator {
             ConfigurationService service = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, service);
             initCache(service);
-            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.autocontextidCache.getPool()));
             track(DBMigrationExecutorService.class, new AutoCIDDBMigrationServiceTracker(this, context));
             openTrackers();
 
@@ -96,7 +96,7 @@ public class Activator extends HousekeepingActivator {
         cache.initCache(service);
         cache.initCacheExtended();
         cache.initIDGenerator();
-        ClientAdminThreadExtended.cache = cache;
+        ClientAdminThreadExtended.autocontextidCache = cache;
         LOG.info("AutocontextID Bundle: Cache and Pools initialized!");
     }
 

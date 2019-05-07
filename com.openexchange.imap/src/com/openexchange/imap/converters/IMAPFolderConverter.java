@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.converters;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -105,8 +107,8 @@ public final class IMAPFolderConverter {
         private final int sessionUser;
         private final String fullname;
         private final char separator;
-        private final String otherUserNamespace;
-        private final String publicNamespace;
+        private final String[] otherUserNamespaces;
+        private final String[] publicNamespaces;
 
         /**
          * Initializes a new {@link Entity2ACLArgsImpl}.
@@ -116,7 +118,8 @@ public final class IMAPFolderConverter {
          * @param sessionUser The session user ID
          * @param fullname The IMAP folder's full name
          * @param separator The separator character
-         * @param otherUserNamespaces The namespace for other users
+         * @param otherUserNamespaces The namespaces for other users
+         * @param publicNamespaces The namespaces for public folders
          */
         Entity2ACLArgsImpl(int accountId, String serverUrl, int sessionUser, String fullname, char separator, String[] otherUserNamespaces, String[] publicNamespaces) {
             super();
@@ -125,13 +128,13 @@ public final class IMAPFolderConverter {
             this.sessionUser = sessionUser;
             this.fullname = fullname;
             this.separator = separator;
-            this.otherUserNamespace = null == otherUserNamespaces || otherUserNamespaces.length == 0 ? null : otherUserNamespaces[0];
-            this.publicNamespace = null == publicNamespaces || publicNamespaces.length == 0 ? null : publicNamespaces[0];
+            this.otherUserNamespaces = null == otherUserNamespaces || otherUserNamespaces.length == 0 ? null : otherUserNamespaces;
+            this.publicNamespaces = null == publicNamespaces || publicNamespaces.length == 0 ? null : publicNamespaces;
         }
 
         @Override
         public Object[] getArguments(final IMAPServer imapServer) throws OXException {
-            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespace, publicNamespace);
+            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespaces, publicNamespaces);
         }
     }
 
@@ -465,7 +468,7 @@ public final class IMAPFolderConverter {
                 } else {
                     mailFolder.setSupportsUserFlags(false);
                 }
-                LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, System.currentTimeMillis() - st);
+                LOG.debug("IMAP folder \"{}\" converted in {}msec.", imapFullName, L(System.currentTimeMillis() - st));
                 return mailFolder;
             }
         } catch (final MessagingException e) {
@@ -647,7 +650,7 @@ public final class IMAPFolderConverter {
                     userPermAdded = true;
                     final Rights aclRights = acl.getRights();
                     if (!ownRights.equals(aclRights)) {
-                        LOG.debug("Detected different rights for MYRIGHTS ({}) and GETACL ({}) for user {} in context {}. Preferring GETACL rights as user''s own-rights.", ownRights, aclRights, session.getUserId(), session.getContextId());
+                        LOG.debug("Detected different rights for MYRIGHTS ({}) and GETACL ({}) for user {} in context {}. Preferring GETACL rights as user''s own-rights.", ownRights, aclRights, I(session.getUserId()), I(session.getContextId()));
                         final MailPermission ownPermission = mailFolder.getOwnPermission();
                         if (ownPermission instanceof ACLPermission) {
                             ((ACLPermission) ownPermission).parseRights(aclRights, imapConfig);

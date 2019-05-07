@@ -58,7 +58,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.GetRequest;
@@ -190,7 +189,7 @@ public class Bug15776Test extends AbstractAJAXSession {
         return appointment;
     }
 
-    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, JSONException {
         Calendar cal = TimeTools.createCalendar(timezone);
 
         // This yearly series starts 5 years ago.

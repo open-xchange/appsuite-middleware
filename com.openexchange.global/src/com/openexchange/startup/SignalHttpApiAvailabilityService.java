@@ -61,5 +61,5 @@ import com.openexchange.osgi.annotation.SingletonService;
  */
 @SingletonService
 public interface SignalHttpApiAvailabilityService {
-
+    // Empty
 }

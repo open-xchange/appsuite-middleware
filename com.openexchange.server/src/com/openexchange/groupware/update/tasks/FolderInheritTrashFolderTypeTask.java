@@ -148,7 +148,7 @@ public final class FolderInheritTrashFolderTypeTask extends UpdateTaskAdapter {
     private static List<Integer> getSubfolderIDsRecursively(Connection connection, int contextID, int folderID) throws SQLException {
         List<Integer> subfolderIDs = new ArrayList<Integer>();
         List<Integer> parentFolderIDs = new ArrayList<Integer>();
-        parentFolderIDs.add(folderID);
+        parentFolderIDs.add(Integer.valueOf(folderID));
         do {
             StringBuilder stringBuilder = new StringBuilder("SELECT fuid FROM oxfolder_tree WHERE cid=? AND parent");
             if (1 == parentFolderIDs.size()) {

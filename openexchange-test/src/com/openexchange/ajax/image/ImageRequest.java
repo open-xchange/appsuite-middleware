@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax.image;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -70,8 +73,9 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
      *
      * @param imageUri The image UIR to parse
      * @return The image request
+     * @throws UnsupportedEncodingException
      */
-    public static ImageRequest parseFrom(String imageUri) {
+    public static ImageRequest parseFrom(String imageUri) throws UnsupportedEncodingException {
         if (null == imageUri) {
             return null;
         }
@@ -88,13 +92,13 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
         while ((i = query.indexOf('&')) > 0) {
             String nvp = query.substring(0, i);
             int delim = nvp.indexOf('=');
-            imageRequest.addParameter(URLDecoder.decode(nvp.substring(0, delim)), URLDecoder.decode(nvp.substring(delim + 1)));
+            imageRequest.addParameter(URLDecoder.decode(nvp.substring(0, delim), UTF_8.name()), URLDecoder.decode(nvp.substring(delim + 1), UTF_8.name()));
 
             query = query.substring(i + 1);
         }
         {
             int delim = query.indexOf('=');
-            imageRequest.addParameter(URLDecoder.decode(query.substring(0, delim)), URLDecoder.decode(query.substring(delim + 1)));
+            imageRequest.addParameter(URLDecoder.decode(query.substring(0, delim), StandardCharsets.UTF_8.name()), URLDecoder.decode(query.substring(delim + 1), UTF_8.name()));
         }
         return imageRequest;
     }

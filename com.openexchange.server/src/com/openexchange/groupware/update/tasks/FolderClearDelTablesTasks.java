@@ -97,11 +97,11 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
 
             LOG.info("Clearing obsolete fields in 'del_oxfolder_tree'...");
             int cleared = clearDelOxfolderTree(connection);
-            LOG.info("Cleared {} rows in 'del_oxfolder_tree'.", cleared);
+            LOG.info("Cleared {} rows in 'del_oxfolder_tree'.", Integer.valueOf(cleared));
 
             LOG.info("Clearing obsolete fields in 'virtualBackupTree'...");
             cleared = clearVirtuelBackupTree(connection);
-            LOG.info("Cleared {} rows in 'virtualBackupTree'.", cleared);
+            LOG.info("Cleared {} rows in 'virtualBackupTree'.", Integer.valueOf(cleared));
 
             connection.commit();
             rollback = 2;

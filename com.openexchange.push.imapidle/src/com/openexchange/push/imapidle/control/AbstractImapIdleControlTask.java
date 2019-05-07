@@ -49,6 +49,7 @@
 
 package com.openexchange.push.imapidle.control;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.slf4j.Logger;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
 
@@ -88,7 +89,7 @@ public abstract class AbstractImapIdleControlTask {
                 pushListener.markInterrupted();
                 registration.getImapFolder().close(false);
             } catch (Exception e) {
-                LoggerHolder.LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId(), e);
+                LoggerHolder.LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", I(pushListener.getUserId()), I(pushListener.getContextId()), e);
             }
         }
     }

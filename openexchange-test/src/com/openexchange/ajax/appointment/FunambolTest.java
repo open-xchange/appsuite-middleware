@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment;
 
 import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,6 +84,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,6 +103,7 @@ public final class FunambolTest extends AbstractAJAXSession {
         return appointment;
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -143,8 +146,10 @@ public final class FunambolTest extends AbstractAJAXSession {
             toDelete.add(appointment);
         }
 
+        assertNotNull("Missing last modified", lastModified);
         assertTrue("Appointment creation time is not after time request before creation.", lastModified.after(timeBeforeCreation));
         assertTrue("Appointment creation time is not before time request after creation.", lastModified.before(timeAfterCreation));
+        assertNotNull("Missing appointment", reload);
         assertEquals("Last modified and creation date are different.", L(lastModified.getTime() / 1000), L(reload.getCreationDate().getTime() / 1000));
     }
 }

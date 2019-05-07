@@ -59,7 +59,6 @@ import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
 
@@ -68,7 +67,6 @@ import com.openexchange.groupware.container.Contact;
  */
 public class Bug16515Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private TimeZone tz;
     private Contact contact;
 
@@ -78,10 +76,10 @@ public class Bug16515Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         tz = getClient().getValues().getTimeZone();
         contact = createContact();
     }
@@ -95,6 +93,7 @@ public class Bug16515Test extends AbstractAJAXSession {
         assertEquals("File as has changed after creating contact.", contact.getFileAs(), toCompare.getFileAs());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

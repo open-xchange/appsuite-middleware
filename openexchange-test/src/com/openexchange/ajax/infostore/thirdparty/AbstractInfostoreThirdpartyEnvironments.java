@@ -175,13 +175,13 @@ public abstract class AbstractInfostoreThirdpartyEnvironments {
         this.accountIds = new ArrayList<Integer>(authProviders.size());
 
         for (OAuthService authProvider : authProviders) {
-            int currentOAuthAccount = initOAuthAccountFor(authProvider);
-            createFilestorageFor(authProvider, currentOAuthAccount);
+            Integer currentOAuthAccount = initOAuthAccountFor(authProvider);
+            createFilestorageFor(authProvider, currentOAuthAccount.intValue());
             accountIds.add(currentOAuthAccount);
         }
     }
 
-    private int initOAuthAccountFor(OAuthService auth) throws Exception {
+    private Integer initOAuthAccountFor(OAuthService auth) throws Exception {
         InitOAuthAccountRequest req = new InitOAuthAccountRequest(auth);
         InitOAuthAccountResponse resp = ajaxClient.execute(req);
         JSONObject json = (JSONObject) resp.getData();

@@ -114,7 +114,7 @@ public class OnboardingConfig {
 
         Object yaml = configService.getYaml(CONFIGFILE_SCENARIOS);
         if (null != yaml && Map.class.isInstance(yaml)) {
-            Map<String, Object> map = (Map<String, Object>) yaml;
+            @SuppressWarnings("unchecked") Map<String, Object> map = (Map<String, Object>) yaml;
             if (!map.isEmpty()) {
                 try {
                     scenarios = parseScenarios(map);
@@ -150,7 +150,7 @@ public class OnboardingConfig {
             }
 
             // Parse values map
-            Map<String, Object> values = (Map<String, Object>) entry.getValue();
+            @SuppressWarnings("unchecked") Map<String, Object> values = (Map<String, Object>) entry.getValue();
 
             // Enabled flag
             Boolean enabled = (Boolean) values.get("enabled");
@@ -174,7 +174,7 @@ public class OnboardingConfig {
                     if (false == Map.class.isInstance(linkObject)) {
                         throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
                     }
-                    Map<String, Object> linkValues = (Map<String, Object>) linkObject;
+                    @SuppressWarnings("unchecked") Map<String, Object> linkValues = (Map<String, Object>) linkObject;
                     LinkType linkType = LinkType.COMMON;
                     {
                         String sType = (String) linkValues.get("type");
@@ -223,7 +223,8 @@ public class OnboardingConfig {
                 if (null == providersValue || false == List.class.isInstance(providersValue)) {
                     throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
                 }
-                providerIds = (List<String>) providersValue;
+                @SuppressWarnings("unchecked") List<String> list = (List<String>) providersValue;
+                providerIds = list;
             }
 
             // Optional alternative scenarios
@@ -237,7 +238,8 @@ public class OnboardingConfig {
                     if (false == List.class.isInstance(alternativesValue)) {
                         throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
                     }
-                    alternativeIds = (List<String>) alternativesValue;
+                    @SuppressWarnings("unchecked") List<String> list = (List<String>) alternativesValue;
+                    alternativeIds = list;
                 }
             }
 

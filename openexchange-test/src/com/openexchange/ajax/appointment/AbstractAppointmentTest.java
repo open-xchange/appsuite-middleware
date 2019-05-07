@@ -401,12 +401,11 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @param inFolder Folder id to use for the request
      * @param cols Columns to use for the request
      * @param lastModified The timestamp of the last update of the requested appointments
-     * @param ignore what kind of updates to ignore
      * @return The UpdatesResponse containg new, modified and deleted appointments
      * @throws Exception
      */
-    public AppointmentUpdatesResponse listModifiedAppointments(final int inFolder, int[] cols, final Date lastModified, Ignore ignore) throws Exception {
-        return listModifiedAppointments(null, inFolder, cols, lastModified, ignore);
+    public AppointmentUpdatesResponse listModifiedAppointments(final int inFolder, int[] cols, final Date lastModified) throws Exception {
+        return listModifiedAppointments(null, inFolder, cols, lastModified);
     }
 
     /**
@@ -414,11 +413,10 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @param inFolder Folder id to use for the request
      * @param cols Columns to use for the request
      * @param lastModified The timestamp of the last update of the requested appointments
-     * @param ignore what kind of updates to ignore
      * @return The UpdatesResponse containg new, modified and deleted appointments
      * @throws Exception
      */
-    public AppointmentUpdatesResponse listModifiedAppointments(AJAXClient selectedClient, final int inFolder, int[] cols, final Date lastModified, Ignore ignore) throws Exception {
+    public AppointmentUpdatesResponse listModifiedAppointments(AJAXClient selectedClient, final int inFolder, int[] cols, final Date lastModified) throws Exception {
         if (selectedClient == null) {
             selectedClient = getClient();
         }
@@ -438,9 +436,6 @@ public class AbstractAppointmentTest extends AbstractAJAXSession {
      * @throws OXException
      */
     public FolderObject createCalendarSubFolder(AJAXClient selectedClient, String folderName, OCLPermission... folderPermissions) throws OXException, IOException, JSONException {
-        if (selectedClient == null) {
-            selectedClient = null;
-        }
         FolderObject folderObject = Create.folder(selectedClient.getValues().getPrivateAppointmentFolder(), folderName, FolderObject.CALENDAR, FolderObject.PRIVATE, folderPermissions);
         com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folderObject);
         com.openexchange.ajax.folder.actions.InsertResponse folderInsertResponse = selectedClient.execute(insFolder);

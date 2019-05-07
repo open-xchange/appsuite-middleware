@@ -83,6 +83,7 @@ public abstract class ContactsFindTest extends AbstractFindTest {
 
     protected int folderID;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

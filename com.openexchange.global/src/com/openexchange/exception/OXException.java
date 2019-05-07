@@ -676,7 +676,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @deprecated Just use {@link #getLogMessage()}
      */
     @Deprecated
-    public String getLogMessage(LogLevel logLevel, String defaultLog) {
+    public String getLogMessage(@SuppressWarnings("unused") LogLevel logLevel, String defaultLog) {
         if (!isLoggable()) {
             return defaultLog;
         }

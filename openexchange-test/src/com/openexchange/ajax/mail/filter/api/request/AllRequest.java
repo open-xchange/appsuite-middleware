@@ -67,6 +67,7 @@ public class AllRequest extends AbstractMailFilterRequest<AllResponse> {
 
     public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID };
 
+    @SuppressWarnings("hiding")
     private final boolean failOnError;
 
     private String userName = null;

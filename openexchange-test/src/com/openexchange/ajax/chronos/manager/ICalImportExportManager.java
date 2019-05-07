@@ -95,8 +95,8 @@ public class ICalImportExportManager {
         this.importApi = importApi;
     }
 
-    public String importICalFile(String session, String folder, File file, boolean suppressNotification, boolean ignoreUIDs) throws Exception {
-        return importApi.importICal(session, folder, file, suppressNotification, ignoreUIDs, true);
+    public String importICalFile(String session, String folder, File file, Boolean suppressNotification, Boolean ignoreUIDs) throws Exception {
+        return importApi.importICal(session, folder, file, suppressNotification, ignoreUIDs, Boolean.TRUE);
     }
 
     public String exportICalFile(String session, String folder) throws ApiException {

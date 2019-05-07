@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard.storage.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -102,7 +103,7 @@ public class VCardCleaner implements EventHandler {
                                 vCardStorageService.deleteVCard(vCardID, contextID);
                             }
                         } catch (OXException oxException) {
-                            LOG.warn("Error while deleting the VCard with id {} in context {} from storage.", vCardID, contextID, oxException);
+                            LOG.warn("Error while deleting the VCard with id {} in context {} from storage.", vCardID, I(contextID), oxException);
                         }
                     }
                 }

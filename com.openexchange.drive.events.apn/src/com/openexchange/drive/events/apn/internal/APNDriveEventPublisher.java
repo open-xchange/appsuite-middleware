@@ -179,7 +179,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
          */
         Map<APNAccess, List<PayloadPerDevice>> payloadsPerAccess = new HashMap<APNAccess, List<PayloadPerDevice>>();
         for (Subscription subscription : subscriptions) {
-            PayloadPerDevice payload = getPayload(event, subscription);
+            PayloadPerDevice payload = getSilentNotificationPayload(subscription);
             if (null == payload) {
                 LOG.debug("No payload constructed for subscription {}, skipping", subscription);
                 continue;
@@ -304,6 +304,7 @@ public class APNDriveEventPublisher implements DriveEventPublisher {
         try {
             PushNotificationPayload payload = new PushNotificationBigPayload();
             payload.addCustomDictionary("root", subscription.getRootFolderID());
+            payload.addCustomDictionary("action", "sync");
             JSONObject apsObject = payload.getPayload().getJSONObject("aps");
             if (null == apsObject) {
                 apsObject = new JSONObject();

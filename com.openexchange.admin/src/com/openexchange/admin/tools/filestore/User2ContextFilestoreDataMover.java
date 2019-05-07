@@ -53,6 +53,7 @@ import static com.openexchange.filestore.FileStorages.ensureEndingSlash;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForContext;
 import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForUser;
 import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -192,7 +193,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
                             oxcox.cleanseFilestoreUsageFor(user, ctx);
                         } catch (Exception x) {
-                            LOGGER.error("{} failed to cleanse filestore-usage entry for user {} in context {}", Thread.currentThread().getName(), userId, contextId, x);
+                            LOGGER.error("{} failed to cleanse filestore-usage entry for user {} in context {}", Thread.currentThread().getName(), I(userId), I(contextId), x);
                         }
 
                         if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
@@ -216,7 +217,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
                             oxcox.cleanseFilestoreUsageFor(user, ctx);
                         } catch (Exception x) {
-                            LOGGER.error("{} failed to cleanse filestore-usage entry for user {} in context {}", Thread.currentThread().getName(), userId, contextId, x);
+                            LOGGER.error("{} failed to cleanse filestore-usage entry for user {} in context {}", Thread.currentThread().getName(), I(userId), I(contextId), x);
                         }
 
                         if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {

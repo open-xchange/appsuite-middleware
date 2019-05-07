@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -2153,7 +2154,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setObjectID(value);
+                contact.setObjectID(value.intValue());
             }
 
             @Override
@@ -2163,7 +2164,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getObjectID();
+                return I(contact.getObjectID());
             }
 
 			@Override
@@ -2176,7 +2177,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfDistributionLists(value);
+                contact.setNumberOfDistributionLists(value.intValue());
             }
 
             @Override
@@ -2186,7 +2187,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfDistributionLists();
+                return I(contact.getNumberOfDistributionLists());
             }
 
 			@Override
@@ -2227,7 +2228,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setParentFolderID(value);
+                contact.setParentFolderID(value.intValue());
             }
 
             @Override
@@ -2237,7 +2238,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getParentFolderID();
+                return I(contact.getParentFolderID());
             }
 
 			@Override
@@ -2250,7 +2251,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setContextId(value);
+                contact.setContextId(value.intValue());
             }
 
             @Override
@@ -2260,7 +2261,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getContextId();
+                return I(contact.getContextId());
             }
 
 			@Override
@@ -2307,7 +2308,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setCreatedBy(value);
+                contact.setCreatedBy(value.intValue());
             }
 
             @Override
@@ -2317,7 +2318,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getCreatedBy();
+                return I(contact.getCreatedBy());
             }
 
 			@Override
@@ -2330,7 +2331,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setModifiedBy(value);
+                contact.setModifiedBy(value.intValue());
             }
 
             @Override
@@ -2340,7 +2341,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getModifiedBy();
+                return I(contact.getModifiedBy());
             }
 
 			@Override
@@ -2353,7 +2354,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Long value) {
-                contact.setCreationDate(new Date(value));
+                contact.setCreationDate(new Date(value.longValue()));
             }
 
             @Override
@@ -2363,7 +2364,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Long get(Contact contact) {
-                return contact.getCreationDate().getTime();
+                return Long.valueOf(contact.getCreationDate().getTime());
             }
 
 			@Override
@@ -2376,7 +2377,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Long value) {
-                contact.setLastModified(new Date(value));
+                contact.setLastModified(new Date(value.longValue()));
             }
 
             @Override
@@ -2386,7 +2387,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Long get(Contact contact) {
-                return contact.getLastModified().getTime();
+                return Long.valueOf(contact.getLastModified().getTime());
             }
 
 			@Override
@@ -2496,7 +2497,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Long value) {
-                contact.setImageLastModified(new Date(value));
+                contact.setImageLastModified(new Date(value.longValue()));
             }
 
             @Override
@@ -2506,7 +2507,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Long get(Contact contact) {
-                return contact.getImageLastModified().getTime();
+                return Long.valueOf(contact.getImageLastModified().getTime());
             }
 
 			@Override
@@ -2519,7 +2520,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setInternalUserId(value);
+                contact.setInternalUserId(value.intValue());
             }
 
             @Override
@@ -2529,7 +2530,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getInternalUserId();
+                return I(contact.getInternalUserId());
             }
 
 			@Override
@@ -2542,7 +2543,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setLabel(value);
+                contact.setLabel(value.intValue());
             }
 
             @Override
@@ -2552,7 +2553,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getLabel();
+                return I(contact.getLabel());
             }
 
 			@Override
@@ -2588,7 +2589,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setDefaultAddress(value);
+                contact.setDefaultAddress(value.intValue());
             }
 
             @Override
@@ -2598,7 +2599,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getDefaultAddress();
+                return I(contact.getDefaultAddress());
             }
 
 			@Override
@@ -2634,7 +2635,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfAttachments(value);
+                contact.setNumberOfAttachments(value.intValue());
             }
 
             @Override
@@ -2644,7 +2645,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfAttachments();
+                return I(contact.getNumberOfAttachments());
             }
 
 			@Override
@@ -2726,7 +2727,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfImages(value);
+                contact.setNumberOfImages(value.intValue());
             }
 
             @Override
@@ -2737,7 +2738,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfImages();
+                return I(contact.getNumberOfImages());
             }
 
 			@Override
@@ -2750,7 +2751,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setUseCount(value);
+                contact.setUseCount(value.intValue());
             }
 
             @Override
@@ -2760,7 +2761,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getUseCount();
+                return I(contact.getUseCount());
             }
 
 			@Override
@@ -2904,7 +2905,7 @@ public class ContactMapper extends DefaultDbMapper<Contact, ContactField> {
 
             @Override
             public void remove(Contact contact) {
-                contact.removeVCardId();;
+                contact.removeVCardId();
             }
         });
 

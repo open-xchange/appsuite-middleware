@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -263,7 +264,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
 
     /**
      * Initializes & prepares a calendar access for handling a specific search request.
-     * 
+     *
      * @param searchRequest The handled search request
      * @param session The user's session
      * @param limit The limit to apply for the search
@@ -272,7 +273,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     private static IDBasedCalendarAccess initCalendarAccess(SearchRequest searchRequest, ServerSession session, int limit) throws OXException {
         IDBasedCalendarAccess calendarAccess = Services.requireService(IDBasedCalendarAccessFactory.class).createAccess(session);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-        calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, limit + 1);
+        calendarAccess.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(limit + 1));
         if (null != searchRequest.getOptions().getTimeZone()) {
             calendarAccess.set(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.getTimeZone(searchRequest.getOptions().getTimeZone()));
         }

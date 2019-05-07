@@ -49,6 +49,8 @@
 
 package com.openexchange.download.limit.limiter;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -83,6 +85,7 @@ import com.openexchange.download.limit.util.LimitConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -95,7 +98,7 @@ import com.openexchange.tools.session.ServerSession;
 @PrepareForTest({ Services.class, RdbFileAccessStorage.class, LimitConfig.class })
 public class FilesDownloadLimiterTest {
 
-    private static int CONTEXT_ID = 1;
+    static int CONTEXT_ID = 1;
     private static int USER_ID = 77;
     private static int DEFAULT_TIME_FRAME_LINKS = 0;
 
@@ -153,12 +156,12 @@ public class FilesDownloadLimiterTest {
         requestData.setAction("document");
         requestData.setPathInfo("/myFile.txt");
         requestData.setSession(session);
-        Mockito.when(session.isAnonymous()).thenReturn(Boolean.FALSE);
+        Mockito.when(Autoboxing.valueOf(session.isAnonymous())).thenReturn(Boolean.FALSE);
         Mockito.when(session.getUser()).thenReturn(linkUser);
 
         PowerMockito.mockStatic(LimitConfig.class);
         PowerMockito.when(LimitConfig.getInstance()).thenReturn(config);
-        Mockito.when(config.isEnabled()).thenReturn(Boolean.TRUE);
+        Mockito.when(Autoboxing.valueOf(config.isEnabled())).thenReturn(Boolean.TRUE);
 
         Mockito.when(configView.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
@@ -192,22 +195,22 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testDropObsoleteAccesses_isLink_usedConfigCascadeAndCommitedConnection() throws OXException, SQLException {
-        Mockito.when(configView.opt(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<Integer>> any(), ArgumentMatchers.<Integer> any())).thenReturn(DEFAULT_TIME_FRAME_LINKS);
+        Mockito.when(configView.opt(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<Integer>> any(), ArgumentMatchers.<Integer> any())).thenReturn(I(DEFAULT_TIME_FRAME_LINKS));
 
         limiter.dropObsoleteAccesses(linkUser, CONTEXT_ID);
 
-        Mockito.verify(configView, Mockito.times(1)).opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, DEFAULT_TIME_FRAME_LINKS);
+        Mockito.verify(configView, Mockito.times(1)).opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, I(DEFAULT_TIME_FRAME_LINKS));
         Mockito.verify(fileAccessStorage, Mockito.times(1)).removeAccesses(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
         Mockito.verify(connection, Mockito.times(1)).commit();
     }
 
     @Test
     public void testDropObsoleteAccesses_isGuest_usedConfigCascadeAndCommitedConnection() throws OXException, SQLException {
-        Mockito.when(configView.opt(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<Integer>> any(), ArgumentMatchers.<Integer> any())).thenReturn(DEFAULT_TIME_FRAME_LINKS);
+        Mockito.when(configView.opt(ArgumentMatchers.anyString(), ArgumentMatchers.<Class<Integer>> any(), ArgumentMatchers.<Integer> any())).thenReturn(I(DEFAULT_TIME_FRAME_LINKS));
 
         limiter.dropObsoleteAccesses(guest, CONTEXT_ID);
 
-        Mockito.verify(configView, Mockito.times(1)).opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, DEFAULT_TIME_FRAME_LINKS);
+        Mockito.verify(configView, Mockito.times(1)).opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, I(DEFAULT_TIME_FRAME_LINKS));
         Mockito.verify(fileAccessStorage, Mockito.times(1)).removeAccesses(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
         Mockito.verify(connection, Mockito.times(1)).commit();
     }
@@ -216,7 +219,7 @@ public class FilesDownloadLimiterTest {
     public void testDropObsoleteAccesses_noGuest_doNothing() throws OXException, SQLException {
         limiter.dropObsoleteAccesses(internal, CONTEXT_ID);
 
-        Mockito.verify(configView, Mockito.never()).opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, DEFAULT_TIME_FRAME_LINKS);
+        Mockito.verify(configView, Mockito.never()).opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, I(DEFAULT_TIME_FRAME_LINKS));
         Mockito.verify(fileAccessStorage, Mockito.never()).removeAccesses(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyLong(), (Connection) ArgumentMatchers.any());
         Mockito.verify(connection, Mockito.never()).commit();
     }
@@ -239,11 +242,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_noConfigCascadeValueSet_ReturnDefaults() throws OXException {
-        Long sizeLimit = LimitConfig.getInstance().sizeLimitLinks();
+        Long sizeLimit = L(LimitConfig.getInstance().sizeLimitLinks());
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, sizeLimit)).thenReturn(sizeLimit);
-        Integer countLimit = LimitConfig.getInstance().countLimitLinks();
+        Integer countLimit = I(LimitConfig.getInstance().countLimitLinks());
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, countLimit)).thenReturn(countLimit);
-        Integer timeFrame = LimitConfig.getInstance().timeFrameLinks();
+        Integer timeFrame = I(LimitConfig.getInstance().timeFrameLinks());
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, timeFrame)).thenReturn(timeFrame);
         Mockito.when(configView.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
@@ -257,11 +260,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_configCascadeValueSet_ReturnConfigCascadeValues() throws OXException {
-        Long sizeLimit = LimitConfig.getInstance().sizeLimitLinks();
+        Long sizeLimit = L(LimitConfig.getInstance().sizeLimitLinks());
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_LINKS, Long.class, sizeLimit)).thenReturn(new Long(22222222222L));
-        Integer countLimit = LimitConfig.getInstance().countLimitLinks();
+        Integer countLimit = I(LimitConfig.getInstance().countLimitLinks());
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_LINKS, Integer.class, countLimit)).thenReturn(new Integer(111111));
-        Integer timeFrame = LimitConfig.getInstance().timeFrameLinks();
+        Integer timeFrame = I(LimitConfig.getInstance().timeFrameLinks());
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_LINKS, Integer.class, timeFrame)).thenReturn(new Integer(7));
 
         FileAccess limit = limiter.getLimit(linkUser, CONTEXT_ID);
@@ -283,11 +286,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_noConfigCascadeValueSetForGuest_ReturnDefaults() throws OXException {
-        Long sizeLimit = LimitConfig.getInstance().sizeLimitGuests();
+        Long sizeLimit = L(LimitConfig.getInstance().sizeLimitGuests());
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, sizeLimit)).thenReturn(sizeLimit);
-        Integer countLimit = LimitConfig.getInstance().countLimitGuests();
+        Integer countLimit = I(LimitConfig.getInstance().countLimitGuests());
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, countLimit)).thenReturn(countLimit);
-        Integer timeFrame = LimitConfig.getInstance().timeFrameGuests();
+        Integer timeFrame = I(LimitConfig.getInstance().timeFrameGuests());
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, timeFrame)).thenReturn(timeFrame);
         Mockito.when(configView.opt(LimitConfig.LIMIT_ENABLED, Boolean.class, Boolean.FALSE)).thenReturn(Boolean.TRUE);
 
@@ -301,11 +304,11 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testGetLimit_configCascadeValueSetForGuest_ReturnConfigCascadeValues() throws OXException {
-        Long sizeLimit = LimitConfig.getInstance().sizeLimitGuests();
+        Long sizeLimit = L(LimitConfig.getInstance().sizeLimitGuests());
         Mockito.when(configView.opt(LimitConfig.SIZE_LIMIT_GUESTS, Long.class, sizeLimit)).thenReturn(new Long(22222222222L));
-        Integer countLimit = LimitConfig.getInstance().countLimitGuests();
+        Integer countLimit = I(LimitConfig.getInstance().countLimitGuests());
         Mockito.when(configView.opt(LimitConfig.COUNT_LIMIT_GUESTS, Integer.class, countLimit)).thenReturn(new Integer(111111));
-        Integer timeFrame = LimitConfig.getInstance().timeFrameGuests();
+        Integer timeFrame = I(LimitConfig.getInstance().timeFrameGuests());
         Mockito.when(configView.opt(LimitConfig.TIME_FRAME_GUESTS, Integer.class, timeFrame)).thenReturn(new Integer(7));
 
         FileAccess limit = limiter.getLimit(guest, CONTEXT_ID);
@@ -336,7 +339,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testApplicable_isAnonymousSession_notApplicable() throws OXException {
-        Mockito.when(session.isAnonymous()).thenReturn(Boolean.TRUE);
+        Mockito.when(Autoboxing.valueOf(session.isAnonymous())).thenReturn(Boolean.TRUE);
 
         boolean applicable = limiter.applicable(requestData);
 
@@ -393,7 +396,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestInitialized_noLimitAvailable_returnWithoutCheck() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -419,7 +422,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestInitialized_limitDisabled_returnWithoutCheck() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -445,7 +448,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestInitialized_usedNotFound_returnWithoutCheck() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -476,7 +479,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestInitialized_notExceeded_return() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -503,7 +506,7 @@ public class FilesDownloadLimiterTest {
 
     @Test(expected = OXException.class)
     public void testOnRequestInitialized_sizeExceeded_throwException() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -530,7 +533,7 @@ public class FilesDownloadLimiterTest {
 
     @Test(expected = OXException.class)
     public void testOnRequestInitialized_countExceeded_throwException() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -564,7 +567,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestPerformed_limitNull_doNothing() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -581,7 +584,7 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestPerformed_limitDisabled_doNothing() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
 
         limiter = new FilesDownloadLimiter(configViewFactory) {
 
@@ -598,15 +601,15 @@ public class FilesDownloadLimiterTest {
 
     @Test
     public void testOnRequestPerformed_resultTypeCommon_addAccess() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
-        Mockito.when(session.getUserId()).thenReturn(USER_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
+        Mockito.when(I(session.getUserId())).thenReturn(I(USER_ID));
 
         AJAXRequestResult result = new AJAXRequestResult();
         result.setType(ResultType.COMMON);
         IFileHolder fileHolder = Mockito.mock(IFileHolder.class);
-        Long length = 10000L;
+        Long length = L(10000L);
 
-        Mockito.when(fileHolder.getLength()).thenReturn(length);
+        Mockito.when(L(fileHolder.getLength())).thenReturn(length);
         result.setResultObject(fileHolder);
 
         limiter = new FilesDownloadLimiter(this.configViewFactory) {
@@ -620,17 +623,17 @@ public class FilesDownloadLimiterTest {
 
         limiter.onRequestPerformed(requestData, result, null);
 
-        Mockito.verify(fileAccessStorage, Mockito.times(1)).addAccess(CONTEXT_ID, USER_ID, length, connection);
+        Mockito.verify(fileAccessStorage, Mockito.times(1)).addAccess(CONTEXT_ID, USER_ID, length.longValue(), connection);
     }
 
     @Test
     public void testOnRequestPerformed_resultTypeDirect_addAccess() throws OXException {
-        Mockito.when(session.getContextId()).thenReturn(CONTEXT_ID);
-        Mockito.when(session.getUserId()).thenReturn(USER_ID);
+        Mockito.when(I(session.getContextId())).thenReturn(I(CONTEXT_ID));
+        Mockito.when(I(session.getUserId())).thenReturn(I(USER_ID));
 
         AJAXRequestResult result = new AJAXRequestResult();
         result.setType(ResultType.DIRECT);
-        Long length = 10000L;
+        Long length = L(10000L);
         result.setResponseProperty("X-Content-Size", length);
 
         limiter = new FilesDownloadLimiter(this.configViewFactory) {
@@ -644,6 +647,6 @@ public class FilesDownloadLimiterTest {
 
         limiter.onRequestPerformed(requestData, result, null);
 
-        Mockito.verify(fileAccessStorage, Mockito.times(1)).addAccess(CONTEXT_ID, USER_ID, length, connection);
+        Mockito.verify(fileAccessStorage, Mockito.times(1)).addAccess(CONTEXT_ID, USER_ID, length.longValue(), connection);
     }
 }

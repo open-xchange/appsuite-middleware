@@ -96,19 +96,19 @@ public class CIDRUtils {
         int counter = 0;
         List<Byte> newArr = new ArrayList<Byte>();
         while (counter < targetSize && (array.length - 1 - counter >= 0)) {
-            newArr.add(0, array[array.length - 1 - counter]);
+            newArr.add(0, Byte.valueOf(array[array.length - 1 - counter]));
             counter++;
         }
 
         int size = newArr.size();
         for (int i = 0; i < (targetSize - size); i++) {
 
-            newArr.add(0, (byte) 0);
+            newArr.add(0, Byte.valueOf((byte) 0));
         }
 
         byte[] ret = new byte[newArr.size()];
         for (int i = 0; i < newArr.size(); i++) {
-            ret[i] = newArr.get(i);
+            ret[i] = newArr.get(i).byteValue();
         }
         return ret;
     }

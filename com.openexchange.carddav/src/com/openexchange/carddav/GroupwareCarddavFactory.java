@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -495,9 +496,9 @@ public class GroupwareCarddavFactory extends DAVFactory {
         public int getContactLimit() {
             int limit = 25000;
             try {
-                limit = Integer.valueOf(factory.getConfigValue("com.openexchange.webdav.recursiveMarshallingLimit", String.valueOf(limit)));
+                limit = Integer.parseInt(factory.getConfigValue("com.openexchange.webdav.recursiveMarshallingLimit", String.valueOf(limit)));
             } catch (OXException e) {
-                LOG.warn("error getting \"com.openexchange.webdav.recursiveMarshallingLimit\", falling back to \"{}\".", limit, e);
+                LOG.warn("error getting \"com.openexchange.webdav.recursiveMarshallingLimit\", falling back to \"{}\".", I(limit), e);
             }
             return 0 >= limit ? 0 : 1 + limit;
         }

@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.actions.ForwardRequest;
 import com.openexchange.ajax.mail.actions.ForwardResponse;
 import com.openexchange.ajax.mail.actions.ReplyAllRequest;
@@ -80,6 +79,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -88,6 +88,7 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         this.contactManager = new ContactTestManager(getClient());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -108,28 +109,28 @@ public abstract class AbstractReplyTest extends AbstractMailTest {
         return false;
     }
 
-    protected JSONObject getReplyEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
+    protected JSONObject getReplyEMail(TestMail testMail) throws OXException, IOException, JSONException {
         ReplyRequest reply = new ReplyRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
         ReplyResponse response = getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
-    protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
+    protected JSONObject getReplyAllEMail(TestMail testMail) throws OXException, IOException, JSONException {
         ReplyRequest reply = new ReplyAllRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
         ReplyAllResponse response = (ReplyAllResponse) getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
-    protected JSONObject getForwardMail(TestMail testMail) throws OXException, IOException, SAXException, JSONException {
+    protected JSONObject getForwardMail(TestMail testMail) throws OXException, IOException, JSONException {
         ReplyRequest reply = new ForwardRequest(testMail.getFolder(), testMail.getId());
         reply.setFailOnError(true);
         ForwardResponse response = (ForwardResponse) getClient().execute(reply);
         return (JSONObject) response.getData();
     }
 
-    public static void assertNullOrEmpty(String msg, Collection coll) {
+    public static void assertNullOrEmpty(String msg, Collection<?> coll) {
         if (coll == null) {
             return;
         }

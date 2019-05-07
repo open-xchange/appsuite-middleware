@@ -62,13 +62,13 @@ public class NewTest extends AbstractContactTest {
 
     @Test
     public void testNew() throws Exception {
-        final Contact contactObj = createContactObject("testNew");
+        final Contact contactObj = createContactObject();
         insertContact(contactObj);
     }
 
     @Test
     public void testNewWithDistributionList() throws Exception {
-        final Contact contactEntry = createContactObject("internal contact");
+        final Contact contactEntry = createContactObject();
         contactEntry.setEmail1("internalcontact@x.de");
         final int contactId = insertContact(contactEntry);
         contactEntry.setObjectID(contactId);
@@ -78,7 +78,7 @@ public class NewTest extends AbstractContactTest {
 
     @Test
     public void testNewContactWithAttachment() throws Exception {
-        final Contact contactObj = createContactObject("testNewContactWithAttachment");
+        final Contact contactObj = createContactObject();
         final int objectId = insertContact(contactObj);
         contactObj.setObjectID(objectId);
 

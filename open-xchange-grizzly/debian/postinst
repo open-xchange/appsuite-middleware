@@ -59,12 +59,17 @@ EOF
     fi
 }
 
+setConfigFilePermissions() {
+    ox_update_permissions "/opt/open-xchange/etc/grizzly.properties" root:open-xchange 640
+}
+
 case "$1" in
     configure)
         test -n "$2" && {
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
         }
+        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

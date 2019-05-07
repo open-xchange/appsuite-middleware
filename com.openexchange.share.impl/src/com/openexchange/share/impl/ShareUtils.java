@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
@@ -360,7 +361,7 @@ public class ShareUtils {
      * @return The permission bits
      */
     public int getRequiredPermissionBits(ShareRecipient recipient, ShareTarget target) throws OXException {
-        return getRequiredPermissionBits(ShareTool.getAuthenticationMode(recipient), Collections.singleton(target.getModule()));
+        return getRequiredPermissionBits(ShareTool.getAuthenticationMode(recipient), Collections.singleton(I(target.getModule())));
     }
 
     /**

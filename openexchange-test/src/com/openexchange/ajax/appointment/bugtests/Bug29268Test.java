@@ -21,6 +21,7 @@ public class Bug29268Test extends AbstractAJAXSession {
 
     private Appointment appointment;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

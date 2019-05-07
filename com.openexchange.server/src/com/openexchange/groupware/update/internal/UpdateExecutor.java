@@ -223,7 +223,8 @@ public final class UpdateExecutor {
                 long startNanos;
                 long durMillis;
                 for (final UpdateTaskV2 task : scheduled) {
-                    final String taskName = task.getClass().getSimpleName();
+                    checkDependencies(task, state);
+                    final String taskName = task.getClass().getName();
                     boolean success = false;
                     startNanos = System.nanoTime();
                     try {
@@ -247,7 +248,8 @@ public final class UpdateExecutor {
                         }
                         LOG.error("Update task {} on schema {} failed ({}).", taskName, state.getSchema(), exactly(durMillis, true));
                     }
-                    addExecutedTask(task.getClass().getName(), success, poolId, state.getSchema(), connectionProvider.getConnection());
+                    addExecutedTask(taskName, success, poolId, state.getSchema(), connectionProvider.getConnection());
+                    state.addExecutedTask(taskName, success);
                 }
             } finally {
                 connectionProvider.close();
@@ -359,4 +361,34 @@ public final class UpdateExecutor {
             databaseService.backReadOnly(con);
         }
     }
+
+    /**
+     * (Re-)checks that all of the update tasks a specific update task is dependent upon were executed successfully in a schema, throwing
+     * an appropriate exception if they're not met.
+     * 
+     * @param task The update task to check the dependencies for
+     * @param state The update state of the schema
+     * @throws OXException {@link UpdateExceptionCodes#UNMET_DEPENDENCY}
+     */
+    private static void checkDependencies(UpdateTaskV2 task, SchemaUpdateState state) throws OXException {
+        String[] dependencies = task.getDependencies();
+        if (null == dependencies || 0 == dependencies.length) {
+            return;
+        }
+        DependenciesResolvedChecker checker = new DependenciesResolvedChecker();
+        String[] executedTasks = state.getExecutedList(true);
+        for (String dependency : dependencies) {
+            if (checker.dependencyFulfilled(dependency, executedTasks, new UpdateTaskV2[0])) {
+                continue;
+            }
+            Exception cause = null;
+            if (false == state.isExecuted(dependency)) {
+                cause = new Exception("Task \"" + dependency + "\" was not yet executed on schema \"" + state.getSchema() + "\".");
+            } else if (false == state.isExecutedSuccessfully(dependency)) {
+                cause = new Exception("Task \"" + dependency + "\" was not yet executed successfully on schema \"" + state.getSchema() + "\".");
+            }
+            throw UpdateExceptionCodes.UNMET_DEPENDENCY.create(cause, task.getClass().getName(), dependency);
+        }
+    }
+
 }

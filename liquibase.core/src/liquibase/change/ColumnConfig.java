@@ -69,18 +69,18 @@ public class ColumnConfig implements LiquibaseSerializable {
             constraints.setNullable(columnSnapshot.isNullable());
 
             if (columnSnapshot.isAutoIncrement()) {
-                setAutoIncrement(true);
+                setAutoIncrement(Boolean.TRUE);
                 setStartWith(columnSnapshot.getAutoIncrementInformation().getStartWith());
                 setIncrementBy(columnSnapshot.getAutoIncrementInformation().getIncrementBy());
             } else {
-                setAutoIncrement(false);
+                setAutoIncrement(Boolean.FALSE);
             }
 
 
             Table table = (Table) columnSnapshot.getRelation();
             PrimaryKey primaryKey = table.getPrimaryKey();
             if (primaryKey != null && primaryKey.getColumnNamesAsList().contains(columnSnapshot.getName())) {
-                constraints.setPrimaryKey(true);
+                constraints.setPrimaryKey(Boolean.TRUE);
                 constraints.setPrimaryKeyName(primaryKey.getName());
                 constraints.setPrimaryKeyTablespace(primaryKey.getTablespace());
             }
@@ -89,7 +89,7 @@ public class ColumnConfig implements LiquibaseSerializable {
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
                     if (constraint.getColumnNames().contains(getName())) {
-                        constraints.setUnique(true);
+                        constraints.setUnique(Boolean.TRUE);
                         constraints.setUniqueConstraintName(constraint.getName());
                     }
                 }
@@ -106,10 +106,10 @@ public class ColumnConfig implements LiquibaseSerializable {
             }
 
             if (constraints.isPrimaryKey() == null) {
-                constraints.setPrimaryKey(false);
+                constraints.setPrimaryKey(Boolean.FALSE);
             }
             if (constraints.isUnique() == null) {
-                constraints.setUnique(false);
+                constraints.setUnique(Boolean.FALSE);
             }
             setConstraints(constraints);
         }
@@ -238,9 +238,9 @@ public class ColumnConfig implements LiquibaseSerializable {
             this.valueBoolean = null;
         } else {
             if (valueBoolean.equalsIgnoreCase("true") || valueBoolean.equals("1")) {
-                this.valueBoolean = true;
+                this.valueBoolean = Boolean.TRUE;
             } else if (valueBoolean.equalsIgnoreCase("false") || valueBoolean.equals("0")) {
-                this.valueBoolean = false;
+                this.valueBoolean = Boolean.FALSE;
             } else {
                 this.valueComputed = new DatabaseFunction(valueBoolean);
             }
@@ -419,7 +419,7 @@ public class ColumnConfig implements LiquibaseSerializable {
             this.defaultValueNumeric = null;
         } else {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
-                setAutoIncrement(true);
+                setAutoIncrement(Boolean.TRUE);
             } else {
                 if (defaultValueNumeric.startsWith("(")) {
                     defaultValueNumeric = defaultValueNumeric.replaceFirst("^\\(", "");
@@ -497,9 +497,9 @@ public class ColumnConfig implements LiquibaseSerializable {
             this.defaultValueBoolean = null;
         } else {
             if (defaultValueBoolean.equalsIgnoreCase("true") || defaultValueBoolean.equals("1")) {
-                this.defaultValueBoolean = true;
+                this.defaultValueBoolean = Boolean.TRUE;
             } else if (defaultValueBoolean.equalsIgnoreCase("false") || defaultValueBoolean.equals("0")) {
-                this.defaultValueBoolean = false;
+                this.defaultValueBoolean = Boolean.FALSE;
             } else {
                 this.defaultValueComputed = new DatabaseFunction(defaultValueBoolean);
             }
@@ -644,7 +644,7 @@ public class ColumnConfig implements LiquibaseSerializable {
 
         return this;
     }
-    
+
     @Override
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;

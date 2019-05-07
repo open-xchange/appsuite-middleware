@@ -125,7 +125,7 @@ public final class FolderPermissionReadAllForUserInfostore extends UpdateTaskAda
      * @param orp The object read permissions to apply
      * @return The update count
      */
-    private static int adjustReadPermission(Connection connection, int folderID, int orp) throws SQLException, OXException {
+    private static int adjustReadPermission(Connection connection, int folderID, int orp) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = connection.prepareStatement("UPDATE oxfolder_permissions SET orp=? WHERE fuid=?;");

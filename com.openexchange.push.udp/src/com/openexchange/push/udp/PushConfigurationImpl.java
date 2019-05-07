@@ -49,6 +49,8 @@
 
 package com.openexchange.push.udp;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -107,10 +109,10 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         }
 
         isPushEnabled = parseProperty(conf, "com.openexchange.push.udp.pushEnabled", isPushEnabled);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled={}", isPushEnabled);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled={}", B(isPushEnabled));
 
         registerPort = parseProperty(conf, "com.openexchange.push.udp.registerPort", registerPort);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort={}", registerPort);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort={}", I(registerPort));
 
         String[] remoteAddressAndPort = null;
         remoteAddressAndPort = parseProperty(conf, "com.openexchange.push.udp.remoteHost", remoteAddressAndPort);
@@ -137,19 +139,19 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         }
 
         registerTimeout = parseProperty(conf, "com.openexchange.push.udp.registerTimeout", registerTimeout);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.registerTimeout={}", registerTimeout);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.registerTimeout={}", I(registerTimeout));
 
         outputQueueDelay = parseProperty(conf, "com.openexchange.push.udp.outputQueueDelay", outputQueueDelay);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay={}", outputQueueDelay);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay={}", I(outputQueueDelay));
 
         isRegisterDistributionEnabled = parseProperty(
             conf,
             "com.openexchange.push.udp.registerDistributionEnabled",
             isRegisterDistributionEnabled);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.registerDistributionEnabled={}", isRegisterDistributionEnabled);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.registerDistributionEnabled={}", B(isRegisterDistributionEnabled));
 
         isEventDistributionEnabled = parseProperty(conf, "com.openexchange.push.udp.eventDistributionEnabled", isEventDistributionEnabled);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.eventDistributionEnabled={}", isEventDistributionEnabled);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.eventDistributionEnabled={}", B(isEventDistributionEnabled));
 
         String senderAddressString = null;
         senderAddressString = parseProperty(conf, "com.openexchange.push.udp.senderAddress", senderAddressString);
@@ -164,13 +166,13 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         }
 
         remoteHostTimeOut = parseProperty(conf, "com.openexchange.push.udp.remoteHostTimeOut", remoteHostTimeOut);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostTimeOut={}", remoteHostTimeOut);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostTimeOut={}", I(remoteHostTimeOut));
 
         remoteHostRefresh = parseProperty(conf, "com.openexchange.push.udp.remoteHostRefresh", remoteHostRefresh);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostRefresh={}", remoteHostRefresh);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.remoteHostRefresh={}", I(remoteHostRefresh));
 
         multicastEnabled = parseProperty(conf, "com.openexchange.push.udp.multicastEnabled", multicastEnabled);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.multicastEnabled={}", multicastEnabled);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.multicastEnabled={}", B(multicastEnabled));
 
         String multicastAddressString = null;
         multicastAddressString = parseProperty(conf, "com.openexchange.push.udp.multicastAddress", multicastAddressString);
@@ -183,7 +185,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         }
 
         multicastPort = parseProperty(conf, "com.openexchange.push.udp.multicastPort", multicastPort);
-        LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort={}", multicastPort);
+        LOG.debug("PushHandler property: com.openexchange.push.udp.multicastPort={}", I(multicastPort));
 
         String hostnameString = parseProperty(conf, "com.openexchange.push.udp.hostname", (String) null);
         LOG.debug("PushHandler property: com.openexchange.push.udp.hostname={}", hostnameString);
@@ -196,11 +198,11 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         } catch (UnknownHostException e) {
             LOG.error("Unable to determine internet address for hostname: {}", hostnameString, e);
         }
-        
+
         if (hostname == null) {
             throw PushUDPExceptionCode.UNRESOLVABLE_HOSTNAME.create(hostnameString);
         }
-        
+
         LOG.info("Using {} for inter OX UDP communication.", hostname.getHostAddress());
 
         isInit = true;

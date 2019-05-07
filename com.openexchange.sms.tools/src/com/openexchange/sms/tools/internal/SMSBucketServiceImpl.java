@@ -49,6 +49,7 @@
 
 package com.openexchange.sms.tools.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.config.cascade.ConfigView;
@@ -70,12 +71,12 @@ import com.openexchange.sms.tools.osgi.Services;
  */
 public class SMSBucketServiceImpl implements SMSBucketService {
 
-    private IMap<String, SMSBucket> map;
+    private final IMap<String, SMSBucket> map;
     private static final String HZ_MAP_NAME = "SMS_Bucket";
 
     /**
      * Initializes a new {@link SMSBucketServiceImpl}.
-     * 
+     *
      * @throws OXException
      */
     public SMSBucketServiceImpl() throws OXException {
@@ -89,7 +90,7 @@ public class SMSBucketServiceImpl implements SMSBucketService {
 
     /**
      * Initializes a new {@link SMSBucketServiceImpl} for testing purposes.
-     * 
+     *
      * @throws OXException
      */
     public SMSBucketServiceImpl(HazelcastInstance hzInstance) throws OXException {
@@ -120,11 +121,11 @@ public class SMSBucketServiceImpl implements SMSBucketService {
         ConfigView view =configFactory.getView(session.getUserId(), session.getContextId());
         int refreshInterval = 0;
         try {
-            refreshInterval = Integer.valueOf(view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, String.class));
+            refreshInterval = Integer.parseInt(view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, String.class));
         } catch (NumberFormatException e) {
             throw new OXException(e);
         }
-        
+
         for (;;) {
             SMSBucket oldBucket = map.get(userIdentifier);
             SMSBucket newBucket = oldBucket.clone();
@@ -132,7 +133,7 @@ public class SMSBucketServiceImpl implements SMSBucketService {
 
             if (amount == -1) {
                 int hours = (int) Math.ceil(refreshInterval / 60d);
-                throw SMSBucketExceptionCodes.SMS_LIMIT_REACHED.create(hours);
+                throw SMSBucketExceptionCodes.SMS_LIMIT_REACHED.create(I(hours));
             }
 
             if (map.replace(userIdentifier, oldBucket, newBucket)) {
@@ -147,7 +148,7 @@ public class SMSBucketServiceImpl implements SMSBucketService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
         ConfigView view = configFactory.getView(session.getUserId(), session.getContextId());
-        return Integer.valueOf(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class));
+        return Integer.parseInt(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class));
     }
 
     @Override
@@ -157,14 +158,14 @@ public class SMSBucketServiceImpl implements SMSBucketService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
         ConfigView view = configFactory.getView(session.getUserId(), session.getContextId());
-        return view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class);
+        return view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class).booleanValue();
     }
 
     @Override
     public int getRefreshInterval(Session session) throws OXException {
         ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-        int hours = (int) Math.ceil(Integer.valueOf(view.property("com.openexchange.sms.userlimit.refreshInterval", String.class).get()) / 60d);
+        int hours = (int) Math.ceil(Double.parseDouble(view.property("com.openexchange.sms.userlimit.refreshInterval", String.class).get()) / 60d);
         return hours;
     }
 

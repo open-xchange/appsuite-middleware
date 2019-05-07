@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -210,7 +211,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         boolean error = true;
         try {
             if (offset >= eraf.length() || -1 != length && length > eraf.length() - offset) {
-                throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, eraf.length());
+                throw FileStorageCodes.INVALID_RANGE.create(L(offset), L(length), name, L(eraf.length()));
             }
             RandomAccessFileInputStream in = new RandomAccessFileInputStream(eraf, offset, length);
             error = false;
@@ -236,7 +237,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             eraf = eraf(name, false);
             if (offset != eraf.length()) {
-                throw FileStorageCodes.INVALID_OFFSET.create(offset, name, eraf.length());
+                throw FileStorageCodes.INVALID_OFFSET.create(L(offset), name, L(eraf.length()));
             }
             eraf.seek(eraf.length());
             byte[] buffer = new byte[8192];
@@ -266,7 +267,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         try {
             raf = raf(name, false);
             if (length > raf.length()) {
-                throw FileStorageCodes.INVALID_LENGTH.create(length, name, raf.length());
+                throw FileStorageCodes.INVALID_LENGTH.create(L(length), name, L(raf.length()));
             }
             raf.setLength(length);
         } catch (IOException e) {

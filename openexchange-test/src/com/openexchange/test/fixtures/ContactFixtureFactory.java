@@ -73,8 +73,8 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
     }
 
     @Override
-    public Fixtures<Contact> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new ContactFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<Contact> createFixture(final Map<String, Map<String, String>> entries) {
+        return new ContactFixtures(entries, fixtureLoader);
     }
 
     private class ContactFixtures extends DefaultFixtures<Contact> implements Fixtures<Contact> {
@@ -82,7 +82,7 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
         private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Contact>> contacts = new HashMap<String, Fixture<Contact>>();
 
-        public ContactFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
+        public ContactFixtures(final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
             super(Contact.class, entries, fixtureLoader);
             this.entries = entries;
             addTransformator(new DistributionListTransformator(fixtureLoader), "distribution_list");
@@ -105,6 +105,7 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
 
             final Fixture<Contact> fixture = new Fixture<Contact>(contact, values.keySet().toArray(new String[values.size()]), values) {
 
+                @SuppressWarnings({ "rawtypes", "unchecked" })
                 @Override
                 public Comparator getComparator(final String field) {
                     if ("birthday".equals(field) || "anniversary".equals(field)) {
@@ -118,7 +119,7 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
             return fixture;
         }
 
-        private void defaults(final Map values) {
+        private void defaults(final Map<String, String> values) {
             if (false == values.containsKey("display_name")) {
                 final String surName = values.containsKey("sur_name") ? values.get("sur_name").toString() : null;
                 final String givenName = values.containsKey("given_name") ? values.get("given_name").toString() : null;

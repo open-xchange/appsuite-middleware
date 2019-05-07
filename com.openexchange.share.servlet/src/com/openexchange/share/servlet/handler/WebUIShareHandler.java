@@ -50,6 +50,7 @@
 package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -134,7 +135,8 @@ public class WebUIShareHandler extends AbstractShareHandler {
             GuestInfo guestInfo = shareRequest.getGuest();
             User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
             TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class, true);
-            Translator translator = factory.translatorFor(AbstractShareServlet.determineLocale(request, guestInfo));
+            Locale locale = AbstractShareServlet.determineLocale(request, guestInfo);
+            Translator translator = factory.translatorFor(locale);
 
             ShareTargetPath targetPath = shareRequest.getTargetPath();
             if (shareRequest.isInvalidTarget()) {
@@ -166,7 +168,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             String displayName = FullNameBuilder.buildFullName(sharingUser, translator);
             TargetProxy proxy = shareRequest.getTargetProxy();
             String type = targetPath.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
-            String message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle());
+            String message = String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getLocalizedTitle(locale));
 
             LoginLocation location = new LoginLocation()
                 .share(guestInfo.getBaseToken())

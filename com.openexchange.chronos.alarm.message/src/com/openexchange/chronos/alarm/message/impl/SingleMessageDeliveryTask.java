@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.message.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -62,6 +63,7 @@ import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.alarm.message.AlarmNotificationService;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarProvider;
@@ -69,6 +71,8 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AdministrativeAlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -90,7 +94,13 @@ import com.openexchange.ratelimit.RateLimiterFactory;
  * @since v7.10.1
  */
 class SingleMessageDeliveryTask implements Runnable {
-
+    
+    /**
+     * A {@link Builder} for the {@link SingleMessageDeliveryTask}
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.1
+     */
     public static class Builder {
         Context ctx;
         private Alarm alarm;
@@ -106,6 +116,7 @@ class SingleMessageDeliveryTask implements Runnable {
         private CalendarProviderRegistry calendarProviderRegistry;
         private AdministrativeCalendarAccountService administrativeCalendarAccountService;
         private RateLimiterFactory rateLimitFactory;
+        private RecurrenceService recurrenceService;
 
         public Builder setCtx(Context ctx) {
             this.ctx = ctx;
@@ -176,6 +187,11 @@ class SingleMessageDeliveryTask implements Runnable {
             this.rateLimitFactory = rateLimitFactory;
             return this;
         }
+        
+        public Builder setRecurrenceService(RecurrenceService recurrenceService) {
+            this.recurrenceService = recurrenceService;
+            return this;
+        }
 
         public SingleMessageDeliveryTask build() {
             return new SingleMessageDeliveryTask(   dbservice,
@@ -186,6 +202,7 @@ class SingleMessageDeliveryTask implements Runnable {
                                                     calendarProviderRegistry,
                                                     administrativeCalendarAccountService,
                                                     rateLimitFactory,
+                                                    recurrenceService,
                                                     ctx,
                                                     account,
                                                     alarm,
@@ -211,6 +228,7 @@ class SingleMessageDeliveryTask implements Runnable {
     private final CalendarProviderRegistry calendarProviderRegistry;
     private final AdministrativeCalendarAccountService administrativeCalendarAccountService;
     private final RateLimiterFactory rateLimitFactory;
+    private final RecurrenceService recurrenceService;
 
     /**
      * Initializes a new {@link SingleMessageDeliveryTask}.
@@ -222,6 +240,8 @@ class SingleMessageDeliveryTask implements Runnable {
      * @param calUtil The {@link CalendarUtilities}
      * @param calendarProviderRegistry The {@link CalendarProviderRegistry}
      * @param administrativeCalendarAccountService An {@link AdministrativeCalendarAccountService}
+     * @param rateLimitFactory The {@link RateLimiterFactory}
+     * @param recurrenceService The {@link RecurrenceService}
      * @param ctx The {@link Context}
      * @param account The account id
      * @param alarm The {@link Alarm}
@@ -237,6 +257,7 @@ class SingleMessageDeliveryTask implements Runnable {
                                         CalendarProviderRegistry calendarProviderRegistry,
                                         AdministrativeCalendarAccountService administrativeCalendarAccountService,
                                         RateLimiterFactory rateLimitFactory,
+                                        RecurrenceService recurrenceService,
                                         Context ctx,
                                         int account,
                                         Alarm alarm,
@@ -257,11 +278,12 @@ class SingleMessageDeliveryTask implements Runnable {
         this.calendarProviderRegistry = calendarProviderRegistry;
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
         this.rateLimitFactory = rateLimitFactory;
-
+        this.recurrenceService = recurrenceService;
     }
 
     @Override
     public void run() {
+        LOG.trace("Started SingleMessageDeliveryTask for event {} and alarm {} in context {}", trigger.getEventId(), I(alarm.getId()), I(ctx.getContextId()));
         Connection writeCon = null;
         boolean isReadOnly = true;
         boolean processFinished = false;
@@ -276,8 +298,18 @@ class SingleMessageDeliveryTask implements Runnable {
                 Databases.autocommit(writeCon);
                 dbservice.backWritable(ctx, writeCon);
                 writeCon = null;
+                
+                Event mailEvent = event;
+                if(CalendarUtils.isSeriesMaster(event) && trigger.getRecurrenceId() != null) {
+                    Date from = new Date(trigger.getRecurrenceId().getValue().getTimestamp());
+                    RecurrenceIterator<Event> iterator = recurrenceService.iterateEventOccurrences(event, from, null);
+                    if(iterator.hasNext()) {
+                        mailEvent = iterator.next();
+                    }
+                }
+                
                 // send the message
-                sendMessage(event);
+                sendMessage(mailEvent);
                 // If the triggers has been updated (deleted + inserted) check if a trigger needs to be scheduled.
                 writeCon = dbservice.getWritable(ctx);
                 writeCon.setAutoCommit(false);
@@ -285,12 +317,14 @@ class SingleMessageDeliveryTask implements Runnable {
                 writeCon.commit();
             }
         } catch (OXException | SQLException e) {
+            LOG.error("Unable to send message.", e);
             if (writeCon != null) {
                 // rollback the last transaction
                 Databases.rollback(writeCon);
                 // if the error occurred during the process retry the hole operation once
                 if (processFinished == false) {
                     try {
+                        LOG.debug("Retrying operation...");
                         writeCon.setAutoCommit(false);
                         // do the delivery and update the db entries (e.g. like setting the acknowledged field)
                         Event event = prepareEvent(writeCon);
@@ -307,18 +341,22 @@ class SingleMessageDeliveryTask implements Runnable {
                         }
                     } catch (SQLException | OXException e1) {
                         // Nothing that can be done. Do a rollback and reset the processed value if necessary
+                        LOG.trace(e1.getMessage(), e1);
                         Databases.rollback(writeCon);
                         if (processFinished == false) {
                             try {
-                                storage.setProcessingStatus(writeCon, Collections.singletonMap(new Pair<>(ctx.getContextId(), account), Collections.singletonList(trigger)), 0l);
+                                storage.setProcessingStatus(writeCon, Collections.singletonMap(new Pair<>(I(ctx.getContextId()), I(account)), Collections.singletonList(trigger)), Long.valueOf(0l));
                                 isReadOnly = false;
-                            } catch (OXException e2) {
+                            } catch (@SuppressWarnings("unused") OXException e2) {
                                 // ignore
                             }
                         }
                     }
                 }
             }
+        } catch(Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+            throw ex;
         } finally {
             callback.remove(new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             Databases.autocommit(writeCon);
@@ -345,8 +383,8 @@ class SingleMessageDeliveryTask implements Runnable {
     private Event prepareEvent(Connection writeCon) throws OXException {
         SimpleDBProvider provider = new SimpleDBProvider(writeCon, writeCon);
         CalendarStorage calStorage = factory.create(ctx, account, optEntityResolver(ctx.getContextId()), provider, DBTransactionPolicy.NO_TRANSACTIONS);
-        AlarmTrigger loadedTrigger = calStorage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm());
-        if (loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
+        AlarmTrigger loadedTrigger = calStorage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm().intValue());
+        if (loadedTrigger == null || loadedTrigger.getProcessed().longValue() != processed) {
             // Abort since the triggers is either gone or picked up by another node (e.g. because of an update)
             LOG.trace("Skipped message alarm task for {}. Its trigger is not up to date!", new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             return null;
@@ -355,7 +393,7 @@ class SingleMessageDeliveryTask implements Runnable {
         CalendarAccount calendarAccount = null;
         AdministrativeCalendarProvider adminCalProvider = null;
         try {
-            calendarAccount = administrativeCalendarAccountService.getAccount(ctx.getContextId(), trigger.getUserId(), account);
+            calendarAccount = administrativeCalendarAccountService.getAccount(ctx.getContextId(), trigger.getUserId().intValue(), account);
             if (calendarAccount == null) {
                 LOG.trace("Unable to load calendar account.");
                 return null;
@@ -384,13 +422,11 @@ class SingleMessageDeliveryTask implements Runnable {
                 break;
             }
         }
-        calStorage.getAlarmStorage().updateAlarms(event, trigger.getUserId(), alarms);
+        calStorage.getAlarmStorage().updateAlarms(event, trigger.getUserId().intValue(), alarms);
         Map<Integer, List<Alarm>> loadAlarms = calStorage.getAlarmStorage().loadAlarms(event);
         calStorage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         calStorage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
-        if (adminCalProvider != null && calendarAccount != null) {
-            adminCalProvider.touchEvent(ctx, calendarAccount, trigger.getEventId());
-        }
+        adminCalProvider.touchEvent(ctx, calendarAccount, trigger.getEventId());
         return event;
     }
 
@@ -402,11 +438,11 @@ class SingleMessageDeliveryTask implements Runnable {
     private void sendMessage(Event event) {
         Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
         try {
-            int userId = trigger.getUserId();
+            int userId = trigger.getUserId().intValue();
             int contextId = ctx.getContextId();
             if (notificationService.isEnabled(userId, contextId)) {
-                if (checkRateLimit(alarm.getAction(), notificationService.getRate(userId, contextId), trigger.getUserId(), ctx.getContextId())) {
-                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
+                if (checkRateLimit(alarm.getAction(), notificationService.getRate(userId, contextId), trigger.getUserId().intValue(), ctx.getContextId())) {
+                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId().intValue(), trigger.getTime().longValue());
                     LOG.trace("Message successfully send for {}", key);
                 } else {
                     LOG.info("Due to the rate limit it is not possible to send the message for {}", key);
@@ -422,7 +458,13 @@ class SingleMessageDeliveryTask implements Runnable {
     private static final String RATE_LIMIT_PREFIX = "MESSAGE_ALARM_";
 
     /**
+     * Checks the rate limit
      *
+     * @param action The action to check
+     * @param rate The rate to consider
+     * @param userId The user id
+     * @param ctxId The context id
+     * @return <code>false</code> in case the rate limit is reached, <code>true</code> otherwise
      */
     private boolean checkRateLimit(AlarmAction action, Rate rate, int userId, int ctxId) {
         if (!rate.isEnabled() || rateLimitFactory == null) {
@@ -436,13 +478,21 @@ class SingleMessageDeliveryTask implements Runnable {
         }
     }
 
+    /**
+     * Checks if the event contains message alarms which needs to be triggered soon
+     *
+     * @param writeCon The write connection to use
+     * @param event The even to check
+     * @return <code>true</code> if the write connections is used for read only, <code>false</code> otherwise
+     * @throws OXException
+     */
     private boolean checkEvent(Connection writeCon, Event event) throws OXException {
         int cid = ctx.getContextId();
         List<AlarmTrigger> triggers = callback.checkEvents(writeCon, Collections.singletonList(event), cid, account, true);
         if (triggers.isEmpty() == false) {
             CalendarStorage calStorage = factory.create(ctx, account, optEntityResolver(cid), new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
             for (AlarmTrigger tmpTrigger : triggers) {
-                callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, tmpTrigger.getEventId(), tmpTrigger.getAlarm()), tmpTrigger);
+                callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, tmpTrigger.getEventId(), tmpTrigger.getAlarm().intValue()), tmpTrigger);
             }
             return false;
         }

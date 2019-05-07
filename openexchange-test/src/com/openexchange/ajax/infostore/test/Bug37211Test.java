@@ -90,7 +90,7 @@ public class Bug37211Test extends AbstractInfostoreTest {
         /*
          * verify deletion
          */
-        ftm.deleteFolderOnServer(folder, true);
+        ftm.deleteFolderOnServer(folder, Boolean.TRUE);
     }
 
 }

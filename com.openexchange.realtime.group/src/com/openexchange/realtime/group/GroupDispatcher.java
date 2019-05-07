@@ -254,23 +254,29 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
         MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
-        Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
-        // Iterate over snapshot
-        for (ID id : idsRef.get()) {
-            if (!ex.contains(id)) {
-                // Send a copy of the stanza
-                Stanza copy = copyFor(stanza, id);
-                stamp(copy);
-                if (inResponseTo != null) {
-                    if (inResponseTo.getTracer() != null) {
-                        copy.setTracer(inResponseTo.getTracer() + " response for " + id);
-                        copy.addLogMessages(inResponseTo.getLogEntries());
-                        copy.trace("---- Response ---");
+
+        if (dispatcher != null) {
+            Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
+            // Iterate over snapshot
+            for (ID id : idsRef.get()) {
+                if (!ex.contains(id)) {
+                    // Send a copy of the stanza
+                    Stanza copy = copyFor(stanza, id);
+                    stamp(copy);
+                    if (inResponseTo != null) {
+                        if (inResponseTo.getTracer() != null) {
+                            copy.setTracer(inResponseTo.getTracer() + " response for " + id);
+                            copy.addLogMessages(inResponseTo.getLogEntries());
+                            copy.trace("---- Response ---");
+                        }
+
                     }
 
+                    dispatcher.send(copy);
                 }
-                dispatcher.send(copy);
             }
+        } else {
+            LOG.error("Dispatcher reference unset. Cannot relay stanza!");
         }
     }
 

@@ -264,7 +264,7 @@ public class DefaultConfig implements SAMLConfig {
     }
 
     private void setAutoLoginEnabled(boolean autoLoginEnabled) {
-        this.autoLoginEnabled = autoLoginEnabled;;
+        this.autoLoginEnabled = autoLoginEnabled;
     }
 
     @Override

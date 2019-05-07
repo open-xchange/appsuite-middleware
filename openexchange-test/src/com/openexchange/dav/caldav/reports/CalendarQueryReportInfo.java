@@ -86,6 +86,17 @@ public class CalendarQueryReportInfo extends ReportInfo {
     private static Element getFilterElement(Document document, CompFilter filter) {
         Element element = DomUtil.createElement(document, "comp-filter", PropertyNames.NS_CALDAV);
         element.setAttribute("name", filter.getName());
+        TimeRangeFilter timeRangeFilter = filter.getTimeRangeFilter();
+        if (null != timeRangeFilter) {
+            Element timeRangeElement = DomUtil.createElement(document, "time-range", PropertyNames.NS_CALDAV);
+            if (null != timeRangeFilter.getStart()) {
+                timeRangeElement.setAttribute("start", timeRangeFilter.getStart());
+            }
+            if (null != timeRangeFilter.getEnd()) {
+                timeRangeElement.setAttribute("end", timeRangeFilter.getEnd());
+            }
+            element.appendChild(timeRangeElement);
+        }
         List<CompFilter> subFilters = filter.getSubFilters();
         if (null != subFilters) {
             for (CompFilter subFilter : subFilters) {

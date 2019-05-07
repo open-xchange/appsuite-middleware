@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.sql;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.sql.schema.Tables.subscriptions;
@@ -239,7 +240,7 @@ public class AbstractSubscriptionSQLStorageTest extends SQLTestCase {
         Assert.assertEquals(expected.getUserId(), actual.getUserId());
         Assert.assertEquals(expected.getSource(), actual.getSource());
         Assert.assertEquals(expected.getDescription(), actual.getDescription());
-        Assert.assertEquals(expected.isEnabled(), actual.isEnabled());
+        Assert.assertEquals(B(expected.isEnabled()), B(actual.isEnabled()));
     }
 
     protected void assertEquals(final SubscriptionSource expected, final SubscriptionSource actual) {

@@ -125,11 +125,11 @@ public class ParameterBasedFileMetadataParser {
         result.setCategories(request.getParameter(File.Field.CATEGORIES.getName()));
         String colorString = request.getParameter(File.Field.COLOR_LABEL.getName());
         if (Strings.isNotEmpty(colorString)) {
-            result.setColorLabel(Integer.valueOf(colorString));
+            result.setColorLabel(Integer.parseInt(colorString));
         }
         String sizeString = request.getParameter(File.Field.FILE_SIZE.getName());
         if (Strings.isNotEmpty(sizeString)) {
-            result.setFileSize(Long.valueOf(sizeString));
+            result.setFileSize(Long.parseLong(sizeString));
         }
         return result;
     }

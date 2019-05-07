@@ -49,8 +49,6 @@
 
 package com.openexchange.imageconverter.api;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -71,31 +69,20 @@ public class ElementLock extends ReentrantLock {
      */
     public enum LockMode {
         STANDARD,
+        BEGIN_PROCESSING,
         WAIT_IF_PROCESSED,
-        WAIT_IF_PROCESSED_AND_BEGIN_PROCESSING,
-        PROCESSING,
         TRY_LOCK;
+    }
 
-        /**
-         * @return
-         */
-        boolean needsWaiting() {
-            return (PROCESSING != this);
-        }
-
-        /**
-         * @return
-         */
-        boolean isBeginProcessing() {
-            return (WAIT_IF_PROCESSED_AND_BEGIN_PROCESSING == this);
-        }
-
-        /**
-         * @return
-         */
-        boolean isTryLock() {
-            return TRY_LOCK == this;
-        }
+    /**
+     * {@link UnlockMode}
+     *
+     * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+     * @since v7.10.2
+     */
+    public enum UnlockMode {
+        STANDARD,
+        END_PROCESSING
     }
 
     /**
@@ -108,20 +95,29 @@ public class ElementLock extends ReentrantLock {
     /**
      * @return
      */
-    public boolean lock(final LockMode lockMode) {
-        m_useCount.incrementAndGet();
+    public int incrementUseCount() {
+        return ++m_useCount;
+    }
 
-        if (lockMode.isTryLock()) {
-            if (!super.tryLock()) {
-                m_useCount.decrementAndGet();
-                return false;
-            }
-        } else {
-            super.lock();
+    /**
+     * @return
+     */
+    public int decrementUseCount() {
+        return --m_useCount;
+    }
+
+    /**
+     * @return
+     */
+    public boolean lock(final LockMode lockMode) {
+        if (LockMode.TRY_LOCK == lockMode) {
+            return super.tryLock();
         }
 
-        if (lockMode.needsWaiting() && m_isProcessing.get()) {
-            while (m_isProcessing.get() && !Thread.currentThread().isInterrupted()) {
+        super.lock();
+
+        if (LockMode.WAIT_IF_PROCESSED == lockMode) {
+            while (m_isProcessing && !Thread.currentThread().isInterrupted()) {
                 try {
                     m_processingFinishedCondition.await();
                 } catch (@SuppressWarnings("unused") InterruptedException e) {
@@ -130,45 +126,39 @@ public class ElementLock extends ReentrantLock {
             }
         }
 
-        if (lockMode.isBeginProcessing()) {
-            m_isProcessing.compareAndSet(false, true);
+        if (LockMode.BEGIN_PROCESSING == lockMode) {
+            m_isProcessing = true;
         }
 
         return true;
     }
 
     /**
+     * Calling this method needs to be synchronized by the caller
+     *
      * @return
      */
-    public long unlockAndGetUseCount(final boolean finishProcessing) {
-        if (finishProcessing && m_isProcessing.compareAndSet(true, false)) {
+    public void unlock(final UnlockMode unlockMode) {
+        if (m_isProcessing && (UnlockMode.END_PROCESSING == unlockMode)) {
+            m_isProcessing = false;
             m_processingFinishedCondition.signalAll();
         }
 
         super.unlock();
-
-        return m_useCount.decrementAndGet();
-    }
-
-    /**
-     * @return
-     */
-    public long getUseCount() {
-        return m_useCount.get();
     }
 
     /**
      * @return
      */
     public boolean isProcessing() {
-        return m_isProcessing.get();
+        return m_isProcessing;
     }
 
     // - Members ---------------------------------------------------------------
 
     final private Condition m_processingFinishedCondition = newCondition();
 
-    final private AtomicLong m_useCount = new AtomicLong(0);
+    volatile private int m_useCount = 1;
 
-    final private AtomicBoolean m_isProcessing = new AtomicBoolean(false);
+    volatile private boolean m_isProcessing = false;
 }

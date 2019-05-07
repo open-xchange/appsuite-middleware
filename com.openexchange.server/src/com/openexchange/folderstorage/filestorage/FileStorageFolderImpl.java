@@ -359,9 +359,9 @@ public final class FileStorageFolderImpl extends AbstractFolder {
 
         final boolean b = showPersonalBelowInfoStore(session.getUserId(), session.getContextId(), altNames);
         if (session instanceof PutIfAbsent) {
-            ((PutIfAbsent) session).setParameterIfAbsent(paramName, b);
+            ((PutIfAbsent) session).setParameterIfAbsent(paramName, b ? Boolean.TRUE : Boolean.FALSE);
         } else {
-            session.setParameter(paramName, b);
+            session.setParameter(paramName, b ? Boolean.TRUE : Boolean.FALSE);
         }
         return b;
     }

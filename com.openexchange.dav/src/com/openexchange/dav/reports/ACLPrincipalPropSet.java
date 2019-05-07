@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.reports;
 
+import static com.openexchange.java.Autoboxing.I;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
@@ -115,7 +116,7 @@ public class ACLPrincipalPropSet extends PROPFINDAction {
                     }
                     multistatusElement.addContent(marshaller.marshal(resource));
                 } catch (OXException e) {
-                    org.slf4j.LoggerFactory.getLogger(ACLPrincipalPropSet.class).warn("Error marshalling ACL resource for permission entity {}", permission.getEntity(), e);
+                    org.slf4j.LoggerFactory.getLogger(ACLPrincipalPropSet.class).warn("Error marshalling ACL resource for permission entity {}", I(permission.getEntity()), e);
                 }
             }
             sendMultistatusResponse(res, multistatusElement);

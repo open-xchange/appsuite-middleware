@@ -93,16 +93,16 @@ public final class QuartzServiceImpl implements QuartzService {
 
                 Properties localProperties = new Properties();
                 localProperties.put("org.quartz.scheduler.instanceName", "OX-Local-Scheduler");
-                localProperties.put("org.quartz.scheduler.rmi.export", false);
-                localProperties.put("org.quartz.scheduler.rmi.proxy", false);
-                localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
+                localProperties.put("org.quartz.scheduler.rmi.export", Boolean.FALSE);
+                localProperties.put("org.quartz.scheduler.rmi.proxy", Boolean.FALSE);
+                localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", Boolean.FALSE);
                 localProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
                 localProperties.put("org.quartz.threadPool.threadCount", String.valueOf(localThreads));
                 localProperties.put("org.quartz.threadPool.threadPriority", "5");
-                localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
+                localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", Boolean.TRUE);
                 localProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
                 localProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
-                localProperties.put("org.quartz.scheduler.jmx.export", true);
+                localProperties.put("org.quartz.scheduler.jmx.export", Boolean.TRUE);
 
                 try {
                     SchedulerFactory csf = new StdSchedulerFactory(localProperties);
@@ -130,16 +130,16 @@ public final class QuartzServiceImpl implements QuartzService {
                 Properties clusteredProperties = new Properties();
                 clusteredProperties.put("org.quartz.scheduler.instanceName", name);
                 clusteredProperties.put("org.quartz.scheduler.instanceId", "AUTO");
-                clusteredProperties.put("org.quartz.scheduler.rmi.export", false);
-                clusteredProperties.put("org.quartz.scheduler.rmi.proxy", false);
-                clusteredProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
+                clusteredProperties.put("org.quartz.scheduler.rmi.export", Boolean.FALSE);
+                clusteredProperties.put("org.quartz.scheduler.rmi.proxy", Boolean.FALSE);
+                clusteredProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", Boolean.FALSE);
                 clusteredProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
                 clusteredProperties.put("org.quartz.threadPool.threadCount", String.valueOf(threads <= 0 ? 1 : threads));
                 clusteredProperties.put("org.quartz.threadPool.threadPriority", "5");
-                clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
+                clusteredProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", Boolean.TRUE);
                 clusteredProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
                 clusteredProperties.put("org.quartz.jobStore.class", "org.quartz.simpl.RAMJobStore");
-                clusteredProperties.put("org.quartz.scheduler.jmx.export", true);
+                clusteredProperties.put("org.quartz.scheduler.jmx.export", Boolean.TRUE);
                 try {
                     SchedulerFactory csf = new StdSchedulerFactory(clusteredProperties);
                     scheduler = csf.getScheduler();

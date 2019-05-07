@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.caldav.clientfields.Lightning;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
@@ -79,7 +80,7 @@ public class CalDAVImport {
 
     private static final String[] EXTRA_PROPERTIES = {
         "X-CALENDARSERVER-ATTENDEE-COMMENT", "X-CALENDARSERVER-PRIVATE-COMMENT", "X-CALENDARSERVER-ACCESS",
-        "X-MOZ-FAKED-MASTER", "X-MOZ-SNOOZE", "X-MOZ-SNOOZE-TIME*", "X-MOZ-LASTACK"
+        Lightning.X_MOZ_FAKED_MASTER.getId(), Lightning.X_MOZ_SNOOZE.getId(), Lightning.X_MOZ_SNOOZE_TIME.getId() +"*", Lightning.X_MOZ_LASTACK.getId()
     };
 
     private final WebdavPath url;
@@ -123,9 +124,9 @@ public class CalDAVImport {
             /*
              * skip any X-MOZ-FAKED-MASTER appointments
              */
-            ExtendedProperty extendedProperty = CalendarUtils.optExtendedProperty(importedEvent, "X-MOZ-FAKED-MASTER");
+            ExtendedProperty extendedProperty = CalendarUtils.optExtendedProperty(importedEvent, Lightning.X_MOZ_FAKED_MASTER.getId());
             if (null != extendedProperty && "1".equals(extendedProperty.getValue())) {
-                LOG.debug("Skipping event marked with \"X-MOZ-FAKED-MASTER\": {}", importedEvent);
+                LOG.debug("Skipping event marked with \"{}\": {}", Lightning.X_MOZ_FAKED_MASTER.getId(), importedEvent);
                 continue;
             }
             if (null == uid) {

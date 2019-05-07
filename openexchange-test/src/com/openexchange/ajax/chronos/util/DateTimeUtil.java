@@ -94,7 +94,7 @@ public final class DateTimeUtil {
             return new SimpleDateFormat("yyyyMMdd");
         }
     };
-    
+
     /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} in ZULU format
      *
@@ -157,7 +157,7 @@ public final class DateTimeUtil {
     /**
      * Parses the specified millisecond timestamp into a proper {@link DateTimeData} format
      * without the time information
-     * 
+     *
      * @param millis The millisecond timestamp
      * @return The {@link DateTimeData}
      */
@@ -166,6 +166,17 @@ public final class DateTimeUtil {
         Date date = new Date(millis);
         result.setValue(SIMPLE_FORMATER.get().format(date));
         return result;
+    }
+
+    /**
+     * Parses the specified {@link DateTimeData} object to a {@link Date} object
+     *
+     * @param time The {@link DateTimeData} object
+     * @return The {@link Date} object
+     * @throws ParseException if a parsing error occurs
+     */
+    public static Date parseAllDay(DateTimeData time) throws ParseException {
+        return SIMPLE_FORMATER.get().parse(time.getValue());
     }
 
     /**
@@ -275,7 +286,7 @@ public final class DateTimeUtil {
         cal.set(Calendar.MILLISECOND, 0);
         return cal;
     }
-    
+
     public static DateTimeData getDateTimeData(String timestamp, String timezoneId) {
         DateTimeData result = new DateTimeData();
         result.setTzid(timezoneId);
@@ -304,7 +315,7 @@ public final class DateTimeUtil {
     /**
      * Strips the time information from the specified {@link DateTimeData} and returns
      * a new version of the data
-     * 
+     *
      * @param data The {@link DateTimeData}
      * @return The new {@link DateTimeData} without the time information
      * @throws ParseException if a parsing error is occurred

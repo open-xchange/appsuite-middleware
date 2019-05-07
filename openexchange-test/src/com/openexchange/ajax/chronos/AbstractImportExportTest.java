@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         if (contactsToDelete != null) {
-            contactsApi.deleteContacts(defaultUserApi.getSession(), System.currentTimeMillis(), new ArrayList<>(contactsToDelete));
+            contactsApi.deleteContacts(defaultUserApi.getSession(), L(System.currentTimeMillis()), new ArrayList<>(contactsToDelete));
         }
         super.tearDown();
     }
@@ -117,7 +118,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
 
     protected String importICalFile(String fileName) throws Exception {
         Asset asset = assetManager.getAsset(AssetType.ics, fileName);
-        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
     }
 
     protected void createContactWithBirthdayEvent(String session) throws Exception {
@@ -138,7 +139,7 @@ public class AbstractImportExportTest extends AbstractChronosTest {
         ContactData contact = new ContactData();
         contact.setFirstName("Peter");
         contact.setLastName("Paul Rubens"+UUID.randomUUID());
-        contact.setBirthday(c.getTimeInMillis());
+        contact.setBirthday(L(c.getTimeInMillis()));
         contact.setFolderId(contactsFolder);
         return contact;
     }

@@ -79,6 +79,7 @@ public class Bug39105Test extends AbstractMailFindTest {
 
     private FolderObject testFolder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

@@ -82,7 +82,7 @@ public class CalDAV extends DAVServlet {
     protected boolean checkPermission(HttpServletRequest req, ServerSession session) {
         try {
             ComposedConfigProperty<Boolean> property = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
+            if (property.isDefined() && property.get().booleanValue() && session.getUserPermissionBits().hasCalendar()) {
                 OAuthAccess oAuthAccess = (OAuthAccess) req.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
                 if (oAuthAccess == null) {
                     // basic auth took place

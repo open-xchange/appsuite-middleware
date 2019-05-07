@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.attachment.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -168,7 +169,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             OXFolderAccess folderAccess = new OXFolderAccess(ctx);
             FolderObject defaultInfoStoreFolder = folderAccess.getDefaultFolder(serverSession.getUserId(), FolderObject.INFOSTORE);
             if (!defaultInfoStoreFolder.getEffectiveUserPermission(serverSession.getUserId(), permissionBits).canCreateSubfolders()) {
-                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(session.getUserId(), defaultInfoStoreFolder.getObjectID(), ctx.getContextId());
+                throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(I(session.getUserId()), I(defaultInfoStoreFolder.getObjectID()), I(ctx.getContextId()));
             }
 
             String name = folderName;

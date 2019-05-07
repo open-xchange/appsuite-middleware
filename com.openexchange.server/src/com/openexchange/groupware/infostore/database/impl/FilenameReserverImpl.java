@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -171,7 +173,7 @@ public class FilenameReserverImpl implements FilenameReserver {
                     if (usedNames.keySet().contains(fileName)) {
                         if (false == adjustAsNeeded) {
                             DocumentMetadata documentMetadata = usedNames.get(fileName);
-                            throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(fileName, documentMetadata.getFolderId(), documentMetadata.getId());
+                            throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(fileName, L(documentMetadata.getFolderId()), I(documentMetadata.getId()));
                         }
                         adjusted = true;
                         NameBuilder nb = NameBuilder.nameBuilderFor(fileName);

@@ -50,6 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -369,7 +370,7 @@ public class ContactServiceImpl extends DefaultContactService {
         }
         new EventClient(session).modify(storedContact, updatedContact, folder);
     }
-    
+
     @Override
     protected void doUpdateUser(final Session session, final String folderID, final String objectID, final Contact contact,
         final Date lastRead) throws OXException {
@@ -390,7 +391,7 @@ public class ContactServiceImpl extends DefaultContactService {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID != parse(folderID) ||
             contact.containsParentFolderID() && 0 < contact.getParentFolderID() &&
             FolderObject.SYSTEM_LDAP_FOLDER_ID != contact.getParentFolderID()) {
-            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(FolderObject.SYSTEM_LDAP_FOLDER_ID, contextId, userID);
+            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(contextId), I(userID));
         }
         /*
          * check currently stored contact
@@ -1019,7 +1020,7 @@ public class ContactServiceImpl extends DefaultContactService {
     protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
-        parameters.put(AutocompleteParameters.USER_ID, userID);
+        parameters.put(AutocompleteParameters.USER_ID, I(userID));
         /*
          * check supplied search
          */

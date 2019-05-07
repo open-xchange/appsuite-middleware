@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -377,10 +378,9 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
 
             if (quotaAware) {
                 return qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.drive());
-            } else {
-                FileStorageService fsService = FileStorages.getFileStorageService();
-                return fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.administrative()).getUri());
             }
+            FileStorageService fsService = FileStorages.getFileStorageService();
+            return fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId, Info.administrative()).getUri());
 
         } finally {
             databaseService.backReadOnly(schemaCon);
@@ -404,12 +404,12 @@ public class DbFileStorage2EntitiesResolver implements FileStorage2EntitiesResol
             rs = stmt.executeQuery();
             while (rs.next()) {
                 int ctxId = rs.getInt(1);
-                List<Integer> list = users.get(ctxId);
+                List<Integer> list = users.get(I(ctxId));
                 if (null == list) {
                     list = new ArrayList<Integer>();
-                    users.put(ctxId, list);
+                    users.put(I(ctxId), list);
                 }
-                list.add(rs.getInt(2));
+                list.add(I(rs.getInt(2)));
             }
         } catch (SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);

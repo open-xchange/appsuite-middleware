@@ -132,7 +132,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         if (alarmValue == null) {
             alarmValueInt = 0;
         } else {
-            alarmValueInt = (Integer) alarmValue;
+            alarmValueInt = ((Integer) alarmValue).intValue();
         }
 
         assertEquals("Alarm is not equal in All- and GetRequest before update.", getResponseBeforeUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
@@ -150,7 +150,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         if (alarmValue == null) {
             alarmValueInt = 0;
         } else {
-            alarmValueInt = (Integer) alarmValue;
+            alarmValueInt = ((Integer) alarmValue).intValue();
         }
 
         assertEquals("Alarm is not equal in All- and GetRequest after update.", getResponseAfterUpdate.getAppointment(tz).getAlarm(), alarmValueInt);
@@ -169,7 +169,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         }
     }
 
-    public Appointment createAppointment() throws Exception {
+    public Appointment createAppointment() {
         final Appointment appointment = new Appointment();
         appointment.setTitle("Bug 17327 Testappointment");
         appointment.setParentFolderID(sharedFolder.getObjectID());

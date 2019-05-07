@@ -49,11 +49,11 @@
 
 package com.openexchange.file.storage.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -85,7 +85,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider#getAssociationsFor(int, com.openexchange.session.Session)
      */
     @Override
@@ -93,13 +93,12 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
         Collection<OAuthAccountAssociation> associations = null;
         List<FileStorageAccount> accounts = storageService.getAccounts(session);
         for (FileStorageAccount fileStorageAccount : accounts) {
-            Map<String, Object> configuration = fileStorageAccount.getConfiguration();
             try {
-                if (OAuthUtil.getAccountId(configuration) != accountId) {
+                if (OAuthUtil.getAccountId(fileStorageAccount.getConfiguration()) != accountId) {
                     continue;
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Possible malfunctioning file storage oauth account with id: {}, for user: {}, in context {}.", accountId, session.getUserId(), session.getContextId(), e);
+                LOGGER.debug("No association found between file storage account {} and oauth account {} for user {} in context {}.", fileStorageAccount.getId(), I(accountId), I(session.getUserId()), I(session.getContextId()), e);
                 continue;
             }
             if (null == associations) {
@@ -113,7 +112,7 @@ public abstract class AbstractFileStorageOAuthAccountAssociationProvider impleme
 
     /**
      * Creates a new {@link OAuthAccountAssociation} for the specified {@link FileStorageAccount}
-     * 
+     *
      * @param accountId The OAuthAccount identifier
      * @param account The file storage account
      * @param userId The user identifier

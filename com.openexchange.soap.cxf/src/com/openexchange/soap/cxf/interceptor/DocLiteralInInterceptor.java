@@ -19,6 +19,7 @@
 
 package com.openexchange.soap.cxf.interceptor;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +72,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         super(Phase.UNMARSHAL);
     }
 
+    @Override
     public void handleMessage(Message message) {
         if (isGET(message) && message.getContent(List.class) != null) {
             LOG.fine("DocLiteralInInterceptor skipped in HTTP GET method");
@@ -144,7 +146,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                         throw new Fault(m, LOG, fault);
                                     } else if (linkedException instanceof SAXParseException) {
                                         final SAXParseException sax = (SAXParseException) linkedException;
-                                        final String m = MessageFormat.format("Invalid value in line {0} in row {1}. Please correct SOAP request.", sax.getLineNumber(), sax.getColumnNumber());
+                                        final String m = MessageFormat.format("Invalid value in line {0} in row {1}. Please correct SOAP request.", I(sax.getLineNumber()), I(sax.getColumnNumber()));
                                         throw new Fault(m, LOG, fault);
                                     }
                                 }
@@ -310,7 +312,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
             OperationInfo op = p.getMessageInfo().getOperation();
             Boolean b = (Boolean) op.getProperty("operation.is.synthetic");
             if (b != null) {
-                synth = b;
+                synth = b.booleanValue();
             }
         }
 
@@ -375,6 +377,7 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         return setMessage(message, operation, requestor, si, msgInfo);
     }
 
+    @Override
     protected BindingOperationInfo getBindingOperationInfo(Exchange exchange, QName name, boolean client) {
         BindingOperationInfo bop = ServiceModelUtil.getOperationForWrapperElement(exchange, name, client);
         if (bop == null) {

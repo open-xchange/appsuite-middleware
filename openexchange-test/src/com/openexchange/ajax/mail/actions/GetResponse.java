@@ -261,7 +261,7 @@ public class GetResponse extends AbstractAJAXResponse {
                     if (object instanceof JSONObject) {
                         date = new Date(((JSONObject) object).getLong("utc"));
                     } else {
-                        date = new Date((Long) object);
+                        date = new Date(((Long) object).longValue());
                     }
                     final int offset = timeZone.getOffset(date.getTime());
                     mail.setReceivedDate(new Date(date.getTime() - offset));

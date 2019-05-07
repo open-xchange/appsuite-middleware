@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -73,6 +74,7 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -82,7 +84,7 @@ public class TestsForUsingRecurrencePositionToGetChangeExceptions extends Manage
         catm.insert(app);
 
         changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.RECURRENCE_POSITION, I(2));
         changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
 

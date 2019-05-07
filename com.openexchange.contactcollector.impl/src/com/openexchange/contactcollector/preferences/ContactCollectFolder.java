@@ -118,7 +118,7 @@ public class ContactCollectFolder implements PreferencesItemService {
             }
 
             private Integer getPrevValue(final Session session) throws OXException {
-                final Map<String, Object> map = (Map<String, Object>) session.getParameter("__serverUserSetting");
+                @SuppressWarnings("unchecked") Map<String, Object> map = (Map<String, Object>) session.getParameter("__serverUserSetting");
                 if (null != map) {
                     return (Integer) map.get("contact_collect_folder");
                 }

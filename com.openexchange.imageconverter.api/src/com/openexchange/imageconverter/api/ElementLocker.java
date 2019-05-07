@@ -49,10 +49,10 @@
 
 package com.openexchange.imageconverter.api;
 
-import static com.openexchange.java.Strings.isNotEmpty;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.imageconverter.api.ElementLock.LockMode;
+import com.openexchange.imageconverter.api.ElementLock.UnlockMode;
 
 /**
  * {@link ElementLocker}
@@ -77,7 +77,7 @@ public class ElementLocker {
     public static boolean lock(final String element, final LockMode lockMode) {
         boolean ret = false;
 
-        if (isNotEmpty(element)) {
+        if (null != element) {
             ElementLock elementLock = null;
 
             synchronized (m_elementLockMap) {
@@ -85,17 +85,19 @@ public class ElementLocker {
 
                 if (null == elementLock) {
                     m_elementLockMap.put(element, elementLock = new ElementLock());
+                } else {
+                    elementLock.incrementUseCount();
                 }
             }
 
             ret = elementLock.lock(lockMode);
 
             // cleaning up in case of unsuccessful try lock
-            if (!ret && (LockMode.TRY_LOCK == lockMode)) {
+            if (!ret) {
                 // remove element only from map, if no one else
                 // holds the lock and no processing is happening
                 synchronized (m_elementLockMap) {
-                    if ((0 == elementLock.getUseCount()) && !elementLock.isProcessing()) {
+                    if ((0 == elementLock.decrementUseCount()) && !elementLock.isProcessing()) {
                         m_elementLockMap.remove(element);
                     }
                 }
@@ -110,20 +112,22 @@ public class ElementLocker {
      * @param element
      */
     public static void unlock(final String element) {
-        unlock(element, false);
+        unlock(element, UnlockMode.STANDARD);
     }
 
     /**
      * @param element
      * @param finishProcessing
      */
-    public static void unlock(final String element, final boolean finishProcessing) {
-        if (isNotEmpty(element)) {
+    public static void unlock(final String element, final UnlockMode unlockMode) {
+        if (null != element) {
             synchronized (m_elementLockMap) {
-                final ElementLock keyLock = m_elementLockMap.get(element);
+                final ElementLock elementLock = m_elementLockMap.get(element);
 
-                if (null != keyLock) {
-                    if ((0 == keyLock.unlockAndGetUseCount(finishProcessing)) && !keyLock.isProcessing()) {
+                if (null != elementLock) {
+                    elementLock.unlock(unlockMode);
+
+                    if ((0 == elementLock.decrementUseCount()) && !elementLock.isProcessing()) {
                         m_elementLockMap.remove(element);
                     }
                 }
@@ -133,5 +137,6 @@ public class ElementLocker {
 
     // - Members ---------------------------------------------------------------
 
+    // m_elementLockMap needs to be synchronized with every access (intended)
     private static Map<String, ElementLock> m_elementLockMap = new HashMap<>();
 }

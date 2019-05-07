@@ -137,6 +137,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 failFastTimeout = null;
@@ -203,6 +204,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected int holdsMessages = -1;
     protected final boolean ignoreSubscriptions;
     protected final boolean examineHasAttachmentUserFlags;
+    protected final boolean previewSupported;
 
     /**
      * Initializes a new {@link IMAPFolderWorker}.
@@ -226,6 +228,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         otherFolders = new HashSet<IMAPFolder>(4);
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
         examineHasAttachmentUserFlags = imapConfig.getCapabilities().hasAttachmentMarker();
+        previewSupported = imapConfig.asMap().containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW_NEW);
     }
 
     /**

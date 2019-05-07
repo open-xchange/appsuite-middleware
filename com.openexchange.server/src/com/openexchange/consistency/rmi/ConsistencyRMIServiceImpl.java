@@ -49,6 +49,7 @@
 
 package com.openexchange.consistency.rmi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#checkOrRepairConfigDB(boolean)
      */
     @Override
@@ -96,46 +97,46 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listMissingFilesInContext(int)
      */
     @Override
     public List<String> listMissingFilesInContext(int contextId) throws RemoteException {
         return handle((service) -> {
-            LOG.info("RMI invocation for: Listing missing files in context {}", contextId);
+            LOG.info("RMI invocation for: Listing missing files in context {}", I(contextId));
             return service.listMissingFilesInContext(contextId);
         });
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listMissingFilesInFilestore(int)
      */
     @Override
     public Map<ConsistencyEntity, List<String>> listMissingFilesInFilestore(int filestoreId) throws RemoteException {
         return handle((service) -> {
-            LOG.info("RMI invocation for: Listing missing files in filestore {}", filestoreId);
+            LOG.info("RMI invocation for: Listing missing files in filestore {}", I(filestoreId));
             return convertMap(service.listMissingFilesInFilestore(filestoreId));
         });
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listMissingFilesInDatabase(int)
      */
     @Override
     public Map<ConsistencyEntity, List<String>> listMissingFilesInDatabase(int databaseId) throws RemoteException {
         return handle((service) -> {
-            LOG.info("RMI invocation for: List missing files in database {}", databaseId);
+            LOG.info("RMI invocation for: List missing files in database {}", I(databaseId));
             return convertMap(service.listMissingFilesInDatabase(databaseId));
         });
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listAllMissingFiles()
      */
     @Override
@@ -148,46 +149,46 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listUnassignedFilesInContext(int)
      */
     @Override
     public List<String> listUnassignedFilesInContext(int contextId) throws RemoteException {
         return handle((service) -> {
-            LOG.info("RMI invocation for: List all unassigned files in context {}", contextId);
+            LOG.info("RMI invocation for: List all unassigned files in context {}", I(contextId));
             return service.listUnassignedFilesInContext(contextId);
         });
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listUnassignedFilesInFilestore(int)
      */
     @Override
     public Map<ConsistencyEntity, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws RemoteException {
         return handle((service) -> {
-            LOG.info("RMI invocation for: List all unassigned files in filestore {}", filestoreId);
+            LOG.info("RMI invocation for: List all unassigned files in filestore {}", I(filestoreId));
             return convertMap(service.listMissingFilesInFilestore(filestoreId));
         });
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listUnassignedFilesInDatabase(int)
      */
     @Override
     public Map<ConsistencyEntity, List<String>> listUnassignedFilesInDatabase(int databaseId) throws RemoteException {
         return handle((service) -> {
-            LOG.info("RMI invocation for: List all unassigned files in database {}", databaseId);
+            LOG.info("RMI invocation for: List all unassigned files in database {}", I(databaseId));
             return convertMap(service.listUnassignedFilesInDatabase(databaseId));
         });
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyCheckRMIService#listAllUnassignedFiles()
      */
     @Override
@@ -200,13 +201,13 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInContext(int, java.lang.String, java.lang.String)
      */
     @Override
     public void repairFilesInContext(int contextId, String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
-            LOG.info("RMI invocation for: Repair files in context {} with repair policy {} and repair action {}", contextId, repairPolicy, repairAction);
+            LOG.info("RMI invocation for: Repair files in context {} with repair policy {} and repair action {}", I(contextId), repairPolicy, repairAction);
             service.repairFilesInContext(contextId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
             return null;
         });
@@ -214,13 +215,13 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInFilestore(int, java.lang.String, java.lang.String)
      */
     @Override
     public void repairFilesInFilestore(int filestoreId, String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
-            LOG.info("RMI invocation for: Repair files in filestore {} with repair policy {} and repair action {}", filestoreId, repairPolicy, repairAction);
+            LOG.info("RMI invocation for: Repair files in filestore {} with repair policy {} and repair action {}", I(filestoreId), repairPolicy, repairAction);
             service.repairFilesInFilestore(filestoreId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
             return null;
         });
@@ -228,13 +229,13 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairFilesInDatabase(int, java.lang.String, java.lang.String)
      */
     @Override
     public void repairFilesInDatabase(int databaseId, String repairPolicy, String repairAction) throws RemoteException {
         handle((service) -> {
-            LOG.info("RMI invocation for: Repair files in database {} with repair policy {} and repair action {}", databaseId, repairPolicy, repairAction);
+            LOG.info("RMI invocation for: Repair files in database {} with repair policy {} and repair action {}", I(databaseId), repairPolicy, repairAction);
             service.repairFilesInDatabase(databaseId, RepairPolicy.valueOf(repairPolicy.toUpperCase()), RepairAction.valueOf(repairAction.toUpperCase()));
             return null;
         });
@@ -242,7 +243,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.consistency.rmi.ConsistencyRMIService#repairAllFiles(java.lang.String, java.lang.String)
      */
     @Override
@@ -275,7 +276,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /**
      * Converts the keys of the specified {@link Map} from {@link Entity} to {@link ConsistencyEntity}
-     * 
+     *
      * @param entities The map to convert
      * @return The converted map
      */
@@ -285,7 +286,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
     /**
      * Applies the given {@link ConsistencyWorker} and handles errors
-     * 
+     *
      * @param w The worker
      * @return The output from the worker
      * @throws RemoteException If {@link OXException} happens
@@ -304,9 +305,9 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
     }
 
     /**
-     * 
+     *
      * {@link ConsistencyPerformer}
-     * 
+     *
      * @param <T> - The outcome of the operation
      */
     @FunctionalInterface
@@ -314,7 +315,7 @@ public class ConsistencyRMIServiceImpl implements ConsistencyRMIService {
 
         /**
          * Performs the denoted consistency operation
-         * 
+         *
          * @param service The {@link ConsistencyService}
          * @return The outcome of the operation
          * @throws OXException if an error is occurred

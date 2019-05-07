@@ -129,7 +129,7 @@ public class Bug48149Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testLoadAppointmentFromUserWithShared() throws Exception {
+    public void testLoadAppointmentFromUserWithShared() {
         try {
             ctm3.get(sharedFolder1.getObjectID(), app1.getObjectID());
         } catch (Exception e) {
@@ -140,7 +140,7 @@ public class Bug48149Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testLoadAppointmentFromUserWithoutAnyShares() throws Exception {
+    public void testLoadAppointmentFromUserWithoutAnyShares() {
         try {
             ctm3.get(sharedFolder1.getObjectID(), app2.getObjectID());
         } catch (Exception e) {

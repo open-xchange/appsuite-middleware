@@ -106,15 +106,11 @@ public final class ExtendedMimeMessage extends MimeMessage {
     /**
      * Gets this message's folder fullname
      *
-     * @return The fullname
+     * @return The full name
      */
     public String getFullname() {
         return fullname;
     }
-
-    private static final String MULTI = "multipart/";
-
-    private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
     /**
      * The flag if this message has attachments
@@ -125,7 +121,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
         if (null == hasAttachment) {
             final ContentType ct = getContentType0();
             try {
-                hasAttachment = deepAttachmentCheck(ct.getSubType());
+                hasAttachment = Boolean.valueOf(deepAttachmentCheck(ct.getSubType()));
             } catch (final OXException e) {
                 LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));

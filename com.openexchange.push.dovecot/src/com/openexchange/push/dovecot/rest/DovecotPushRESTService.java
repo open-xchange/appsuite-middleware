@@ -1,6 +1,7 @@
 
 package com.openexchange.push.dovecot.rest;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -161,13 +162,13 @@ public class DovecotPushRESTService {
                     }
 
                     if (null == session) {
-                        LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", userId, contextId);
+                        LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", I(userId), I(contextId));
                     } else {
                         Map<String, Object> props = new LinkedHashMap<String, Object>(4);
                         props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
                         setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unseen", -1), props);
                         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
-                        LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
+                        LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", I(userId), I(contextId));
                     }
                 }
             }

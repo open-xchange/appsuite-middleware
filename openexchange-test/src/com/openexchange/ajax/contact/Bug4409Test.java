@@ -4,7 +4,6 @@ package com.openexchange.ajax.contact;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
@@ -26,7 +25,7 @@ public class Bug4409Test extends AbstractContactTest {
         /*
          * insert contact with image
          */
-        Contact contact = createContactObject(UUID.randomUUID().toString());
+        Contact contact = createContactObject();
         contact.setImage1(image);
         contact.setImageContentType(CONTENT_TYPE);
         contact.setEmail1("Bug4409Test@example.org");

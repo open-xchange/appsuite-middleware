@@ -87,6 +87,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
 
     private Date creationDate;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -102,6 +103,7 @@ public class ContactAttachmentTests extends AbstractAJAXSession {
         creationDate = new Date(timestamp - tz.getOffset(timestamp));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

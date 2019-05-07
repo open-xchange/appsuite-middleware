@@ -91,12 +91,12 @@ public class UserAdapter implements User {
 
     @Override
     public int getId() {
-        return delegate.getId();
+        return delegate.getId().intValue();
     }
 
     @Override
     public boolean isMailEnabled() {
-        return delegate.getMailenabled();
+        return delegate.getMailenabled().booleanValue();
     }
 
     @Override

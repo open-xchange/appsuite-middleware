@@ -99,6 +99,7 @@ import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.imap.util.HostAndPort;
 import com.openexchange.imap.util.HostAndPortAndCredentials;
 import com.openexchange.imap.util.StampAndOXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.audit.AuditLogService;
@@ -310,6 +311,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 final ConcurrentMap<String, Integer> m = maxCountCache;
@@ -524,7 +526,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null == tmp) {
             try {
                 return (IMAPConfig) getMailConfig();
-            } catch (final OXException e) {
+            } catch (@SuppressWarnings("unused") OXException e) {
                 // Cannot occur
                 return null;
             }
@@ -663,7 +665,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                             warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
                         }
                     }
-                } catch (final MessagingException e) {
+                } catch (@SuppressWarnings("unused") MessagingException e) {
                     // Ignore
                 }
             } catch (final AuthenticationFailedException e) {
@@ -823,6 +825,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapStore = connectIMAPStore(maxCount);
             } catch (final AuthenticationFailedException e) {
                 if (accountId != MailAccount.DEFAULT_ID) {
+                    int accountId = this.accountId;
+                    Session session = this.session;
                     AbstractTask<Void> task = new AbstractTask<Void>() {
 
                         @Override
@@ -898,7 +902,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                             try {
                                 dummy.myRights();
                                 nb = Boolean.TRUE;
-                            } catch (MessagingException e) {
+                            } catch (@SuppressWarnings("unused") MessagingException e) {
                                 // MessagingException - If the server doesn't support the ACL extension
                                 nb = Boolean.FALSE;
                             }
@@ -960,7 +964,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             while ((tmp = mailAccessCache.removeMailAccess(session, accountId)) != null) {
                 tmp.close(false);
             }
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore
         }
     }
@@ -1043,7 +1047,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         if (MailAccount.DEFAULT_ID == accountId) {
-            IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+            boolean failedToSetClientParameters = true; // Pessimistic
+            try {
+                IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+                failedToSetClientParameters = false;
+            } catch (OXException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } finally {
+                if (failedToSetClientParameters) {
+                    Streams.close(imapStore);
+                }
+            }
         }
         /*
          * ... and connect it
@@ -1081,28 +1095,34 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @throws MessagingException If operation fails
      */
     public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session, boolean knownExternal) throws MessagingException {
-        Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
-        if (null == kerberosSubject) {
-            imapStore.connect(server, port, login, pw);
-        } else {
-            synchronized (kerberosSubject) {
+        boolean error = true;
+        try {
+            Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
+            if (null == kerberosSubject) {
                 imapStore.connect(server, port, login, pw);
+            } else {
+                synchronized (kerberosSubject) {
+                    imapStore.connect(server, port, login, pw);
+                }
             }
-        }
-
-        AuditLogService auditLogService = Services.optService(AuditLogService.class);
-        if (null != auditLogService) {
-            String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
-            auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
-        }
-
-        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
-        if (null != sessionInformation) {
-            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
-        }
-        java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
-        if (null != remoteAddress) {
-            LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
+            AuditLogService auditLogService = Services.optService(AuditLogService.class);
+            if (null != auditLogService) {
+                String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
+                auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
+            }
+            String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
+            if (null != sessionInformation) {
+                LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
+            }
+            java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
+            if (null != remoteAddress) {
+                LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
+            }
+            error = false;
+        } finally {
+            if (error) {
+                Streams.close(imapStore);
+            }
         }
     }
 
@@ -1533,7 +1553,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 i += b;
             }
             return (i < 0) ? -i : i;
-        } catch (NoSuchAlgorithmException e) {
+        } catch (@SuppressWarnings("unused") NoSuchAlgorithmException e) {
             // Ignore
         }
         return 0;
@@ -1546,38 +1566,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return imapStore.toString();
         }
         return "[not connected]";
-    }
-
-    private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
-
-    private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final StringBuilder sb) {
-        if (null == trace) {
-            return;
-        }
-        final int length = (MAX_STACK_TRACE_ELEMENTS <= trace.length) ? MAX_STACK_TRACE_ELEMENTS : trace.length;
-        for (int i = 0; i < length; i++) {
-            final StackTraceElement ste = trace[i];
-            final String className = ste.getClassName();
-            if (null != className) {
-                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(lineSeparator);
-            }
-        }
     }
 
     private static void closeSafely(final IMAPStore imapStore) {

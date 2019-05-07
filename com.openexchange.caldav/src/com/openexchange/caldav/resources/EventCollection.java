@@ -143,10 +143,10 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         );
         if (isSubscription(folder)) {
             includeProperties(
-                new RefreshRate(this), 
-                new Source(this), 
-                new SubscribedStripAlarms(this), 
-                new SubscribedStripAttachments(this), 
+                new RefreshRate(this),
+                new Source(this),
+                new SubscribedStripAlarms(this),
+                new SubscribedStripAttachments(this),
                 new SubscribedStripTodos(this)
             );
         }
@@ -287,7 +287,7 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         return constructPathForChildResource(fileName + fileExtension);
     }
 
-    private static final EventField[] SYNC_STATUS_FIELDS = {
+    static final EventField[] SYNC_STATUS_FIELDS = {
         EventField.ID, EventField.UID, EventField.FILENAME, EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED,
         EventField.SERIES_ID, EventField.RECURRENCE_ID
     };
@@ -366,12 +366,12 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
         }
     }
 
-    private int getMaxResults() {
+    int getMaxResults() {
         int defaultValue = 500;
         try {
-            return Integer.parseInt(factory.getConfigValue("com.openexchange.calendar.maxEventResults", String.valueOf(defaultValue)));
+            return Integer.parseInt(caldavFactory.getConfigValue("com.openexchange.calendar.maxEventResults", String.valueOf(defaultValue)));
         } catch (NumberFormatException | OXException e) {
-            LOG.warn("Error reading value for \"com.openexchange.calendar.maxEventResults\", falling back to {}.", defaultValue, e);
+            LOG.warn("Error reading value for \"com.openexchange.calendar.maxEventResults\", falling back to {}.", I(defaultValue), e);
             return defaultValue;
         }
     }

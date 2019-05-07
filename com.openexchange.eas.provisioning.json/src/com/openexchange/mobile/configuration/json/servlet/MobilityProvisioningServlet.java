@@ -49,6 +49,7 @@
 
 package com.openexchange.mobile.configuration.json.servlet;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.net.URLEncoder;
 import javax.servlet.ServletException;
@@ -209,7 +210,7 @@ public final class MobilityProvisioningServlet extends PermissionServlet {
 			    		provisioningResponse = service.handleAction(provisioningInformation);
 			    	} catch (final OXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
-						response.setException(MobileProvisioningJsonExceptionCodes.USER_ERROR.create(e, session.getUserId()));
+						response.setException(MobileProvisioningJsonExceptionCodes.USER_ERROR.create(e, I(session.getUserId())));
 					} catch (final ServiceException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						response.setException(MobileProvisioningJsonExceptionCodes.CONFIGURATION_ERROR.create(e));

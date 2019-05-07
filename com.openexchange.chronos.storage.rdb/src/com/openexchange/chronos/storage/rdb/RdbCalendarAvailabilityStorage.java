@@ -80,7 +80,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Initialises a new {@link RdbCalendarAvailabilityStorage}.
-     * 
+     *
      * @param context The context
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
@@ -92,7 +92,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#nextCalendarFreeSlotId()
      */
     @Override
@@ -102,7 +102,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#insertCalendarFreeSlot(com.openexchange.chronos.CalendarFreeSlot)
      */
     @Override
@@ -123,7 +123,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
             release(connection, updated);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#setAvailable(java.util.List)
      */
@@ -150,7 +150,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAvailable(int)
      */
     @Override
@@ -169,7 +169,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#loadAvailable(java.util.List)
      */
     @Override
@@ -188,7 +188,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(int)
      */
     @Override
@@ -209,7 +209,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(java.lang.String)
      */
     @Override
@@ -230,7 +230,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(int)
      */
     @Override
@@ -251,7 +251,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailable(java.util.List)
      */
     @Override
@@ -272,7 +272,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailableById(java.util.List)
      */
     @Override
@@ -293,7 +293,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.storage.CalendarAvailabilityStorage#deleteAvailableByUserId(java.util.List)
      */
     @Override
@@ -316,7 +316,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Inserts multiple {@link Available} items to the storage
-     * 
+     *
      * @param items The items to insert
      * @param tableName The table name
      * @param mapper The mapper to use
@@ -353,7 +353,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Loads from the storage all {@link Available} blocks for the specified user
-     * 
+     *
      * @param connection The read-only {@link Connection} to the storage
      * @param userId The user identifier
      * @return A {@link List} with all {@link Available} blocks
@@ -375,7 +375,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Loads all {@link Availability} blocks for the users with the specified identifiers
-     * 
+     *
      * @param connection The read-only {@link Connection} to the storage
      * @param userIds The {@link List} of user identifiers
      * @return A {@link List} with the {@link Availability} blocks of the specified users
@@ -395,7 +395,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(sb.toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             for (Integer id : userIds) {
-                stmt.setInt(parameterIndex++, id);
+                stmt.setInt(parameterIndex++, id.intValue());
             }
             available = AVAILABLE_MAPPER.listFromResultSet(logExecuteQuery(stmt), mappedFields);
         }
@@ -405,7 +405,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Deletes from the storage all {@link Available} blocks for the specified user
-     * 
+     *
      * @param connection The writeable connection
      * @param userID The user's identifier
      * @return The amount of affected rows
@@ -422,7 +422,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Deletes from the storage the {@link Available} block with the specified unique identifier
-     * 
+     *
      * @param connection The writeable connection
      * @param availableUid The unique identifier of the {@link Available} block
      * @return The amount of affected rows
@@ -440,7 +440,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
     /**
      * Deletes from the storage the {@link Available} block with the specified identifier
      * for the specified user
-     * 
+     *
      * @param connection The writeable connection
      * @param userId The user identifier
      * @param availableId The identifier of the {@link Available} block
@@ -459,7 +459,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Deletes from the storage the {@link Available} block with the specified unique identifier
-     * 
+     *
      * @param connection The writeable connection
      * @param availableUid The unique identifier of the {@link Available} block
      * @return The amount of affected rows
@@ -478,7 +478,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Deletes from the storage the {@link Available} block with the specified unique identifier
-     * 
+     *
      * @param connection The writeable connection
      * @param availableUid The unique identifier of the {@link Available} block
      * @return The amount of affected rows
@@ -489,7 +489,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
         try (PreparedStatement stmt = connection.prepareStatement(SQLStatementBuilder.buildDeleteQueryBuilder(AVAILABLE_TABLE_NAME).append(" AND id IN (").append(AvailabilityMapper.getParameters(availableIds.size())).append(");").toString())) {
             stmt.setInt(parameterIndex++, context.getContextId());
             for (Integer id : availableIds) {
-                stmt.setInt(parameterIndex++, id);
+                stmt.setInt(parameterIndex++, id.intValue());
             }
             return logExecuteUpdate(stmt);
         }
@@ -497,7 +497,7 @@ public class RdbCalendarAvailabilityStorage extends RdbStorage implements Calend
 
     /**
      * Deletes from the storage the {@link Available} block with the specified unique identifier
-     * 
+     *
      * @param connection The writeable connection
      * @param availableUid The unique identifier of the {@link Available} block
      * @return The amount of affected rows

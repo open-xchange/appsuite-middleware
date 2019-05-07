@@ -72,7 +72,7 @@ public class SelectExample {
 
     public void simpleSelect() {
         SELECT select = new SELECT("a", "b", "c").FROM("bebe").WHERE(
-            new EQUALS("a", 10).AND(new EQUALS("b", "lala").OR(new EQUALS("c", new Date()))));
+            new EQUALS("a", Integer.valueOf(10)).AND(new EQUALS("b", "lala").OR(new EQUALS("c", new Date()))));
         System.out.println(new StatementBuilder().buildCommand(select));
         // WHERE(new EQUALS("a", 10));
         // SELECT select2 = new SELECT(new String[] { "a", "b", "c" });

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -71,45 +72,45 @@ public class TestsForDeleteExceptionsAndFixedEndsOfSeries extends ManagedAppoint
     }
 
     @Test
-    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInYearlySeries() throws Exception {
+    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInYearlySeries() {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 5);
+        changes.put(Appointment.RECURRENCE_POSITION, I(5));
 
         Expectations expectations = new Expectations();
-        expectations.put(Appointment.RECURRENCE_COUNT, 5);
+        expectations.put(Appointment.RECURRENCE_COUNT, I(5));
         expectations.put(Appointment.UNTIL, null); //tricky decision whether this should be set or not
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }
 
     @Test
-    public void testShouldFailWhenDeletingBeyondScopeOfSeriesInYearlySeries() throws Exception {
+    public void testShouldFailWhenDeletingBeyondScopeOfSeriesInYearlySeries() {
         Appointment app = generateYearlyAppointment();
         app.setOccurrence(5);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 6);
+        changes.put(Appointment.RECURRENCE_POSITION, I(6));
 
         try {
             negativeAssertionOnDeleteException.check(app, changes, new OXException(11));
         } catch (AssertionError e) {
-            negativeAssertionOnDeleteException.check(app, changes, OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create());
+            negativeAssertionOnDeleteException.check(app, changes, OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(e));
         }
     }
 
     @Test
-    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() throws Exception {
+    public void testShouldNotReduceNumberOfOccurrencesWhenDeletingOneInMonthlySeries() {
         Appointment app = generateMonthlyAppointment();
         app.setOccurrence(6);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 6);
+        changes.put(Appointment.RECURRENCE_POSITION, I(6));
 
         Expectations expectations = new Expectations();
-        expectations.put(Appointment.RECURRENCE_COUNT, 6);
+        expectations.put(Appointment.RECURRENCE_COUNT, I(6));
 
         positiveAssertionOnDeleteException.check(app, changes, expectations);
     }

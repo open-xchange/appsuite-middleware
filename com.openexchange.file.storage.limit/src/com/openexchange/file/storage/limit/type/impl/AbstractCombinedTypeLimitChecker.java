@@ -71,7 +71,7 @@ public abstract class AbstractCombinedTypeLimitChecker implements TypeLimitCheck
 
     /**
      * Checks the upload size limit per file for the given {@link List} and return exceeded limits.
-     * 
+     *
      * @param files The files to check
      * @return {@link List} containing already exceeded limits.
      */
@@ -89,7 +89,7 @@ public abstract class AbstractCombinedTypeLimitChecker implements TypeLimitCheck
 
     /**
      * Returns the configured upload size limit based on the given module. If the module configuration is set to <0 the server configuration will be used.
-     * 
+     *
      * @see #getMaxUploadSizePerModule()
      * @return long with the upload size limit
      */
@@ -104,7 +104,7 @@ public abstract class AbstractCombinedTypeLimitChecker implements TypeLimitCheck
 
     /**
      * Returns the configured upload size limit for the current module.
-     * 
+     *
      * @return long with the upload size limit for the current module
      */
     protected abstract long getMaxUploadSizePerModule();
@@ -112,7 +112,7 @@ public abstract class AbstractCombinedTypeLimitChecker implements TypeLimitCheck
     protected long getServerMaxUploadSize() {
         long result;
         try {
-            result = ServerConfig.getLong(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
+            result = ServerConfig.getLong(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE).longValue();
         } catch (OXException e) {
             result = 0l;
             LOG.error("", e);

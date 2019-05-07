@@ -57,7 +57,6 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.subscribe.actions.ListSubscriptionsResponse;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
@@ -75,7 +74,7 @@ public class ListSubscriptionsTest extends AbstractSubscriptionTest {
     }
 
     @Test
-    public void testShouldSurviveBasicOXMFSubscription() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldSurviveBasicOXMFSubscription() throws OXException, IOException, JSONException {
         FolderObject folder = createDefaultContactFolder();
 
         DynamicFormDescription formDescription = generateFormDescription();

@@ -49,6 +49,7 @@
 
 package com.openexchange.tasks.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -256,7 +257,7 @@ public abstract class TaskAction implements AJAXActionService {
                     principalUseCountService.increment(session, p.getIdentifier());
                     break;
                 default:
-                    LOGGER.debug("Skipping participant type '{}'", p.getType());
+                    LOGGER.debug("Skipping participant type '{}'", I(p.getType()));
                     break;
             }
         }

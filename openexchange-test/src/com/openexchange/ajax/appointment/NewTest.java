@@ -657,7 +657,7 @@ public class NewTest extends AppointmentTest {
     }
 
     @Test
-    public void testConflict() throws Exception {
+    public void testConflict() {
         Appointment appointment = CalendarTestManager.createAppointmentObject(appointmentFolderId, "testConflict", new Date(startTime), new Date(endTime));
         appointment.setShownAs(Appointment.ABSENT);
         appointment.setIgnoreConflicts(true);

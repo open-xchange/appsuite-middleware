@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.taskmanagement;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -116,13 +117,13 @@ public class TaskManager {
             numberOfRunningJobs.incrementAndGet();
             try {
                 V result = delegate.call();
-                LOGGER.info("Job '{}' with number {} successfully terminated.", typeofjob, id);
+                LOGGER.info("Job '{}' with number {} successfully terminated.", typeofjob, I(id));
                 return result;
             } catch (Exception e) {
-                LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, e);
+                LOGGER.error("Job '{}' with number {} failed.", typeofjob, I(id), e);
                 throw e;
             } catch (Throwable t) {
-                LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, t);
+                LOGGER.error("Job '{}' with number {} failed.", typeofjob, I(id), t);
                 throw new Exception(t);
             } finally {
                 numberOfRunningJobs.decrementAndGet();

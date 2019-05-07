@@ -69,7 +69,6 @@ import com.openexchange.imap.threader.references.Conversation;
 import com.openexchange.imap.util.WrappingProtocolException;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
@@ -175,14 +174,15 @@ public final class ThreadSorts {
      * @param imapFolder The IMAP folder on which THREAD command shall be executed
      * @param sortRange The THREAD command argument specifying the sort range; e.g. <code>&quot;ALL&quot;</code> or <code>&quot;12,13,14,24&quot;</code>
      * @param isRev1 Flag for IMAPrev1
+     * @param examineHasAttachmentUserFlags Whether to consider user flags to determine "has attachment(s)" flag
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @param serverInfo The IMAP server information
      * @param fields The optional fields to pre-fill
-     * @param mailConfig The mail configuration
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, boolean examineHasAttachmentUserFlags, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailConfig mailConfig, MailField... fields) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, boolean examineHasAttachmentUserFlags, boolean previewSupported, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailField... fields) throws OXException, MessagingException {
         if (null == fields || fields.length == 0 || (fields.length == 1 && MailField.RECEIVED_DATE.equals(fields[0]))) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -190,9 +190,9 @@ public final class ThreadSorts {
         // Its fetch profile...
         FetchProfile fp = new FetchProfile();
         for (MailField field : fields) {
-            MimeStorageUtility.addFetchItem(fp, field, examineHasAttachmentUserFlags);
+            MimeStorageUtility.addFetchItem(fp, field, examineHasAttachmentUserFlags, previewSupported);
         }
-        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, mailConfig.getCapabilities().hasAttachmentMarker(), searchTerm);
+        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, examineHasAttachmentUserFlags, previewSupported, searchTerm);
     }
 
     /**
@@ -206,11 +206,12 @@ public final class ThreadSorts {
      * @param fetchProfile The optional fetch profile to pre-fill messages
      * @param serverInfo The IMAP server information
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, SearchTerm<?> searchTerm) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         if (null == fetchProfile) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -226,7 +227,7 @@ public final class ThreadSorts {
                 }
             }
             // Fill them
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, examineHasAttachmentUserFlags, imapFolder).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, examineHasAttachmentUserFlags, previewSupported, imapFolder).doCommand();
         }
 
         return conversations;
@@ -243,11 +244,12 @@ public final class ThreadSorts {
      * @param fetchProfile The optional fetch profile to pre-fill messages
      * @param serverInfo The IMAP server information
      * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, SearchTerm<?> searchTerm) throws OXException, MessagingException {
+    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         {
             // Turn conversations to a flat list
@@ -258,7 +260,7 @@ public final class ThreadSorts {
                 }
             }
             // Fill them
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, examineHasAttachmentUserFlags, imapFolder).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, examineHasAttachmentUserFlags, previewSupported, imapFolder).doCommand();
         }
 
         List<Conversation> retval = new ArrayList<>(conversations.size());

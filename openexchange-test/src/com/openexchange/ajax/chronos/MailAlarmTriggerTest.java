@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.rmi.server.UID;
 import java.util.Calendar;
 import java.util.Collections;
@@ -101,7 +102,6 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws ApiException
      * @throws InterruptedException
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void testBasicMailAlarm() throws ApiException, ChronosApiException, InterruptedException {
 
@@ -115,14 +115,14 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(15);
 
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), summary, startDate, endDate, mailAlarm, folderId);
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(getCalendaruser(), summary, startDate, endDate, mailAlarm, folderId);
         EventData event = eventManager.createEvent(toCreate);
         getAndAssertAlarms(event, 1, folderId);
 
         // wait until the mail is send (30 seconds + 15 seconds as a buffer)
         Thread.sleep(TimeUnit.SECONDS.toMillis(45));
 
-        checkMail(summary, time, Collections.singletonList(expectedSentDate), 1);
+        checkMail(summary, time, getDates(expectedSentDate), 1);
     }
 
     /**
@@ -132,7 +132,6 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws ApiException
      * @throws InterruptedException
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void testMoveOut() throws ApiException, ChronosApiException, InterruptedException {
 
@@ -146,7 +145,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30);
 
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), summary, startDate, endDate, mailAlarm, folderId);
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(getCalendaruser(), summary, startDate, endDate, mailAlarm, folderId);
         EventData event = eventManager.createEvent(toCreate);
         EventData createdEvent = getAndAssertAlarms(event, 1, folderId);
 
@@ -160,7 +159,11 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         // wait until the mail is send (30 seconds + 15 seconds as a buffer)
         Thread.sleep(TimeUnit.SECONDS.toMillis(45));
 
-        checkMail(summary, time, Collections.singletonList(expectedSentDate), 0);
+        checkMail(summary, time, getDates(expectedSentDate), 0);
+    }
+    
+    List<Long> getDates(long expectedSentDate){
+        return Collections.singletonList(L(expectedSentDate));
     }
 
     /**
@@ -170,7 +173,6 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
      * @throws ApiException
      * @throws InterruptedException
      */
-    @SuppressWarnings("unchecked")
     @Test
     public void testMoveIn() throws ApiException, ChronosApiException, InterruptedException {
 
@@ -184,7 +186,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         Calendar time = Calendar.getInstance(getUserTimeZone());
         long expectedSentDate = time.getTimeInMillis() + TimeUnit.SECONDS.toMillis(30);
 
-        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), summary, startDate, endDate, mailAlarm, folderId);
+        EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(getCalendaruser(), summary, startDate, endDate, mailAlarm, folderId);
         EventData event = eventManager.createEvent(toCreate);
         EventData createdEvent = getAndAssertAlarms(event, 1, folderId);
 
@@ -197,7 +199,7 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
 
         // wait until the mail is send (30 seconds + 15 seconds as a buffer)
         Thread.sleep(TimeUnit.SECONDS.toMillis(45));
-        checkMail(summary, time, Collections.singletonList(expectedSentDate), 1);
+        checkMail(summary, time, getDates(expectedSentDate), 1);
     }
 
     private TimeZone getUserTimeZone() throws ApiException {
@@ -209,9 +211,8 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
         return TimeZone.getTimeZone(timezone);
     }
 
-    @SuppressWarnings("unchecked")
     private void checkMail(String summary, Calendar time, List<Long> expectedSentDates, int mails) throws ApiException {
-        MailsResponse mailResponse = mailApi.getAllMails(getSessionId(), "default0/INBOX", getColumns(), null, false, false, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, 100, null);
+        MailsResponse mailResponse = mailApi.getAllMails(getSessionId(), "default0/INBOX", getColumns(), null, Boolean.FALSE, Boolean.FALSE, String.valueOf(MailListField.DATE.getField()), "DESC", null, null, Integer.valueOf(100), null);
         Assert.assertNull(mailResponse.getError());
         Assert.assertNotNull(mailResponse.getData());
         int found = 0;
@@ -223,22 +224,22 @@ public class MailAlarmTriggerTest extends AbstractAlarmTriggerTest {
                 if(mails == 0) {
                     Assert.fail("Mail found even though no mail should be sent out.");
                 }
-                Long sentDate = Long.valueOf(mail.get(1));
+                long sentDate = Long.valueOf(mail.get(1)).longValue();
                 sentDate = sentDate - time.getTimeZone().getOffset(sentDate);
                 MailListElement element = new MailListElement();
                 element.setFolder("default0/INBOX");
                 element.setId(mail.get(0));
-                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), Long.MAX_VALUE);
+                mailApi.deleteMails(getSessionId(), Collections.singletonList(element), L(Long.MAX_VALUE));
                 found++;
                 boolean matchAnySentDate = false;
                 long closest = 0;
                 for(Long expectedSentDate : expectedSentDates) {
-                    if(Math.abs(sentDate - expectedSentDate) <= delta){
+                    if(Math.abs(sentDate - expectedSentDate.longValue()) <= delta){
                         matchAnySentDate = true;
                         break;
                     }
-                    if (closest == 0 || closest > Math.abs(sentDate - expectedSentDate)) {
-                        closest = Math.abs(sentDate - expectedSentDate);
+                    if (closest == 0 || closest > Math.abs(sentDate - expectedSentDate.longValue())) {
+                        closest = Math.abs(sentDate - expectedSentDate.longValue());
                     }
                 }
                 Assert.assertTrue("Wrong sent date. Expected a maximal difference of "+delta+" but was "+closest, matchAnySentDate);
