@@ -25,7 +25,7 @@ public class ResponseEvent {
         /** Indicates that the server is about to close the connection */
         BYE;
     }
-    
+
     /**
      * Represents a server status responses.
      */
@@ -33,7 +33,7 @@ public class ResponseEvent {
 
         /**
          * Gets the status response for specified response instance
-         * 
+         *
          * @param response The response instance
          * @return The associated status response or <code>null</code>
          */
@@ -52,28 +52,28 @@ public class ResponseEvent {
             }
             return null;
         }
-        
-        private Status status;
-        private Response response;
-        
+
+        private final Status status;
+        private final Response response;
+
         private StatusResponse(Status status, Response response) {
             super();
             this.status = status;
             this.response = response;
         }
-        
+
         /**
          * Gets the associated status response from IMAP server
-         * 
+         *
          * @return The status response
          */
         public Response getResponse() {
             return response;
         }
-        
+
         /**
          * Gets the status
-         * 
+         *
          * @return The status
          */
         public Status getStatus() {
@@ -82,7 +82,7 @@ public class ResponseEvent {
 
         /**
          * Checks if the associated status response was synthetically created through {@link Response#byeResponse(Exception)} to advertise an I/O error as BYE response.
-         * 
+         *
          * @return <code>true</code> if synthetic; otherwise <code>false</code>
          */
         public boolean isSynthetic() {
@@ -91,18 +91,18 @@ public class ResponseEvent {
 
         /**
          * Gets the exception for which the associated status response was synthetically created through {@link Response#byeResponse(Exception)}.
-         * 
+         *
          * @return The exception or <code>null</code> (if not synthetic)
          */
         public Exception getException() {
             return response.getException();
         }
-        
+
     }
 
     /**
      * Creates a new builder instance
-     * 
+     *
      * @return The new builder instance
      */
     public static Builder builder() {
