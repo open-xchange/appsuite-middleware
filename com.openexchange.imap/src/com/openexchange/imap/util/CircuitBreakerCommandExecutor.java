@@ -69,8 +69,6 @@ import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.CommandEvent;
 import com.sun.mail.imap.CommandExecutor;
-import com.sun.mail.imap.ResponseEvent;
-import com.sun.mail.imap.ResponseEvent.StatusResponse;
 
 /**
  * {@link CircuitBreakerCommandExecutor}
@@ -188,22 +186,22 @@ public class CircuitBreakerCommandExecutor implements CommandExecutor {
 
         @Override
         public Response[] call() throws Exception {
+            // Obtain responses
             Response[] responses = protocol.executeCommand(command, args);
-            StatusResponse statusResponse = ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]);
-            if (ResponseEvent.Status.BYE != statusResponse.getStatus()) {
-                // Command succeeded.
-                return responses;
+
+            // Check last response
+            Response response = responses[responses.length - 1];
+            if (response.isBYE() && response.isTagged()) {
+                // Command failed. Check if for a synthetic BYE response providing the causing I/O error
+                responeReference.set(responses);
+                Exception byeException = response.getByeException();
+                if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
+                    // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
+                    throw byeException;
+                }
             }
 
-            // Command failed. Check if for a synthetic BYE response providing the causing I/O error
-            responeReference.set(responses);
-            Exception byeException = statusResponse.getResponse().getByeException();
-            if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
-                // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
-                throw byeException;
-            }
-
-            // Command failed for any other reason than a network communication error
+            // Command succeeded or failed for any other reason than a network communication error
             return responses;
         }
     }
