@@ -226,7 +226,7 @@ public class ActivatorTest {
     @Test
     public void testInstallJulLevelChangePropagator_propagatorNotAvailable_addPropagator() {
         Activator activatorSpy = Mockito.spy(activator);
-        Mockito.doReturn(false).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
+        Mockito.doReturn(Boolean.FALSE).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
 
         activatorSpy.installJulLevelChangePropagator(loggerContext);
 
@@ -236,7 +236,7 @@ public class ActivatorTest {
     @Test
     public void testInstallJulLevelChangePropagator_propagatorAvailable_DoNothing() {
         Activator activatorSpy = Mockito.spy(activator);
-        Mockito.doReturn(true).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
+        Mockito.doReturn(Boolean.TRUE).when(activatorSpy).hasInstanceOf(ArgumentMatchers.anyCollection(), ArgumentMatchers.any(Class.class));
 
         activatorSpy.installJulLevelChangePropagator(loggerContext);
 

@@ -102,23 +102,23 @@ public class AddNotNullConstraintChange extends AbstractChange {
                     .addNewColumnValue(getColumnName(), defaultNullValue)
                     .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
         }
-        
+
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
-        }           
-        
+        }
+
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
+
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
-    	
+
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
+
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
@@ -145,7 +145,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //    					"values for the existing null values.");
 //    		}
 //    	}
-		
+
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
 			@Override
@@ -159,7 +159,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 			@Override
             public boolean createThisColumn(ColumnConfig column) {
 				if (column.getName().equals(getColumnName())) {
-					column.getConstraints().setNullable(false);
+					column.getConstraints().setNullable(Boolean.FALSE);
 				}
 				return true;
 			}
@@ -168,14 +168,14 @@ public class AddNotNullConstraintChange extends AbstractChange {
 				return true;
 			}
 		};
-    		
+
 		try {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	
+
     	return statements.toArray(new SqlStatement[statements.size()]);
     }
 

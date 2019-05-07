@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import gnu.trove.list.TByteList;
+import gnu.trove.list.array.TByteArrayList;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +20,7 @@ import liquibase.util.StringUtils;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
- * 
+ *
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
@@ -87,7 +89,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set")
     public Boolean isStripComments() {
-        return stripComments;
+        return Boolean.valueOf(stripComments);
     }
 
 
@@ -99,7 +101,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         if (stripComments == null) {
             this.stripComments = false;
         } else {
-            this.stripComments = stripComments;
+            this.stripComments = stripComments.booleanValue();
         }
     }
 
@@ -111,7 +113,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @DatabaseChangeProperty(description = "Set to false to not have liquibase split statements on ;'s and GO's. Defaults to true if not set")
     public Boolean isSplitStatements() {
-        return splitStatements;
+        return Boolean.valueOf(splitStatements);
     }
 
     /**
@@ -122,7 +124,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         if (splitStatements == null) {
             this.splitStatements = true;
         } else {
-            this.splitStatements = splitStatements;
+            this.splitStatements = splitStatements.booleanValue();
         }
     }
 
@@ -209,7 +211,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         String processedSQL = normalizeLineEndings(sql);
-        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
+        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments().booleanValue(), isSplitStatements().booleanValue(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\n", "\r\n");
              }
@@ -262,11 +264,9 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     public static class NormalizingStream extends InputStream {
         private ByteArrayInputStream headerStream;
-        private PushbackInputStream stream;
+        private final PushbackInputStream stream;
 
-        private byte[] quickBuffer = new byte[100];
-        private List<Byte> resizingBuffer = new ArrayList<Byte>();
-
+        private final byte[] quickBuffer = new byte[100];
 
         private int lastChar = 'X';
         private boolean seenNonSpace = false;
@@ -331,36 +331,34 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         private boolean isOnlyWhitespaceRemaining() throws IOException {
-            try {
-                int quickBufferUsed = 0;
-                while (true) {
-                    byte read = (byte) stream.read();
-                    if (quickBufferUsed >= quickBuffer.length) {
-                        resizingBuffer.add(read);
-                    } else {
-                        quickBuffer[quickBufferUsed++] = read;
-                    }
-
-                    if (read == -1) {
-                        return true;
-                    }
-                    if (!isWhiteSpace(read)) {
-                        if (resizingBuffer.size() > 0) {
-
-                            byte[] buf = new byte[resizingBuffer.size()];
-                            for (int i=0; i< resizingBuffer.size(); i++) {
-                                buf[i] = resizingBuffer.get(i);
-                            }
-
-                            stream.unread(buf);
-                        }
-
-                        stream.unread(quickBuffer, 0, quickBufferUsed);
-                        return false;
-                    }
+            int quickBufferUsed = 0;
+            TByteList resizingBuffer = null;
+            while (true) {
+                byte read = (byte) stream.read();
+                if (read == -1) {
+                    return true;
                 }
-            } finally {
-                resizingBuffer.clear();
+
+                if (quickBufferUsed >= quickBuffer.length) {
+                    if (resizingBuffer == null) {
+                        resizingBuffer = new TByteArrayList();
+                    }
+                    resizingBuffer.add(read);
+                } else {
+                    quickBuffer[quickBufferUsed++] = read;
+                }
+
+                if (!isWhiteSpace(read)) {
+                    if (resizingBuffer != null) {
+
+                        byte[] buf = resizingBuffer.toArray();
+
+                        stream.unread(buf);
+                    }
+
+                    stream.unread(quickBuffer, 0, quickBufferUsed);
+                    return false;
+                }
             }
         }
 

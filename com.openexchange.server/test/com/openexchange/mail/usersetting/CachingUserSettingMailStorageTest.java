@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.usersetting;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -116,7 +117,7 @@ public class CachingUserSettingMailStorageTest {
         PowerMockito.when(serverServiceRegistry.getService(CacheService.class, true)).thenReturn(cacheService);
         PowerMockito.when(configViewFactory.getView(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(configView);
         PowerMockito.when(configView.property(CachingUserSettingMailStorage.SPAM_ENABLED, Boolean.class)).thenReturn(composedConfigProperty);
-        PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.FALSE);
+        PowerMockito.when(B(composedConfigProperty.isDefined())).thenReturn(Boolean.FALSE);
     }
 
     @Test
@@ -168,7 +169,7 @@ public class CachingUserSettingMailStorageTest {
     @Test
     public void testUpdateSpamSetting_setViaConfigCascade_updateToNewConfig() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
+        PowerMockito.when(B(composedConfigProperty.isDefined())).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.FALSE);
 
         PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
@@ -183,7 +184,7 @@ public class CachingUserSettingMailStorageTest {
     @Test
     public void testUpdateSpamSetting_setViaConfigCascade_updateToNewConfig2() throws OXException {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
-        PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
+        PowerMockito.when(B(composedConfigProperty.isDefined())).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.TRUE);
         PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(false);
@@ -199,7 +200,7 @@ public class CachingUserSettingMailStorageTest {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
         PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(false);
-        PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
+        PowerMockito.when(B(composedConfigProperty.isDefined())).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.FALSE);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);
@@ -214,7 +215,7 @@ public class CachingUserSettingMailStorageTest {
         CachingUserSettingMailStorage storageSpy = PowerMockito.spy(new CachingUserSettingMailStorage());
         PowerMockito.doNothing().when(storageSpy).saveUserSettingMail((UserSettingMail) ArgumentMatchers.any(), ArgumentMatchers.anyInt(), (Context) ArgumentMatchers.any());
         userSettingMail.setSpamEnabled(true);
-        PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(Boolean.TRUE);
+        PowerMockito.when(B(composedConfigProperty.isDefined())).thenReturn(Boolean.TRUE);
         PowerMockito.when(composedConfigProperty.get()).thenReturn(Boolean.TRUE);
 
         storageSpy.updateSpamSetting(userSettingMail, user.getId(), context, configView);

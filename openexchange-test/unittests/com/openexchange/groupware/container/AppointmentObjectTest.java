@@ -74,6 +74,7 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         assertFalse(b.containsShownAs());
     }
 
+    @Override
     @Test
     public void testAttrAccessors() {
         Appointment object = new Appointment();
@@ -101,9 +102,9 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         object.setAlarm(-12);
         assertTrue(object.contains(ALARM));
         assertTrue(object.containsAlarm());
-        assertEquals(-12, object.get(ALARM));
+        assertEquals(Integer.valueOf(-12), object.get(ALARM));
 
-        object.set(ALARM, 12);
+        object.set(ALARM, Integer.valueOf(12));
         assertEquals(12, object.getAlarm());
 
         object.remove(ALARM);
@@ -117,10 +118,10 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         object.setFullTime(false);
         assertTrue(object.contains(FULL_TIME));
         assertTrue(object.containsFullTime());
-        assertEquals(false, object.get(FULL_TIME));
+        assertEquals(Boolean.FALSE, object.get(FULL_TIME));
 
-        object.set(FULL_TIME, true);
-        assertEquals(true, object.getFullTime());
+        object.set(FULL_TIME, Boolean.TRUE);
+        assertEquals(Boolean.TRUE, object.getFullTime() ? Boolean.TRUE : Boolean.FALSE);
 
         object.remove(FULL_TIME);
         assertFalse(object.contains(FULL_TIME));
@@ -152,9 +153,9 @@ public class AppointmentObjectTest extends CalendarObjectTest {
         object.setRecurringStart(start);
         assertTrue(object.contains(RECURRENCE_START));
         assertTrue(object.containsRecurringStart());
-        assertEquals(start, object.get(RECURRENCE_START));
+        assertEquals(Long.valueOf(start), object.get(RECURRENCE_START));
 
-        object.set(RECURRENCE_START, otherStart);
+        object.set(RECURRENCE_START, Long.valueOf(otherStart));
         assertEquals(otherStart, object.getRecurringStart());
 
         object.remove(RECURRENCE_START);

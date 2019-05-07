@@ -49,6 +49,8 @@
 
 package com.openexchange.admin.rmi.util;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -79,7 +81,7 @@ public class AssertUtil {
     /**
      * Asserts that the <code>expected</code> user is equal to the <code>actual</code>.
      * Only the mandatory fields are asserted.
-     * 
+     *
      * @param expected The expected {@link User}
      * @param actual The actual {@link User}
      */
@@ -94,7 +96,7 @@ public class AssertUtil {
 
     /**
      * Compares the {@link User} A with {@link User} B
-     * 
+     *
      * @param a The {@link User} A
      * @param b The {@link User} B
      */
@@ -116,7 +118,7 @@ public class AssertUtil {
 
     /**
      * Asserts that the groups are equal
-     * 
+     *
      * @param expected The expected {@link Group}
      * @param actual The actual {@link Group}
      */
@@ -127,7 +129,7 @@ public class AssertUtil {
 
     /**
      * Asserts that the expected {@link Resource} is equal the actual {@link Resource}
-     * 
+     *
      * @param expected The expected {@link Resource}
      * @param actual The actual {@link Resource}
      */
@@ -141,7 +143,7 @@ public class AssertUtil {
      * Compares two user arrays by retrieving all the IDs they contain
      * an checking if they match. Ignores duplicate entries, ignores
      * users without an ID at all.
-     * 
+     *
      * @param arr1 the first array
      * @param arr2 the second array
      */
@@ -160,31 +162,31 @@ public class AssertUtil {
 
     /**
      * Asserts that both {@link UserModuleAccess} objects are equal
-     * 
+     *
      * @param a The {@link UserModuleAccess} a
      * @param b The {@link UserModuleAccess} b
      */
     public static void compareUserAccess(UserModuleAccess a, UserModuleAccess b) {
-        assertEquals("access calendar not equal", a.getCalendar(), b.getCalendar());
-        assertEquals("access contacts not equal", a.getContacts(), b.getContacts());
-        assertEquals("access delegatetasks not equal", a.getDelegateTask(), b.getDelegateTask());
-        assertEquals("access edit public folders not equal", a.getEditPublicFolders(), b.getEditPublicFolders());
-        assertEquals("access ical not equal", a.getIcal(), b.getIcal());
-        assertEquals("access infostore not equal", a.getInfostore(), b.getInfostore());
-        assertEquals("access ReadCreateSharedFolders not equal", a.getReadCreateSharedFolders(), b.getReadCreateSharedFolders());
-        assertEquals("access syncml not equal", a.getSyncml(), b.getSyncml());
-        assertEquals("access tasks not equal", a.getTasks(), b.getTasks());
-        assertEquals("access vcard not equal", a.getVcard(), b.getVcard());
-        assertEquals("access webdav not equal", a.getWebdav(), b.getWebdav());
-        assertEquals("access webdav xml not equal", a.getWebdavXml(), b.getWebdavXml());
-        assertEquals("access webmail not equal", a.getWebmail(), b.getWebmail());
+        assertEquals("access calendar not equal", B(a.getCalendar()), B(b.getCalendar()));
+        assertEquals("access contacts not equal", B(a.getContacts()), B(b.getContacts()));
+        assertEquals("access delegatetasks not equal", B(a.getDelegateTask()), B(b.getDelegateTask()));
+        assertEquals("access edit public folders not equal", B(a.getEditPublicFolders()), B(b.getEditPublicFolders()));
+        assertEquals("access ical not equal", B(a.getIcal()), B(b.getIcal()));
+        assertEquals("access infostore not equal", B(a.getInfostore()), B(b.getInfostore()));
+        assertEquals("access ReadCreateSharedFolders not equal", B(a.getReadCreateSharedFolders()), B(b.getReadCreateSharedFolders()));
+        assertEquals("access syncml not equal", B(a.getSyncml()), b.getSyncml() ? Boolean.TRUE : Boolean.FALSE);
+        assertEquals("access tasks not equal", B(a.getTasks()), B(b.getTasks()));
+        assertEquals("access vcard not equal", B(a.getVcard()), B(b.getVcard()));
+        assertEquals("access webdav not equal", B(a.getWebdav()), B(b.getWebdav()));
+        assertEquals("access webdav xml not equal", B(a.getWebdavXml()), B(b.getWebdavXml()));
+        assertEquals("access webmail not equal", B(a.getWebmail()), B(b.getWebmail()));
     }
 
     /**
      * Asserts that the {@link User} <code>b</code> does not have any of
      * its mandatory fields set to <code>null</code> and then asserts
      * that is equal to {@link User} <code>a</code>
-     * 
+     *
      * @param a The {@link User} a
      * @param b The {@link User} b
      */
@@ -305,8 +307,8 @@ public class AssertUtil {
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
             for (int i = 0; i < aexts.size(); i++) {
-                OXCommonExtensionInterface aext = aexts.get(i);
-                OXCommonExtensionInterface bext = bexts.get(i);
+                OXCommonExtensionInterface aext = aexts.get(I(i));
+                OXCommonExtensionInterface bext = bexts.get(I(i));
                 assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
             }
         }

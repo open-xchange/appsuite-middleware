@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.services.configuration;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -92,7 +93,7 @@ public class ConfigRESTServiceTest {
     public void testRetrieveProperty() throws OXException, JSONException {
 
         ComposedConfigProperty<String> prop = mock(ComposedConfigProperty.class);
-        when(prop.isDefined()).thenReturn(true);
+        when(B(prop.isDefined())).thenReturn(B(true));
         when(prop.get()).thenReturn("myValue");
 
         when(configView.property("myProperty", String.class)).thenReturn(prop);
@@ -108,7 +109,7 @@ public class ConfigRESTServiceTest {
     @SuppressWarnings("unchecked")
     public void retrieveUnknownProperty() throws OXException {
         ComposedConfigProperty<String> prop = mock(ComposedConfigProperty.class);
-        when(prop.isDefined()).thenReturn(false);
+        when(B(prop.isDefined())).thenReturn(B(false));
 
         when(configView.property("myProperty", String.class)).thenReturn(prop);
         try {

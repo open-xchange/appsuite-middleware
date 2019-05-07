@@ -110,7 +110,7 @@ public final class Autoboxing {
      * @return Boolean object.
      */
     public static Boolean B(final boolean b) {
-        return Boolean.valueOf(b);
+        return (b ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**
@@ -128,7 +128,7 @@ public final class Autoboxing {
      * @return <code>Boolean.TRUE</code> if b == false, <code>Boolean.FALSE</code> otherwise.
      */
     public static Boolean NOT(final boolean b) {
-        return Boolean.valueOf(!b);
+        return (!b ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**
