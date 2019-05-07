@@ -250,7 +250,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
              */
             Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
             if (null == originalAttendee) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUserId), originalEvent.getId());
             }
             updateAttendeeFolderId(originalEvent, originalAttendee, targetFolder.getId());
             touch(originalEvent.getId());
@@ -281,7 +281,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
              */
             Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
             if (null == originalAttendee) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUserId), originalEvent.getId());
             }
             storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));

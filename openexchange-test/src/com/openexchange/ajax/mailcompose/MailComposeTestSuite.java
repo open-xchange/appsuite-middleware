@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,25 @@
  *
  */
 
-package com.openexchange.tools.encoding;
+package com.openexchange.ajax.mailcompose;
 
-import com.openexchange.java.Charsets;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * Central entry point for a base64 en/decoder.
+ * {@link MailComposeTestSuite}
  *
- * @author <a href="mailto:martin.kauss@open-xchange.com">Martin Kauss</a>
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.2
  */
-public class Base64 {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    // @formatter:off
+    CompositionSpaceTest.class,
+    AttachmentsTest.class
+    // @formatter:on
+})
+public class MailComposeTestSuite {
 
-    /**
-     * Prevent instantiation
-     */
-    private Base64() {
-        super();
-    }
-
-    /**
-     * Encodes some binary data into base64.
-     *
-     * @param bytes binary data to encode.
-     * @return a string containing the encoded data.
-     */
-    public static String encode(final byte[] bytes) {
-        return java.util.Base64.getEncoder().encodeToString(bytes);
-    }
-
-    /**
-     * Converts the string using UTF-8 character set encoding and encodes then into base64.
-     *
-     * @param source string the encode.
-     * @return the base64 data for the string.
-     */
-    public static String encode(final String source) {
-        return encode(Charsets.getBytes(source, Charsets.UTF_8));
-    }
-
-    /**
-     * Decodes some base64 data.
-     *
-     * @param source string to decode.
-     * @return the decoded data.
-     */
-    public static byte[] decode(final String source) {
-        return java.util.Base64.getDecoder().decode(source);
-    }
 }

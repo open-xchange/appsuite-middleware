@@ -116,15 +116,14 @@ public class RecurrenceUtils {
                     recurrenceSet.addInstances(new RecurrenceList(recurrenceDates));
                 }
                 return recurrenceSet.iterator(seriesStart.getTimeZone(), seriesStart.getTimestamp());
-            } else {
-                RecurrenceSet recurrenceSet = new RecurrenceSet();
-                recurrenceSet.addInstances(new RecurrenceRuleAdapter(rule));
-                if (null != recurrenceDates && 0 < recurrenceDates.length) {
-                    recurrenceSet.addInstances(new RecurrenceList(recurrenceDates));
-                }
-                return recurrenceSet.iterator(seriesStart.getTimeZone(), seriesStart.getTimestamp());
             }
-        } catch (IllegalArgumentException e) {
+            RecurrenceSet recurrenceSet = new RecurrenceSet();
+            recurrenceSet.addInstances(new RecurrenceRuleAdapter(rule));
+            if (null != recurrenceDates && 0 < recurrenceDates.length) {
+                recurrenceSet.addInstances(new RecurrenceList(recurrenceDates));
+            }
+            return recurrenceSet.iterator(seriesStart.getTimeZone(), seriesStart.getTimestamp());
+        } catch (IllegalArgumentException | IllegalStateException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(e, rule);
         }
     }

@@ -66,6 +66,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -126,7 +127,9 @@ public class UpdateAlarmsPerformer extends AbstractUpdatePerformer {
                 List<Event> exceptionData = loadExceptionData(originalEvent);
                 exceptions = new ArrayList<>(exceptionData.size());
                 for(Event eve: exceptionData) {
-                    exceptions.add(storage.getUtilities().loadAdditionalEventData(calendarUserId, EventMapper.getInstance().copy(eve, null, (EventField[]) null), null));
+                    if (Utils.isInFolder(eve, folder)) {
+                        exceptions.add(storage.getUtilities().loadAdditionalEventData(calendarUserId, EventMapper.getInstance().copy(eve, null, (EventField[]) null), new EventField[] { EventField.ALARMS }));
+                    }
                 }
             }
         }

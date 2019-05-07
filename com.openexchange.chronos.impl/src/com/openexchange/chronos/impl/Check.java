@@ -498,7 +498,7 @@ public class Check extends com.openexchange.chronos.common.Check {
     public static Attendee attendeeExists(Event event, Attendee attendee) throws OXException {
         Attendee matchingAttendee = CalendarUtils.find(event.getAttendees(), attendee);
         if (null == matchingAttendee) {
-            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, event.getId());
+            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(attendee.getEntity()), event.getId());
         }
         return matchingAttendee;
     }

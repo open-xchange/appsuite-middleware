@@ -7,23 +7,13 @@
       - MailCompose
     summary: Create a new composition space
     description: For any types but "new", the response provides ready-to-use values, e.g. to, cc, bcc, subject with prefix, attachments. Internally all mime headers are set properly (a..g to maintain threads). Only the content is still original, i.e. the client uses DOMPurify to sanitize and to quote the content.
+    consumes:
+      - application/json
     parameters:
       - 
         name: type
         in: query
         description: One of new/reply/replyall/forward/resend/edit/copy
-        required: false
-        type: string
-      - 
-        name: folderId
-        in: query
-        description: Folder of original email
-        required: false
-        type: string
-      -
-        name: id
-        in: query
-        description: Id of original mail
         required: false
         type: string
       -
@@ -38,7 +28,16 @@
         description: Array of Objects (id, folderId) to reference mails (reply or multiple on forward as example)
         required: false
         schema:
-          type: string
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Id of original email
+              folderId:
+                type: string
+                description: folder of original email
 
     responses:
       200:
@@ -68,15 +67,7 @@
       200:
         description: A JSON array containing message models.
         schema:
-          type: array
-          items:
-            type: object
-            properties:
-              fullObject:
-                $ref: "#/definitions/MailComposeResponse"
-              ids:
-                type: integer
-                description: Composition Space identifier, if no columns are requested.
+          $ref: "#/definitions/MailComposeGetResponse"
       400:
         description: Bad request, response contains error message.
       401:

@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb.migration;
 
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
+import static com.openexchange.database.Databases.tableExists;
 import static com.openexchange.groupware.update.UpdateConcurrency.BLOCKING;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import java.sql.Connection;
@@ -103,7 +104,7 @@ public class ChronosStoragePurgeLegacyDataTask extends UpdateTaskAdapter {
              * drop legacy calendar tables
              */
             for (String tableName : tableNames) {
-                dropTableIfExists(connection, tableName);
+                clearTableIfExists(connection, tableName);
             }
             /*
              * delete any appointment reminder triggers
@@ -128,9 +129,12 @@ public class ChronosStoragePurgeLegacyDataTask extends UpdateTaskAdapter {
         }
     }
 
-    private static int dropTableIfExists(Connection connection, String tableName) throws SQLException {
+    private static int clearTableIfExists(Connection connection, String tableName) throws SQLException {
         try (Statement stmt = connection.createStatement()) {
-            return stmt.executeUpdate("DROP TABLE IF EXISTS " + tableName + ';');
+            if (false == tableExists(connection, tableName)) {
+                return 0;
+            }
+            return stmt.executeUpdate("DELETE FROM " + tableName + ';');
         }
     }
 

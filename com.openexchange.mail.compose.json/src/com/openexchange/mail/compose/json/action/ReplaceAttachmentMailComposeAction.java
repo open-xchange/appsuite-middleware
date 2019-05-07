@@ -53,6 +53,7 @@ import java.util.UUID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestData.StreamParams;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
 import com.openexchange.mail.compose.Attachment;
@@ -80,7 +81,7 @@ public class ReplaceAttachmentMailComposeAction extends AbstractMailComposeActio
     }
 
     private boolean hasUploads(long maxFileSize, long maxSize, AJAXRequestData request) throws OXException {
-        return request.hasUploads(maxFileSize, maxSize, true);
+        return request.hasUploads(maxFileSize, maxSize, StreamParams.streamed(false));
     }
 
     @Override
