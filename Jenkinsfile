@@ -14,6 +14,11 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
+  - name: gradle
+    image: gradle:5.4-alpine
+    command:
+    - cat
+    tty: true
   - name: coverity
     image: gitlab.open-xchange.com:4567/jenkins/slave-coverity:latest
     command:
@@ -25,7 +30,7 @@ spec:
         }
     }
     options {
-        buildDiscarder(logRotator(daysToKeepStr: '10', numToKeepStr: '30'))
+        buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '0'))
         checkoutToSubdirectory('backend')
         timestamps()
     }
@@ -33,6 +38,39 @@ spec:
         cron('H H(20-23) * * 1-5')
     }
     stages {
+        stage('Configuration documentation') {
+            when {
+                allOf {
+                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
+                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
+                    expression { null != version4ConfigDocProcessor(env.BRANCH_NAME) }
+                }
+            }
+            steps {
+                script {
+                    def targetVersion = version4ConfigDocProcessor(env.BRANCH_NAME)
+                    def targetDirectory
+                    dir('config-doc-processor') {
+                        // Need to do some file operation in directory otherwise it is not created.
+                        writeFile file: 'properties.json', text: ''
+                        targetDirectory = pwd()
+                    }
+                    container('gradle') {
+                        dir('backend/documentation-generic/config') {
+                            sh "gradle runConfigDocuProcessor -PtargetDirectory=${targetDirectory} -PtargetVersion=${targetVersion}"
+                        }
+                    }
+                    dir('config-doc-processor') {
+                        sshPublisher(publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/config/${targetVersion}", remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'properties.json')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                    }
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts 'config-doc-processor/properties.json'
+                }
+            }
+        }
         stage('Coverity Build') {
             when {
                 allOf {
@@ -59,6 +97,12 @@ spec:
                     }
                 }
             }
+            post {
+                always {
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/build-log.txt")
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityBuildDir}/**")
+                }
+            }
         }
         stage('Coverity Analyze') {
             when {
@@ -71,6 +115,12 @@ spec:
             steps {
                 container('coverity') {
                     sh "cov-analyze --dir ${workspace}/${coverityIntermediateDir} --strip-path ${workspace}/backend/ --webapp-security --webapp-security-preview --all"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/output/analysis-log.txt")
+                    archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/output/distributor.log")
                 }
             }
         }
@@ -92,12 +142,6 @@ spec:
         }
     }
     post {
-        always {
-            archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/build-log.txt")
-            archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/output/analysis-log.txt")
-            archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityIntermediateDir}/output/distributor.log")
-            archiveArtifacts(allowEmptyArchive: true, artifacts: "${coverityBuildDir}/**")
-        }
         failure {
             emailext attachLog: true,
                 body: "${env.BUILD_URL} failed.\\n\\nFull log at: ${env.BUILD_URL}console",
@@ -105,4 +149,17 @@ spec:
                 to: 'backend@open-xchange.com'
         }
     }
+}
+
+String version4ConfigDocProcessor(String branchName) {
+    println("Branch: ${branchName}")
+    if ('develop' == branchName)
+        return branchName
+    if (branchName.startsWith('master-'))
+        return branchName.substring(7)
+    if (branchName.startsWith('release-'))
+        return branchName.substring(8)
+    if ('master' == branchName)
+        return '7.10.1'
+    error "Processing configuration documentation is not intended for branch ${branchName}"
 }
