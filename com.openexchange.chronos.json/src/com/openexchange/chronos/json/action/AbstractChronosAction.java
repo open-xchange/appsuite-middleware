@@ -191,8 +191,8 @@ public abstract class AbstractChronosAction implements AJAXActionService {
      * @return The parsed full event identifier
      */
     protected EventID parseIdParameter(AJAXRequestData requestData) throws OXException {
-        String objectId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
-        String folderId = requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = requestData.nonEmptyParameter(AJAXServlet.PARAMETER_ID);
+        String folderId = requestData.nonEmptyParameter(AJAXServlet.PARAMETER_FOLDERID);
         String optRecurrenceId = requestData.getParameter(PARAM_RECURRENCE_ID);
         String optRecurrenceRange = requestData.getParameter(PARAM_RECURRENCE_RANGE);
         return getEventID(folderId, objectId, optRecurrenceId, optRecurrenceRange);

@@ -65,7 +65,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
 import com.sun.mail.imap.CommandEvent;
-import com.sun.mail.imap.CommandListener;
+import com.sun.mail.imap.CommandExecutor;
+import com.sun.mail.imap.CommandExecutorCollection;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.ProtocolListener;
@@ -389,37 +390,9 @@ public class Protocol {
 
     public String writeCommand(String command, Argument args) 
         throws IOException, ProtocolException {
-        return writeCommand(command, args, IMAPStore.getProtocolListeners());
-    }
-
-    protected String writeCommand(String command, Argument args, ProtocolListenerCollection optCommandListeners) 
-		throws IOException, ProtocolException {
 	// assert Thread.holdsLock(this);
 	// can't assert because it's called from constructor
 	String tag = new StringBuilder(6).append('A').append(Integer.toString(tagCounter++, 10)).toString(); // unique tag
-
-	if (null != optCommandListeners) {
-	    Iterator<CommandListener> it = optCommandListeners.commandListeners();
-	    if (it.hasNext()) {
-	        CommandEvent commandEvent = CommandEvent.builder()
-                .setArgs(args)
-                .setCommand(command)
-                .setHost(host)
-                .setPort(port)
-                .setTag(tag)
-                .setUser(user)
-                .build();
-	        boolean applicable;
-	        do {
-	            CommandListener listener = it.next();
-                applicable = listener.onBeforeCommandIssued(commandEvent);
-	            if (false == applicable) {
-	                // Remove non-applicable listener from collection to prevent from calling it unnecessarily later on
-                    it.remove();
-                }
-            } while (it.hasNext());
-        }
-    }
 
 	output.writeBytes(tag + " " + command);
 
@@ -434,6 +407,42 @@ public class Protocol {
     }
 
     /**
+     * Send a command to the server possibly using a command executor.
+     * <p>
+     * Collect all responses until either the corresponding command
+     * completion response or a BYE response (indicating server failure).
+     * Return all the collected responses.
+     *
+     * @param   command the command
+     * @param   args    the arguments
+     * @return      array of Response objects returned by the server
+     */
+    public synchronized Response[] command(String command, Argument args) {
+        CommandExecutorCollection commandExecutors = IMAPStore.getCommandExecutors();
+        if (commandExecutors == null) {
+            // No executors available
+            return executeCommand(command, args);
+        }
+
+        // Determine suitable executor
+        CommandEvent commandEvent = CommandEvent.builder()
+            .setArgs(args)
+            .setCommand(command)
+            .setHost(host)
+            .setPort(port)
+            .setUser(user)
+            .build();
+        for (CommandExecutor commandExecutor : commandExecutors) {
+            if (commandExecutor.onBeforeCommandIssued(commandEvent)) {
+                return commandExecutor.executeCommand(command, args, this);
+            }
+        }
+
+        // No suitable executor found
+        return executeCommand(command, args);
+    }
+
+    /**
      * Send a command to the server. Collect all responses until either
      * the corresponding command completion response or a BYE response 
      * (indicating server failure).  Return all the collected responses.
@@ -442,7 +451,7 @@ public class Protocol {
      * @param	args	the arguments
      * @return		array of Response objects returned by the server
      */
-    public synchronized Response[] command(String command, Argument args) {
+    public synchronized Response[] executeCommand(String command, Argument args) {
 	commandStart(command);
 	List<Response> v = new LinkedList<Response>();
 	boolean done = false;
@@ -454,7 +463,7 @@ public class Protocol {
 	boolean measure = null != protocolListeners || auditLogEnabled;
 	long start = measure ? System.currentTimeMillis() : 0L;
 	try {
-	    tag = writeCommand(command, args, protocolListeners);
+	    tag = writeCommand(command, args);
 	} catch (LiteralException lex) {
 	    v.add(lex.getResponse());
 	    done = true;

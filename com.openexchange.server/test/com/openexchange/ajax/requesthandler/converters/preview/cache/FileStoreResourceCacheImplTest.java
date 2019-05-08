@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -123,7 +125,7 @@ public class FileStoreResourceCacheImplTest {
         com.openexchange.filestore.FileStorage fileStorage = mock(com.openexchange.filestore.FileStorage.class);
         String fileId = "12345";
         when(fileStorage.saveNewFile(any(InputStream.class))).thenReturn(fileId);
-        when(FileStoreResourceCacheImpl.class, "getFileStorage", anyInt(), anyBoolean()).thenReturn(fileStorage);
+        when(FileStoreResourceCacheImpl.class, "getFileStorage", I(anyInt()), B(anyBoolean())).thenReturn(fileStorage);
 
         boolean exceptionThrown = false;
         try {

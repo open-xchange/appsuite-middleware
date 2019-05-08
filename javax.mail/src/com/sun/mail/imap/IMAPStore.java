@@ -251,6 +251,57 @@ public class IMAPStore extends Store
         return null == collection ? null : collection.snapshot();
     }
 
+    private static final AtomicReference<CommandExecutorCollection> COMMAND_EXECUTORS_REF = new AtomicReference<CommandExecutorCollection>(null);
+
+    /**
+     * Adds specified executor
+     *
+     * @param commandExecutor The executor to add
+     */
+    public static synchronized void addCommandExecutor(CommandExecutor commandExecutor) {
+        if (null == commandExecutor) {
+            return;
+        }
+
+        CommandExecutorCollection executors = COMMAND_EXECUTORS_REF.get();
+        if (null == executors) {
+            COMMAND_EXECUTORS_REF.set(CommandExecutorCollection.newCollection(commandExecutor));
+        } else {
+            executors.add(commandExecutor);
+        }
+    }
+
+    /**
+     * Removes specified executor
+     *
+     * @param commandExecutor The executor to remove
+     */
+    public static synchronized void removeCommandExecutor(CommandExecutor commandExecutor) {
+        if (null == commandExecutor) {
+            return;
+        }
+
+        CommandExecutorCollection executors = COMMAND_EXECUTORS_REF.get();
+        if (null == executors) {
+            return;
+        }
+
+        boolean lastRemoved = executors.remove(commandExecutor);
+        if (lastRemoved) {
+            COMMAND_EXECUTORS_REF.set(null);
+        }
+    }
+
+    /**
+     * Gets a snapshot of the currently available executors.
+     *
+     * @return The executors or <code>null</code> if none registered
+     */
+    public static CommandExecutorCollection getCommandExecutors() {
+        CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
+        return null == collection ? null : collection.snapshot();
+    }
+
     protected final String name;		// name of this protocol
     protected final int defaultPort;	// default IMAP port
     protected final boolean isSSL;	// use SSL?
@@ -693,7 +744,7 @@ public class IMAPStore extends Store
     s = session.getProperty("mail." + name + ".failOnNOFetch");
     if (s != null) {
         failOnNOFetch = Boolean.parseBoolean(s.trim());
-        logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch);
+        logger.log(Level.CONFIG, "mail.imap.failOnNOFetch: {0}", failOnNOFetch ? Boolean.TRUE : Boolean.FALSE);
     }
 
 	guid = session.getProperty("mail." + name + ".yahoo.guid");

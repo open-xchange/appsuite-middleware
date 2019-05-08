@@ -1,5 +1,6 @@
 package com.openexchange.folderstorage.internal;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Before;
@@ -20,7 +21,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ConfigViewFactory.class, ServerServiceRegistry.class})
 public class ConfiguredDefaultPermissionsTest {
-    
+
     private static final String PARENTFOLDER_PERMISSIONS = "parent=group_2@2.4.0.0,admin_user_5@8.4.4.4";
     private static final String CUSTOM_FOLDER_PERMISSIONS = "15=admin_group_2@author";
     private static final String FAIL_PERMISSION_EXPRESSION_PREFIX = "folder=failPerm@author";
@@ -33,9 +34,9 @@ public class ConfiguredDefaultPermissionsTest {
 
     // ATTENTION, must be equal to tested class: ConfiguredDefaultPermissions member: 'PROP_DEFAULT_PERMISSIONS'
     private static final String PROP_DEFAULT_PERMISSIONS = "com.openexchange.folderstorage.defaultPermissions";
-    
+
     private ConfiguredDefaultPermissions testedClass;
-    
+
     @Mock
     private ConfigViewFactory configViewFactory;
     @Mock
@@ -44,10 +45,10 @@ public class ConfiguredDefaultPermissionsTest {
     private ConfigView configView;
     @Mock
     private ComposedConfigProperty<String> composedConfigProperty;
-    
-    
+
+
     //ServerServiceRegistry.getInstance().getService
-    
+
     @Before
     public void setUp() throws OXException {
         testedClass = ConfiguredDefaultPermissions.getInstance();
@@ -56,7 +57,7 @@ public class ConfiguredDefaultPermissionsTest {
         PowerMockito.when(serverServiceRegistry.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
         PowerMockito.when(configViewFactory.getView(1,1)).thenReturn(configView);
         PowerMockito.when(configView.property(PROP_DEFAULT_PERMISSIONS, String.class)).thenReturn(composedConfigProperty);
-        PowerMockito.when(composedConfigProperty.isDefined()).thenReturn(true);
+        PowerMockito.when(B(composedConfigProperty.isDefined())).thenReturn(B(true));
     }
 
     @Test
@@ -74,7 +75,7 @@ public class ConfiguredDefaultPermissionsTest {
             fail("Exception thrown");
         }
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failNoEqual() {
         testedClass.invalidateCache();
@@ -87,7 +88,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failNoPrefix() {
         testedClass.invalidateCache();
@@ -100,7 +101,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failNoAT() {
         testedClass.invalidateCache();
@@ -113,7 +114,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failNoPermissions() {
         testedClass.invalidateCache();
@@ -126,7 +127,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failOnlyFolder() {
         testedClass.invalidateCache();
@@ -139,7 +140,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failOnlyFolderRead() {
         testedClass.invalidateCache();
@@ -152,7 +153,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
     @Test
     public void testGetConfiguredDefaultPermissionsFor_failOnlyFolderReadWrite() {
         testedClass.invalidateCache();
@@ -165,7 +166,7 @@ public class ConfiguredDefaultPermissionsTest {
         }
         fail("No Exception thrown");
     }
-    
+
 
     private Object getAdminPermissions() {
         ImmutablePermission.Builder permissionBuilder = ImmutablePermission.builder();
@@ -178,7 +179,7 @@ public class ConfiguredDefaultPermissionsTest {
         permissionBuilder.setAdmin(true).setGroup(false).setDeletePermission(4).setEntity(5).setFolderPermission(8).setReadPermission(4).setSystem(0).setWritePermission(4);
         return permissionBuilder.build();
     }
-    
+
     private Object getCustomPermissions() {
         ImmutablePermission.Builder permissionBuilder = ImmutablePermission.builder();
         permissionBuilder.setAdmin(true).setGroup(true).setDeletePermission(4).setEntity(2).setFolderPermission(8).setReadPermission(4).setSystem(0).setWritePermission(4);

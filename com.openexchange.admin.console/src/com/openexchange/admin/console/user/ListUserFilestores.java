@@ -112,7 +112,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
                 sysexit(0);
             }
             users = oxusr.getData(ctx, users, auth);
-            final boolean masteronly = (boolean) parser.getOptionValue(master_only, false, false);
+            final boolean masteronly = ((Boolean) parser.getOptionValue(master_only, Boolean.FALSE, false)).booleanValue();
             printUserFilestores(users, masteronly);
 
         } catch (CLIParseException e) {
@@ -173,7 +173,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
             if (user.getFilestoreId().intValue() == 0) {
                 continue;
             }
-            
+
             if (user.getFilestoreOwner().intValue() == 0)
             {
                 final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
@@ -195,7 +195,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
                 System.out.println("Filestore_name: " + user.getFilestore_name());
                 System.out.println();
                 doOutput(new String[] { "l", "r", "l", "l", "l", "l", "l" },
-                    new String[] { "Master", "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);   
+                    new String[] { "Master", "Id", "Name", "Displayname", "Email", "qmax", "qused" }, data);
 
             }
         }

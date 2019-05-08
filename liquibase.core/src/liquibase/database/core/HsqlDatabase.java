@@ -20,13 +20,13 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public HsqlDatabase() {
-    	super.unquotedObjectsAreUppercased=true;
+    	super.unquotedObjectsAreUppercased=Boolean.TRUE;
         super.setCurrentDateTimeFunction("NOW");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
     	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
-    
+
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "HSQL Database Engine".equalsIgnoreCase(conn.getDatabaseProductName());

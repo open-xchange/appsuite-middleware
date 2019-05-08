@@ -49,6 +49,7 @@
 
 package com.openexchange.imageconverter.api;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -96,14 +97,14 @@ public class ElementLock extends ReentrantLock {
      * @return
      */
     public int incrementUseCount() {
-        return ++m_useCount;
+        return m_useCount.incrementAndGet();
     }
 
     /**
      * @return
      */
     public int decrementUseCount() {
-        return --m_useCount;
+        return m_useCount.decrementAndGet();
     }
 
     /**
@@ -158,7 +159,7 @@ public class ElementLock extends ReentrantLock {
 
     final private Condition m_processingFinishedCondition = newCondition();
 
-    volatile private int m_useCount = 1;
+    final private AtomicInteger m_useCount = new AtomicInteger(1);
 
     volatile private boolean m_isProcessing = false;
 }

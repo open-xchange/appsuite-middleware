@@ -883,8 +883,8 @@ public class Liquibase {
             setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
             setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
             setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
-            setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
-            setChangeLogParameter("database.databaseMinorVersion", database.getDatabaseMinorVersion());
+            setChangeLogParameter("database.databaseMajorVersion", Integer.valueOf(database.getDatabaseMajorVersion()));
+            setChangeLogParameter("database.databaseMinorVersion", Integer.valueOf(database.getDatabaseMinorVersion()));
             setChangeLogParameter("database.databaseProductName", database.getDatabaseProductName());
             setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
             setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
@@ -893,15 +893,15 @@ public class Liquibase {
             setChangeLogParameter("database.lineComment", database.getLineComment());
             setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
             setChangeLogParameter("database.typeName", database.getShortName());
-            setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
-            setChangeLogParameter("database.requiresPassword", database.requiresPassword());
-            setChangeLogParameter("database.requiresUsername", database.requiresUsername());
-            setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
-            setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
-            setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
-            setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
-            setChangeLogParameter("database.supportsSequences", database.supportsSequences());
-            setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
+            setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.requiresPassword", database.requiresPassword() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.requiresUsername", database.requiresUsername() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.supportsSchemas", database.supportsSchemas() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.supportsSequences", database.supportsSequences() ? Boolean.TRUE : Boolean.FALSE);
+            setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces() ? Boolean.TRUE : Boolean.FALSE);
     }
 
     private LockService getLockService() {

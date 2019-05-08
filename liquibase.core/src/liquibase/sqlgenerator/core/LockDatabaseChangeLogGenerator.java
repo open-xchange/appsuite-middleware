@@ -47,10 +47,10 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
 
 
         UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogLockTableName());
-        updateStatement.addNewColumnValue("LOCKED", true);
+        updateStatement.addNewColumnValue("LOCKED", Boolean.TRUE);
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
-        updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean").objectToSql(false, database));
+        updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean").objectToSql(Boolean.FALSE, database));
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 

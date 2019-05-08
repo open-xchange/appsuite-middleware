@@ -67,6 +67,8 @@ import static com.openexchange.groupware.container.CalendarObject.START_DATE;
 import static com.openexchange.groupware.container.CalendarObject.TITLE;
 import static com.openexchange.groupware.container.CalendarObject.UNTIL;
 import static com.openexchange.groupware.container.CalendarObject.USERS;
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -206,6 +208,7 @@ public class CalendarObjectTest extends CommonObjectTest {
 
     }
 
+    @Override
     @Test
     public void testAttrAccessors() {
 
@@ -356,10 +359,10 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setNotification(false);
         assertTrue(object.contains(NOTIFICATION));
         assertTrue(object.containsNotification());
-        assertEquals(false, object.get(NOTIFICATION));
+        assertEquals(Boolean.FALSE, object.get(NOTIFICATION));
 
-        object.set(NOTIFICATION, true);
-        assertEquals(true, object.getNotification());
+        object.set(NOTIFICATION, Boolean.TRUE);
+        assertEquals(Boolean.TRUE, B(object.getNotification()));
 
         object.remove(NOTIFICATION);
         assertFalse(object.contains(NOTIFICATION));
@@ -372,9 +375,9 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setMonth(-12);
         assertTrue(object.contains(MONTH));
         assertTrue(object.containsMonth());
-        assertEquals(-12, object.get(MONTH));
+        assertEquals(I(-12), object.get(MONTH));
 
-        object.set(MONTH, 12);
+        object.set(MONTH, I(12));
         assertEquals(12, object.getMonth());
 
         object.remove(MONTH);
@@ -388,9 +391,9 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setRecurrenceCount(-12);
         assertTrue(object.contains(RECURRENCE_COUNT));
         assertTrue(object.containsRecurrenceCount());
-        assertEquals(-12, object.get(RECURRENCE_COUNT));
+        assertEquals(I(-12), object.get(RECURRENCE_COUNT));
 
-        object.set(RECURRENCE_COUNT, 12);
+        object.set(RECURRENCE_COUNT, I(12));
         assertEquals(12, object.getRecurrenceCount());
 
         object.remove(RECURRENCE_COUNT);
@@ -404,9 +407,9 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setDayInMonth(-12);
         assertTrue(object.contains(DAY_IN_MONTH));
         assertTrue(object.containsDayInMonth());
-        assertEquals(-12, object.get(DAY_IN_MONTH));
+        assertEquals(I(-12), object.get(DAY_IN_MONTH));
 
-        object.set(DAY_IN_MONTH, 12);
+        object.set(DAY_IN_MONTH, I(12));
         assertEquals(12, object.getDayInMonth());
 
         object.remove(DAY_IN_MONTH);
@@ -420,9 +423,9 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setRecurrenceType(-12);
         assertTrue(object.contains(RECURRENCE_TYPE));
         assertTrue(object.containsRecurrenceType());
-        assertEquals(-12, object.get(RECURRENCE_TYPE));
+        assertEquals(I(-12), object.get(RECURRENCE_TYPE));
 
-        object.set(RECURRENCE_TYPE, 12);
+        object.set(RECURRENCE_TYPE, I(12));
         assertEquals(12, object.getRecurrenceType());
 
         object.remove(RECURRENCE_TYPE);
@@ -452,9 +455,9 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setInterval(-12);
         assertTrue(object.contains(INTERVAL));
         assertTrue(object.containsInterval());
-        assertEquals(-12, object.get(INTERVAL));
+        assertEquals(I(-12), object.get(INTERVAL));
 
-        object.set(INTERVAL, 12);
+        object.set(INTERVAL, I(12));
         assertEquals(12, object.getInterval());
 
         object.remove(INTERVAL);
@@ -484,9 +487,9 @@ public class CalendarObjectTest extends CommonObjectTest {
         object.setRecurrenceID(-12);
         assertTrue(object.contains(RECURRENCE_ID));
         assertTrue(object.containsRecurrenceID());
-        assertEquals(-12, object.get(RECURRENCE_ID));
+        assertEquals(I(-12), object.get(RECURRENCE_ID));
 
-        object.set(RECURRENCE_ID, 12);
+        object.set(RECURRENCE_ID, I(12));
         assertEquals(12, object.getRecurrenceID());
 
         object.remove(RECURRENCE_ID);

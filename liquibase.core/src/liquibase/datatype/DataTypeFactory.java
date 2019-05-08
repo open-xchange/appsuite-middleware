@@ -22,7 +22,7 @@ public class DataTypeFactory {
 
     private static DataTypeFactory instance;
 
-    private Map<String, SortedSet<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends LiquibaseDataType>>>();
+    private final Map<String, SortedSet<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends LiquibaseDataType>>>();
 
     protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
@@ -203,10 +203,10 @@ public class DataTypeFactory {
     }
 
     public String getTrueBooleanValue(Database database) {
-        return fromDescription("boolean").objectToSql(true, database);
+        return fromDescription("boolean").objectToSql(Boolean.TRUE, database);
     }
 
     public String getFalseBooleanValue(Database database) {
-        return fromDescription("boolean").objectToSql(false, database);
+        return fromDescription("boolean").objectToSql(Boolean.FALSE, database);
     }
 }

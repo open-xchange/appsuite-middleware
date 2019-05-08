@@ -21,6 +21,8 @@
     responses:
       200:
         description: The path to the sent mail or {"success"=true}.
+        schema:
+          $ref: "#/definitions/MailComposeSendResponse"
       400:
         description: Bad request, response contains error message.
       401:

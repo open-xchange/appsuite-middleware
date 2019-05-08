@@ -60,6 +60,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -76,6 +78,7 @@ import com.openexchange.mail.compose.MessageField;
 import com.openexchange.mail.compose.impl.storage.db.mapping.MessageMapper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CompositionSpaceDbStorage}
@@ -164,14 +167,34 @@ public class CompositionSpaceDbStorage {
      * @throws OXException If insertion fails
      */
     public void insert(CompositionSpaceContainer compositionSpace, int maxSpacesPerUser) throws OXException {
-        Connection connection = dbProvider.getWriteConnection(context);
         try {
-            insert(connection, compositionSpace, maxSpacesPerUser);
+            DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+            do {
+                Connection connection = dbProvider.getWriteConnection(context);
+                try {
+                    insert(connection, compositionSpace, maxSpacesPerUser);
+                } catch (SQLException e) {
+                    if (!condition.isFailedTransactionRollback(e)) {
+                        throw handleException(e);
+                    }
+                } finally {
+                    dbProvider.releaseWriteConnection(context, connection);
+                }
+            } while (retryInsert(condition));
         } catch (SQLException e) {
             throw handleException(e);
-        } finally {
-            dbProvider.releaseWriteConnection(context, connection);
         }
+    }
+
+    private boolean retryInsert(DBUtils.TransactionRollbackCondition condition) throws SQLException {
+        boolean retry = condition.checkRetry();
+        if (retry) {
+            // Wait with exponential backoff
+            int retryCount = condition.getCount();
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+        }
+        return retry;
     }
 
     /**

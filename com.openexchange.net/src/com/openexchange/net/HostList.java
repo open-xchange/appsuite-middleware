@@ -71,7 +71,7 @@ public class HostList {
     /**
      * The empty host list.
      */
-    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet());
+    public static final HostList EMPTY = new HostList(Collections.<IPRange> emptyList(), Collections.<String> emptySet(), Collections.<String> emptySet(), "<empty>");
 
     /**
      * Accepts a comma-separated list of IP addresses, IP address ranges, and host names.
@@ -120,7 +120,7 @@ public class HostList {
             }
         }
 
-        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames);
+        return new HostList(ipRanges, matchingAppendixHostNames, matchingHostNames, hostList);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -128,13 +128,15 @@ public class HostList {
     private final List<IPRange> ipRanges;
     private final Set<String> matchingAppendixHostNames;
     private final Set<String> matchingHostNames;
+    private final String hostString;
 
     /**
      * Initializes a new {@link HostList}.
      */
-    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames) {
+    private HostList(List<IPRange> ipRanges, Set<String> matchingAppendixHostNames, Set<String> matchingHostNames, String hostString) {
         super();
         this.ipRanges = ipRanges;
+        this.hostString = hostString;
         this.matchingAppendixHostNames = matchingAppendixHostNames.isEmpty() ? null : ImmutableSet.copyOf(matchingAppendixHostNames);
         this.matchingHostNames = ImmutableSet.copyOf(matchingHostNames);
     }
@@ -161,6 +163,15 @@ public class HostList {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Gets the host string from which this instance was parsed.
+     *
+     * @return The host string
+     */
+    public String getHostString() {
+        return hostString;
     }
 
     /**

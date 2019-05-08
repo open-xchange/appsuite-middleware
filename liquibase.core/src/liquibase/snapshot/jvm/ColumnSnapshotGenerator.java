@@ -115,19 +115,19 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof OracleDatabase) {
             String nullable = columnMetadataResultSet.getString("NULLABLE");
             if (nullable.equals("Y")) {
-                column.setNullable(true);
+                column.setNullable(Boolean.TRUE);
             } else {
-                column.setNullable(false);
+                column.setNullable(Boolean.FALSE);
             }
         } else {
-            int nullable = columnMetadataResultSet.getInt("NULLABLE");
+            int nullable = columnMetadataResultSet.getInt("NULLABLE").intValue();
             if (nullable == DatabaseMetaData.columnNoNulls) {
-                column.setNullable(false);
+                column.setNullable(Boolean.FALSE);
             } else if (nullable == DatabaseMetaData.columnNullable) {
-                column.setNullable(true);
+                column.setNullable(Boolean.TRUE);
             } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
                 LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
-                column.setNullable(true);
+                column.setNullable(Boolean.TRUE);
             }
         }
 
@@ -192,7 +192,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (dataType.equalsIgnoreCase("NUMBER")) {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
                 if (type.getColumnSize() == null) {
-                    type.setColumnSize(38);
+                    type.setColumnSize(Integer.valueOf(38));
                 }
                 type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
 //            type.setRadix(10);
@@ -201,7 +201,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 if (dataType.equalsIgnoreCase("NVARCHAR")) {
                     //data length is in bytes but specified in chars
-                    type.setColumnSize(type.getColumnSize() / 2);
+                    type.setColumnSize(Integer.valueOf(type.getColumnSize().intValue() / 2));
                     type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
                 } else {
                     String charUsed = columnMetadataResultSet.getString("CHAR_USED");
@@ -230,7 +230,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
-        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
+        int dataType = columnMetadataResultSet.getInt("DATA_TYPE").intValue();
         Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
         // don't set size for types like int4, int8 etc
         if (database.dataTypeIsNotModifiable(columnTypeName)) {
@@ -238,7 +238,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
-        if (decimalDigits != null && decimalDigits.equals(0)) {
+        if (decimalDigits != null && decimalDigits.equals(Integer.valueOf(0))) {
             decimalDigits = null;
         }
 
@@ -247,7 +247,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
 
         DataType type = new DataType(columnTypeName);
-        type.setDataTypeId(dataType);
+        type.setDataTypeId(Integer.valueOf(dataType));
         type.setColumnSize(columnSize);
         type.setDecimalDigits(decimalDigits);
         type.setRadix(radix);
@@ -288,7 +288,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
 
-        int type = columnInfo.getType().getDataTypeId();
+        int type = columnInfo.getType().getDataTypeId().intValue();
         String typeName = columnInfo.getType().getTypeName();
         Scanner scanner = new Scanner(stringVal.trim());
         try {
@@ -304,14 +304,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 stringVal = stringVal.trim();
                 if (scanner.hasNextBoolean()) {
-                    return scanner.nextBoolean();
+                    return scanner.nextBoolean() ? Boolean.TRUE : Boolean.FALSE;
                 } else {
-                    return new Integer(stringVal);
+                    return Integer.valueOf(stringVal);
                 }
             } else if (type == Types.BLOB) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.BOOLEAN && scanner.hasNextBoolean()) {
-                return scanner.nextBoolean();
+                return scanner.nextBoolean() ? Boolean.TRUE : Boolean.FALSE;
             } else if (type == Types.CHAR) {
                 return stringVal;
             } else if (type == Types.DATALINK) {
@@ -326,11 +326,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.DISTINCT) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.DOUBLE && scanner.hasNextDouble()) {
-                return scanner.nextDouble();
+                return Double.valueOf(scanner.nextDouble());
             } else if (type == Types.FLOAT && scanner.hasNextFloat()) {
-                return scanner.nextFloat();
+                return Float.valueOf(scanner.nextFloat());
             } else if (type == Types.INTEGER && scanner.hasNextInt()) {
-                return scanner.nextInt();
+                return Integer.valueOf(scanner.nextInt());
             } else if (type == Types.JAVA_OBJECT) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.LONGNVARCHAR) {
@@ -358,7 +358,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.ROWID) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.SMALLINT && scanner.hasNextInt()) {
-                return scanner.nextInt();
+                return Integer.valueOf(scanner.nextInt());
             } else if (type == Types.SQLXML) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.STRUCT) {
@@ -374,7 +374,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 return new Timestamp(getDateTimeFormat(database).parse(stringVal).getTime());
             } else if (type == Types.TINYINT && scanner.hasNextInt()) {
-                return scanner.nextInt();
+                return Integer.valueOf(scanner.nextInt());
             } else if (type == Types.VARBINARY) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.VARCHAR) {

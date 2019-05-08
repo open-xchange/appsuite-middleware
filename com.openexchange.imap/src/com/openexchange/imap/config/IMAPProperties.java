@@ -65,7 +65,6 @@ import java.util.regex.PatternSyntaxException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -75,7 +74,7 @@ import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
-import com.openexchange.imap.util.CircuitBreakerCommandListener;
+import com.openexchange.imap.util.CircuitBreakerCommandExecutor;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
@@ -84,6 +83,7 @@ import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.net.HostList;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.spamhandler.SpamHandler;
@@ -431,7 +431,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean enableAttachmentSearch;
 
-    private List<CircuitBreakerCommandListener> breakers;
+    private List<CircuitBreakerCommandExecutor> breakers;
 
     /**
      * Initializes a new {@link IMAPProperties}
@@ -801,7 +801,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             if (null != tmp) {
                 tmp = tmp.trim();
                 String[] names = Strings.splitByComma(tmp);
-                List<CircuitBreakerCommandListener> breakerList = new ArrayList<>(names.length);
+                List<CircuitBreakerCommandExecutor> breakerList = new ArrayList<>(names.length);
                 NextName: for (String name : names) {
                     String propertyName = "com.openexchange.imap.breaker." + name + ".hosts";
                     String hosts = configuration.getProperty(propertyName, "");
@@ -848,7 +848,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         }
                     }
 
-                    Set<String> hostSet = ImmutableSet.copyOf(Strings.splitByComma(hosts));
+                    HostList hostList = HostList.valueOf(hosts);
                     Set<Integer> portSet;
                     if (null == ports) {
                         portSet = null;
@@ -863,14 +863,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             }
                         }
                     }
-                    breakerList.add(new CircuitBreakerCommandListener(hostSet, portSet, percent, windowMillis));
+                    breakerList.add(new CircuitBreakerCommandExecutor(hostList, portSet, percent, windowMillis));
                     logBuilder.append("    Added circuit breaker for hosts: {}{}");
-                    args.add(hostSet);
+                    args.add(hosts);
                     args.add(Strings.getLineSeparator());
                 }
                 breakers = breakerList;
-                for (CircuitBreakerCommandListener breaker : breakerList) {
-                    IMAPStore.addProtocolListener(breaker);
+                for (CircuitBreakerCommandExecutor breaker : breakerList) {
+                    IMAPStore.addCommandExecutor(breaker);
                 }
             }
         }
@@ -906,10 +906,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
-        List<CircuitBreakerCommandListener> breakerList = breakers;
+        List<CircuitBreakerCommandExecutor> breakerList = breakers;
         if (null != breakerList) {
-            for (CircuitBreakerCommandListener breaker : breakerList) {
-                IMAPStore.removeProtocolListener(breaker);
+            for (CircuitBreakerCommandExecutor breaker : breakerList) {
+                IMAPStore.removeCommandExecutor(breaker);
             }
         }
         breakers = null;

@@ -6,7 +6,9 @@ Bundle-Version: 3.0.7
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
-Import-Package: javax.servlet,
+Import-Package: gnu.trove.list,
+ gnu.trove.list.array,
+ javax.servlet,
  javax.servlet.http,
  javax.xml.parsers,
  org.apache.commons.cli,

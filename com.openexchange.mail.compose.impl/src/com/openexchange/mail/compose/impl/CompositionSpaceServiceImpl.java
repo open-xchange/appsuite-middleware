@@ -591,7 +591,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
         }
 
         if (deleteAfterTransport) {
-            closeCompositionSpace(compositionSpaceId, session);
+            boolean closed = closeCompositionSpace(compositionSpaceId, session);
+            if (!closed) {
+                String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
+                LoggerHolder.LOG.warn("Compositon space {} could not be closed after transport.", sCompositionSpaceId);
+            }
         }
 
         return sentMailPath;
@@ -790,7 +794,11 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             mailInterface = null;
 
             if (deleteAfterSave) {
-                closeCompositionSpace(compositionSpaceId, session);
+                boolean closed = closeCompositionSpace(compositionSpaceId, session);
+                if (!closed) {
+                    String sCompositionSpaceId = getUnformattedString(compositionSpaceId);
+                    LoggerHolder.LOG.warn("Compositon space {} could not be closed after saving it to a draft mail.", sCompositionSpaceId);
+                }
             }
 
             return draftPath;

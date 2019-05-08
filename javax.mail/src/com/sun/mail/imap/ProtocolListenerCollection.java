@@ -116,13 +116,6 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
     public abstract Iterator<ProtocolListener> protocolListeners();
 
     /**
-     * Gets an iterator over contained {@code CommandListener} instances.
-     *
-     * @return The iterator
-     */
-    public abstract Iterator<CommandListener> commandListeners();
-
-    /**
      * Creates a snapshot from this collection.
      * <p>
      * Modifications to the snapshot are <b>not</b> reflected to this collection.
@@ -136,7 +129,6 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
     private static class ConcurrentProtocolListenerCollection extends ProtocolListenerCollection {
 
         private final List<ProtocolListener> protocolListeners;
-        private final List<CommandListener> commandListeners;
 
         /**
          * Initializes a new {@link ProtocolListenerCollection}.
@@ -146,27 +138,16 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
         ConcurrentProtocolListenerCollection(ProtocolListener protocolListener) {
             super();
             protocolListeners = new CopyOnWriteArrayList<>(new ProtocolListener[] { protocolListener });
-            if (protocolListener instanceof CommandListener) {
-                commandListeners = new CopyOnWriteArrayList<>(new CommandListener[] { (CommandListener) protocolListener });
-            } else {
-                commandListeners = new CopyOnWriteArrayList<>();
-            }
         }
 
         @Override
         public void add(ProtocolListener protocolListener) {
-            boolean added = protocolListeners.add(protocolListener);
-            if (added && (protocolListener instanceof CommandListener)) {
-                commandListeners.add((CommandListener) protocolListener);
-            }
+            protocolListeners.add(protocolListener);
         }
 
         @Override
         public boolean remove(ProtocolListener protocolListener) {
             boolean removed = protocolListeners.remove(protocolListener);
-            if (removed && (protocolListener instanceof CommandListener)) {
-                commandListeners.remove(protocolListener);
-            }
             return removed && protocolListeners.isEmpty();
         }
 
@@ -177,48 +158,35 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
 
         @Override
         public Iterator<ProtocolListener> protocolListeners() {
-            return new ProtocolListenersIterator(protocolListeners.iterator(), commandListeners);
-        }
-
-        @Override
-        public Iterator<CommandListener> commandListeners() {
-            return new CommandListenersIterator(commandListeners.iterator(), protocolListeners);
+            return protocolListeners.iterator();
         }
 
         @Override
         public ProtocolListenerCollection snapshot() {
-            return new SnapshotProtocolListenerCollection(protocolListeners, commandListeners);
+            return new SnapshotProtocolListenerCollection(protocolListeners);
         }
     }
 
     private static class SnapshotProtocolListenerCollection extends ProtocolListenerCollection {
 
         private final List<ProtocolListener> protocolListeners;
-        private final List<CommandListener> commandListeners;
 
         /**
          * Initializes a new {@link SnapshotProtocolListenerCollection}.
          */
-        SnapshotProtocolListenerCollection(List<ProtocolListener> protocolListeners, List<CommandListener> commandListeners) {
+        SnapshotProtocolListenerCollection(List<ProtocolListener> protocolListeners) {
             super();
             this.protocolListeners = new ArrayList<>(protocolListeners);
-            this.commandListeners = new ArrayList<>(commandListeners);
         }
 
         @Override
         public void add(ProtocolListener protocolListener) {
-            boolean added = protocolListeners.add(protocolListener);
-            if (added && (protocolListener instanceof CommandListener)) {
-                commandListeners.add((CommandListener) protocolListener);
-            }
+            protocolListeners.add(protocolListener);
         }
 
         @Override
         public boolean remove(ProtocolListener protocolListener) {
             boolean removed = protocolListeners.remove(protocolListener);
-            if (removed && (protocolListener instanceof CommandListener)) {
-                commandListeners.remove(protocolListener);
-            }
             return removed && protocolListeners.isEmpty();
         }
 
@@ -229,91 +197,13 @@ public abstract class ProtocolListenerCollection implements Iterable<ProtocolLis
 
         @Override
         public Iterator<ProtocolListener> protocolListeners() {
-            return new ProtocolListenersIterator(protocolListeners.iterator(), commandListeners);
-        }
-
-        @Override
-        public Iterator<CommandListener> commandListeners() {
-            return new CommandListenersIterator(commandListeners.iterator(), protocolListeners);
+            return protocolListeners.iterator();
         }
 
         @Override
         public ProtocolListenerCollection snapshot() {
-            return new SnapshotProtocolListenerCollection(protocolListeners, commandListeners);
+            return new SnapshotProtocolListenerCollection(protocolListeners);
         }
-    }
-    
-    private static class ProtocolListenersIterator implements Iterator<ProtocolListener> {
-
-        private final List<CommandListener> commandListeners;
-        private final Iterator<ProtocolListener> iterator;
-        private ProtocolListener next;
-
-        ProtocolListenersIterator(Iterator<ProtocolListener> iterator, List<CommandListener> commandListeners) {
-            super();
-            this.commandListeners = commandListeners;
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean hasNext() {
-            next = null;
-            return iterator.hasNext();
-        }
-
-        @Override
-        public ProtocolListener next() {
-            ProtocolListener next = iterator.next();
-            this.next = next;
-            return next;
-        }
-
-        @Override
-        public void remove() {
-            iterator.remove();
-            ProtocolListener next = this.next;
-            if (null != next) {                        
-                commandListeners.remove(next);
-                this.next = null;
-            }
-        }
-    }
-    
-    private static class CommandListenersIterator implements Iterator<CommandListener> {
-
-        private final List<ProtocolListener> protocolListeners;
-        private final Iterator<CommandListener> iterator;
-        private CommandListener next;
-
-        CommandListenersIterator(Iterator<CommandListener> iterator, List<ProtocolListener> protocolListeners) {
-            super();
-            this.protocolListeners = protocolListeners;
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean hasNext() {
-            next = null;
-            return iterator.hasNext();
-        }
-
-        @Override
-        public CommandListener next() {
-            CommandListener next = iterator.next();
-            this.next = next;
-            return next;
-        }
-
-        @Override
-        public void remove() {
-            iterator.remove();
-            CommandListener next = this.next;
-            if (null != next) {                        
-                protocolListeners.remove(next);
-                this.next = null;
-            }
-        }
-
     }
 
 }

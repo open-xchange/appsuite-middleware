@@ -111,21 +111,21 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isDeferrable() {
-        return getAttribute("deferrable", Boolean.class);
+        return getAttribute("deferrable", Boolean.class).booleanValue();
     }
 
     public ForeignKey setDeferrable(boolean deferrable) {
-        this.setAttribute("deferrable", deferrable);
+        this.setAttribute("deferrable", deferrable ? Boolean.TRUE : Boolean.FALSE);
         return this;
     }
 
 
     public boolean isInitiallyDeferred() {
-        return getAttribute("initiallyDeferred", Boolean.class);
+        return getAttribute("initiallyDeferred", Boolean.class).booleanValue();
     }
 
     public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {
-        this.setAttribute("initiallyDeferred", initiallyDeferred);
+        this.setAttribute("initiallyDeferred", initiallyDeferred ? Boolean.TRUE : Boolean.FALSE);
         return this;
     }
 

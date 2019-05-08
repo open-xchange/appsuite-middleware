@@ -25,7 +25,6 @@ public class CommandEvent {
 
         private String command;
         private Argument args;
-        private String tag;
         private String host;
         private int port;
         private String user;
@@ -54,14 +53,6 @@ public class CommandEvent {
         }
 
         /**
-         * Sets the tag
-         */
-        public Builder setTag(String tag) {
-            this.tag = tag;
-            return this;
-        }
-
-        /**
          * Sets the host
          */
         public Builder setHost(String host) {
@@ -86,7 +77,7 @@ public class CommandEvent {
         }
 
         public CommandEvent build() {
-            return new CommandEvent(command, args, tag, host, port, user);
+            return new CommandEvent(command, args, host, port, user);
         }
     }
 
@@ -94,7 +85,6 @@ public class CommandEvent {
 
     private final String command;
     private final Argument args;
-    private final String tag;
     private final String host;
     private final int port;
     private final String user;
@@ -102,10 +92,9 @@ public class CommandEvent {
     /**
      * Initializes a new {@link CommandEvent}.
      */
-    CommandEvent(String command, Argument args, String tag, String host, int port, String user) {
+    CommandEvent(String command, Argument args, String host, int port, String user) {
         this.command = command;
         this.args = args;
-        this.tag = tag;
         this.host = host;
         this.port = port;
         this.user = user;
@@ -127,15 +116,6 @@ public class CommandEvent {
      */
     public Argument getArgs() {
         return args;
-    }
-
-    /**
-     * Gets the tag
-     *
-     * @return The tag
-     */
-    public String getTag() {
-        return tag;
     }
 
     /**

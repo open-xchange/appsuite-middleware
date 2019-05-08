@@ -49,7 +49,7 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
         }
         change.setSelectQuery(selectQuery);
-        change.setReplaceIfExists(true);
+        change.setReplaceIfExists(Boolean.TRUE);
 
         return new Change[] { change };
     }
