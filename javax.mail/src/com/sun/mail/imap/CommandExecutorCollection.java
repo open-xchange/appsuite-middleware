@@ -49,10 +49,15 @@
 
 package com.sun.mail.imap;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.java.ImmutableReference;
+import com.sun.mail.iap.Protocol;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link CommandExecutorCollection} - A collection for {@code ProtocolListener} instances.
@@ -124,11 +129,20 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
      */
     public abstract CommandExecutorCollection snapshot();
 
+    /**
+     * Gets the matching command executor for given protocol instance.
+     *
+     * @param protocol The protocol instance
+     * @return The matching command executor or <code>null</code>
+     */
+    public abstract CommandExecutor getMatchingCommandExecutorFor(Protocol protocol);
+
     // ------------------------------------------------ Implementations ------------------------------------------------
 
     private static class ConcurrentCommandExecutorCollection extends CommandExecutorCollection {
 
         private final List<CommandExecutor> commandExecutors;
+        private final Cache<CommandKey, ImmutableReference<CommandExecutor>> matchingCommandExecutors;
 
         /**
          * Initializes a new {@link CommandExecutorCollection}.
@@ -138,6 +152,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         ConcurrentCommandExecutorCollection(CommandExecutor commandExecutor) {
             super();
             commandExecutors = new CopyOnWriteArrayList<>(new CommandExecutor[] { commandExecutor });
+            matchingCommandExecutors = CacheBuilder.newBuilder().initialCapacity(256).maximumSize(256000).expireAfterAccess(10, TimeUnit.MINUTES).build();
         }
 
         @Override
@@ -164,6 +179,25 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         @Override
         public CommandExecutorCollection snapshot() {
             return new SnapshotCommandExecutorCollection(commandExecutors);
+        }
+
+        @Override
+        public CommandExecutor getMatchingCommandExecutorFor(Protocol protocol) {
+            CommandKey key = new CommandKey(protocol);
+            ImmutableReference<CommandExecutor> executorRef = matchingCommandExecutors.getIfPresent(key);
+            if (executorRef != null) {
+                return executorRef.getValue();
+            }
+
+            CommandExecutor matching = null;
+            for (Iterator<CommandExecutor> it = commandExecutors.iterator(); matching == null && it.hasNext();) {
+                CommandExecutor commandExecutor = it.next();
+                if (commandExecutor.isApplicable(protocol)) {
+                    matching = commandExecutor;
+                }
+            }
+            matchingCommandExecutors.put(key, new ImmutableReference<CommandExecutor>(matching));
+            return matching;
         }
     }
 
@@ -203,6 +237,79 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         @Override
         public CommandExecutorCollection snapshot() {
             return new SnapshotCommandExecutorCollection(commandExecutors);
+        }
+
+        @Override
+        public CommandExecutor getMatchingCommandExecutorFor(Protocol protocol) {
+            for (CommandExecutor commandExecutor : commandExecutors) {
+                if (commandExecutor.isApplicable(protocol)) {
+                    return commandExecutor;
+                }
+            }
+            return null;
+        }
+    }
+
+    private static class CommandKey {
+
+        private final String host;
+        private final int port;
+        private final String user;
+        private final int hash;
+
+        CommandKey(Protocol protocol) {
+            this(protocol.getHost(), protocol.getPort(), protocol.getUser());
+        }
+
+        CommandKey(String host, int port, String user) {
+            super();
+            this.host = host;
+            this.port = port;
+            this.user = user;
+
+            int prime = 31;
+            int result = 1;
+            result = prime * result + port;
+            result = prime * result + ((host == null) ? 0 : host.hashCode());
+            result = prime * result + ((user == null) ? 0 : user.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            CommandKey other = (CommandKey) obj;
+            if (port != other.port) {
+                return false;
+            }
+            if (host == null) {
+                if (other.host != null) {
+                    return false;
+                }
+            } else if (!host.equals(other.host)) {
+                return false;
+            }
+            if (user == null) {
+                if (other.user != null) {
+                    return false;
+                }
+            } else if (!user.equals(other.user)) {
+                return false;
+            }
+            return true;
         }
     }
 

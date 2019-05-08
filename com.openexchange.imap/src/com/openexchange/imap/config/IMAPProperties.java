@@ -74,7 +74,7 @@ import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
-import com.openexchange.imap.util.CircuitBreakerCommandExecutor;
+import com.openexchange.imap.util.FailsafeCircuitBreakerCommandExecutor;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Strings;
@@ -431,7 +431,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean enableAttachmentSearch;
 
-    private List<CircuitBreakerCommandExecutor> breakers;
+    private List<FailsafeCircuitBreakerCommandExecutor> breakers;
 
     /**
      * Initializes a new {@link IMAPProperties}
@@ -801,7 +801,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             if (null != tmp) {
                 tmp = tmp.trim();
                 String[] names = Strings.splitByComma(tmp);
-                List<CircuitBreakerCommandExecutor> breakerList = new ArrayList<>(names.length);
+                List<FailsafeCircuitBreakerCommandExecutor> breakerList = new ArrayList<>(names.length);
                 NextName: for (String name : names) {
                     String propertyName = "com.openexchange.imap.breaker." + name + ".hosts";
                     String hosts = configuration.getProperty(propertyName, "");
@@ -816,32 +816,48 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                         ports = null;
                     }
 
-                    int percent;
+                    int failures;
                     {
-                        propertyName = "com.openexchange.imap.breaker." + name + ".percent";
-                        String sPercent = configuration.getProperty(propertyName, "");
-                        if (Strings.isEmpty(sPercent)) {
+                        propertyName = "com.openexchange.imap.breaker." + name + ".failureThreshold";
+                        String sFailures = configuration.getProperty(propertyName, "");
+                        if (Strings.isEmpty(sFailures)) {
                             LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
                             continue NextName;
                         }
                         try {
-                            percent = Integer.parseInt(sPercent.trim());
+                            failures = Integer.parseInt(sFailures.trim());
+                        } catch (@SuppressWarnings("unused") NumberFormatException e) {
+                            LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                            continue NextName;
+                        }
+                    }
+                    
+                    int success;
+                    {
+                        propertyName = "com.openexchange.imap.breaker." + name + ".successThreshold";
+                        String sSuccess = configuration.getProperty(propertyName, "");
+                        if (Strings.isEmpty(sSuccess)) {
+                            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                            continue NextName;
+                        }
+                        try {
+                            success = Integer.parseInt(sSuccess.trim());
                         } catch (@SuppressWarnings("unused") NumberFormatException e) {
                             LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
                             continue NextName;
                         }
                     }
 
-                    long windowMillis;
+                    long delayMillis;
                     {
-                        propertyName = "com.openexchange.imap.breaker." + name + ".windowMillis";
-                        String sWindowMillis = configuration.getProperty(propertyName, "");
-                        if (Strings.isEmpty(sWindowMillis)) {
+                        propertyName = "com.openexchange.imap.breaker." + name + ".delayMillis";
+                        String sDelayMillis = configuration.getProperty(propertyName, "");
+                        if (Strings.isEmpty(sDelayMillis)) {
                             LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
                             continue NextName;
                         }
                         try {
-                            windowMillis = Long.parseLong(sWindowMillis.trim());
+                            delayMillis = Long.parseLong(sDelayMillis.trim());
                         } catch (@SuppressWarnings("unused") NumberFormatException e) {
                             LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
                             continue NextName;
@@ -863,13 +879,13 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             }
                         }
                     }
-                    breakerList.add(new CircuitBreakerCommandExecutor(hostList, portSet, percent, windowMillis));
+                    breakerList.add(new FailsafeCircuitBreakerCommandExecutor(hostList, portSet, failures, success, delayMillis));
                     logBuilder.append("    Added circuit breaker for hosts: {}{}");
                     args.add(hosts);
                     args.add(Strings.getLineSeparator());
                 }
                 breakers = breakerList;
-                for (CircuitBreakerCommandExecutor breaker : breakerList) {
+                for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                     IMAPStore.addCommandExecutor(breaker);
                 }
             }
@@ -906,9 +922,9 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
-        List<CircuitBreakerCommandExecutor> breakerList = breakers;
+        List<FailsafeCircuitBreakerCommandExecutor> breakerList = breakers;
         if (null != breakerList) {
-            for (CircuitBreakerCommandExecutor breaker : breakerList) {
+            for (FailsafeCircuitBreakerCommandExecutor breaker : breakerList) {
                 IMAPStore.removeCommandExecutor(breaker);
             }
         }

@@ -52,21 +52,16 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import javax.net.ssl.SSLSocket;
-import com.sun.mail.imap.CommandEvent;
 import com.sun.mail.imap.CommandExecutor;
-import com.sun.mail.imap.CommandExecutorCollection;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.ProtocolListener;
@@ -160,7 +155,14 @@ public class Protocol {
 	    initStreams();
 
 	    // Read server greeting
-	    processGreeting(readResponse());
+	    {
+	        CommandExecutor commandExecutor = IMAPStore.getMatchingCommandExecutors(this);
+	        if (commandExecutor == null) {
+	            processGreeting(readResponse());
+	        } else {
+	            processGreeting(commandExecutor.readResponse(this));
+	        }
+	    }
 	    
 	    // Call greeting listeners
 	    if (null != props) {
@@ -418,28 +420,15 @@ public class Protocol {
      * @return      array of Response objects returned by the server
      */
     public synchronized Response[] command(String command, Argument args) {
-        CommandExecutorCollection commandExecutors = IMAPStore.getCommandExecutors();
-        if (commandExecutors == null) {
-            // No executors available
+        // Determine suitable executor
+        CommandExecutor commandExecutor = IMAPStore.getMatchingCommandExecutors(this);
+        if (commandExecutor == null) {
+            // No matching executor available
             return executeCommand(command, args);
         }
 
-        // Determine suitable executor
-        CommandEvent commandEvent = CommandEvent.builder()
-            .setArgs(args)
-            .setCommand(command)
-            .setHost(host)
-            .setPort(port)
-            .setUser(user)
-            .build();
-        for (CommandExecutor commandExecutor : commandExecutors) {
-            if (commandExecutor.onBeforeCommandIssued(commandEvent)) {
-                return commandExecutor.executeCommand(command, args, this);
-            }
-        }
-
-        // No suitable executor found
-        return executeCommand(command, args);
+        // Issue command using matching executor
+        return commandExecutor.executeCommand(command, args, this);
     }
 
     /**
@@ -526,7 +515,7 @@ public class Protocol {
                     .setResponses(responses)
                     .setTag(tag)
                     .setTerminatedTmestamp(end)
-                    .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses[responses.length - 1]))
+                    .setStatusResponse(ResponseEvent.StatusResponse.statusResponseFor(responses))
                     .setUser(user)
                     .build();
 	            do {
@@ -834,6 +823,15 @@ public class Protocol {
      */
     public int getPort() {
         return port;
+    }
+    
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public String getUser() {
+        return user;
     }
 
     /**

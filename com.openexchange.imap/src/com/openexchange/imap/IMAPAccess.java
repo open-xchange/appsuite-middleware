@@ -848,6 +848,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 throw oxe;
+            } catch (final com.sun.mail.util.MailConnectException e) {
+                if (tmpDownEnabled) {
+                    /*
+                     * Remember a timed-out IMAP server on connect attempt
+                     */
+                    final Map<HostAndPort, Long> map = timedOutServers;
+                    if (null != map) {
+                        map.put(newHostAndPort(config), Long.valueOf(System.currentTimeMillis()));
+                    }
+                }
+                throw e;
             } catch (final MessagingException e) {
                 /*
                  * Check for a SocketTimeoutException

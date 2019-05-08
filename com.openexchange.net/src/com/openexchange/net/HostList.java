@@ -166,6 +166,15 @@ public class HostList {
     }
 
     /**
+     * Checks if this host list is empty.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return ipRanges.isEmpty() && matchingAppendixHostNames.isEmpty() && matchingHostNames.isEmpty();
+    }
+
+    /**
      * Gets the host string from which this instance was parsed.
      *
      * @return The host string

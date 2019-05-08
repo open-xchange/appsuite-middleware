@@ -47,55 +47,37 @@
  *
  */
 
-package com.sun.mail.imap;
+package com.openexchange.java;
 
-import java.io.IOException;
-import com.sun.mail.iap.Argument;
-import com.sun.mail.iap.Protocol;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.iap.Response;
 
 /**
- * {@link CommandExecutor} - Is responsible for executing commands and reading responses.
+ * {@link ImmutableReference} - A simple immutable reference class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @since v7.8.0
  */
-public interface CommandExecutor {
-    
-    /**
-     * Checks if this executor is applicable to given protocol instance
-     *
-     * @param protocol The protocol instance
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     */
-    boolean isApplicable(Protocol protocol);
+public final class ImmutableReference<V> {
+
+    /** The value */
+    private final V value;
 
     /**
-     * Executes given command with given arguments using specified protocol instance.
+     * Initializes a new {@link ImmutableReference}.
      *
-     * @param command The command
-     * @param args The arguments
-     * @param protocol The protocol instance
-     * @return The response array
+     * @param value The value to set
      */
-    default Response[] executeCommand(String command, Argument args, Protocol protocol) {
-        return protocol.executeCommand(command, args);
+    public ImmutableReference(V value) {
+        super();
+        this.value = value;
     }
-    
+
     /**
-     * Reads a response using specified protocol instance.
+     * Gets the value
      *
-     * @param protocol The protocol instance
-     * @return The response
-     * @throws IOException If an I/O error occurs
+     * @return The value
      */
-    default Response readResponse(Protocol protocol) throws IOException {
-        try {
-            return protocol.readResponse();
-        } catch (ProtocolException e) {
-            // Cannot occur
-            throw new IOException(e);
-        }
+    public V getValue() {
+        return value;
     }
+
 }

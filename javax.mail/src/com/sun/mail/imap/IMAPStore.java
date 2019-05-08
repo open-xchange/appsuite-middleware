@@ -69,6 +69,7 @@ import javax.mail.event.StoreEvent;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.Protocol;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.iap.ResponseCode;
@@ -290,6 +291,17 @@ public class IMAPStore extends Store
         if (lastRemoved) {
             COMMAND_EXECUTORS_REF.set(null);
         }
+    }
+
+    /**
+     * Gets the matching command executor for given protocol instance.
+     *
+     * @param commandEvent The protocol instance
+     * @return The matching command executor or <code>null</code>
+     */
+    public static CommandExecutor getMatchingCommandExecutors(Protocol protocol) {
+        CommandExecutorCollection collection = COMMAND_EXECUTORS_REF.get();
+        return null == collection ? null : collection.getMatchingCommandExecutorFor(protocol);
     }
 
     /**
