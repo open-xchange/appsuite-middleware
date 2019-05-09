@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: Open-Xchange 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-11 22:40+0200\n"
+"PO-Revision-Date: 2019-05-03 22:38+0200\n"
 "Last-Translator: \n"
 "Language-Team: x\n"
 "Language: sk\n"
@@ -1227,10 +1227,10 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Interný kalendár"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
-msgstr "Požadovaná stránka neodkazuje na kalendár."
+msgid "The requested page does not denote a calendar."
+msgstr "Požadovaná stránka neobsahuje kalendár."
 
 #. You have no access to this calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
@@ -4843,7 +4843,8 @@ msgstr ""
 msgid ""
 "There is another authentication attempt for this user in process.  Please "
 "wait."
-msgstr "Prebieha iný pokus o overenie totožnosti používateľa. Prosím, počkajte."
+msgstr ""
+"Prebieha iný pokus o overenie totožnosti používateľa. Prosím, počkajte."
 
 #. *
 #. * The default name for the multifactor recovery codes
@@ -7101,11 +7102,9 @@ msgid "Drafts"
 msgstr "Rozpísané"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Odoslané objekty"
+msgid "Sent"
+msgstr "Odoslané"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7246,6 +7245,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Vážený pán alebo pani"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Odoslané objekty"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10690,6 +10694,10 @@ msgid ""
 "its subfolders"
 msgstr ""
 "Nemáte oprávnenie zmeniť oprávnenia priečinka Kôš ani jeho podpriečinkov"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Priečinok s názvom „%1$s“ už existuje. Prosím, vyberte iný názov."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -14284,6 +14292,9 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "Požadovaná stránka neodkazuje na kalendár."
+
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr ""
@@ -17802,9 +17813,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Priečinok Rozpísané"
-
-#~ msgid "Sent"
-#~ msgstr "Odoslané"
 
 #~ msgid "Sent folder"
 #~ msgstr "Priečinok odoslané"

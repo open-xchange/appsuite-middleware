@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-27 11:22+0900\n"
+"PO-Revision-Date: 2019-05-04 20:56+0900\n"
 "Last-Translator: sandrine <sandrine@workshop-chapina.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
 "Language: fr_CA\n"
@@ -1267,9 +1267,9 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Agenda interne"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "La page demandée ne désigne pas un agenda."
 
 #. You have no access to this calendar.
@@ -1444,8 +1444,8 @@ msgid ""
 "The supplied folder is not supported. Please select a valid folder and try "
 "again."
 msgstr ""
-"Le dossier fourni n'est pas géré. Veuillez sélectionner un dossier valide "
-"et réessayer."
+"Le dossier fourni n'est pas géré. Veuillez sélectionner un dossier valide et "
+"réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
 msgid ""
@@ -1546,8 +1546,8 @@ msgid ""
 "The supplied geographical location is invalid. Please select valid "
 "coordinates and try again."
 msgstr ""
-"La position géographique fournie n'est pas valide. Veuillez sélectionner "
-"des coordonnées valides et réessayer."
+"La position géographique fournie n'est pas valide. Veuillez sélectionner des "
+"coordonnées valides et réessayer."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid ""
@@ -5018,8 +5018,8 @@ msgstr "Ma solution de récupération"
 #: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
 msgid "Primary authentication devices must be set up before backup devices."
 msgstr ""
-"Les appareils d'authentification principaux doivent être configurés avant les"
-" appareils de secours."
+"Les appareils d'authentification principaux doivent être configurés avant "
+"les appareils de secours."
 
 #. *
 #. * The text message sent to the user for providing him the authentication code
@@ -5064,8 +5064,8 @@ msgstr "Authentification multifacteur non valide"
 msgid ""
 "An error occured while creating/calculating the authentication factor: %1$s."
 msgstr ""
-"Une erreur s'est produite lors de la création ou du calcul du facteur"
-" d'authentification : %1$s."
+"Une erreur s'est produite lors de la création ou du calcul du facteur "
+"d'authentification : %1$s."
 
 #. * Data format error
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
@@ -5086,8 +5086,8 @@ msgstr "Le fournisseur %1$s demandé n'est pas disponible pour cet utilisateur."
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
 msgid "Multifactor authentication required but device identifier is missing"
 msgstr ""
-"L'authentification multifacteur est requise mais l'identifiant d'appareil est"
-" manquant"
+"L'authentification multifacteur est requise mais l'identifiant d'appareil "
+"est manquant"
 
 #. * The specified device is not known
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
@@ -5098,14 +5098,15 @@ msgstr "L'appareil demandé est inconnu"
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:90
 msgid "An unknown error occured during multifactor authentication: %s"
 msgstr ""
-"Une erreur inconnue s'est produite durant l'authentification multifacteur : %s"
+"Une erreur inconnue s'est produite durant l'authentification multifacteur : "
+"%s"
 
 #. * The provider type is not specified
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:93
 msgid "Multifactor authentication required but provider name is missing"
 msgstr ""
-"L'authentification multifacteur est requise mais le nom du fournisseur est"
-" manquant"
+"L'authentification multifacteur est requise mais le nom du fournisseur est "
+"manquant"
 
 #. * Database error
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:96
@@ -5147,8 +5148,8 @@ msgid ""
 "The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
 "%3$s"
 msgstr ""
-"L'argument fourni \"%1$s\" a une longueur %2$s qui dépasse la longueur"
-" maximale autorisée, %3$s"
+"L'argument fourni \"%1$s\" a une longueur %2$s qui dépasse la longueur "
+"maximale autorisée, %3$s"
 
 #. * The registration failed
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
@@ -5176,8 +5177,8 @@ msgid ""
 "The authentication failed.  A total of %1$d attempts allowed before "
 "temporary lockout."
 msgstr ""
-"L'authentification a échoué. Un total de %1$d tentatives est "
-"autorisé avant le déclenchement d'un verrouillage temporaire."
+"L'authentification a échoué. Un total de %1$d tentatives est autorisé avant "
+"le déclenchement d'un verrouillage temporaire."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -7337,11 +7338,9 @@ msgid "Drafts"
 msgstr "Brouillons"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Objets envoyés"
+msgid "Sent"
+msgstr "Envoyé"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7484,6 +7483,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Cher Monsieur ou Chère Madame"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Objets envoyés"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -9048,8 +9052,8 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
-"Le mot de passe actuel n'est pas valide. Veuillez saisir le bon mot de "
-"passe et réessayer."
+"Le mot de passe actuel n'est pas valide. Veuillez saisir le bon mot de passe "
+"et réessayer."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -11070,6 +11074,11 @@ msgstr ""
 "Vous n'êtes pas autorisé à modifier les droits sur la corbeille ou l'un de "
 "ses sous-dossiers."
 
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr ""
+"Il existe déjà un dossier nommé \"%1$s\". Veuillez choisir un autre nom."
+
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
@@ -11219,8 +11228,8 @@ msgid ""
 "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s a partagé le %2$s \"%3$s\" avec vous. Veuillez saisir le mot de passe de"
-" partage pour le consulter."
+"%1$s a partagé le %2$s \"%3$s\" avec vous. Veuillez saisir le mot de passe "
+"de partage pour le consulter."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -14729,6 +14738,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zoulou"
+
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "La page demandée ne désigne pas un agenda."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
@@ -18462,9 +18474,6 @@ msgstr "Zoulou"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Dossiers de brouillons"
-
-#~ msgid "Sent"
-#~ msgstr "Envoyé"
 
 #~ msgid "Sent folder"
 #~ msgstr "Dossier des objets envoyés"

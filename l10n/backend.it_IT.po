@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-11 08:44+0200\n"
-"Last-Translator: Vincenzo Reale <vincenzo@workshop-chapina.com>\n"
-"Language-Team: Italian <it@workshop-chapina.com>\n"
+"PO-Revision-Date: 2019-05-03 21:29+0200\n"
+"Last-Translator: Vincenzo Reale <smart2128@baslug.org>\n"
+"Language-Team: Italian <kde-i18n-it@kde.org>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 18.12.3\n"
+"X-Generator: Lokalize 19.04.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -1246,10 +1246,10 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Calendario interno"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
-msgstr "La pagina richiesta non fa riferimento a un calendario."
+msgid "The requested page does not denote a calendar."
+msgstr "La pagina richiesta non indica un calendario."
 
 #. You have no access to this calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
@@ -4945,9 +4945,8 @@ msgstr "Il mio backup"
 #: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
 msgid "Primary authentication devices must be set up before backup devices."
 msgstr ""
-"I dispositivi primari di autenticazione devono essere configurati prima dei"
-" dispositivi "
-"di backup."
+"I dispositivi primari di autenticazione devono essere configurati prima dei "
+"dispositivi di backup."
 
 #. *
 #. * The text message sent to the user for providing him the authentication code
@@ -4992,8 +4991,8 @@ msgstr "Autenticazione multifattore non valida"
 msgid ""
 "An error occured while creating/calculating the authentication factor: %1$s."
 msgstr ""
-"Si è verificato un errore durante la creazione/calcolo del fattore di"
-" autenticazione: %1$s."
+"Si è verificato un errore durante la creazione/calcolo del fattore di "
+"autenticazione: %1$s."
 
 #. * Data format error
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
@@ -5014,8 +5013,8 @@ msgstr "Il fornitore richiesto %1$s non è disponibile per l'utente."
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
 msgid "Multifactor authentication required but device identifier is missing"
 msgstr ""
-"Autenticazione multifattore richiesta, ma manca l'identificatore del"
-" dispositivo"
+"Autenticazione multifattore richiesta, ma manca l'identificatore del "
+"dispositivo"
 
 #. * The specified device is not known
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:87
@@ -5055,9 +5054,8 @@ msgid ""
 "This action requires recent multifactor authentication.  Missing multifactor "
 "parameters for this action"
 msgstr ""
-"Questa azione richiede la recente autenticazione multifattore. Mancano i"
-" parametri "
-"multifattore per questa azione."
+"Questa azione richiede la recente autenticazione multifattore. Mancano i "
+"parametri multifattore per questa azione."
 
 #. * Specified device is not regisiterd
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
@@ -5075,8 +5073,8 @@ msgid ""
 "The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
 "%3$s"
 msgstr ""
-"L'argomento fornito \"%1$s\" di lunghezza %2$s supera la lunghezza consentita"
-" di %3$s"
+"L'argomento fornito \"%1$s\" di lunghezza %2$s supera la lunghezza "
+"consentita di %3$s"
 
 #. * The registration failed
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
@@ -7229,11 +7227,9 @@ msgid "Drafts"
 msgstr "Bozze"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Messaggi inviati"
+msgid "Sent"
+msgstr "Posta inviata"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7376,6 +7372,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Spett.le Signor o Signora"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Messaggi inviati"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10913,6 +10914,10 @@ msgstr ""
 "Non ti è consentito cambiare i permessi della cartella Cestino o di "
 "qualsiasi sua sottocartella"
 
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Esiste già una cartella con nome \"%1$s\". Scegli un altro nome."
+
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
@@ -11062,8 +11067,8 @@ msgid ""
 "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s ha condiviso il/la %2$s \"%3$s\" con te. Digita la password di"
-" condivisione per visualizzarlo/a."
+"%1$s ha condiviso il/la %2$s \"%3$s\" con te. Digita la password di "
+"condivisione per visualizzarlo/a."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -14559,6 +14564,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "La pagina richiesta non fa riferimento a un calendario."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
@@ -18209,9 +18217,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Cartella delle bozze"
-
-#~ msgid "Sent"
-#~ msgstr "Posta inviata"
 
 #~ msgid "Sent folder"
 #~ msgstr "Cartella della posta inviata "
