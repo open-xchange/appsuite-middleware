@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -62,8 +63,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
@@ -298,6 +299,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                         Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()), e.getCause());
                     task.markAsNeutral();
                 } catch (TimeoutException e) {
+                    task.interrupt();
                     future.cancel(true);
                     long durationMicros = task.getDurationMicros();
                     if (durationMicros == 0) {
@@ -316,9 +318,14 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             Thread.currentThread().interrupt();
 
             // Cancel submitted tasks in reverse order
-            Future<?>[] futures = Iterators.toArray(submittedTasks.keySet().iterator(), Future.class);
-            for (int i = futures.length; i-- > 0;) {
-                futures[i].cancel(true);
+            List<Map.Entry<Future<Void>, MailAuthenticityTask>> pending = new ArrayList<>(submittedTasks.size());
+            for (Map.Entry<Future<Void>, MailAuthenticityTask> submitted : submittedTasks.entrySet()) {
+                pending.add(submitted);
+            }
+            for (int i = pending.size(); i-- > 0;) {
+                Map.Entry<Future<Void>, MailAuthenticityTask> submitted = pending.get(i);
+                submitted.getValue().interrupt();
+                submitted.getKey().cancel(true);
             }
 
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
@@ -351,6 +358,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {} after {}\u00b5s", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()), e.getCause());
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (TimeoutException e) {
+            task.interrupt();
             future.cancel(true);
             long durationMicros = task.getDurationMicros();
             if (durationMicros == 0) {
@@ -363,6 +371,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
+            task.interrupt();
             future.cancel(true);
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
@@ -390,6 +399,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         private final Session session;
         private final FolderChecker folderChecker;
         private final AtomicLong durationMicros;
+        private final AtomicReference<Thread> runnerReference;
 
         MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
             this(new MailMessage[] { mail }, handler, session, folderChecker);
@@ -402,6 +412,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             this.session = session;
             this.folderChecker = folderChecker;
             durationMicros = new AtomicLong(0);
+            runnerReference = new AtomicReference<>(null);
         }
 
         /**
@@ -478,32 +489,47 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             super.afterExecute(throwable);
         }
 
+        /**
+         * Interrupts the thread (if any) currently executing this task.
+         */
+        public void interrupt() {
+            Thread runner = runnerReference.get();
+            if (runner != null) {
+                runner.interrupt();
+            }
+        }
+
         @Override
         public Void call() {
-            // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
-            // Handle first mail
-            {
-                MailMessage mail = mails[0];
-                if (null != mail) {
-                    verifyAuthenticityFrom(mail);
-                }
-            }
-
-            // Handle rest while paying respect to processing thread's interrupted status
-            if (mails.length > 1) {
-                Thread t = Thread.currentThread();
-                for (int i = 1, length = mails.length; i < length; i++) {
-                    MailMessage mail = mails[i];
+            runnerReference.set(Thread.currentThread());
+            try {
+                // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
+                // Handle first mail
+                {
+                    MailMessage mail = mails[0];
                     if (null != mail) {
-                        if (t.isInterrupted()) {
-                            // Processing thread was interrupted
-                            return null;
-                        }
                         verifyAuthenticityFrom(mail);
                     }
                 }
+
+                // Handle rest while paying respect to processing thread's interrupted status
+                if (mails.length > 1) {
+                    Thread t = Thread.currentThread();
+                    for (int i = 1, length = mails.length; i < length; i++) {
+                        MailMessage mail = mails[i];
+                        if (null != mail) {
+                            if (t.isInterrupted()) {
+                                // Processing thread was interrupted
+                                return null;
+                            }
+                            verifyAuthenticityFrom(mail);
+                        }
+                    }
+                }
+                return null;
+            } finally {
+                runnerReference.set(null);
             }
-            return null;
         }
 
         private void verifyAuthenticityFrom(MailMessage mail) {
