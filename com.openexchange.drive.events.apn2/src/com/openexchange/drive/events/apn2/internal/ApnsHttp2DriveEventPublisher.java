@@ -217,10 +217,11 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
         if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
             return null;
         }
-
         return new ApnsHttp2Notification.Builder(subscription.getToken(), options.getTopic())
-            .withCustomField("container-identifier", "NSFileProviderRootContainerItemIdentifier")
-            .withExpiration(TimeUnit.HOURS.toMillis(1L))
+            .withCustomField("root", subscription.getRootFolderID())
+            .withCustomField("action", "sync")
+            .withContentAvailable(true)
+            .withExpiration(TimeUnit.DAYS.toMillis(1L))
         .build();
     }
 
