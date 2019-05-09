@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-18 11:35+0200\n"
+"PO-Revision-Date: 2019-05-08 13:31+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -1098,9 +1098,9 @@ msgstr "認証情報が最近変更されたため認証に失敗しました。
 msgid "Internal Calendar"
 msgstr "内部カレンダー"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "要求されたページはカレンダーに表示されません。"
 
 #. You have no access to this calendar.
@@ -6260,11 +6260,9 @@ msgid "Drafts"
 msgstr "下書き"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "送信済み"
+msgid "Sent"
+msgstr "送信日時"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -6397,6 +6395,11 @@ msgstr "このファイルは #DATE# に #TO# へ送信した、件名が \"#SUB
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "拝啓"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "送信済み"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -9494,6 +9497,10 @@ msgstr "フォルダーを %2$s と共有することは許可されていませ
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:133
 msgid "You are not allowed to change the permissions of the trash folder or any of its subfolders"
 msgstr "ゴミ箱フォルダーやそのサブフォルダーの権限を変更することは許可されていません"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "フォルダー名 \"%1$s\" は存在します。別の名前を選んでください。"
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -12834,6 +12841,9 @@ msgstr "UTC (協定世界時)"
 msgid "Zulu"
 msgstr "ズールー"
 
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "要求されたページはカレンダーに表示されません。"
+
 #~ msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr "%1$s は %2$s %3$s をあなたと共有しました。ログインして表示してください。 "
 
@@ -15669,9 +15679,6 @@ msgstr "ズールー"
 
 #~ msgid "Drafts folder"
 #~ msgstr "下書きフォルダー"
-
-#~ msgid "Sent"
-#~ msgstr "送信済みアイテム"
 
 #~ msgid "Sent folder"
 #~ msgstr "送信済みアイテム フォルダー"

@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-29 08:39-0300\n"
-"Last-Translator: Luiz Fernando Ranghetti <luiz@workshop-chapina.com>\n"
+"PO-Revision-Date: 2019-05-07 15:31-0300\n"
+"Last-Translator: Aracele Torres <aracele@workshop-chapina.com >\n"
 "Language-Team: Portuguese <>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Lokalize 19.04.0\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -1233,9 +1233,9 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Calendário interno"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "A página solicitada não direciona para um calendário."
 
 #. You have no access to this calendar.
@@ -7149,11 +7149,9 @@ msgid "Drafts"
 msgstr "Rascunhos"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Objetos enviados"
+msgid "Sent"
+msgstr "Enviados"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7295,6 +7293,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Prezado senhor ou senhora"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Objetos enviados"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10784,6 +10787,10 @@ msgid ""
 msgstr ""
 "Você não tem permissão para alterar as permissões da pasta da Lixeira ou "
 "qualquer de suas subpastas"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Já existe uma pasta chamada \"%1$s\". Escolha outro nome."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -14412,6 +14419,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "A página solicitada não direciona para um calendário."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "

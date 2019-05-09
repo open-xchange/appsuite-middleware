@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-22 08:39+0100\n"
+"PO-Revision-Date: 2019-05-06 19:23+0200\n"
 "Last-Translator: Ivar Snaaijer <Ivar@workshop-chapina.com>\n"
 "Language-Team: Dutch <kde-i18n-nl@kde.org>\n"
 "Language: nl_NL\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 2.0\n"
+"X-Generator: Lokalize 18.12.3\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
@@ -1246,10 +1246,10 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Interne Agenda"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
-msgstr "De gevraagde pagina verwijst niet naar een agenda."
+msgid "The requested page does not denote a calendar."
+msgstr "De gevraagde pagina is geen agenda."
 
 #. You have no access to this calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
@@ -4910,7 +4910,8 @@ msgstr "U heeft geen toestemming om de hoofdmap te verwijderen."
 msgid ""
 "This account has been locked out. Please wait %1$d minutes then try again."
 msgstr ""
-"Dit account is geblokkeerd. Wacht alstublieft %1$d minuten en probeer opnieuw."
+"Dit account is geblokkeerd. Wacht alstublieft %1$d minuten en probeer "
+"opnieuw."
 
 #. *
 #. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
@@ -4920,8 +4921,8 @@ msgid ""
 "There is another authentication attempt for this user in process.  Please "
 "wait."
 msgstr ""
-"Er is een andere aanmeldpogingen voor deze gebruiker actief. Wacht"
-" alstublieft."
+"Er is een andere aanmeldpogingen voor deze gebruiker actief. Wacht "
+"alstublieft."
 
 #. *
 #. * The default name for the multifactor recovery codes
@@ -4936,8 +4937,8 @@ msgstr "Mijn Reservekopie"
 #: com.openexchange.multifactor.provider.backupString/src/com/openexchange/multifactor/provider/backupString/impl/BackupStringsLocalizationStrings.java:70
 msgid "Primary authentication devices must be set up before backup devices."
 msgstr ""
-"Primaire authenticatie apparaten moeten ingesteld worden voordat backup"
-" apparaten ingesteld kunnen worden."
+"Primaire authenticatie apparaten moeten ingesteld worden voordat backup "
+"apparaten ingesteld kunnen worden."
 
 #. *
 #. * The text message sent to the user for providing him the authentication code
@@ -4982,8 +4983,8 @@ msgstr "Ongeldige multifactor authenticatie"
 msgid ""
 "An error occured while creating/calculating the authentication factor: %1$s."
 msgstr ""
-"Er is een fout ontstaan tijdens aanmaken/berekenen van de"
-" authenticatiefactor: %1$s."
+"Er is een fout ontstaan tijdens aanmaken/berekenen van de "
+"authenticatiefactor: %1$s."
 
 #. * Data format error
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:75
@@ -5043,8 +5044,8 @@ msgid ""
 "This action requires recent multifactor authentication.  Missing multifactor "
 "parameters for this action"
 msgstr ""
-"Deze actie vereist een recente multifactor authenticatie. Ontbrekende"
-" multifactor parameters voor deze actie"
+"Deze actie vereist een recente multifactor authenticatie. Ontbrekende "
+"multifactor parameters voor deze actie"
 
 #. * Specified device is not regisiterd
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:108
@@ -5062,8 +5063,8 @@ msgid ""
 "The provided agument \"%1$s\" of length %2$s exceeded the allowed length of "
 "%3$s"
 msgstr ""
-"Het gegeven argument \"%1$s\" met de lengte %2$s is groter dan de toegestane"
-" lengte voor %3$s"
+"Het gegeven argument \"%1$s\" met de lengte %2$s is groter dan de toegestane "
+"lengte voor %3$s"
 
 #. * The registration failed
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:117
@@ -5091,8 +5092,8 @@ msgid ""
 "The authentication failed.  A total of %1$d attempts allowed before "
 "temporary lockout."
 msgstr ""
-"De authenticatie is mislukt. Er zijn totaal %1$d pogingen toegestaan voordat"
-" u tijdelijk wordt uitgesloten."
+"De authenticatie is mislukt. Er zijn totaal %1$d pogingen toegestaan voordat "
+"u tijdelijk wordt uitgesloten."
 
 #. The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in context '%3$s'
 #: com.openexchange.net.ssl.management/src/com/openexchange/net/ssl/management/exception/SSLCertificateManagementExceptionMessages.java:62
@@ -7222,11 +7223,9 @@ msgid "Drafts"
 msgstr "Concepten"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Verzonden objecten"
+msgid "Sent"
+msgstr "Verzonden"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7367,6 +7366,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Beste Mijnheer of Mevrouw"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Verzonden objecten"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10931,6 +10935,11 @@ msgstr ""
 "Het is u niet toegestaan de rechten te veranderen van de prullenbakmap of "
 "een van de submappen hiervan."
 
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr ""
+"Er is al een map met de naam \"%1$s\". Kies alstublieft een andere naam."
+
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
@@ -11077,8 +11086,8 @@ msgid ""
 "%1$s has shared the %2$s \"%3$s\" with you. Please enter the share password "
 "to view it."
 msgstr ""
-"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Geef het gedeelde wachtwoord om"
-" deze te zien."
+"%1$s heeft het %2$s \"%3$s\" met u gedeeld. Geef het gedeelde wachtwoord om "
+"deze te zien."
 
 #. We sent a message to john.doe@example.com with further instructions on how to set a new password.
 #: com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
@@ -18154,9 +18163,6 @@ msgstr "Zoeloe"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Concept map"
-
-#~ msgid "Sent"
-#~ msgstr "Verzonden"
 
 #~ msgid "Sent folder"
 #~ msgstr "Verzonden map"

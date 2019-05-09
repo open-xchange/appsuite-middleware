@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-20 11:24+0900\n"
+"PO-Revision-Date: 2019-05-03 18:53+0200\n"
 "Last-Translator: Adi David <adi@workshop-chapina.com>\n"
 "Language-Team: Romanian <ro@workshop-chapina.com>\n"
 "Language: ro_RO\n"
@@ -1238,9 +1238,9 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Calendar intern"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "Pagina solicitată nu denotă un calendar."
 
 #. You have no access to this calendar.
@@ -7153,11 +7153,9 @@ msgid "Drafts"
 msgstr "Schițe"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Obiecte trimise"
+msgid "Sent"
+msgstr "Mesaje trimise"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7298,6 +7296,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Stimată doamnă/Stimate domn"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Obiecte trimise"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10791,6 +10794,10 @@ msgid ""
 msgstr ""
 "Nu aveți dreptul de a modifica permisiunile dosarului coș de gunoi și ale "
 "dosarelor subordonate acestuia"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Există deja un dosar denumit \"%1$s\". Vă rugăm să alegeți alt nume."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -14411,6 +14418,9 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "Pagina solicitată nu denotă un calendar."
+
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr ""
@@ -18000,9 +18010,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Dosar de schițe"
-
-#~ msgid "Sent"
-#~ msgstr "Mesaje trimise"
 
 #~ msgid "Sent folder"
 #~ msgstr "Dosar de mesaje trimise"

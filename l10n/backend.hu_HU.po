@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-09 09:15+0200\n"
+"PO-Revision-Date: 2019-05-02 15:12+0200\n"
 "Last-Translator: Kalman Kemenczy <kalman@workshop-chapina.com>\n"
 "Language-Team: Hungarian <hu@workshop-chapina.com>\n"
 "Language: hu_HU\n"
@@ -1154,10 +1154,10 @@ msgstr "A hitelesítés nem sikerült a hitelesítő adatok legutóbbi módosít
 msgid "Internal Calendar"
 msgstr "Belső naptár"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
-msgstr "A lekért oldal mutat naotárra."
+msgid "The requested page does not denote a calendar."
+msgstr "A kért oldal nem mutat naptárra."
 
 #. You have no access to this calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
@@ -6606,11 +6606,9 @@ msgid "Drafts"
 msgstr "Piszkozatok"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Elküldött elemek"
+msgid "Sent"
+msgstr "Elküldve"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -6738,6 +6736,11 @@ msgstr "Ez fájl a \"#SUBJECT#\" tárgyú levélhez lett közzétéve, dátum: #
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Tisztelt Hölgyem/Uram"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Elküldött elemek"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -9607,6 +9610,10 @@ msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
 msgstr "Nincs jogosultsága a szemetes vagy annak bármely alkönyvtárának jogosultságát megváltoztatni."
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Már létezik egy \"%1$s\" nevű mappa. Válasszon másik nevet."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -13048,6 +13055,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "A lekért oldal mutat naotárra."
 
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
@@ -16566,9 +16576,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Piszkozat mappa"
-
-#~ msgid "Sent"
-#~ msgstr "Elküldött"
 
 #~ msgid "Sent folder"
 #~ msgstr "Elküldött mappa"
