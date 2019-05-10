@@ -141,7 +141,7 @@ final class StringUtil {
         String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
 
         //REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
-          REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")( |;|$)");
+          REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
     }
 
     private static final int MAX_NUMBER_OF_ATTRIBUTES = 250;
