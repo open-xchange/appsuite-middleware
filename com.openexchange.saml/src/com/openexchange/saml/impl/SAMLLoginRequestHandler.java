@@ -70,6 +70,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
@@ -134,29 +135,49 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
     private void doSsoLogin(HttpServletRequest req, HttpServletResponse resp, LoginConfiguration conf) throws OXException, IOException {
         String token = req.getParameter(SAMLLoginTools.PARAM_TOKEN);
         if (Strings.isEmpty(token)) {
+            LOG.warn("SAML login requested without session reservation token: {}", token);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
-        SessionReservationService sessionReservationService = services.getService(SessionReservationService.class);
-        Reservation reservation = sessionReservationService.removeReservation(token);
-        if (null == reservation) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        Reservation reservation;
+        {
+            SessionReservationService sessionReservationService = services.getServiceSafe(SessionReservationService.class);
+            reservation = sessionReservationService.removeReservation(token);
+            if (null == reservation) {
+                LOG.warn("SAML login requested with invalid or expired session reservation token: {}", token);
+                backend.getExceptionHandler().handleSessionReservationExpired(req, resp, token);
+                return;
+            }
         }
 
-        ContextService contextService = services.getService(ContextService.class);
-        Context context = contextService.getContext(reservation.getContextId());
-        if (!context.isEnabled()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        Context context;
+        try {
+            ContextService contextService = services.getServiceSafe(ContextService.class);
+            context = contextService.getContext(reservation.getContextId());
+            if (!context.isEnabled()) {
+                LOG.info("Declining SAML login for user {} of context {}: Context is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
+                backend.getExceptionHandler().handleContextDisabled(req, resp, reservation.getContextId());
+                return;
+            }
+        } catch (OXException e) {
+            if (ContextExceptionCodes.UPDATE.equals(e) || ContextExceptionCodes.UPDATE_NEEDED.equals(e)) {
+                LOG.info("Declining SAML login for user {} of context {}: Running or pending update tasks.", I(reservation.getUserId()), I(reservation.getContextId()));
+                backend.getExceptionHandler().handleUpdateTasksRunningOrPending(req, resp, reservation.getContextId());
+                return;
+            }
+            throw e;
         }
 
-        UserService userService = services.getService(UserService.class);
-        User user = userService.getUser(reservation.getUserId(), context);
-        if (!user.isMailEnabled()) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-            return;
+        User user;
+        {
+            UserService userService = services.getServiceSafe(UserService.class);
+            user = userService.getUser(reservation.getUserId(), context);
+            if (!user.isMailEnabled()) {
+                LOG.info("Declining SAML login for user {} of context {}: User is disabled.", I(reservation.getUserId()), I(reservation.getContextId()));
+                backend.getExceptionHandler().handleUserDisabled(req, resp, reservation.getUserId(), reservation.getContextId());
+                return;
+            }
         }
 
         {

@@ -63,8 +63,8 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum AuthorizationExceptionCodes implements DisplayableOXExceptionCode {
 
-    /** User is deactivated */
-    USER_DISABLED("User is deactivated", USER_DISABLED_DISPLAY, CATEGORY_PERMISSION_DENIED, 1),
+    /** User %1$s in context %2$s is deactivated */
+    USER_DISABLED("User %1$s in context %2$s is deactivated", USER_DISABLED_DISPLAY, CATEGORY_PERMISSION_DENIED, 1),
     /** Unknown error */
     UNKNOWN("Unknown error", null, CATEGORY_ERROR, 2),
     /** Password expired */
@@ -96,7 +96,7 @@ public enum AuthorizationExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;
