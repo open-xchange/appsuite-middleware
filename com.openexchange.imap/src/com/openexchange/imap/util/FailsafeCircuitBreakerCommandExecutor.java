@@ -222,7 +222,7 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
 
             // Check status response
             StatusResponse statusResponse = StatusResponse.statusResponseFor(responses);
-            if (Status.BYE == statusResponse.getStatus()) {
+            if (statusResponse != null && Status.BYE == statusResponse.getStatus()) {
                 Response response = statusResponse.getResponse();
                 // Command failed. Check for a synthetic BYE response providing the causing I/O error
                 Exception byeException = response.getByeException();
