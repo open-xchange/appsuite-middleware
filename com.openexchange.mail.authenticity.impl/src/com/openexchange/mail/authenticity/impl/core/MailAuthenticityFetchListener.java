@@ -159,7 +159,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         return !fullName.equals(mailAccess.getFolderStorage().getDraftsFolder()) && !fullName.equals(mailAccess.getFolderStorage().getSentFolder());
     }
 
-    private boolean isFolderAccepted(String fullName, int accountId, Session session) throws OXException {
+    private boolean isFolderAccepted(String fullName, int accountId, Session session) {
         MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
 
         Boolean b = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());

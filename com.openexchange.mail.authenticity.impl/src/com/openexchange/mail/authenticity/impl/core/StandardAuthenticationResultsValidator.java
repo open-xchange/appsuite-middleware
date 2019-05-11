@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -411,7 +412,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             }
             overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, domain);
             overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MECH, result.getMechanism().getTechnicalName());
-            overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, !domain.equalsIgnoreCase(fromDomain));
+            overallResult.addAttribute(MailAuthenticityResultKey.DOMAIN_MISMATCH, B(!domain.equalsIgnoreCase(fromDomain)));
             break;
         }
     }
@@ -455,6 +456,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                     // Keep the 'none' status as DMARC set it to 'none' as well
                     break;
                 }
+                //$FALL-THROUGH$
             default:
                 overallResult.setStatus(bestOfDKIM.getResult().convert());
         }
@@ -494,6 +496,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                     // Keep the 'none' status as DKIM and/or DMARC set it to 'none' as well
                     break;
                 }
+                //$FALL-THROUGH$
             case NEUTRAL:
                 // Handle as neutral or fail, depending on the domain match
                 if (dkimFailed) {
