@@ -174,7 +174,7 @@ public class DovecotPushListener implements PushListener, Runnable {
 
             pushManager.refreshLock(new SessionInfo(registrationContext, permanent));
         } catch (Exception e) {
-            LOGGER.warn("Failed to refresh lock for user {} in context {}: {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()), e);
+            LOGGER.warn("Failed to refresh lock for user {} in context {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()), e);
         }
     }
 
