@@ -49,37 +49,98 @@
 
 package com.openexchange.halo;
 
+import java.util.ArrayList;
 import java.util.List;
-
+import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 
+/**
+ * Provides information for a Halo contact query.
+ */
 public class HaloContactQuery {
-	private Contact contact;
-	private User user;
-	private List<Contact> merged;
 
-	public void setUser(User user) {
-		this.user = user;
-	}
+    public static Builder builder() {
+        return new Builder();
+    }
 
-	public User getUser() {
-		return user;
-	}
+    public static class Builder {
 
-	public void setContact(Contact contact) {
-		this.contact = contact;
-	}
+        private Contact contact;
+        private User user;
+        private List<Contact> merged;
 
-	public Contact getContact() {
-		return contact;
-	}
+        Builder() {
+            super();
+        }
 
-	public void setMergedContacts(List<Contact> contactsToMerge) {
-		this.merged = contactsToMerge;
-	}
+        public Builder withUser(User user) {
+            this.user = user;
+            return this;
+        }
 
-	public List<Contact> getMergedContacts() {
-		return merged;
-	}
+        public Builder withContact(Contact contact) {
+            this.contact = contact;
+            return this;
+        }
+
+        public Builder withMergedContacts(List<Contact> contactsToMerge) {
+            this.merged = contactsToMerge;
+            return this;
+        }
+
+        public HaloContactQuery build() {
+            return new HaloContactQuery(contact, user, merged);
+        }
+    }
+
+    // -------------------------------------------------------------------------------
+
+    private final Contact contact;
+    private final User user;
+    private final List<Contact> merged;
+
+    HaloContactQuery(Contact contact, User user, List<Contact> merged) {
+        super();
+        this.contact = contact;
+        this.user = user;
+        this.merged = null == merged ? null : ImmutableList.copyOf(merged);
+    }
+
+    /**
+     * Gets the user
+     *
+     * @return The user
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
+     * Gets the contact
+     *
+     * @return The contact
+     */
+    public Contact getContact() {
+        return contact;
+    }
+
+    /**
+     * Gets the (immutable) list of merged contacts
+     *
+     * @return The merged contacts or <code>null</code>
+     */
+    public List<Contact> getMergedContacts() {
+        return merged;
+    }
+
+    /**
+     * Gets a copy for the list of merged contacts
+     *
+     * @return The merged contacts' copy or <code>null</code>
+     */
+    public List<Contact> getCopyOfMergedContacts() {
+        return null == merged ? null : new ArrayList<>(merged);
+    }
+
 }

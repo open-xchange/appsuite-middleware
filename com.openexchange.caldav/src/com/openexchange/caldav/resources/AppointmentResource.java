@@ -390,6 +390,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                      */
                     exceptionToSave.setObjectID(object.getObjectID());
                     exceptionToSave.setParentFolderID(object.getParentFolderID());
+                    checkForExplicitRemoves(originalAppointment, exceptionToSave);
                     if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, exceptionToSave)) {
                         Patches.Incoming.patchParticipantListRemovingAliases(factory, exceptionToSave);
                         Patches.Incoming.patchParticipantListRemovingDoubleUsers(exceptionToSave);
