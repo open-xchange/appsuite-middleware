@@ -95,10 +95,9 @@ public final class RequestTools {
             synchronized (RequestTools.class) {
                 tmp = driveUri;
                 if (null == tmp) {
-                    String defaultPrefix = DispatcherPrefixService.DEFAULT_PREFIX;
                     DispatcherPrefixService service = Services.optService(DispatcherPrefixService.class);
                     if (null == service) {
-                        return defaultPrefix;
+                        return new StringBuilder(DispatcherPrefixService.DEFAULT_PREFIX).append("drive").toString();
                     }
                     tmp = new StringBuilder(service.getPrefix()).append("drive").toString();
                     driveUri = tmp;
