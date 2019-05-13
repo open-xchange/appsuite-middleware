@@ -355,7 +355,7 @@ public class IMAPStore extends Store
     private String propagateClientIpAddress = null;
     private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
-    private ExternalIdGenerator externalIdGenerator = null;
+    private volatile ExternalIdGenerator externalIdGenerator = null;
     private boolean failOnNOFetch = false;
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
