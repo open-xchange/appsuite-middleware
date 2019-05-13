@@ -49,6 +49,7 @@
 
 package com.openexchange.push.dovecot;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
@@ -173,7 +174,7 @@ public class DovecotPushListener implements PushListener, Runnable {
 
             pushManager.refreshLock(new SessionInfo(registrationContext, permanent));
         } catch (Exception e) {
-            LOGGER.warn("Failed to refresh lock for user {} in context {}", Integer.valueOf(registrationContext.getUserId()), Integer.valueOf(registrationContext.getContextId()));
+            LOGGER.warn("Failed to refresh lock for user {} in context {}: {}", I(registrationContext.getUserId()), I(registrationContext.getContextId()), e);
         }
     }
 
