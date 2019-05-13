@@ -62,10 +62,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
+import com.openexchange.admin.reseller.rmi.dataobjects.CustomField;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -80,6 +83,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
@@ -576,6 +580,73 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
+    public void restore(Context ctx, int subadmin, Restriction[] restrictions, CustomField[] customFields) throws StorageException {
+        Connection oxcon = null;
+        PreparedStatement prep = null;
+
+        log.debug("restore {}", ctx.getId());
+
+        boolean rollback = false;
+        try {
+            oxcon = cache.getWriteConnectionForConfigDB();
+            oxcon.setAutoCommit(false);
+            rollback = true;
+
+            if (subadmin > 0) {
+                prep = oxcon.prepareStatement("INSERT INTO context2subadmin (sid,cid) VALUES(?,?)");
+                prep.setInt(1, subadmin);
+                prep.setInt(2, ctx.getId().intValue());
+                prep.executeUpdate();
+                Databases.closeSQLStuff(prep);
+                prep = null;
+            }
+
+            if (restrictions != null) {
+                for (Restriction r : restrictions) {
+                    prep = oxcon.prepareStatement("INSERT INTO context_restrictions (cid,rid,value) VALUES (?,?,?)");
+                    prep.setInt(1, ctx.getId().intValue());
+                    prep.setInt(2, r.getId().intValue());
+                    prep.setString(3, r.getValue());
+                    prep.executeUpdate();
+                    Databases.closeSQLStuff(prep);
+                    prep = null;
+                }
+            }
+
+            if (customFields != null) {
+                for (CustomField customField : customFields) {
+                    prep = oxcon.prepareStatement("INSERT INTO context_customfields (cid, customid, createTimestamp, modifyTimestamp) VALUES (?,?, ?, ?)");
+                    prep.setInt(1, ctx.getId().intValue());
+                    prep.setString(2, customField.getCustomId());
+                    prep.setLong(3, customField.getCreateTimestamp());
+                    prep.setLong(4, customField.getModifyTimestamp());
+                    prep.executeUpdate();
+                    Databases.closeSQLStuff(prep);
+                    prep = null;
+                }
+            }
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } catch (final PoolException e) {
+            log.error("", e);
+            // no Rollback needed as the connection is null at this moment
+            throw new StorageException(e.getMessage());
+        } catch (final SQLException e) {
+            log.error("", e);
+            throw new StorageException(e.getMessage());
+        } finally {
+            if (rollback) {
+                doRollback(oxcon);
+            }
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
+        }
+    }
+
+    @Override
     public void ownContextToAdmin(final Context ctx, final Credentials creds) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
@@ -623,10 +694,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public void unownContextFromAdmin(final Context ctx, final Credentials creds) throws StorageException {
+    public int unownContextFromAdmin(final Context ctx, final Credentials creds) throws StorageException {
         try {
             final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
-            unownContextFromAdmin(ctx, adm);
+            return unownContextFromAdmin(ctx, adm);
         } catch (final RuntimeException e) {
             log.error("", e);
             throw e;
@@ -634,7 +705,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public void unownContextFromAdmin(final Context ctx, final ResellerAdmin adm) throws StorageException {
+    public int unownContextFromAdmin(final Context ctx, final ResellerAdmin adm) throws StorageException {
         Connection oxcon = null;
         PreparedStatement prep = null;
 
@@ -652,13 +723,17 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             oxcon.setAutoCommit(false);
             rollback = true;
 
+            int subadminId = adm.getId().intValue();
+
             prep = oxcon.prepareStatement("DELETE FROM context2subadmin WHERE sid=? AND cid=?");
-            prep.setInt(1, adm.getId());
-            prep.setInt(2, ctx.getId());
+            prep.setInt(1, subadminId);
+            prep.setInt(2, ctx.getId().intValue());
             prep.executeUpdate();
 
             oxcon.commit();
             rollback = false;
+
+            return subadminId;
         } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
@@ -1428,10 +1503,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
      * com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
-    public void applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException {
+    public Restriction[] applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException {
         log.debug("applyRestrictionsToContext {}", ctx);
         Connection oxcon = null;
         PreparedStatement prep = null;
+        ResultSet rs = null;
+
+        List<Restriction> dropped = null;
 
         boolean rollback = false;
         try {
@@ -1439,19 +1517,35 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             oxcon.setAutoCommit(false);
             rollback = true;
 
-            final int cid = ctx.getId();
+            final int cid = ctx.getId().intValue();
+            prep = oxcon.prepareStatement("SELECT rid, value FROM context_restrictions WHERE cid=?");
+            prep.setInt(1, cid);
+            rs = prep.executeQuery();
+            if (rs.next()) {
+                dropped = new LinkedList<Restriction>();
+                do {
+                    dropped.add(new Restriction(Integer.valueOf(rs.getInt(1)), null, rs.getString(2)));
+                } while (rs.next());
+            }
+            Databases.closeSQLStuff(rs, prep);
+            rs = null;
+            prep = null;
+
             prep = oxcon.prepareStatement("DELETE FROM context_restrictions WHERE cid=?");
             prep.setInt(1, cid);
             prep.executeUpdate();
-            prep.close();
+            Databases.closeSQLStuff(prep);
+            prep = null;
+
             if (restrictions != null) {
                 for (final Restriction r : restrictions) {
                     prep = oxcon.prepareStatement("INSERT INTO context_restrictions (cid,rid,value) VALUES (?,?,?)");
                     prep.setInt(1, cid);
-                    prep.setInt(2, r.getId());
+                    prep.setInt(2, r.getId().intValue());
                     prep.setString(3, r.getValue());
                     prep.executeUpdate();
-                    prep.close();
+                    Databases.closeSQLStuff(prep);
+                    prep = null;
                 }
             }
 
@@ -1473,8 +1567,10 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (rollback) {
                 doRollback(oxcon);
             }
-            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep, rs);
         }
+
+        return dropped == null ? new Restriction[0] : dropped.toArray(new Restriction[dropped.size()]);
     }
 
     /*
@@ -1699,17 +1795,36 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     }
 
     @Override
-    public void deleteCustomFields(final Context ctx) throws StorageException {
+    public CustomField[] deleteCustomFields(final Context ctx) throws StorageException {
         log.debug("deleteCustomFields from context {}", ctx);
         Connection con = null;
         PreparedStatement prep = null;
-        final ResultSet rs = null;
+        ResultSet rs = null;
         try {
             con = cache.getWriteConnectionForConfigDB();
+
+            prep = con.prepareStatement("SELECT customid, createTimestamp, modifyTimestamp FROM context_customfields WHERE cid=?");
+            prep.setInt(1, ctx.getId().intValue());
+            rs = prep.executeQuery();
+            if (!rs.next()) {
+                return new CustomField[0];
+            }
+
+            List<CustomField> dropped = new LinkedList<CustomField>();
+            do {
+                dropped.add(new CustomField(rs.getString(1), rs.getLong(2), rs.getLong(3)));
+            } while (rs.next());
+            Databases.closeSQLStuff(rs, prep);
+            rs = null;
+            prep = null;
+
             prep = con.prepareStatement("DELETE FROM context_customfields WHERE cid=?");
-            prep.setInt(1, ctx.getId());
+            prep.setInt(1, ctx.getId().intValue());
             prep.executeUpdate();
-            prep.close();
+            Databases.closeSQLStuff(prep);
+            prep = null;
+
+            return dropped.toArray(new CustomField[dropped.size()]);
         } catch (final PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());

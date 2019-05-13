@@ -113,6 +113,7 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.storage.utils.CreateTableRegistry;
 import com.openexchange.admin.storage.utils.PoolAndSchema;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -216,11 +217,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     @Override
     public void delete(final Context ctx) throws StorageException {
         // Delete filestores of the context
-        {
-            LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
-            Utils.removeFileStorages(ctx, true);
-            LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
-        }
+        LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
+        Utils.removeFileStorages(ctx, true);
+        Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
+        LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
 
         AdminCacheExtended adminCache = cache;
 
@@ -3735,7 +3735,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 if (containedSchemas == null || containedSchemas.isEmpty()) {
                     continue;
                 }
-                
+
                 // Insert with 100-sized batches
                 for (List<SchemaCount> schemaCountSublist : Lists.partition(schemaCounts, 100)) {
                     Set<String> insertLockFor = null;
@@ -3790,7 +3790,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Inserts existing schemas to 'contexts_per_dbschema' (if not contained).
-     * 
+     *
      * @param database The {@link Database}
      * @param schemata The schemata to insert
      * @param db2ContainedSchemata A map with the already contained database schemata
