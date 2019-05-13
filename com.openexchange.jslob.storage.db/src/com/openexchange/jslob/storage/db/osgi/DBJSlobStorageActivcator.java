@@ -85,6 +85,7 @@ import com.openexchange.jslob.storage.db.groupware.JsonStorageTableUtf8Mb4Update
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -104,6 +105,11 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
      */
     public DBJSlobStorageActivcator() {
         super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -216,29 +222,42 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
             openTrackers();
 
             {
-
-
                 EventHandler eventHandler = new EventHandler() {
 
                     @Override
-                    public void handleEvent(Event event) {
+                    public void handleEvent(final Event event) {
                         String topic = event.getTopic();
                         if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
                             Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                            Set<UsID> set = new HashSet<UsID>(container.size());
-                            for (Session session : container.values()) {
-                                if (false == session.isTransient()) {
-                                    int contextId = session.getContextId();
-                                    int userId = session.getUserId();
-                                    UsID usid = new UsID(userId, contextId);
-                                    if (set.add(usid)) {
-                                        cachingJSlobStorage.dropAllUserJSlobs(userId, contextId);
+                            ThreadPoolService threadPool = DBJSlobStorageActivcator.this.getService(ThreadPoolService.class);
+                            if (null == threadPool) {
+                                doHandleSessionContainer(container);
+                            } else {
+                                threadPool.submit(new AbstractTask<Void>() {
+
+                                    @Override
+                                    public Void call() throws Exception {
+                                        doHandleSessionContainer(container);
+                                        return null;
                                     }
-                                }
+                                });
                             }
                         } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
                             Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
                             cachingJSlobStorage.dropAllUserJSlobs(session.getUserId(), session.getContextId());
+                        }
+                    }
+
+                    void doHandleSessionContainer(Map<String, Session> container) {
+                        Set<UsID> set = new HashSet<UsID>(container.size());
+                        for (Session session : container.values()) {
+                            if (!session.isTransient()) {
+                                int contextId = session.getContextId();
+                                int userId = session.getUserId();
+                                if (set.add(new UsID(userId, contextId))) {
+                                    cachingJSlobStorage.dropAllUserJSlobs(userId, contextId);
+                                }
+                            }
                         }
                     }
                 };
@@ -275,11 +294,6 @@ public class DBJSlobStorageActivcator extends HousekeepingActivator {
         } finally {
             Services.setServices(null);
         }
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ThreadPoolService.class };
     }
 
     // ------------------------------------------------------------------------------------------------------------------

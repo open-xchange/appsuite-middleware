@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -113,13 +113,15 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/googleoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msliveconnectoauth.properties
 %config(noreplace) /opt/open-xchange/etc/oauth.properties
-%config(noreplace) /opt/open-xchange/etc/twitteroauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/twitteroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Mon May 06 2019 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2019-05-13 (5235)
 * Wed Apr 24 2019 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2019-04-29 (5211)
 * Tue Mar 26 2019 Steffen Templin <marcus.klein@open-xchange.com>
