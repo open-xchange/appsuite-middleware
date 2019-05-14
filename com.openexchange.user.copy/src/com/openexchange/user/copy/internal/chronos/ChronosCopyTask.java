@@ -279,12 +279,14 @@ public class ChronosCopyTask implements CopyUserTaskService {
                 }
                 CalendarUser calendarUser = createCalendarUser(dstCtx, dstUsrId, srcEvent.getCalendarUser(), srcUsrId);
                 Organizer organizer = srcEvent.getOrganizer();
-                if (organizer.getEntity() == srcUsrId) {
-                    organizer.setEntity(dstUsrId);
-                    organizer.setUri(calendarUser.getUri());
-                } else {
-                    organizer.setUri(organizer.getEMail());
-                    organizer.setEntity(0);
+                if (organizer != null) {
+                    if (organizer.getEntity() == srcUsrId) {
+                        organizer.setEntity(dstUsrId);
+                        organizer.setUri(calendarUser.getUri());
+                    } else {
+                        organizer.setUri(organizer.getEMail());
+                        organizer.setEntity(0);
+                    }
                 }
                 srcEvent.setId(dstEventId);
                 if (Strings.isNotEmpty(srcEvent.getSeriesId()) && srcEvent.getSeriesId().equals(srcSeriesMasterId) && Strings.isNotEmpty(dstSeriesMasterId)) {
