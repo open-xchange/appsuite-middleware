@@ -104,8 +104,6 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.uadetector.UserAgentParser;
-import net.sf.uadetector.UserAgentFamily;
 
 
 /**
