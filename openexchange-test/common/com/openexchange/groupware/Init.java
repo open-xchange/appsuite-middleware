@@ -140,6 +140,7 @@ import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.TranslationsI18N;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
@@ -171,7 +172,6 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.SimpleServiceLookup;
-import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -747,13 +747,13 @@ public final class Init {
             return;
         }
         final File dir = new File(directory_name);
-        final I18nServices i18nServices = I18nServices.getInstance();
+        final I18nServiceRegistryImpl i18nServices = I18nServiceRegistryImpl.getInstance();
         try {
             for (final ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
-                i18nServices.addService(new I18nImpl(rc));
+                i18nServices.addI18nService(new I18nImpl(rc));
             }
             for (final Translations tr : new POTranslationsDiscoverer(dir).getTranslations()) {
-                i18nServices.addService(new TranslationsI18N(tr));
+                i18nServices.addI18nService(new TranslationsI18N(tr));
             }
         } catch (final NullPointerException e) {
             e.printStackTrace();
@@ -1084,7 +1084,7 @@ public final class Init {
     }
 
     public static void dropI18NBundle() {
-        final I18nServices i18nServices = I18nServices.getInstance();
+        final I18nServiceRegistryImpl i18nServices = I18nServiceRegistryImpl.getInstance();
         i18nServices.clear();
     }
 

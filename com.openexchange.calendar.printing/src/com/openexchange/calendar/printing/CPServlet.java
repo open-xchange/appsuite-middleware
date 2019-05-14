@@ -79,6 +79,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -147,14 +149,10 @@ public class CPServlet extends PermissionServlet {
             final TimeZone zone = TimeZone.getTimeZone(user.getTimeZone());
             final CPParameters params = new CPParameters(req, zone);
             if (params.hasUnparseableFields()) {
-                throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(
-                    params.getUnparseableFields(),
-                    ","));
+                throw new ServletException("Could not parse the value of the following parameters: " + Strings.join(params.getUnparseableFields(), ","));
             }
             if (params.isMissingMandatoryFields()) {
-                throw new ServletException("Missing one or more mandatory parameters: " + Strings.join(
-                    params.getMissingMandatoryFields(),
-                    ","));
+                throw new ServletException("Missing one or more mandatory parameters: " + Strings.join(params.getMissingMandatoryFields(), ","));
             }
             if (CPType.getByTemplateName(params.getTemplate()) == null) {
                 throw new ServletException("Cannot find template " + params.getTemplate());
@@ -166,7 +164,7 @@ public class CPServlet extends PermissionServlet {
 
             TemplateService templateService = services.getServiceSafe(TemplateService.class);
             OXTemplate template;
-            if(params.hasUserTemplate()) {
+            if (params.hasUserTemplate()) {
                 template = templateService.loadTemplate(params.getUserTemplate(), params.getTemplate(), session);
             } else {
                 template = templateService.loadTemplate(params.getTemplate());
@@ -182,7 +180,7 @@ public class CPServlet extends PermissionServlet {
             // Get events
             List<Event> events;
             if (params.hasFolder()) {
-               events = calendarService.getEventsInFolder(calendarSession, String.valueOf(params.getFolder()));
+                events = calendarService.getEventsInFolder(calendarSession, String.valueOf(params.getFolder()));
             } else {
                 events = calendarService.getEventsOfUser(calendarSession);
             }
@@ -214,7 +212,7 @@ public class CPServlet extends PermissionServlet {
             variables.put(VIEW_END, params.getEnd());
             variables.put(DEBUG, debuggingItems);
             variables.put(DAYS, perDayList);
-            variables.put(I18N, new I18n(I18nServices.getInstance().getService(locale)));
+            variables.put(I18N, new I18n(getiI18nService(locale)));
             variables.put(DOCUMENT_TITLE, getDocumentTitle(session));
             variables.put(DATE_FORMATTER, new DateFormatter(user.getLocale(), TimeZone.getTimeZone(user.getTimeZone())));
 
@@ -233,6 +231,20 @@ public class CPServlet extends PermissionServlet {
         } catch (final Exception x) {
             writeException(resp, x);
         }
+    }
+
+    /**
+     * Returns a {@link I18nService} for the given locale or null if none available
+     *
+     * @param locale The locale
+     * @return The {@link I18nService}
+     */
+    private I18nService getiI18nService(Locale locale) {
+        I18nServiceRegistry registry = services.getOptionalService(I18nServiceRegistry.class);
+        if (registry == null) {
+            return null;
+        }
+        return registry.getI18nService(locale);
     }
 
     private String getDocumentTitle(Session session) {
@@ -255,6 +267,7 @@ public class CPServlet extends PermissionServlet {
 
     /**
      * Write an exception message as HTML to the response
+     * 
      * @throws IOException {@link HttpServletResponse#getWriter()}
      */
     private void writeException(final HttpServletResponse resp, final Throwable t) throws IOException {
@@ -265,6 +278,7 @@ public class CPServlet extends PermissionServlet {
 
     /**
      * Modify a calendar according to the given parameters
+     * 
      * @param calendar The {@link CPCalendar}
      * @param params The {@link CPParameters}
      */

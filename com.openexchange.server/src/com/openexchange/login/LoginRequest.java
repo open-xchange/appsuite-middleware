@@ -136,5 +136,9 @@ public interface LoginRequest {
     String getLanguage();
 
     boolean isStoreLanguage();
+    
+    String getLocale();
+    
+    boolean isStoreLocale();
 
 }

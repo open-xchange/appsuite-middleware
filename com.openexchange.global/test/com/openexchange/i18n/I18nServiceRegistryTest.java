@@ -47,47 +47,38 @@
  *
  */
 
-package com.openexchange.messaging.json.osgi;
+package com.openexchange.i18n;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.messaging.json.I18nServices;
+import java.util.Locale;
+import org.junit.Assert;
+import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 
 /**
- * {@link I18nServiceCustomizer}
+ * {@link I18nServiceRegistryTest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService, I18nService> {
+public class I18nServiceRegistryTest {
 
-    private final BundleContext context;
-    private final I18nServices services = I18nServices.getInstance();
+    @Test
+    public void testMapping() throws Exception {
 
-    I18nServiceCustomizer(final BundleContext context) {
-        super();
-        this.context = context;
+        I18nService en_US = PowerMockito.mock(I18nService.class);
+        PowerMockito.when(en_US.getLocale()).thenReturn(new Locale("en", "US"));
+        I18nService es_ES = PowerMockito.mock(I18nService.class);
+        PowerMockito.when(es_ES.getLocale()).thenReturn(new Locale("es", "ES"));
+        I18nService es_MX = PowerMockito.mock(I18nService.class);
+        PowerMockito.when(es_MX.getLocale()).thenReturn(new Locale("es", "MX"));
+
+        I18nServiceRegistryImpl.getInstance().addI18nService(en_US);
+        I18nServiceRegistryImpl.getInstance().addI18nService(es_ES);
+        I18nServiceRegistryImpl.getInstance().addI18nService(es_MX);
+
+        I18nService bestFittingI18nService = I18nServiceRegistryImpl.getInstance().getBestFittingI18nService(new Locale("es", "US"));
+        Assert.assertEquals(es_MX, bestFittingI18nService);
     }
 
-    @Override
-    public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService service = context.getService(reference);
-        services.addService(service);
-        return service;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        try {
-            services.removeService(service);
-        } finally {
-            context.ungetService(reference);
-        }
-    }
 }

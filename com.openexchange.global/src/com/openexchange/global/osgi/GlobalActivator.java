@@ -129,14 +129,13 @@ public final class GlobalActivator implements BundleActivator {
                 inspectorChainRegistration = context.registerService(SessionInspectorChain.class, chainImpl, null);
             }
 
-            I18nServiceRegistryImpl i18nRegistry = new I18nServiceRegistryImpl();
-            trackers.add(new ServiceTracker<>(context, I18nService.class, new I18nServiceTracker(i18nRegistry, context)));
+            trackers.add(new ServiceTracker<>(context, I18nService.class, new I18nServiceTracker(I18nServiceRegistryImpl.getInstance(), context)));
 
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
 
-            i18nRegistryRegistration = context.registerService(I18nServiceRegistry.class, i18nRegistry, null);
+            i18nRegistryRegistration = context.registerService(I18nServiceRegistry.class, I18nServiceRegistryImpl.getInstance(), null);
 
             threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
             closeableControlRegistration = context.registerService(CloseableControlService.class, ThreadLocalCloseableControl.getInstance(), null);

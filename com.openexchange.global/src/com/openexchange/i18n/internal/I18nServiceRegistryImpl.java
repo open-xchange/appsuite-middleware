@@ -59,13 +59,13 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nServiceRegistry;
-
+import com.openexchange.java.Strings;
 
 /**
  * {@link I18nServiceRegistryImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
 public class I18nServiceRegistryImpl implements I18nServiceRegistry {
 
@@ -80,10 +80,16 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
 
     private static final I18nService NOOP_I18N = new NOOPI18nService(Locale.US);
 
+    private static final I18nServiceRegistryImpl INSTANCE = new I18nServiceRegistryImpl();
+
+    public static I18nServiceRegistryImpl getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Initializes a new {@link I18nServiceRegistryImpl}.
      */
-    public I18nServiceRegistryImpl() {
+    private I18nServiceRegistryImpl() {
         super();
         services = new ConcurrentHashMap<Locale, I18nService>(32, 0.9F, 1);
         en_Locale = new Locale("en");
@@ -116,15 +122,21 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
     }
 
     @Override
-    public I18nService getI18nService(Locale locale) throws OXException {
-        return null == locale ? null : services.get(locale);
+    public I18nService getI18nService(Locale locale) {
+        return getI18nService(locale, false);
     }
 
     @Override
-    public I18nService getBestFittingI18nService(Locale locale) throws OXException {
+    public I18nService getI18nService(Locale locale, boolean strict) {
+        if (strict) {
+            return null == locale ? NOOP_I18N : services.get(locale);
+        }
+        return getBestFittingI18nService(locale);
+    }
+
+    public I18nService getBestFittingI18nService(Locale locale) {
         if (null == locale) {
-            // Garbage in, garbage out...
-            return null;
+            return NOOP_I18N;
         }
 
         // Direct look-up
@@ -133,11 +145,22 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
             return service;
         }
 
+        String bestFit = Locale2LanguageMapping.getLanguageForLocale(locale.toLanguageTag());
+        if (Strings.isEmpty(bestFit)) {
+            // No such language tag
+            return NOOP_I18N;
+        }
+        Locale bestFitLocale = Locale.forLanguageTag(bestFit);
+        service = services.get(bestFitLocale);
+        if (null != service) {
+            return service;
+        }
+
         // Grab language identifier
         String language = locale.getLanguage();
         if (null == language) {
             // Huh...?
-            return null;
+            return NOOP_I18N;
         }
 
         /*-
@@ -153,13 +176,13 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
          */
         if (en_Locale.getLanguage().equals(language)) {
             I18nService i18nService = services.get(DEFAULT_LOCALE);
-            if(i18nService!=null){
+            if (i18nService != null) {
                 return i18nService;
             }
             return NOOP_I18N;
         } else if (ja_Locale.getLanguage().equals(language)) {
             I18nService i18nService = services.get(Locale.JAPAN);
-            if(i18nService!=null){
+            if (i18nService != null) {
                 return i18nService;
             }
         }
@@ -180,7 +203,13 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
                 }
             }
         }
-        return firstMatch;
+        return firstMatch == null ? NOOP_I18N : firstMatch;
     }
 
+    /**
+     * Removes all services from this registry
+     */
+    public void clear() {
+        services.clear();
+    }
 }

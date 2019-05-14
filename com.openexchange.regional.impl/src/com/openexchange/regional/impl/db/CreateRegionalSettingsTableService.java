@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,46 +47,49 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting.osgi;
+package com.openexchange.regional.impl.db;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.admin.plugin.hosting.services.I18nServices;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * Adds a found {@link I18nService} to the registry for the services.
+ * {@link CreateRegionalSettingsTableService}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
+public class CreateRegionalSettingsTableService extends AbstractCreateTableImpl {
 
-    private final BundleContext context;
+    public static final String TABLE_NAME = "regional_settings";
+    //@formatter:off
+    public static final String TABLE_STMT = "CREATE TABLE regional_settings (" +
+                                            "cid INT4 UNSIGNED NOT NULL," +
+                                            "userId INT4 UNSIGNED NOT NULL," +
+                                            "timeFormat VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "timeFormatLong VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "dateFormat VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "dateFormatShort VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "dateFormatMedium VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "dateFormatLong VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "dateFormatFull VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "numberFormat VARCHAR(64) COLLATE utf8mb4_bin," +
+                                            "firstDayOfWeek TINYINT," +
+                                            "firstDayOfYear TINYINT," +
+                                            "PRIMARY KEY (cid,userId)" +
+                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+    //@formatter:on
 
-    public I18nServiceCustomizer(final BundleContext context) {
-        super();
-        this.context = context;
+    @Override
+    public String[] requiredTables() {
+        return new String[0];
     }
 
     @Override
-    public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService i18n = context.getService(reference);
-        I18nServices.getInstance().addService(i18n);
-        return i18n;
+    public String[] tablesToCreate() {
+        return new String[] { TABLE_NAME };
     }
 
     @Override
-    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        try {
-            I18nServices.getInstance().removeService(service);
-        } finally {
-            context.ungetService(reference);
-        }
+    protected String[] getCreateStatements() {
+        return new String[] { TABLE_STMT };
     }
 }

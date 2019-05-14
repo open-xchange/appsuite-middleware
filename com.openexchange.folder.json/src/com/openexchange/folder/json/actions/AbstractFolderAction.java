@@ -196,18 +196,13 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             return null;
         }
 
-        try {
-            I18nService i18nService = i18nServiceRegistry.getBestFittingI18nService(locale);
-            if (null == i18nService) {
-                LOG.warn("No suitable support for locale \"{}\". Using user's locale instead.", locale.toString());
-                return null;
-            }
-
-            return i18nService.getLocale();
-        } catch (OXException e) {
-            LOG.warn("Failed to check support for locale \"{}\". Using user's locale instead.", locale.toString(), e);
+        I18nService i18nService = i18nServiceRegistry.getI18nService(locale);
+        if (null == i18nService) {
+            LOG.warn("No suitable support for locale \"{}\". Using user's locale instead.", locale.toString());
             return null;
         }
+
+        return i18nService.getLocale();
     }
 
     /**
@@ -561,7 +556,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
         final Map<String, Object> ret = new HashMap<>(length >> 1);
         for (int i = 0; i < length; i += 2) {
-            ret.put(objects[i].toString(), objects[i+1]);
+            ret.put(objects[i].toString(), objects[i + 1]);
         }
         return ret;
     }
@@ -601,13 +596,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             }
         }
 
-        return notificationService.sendShareCreatedNotifications(
-            notificationData.getTransport(),
-            entities,
-            notificationData.getMessage(),
-            new ShareTargetPath(modified.getContentType().getModule(), modified.getID(), null),
-            session,
-            hostData);
+        return notificationService.sendShareCreatedNotifications(notificationData.getTransport(), entities, notificationData.getMessage(), new ShareTargetPath(modified.getContentType().getModule(), modified.getID(), null), session, hostData);
     }
 
     private List<Permission> determineAddedPermissions(UserizedFolder original, UserizedFolder modified) {

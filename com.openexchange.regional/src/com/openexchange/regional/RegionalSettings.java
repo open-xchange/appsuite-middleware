@@ -47,53 +47,87 @@
  *
  */
 
-package com.openexchange.subscribe.json;
+package com.openexchange.regional;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.i18n.I18nService;
+import java.io.Serializable;
 
 /**
- * Registry for all found {@link I18nService} instances.
+ * {@link RegionalSettings}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public final class I18nServices {
+public interface RegionalSettings extends Serializable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
-    private static final I18nServices SINGLETON = new I18nServices();
+    /**
+     * Gets the time format
+     *
+     * @return The time format
+     */
+    String getTimeFormat();
 
-    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+    /**
+     * Gets the long time format
+     *
+     * @return The long time format
+     */
+    String getTimeFormatLong();
 
-    private I18nServices() {
-        super();
-    }
+    /**
+     * Gets the date format
+     *
+     * @return The date format
+     */
+    String getDateFormat();
 
-    public static I18nServices getInstance() {
-        return SINGLETON;
-    }
+    /**
+     * Gets the short date format
+     *
+     * @return The short date format
+     */
+    String getDateFormatShort();
 
-    public void addService(final I18nService service) {
-        if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for {}", service.getLocale());
-        }
-    }
+    /**
+     * Gets the medium date format
+     *
+     * @return The medium date format
+     */
+    String getDateFormatMedium();
 
-    public void removeService(final I18nService service) {
-        if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for {}", service.getLocale());
-        }
-    }
+    /**
+     * Gets the long date format
+     *
+     * @return The long date format
+     */
+    String getDateFormatLong();
 
-    private static final Locale DEFAULT_LOCALE = Locale.US;
+    /**
+     * Gets the full date format
+     *
+     * @return The full date format
+     */
+    String getDateFormatFull();
 
-    public I18nService getService(final Locale locale) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService retval = services.get(loc);
-        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale {}.", loc);
-        }
-        return retval;
-    }
+    /**
+     * Gets the number format
+     *
+     * @return The number format
+     */
+    String getNumberFormat();
+
+    /**
+     * Gets the first day of the week
+     *
+     * @return The number of the first day of the week starting with Sunday
+     */
+    Integer getFirstDayOfWeek();
+
+    /**
+     * Gets the first day of the year
+     *
+     * @return the first day of the year
+     */
+    Integer getFirstDayOfYear();
+
+    boolean isFieldSet(RegionalSettingField field);
 }

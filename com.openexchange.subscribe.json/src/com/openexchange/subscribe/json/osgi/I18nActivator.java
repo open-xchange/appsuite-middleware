@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.json.osgi;
 
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -68,12 +68,22 @@ public class I18nActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        track(I18nService.class, new I18nServiceCustomizer(context));
-        openTrackers();
+        Services.setServiceLookup(this);
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
+    }
+    
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { I18nServiceRegistry.class };
     }
 }

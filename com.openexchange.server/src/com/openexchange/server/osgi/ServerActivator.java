@@ -172,6 +172,7 @@ import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationL
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imagetransformation.ImageMetadataService;
@@ -444,6 +445,7 @@ public final class ServerActivator extends HousekeepingActivator {
         serviceTrackerList.add(confTracker);
 
         // I18n service load
+        track(I18nServiceRegistry.class, new RegistryCustomizer<I18nServiceRegistry>(context, I18nServiceRegistry.class));
         track(I18nService.class, new I18nServiceListener(context));
 
         // Audit logger

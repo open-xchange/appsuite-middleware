@@ -47,70 +47,70 @@
  *
  */
 
-package com.openexchange.calendar.printing;
+package com.openexchange.subscribe.json.osgi;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.i18n.LocaleTools;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * Registry for all found {@link I18nService} instances.
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since 7.10.3
  */
-public class I18nServices {
+public final class Services {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
-    private static final Locale DEFAULT_LOCALE = Locale.US;
-    private static final I18nServices SINGLETON = new I18nServices();
-
-    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
-
-    private I18nServices() {
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
         super();
     }
 
-    public void addService(final I18nService service) {
-        if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service found for {}", service.getLocale());
-        }
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    public void removeService(final I18nService service) {
-        if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for {}", service.getLocale());
-        }
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    public static I18nServices getInstance() {
-        return SINGLETON;
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.subscribe.json\" not started?");
+        }
+        return serviceLookup.getService(clazz);
     }
 
-    public I18nService getService(final Locale locale) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService retval = services.get(loc);
-        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale {}.", loc);
-        }
-        return retval;
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 
-    public String translate(final Locale locale, final String toTranslate) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService service = services.get(loc);
-        if (null == service) {
-            return toTranslate;
-        }
-        if (!service.hasKey(toTranslate)) {
-            LOG.debug("I18n service for locale {} has no translation for \"{}\".", loc, toTranslate);
-            return toTranslate;
-        }
-        return service.getLocalized(toTranslate);
-    }
-
-    public String translate(final String localeId, final String toTranslate) {
-        return translate(LocaleTools.getLocale(localeId), toTranslate);
-    }
 }

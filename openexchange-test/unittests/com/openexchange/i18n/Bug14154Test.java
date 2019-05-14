@@ -63,9 +63,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.i18n.internal.I18nServiceRegistryImpl;
 import com.openexchange.test.I18nTests;
 
 /**
@@ -100,8 +101,8 @@ public class Bug14154Test {
     }
 
     @Test
-    public void testContainingPattern() {
-        final I18nService i18nService = I18nServices.getInstance().getService(locale);
+    public void testContainingPattern() throws OXException {
+        final I18nService i18nService = I18nServiceRegistryImpl.getInstance().getI18nService(locale);
         assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
         final String translation = i18nService.getLocalized(MailStrings.FORWARD_PREFIX);
         assertNotNull("Mail forwarding template is not translated.", translation);

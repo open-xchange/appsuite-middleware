@@ -88,8 +88,8 @@ import java.util.concurrent.locks.LockSupport;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
+import com.openexchange.admin.plugin.hosting.osgi.PluginHostingActivator;
 import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
-import com.openexchange.admin.plugin.hosting.services.I18nServices;
 import com.openexchange.admin.plugin.hosting.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.plugin.hosting.tools.database.TableColumnObject;
 import com.openexchange.admin.plugin.hosting.tools.database.TableObject;
@@ -141,6 +141,8 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Sets;
@@ -1983,7 +1985,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     private String translateGroupName(final User administrator) {
         final Locale locale = LocaleTools.getLocale(administrator.getLanguage());
-        return I18nServices.getInstance().translate(locale, Groups.STANDARD_GROUP);
+
+        I18nServiceRegistry registry = PluginHostingActivator.services.getOptionalService(I18nServiceRegistry.class);
+        if (registry == null) {
+            return Groups.STANDARD_GROUP;
+        }
+        I18nService i18nService = registry.getI18nService(locale);
+        return i18nService.getLocalized(Groups.STANDARD_GROUP);
     }
 
     /*
@@ -2213,39 +2221,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     // Deduced from https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-type-conversions.html
-    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder()
-        .put("BIT", I(Types.BIT))
-        .put("TINYINT", I(Types.TINYINT))
-        .put("BOOL", I(Types.BOOLEAN))
-        .put("BOOLEAN", I(Types.BOOLEAN))
-        .put("SMALLINT", I(Types.SMALLINT))
-        .put("MEDIUMINT", I(Types.INTEGER))
-        .put("INT", I(Types.INTEGER))
-        .put("INTEGERR", I(Types.INTEGER))
-        .put("BIGINT", I(Types.BIGINT))
-        .put("FLOAT", I(Types.FLOAT))
-        .put("DOUBLE", I(Types.DOUBLE))
-        .put("DECIMAL", I(Types.DECIMAL))
-        .put("DATE", I(Types.DATE))
-        .put("DATETIME", I(Types.TIMESTAMP))
-        .put("TIMESTAMP", I(Types.TIMESTAMP))
-        .put("TIME", I(Types.TIME))
-        .put("YEAR", I(Types.DATE))
-        .put("CHAR", I(Types.CHAR))
-        .put("VARCHAR", I(Types.VARCHAR))
-        .put("BINARY", I(Types.BINARY))
-        .put("VARBINARY", I(Types.VARBINARY))
-        .put("TINYBLOB", I(Types.BLOB))
-        .put("TINYTEXT", I(Types.VARCHAR))
-        .put("BLOB", I(Types.BLOB))
-        .put("TEXT", I(Types.VARCHAR))
-        .put("MEDIUMBLOB", I(Types.BLOB))
-        .put("MEDIUMTEXT", I(Types.VARCHAR))
-        .put("LONGBLOB", I(Types.BLOB))
-        .put("LONGTEXT", I(Types.VARCHAR))
-        .put("ENUM", I(Types.CHAR))
-        .put("SET", I(Types.CHAR))
-        .build();
+    private static final Map<String, Integer> MYSQL_TYPES = ImmutableMap.<String, Integer> builder().put("BIT", I(Types.BIT)).put("TINYINT", I(Types.TINYINT)).put("BOOL", I(Types.BOOLEAN)).put("BOOLEAN", I(Types.BOOLEAN)).put("SMALLINT", I(Types.SMALLINT)).put("MEDIUMINT", I(Types.INTEGER)).put("INT", I(Types.INTEGER)).put("INTEGERR", I(Types.INTEGER)).put("BIGINT", I(Types.BIGINT)).put("FLOAT", I(Types.FLOAT)).put("DOUBLE", I(Types.DOUBLE)).put("DECIMAL", I(Types.DECIMAL)).put("DATE", I(Types.DATE)).put("DATETIME", I(Types.TIMESTAMP)).put("TIMESTAMP", I(Types.TIMESTAMP)).put("TIME", I(Types.TIME)).put("YEAR", I(Types.DATE)).put("CHAR", I(Types.CHAR)).put("VARCHAR", I(Types.VARCHAR)).put("BINARY", I(Types.BINARY)).put("VARBINARY", I(Types.VARBINARY)).put("TINYBLOB", I(Types.BLOB)).put("TINYTEXT", I(Types.VARCHAR)).put("BLOB", I(Types.BLOB)).put("TEXT", I(Types.VARCHAR)).put("MEDIUMBLOB", I(Types.BLOB)).put("MEDIUMTEXT", I(Types.VARCHAR)).put("LONGBLOB", I(Types.BLOB)).put("LONGTEXT", I(Types.VARCHAR)).put("ENUM", I(Types.CHAR)).put("SET", I(Types.CHAR)).build();
 
     private static List<TableObject> fetchTableObjects(String selectionCriteria, Connection ox_db_write_connection) throws SQLException {
         PreparedStatement stmt = null;

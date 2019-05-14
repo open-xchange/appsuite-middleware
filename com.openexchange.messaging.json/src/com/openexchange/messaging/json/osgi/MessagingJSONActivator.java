@@ -57,7 +57,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.messaging.json.Enabled;
 import com.openexchange.messaging.json.GUI;
@@ -98,6 +98,11 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { I18nServiceRegistry.class };
+    }
+
+    @Override
     protected void handleAvailability(final Class<?> clazz) {
         try {
             register();
@@ -130,7 +135,6 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             writer = new MessagingMessageWriter();
             rememberTracker(new ContentWriterTracker(context, writer));
             rememberTracker(new HeaderWriterTracker(context, writer));
-            track(I18nService.class, new I18nServiceCustomizer(context));
 
             openTrackers();
 

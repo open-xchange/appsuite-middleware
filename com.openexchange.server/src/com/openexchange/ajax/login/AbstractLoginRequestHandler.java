@@ -68,6 +68,7 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
@@ -262,12 +263,12 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
                 final ResultCode code = result.getCode();
                 if (null != code) {
                     switch (code) {
-                    case FAILED:
-                        return true;
-                    case REDIRECT:
-                        throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
-                    default:
-                        break;
+                        case FAILED:
+                            return true;
+                        case REDIRECT:
+                            throw LoginExceptionCodes.REDIRECT.create(result.getRedirect());
+                        default:
+                            break;
                     }
                 }
             }
@@ -374,17 +375,7 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
         try {
             if (response.hasError() || null == result) {
-                final Locale locale;
-                {
-                    final String sLocale = req.getParameter("language");
-                    if (null == sLocale) {
-                        locale = bestGuessLocale(result, req);
-                    } else {
-                        final Locale loc = LocaleTools.getLocale(sLocale);
-                        locale = null == loc ? bestGuessLocale(result, req) : loc;
-                    }
-                }
-                ResponseWriter.write(response, resp.getWriter(), locale);
+                ResponseWriter.write(response, resp.getWriter(), extractLocale(req, result));
                 return false;
             }
 
@@ -491,19 +482,41 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
         }
     }
 
-    private Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {
-        final Locale locale;
-        if (null == result) {
-            locale = Tools.getLocaleByAcceptLanguage(req, null);
-        } else {
-            final User user = result.getUser();
-            if (null == user) {
-                locale = Tools.getLocaleByAcceptLanguage(req, null);
-            } else {
-                locale = user.getLocale();
+    /**
+     * Extracts the locale from the specified request. First tries the {@link LoginFields#LANGUAGE_PARAM},
+     * then the {@link LoginFields#LOCALE_PARAM} and finally a best guess according to the <code>Accept-Language</code>
+     * header if set.
+     *
+     * @param req The request
+     * @param result The result
+     * @return The {@link Locale}
+     */
+    private Locale extractLocale(HttpServletRequest req, LoginResult result) {
+        String sLanguage = req.getParameter(LoginFields.LANGUAGE_PARAM);
+        if (null == sLanguage) {
+            sLanguage = req.getParameter(LoginFields.LOCALE_PARAM);
+            if (null == sLanguage) {
+                return bestGuessLocale(result, req);
             }
+            return LocaleTools.getLocale(sLanguage);
         }
-        return locale;
+        Locale loc = LocaleTools.getLocale(sLanguage);
+        return null == loc ? bestGuessLocale(result, req) : loc;
+    }
+
+    /**
+     * Tries to determine the {@link Locale} based on the <code>Accept-Language</code> header
+     *
+     * @param result the result
+     * @param req The request
+     * @return The {@link Locale}
+     */
+    private Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {
+        if (null == result) {
+            return Tools.getLocaleByAcceptLanguage(req, null);
+        }
+        User user = result.getUser();
+        return null == user ? Tools.getLocaleByAcceptLanguage(req, null) : user.getLocale();
     }
 
     /**

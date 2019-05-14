@@ -61,7 +61,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HtmlService;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -81,7 +81,7 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
 
     @Override
     protected void startBundle() {
-        track(I18nService.class, new I18nCustomizer(context));
+        track(I18nServiceRegistry.class);
         track(GroupService.class);
         track(ConfigViewFactory.class);
         openTrackers();

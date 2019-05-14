@@ -59,36 +59,34 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.tools.TemplateToken;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
  * Unit tests for {@link FormatLocalizedStringReplacement}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ I18nServices.class })
+@PrepareForTest(I18nServiceRegistry.class)
 public class FormatLocalizedStringReplacementTest {
 
     private FormatLocalizedStringReplacement formatLocalizedStringReplacement;
 
-    private String format = "Priority: %1$s";
+    private final String format = "Priority: %1$s";
 
-    private String formatTranslated = "Priorit\\u00e4t: %1$s";
+    private final String formatTranslated = "Priorit\\u00e4t: %1$s";
 
-    private String result = "Priorit\\u00e4t: Niedrig";
+    private final String result = "Priorit\\u00e4t: Niedrig";
 
-    private String replacement = "Low";
+    private final String replacement = "Low";
 
-    private Locale locale = new Locale("de_DE");
+    private final Locale locale = new Locale("de_DE");
 
-    private TemplateToken templateToken = TemplateToken.TASK_PRIORITY;
-
-    @Mock
-    private I18nServices i18nServices;
+    private final TemplateToken templateToken = TemplateToken.TASK_PRIORITY;
 
     @Mock
     private I18nService i18nService;
@@ -102,13 +100,15 @@ public class FormatLocalizedStringReplacementTest {
         formatLocalizedStringReplacement.setChanged(false);
         formatLocalizedStringReplacement.setLocale(locale);
 
-        PowerMockito.mockStatic(I18nServices.class);
+        I18nServiceRegistry mock = PowerMockito.mock(I18nServiceRegistry.class);
+        PowerMockito.when(mock.getI18nService(locale)).thenReturn(i18nService);
+        ServerServiceRegistry.getInstance().addService(I18nServiceRegistry.class, mock);
 
-        PowerMockito.when(i18nServices.getService(locale)).thenReturn(i18nService);
+        PowerMockito.mockStatic(I18nServiceRegistry.class);
+
         PowerMockito.when(i18nService.getLocalized(format)).thenReturn(formatTranslated);
         PowerMockito.when(i18nService.getLocalized(replacement)).thenReturn("Niedrig");
-
-        PowerMockito.when(I18nServices.getInstance()).thenReturn(i18nServices);
+        // TODO check with new implementation
     }
 
      @Test

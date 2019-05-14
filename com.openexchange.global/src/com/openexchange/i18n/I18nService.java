@@ -64,10 +64,29 @@ public interface I18nService {
 
     static final String LANGUAGE = "language";
 
+    /**
+     * Localizes the given string
+     *
+     * @param key The string to localize
+     * @return The localized string
+     */
     String getLocalized(String key);
 
+    /**
+     * Checks if a translation is available for the given string
+     *
+     * @param key The string to check
+     * @return true if a translation is available, false otherwise
+     */
     boolean hasKey(String key);
 
+    /**
+     * Checks if a translation is available for the given string and context
+     *
+     * @param context The string context
+     * @param key The string to check
+     * @return true if a translation is available, false otherwise
+     */
     boolean hasKey(String context, String key);
 
     /**
@@ -112,6 +131,11 @@ public interface I18nService {
      */
     String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural);
 
+    /**
+     * Gets the locale for this {@link I18nService}
+     *
+     * @return The the {@link Locale}
+     */
     Locale getLocale();
 
 }

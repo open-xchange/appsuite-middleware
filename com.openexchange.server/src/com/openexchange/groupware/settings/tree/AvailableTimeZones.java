@@ -65,8 +65,10 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -106,7 +108,7 @@ public class AvailableTimeZones implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 try {
                     final JSONObject json = new JSONObject();
-                    final I18nServices i18nServices = I18nServices.getInstance();
+                    final I18nService i18nService = ServerServiceRegistry.getServize(I18nServiceRegistry.class, true).getI18nService(user.getLocale());
                     Object[][] timezones = new Object[TimeZone.getAvailableIDs().length][3];
 
                     int i = 0;
@@ -126,7 +128,7 @@ public class AvailableTimeZones implements PreferencesItemService {
                                 int offset = TimeZone.getTimeZone(timeZoneID).getOffset(now);
                                 timezones[i][0] = Integer.valueOf(offset);
                                 timezones[i][1] = timeZoneID;
-                                timezones[i][2] = prefix(offset, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
+                                timezones[i][2] = prefix(offset, i18nService.getLocalized(timeZoneID.replace('_', ' ')));
                             }
                         }
                         i++;

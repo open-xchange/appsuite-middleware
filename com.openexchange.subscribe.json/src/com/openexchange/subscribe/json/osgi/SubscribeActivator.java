@@ -55,6 +55,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.json.actions.SubscriptionActionFactory;
@@ -67,6 +68,8 @@ import com.openexchange.subscribe.json.actions.SubscriptionSourcesActionFactory;
  */
 public class SubscribeActivator extends AJAXModuleActivator {
 
+    public static ServiceLookup services;
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { HttpService.class, SubscriptionExecutionService.class, PreferencesItemService.class, SubscriptionSourceDiscoveryService.class, ConfigurationService.class };
@@ -74,10 +77,17 @@ public class SubscribeActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        services = this;
         this.addService(SecretService.class, new WhiteboardSecretService(context));
 
         registerModule(new SubscriptionSourcesActionFactory(this), "subscriptionSources");
         registerModule(new SubscriptionActionFactory(this), "subscriptions");
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        services = null;
+        super.stopBundle();
     }
 
 }

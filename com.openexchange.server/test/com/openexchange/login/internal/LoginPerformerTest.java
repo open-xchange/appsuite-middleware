@@ -233,6 +233,16 @@ public class LoginPerformerTest {
             }
 
             @Override
+            public String getLocale() {
+                return null;
+            }
+
+            @Override
+            public boolean isStoreLocale() {
+                return false;
+            }
+
+            @Override
             public Map<String, String[]> getRequestParameter() {
                 return null;
             }

@@ -52,6 +52,7 @@ package com.openexchange.i18n;
 import java.util.Collection;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.internal.NOOPI18nService;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -72,19 +73,22 @@ public interface I18nServiceRegistry {
     Collection<I18nService> getI18nServices() throws OXException;
 
     /**
-     * Gets the i18n service for specified locale (exact match).
+     * Gets the i18n service, which fits at best the specified locale.
      *
-     * @return The i18n service or <code>null</code> if no such service is currently available
-     * @throws OXException If i18n service cannot be returned
+     * @param locale The locale
+     * @return The i18n service or the default {@link NOOPI18nService} if no such locale is currently available
+     *         never <code>null</code>.
      */
-    I18nService getI18nService(Locale locale) throws OXException;
+    I18nService getI18nService(Locale locale);
 
     /**
      * Gets the i18n service, which fits at best the specified locale.
-     *
-     * @return The i18n service or <code>null</code> if no such service matches at all
-     * @throws OXException If i18n service cannot be returned
+     * 
+     * @param locale The locale
+     * @param exactMatch Whether the {@link I18nService} must match the given locale perfectly (exact match).
+     * @return The i18n service or the default {@link NOOPI18nService} if no such locale is currently available
+     *         never <code>null</code>.
      */
-    I18nService getBestFittingI18nService(Locale locale) throws OXException;
+    I18nService getI18nService(Locale locale, boolean exactMatch);
 
 }

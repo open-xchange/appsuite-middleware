@@ -47,82 +47,21 @@
  *
  */
 
-package com.openexchange.file.storage.json;
-
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.i18n.I18nService;
+package com.openexchange.regional.impl.storage;
 
 /**
- * {@link I18nServices} - A registry for all found {@link I18nService} instances.
+ * {@link SQLStatements}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public final class I18nServices {
+final class SQLStatements {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
-
-    private static final I18nServices SINGLETON = new I18nServices();
-
-    /**
-     * Gets the instance.
-     *
-     * @return The instance
-     */
-    public static I18nServices getInstance() {
-        return SINGLETON;
-    }
-
-    /*
-     * Member stuff
-     */
-
-    private final Map<Locale, I18nService> services;
-
-    private I18nServices() {
-        super();
-        services = new ConcurrentHashMap<Locale, I18nService>();
-    }
-
-    /**
-     * Adds the i18n service to this registry.
-     *
-     * @param service The i18n service
-     */
-    public void addService(final I18nService service) {
-        if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for {}", service.getLocale());
-        }
-    }
-
-    /**
-     * Removes the i18n service from this registry.
-     *
-     * @param service The i18n service
-     */
-    public void removeService(final I18nService service) {
-        if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for {}", service.getLocale());
-        }
-    }
-
-    private static final Locale DEFAULT_LOCALE = Locale.US;
-
-    /**
-     * Gets the i18n service for specified locale.
-     *
-     * @param locale The locale
-     * @return The i18n service for specified locale or <code>null</code> if missing
-     */
-    public I18nService getService(final Locale locale) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService retval = services.get(loc);
-        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale {}.", loc);
-        }
-        return retval;
-    }
-
+    public static final String SELECT = "SELECT * FROM regional_settings WHERE cid=? AND userId=?";
+    //@formatter:off
+    public static final String UPSERT = "INSERT INTO regional_settings (cid,userId,timeFormat,timeFormatLong,dateFormat,dateFormatShort,dateFormatMedium,dateFormatLong,dateFormatFull,numberFormat,firstDayOfWeek,firstDayOfYear) "
+                                                 + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE timeFormat=?,timeFormatLong=?,dateFormat=?,dateFormatShort=?,dateFormatMedium=?,dateFormatLong=?,dateFormatFull=?,numberFormat=?,firstDayOfWeek=?,firstDayOfYear=?;";
+    //@formatter:on
+    public static final String DELETE_USER = "DELETE FROM regional_settings WHERE cid=? AND userId=?";
+    public static final String DELETE_CONTEXT = "SELECT * FROM regional_settings WHERE cid=?";
 }

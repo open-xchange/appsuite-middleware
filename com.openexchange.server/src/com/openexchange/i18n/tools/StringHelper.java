@@ -54,9 +54,10 @@ import java.util.MissingResourceException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
-import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link StringHelper} - Helper class to translate strings.
@@ -102,11 +103,11 @@ public class StringHelper {
         Locale loc = null == locale ? DEFAULT_LOCALE : locale;
         Translator t = TRANSLATOR_CACHE.get(loc);
         if (null == t) {
-            I18nService service = I18nServices.getInstance().getService(loc);
-            if (null == service) {
-                // Do not cache if no such I18nService is available
+            I18nServiceRegistry registry = ServerServiceRegistry.getServize(I18nServiceRegistry.class);
+            if (registry == null) {
                 return Translator.EMPTY;
             }
+            I18nService service = registry.getI18nService(locale);
             Translator nt = new I18nTranslator(service);
             t = TRANSLATOR_CACHE.putIfAbsent(loc, nt);
             if (null == t) {
@@ -142,12 +143,13 @@ public class StringHelper {
             return key;
         }
         try {
-            final I18nService tool = I18nServices.getInstance().getService(locale);
-            if (tool == null) {
+            I18nServiceRegistry registry = ServerServiceRegistry.getServize(I18nServiceRegistry.class);
+            if (registry == null) {
                 LOG.debug("No such i18n service found for {}. Using default.", locale);
                 return key;
             }
-            return tool.getLocalized(key);
+            I18nService service = registry.getI18nService(locale);
+            return service.getLocalized(key);
         } catch (final MissingResourceException x) {
             LOG.debug("Missing resource for {}. Using default.", locale, x);
             return key;

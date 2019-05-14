@@ -149,6 +149,7 @@ public class AdminActivator extends HousekeepingActivator {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
+
         track(CreateTableService.class, new CreateTableCustomizer(context));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(CapabilityService.class, new RegistryServiceTrackerCustomizer<CapabilityService>(context, AdminServiceRegistry.getInstance(), CapabilityService.class));

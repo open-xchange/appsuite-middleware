@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,59 +47,53 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting.services;
-
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.i18n.I18nService;
+package com.openexchange.regional.impl.service;
 
 /**
- * Registry for all found {@link I18nService} instances.
+ * {@link WeekDay} a mapping of weekday names to weekday numbers
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public class I18nServices {
+public enum WeekDay {
+    sunday(1),
+    monday(2),
+    thuesday(3),
+    wednesday(4),
+    thursday(5),
+    friday(6),
+    saturday(7);
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
-    private static final Locale DEFAULT_LOCALE = Locale.US;
-    private static final I18nServices SINGLETON = new I18nServices();
+    private int number;
 
-    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
-
-    private I18nServices() {
-        super();
+    /**
+     * Initializes a new {@link WeekDay}.
+     */
+    private WeekDay(int number) {
+        this.number = number;
     }
 
-    public void addService(final I18nService i18n) {
-        if (null != services.put(i18n.getLocale(), i18n)) {
-            LOG.warn("Another i18n translation service found for {}", i18n.getLocale());
+    /**
+     * Returns the {@link WeekDay} from the specified number
+     * 
+     * @param number The number of the weekday
+     * @return The WeekDay
+     * @throws IllegalArgumentException if an invalid weekday number is specified
+     */
+    public static WeekDay getWeekDayByNumber(int number) {
+        if (number <= 0 || WeekDay.values().length < number) {
+            throw new IllegalArgumentException("Invalid weekday number is specified: Valid numbers are: 1-7");
         }
+        return WeekDay.values()[number - 1];
     }
 
-    public void removeService(final I18nService i18n) {
-        if (null == services.remove(i18n.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for {}", i18n.getLocale());
-        }
-    }
-
-    public static I18nServices getInstance() {
-        return SINGLETON;
-    }
-
-    public String translate(final Locale locale, final String toTranslate) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService service = services.get(loc);
-        if (null == service) {
-            if (!"en".equalsIgnoreCase(loc.getLanguage())) {
-                LOG.warn("No i18n service for locale {}.", loc);
-            }
-            return toTranslate;
-        }
-        if (!service.hasKey(toTranslate)) {
-            LOG.debug("I18n service for locale {} has no translation for \"{}\".", loc, toTranslate);
-            return toTranslate;
-        }
-        return service.getLocalized(toTranslate);
+    /**
+     * Returns the number
+     *
+     * @return The weekday number
+     */
+    public int getNumber() {
+        return number;
     }
 }

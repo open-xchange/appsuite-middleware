@@ -47,54 +47,48 @@
  *
  */
 
-package com.openexchange.file.storage.json.osgi;
+package com.openexchange.regional.impl.test;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.file.storage.json.I18nServices;
-import com.openexchange.i18n.I18nService;
+import static org.junit.Assert.assertEquals;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import org.junit.Test;
+import org.powermock.reflect.Whitebox;
+import com.openexchange.regional.RegionalSettings;
+import com.openexchange.regional.impl.service.RegionalSettingsImpl;
+import com.openexchange.regional.impl.service.RegionalSettingsServiceImpl;
 
 /**
- * {@link I18nServiceCustomizer}
+ * {@link SeparatorTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService, I18nService> {
-
-    private final BundleContext context;
-
-    private final I18nServices services;
+public class SeparatorTest {
 
     /**
-     * Initializes a new {@link I18nServiceCustomizer}.
-     *
-     * @param context The bundle context
+     * Initialises a new {@link SeparatorTest}.
      */
-    protected I18nServiceCustomizer(final BundleContext context) {
+    public SeparatorTest() {
         super();
-        this.context = context;
-        services = I18nServices.getInstance();
     }
 
-    @Override
-    public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService service = context.getService(reference);
-        services.addService(service);
-        return service;
-    }
+    /**
+     * Tests the grouping separators
+     */
+    @Test
+    public void testGroupingSeparators() throws Exception {
+        RegionalSettings settings = RegionalSettingsImpl.newBuilder().withNumberFormat("1.234,56").build();
+        DecimalFormatSymbols unusualSymbols = new DecimalFormatSymbols(Locale.US);
+        unusualSymbols.setDecimalSeparator(Whitebox.invokeMethod(RegionalSettingsServiceImpl.class, "getDecimalSeparator", settings));
+        unusualSymbols.setGroupingSeparator(Whitebox.invokeMethod(RegionalSettingsServiceImpl.class, "getGroupingSeparator", settings));
 
-    @Override
-    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        try {
-            services.removeService(service);
-        } finally {
-            context.ungetService(reference);
-        }
+        String format = "#,###.###";
+        DecimalFormat decimalFormat = new DecimalFormat(format, unusualSymbols);
+        assertEquals("1.234,56", decimalFormat.format(1234.56));
+        assertEquals("123.456,78", decimalFormat.format(123456.78));
+        assertEquals("1.234.567.891.234,568", decimalFormat.format(1234567891234.56789));
+        assertEquals("1.234.567.891.234,567", decimalFormat.format(1234567891234.567189));
     }
 }

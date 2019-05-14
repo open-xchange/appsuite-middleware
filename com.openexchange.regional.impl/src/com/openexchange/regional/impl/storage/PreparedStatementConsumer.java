@@ -47,53 +47,27 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.regional.impl.storage;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.i18n.I18nService;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
- * Registry for all found {@link I18nService} instances.
+ * {@link PreparedStatementConsumer}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public final class I18nServices {
+@FunctionalInterface
+public interface PreparedStatementConsumer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nServices.class);
-    private static final I18nServices SINGLETON = new I18nServices();
+    /**
+     * Prepares the specified {@link PreparedStatement}, i.e. fills
+     * in the values if necessary.
+     * 
+     * @param statement The {@link PreparedStatement} to fill with values.
+     * @throws SQLException If an SQL error is occurred
+     */
+    void accept(PreparedStatement statement) throws SQLException;
 
-    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
-
-    private I18nServices() {
-        super();
-    }
-
-    public static I18nServices getInstance() {
-        return SINGLETON;
-    }
-
-    public void addService(final I18nService service) {
-        if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for {}", service.getLocale());
-        }
-    }
-
-    public void removeService(final I18nService service) {
-        if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for {}", service.getLocale());
-        }
-    }
-
-    private static final Locale DEFAULT_LOCALE = Locale.US;
-
-    public I18nService getService(final Locale locale) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService retval = services.get(loc);
-        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale {}.", loc);
-        }
-        return retval;
-    }
 }

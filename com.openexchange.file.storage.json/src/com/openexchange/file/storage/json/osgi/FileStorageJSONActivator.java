@@ -72,7 +72,6 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.i18n.I18nService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -99,7 +98,6 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             Services.setServiceLookup(this);
-            rememberTracker(new ServiceTracker<>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             OSGiFileFieldCollector fieldCollector = new OSGiFileFieldCollector(context);
             Services.setFieldCollector(fieldCollector);
             rememberTracker(new ServiceTracker<>(context, AdditionalFileField.class.getName(), fieldCollector));

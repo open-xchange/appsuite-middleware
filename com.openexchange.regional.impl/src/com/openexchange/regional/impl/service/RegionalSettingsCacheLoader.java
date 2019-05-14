@@ -47,47 +47,29 @@
  *
  */
 
-package com.openexchange.subscribe.json.osgi;
+package com.openexchange.regional.impl.service;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.subscribe.json.I18nServices;
+import java.util.Locale;
+import com.google.common.cache.CacheLoader;
+import com.openexchange.regional.RegionalSettings;
 
 /**
- * {@link I18nServiceCustomizer}
+ * {@link RegionalSettingsCacheLoader}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService,I18nService> {
+public class RegionalSettingsCacheLoader extends CacheLoader<Locale, RegionalSettings> {
 
-    private final BundleContext context;
-    private final I18nServices services = I18nServices.getInstance();
-
-    I18nServiceCustomizer(final BundleContext context) {
+    /**
+     * Initialises a new {@link RegionalSettingsCacheLoader}.
+     */
+    public RegionalSettingsCacheLoader() {
         super();
-        this.context = context;
     }
 
     @Override
-    public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService service = context.getService(reference);
-        services.addService(service);
-        return service;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        try {
-            services.removeService(service);
-        } finally {
-            context.ungetService(reference);
-        }
+    public RegionalSettings load(Locale locale) throws Exception {
+        return RegionalSettingsImpl.newBuilder().withDefaults(locale).build();
     }
 }

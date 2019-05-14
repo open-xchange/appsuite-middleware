@@ -68,13 +68,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
@@ -84,6 +85,8 @@ public class PluginHostingActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PluginHostingActivator.class);
 
     private PluginStarter starter = null;
+    
+    public static ServiceLookup services;
 
     /**
      * Initializes a new {@link PluginHostingActivator}.
@@ -116,7 +119,6 @@ public class PluginHostingActivator extends HousekeepingActivator {
         AdminServiceRegistry.getInstance().addService(ConfigViewFactory.class, configViewFactory);
         track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ContextService.class));
-        track(I18nService.class, new I18nServiceCustomizer(context));
         track(ManagementService.class, new HousekeepingManagementTracker(context, MonitorMBean.MBEAN_NAME, MonitorMBean.MBEAN_DOMAIN, new Monitor()));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(CacheService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), CacheService.class));
@@ -176,5 +178,10 @@ public class PluginHostingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, ConfigViewFactory.class };
+    }
+    
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] {I18nServiceRegistry.class};
     }
 }

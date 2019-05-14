@@ -47,44 +47,39 @@
  *
  */
 
-package com.openexchange.calendar.printing.osgi;
+package com.openexchange.regional.impl.service;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.calendar.printing.I18nServices;
-import com.openexchange.i18n.I18nService;
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.regional.impl.storage.RegionalSettingStorage;
 
 /**
- * Put dynamically appearing {@link I18nService I18nServices} into the registry.
+ * {@link RegionalSettingsDeleteListener}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.3
  */
-public class I18nCustomizer implements ServiceTrackerCustomizer<I18nService, I18nService> {
+public class RegionalSettingsDeleteListener implements DeleteListener {
 
-    private final BundleContext context;
+    private final RegionalSettingStorage storage;
 
-    public I18nCustomizer(final BundleContext context) {
+    /**
+     * Initializes a new {@link RegionalSettingsDeleteListener}.
+     */
+    public RegionalSettingsDeleteListener(RegionalSettingStorage storage) {
         super();
-        this.context = context;
+        this.storage = storage;
     }
 
     @Override
-    public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService service = context.getService(reference);
-        I18nServices.getInstance().addService(service);
-        return service;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        final I18nService i18nService = service;
-        I18nServices.getInstance().removeService(i18nService);
-        context.ungetService(reference);
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (DeleteEvent.TYPE_USER == event.getType()) {
+            storage.delete(event.getContext().getContextId(), event.getId(), writeCon);
+        }
+        if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            storage.delete(event.getContext().getContextId(), writeCon);
+        }
     }
 }

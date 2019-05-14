@@ -55,11 +55,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.I18nTranslator;
 import com.openexchange.i18n.Translator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
-import com.openexchange.subscribe.json.I18nServices;
+import com.openexchange.subscribe.json.osgi.Services;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,7 +104,11 @@ public abstract class AbstractSubscribeSourcesAction implements AJAXActionServic
     }
 
     protected Translator createTranslator(final ServerSession session) {
-        final I18nService service = I18nServices.getInstance().getService(session.getUser().getLocale());
+        I18nServiceRegistry registry = Services.getService(I18nServiceRegistry.class);
+        if (registry == null) {
+            return Translator.EMPTY;
+        }
+        I18nService service = registry.getI18nService(session.getUser().getLocale());
         return null == service ? Translator.EMPTY : new I18nTranslator(service);
     }
 

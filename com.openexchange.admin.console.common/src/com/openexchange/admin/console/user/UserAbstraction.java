@@ -100,8 +100,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public boolean isRequired();
 
         /**
-         * @param required The value to set 
-         * 
+         * @param required The value to set
+         *
          * @deprecated since 7.10.2
          */
         @Deprecated
