@@ -75,7 +75,7 @@ public final class BrowserDetector {
 
         BrowserDetector result = CACHE.getIfPresent(userAgent);
         if (result == null) {
-            result = new BrowserDetector(userAgent);
+            result = new BrowserDetector(userAgent, true);
             CACHE.put(userAgent, result);
         }
         return result;
@@ -167,12 +167,24 @@ public final class BrowserDetector {
      */
     @Deprecated
     public BrowserDetector(String userAgent) {
+        this(userAgent, true);
+    }
+
+    /**
+     * Initializes a new {@link BrowserDetector}.
+     *
+     * @param userAgent The user-agent
+     * @param parse Whether to pre-parse user-agent string
+     */
+    private BrowserDetector(String userAgent, boolean parse) {
         super();
         this.userAgent = userAgent;
         browserName = UNKNOWN;
         browserVersion = 0F;
         browserPlatform = UNKNOWN;
-        parse();
+        if (parse) {
+            parse();
+        }
     }
 
     /**
