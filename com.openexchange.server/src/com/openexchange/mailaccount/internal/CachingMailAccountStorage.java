@@ -468,6 +468,16 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public TransportAccount[] getUserTransportAccounts(int userId, int contextId, Connection con) throws OXException {
+        int[] ids = delegate.getUserTransportAccountIDs(userId, contextId, con);
+        TransportAccount[] accounts = new TransportAccount[ids.length];
+        for (int i = 0; i < accounts.length; i++) {
+            accounts[i] = getTransportAccount(ids[i], userId, contextId, con);
+        }
+        return accounts;
+    }
+
+    @Override
     public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
         return delegate.getRawMailAccount(id, userId, contextId);
     }
@@ -544,6 +554,17 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         MailAccount[] accounts = new MailAccount[ids.length];
         for (int i = 0; i < accounts.length; i++) {
             accounts[i] = getMailAccount(ids[i], userId, contextId);
+        }
+        return accounts;
+    }
+
+    @Override
+    public TransportAccount[] getUserTransportAccounts(int userId, int contextId) throws OXException {
+        int[] ids = delegate.getUserTransportAccountIDs(userId, contextId);
+
+        TransportAccount[] accounts = new TransportAccount[ids.length];
+        for (int i = 0; i < accounts.length; i++) {
+            accounts[i] = getTransportAccount(ids[i], userId, contextId);
         }
         return accounts;
     }

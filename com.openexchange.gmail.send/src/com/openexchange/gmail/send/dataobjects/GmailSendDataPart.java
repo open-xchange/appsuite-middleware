@@ -47,55 +47,37 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.dataobjects;
 
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.scope.OAuthScope;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.DataMailPart;
+import com.openexchange.session.Session;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendDataPart}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
+public final class GmailSendDataPart extends DataMailPart {
 
-    private final String mapping;
-    private final OXScope module;
+    private static final long serialVersionUID = -2178540334312772067L;
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
+     * Initializes a new {@link GmailSendDataPart}
      *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * @param data
+     *            The data
+     * @param dataProperties
+     *            The data properties
+     * @param session
+     *            The session
+     * @throws OXException
+     *             If data part cannot be initialized
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    public GmailSendDataPart(final Object data, final Map<String, String> dataProperties, final Session session) throws OXException {
+        super(data, dataProperties, session);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

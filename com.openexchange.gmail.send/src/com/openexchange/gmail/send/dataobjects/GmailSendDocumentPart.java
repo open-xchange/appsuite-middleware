@@ -47,55 +47,34 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.dataobjects;
 
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
+import com.openexchange.session.Session;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendDocumentPart}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
+public final class GmailSendDocumentPart extends InfostoreDocumentMailPart {
 
-    private final String mapping;
-    private final OXScope module;
+    private static final long serialVersionUID = 6100445920631673369L;
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
-     */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
-    }
+	 * Constructor
+	 *
+	 * @param documentId
+	 *            The document's unique ID
+	 * @param session
+	 *            The session providing needed user data
+	 * @throws OXException
+	 *             If infostore document cannot be read
+	 */
+	public GmailSendDocumentPart(final String documentId, final Session session) throws OXException {
+		super(documentId, session);
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

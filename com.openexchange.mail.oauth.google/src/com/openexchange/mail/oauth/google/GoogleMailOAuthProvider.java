@@ -53,6 +53,7 @@ import static com.openexchange.google.api.client.GoogleApiClients.REFRESH_THRESH
 import java.io.IOException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.Gmail.Builder;
 import com.google.api.services.gmail.model.Profile;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
@@ -93,14 +94,14 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
             // Determine E-Mail address from "user/me" end-point
             GoogleCredential credentials = com.openexchange.google.api.client.GoogleApiClients.getCredentials(oauthAccountToUse, session);
-            Gmail gmail = new Gmail.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
+            Gmail gmail = new Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
             Profile profile = gmail.users().getProfile("me").execute();
             String email = profile.getEmailAddress();
 
             ImmutableAutoconfig.Builder builder = ImmutableAutoconfig.builder();
             builder.username(email);
-            builder.mailOAuthId(oauthAccount.getId()).mailPort(993).mailProtocol("imap").mailSecure(true).mailServer("imap.gmail.com").mailStartTls(false);
-            builder.transportOAuthId(oauthAccount.getId()).transportPort(587).transportProtocol("smtp").transportSecure(false).transportServer("smtp.gmail.com").transportStartTls(true);
+            builder.mailOAuthId(oauthAccount.getId()).mailPort(Integer.valueOf(993)).mailProtocol("imap").mailSecure(Boolean.TRUE).mailServer("imap.gmail.com").mailStartTls(false);
+            builder.transportOAuthId(oauthAccount.getId()).transportPort(Integer.valueOf(-1)).transportProtocol("gmailsend").transportSecure(Boolean.FALSE).transportServer("www.googleapis.com");
             return builder.build();
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());

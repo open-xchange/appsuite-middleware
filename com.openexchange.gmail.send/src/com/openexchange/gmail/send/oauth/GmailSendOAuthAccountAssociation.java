@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,53 +47,91 @@
  *
  */
 
-package com.openexchange.mailaccount;
+package com.openexchange.gmail.send.oauth;
 
-import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.gmail.send.GmailSendProvider;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.oauth.association.Status;
+import com.openexchange.oauth.association.Type;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link MailAccounts} - Utility class for mail account.
+ * {@link GmailSendOAuthAccountAssociation}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.10.3
  */
-public final class MailAccounts {
+public class GmailSendOAuthAccountAssociation implements OAuthAccountAssociation {
+
+    private final int accountId;
+    private final TransportAccount account;
+    private final int userId;
+    private final int contextId;
 
     /**
-     * Initializes a new {@link MailAccounts}.
+     * Initializes a new {@link GmailSendOAuthAccountAssociation}.
+     *
+     * @param accountId The identifier of the OAuth account
+     * @param account The associated transport account
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    private MailAccounts() {
+    public GmailSendOAuthAccountAssociation(int accountId, TransportAccount account, int userId, int contextId) {
         super();
+        this.accountId = accountId;
+        this.account = account;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
-    /**
-     * Checks whether the specified transport account uses special Gmail Send API to transport messages.
-     *
-     * @param transportAccount The transport account to check
-     * @return <code>true</code> for a Gmail Send API; otherwise <code>false</code>
-     */
-    public static boolean isGmailTransport(TransportAccount transportAccount) {
-        return null == transportAccount ? false : "gmailsend".equals(transportAccount.getTransportProtocol());
+    @Override
+    public int getOAuthAccountId() {
+        return accountId;
     }
 
-    /**
-     * Gets the transport authentication information from given mail account.
-     *
-     * @param mailAccount The mail account
-     * @param fallback The fall-back value
-     * @return The transport authentication information or <code>fallback</code>
-     */
-    public static TransportAuth getTransportAuthFrom(MailAccount mailAccount, TransportAuth fallback) {
-        if (null == mailAccount) {
-            return fallback;
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public String getServiceId() {
+        return GmailSendProvider.PROTOCOL_GMAIL_SEND.getName();
+    }
+
+    @Override
+    public String getId() {
+        return Integer.toString(account.getId());
+    }
+
+    @Override
+    public String getDisplayName() {
+        return account.getName();
+    }
+
+    @Override
+    public Status getStatus(Session session) throws OXException {
+        try {
+            MailTransport transport = MailTransport.getInstance(session, account.getId());
+            transport.ping();
+            return Status.OK;
+        } catch (OXException e) {
+            return Status.RECREATION_NEEDED;
         }
-        Map<String, String> properties = mailAccount.getProperties();
-        if (null == properties) {
-            return fallback;
-        }
-        TransportAuth transportAuth = TransportAuth.transportAuthFor(properties.get("transport.auth"));
-        return null == transportAuth ? fallback : transportAuth;
+    }
+
+    @Override
+    public Type getType() {
+        return Type.MAIL;
     }
 
 }

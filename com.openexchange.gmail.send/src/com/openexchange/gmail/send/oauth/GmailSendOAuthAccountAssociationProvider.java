@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,50 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.oauth;
 
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.scope.OAuthScope;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import com.openexchange.exception.OXException;
+import com.openexchange.gmail.send.services.Services;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.oauth.association.OAuthAccountAssociation;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
+import com.openexchange.session.Session;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendOAuthAccountAssociationProvider}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
-
-    private final String mapping;
-    private final OXScope module;
+public class GmailSendOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * Initializes a new {@link GmailSendOAuthAccountAssociationProvider}.
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    public GmailSendOAuthAccountAssociationProvider() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
     @Override
-    public String getProviderScopes() {
-        return mapping;
+    public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
+        MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
+        TransportAccount[] accounts = mass.getUserTransportAccounts(session.getUserId(), session.getContextId());
+        Collection<OAuthAccountAssociation> associations = null;
+        for (TransportAccount account : accounts) {
+            if (account.isTransportOAuthAble() && account.getTransportOAuthId() == accountId) {
+                if (null == associations) {
+                    associations = new LinkedList<>();
+                }
+                associations.add(new GmailSendOAuthAccountAssociation(accountId, account, session.getUserId(), session.getContextId()));
+            }
+        }
+
+        return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

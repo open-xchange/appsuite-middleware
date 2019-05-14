@@ -47,55 +47,50 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.dataobjects;
 
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.session.Session;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendReferencedPart}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
+public final class GmailSendReferencedPart extends ReferencedMailPart {
 
-    private final String mapping;
-    private final OXScope module;
+    private static final long serialVersionUID = -324097128586148044L;
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
-     */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
-    }
+	 * Initializes a new {@link GmailSendReferencedPart}
+	 *
+	 * @param referencedPart
+	 *            The referenced {@link MailPart part}
+	 * @param session
+	 *            The {@link Session session} providing needed user data
+	 * @throws OXException
+	 *             If instantiation fails
+	 */
+	public GmailSendReferencedPart(final MailPart referencedPart, final Session session) throws OXException {
+		super(referencedPart, session);
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
-    }
+	/**
+	 * Initializes a new {@link GmailSendReferencedPart}
+	 *
+	 * @param referencedMail
+	 *            The referenced {@link MailMessage mail}
+	 * @param session
+	 *            The {@link Session session} providing needed user data
+	 * @throws OXException
+	 *             If instantiation fails
+	 */
+	public GmailSendReferencedPart(final MailMessage referencedMail, final Session session) throws OXException {
+		super(referencedMail, session);
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+<<<<<<< HEAD
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,com.google.api.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,com.google.gdata"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,com.openexchange.google.api.client"/>
@@ -20,5 +21,29 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,com.openexchange.oauth.xing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,com.openexchange.xing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.8.4,com.openexchange.xing.access"/>
+=======
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.api.client"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.google.gdata"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.google.api.client"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.file.storage.oauth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gmail.send"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.oauth.google"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.microsoft.graph"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.boxcom"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.dropbox"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.flickr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.google"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.microsoft.graph"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.tumblr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.twitter"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.yahoo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.xing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.xing.access"/>
+>>>>>>> 9634e6b29f1... MW-1189: Introduced Gmail Send bundle using Google Send API to transport messages and updated Google Client API JARs
 </provider>
 </psf>

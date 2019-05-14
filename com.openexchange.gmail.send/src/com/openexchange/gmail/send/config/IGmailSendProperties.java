@@ -47,55 +47,31 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.config;
 
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.mail.transport.config.ITransportProperties;
 
-/**
- * {@link GoogleOAuthScope}
- *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
-
-    private final String mapping;
-    private final OXScope module;
+public interface IGmailSendProperties extends ITransportProperties {
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
+     * Gets the logTransport flag
      *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * @return the logTransport flag
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
-    }
+    boolean isLogTransport();
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the read timeout
      *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
+     * @return the read timeout
      */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
-    }
+    int getTimeout();
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the connection timeout
      *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
+     * @return the connection timeout
      */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
+    int getConnectionTimeout();
+
 }

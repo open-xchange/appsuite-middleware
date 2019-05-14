@@ -47,55 +47,31 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send;
 
-import com.openexchange.oauth.scope.OXScope;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendExceptionMessage}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
-
-    private final String mapping;
-    private final OXScope module;
+public class GmailSendExceptionMessage implements LocalizableStrings {
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * Initializes a new {@link GmailSendExceptionMessage}.
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    private GmailSendExceptionMessage() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
+    /**
+     * No recipient(s) has been defined for new message
      */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
-    }
+    public final static String MISSING_RECIPIENTS_MSG = "There are no recipient(s) for the new message.";
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
+    /**
+     * The following recipient is not allowed: %1$s. Please remove associated address and try again.
      */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
+    public static final String RECIPIENT_NOT_ALLOWED = "The following recipient is not allowed: %1$s. Please remove associated address and try again.";
 }
