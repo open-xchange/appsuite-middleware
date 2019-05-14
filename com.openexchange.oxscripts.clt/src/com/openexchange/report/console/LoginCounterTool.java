@@ -109,8 +109,8 @@ public final class LoginCounterTool extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createArgumentOption("t", "start", "startDate", "Required. Sets the start date for the detecting range. Example: 2009-12-31 00:00:00", true));
-        options.addOption(createArgumentOption("e", "end", "endDate", "Required. Sets the end date for the detecting range. Example: 2010-01-1 23:59:59", true));
+        options.addOption(createArgumentOption("t", "start", "startDate", "Required. Sets the start date for the detecting range. Example: 2009-12-31T00:00:00", true));
+        options.addOption(createArgumentOption("e", "end", "endDate", "Required. Sets the end date for the detecting range. Example: 2010-01-1T23:59:59", true));
         options.addOption(createArgumentOption("r", "regex", "regex", "Optional. Limits the counter to login devices that match regex.", false));
         options.addOption(createSwitch("a", "aggregate", "Optional. Aggregates the counts by users. Only the total number of logins without duplicate counts (caused by multiple clients per user) is returned.", false));
 
