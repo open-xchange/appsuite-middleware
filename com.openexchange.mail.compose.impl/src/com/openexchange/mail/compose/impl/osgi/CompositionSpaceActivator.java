@@ -107,6 +107,7 @@ import com.openexchange.mail.compose.impl.storage.security.CryptoCompositionSpac
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
@@ -138,7 +139,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, QuotaFileStorageService.class, CapabilityService.class, HtmlService.class,
             ConfigurationService.class, ContextService.class, UserService.class, ComposeHandlerRegistry.class, ObfuscatorService.class,
-            ConfigViewFactory.class, CryptoService.class };
+            ConfigViewFactory.class, CryptoService.class, MailAccountStorageService.class };
     }
 
     @Override

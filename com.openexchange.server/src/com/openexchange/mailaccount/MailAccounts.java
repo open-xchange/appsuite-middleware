@@ -70,6 +70,16 @@ public final class MailAccounts {
     }
 
     /**
+     * Checks whether the specified transport account uses special Gmail Send API to transport messages.
+     *
+     * @param transportAccount The transport account to check
+     * @return <code>true</code> for a Gmail Send API; otherwise <code>false</code>
+     */
+    public static boolean isGmailTransport(TransportAccount transportAccount) {
+        return null == transportAccount ? false : "gmailsend".equals(transportAccount.getTransportProtocol());
+    }
+
+    /**
      * Gets the transport authentication information from given mail account.
      *
      * @param mailAccount The mail account

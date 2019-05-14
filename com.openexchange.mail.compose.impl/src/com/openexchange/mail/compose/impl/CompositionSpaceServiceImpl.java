@@ -166,6 +166,8 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.ContactCollectorUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -484,15 +486,19 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             usm.setNoSave(true);
             {
                 final String paramName = "copy2Sent";
-                if (request.containsParameter(paramName)) { // Provided as URL parameter
-                    String sCopy2Sent = request.getParameter(paramName);
-                    if (null != sCopy2Sent) {
-                        if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
-                            usm.setNoCopyIntoStandardSentFolder(false);
-                        } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
-                            // Explicitly deny copy to sent folder
-                            usm.setNoCopyIntoStandardSentFolder(true);
-                        }
+                String sCopy2Sent = request.getParameter(paramName);
+                if (null != sCopy2Sent) { // Provided as URL parameter
+                    if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                        usm.setNoCopyIntoStandardSentFolder(false);
+                    } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                        // Explicitly deny copy to sent folder
+                        usm.setNoCopyIntoStandardSentFolder(true);
+                    }
+                } else {
+                    MailAccountStorageService mass = services.getOptionalService(MailAccountStorageService.class);
+                    if (mass != null && MailAccounts.isGmailTransport(mass.getTransportAccount(accountId, session.getUserId(), session.getContextId()))) {
+                        // Deny copy to sent folder for Gmail
+                        usm.setNoCopyIntoStandardSentFolder(true);
                     }
                 }
             }
