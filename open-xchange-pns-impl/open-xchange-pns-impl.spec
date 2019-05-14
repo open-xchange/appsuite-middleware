@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 55
+%define        ox_release 56
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -42,12 +42,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-. /opt/open-xchange/lib/oxfunctions.sh
-
-# prevent bash from expanding, see bug 13316
-GLOBIGNORE='*'
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -58,9 +52,16 @@ GLOBIGNORE='*'
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-apns-options.yml
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-gcm-options.yml
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/pns-wns-options.yml
+/opt/open-xchange/etc/pns-apns-options-defaults.yml
+/opt/open-xchange/etc/pns-gcm-options-defaults.yml
+/opt/open-xchange/etc/pns-wns-options-defaults.yml
 
 %changelog
+* Fri May 03 2019 Thorben Betten <thorben.betten@open-xchange.com>
+Build for patch 2019-05-13 (5232)
 * Tue Mar 12 2019 Thorben Betten <thorben.betten@open-xchange.com>
 Build for patch 2019-03-12 (5166)
 * Tue Feb 26 2019 Thorben Betten <thorben.betten@open-xchange.com>
