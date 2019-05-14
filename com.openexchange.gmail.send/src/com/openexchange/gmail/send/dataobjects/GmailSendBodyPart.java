@@ -47,55 +47,34 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.dataobjects;
 
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendBodyPart} - The Gmail Send text body part implementation.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
+public final class GmailSendBodyPart extends TextBodyMailPart {
 
-    private final String mapping;
-    private final OXScope module;
+    private static final long serialVersionUID = -7902519911276000751L;
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
+     * Initializes a new {@link GmailSendBodyPart}.
      *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * @param mailBody The text body as HTML content
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    public GmailSendBodyPart(final String mailBody) {
+        super(mailBody);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
     @Override
-    public String getProviderScopes() {
-        return mapping;
+    public TextBodyMailPart copy() throws OXException {
+        final GmailSendBodyPart copy = new GmailSendBodyPart("");
+        fillInstance(copy);
+        return copy;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

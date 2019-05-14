@@ -47,55 +47,33 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.dataobjects;
 
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendFilePart} - A {@link MailPart} implementation that keeps a
+ * reference to a temporary uploaded file that shall be added as an attachment
+ * later
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
+public final class GmailSendFilePart extends UploadFileMailPart {
 
-    private final String mapping;
-    private final OXScope module;
+    private static final long serialVersionUID = 7072156043857966026L;
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
-     */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
-    }
+	 * Constructor
+	 *
+	 * @throws OXException
+	 *             If upload file's content type cannot be parsed
+	 */
+	public GmailSendFilePart(final UploadFile uploadFile) throws OXException {
+		super(uploadFile);
+	}
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

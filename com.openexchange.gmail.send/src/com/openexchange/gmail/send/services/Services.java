@@ -47,55 +47,69 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.services;
 
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OXScope;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
-
-    private final String mapping;
-    private final OXScope module;
+public final class Services {
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * Initializes a new {@link Services}.
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    private Services() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
      *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    @Override
-    public String getProviderScopes() {
-        return mapping;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the service lookup.
      *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
+     * @return The service lookup or <code>null</code>
      */
-    @Override
-    public OXScope getOXScope() {
-        return module;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.gmail.send\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
+    }
+
 }

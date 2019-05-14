@@ -47,55 +47,82 @@
  *
  */
 
-package com.openexchange.oauth.google;
+package com.openexchange.gmail.send.config;
 
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.UrlInfo;
+import com.openexchange.mail.transport.config.ITransportProperties;
+import com.openexchange.mail.transport.config.TransportConfig;
 
 /**
- * {@link GoogleOAuthScope}
+ * {@link GmailSendConfig} - The Gmail send configuration.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://www.googleapis.com/auth/userinfo.profile https://mail.google.com/ https://www.googleapis.com/auth/gmail.send", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/calendar", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/contacts", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive", OXScope.drive);
+public final class GmailSendConfig extends TransportConfig {
 
-    private final String mapping;
-    private final OXScope module;
+    private IGmailSendProperties transportProperties;
 
     /**
-     * Initialises a new {@link GoogleOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
+     * Default constructor
      */
-    private GoogleOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    public GmailSendConfig() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
     @Override
-    public String getProviderScopes() {
-        return mapping;
+    public MailCapabilities getCapabilities() {
+        return MailCapabilities.EMPTY_CAPS;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
     @Override
-    public OXScope getOXScope() {
-        return module;
+    public int getPort() {
+        return -1;
     }
+
+    @Override
+    public void setPort(final int pop3Port) {
+        // Nothing to set
+    }
+
+    @Override
+    public String getServer() {
+        return "www.googleapis.com";
+    }
+
+    @Override
+    public void setServer(final String pop3Server) {
+        // Nothing to set
+    }
+
+    @Override
+    public void setSecure(final boolean secure) {
+        // Nothing to set
+    }
+
+    @Override
+    public boolean isSecure() {
+        return true;
+    }
+
+    @Override
+    protected void parseServerURL(final UrlInfo urlInfo) throws OXException {
+        // Nothing to parse
+    }
+
+    @Override
+    public ITransportProperties getTransportProperties() {
+        return transportProperties;
+    }
+
+    public IGmailSendProperties getGmailSendProperties() {
+        return transportProperties;
+    }
+
+    @Override
+    public void setTransportProperties(final ITransportProperties transportProperties) {
+        this.transportProperties = (IGmailSendProperties) transportProperties;
+    }
+
 }
