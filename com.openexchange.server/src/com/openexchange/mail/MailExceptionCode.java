@@ -636,6 +636,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Unable to save the mail, due to exceeded quota.
      */
     UNABLE_TO_SAVE_MAIL_QUOTA("Unable to save the mail, due to exceeded quota.", MailExceptionStrings.UNABLE_TO_SAVE_MAIL_QUOTA_MSG, CATEGORY_CAPACITY, 117),
+    /**
+     * %1$s protocol error occurred: %2$s
+     */
+    PROTOCOL_ERROR("%1$s protocol error occurred: %2$s", Category.CATEGORY_ERROR, 118),
     ;
 
     private static final String PREFIX = "MSG";
