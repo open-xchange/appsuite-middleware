@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-12 23:16+0800\n"
+"PO-Revision-Date: 2019-05-04 16:43+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "Language: zh_TW\n"
@@ -1166,9 +1166,9 @@ msgstr "近期修改了登入資訊，造成驗證失敗。請移除帳號後以
 msgid "Internal Calendar"
 msgstr "內部行事曆"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "要求的頁面不是行事曆。"
 
 #. You have no access to this calendar.
@@ -6693,11 +6693,9 @@ msgid "Drafts"
 msgstr "草稿"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "已發送的物件"
+msgid "Sent"
+msgstr "已發送郵件"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -6836,6 +6834,11 @@ msgstr "檔案已使用郵件「#SUBJECT#」發布，發送於 #DATE# 至 #TO#"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "尊敬的先生或女士"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "已發送的物件"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10123,6 +10126,10 @@ msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
 msgstr "您無法變更垃圾桶及其子資料夾的權限"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "已經有名為「%1$s」的資料夾，請使用其他名稱。"
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -13612,6 +13619,9 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "祖魯"
 
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "要求的頁面不是行事曆。"
+
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr "%1$s 與您分享了 %2$s「%3$s」，請登入檢視。"
@@ -16846,9 +16856,6 @@ msgstr "祖魯"
 
 #~ msgid "Drafts folder"
 #~ msgstr "草稿資料夾"
-
-#~ msgid "Sent"
-#~ msgstr "已發送郵件"
 
 #~ msgid "Sent folder"
 #~ msgstr "已發送郵件文件夾"

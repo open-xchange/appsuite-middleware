@@ -51,6 +51,7 @@ package com.openexchange.mail.authenticity.test;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.mail.authenticity.test.bugs.BugsTestSuite;
 
 /**
  * {@link MailAuthenticityTestSuite}
@@ -61,7 +62,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     TestMailAuthenticityHandler.class,
     TestMailAuthenticityStatusMatrix.class,
-    StandardAuthenticationResultsValidatorTest.class
+    StandardAuthenticationResultsValidatorTest.class,
+    BugsTestSuite.class
 })
 public class MailAuthenticityTestSuite {
 

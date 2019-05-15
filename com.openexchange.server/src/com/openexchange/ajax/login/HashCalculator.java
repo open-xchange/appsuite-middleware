@@ -272,11 +272,8 @@ public class HashCalculator {
      * @return The <code>"User-Agent"</code> request header or an empty String if absent
      */
     public static String getUserAgent(final HttpServletRequest req) {
-        final String header = req.getHeader(Header.USER_AGENT);
-        if (header == null) {
-            return "";
-        }
-        return header;
+        String header = req.getHeader(Header.USER_AGENT);
+        return header == null ? "" : header;
     }
 
     private static String removeNonWordCharactersFrom(String str) {

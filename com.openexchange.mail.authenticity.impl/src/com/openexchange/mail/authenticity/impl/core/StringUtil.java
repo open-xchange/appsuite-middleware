@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -134,55 +135,48 @@ final class StringUtil {
 
     private static final Pattern REGEX_PAIR;
     static {
-        String quotedString = "\"(?:\\\"|.)*\"";
-        String token = "\\p{Graph}+";
+        String quotedString = "\"(?:(?:\\\\\\\")|[^\"])+?\"";
+        String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
         String comment = "\\([^)]*\\)";
 
         String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
 
-        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
+        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
     }
+
+    private static final int MAX_NUMBER_OF_ATTRIBUTES = 250;
 
     /**
      * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to the specified {@link T} collector.
      *
      * @param element The element to parse
      * @return A {@link T} with the key/value attributes of the element
-     */
+     */     
     private static <T> T parseToCollector(CharSequence element, T collector) {
-        if (element.toString().indexOf('=') < 0) {
-            // No pairs; return as a singleton collector with the line being both the key and the value
-            String kv = element.toString();
-            add(kv, kv, collector);
-            return collector;
-        }
-        Matcher m = REGEX_PAIR.matcher(element);
-        while (m.find()) {
-            String key = m.group(1);
-            String value = m.group(2);
-            add(key, value, collector);
-        }
-
-        return collector;
-    }
-
-    /**
-     * Adds the specified key/value to the specified {@link T} collector
-     *
-     * @param key The key
-     * @param value The value
-     * @param collector The {@link T} collector
-     */
-    private static <T> void add(String key, String value, T collector) {
         CollectorAdder collectorAdder = COLLECTOR_ADDERS.get(collector.getClass());
         if (collectorAdder == null) {
             throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
         }
-        collectorAdder.add(key, value, collector);
+
+        if (element.toString().indexOf('=') < 0) {
+            // No pairs; return as a singleton collector with the line being both the key and the value
+            String kv = element.toString();
+            collectorAdder.add(kv, kv, collector);
+            return collector;
+        }
+
+        Matcher m = REGEX_PAIR.matcher(element);
+        int maxAttrs = MAX_NUMBER_OF_ATTRIBUTES;
+        while (maxAttrs-- > 0 && m.find()) {
+            String key = m.group(1);
+            String value = m.group(2);
+            collectorAdder.add(key, value, collector);
+        }
+        return collector;
     }
 
     /**
-     * Splits the parametrised header to single elements using the semicolon (';')
+     * Splits the parameterized header to single elements using the semicolon (';')
      * as the split character
      *
      * @param header The header to split
@@ -217,6 +211,7 @@ final class StringUtil {
                         lineBuffer.setLength(0);
                         break;
                     }
+                    //$FALL-THROUGH$
                 default:
                     lineBuffer.append(c);
             }
@@ -225,7 +220,7 @@ final class StringUtil {
         if (lineBuffer.length() > 0) {
             split.add(lineBuffer.toString().trim());
         }
-        LOGGER.trace("Header '{}' split in {} msec.", header, System.currentTimeMillis() - start);
+        LOGGER.trace("Header '{}' split in {} msec.", header, L(System.currentTimeMillis() - start));
         return split;
     }
 }

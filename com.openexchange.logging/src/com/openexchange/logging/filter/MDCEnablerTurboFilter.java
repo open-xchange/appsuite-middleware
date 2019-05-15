@@ -51,6 +51,7 @@ package com.openexchange.logging.filter;
 
 import org.slf4j.MDC;
 import org.slf4j.Marker;
+import com.openexchange.logging.MDCEnabledThreadGroup;
 import com.openexchange.marker.OXThreadMarker;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -81,10 +82,12 @@ public class MDCEnablerTurboFilter extends ExtendedTurboFilter {
     @Override
     public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format, final Object[] params, final Throwable t) {
         // Check if a log message is supposed to be logged
-    	// DO NOT INTEGRATE TO DEVELOPMENT!!!!!!!
-//        if ((null != format) && !(Thread.currentThread() instanceof OXThreadMarker)) {
-//            MDC.clear();
-//        }
+        if (null != format) {
+            Thread currentThread = Thread.currentThread();
+            if (!(currentThread instanceof OXThreadMarker) && !(currentThread.getThreadGroup() instanceof MDCEnabledThreadGroup)) {
+                MDC.clear();
+            }
+        }
         return FilterReply.NEUTRAL;
     }
 

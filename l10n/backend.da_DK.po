@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-17 08:54+0200\n"
+"PO-Revision-Date: 2019-05-06 11:11+0200\n"
 "Last-Translator: Nicky Thomassen <nicky@workshop-chapina.com>\n"
 "Language-Team: Danish <da@workshop-chapina.com>\n"
 "Language: da_DK\n"
@@ -1213,10 +1213,10 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Intern kalender"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
-msgstr "Siden er ikke en kaldender."
+msgid "The requested page does not denote a calendar."
+msgstr "Den adspurgte side er ikke en kaldender."
 
 #. You have no access to this calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:64
@@ -6996,11 +6996,9 @@ msgid "Drafts"
 msgstr "Kladder"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Sendte objekter"
+msgid "Sent"
+msgstr "Sendt"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7139,6 +7137,11 @@ msgstr "Denne fil er udgivet for e-mail »#SUBJECT#« sendt til #TO# #DATE#"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Kære"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Sendte objekter"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10555,6 +10558,10 @@ msgid ""
 "its subfolders"
 msgstr ""
 "Du har ikke lov til at ændre rettighederne til papirkurven og dens undermapper"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Der er allerede en mappe med navnet \"%1$s\". Vælg venligst et andet."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -14128,6 +14135,9 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "Siden er ikke en kaldender."
 
 #~ msgid "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr ""

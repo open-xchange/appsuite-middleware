@@ -49,27 +49,27 @@
 
 package com.sun.mail.imap;
 
+import java.io.IOException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 
 /**
- * {@link CommandExecutor} - Receives call-backs before an issued command to IMAP store and is responsible for executing it.
+ * {@link CommandExecutor} - Is responsible for executing commands and reading responses.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public interface CommandExecutor {
-
+    
     /**
-     * Called when an IMAP command is about to be issued
-     * <p>
-     * <b>Note</b>: If an exception is thrown by this listener, actual command execution is aborted!
+     * Checks if this executor is applicable to given protocol instance
      *
-     * @param event The event providing command details
-     * @return <code>true</code> if this command listener is applicable; otherwise <code>false</code>
+     * @param protocol The protocol instance
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
      */
-    boolean onBeforeCommandIssued(CommandEvent event);
+    boolean isApplicable(Protocol protocol);
 
     /**
      * Executes given command with given arguments using specified protocol instance.
@@ -79,5 +79,23 @@ public interface CommandExecutor {
      * @param protocol The protocol instance
      * @return The response array
      */
-    Response[] executeCommand(String command, Argument args, Protocol protocol);
+    default Response[] executeCommand(String command, Argument args, Protocol protocol) {
+        return protocol.executeCommand(command, args);
+    }
+    
+    /**
+     * Reads a response using specified protocol instance.
+     *
+     * @param protocol The protocol instance
+     * @return The response
+     * @throws IOException If an I/O error occurs
+     */
+    default Response readResponse(Protocol protocol) throws IOException {
+        try {
+            return protocol.readResponse();
+        } catch (ProtocolException e) {
+            // Cannot occur
+            throw new IOException(e);
+        }
+    }
 }

@@ -384,7 +384,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     protected void addWarnings(Collection<OXException> warnings) {
         if (null != warnings && 0 < warnings.size()) {
-            warnings.addAll(warnings);
+            this.warnings.addAll(warnings);
         }
     }
 

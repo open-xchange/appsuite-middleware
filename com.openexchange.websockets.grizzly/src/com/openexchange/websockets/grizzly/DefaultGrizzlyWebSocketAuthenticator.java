@@ -52,6 +52,7 @@ package com.openexchange.websockets.grizzly;
 import java.lang.reflect.UndeclaredThrowableException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import org.glassfish.grizzly.http.util.Header;
 import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.WebSocketException;
@@ -140,6 +141,10 @@ public class DefaultGrizzlyWebSocketAuthenticator implements GrizzlyWebSocketAut
             }
 
             // Check secret...
+            CookieHashSource hashSource = this.hashSource;
+            if (null == request.getHeader(Header.UserAgent.toString())) {
+                hashSource = CookieHashSource.REMEMBER;
+            }
             SessionUtility.checkSecret(hashSource, request, session);
         } catch (OXException e) {
             throw new SessionValidationHandshakeException(e.getPlainLogMessage());

@@ -182,13 +182,15 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
         CalendarStorageFactory factory = Tools.requireService(CalendarStorageFactory.class, services);
         CalendarStorage storage = factory.create(context, account.getAccountId(), optEntityResolver(context.getContextId()));
         Event result;
-        if(recurrenceId == null) {
+        if (recurrenceId == null) {
             result = storage.getEventStorage().loadEvent(eventId, null);
         } else {
             result = storage.getEventStorage().loadException(eventId, recurrenceId, null);
         }
         result = storage.getUtilities().loadAdditionalEventData(account.getUserId(), result, null);
-        result.setFolderId(CalendarUtils.getFolderView(result, account.getUserId()));
+        if (result != null) {
+            result.setFolderId(CalendarUtils.getFolderView(result, account.getUserId()));
+        }
         return result;
     }
 
