@@ -30,7 +30,7 @@ spec:
         }
     }
     options {
-        buildDiscarder(logRotator(daysToKeepStr: '30', numToKeepStr: '0'))
+        buildDiscarder(logRotator(daysToKeepStr: '30'))
         checkoutToSubdirectory('backend')
         timestamps()
     }
