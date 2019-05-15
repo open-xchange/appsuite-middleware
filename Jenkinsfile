@@ -152,7 +152,6 @@ spec:
 }
 
 String version4ConfigDocProcessor(String branchName) {
-    println("Branch: ${branchName}")
     if ('develop' == branchName)
         return branchName
     if (branchName.startsWith('master-'))
