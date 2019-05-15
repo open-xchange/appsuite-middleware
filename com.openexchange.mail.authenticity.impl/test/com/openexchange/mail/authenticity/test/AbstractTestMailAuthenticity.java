@@ -87,8 +87,8 @@ import com.openexchange.session.Session;
 public abstract class AbstractTestMailAuthenticity {
 
     MailAuthenticityHandlerImpl handler;
-    MailAuthenticityResult result;
-    InternetAddress[] fromAddresses;
+    protected MailAuthenticityResult result;
+    protected InternetAddress[] fromAddresses;
 
     private MailMessage mailMessage;
     private HeaderCollection headerCollection;
@@ -254,7 +254,7 @@ public abstract class AbstractTestMailAuthenticity {
      *
      * @param amount The amount of results
      */
-    void assertAmount(int amount) {
+    protected void assertAmount(int amount) {
         assertEquals("The mail authenticity mechanism results amount does not match", amount, result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).size());
     }
 
@@ -274,7 +274,7 @@ public abstract class AbstractTestMailAuthenticity {
      * @param expectedDomain The expected domain
      * @param expectedResult The expected result
      */
-    void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, AuthenticityMechanismResult expectedResult) {
+    protected void assertAuthenticityMechanismResult(MailAuthenticityMechanismResult actualMechanismResult, String expectedDomain, AuthenticityMechanismResult expectedResult) {
         assertEquals("The mechanism's domain does not match", expectedDomain, actualMechanismResult.getDomain());
         assertNotNull("The mechanism's result is null", actualMechanismResult.getResult());
         AuthenticityMechanismResult s = actualMechanismResult.getResult();
@@ -300,7 +300,7 @@ public abstract class AbstractTestMailAuthenticity {
      * @param expected The expected {@link MailAuthenticityStatus}
      * @param actual The actual {@link MailAuthenticityStatus}
      */
-    void assertStatus(MailAuthenticityStatus expected, MailAuthenticityStatus actual) {
+    protected void assertStatus(MailAuthenticityStatus expected, MailAuthenticityStatus actual) {
         assertEquals("The overall status does not match", expected, actual);
     }
 
@@ -310,7 +310,7 @@ public abstract class AbstractTestMailAuthenticity {
      * @param expected The expected domain
      * @param actual The actual domain
      */
-    void assertDomain(String expected, String actual) {
+    protected void assertDomain(String expected, String actual) {
         assertEquals("The domain does not match", expected, actual);
     }
 
@@ -327,7 +327,7 @@ public abstract class AbstractTestMailAuthenticity {
      *
      * @param headers The 'Authentication-Results' headers to add
      */
-    void perform(String... headers) {
+    protected void perform(String... headers) {
         for (String header : headers) {
             headerCollection.addHeader(MessageHeaders.HDR_AUTHENTICATION_RESULTS, header);
         }

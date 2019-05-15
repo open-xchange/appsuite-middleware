@@ -47,30 +47,51 @@
  *
  */
 
-package com.openexchange.mail.authenticity.test;
+package com.openexchange.mail.authenticity.test.bugs;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.mail.authenticity.test.bugs.BugsTestSuite;
+import java.util.List;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.junit.Test;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
+import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
+import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
+import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
+import com.openexchange.mail.authenticity.test.AbstractTestMailAuthenticity;
 
 /**
- * {@link MailAuthenticityTestSuite}
+ * {@link TestBug65199}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    TestMailAuthenticityHandler.class,
-    TestMailAuthenticityStatusMatrix.class,
-    StandardAuthenticationResultsValidatorTest.class,
-    BugsTestSuite.class
-})
-public class MailAuthenticityTestSuite {
+public class TestBug65199 extends AbstractTestMailAuthenticity {
 
     /**
-     * Initializes a new {@link MailAuthenticityTestSuite}.
+     * Initialises a new {@link TestBug65199}.
      */
-    public MailAuthenticityTestSuite() {
+    public TestBug65199() {
         super();
     }
+
+    /**
+     * Teeeeeest
+     */
+    @Test
+    public void test() throws AddressException {
+        fromAddresses[0] = new InternetAddress("Jane Doe <jane.doe@aliceland.com>");
+        perform("ox.io; spf=pass (ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender) smtp.mailfrom=@aliceland.com; dkim=pass header.i=@aliceland.com header.s=sh1244 header.b=nhkmxmg1; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=aliceland.com");
+
+        assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
+        assertDomain("aliceland.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
+        assertAmount(3);
+
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "aliceland.com", SPFResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(1), "aliceland.com", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(2), "aliceland.com", DMARCResult.PASS);
+
+    }
+
 }

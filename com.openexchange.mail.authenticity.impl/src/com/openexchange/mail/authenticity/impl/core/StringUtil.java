@@ -136,13 +136,12 @@ final class StringUtil {
     private static final Pattern REGEX_PAIR;
     static {
         String quotedString = "\"(?:(?:\\\\\\\")|[^\"])+?\"";
-        String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
+        String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
         String comment = "\\([^)]*\\)";
 
         String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
 
-        //REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
-          REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
+        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
     }
 
     private static final int MAX_NUMBER_OF_ATTRIBUTES = 250;
@@ -152,7 +151,7 @@ final class StringUtil {
      *
      * @param element The element to parse
      * @return A {@link T} with the key/value attributes of the element
-     */
+     */     
     private static <T> T parseToCollector(CharSequence element, T collector) {
         CollectorAdder collectorAdder = COLLECTOR_ADDERS.get(collector.getClass());
         if (collectorAdder == null) {

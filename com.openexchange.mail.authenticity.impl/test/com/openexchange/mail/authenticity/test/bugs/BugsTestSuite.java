@@ -47,30 +47,27 @@
  *
  */
 
-package com.openexchange.mail.authenticity.test;
+package com.openexchange.mail.authenticity.test.bugs;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
-import com.openexchange.mail.authenticity.test.bugs.BugsTestSuite;
 
 /**
- * {@link MailAuthenticityTestSuite}
+ * {@link BugsTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    TestMailAuthenticityHandler.class,
-    TestMailAuthenticityStatusMatrix.class,
-    StandardAuthenticationResultsValidatorTest.class,
-    BugsTestSuite.class
+    TestBug65199.class
 })
-public class MailAuthenticityTestSuite {
+public class BugsTestSuite {
 
     /**
-     * Initializes a new {@link MailAuthenticityTestSuite}.
+     * Initialises a new {@link BugsTestSuite}.
      */
-    public MailAuthenticityTestSuite() {
+    public BugsTestSuite() {
         super();
     }
 }
