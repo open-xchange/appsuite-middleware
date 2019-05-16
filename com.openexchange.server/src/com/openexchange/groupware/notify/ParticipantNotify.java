@@ -66,6 +66,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import javax.mail.Multipart;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -552,7 +553,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
                      */
                     state.addSpecial(newObj, oldObj, renderMap, p);
 
-                    if (isUpdate && EmailableParticipant.STATE_NONE == p.state) {
+                    ConfigurationService configService = ServerServiceRegistry.getServize(ConfigurationService.class);
+                    boolean usePool = configService != null && configService.getBoolProperty("com.openexchange.calendar.notify.poolenabled", true);
+                    if (usePool && isUpdate && EmailableParticipant.STATE_NONE == p.state) {
                         /*
                          * Add to pool
                          */
