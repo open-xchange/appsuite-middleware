@@ -139,8 +139,9 @@ location:
   description: The location of the event.
 flags:
   type: array
-  type: string
   description: Flags indicating certain aspects of an event, as described in [Event Flags](#event-flags).
+  items:
+    type: string
 relatedTo:
   type: string
   description: The relationship between this and other events.
