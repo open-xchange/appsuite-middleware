@@ -162,6 +162,6 @@ String version4ConfigDocProcessor(String branchName) {
     if (branchName.startsWith('release-'))
         return branchName.substring(8)
     if ('master' == branchName)
-        return '7.10.1'
+        return '7.10.2'
     error "Processing configuration documentation is not intended for branch ${branchName}"
 }
