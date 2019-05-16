@@ -110,6 +110,7 @@ import net.sourceforge.cardme.vcard.exceptions.VCardException;
 @RunWith(Parameterized.class)
 public abstract class CardDAVTest extends WebDAVTest {
 
+    @SuppressWarnings("hiding")
     protected static final int TIMEOUT = 10000;
 
     private int folderId;
@@ -196,7 +197,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putVCard(String uid, String vCard) throws Exception {
+    public int putVCard(String uid, String vCard) throws Exception {
         return putVCard(uid, vCard, "Contacts");
     }
 
@@ -213,11 +214,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
     }
 
-    protected String postVCard(String uid, String vCard, float maxSimilarity) throws Exception {
-        return postVCard(uid, vCard, "Contacts", maxSimilarity);
+    protected String postVCard(String vCard, float maxSimilarity) throws Exception {
+        return postVCard(vCard, "Contacts", maxSimilarity);
     }
 
-    protected String postVCard(String uid, String vCard, String collection, float maxSimilarity) throws Exception {
+    protected String postVCard(String vCard, String collection, float maxSimilarity) throws Exception {
         PostMethod post = null;
         try {
             final String href = "/carddav/" + collection;
@@ -440,6 +441,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         return vCard;
     }
 
+    protected VCardResource getVCard(final String uid, String collection) throws Exception {
+        String href = "/carddav/" + collection + "/" + uid + ".vcf";
+        return getVCardResource(href);
+    }
+
     protected VCardResource getVCardResource(String href) throws Exception {
         GetMethod get = new GetMethod(getWebDAVClient().getBaseURI() + href);
         String vCard = getWebDAVClient().doGet(get);
@@ -454,11 +460,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         if (null == folderIDs || 0 == folderIDs.length) {
             filter = "{'filter' : [ '=' , {'field' : 'uid'} , '" + uid + "']}";
         } else if (1 == folderIDs.length) {
-            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "['=' , {'field' : 'fid'}, '" + folderIDs[0] + "']" + "]})";
+            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[0] + "']" + "]})";
         } else {
-            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "[ 'or', " + "['=' , {'field' : 'fid'}, '" + folderIDs[0] + "'] ";
+            filter = "{'filter' : [ 'and', " + "['=' , {'field' : 'uid'} , '" + uid + "'], " + "[ 'or', " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[0] + "'] ";
             for (int i = 1; i < folderIDs.length; i++) {
-                filter = filter + ", " + "['=' , {'field' : 'fid'}, '" + folderIDs[i] + "'] ";
+                filter = filter + ", " + "['=' , {'field' : 'folder_id'}, '" + folderIDs[i] + "'] ";
             }
             filter = filter + "]" + "]})";
         }
@@ -470,30 +476,20 @@ public abstract class CardDAVTest extends WebDAVTest {
         return null != contacts && 0 < contacts.length ? contacts[0] : null;
     }
 
-    //	protected Contact getContact(String uid, int folderID) {
-    //		Contact[] contacts = cotm.allAction(folderId, new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.UID });
-    //		for (Contact contact : contacts) {
-    //			if (uid.equals(contact.getUid())) {
-    //				return cotm.getAction(contact);
-    //			}
-    //		}
-    //		return null;
-    //	}
-
-    protected Contact getContact(String uid) throws InterruptedException, JSONException {
+    protected Contact getContact(String uid) throws JSONException {
         return getContact(uid, null);
     }
 
-    protected List<Contact> getContacts(int folderID) throws InterruptedException, JSONException {
+    protected List<Contact> getContacts(int folderID) {
         Contact[] contacts = cotm.allAction(folderID);
         return Arrays.asList(contacts);
     }
 
-    protected Contact getContact(String uid, int folderID) throws InterruptedException, JSONException {
+    protected Contact getContact(String uid, int folderID) throws JSONException {
         return getContact(uid, new int[] { folderID });
     }
 
-    protected Contact getContact(String uid, int[] folderIDs) throws InterruptedException, JSONException {
+    protected Contact getContact(String uid, int[] folderIDs) throws JSONException {
         return this.searchContact(uid, folderIDs, null);
     }
 

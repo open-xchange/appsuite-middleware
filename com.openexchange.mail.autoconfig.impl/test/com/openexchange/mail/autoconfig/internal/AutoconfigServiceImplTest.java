@@ -70,7 +70,7 @@ public class AutoconfigServiceImplTest {
     private final String address = "info@schalke04.de";
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         service = new AutoconfigServiceImpl(null);
     }
 

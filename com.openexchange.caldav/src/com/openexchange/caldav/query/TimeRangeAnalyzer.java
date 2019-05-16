@@ -68,8 +68,8 @@ public class TimeRangeAnalyzer extends AnalyzerElement{
     protected boolean applyAndExtract(Filter filter, List<Object> extracted) {
         if (apply(filter)) {
             TimeRange tr = (TimeRange) filter;
-            extracted.add(tr.getStart());
-            extracted.add(tr.getEnd());
+            extracted.add(Long.valueOf(tr.getStart()));
+            extracted.add(Long.valueOf(tr.getEnd()));
             return true;
         }
         return false;

@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -110,7 +111,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         this.api = api;
 
         setId(api.getServiceId());
-        setDisplayName(api.getShortName());
+        setDisplayName(api.getDisplayName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<>();
@@ -183,7 +184,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         int responseCode = response.getCode();
         String body = response.getBody();
         if (responseCode == 403) {
-            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(getId(), accountId, session.getUserId(), session.getContextId());
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(getId(), I(accountId), I(session.getUserId()), I(session.getContextId()));
         }
         if (responseCode >= 400 && responseCode <= 499) {
             throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(body);

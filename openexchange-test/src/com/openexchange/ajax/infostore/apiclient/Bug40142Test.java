@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNull;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import org.junit.Test;
 import com.openexchange.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -64,7 +65,6 @@ import com.openexchange.testing.httpclient.models.InfoItemData;
 import com.openexchange.testing.httpclient.models.InfoItemListElement;
 import com.openexchange.testing.httpclient.models.InfoItemUpdateResponse;
 import com.openexchange.testing.httpclient.modules.ConfigApi;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link Bug40142Test}
@@ -119,7 +119,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         actual.setFilename("name.name.txt.pgp");
         InfoItemBody body = new InfoItemBody();
         body.setFile(actual);
-        InfoItemUpdateResponse response = infostoreApi.updateInfoItem(getApiClient().getSession(), actual.getId(), timestamp, body);
+        InfoItemUpdateResponse response = infostoreApi.updateInfoItem(getApiClient().getSession(), actual.getId(), timestamp, body, null);
         assertNull(response.getErrorDesc(), response.getError());
 
         InfoItemData changed = getItem(actual.getId());
@@ -138,7 +138,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
             actual = getItem(uploadInfoItem);
             assertEquals("Name should be the same", filename, actual.getFilename());
         }
-        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(getApiClient().getSession(), actual.getId(), actual);
+        InfoItemUpdateResponse response = infostoreApi.copyInfoItem(getApiClient().getSession(), actual.getId(), actual, null);
         assertNull(response.getErrorDesc(), response.getError());
         assertNotNull(response.getData());
         String newId = response.getData();
@@ -148,7 +148,6 @@ public class Bug40142Test extends InfostoreApiClientTest {
 
 
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testDeleteFileWithExistingNameInTrash() throws FileNotFoundException, ApiException, IOException {
 
@@ -165,7 +164,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         InfoItemListElement element = new InfoItemListElement();
         element.setFolder(folderId);
         element.setId(actual.getId());
-        deleteInfoItems(Collections.singletonList(element), false);
+        deleteInfoItems(Collections.singletonList(element), Boolean.FALSE);
 
         actual = null;
 
@@ -180,7 +179,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         element = new InfoItemListElement();
         element.setFolder(folderId);
         element.setId(actual.getId());
-        deleteInfoItems(Collections.singletonList(element), false);
+        deleteInfoItems(Collections.singletonList(element), Boolean.FALSE);
 
         ConfigApi configAPI = new ConfigApi(getApiClient());
         ConfigResponse response = configAPI.getConfigNode("/modules/infostore/folder/trash", getApiClient().getSession());
@@ -204,7 +203,7 @@ public class Bug40142Test extends InfostoreApiClientTest {
         element2.setId(id2);
         toDelete.add(element2);
 
-        deleteInfoItems(toDelete, true);
+        deleteInfoItems(toDelete, Boolean.TRUE);
     }
 
 }

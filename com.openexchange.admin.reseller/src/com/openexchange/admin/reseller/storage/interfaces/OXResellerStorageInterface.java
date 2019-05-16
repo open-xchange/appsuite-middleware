@@ -52,6 +52,7 @@ package com.openexchange.admin.reseller.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import com.openexchange.admin.reseller.rmi.dataobjects.CustomField;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -210,16 +211,18 @@ public abstract class OXResellerStorageInterface {
     /**
      * @param ctx
      * @param creds
+     * @return The identifier of the previous subadmin
      * @throws StorageException
      */
-    public abstract void unownContextFromAdmin(final Context ctx, final Credentials creds) throws StorageException;
+    public abstract int unownContextFromAdmin(final Context ctx, final Credentials creds) throws StorageException;
 
     /**
      * @param ctx
      * @param adm
+     * @return The identifier of the previous subadmin
      * @throws StorageException
      */
-    public abstract void unownContextFromAdmin(final Context ctx, final ResellerAdmin adm) throws StorageException;
+    public abstract int unownContextFromAdmin(final Context ctx, final ResellerAdmin adm) throws StorageException;
 
     /**
      * @param ctx
@@ -285,9 +288,10 @@ public abstract class OXResellerStorageInterface {
     /**
      * @param creds
      * @param restrictions
+     * @return The deleted restrictions
      * @throws StorageException
      */
-    public abstract void applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException;
+    public abstract Restriction[] applyRestrictionsToContext(final Restriction[] restrictions, final Context ctx) throws StorageException;
 
     /**
      * @param ctx
@@ -333,9 +337,10 @@ public abstract class OXResellerStorageInterface {
 
     /**
      * @param ctx
+     * @return The deleted custom fields
      * @throws StorageException
      */
-    public abstract void deleteCustomFields(final Context ctx) throws StorageException;
+    public abstract CustomField[] deleteCustomFields(final Context ctx) throws StorageException;
 
     /**
      * @param ctx
@@ -348,4 +353,15 @@ public abstract class OXResellerStorageInterface {
      * @throws StorageException
      */
     public abstract void updateModifyTimestamp(final Context ctx) throws StorageException;
+
+    /**
+     * Restores a previously deleted context
+     *
+     * @param ctx The context
+     * @param subadmin The sub-admin identifier
+     * @param restrictions The restricitons to restore
+     * @param customFields The custom fields to restore
+     * @throws StorageException If restore fails
+     */
+    public abstract void restore(final Context ctx, int subadmin, Restriction[] restrictions, CustomField[] customFields) throws StorageException;
 }

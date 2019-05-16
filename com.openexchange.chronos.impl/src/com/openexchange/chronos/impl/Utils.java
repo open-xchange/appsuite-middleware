@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.hasFurtherOccurrence
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -63,7 +64,7 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
-import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -432,7 +433,7 @@ public class Utils {
              */
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(searchTerm)
-                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, folder.getSession().getUserId()));
+                .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.EQUALS, I(folder.getSession().getUserId())));
         }
         return searchTerm;
     }
@@ -624,10 +625,9 @@ public class Utils {
     public static boolean isInFolder(Event event, CalendarFolder folder) {
         if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event) && null != event.getFolderId()) {
             return folder.getId().equals(event.getFolderId());
-        } else {
-            Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId()) && false == userAttendee.isHidden();
         }
+        Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
+        return null != userAttendee && folder.getId().equals(userAttendee.getFolderId()) && false == userAttendee.isHidden();
     }
 
     /**
@@ -751,7 +751,7 @@ public class Utils {
          * get configured amount quota limit
          */
         ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class, true);
-        Connection connection = session.get(PARAM_CONNECTION, Connection.class);
+        Connection connection = optConnection(session);
         long limit;
         if (null != connection) {
             limit = AmountQuotas.getLimit(session.getSession(), Module.CALENDAR.getName(), configViewFactory, connection);
@@ -822,7 +822,7 @@ public class Utils {
      * @return The passed event reference, with possibly adjusted exception dates
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
-    private static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) throws OXException {
+    private static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) {
         /*
          * check which change exceptions exist where the user is attending
          */
@@ -938,20 +938,37 @@ public class Utils {
      * @return The folders, or an empty list if there are none
      */
     public static List<CalendarFolder> getVisibleFolders(CalendarSession session) throws OXException {
+        return getVisibleFolders(session, Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+    }
+
+    /**
+     * Gets all calendar folders accessible by the current sesssion's user, where a minimum set of permissions are set.
+     *
+     * @param session The underlying calendar session
+     * @param requiredFolderPermission The required folder permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @return The folders, or an empty list if there are none
+     */
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
         Connection connection = optConnection(session);
         List<FolderObject> folders = getEntityResolver(session).getVisibleFolders(session.getUserId(), connection);
         UserPermissionBits permissionBits = ServerSessionAdapter.valueOf(session.getSession()).getUserPermissionBits();
         List<CalendarFolder> calendarFolders = new ArrayList<CalendarFolder>(folders.size());
         for (FolderObject folder : folders) {
-            EffectivePermission permission;
+            EffectivePermission ownPermission;
             try {
-                permission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits, connection);
+                ownPermission = folder.getEffectiveUserPermission(session.getUserId(), permissionBits, connection);
             } catch (SQLException e) {
                 LOG.warn("Error getting effective user permission for folder {}; skipping.", I(folder.getObjectID()), e);
                 continue;
             }
-            if (permission.isFolderVisible()) {
-                calendarFolders.add(new CalendarFolder(session.getSession(), folder, permission));
+            if (ownPermission.getFolderPermission() >= requiredFolderPermission && 
+                ownPermission.getReadPermission() >= requiredReadPermission &&
+                ownPermission.getWritePermission() >= requiredWritePermission &&
+                ownPermission.getDeletePermission() >= requiredDeletePermission) {
+                calendarFolders.add(new CalendarFolder(session.getSession(), folder, ownPermission));
             }
         }
         return calendarFolders;
@@ -1219,18 +1236,48 @@ public class Utils {
     }
 
     /**
+     * Gets the whitelist of identifiers of those entities that should be resolved automatically when data of the event is passed to the 
+     * entity resolver.
+     * <p/>
+     * For externally organized events, only the calendar user itself should be resolved, otherwise, there are no restrictions.
+     * 
+     * @param session The calendar session
+     * @param folder The parent folder of the event being processed
+     * @param event The event being processed
+     * @return The identifiers of those entities that should be resolved automatically as used by the entity resolver
+     */
+    public static int[] getResolvableEntities(CalendarSession session, CalendarFolder folder, Event event) {
+        if (false == isGroupScheduled(event)) {
+            return null;
+        }
+        int[] calendarUserOnlyEntities = new int[] { folder.getCalendarUserId() };
+        try {
+            CalendarUser preparedOrganizer = session.getEntityResolver().prepare(
+                event.getOrganizer(), CalendarUserType.INDIVIDUAL, calendarUserOnlyEntities);
+            if (isInternal(preparedOrganizer, CalendarUserType.INDIVIDUAL)) {
+                return null;
+            }
+        } catch (OXException e) {
+            LOG.warn("Error checking if event has internal organizer, resolving calendar user, only.", e);
+        }
+        return calendarUserOnlyEntities;
+    }
+
+    /**
      * Prepares the organizer for an event, taking over an external organizer if specified.
      *
      * @param session The calendar session
      * @param folder The target calendar folder of the event
      * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the default organizer for the target folder
+     * @param resolvableEntities A whitelist of identifiers of those entities that should be resolved by their URI value, or
+     *            <code>null</code> to resolve all resolvable entities
      * @return The prepared organizer
      */
-    public static Organizer prepareOrganizer(CalendarSession session, CalendarFolder folder, Organizer organizerData) throws OXException {
+    public static Organizer prepareOrganizer(CalendarSession session, CalendarFolder folder, Organizer organizerData, int[] resolvableEntities) throws OXException {
         CalendarUser calendarUser = getCalendarUser(session, folder);
         Organizer organizer;
         if (null != organizerData) {
-            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
+            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL, resolvableEntities);
             if (0 < organizer.getEntity()) {
                 /*
                  * internal organizer must match the actual calendar user if specified
@@ -1266,7 +1313,7 @@ public class Utils {
      * @return The connection, or <code>null</code> if not defined
      */
     public static Connection optConnection(CalendarSession session) {
-        return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
+        return session.get(PARAMETER_CONNECTION(), Connection.class, null);
     }
 
     private static DefaultEntityResolver getEntityResolver(CalendarSession session) throws OXException {

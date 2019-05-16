@@ -49,15 +49,18 @@
 
 package com.openexchange.file.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.java.GeoLocation;
 
 /**
  * A {@link File} represents the meta data known about a file
@@ -233,6 +236,178 @@ public interface File {
      */
     void setOrigin(FolderPath origin);
 
+    // ------------------------------------------------------------ MEDIA STUFF ------------------------------------------------------------
+
+    /**
+     * Gets the capture date of the image associated with this file
+     *
+     * @return The capture date
+     */
+    Date getCaptureDate();
+
+    /**
+     * Sets the capture date of the image associated with this file
+     *
+     * @param captureDate The capture date
+     */
+    void setCaptureDate(Date captureDate);
+
+    /**
+     * Gets the geo location of the media resource associated with this file
+     *
+     * @return The geo location
+     */
+    GeoLocation getGeoLocation();
+
+    /**
+     * Sets the geo location of the media resource associated with this file
+     *
+     * @param geoLocation The geo location
+     */
+    void setGeoLocation(GeoLocation geoLocation);
+
+    /**
+     * Gets the width of the media resource associated with this file
+     *
+     * @return The width or <code>null</code> if unknown/not set
+     */
+    Long getWidth();
+
+    /**
+     * Sets the width of the media resource associated with this file
+     *
+     * @param width The width
+     */
+    void setWidth(long width);
+
+    /**
+     * Gets the height of the media resource associated with this file
+     *
+     * @return The height or <code>null</code> if unknown/not set
+     */
+    Long getHeight();
+
+    /**
+     * Sets the height of the media resource associated with this file
+     *
+     * @param heigth The height
+     */
+    void setHeight(long height);
+
+    /**
+     * Gets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @return The camera make or <code>null</code> if unknown/not set
+     */
+    String getCameraMake();
+
+    /**
+     * Sets the name for the manufacturer of the recording equipment used to create the photo.
+     *
+     * @param cameraMake The model make
+     */
+    void setCameraMake(String cameraMake);
+
+    /**
+     * Gets the name of the camera model associated with this file
+     *
+     * @return The camera model or <code>null</code> if unknown/not set
+     */
+    String getCameraModel();
+
+    /**
+     * Sets the name of the camera model associated with this file
+     *
+     * @param cameraModel The duration
+     */
+    void setCameraModel(String cameraModel);
+
+    /**
+     * Gets ISO speed value of a camera or input device associated with this file
+     *
+     * @return The ISO speed value or <code>null</code> if unknown/not set
+     */
+    Long getCameraIsoSpeed();
+
+    /**
+     * Sets ISO speed value of a camera or input device associated with this file
+     *
+     * @param isoSpeed The ISO speed value
+     */
+    void setCameraIsoSpeed(long isoSpeed);
+
+    /**
+     * Gets the aperture used to create the photo (f-number).
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraAperture();
+
+    /**
+     * Set the aperture used to create the photo (f-number).
+     *
+     * @param aperture The aperture
+     */
+    void setCameraAperture(double aperture);
+
+    /**
+     * Gets the focal length used to create the photo, in millimeters.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraFocalLength();
+
+    /**
+     * Sets the focal length used to create the photo, in millimeters.
+     *
+     * @param focalLength The focal length
+     */
+    void setCameraFocalLength(double focalLength);
+
+    /**
+     * Gets the length of the exposure, in seconds.
+     *
+     * @return The value or <code>null</code> for none
+     */
+    java.lang.Double getCameraExposureTime();
+
+    /**
+     * Sets the length of the exposure, in seconds.
+     *
+     * @param exposureTime The exposure time
+     */
+    void setCameraExposureTime(double exposureTime);
+
+    /**
+     * Gets the meta information for the media resource associated with this file
+     *
+     * @return The meta information
+     */
+    Map<String, Object> getMediaMeta();
+
+    /**
+     * Sets the meta information for the media resource associated with this file
+     *
+     * @param mediaMeta The meta information
+     */
+    void setMediaMeta(Map<String, Object> mediaMeta);
+
+    /**
+     * Gets the status of parsing/analyzing media meta-data from the media resource associated with this file
+     *
+     * @return The media status
+     */
+    MediaStatus getMediaStatus();
+
+    /**
+     * Sets the status of parsing/analyzing media meta-data from the media resource associated with this file
+     *
+     * @param mediaStatus The media status
+     */
+    void setMediaStatus(MediaStatus mediaStatus);
+
+    // --------------------------------------------------------- END OF MEDIA STUFF --------------------------------------------------------
+
     File dup();
 
     void copyInto(File other);
@@ -287,11 +462,26 @@ public interface File {
         META("meta", 23),
         OBJECT_PERMISSIONS("object_permissions", 108),
         SHAREABLE("shareable", 109),
-        ORIGIN("origin", 712)
+        ORIGIN("origin", 712),
+        CAPTURE_DATE("capture_date", 713),
+        GEOLOCATION("geolocation", 714),
+        WIDTH("width", 715),
+        HEIGHT("height", 716),
+        CAMERA_MAKE("camera_make", 717),
+        CAMERA_MODEL("camera_model", 718),
+        CAMERA_ISO_SPEED("camera_iso_speed", 719),
+        CAMERA_APERTURE("camera_aperture", 720),
+        CAMERA_EXPOSURE_TIME("camera_exposure_time", 721),
+        CAMERA_FOCAL_LENGTH("camera_focal_length", 722),
+        MEDIA_META("media_meta", 723),
+        MEDIA_STATUS("media_status", 724),
+        MEDIA_DATE("media_date", 725),
         ;
 
-        private final int number;
+        /** The set containing all media-associated fields */
+        public static final Set<Field> MEDIA_FIELDS = EnumSet.of(CAPTURE_DATE, GEOLOCATION, WIDTH, HEIGHT, CAMERA_MAKE, CAMERA_MODEL, CAMERA_APERTURE, CAMERA_EXPOSURE_TIME, CAMERA_FOCAL_LENGTH, CAMERA_ISO_SPEED, MEDIA_META, MEDIA_STATUS, MEDIA_DATE);
 
+        private final int number;
         private final String name;
 
         private Field(final String name, final int number) {
@@ -299,14 +489,31 @@ public interface File {
             this.name = name;
         }
 
+        /**
+         * Gets the field's name (e.g. when outputting JSON content).
+         *
+         * @return The name
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Gets the field's number.
+         *
+         * @return The number
+         */
         public int getNumber() {
             return number;
         }
 
+        /**
+         * Applies specified switcher to this field by invoking appropriate method from given switcher instance.
+         *
+         * @param switcher The switcher to invoke
+         * @param args The optional arguments to pass to the switcher invocation
+         * @return The resulting object
+         */
         public Object doSwitch(final FileFieldSwitcher switcher, final Object... args) {
             switch (this) {
             case LAST_MODIFIED:
@@ -363,49 +570,106 @@ public interface File {
                 return switcher.shareable(args);
             case ORIGIN:
                 return switcher.origin(args);
+            case CAPTURE_DATE:
+                return switcher.captureDate(args);
+            case GEOLOCATION:
+                return switcher.geolocation(args);
+            case WIDTH:
+                return switcher.width(args);
+            case HEIGHT:
+                return switcher.height(args);
+            case CAMERA_MAKE:
+                return switcher.cameraMake(args);
+            case CAMERA_MODEL:
+                return switcher.cameraModel(args);
+            case CAMERA_ISO_SPEED:
+                return switcher.cameraIsoSpeed(args);
+            case CAMERA_APERTURE:
+                return switcher.cameraAperture(args);
+            case CAMERA_EXPOSURE_TIME:
+                return switcher.cameraExposureTime(args);
+            case CAMERA_FOCAL_LENGTH:
+                return switcher.cameraFocalLength(args);
+            case MEDIA_META:
+                return switcher.mediaMeta(args);
+            case MEDIA_STATUS:
+                return switcher.mediaStatus(args);
+            case MEDIA_DATE:
+                return switcher.mediaDate(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }
         }
 
-        public static List<Object> forAllFields(final FileFieldSwitcher switcher, final Object... args) {
-            final List<Object> retval = new ArrayList<Object>(values().length);
-            for (final Field field : values()) {
+        /**
+         * Applies specified handler to this field.
+         *
+         * @param handler The handler to invoke
+         * @param args The optional arguments to pass to handler invocation
+         * @return The resulting object
+         */
+        public Object handle(final FileFieldHandler handler, final Object... args) {
+            return handler.handle(this, args);
+        }
+
+        public static List<Object> forAllFields(final FileFieldSwitcher switcher, Object... args) {
+            Field[] allFields = values();
+            List<Object> retval = new ArrayList<Object>(allFields.length);
+            for (Field field : allFields) {
                 retval.add(field.doSwitch(switcher, args));
             }
             return retval;
         }
 
-        public static <T> T inject(final FileFieldSwitcher switcher, T arg, final Object... args) {
+        public static <T> T inject(FileFieldSwitcher switcher, T arg, Object... args) {
             final Object[] newArgs = new Object[args.length + 1];
             newArgs[0] = arg;
             System.arraycopy(args, 0, newArgs, 1, args.length);
-            for (final Field field : values()) {
+            for (Field field : values()) {
                 arg = (T) field.doSwitch(switcher, args);
             }
             return arg;
         }
 
-        public Object handle(final FileFieldHandler handler, final Object... args) {
-            return handler.handle(this, args);
-        }
-
-        public static List<Object> forAllFields(final FileFieldHandler handler, final Object... args) {
-            final List<Object> retval = new ArrayList<Object>(values().length);
-            for (final Field field : values()) {
+        public static List<Object> forAllFields(FileFieldHandler handler, Object... args) {
+            Field[] allFields = values();
+            List<Object> retval = new ArrayList<Object>(allFields.length);
+            for (Field field : allFields) {
                 retval.add(field.handle(handler, args));
             }
             return retval;
         }
 
-        public static <T> T inject(final FileFieldHandler handler, T arg, final Object... args) {
-            final Object[] newArgs = new Object[args.length + 1];
-            newArgs[0] = arg;
-            System.arraycopy(args, 0, newArgs, 1, args.length);
-            for (final Field field : values()) {
+        public static <T> T inject(FileFieldHandler handler, T arg, Object... args) {
+            Object[] newArgs;
+            if (args == null || args.length == 0) {
+                newArgs = new Object[] { arg };
+            } else {
+                newArgs = new Object[args.length + 1];
+                newArgs[0] = arg;
+                System.arraycopy(args, 0, newArgs, 1, args.length);
+            }
+
+            for (Field field : values()) {
                 arg = (T) field.handle(handler, newArgs);
             }
             return arg;
+        }
+
+        /**
+         * Adds needed date fields (last-modified and capture date) if media sort date is requested or is the sort criteria.
+         *
+         * @param fields The fields to enhance
+         * @param optSortField The sort field to consider or <code>null</code>
+         * @return The possibly enhanced fields
+         */
+        public static List<Field> addDateFieldsIfNeeded(List<Field> fields, Field optSortField) {
+            if (Field.MEDIA_DATE != optSortField && !contains(fields, Field.MEDIA_DATE)) {
+                return fields;
+            }
+
+            // Add last-modified and capture date (if absent)
+            return enhanceBy(fields, Field.LAST_MODIFIED, Field.CAPTURE_DATE);
         }
 
         public static List<Field> enhanceBy(List<Field> fields, Field... toAdd) {
@@ -488,17 +752,17 @@ public interface File {
         }
 
         public static Field get(final String key) {
-            if(key == null) {
+            if (key == null) {
                 return null;
             }
             final Field field = byName.get(key);
-            if(field != null) {
-                 return field;
+            if (field != null) {
+                return field;
             }
             try {
                 final int number = Integer.parseInt(key);
                 return byNumber.get(Integer.valueOf(number));
-            } catch (final NumberFormatException x) {
+            } catch (@SuppressWarnings("unused") final NumberFormatException x) {
                 return null;
             }
         }
@@ -515,13 +779,13 @@ public interface File {
         }
 
         public static Field get(final int number) {
-            return byNumber.get(number);
+            return byNumber.get(I(number));
         }
 
         public static List<Field> get(final int[] numbers) {
             final List<Field> fields = new ArrayList<Field>(numbers.length);
             for (int number : numbers) {
-                Field field = byNumber.get(number);
+                Field field = byNumber.get(I(number));
                 if (field != null) {
                     fields.add(field);
                 }

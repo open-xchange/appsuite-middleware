@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.message.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.Property;
 
@@ -64,32 +65,32 @@ public class MessageAlarmConfig {
     /**
      * Defines the time in minutes between executions of the message delivery worker.
      */
-    public static final Property PERIOD = DefaultProperty.valueOf(PREFIX + "period", 30);
+    public static final Property PERIOD = DefaultProperty.valueOf(PREFIX + "period", I(30));
 
     /**
      * Defines the initial delay in minutes after which the message delivery worker runs for the first time.
      */
-    public static final Property INITIAL_DELAY = DefaultProperty.valueOf(PREFIX + "initialDelay", 10);
+    public static final Property INITIAL_DELAY = DefaultProperty.valueOf(PREFIX + "initialDelay", I(10));
 
     /**
      * Defines the time in minutes the delivery worker looks ahead to pick up message alarms. Must not be smaller than {@link #PERIOD}.
      */
-    public static final Property LOOK_AHEAD = DefaultProperty.valueOf(PREFIX + "lookAhead", 35);
+    public static final Property LOOK_AHEAD = DefaultProperty.valueOf(PREFIX + "lookAhead", I(35));
 
     /**
      * Defines the time in minutes that is waited until an alarm that is already in process is picked up. E.g. because the node who originally was going to process the trigger has died.
      */
-    public static final Property OVERDUE = DefaultProperty.valueOf(PREFIX + "overdueWaitTime", 5);
+    public static final Property OVERDUE = DefaultProperty.valueOf(PREFIX + "overdueWaitTime", I(5));
 
     /**
      * Enables or disables the message alarm delivery worker.
      */
-    public static final Property ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
+    public static final Property ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", Boolean.TRUE);
 
     /**
      * Defines the amount of message delivery worker
      */
-    public static final Property WORKER_COUNT = DefaultProperty.valueOf(PREFIX + "count", 1);
+    public static final Property WORKER_COUNT = DefaultProperty.valueOf(PREFIX + "count", I(1));
 
 
 }

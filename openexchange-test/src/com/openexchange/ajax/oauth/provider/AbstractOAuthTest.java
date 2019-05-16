@@ -62,7 +62,6 @@ import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
@@ -86,7 +85,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
 
     protected Scope scope;
 
-    protected AbstractOAuthTest(Scope scope) throws OXException {
+    protected AbstractOAuthTest(Scope scope) {
         super();
         this.scope = scope;
     }

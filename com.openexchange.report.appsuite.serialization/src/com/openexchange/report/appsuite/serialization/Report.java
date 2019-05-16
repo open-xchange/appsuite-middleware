@@ -51,14 +51,16 @@ package com.openexchange.report.appsuite.serialization;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -165,11 +167,11 @@ public class Report implements Serializable {
 
     private int pendingTasks;
 
-    private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
+    private final LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
 
     private ReportConfigs reportConfig;
 
-    private boolean isSingleDeployment = true;
+    private final boolean isSingleDeployment = true;
 
     private Long defaultTimeframeStart;
 
@@ -196,7 +198,7 @@ public class Report implements Serializable {
 
     /**
      * Save a value in the report
-     * 
+     *
      * @param ns a namespace, to keep the data of different analyzers and cumulators separate from one another
      * @param key the name to save the value under
      * @param value the value. The value must be serializable, and a List (composed of these legal values) or Map (again, composed of these legal values) or a primitive Java Type or a String
@@ -270,7 +272,7 @@ public class Report implements Serializable {
 
     /**
      * Retrieve a value and try to turn it into an Object of the given class
-     * 
+     *
      * @param ns The namespace, as it was used in {@link #set(String, String, Serializable)}
      * @param key The key
      * @param klass The klass to try and turn the value into
@@ -282,7 +284,7 @@ public class Report implements Serializable {
 
     /**
      * Retrieve a value and try to turn it into an Object of the given class
-     * 
+     *
      * @param ns The namespace, as used by {@link #set(String, String, Serializable)}
      * @param key The key
      * @param defaultValue The value to return, if no value was set in this report
@@ -409,7 +411,7 @@ public class Report implements Serializable {
     public LinkedHashMap<String, LinkedHashMap<String, Object>> getTenantMap() {
         return tenantMap;
     }
-    
+
     public ReportConfigs getReportConfig() {
         return reportConfig;
     }
@@ -469,7 +471,7 @@ public class Report implements Serializable {
      * is <code>uuid</code>.report.
      * <br><br>
      * Every .part file will be deleted afterwards.
-     * 
+     *
      * @param contentContainer, the first level container above the content, that is gathered from the .part files
      * @param contentContainerType, the type of the first level container, either Map or Array
      * @param rootAttribute, the highest level container, contentContainer will be this containers first entry
@@ -533,16 +535,16 @@ public class Report implements Serializable {
     }
 
     private void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
-        // load every part-file of the report 
-        try (BufferedReader br = new BufferedReader(new FileReader(appendingFile))) {
+        // load every part-file of the report
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(appendingFile), StandardCharsets.ISO_8859_1))) {
             String line = br.readLine();
             while (line != null) {
                 osw.write(indentation + line + ((line = br.readLine()) == null && hasNext ? "," : "") + "\n");
             }
         } catch (FileNotFoundException e) {
-            LOG.error("Unable to load file: " + appendingFile.getAbsolutePath() , e);
+            LOG.error("Unable to load file: {}", appendingFile.getAbsolutePath() , e);
         } catch (IOException e) {
-            LOG.error("Unable to write into file: " + appendingFile.getAbsolutePath() , e);
+            LOG.error("Unable to write into file: {}", appendingFile.getAbsolutePath() , e);
         }
     }
 

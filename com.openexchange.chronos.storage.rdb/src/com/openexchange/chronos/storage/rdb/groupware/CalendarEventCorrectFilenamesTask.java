@@ -65,7 +65,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import com.google.common.collect.Lists;
@@ -94,27 +93,29 @@ public class CalendarEventCorrectFilenamesTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             /*
              * get all events with 'filename' per context & correct entries as needed
              */
-            for (Entry<Integer, List<Event>> entry : getEventsWithFilename(connection).entrySet()) {
+            for (Map.Entry<Integer, List<Event>> entry : getEventsWithFilename(connection).entrySet()) {
                 correctFilenames(connection, i(entry.getKey()), entry.getValue());
             }
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 
@@ -138,7 +139,7 @@ public class CalendarEventCorrectFilenamesTask extends UpdateTaskAdapter {
         /*
          * check for ambiguous filenames (more than one uid per filename)
          */
-        for (Entry<String, List<Event>> entry : eventsByFilename.entrySet()) {
+        for (Map.Entry<String, List<Event>> entry : eventsByFilename.entrySet()) {
             Map<String, List<Event>> eventsByUID = getEventsByUID(entry.getValue());
             if (1 >= eventsByUID.size()) {
                 org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).debug(
@@ -177,7 +178,7 @@ public class CalendarEventCorrectFilenamesTask extends UpdateTaskAdapter {
                 org.slf4j.LoggerFactory.getLogger(CalendarEventCorrectFilenamesTask.class).debug(
                     "Conflicting filename {} for {} in context {}, remembering for cleanup.", uid, event, I(contextId));
                 idsWithRemovableFilenames.add(event.getId());
-            }            
+            }
         }
         if (0 < idsWithRemovableFilenames.size()) {
             int updated2 = removeFilenames(connection, contextId, idsWithRemovableFilenames);
@@ -187,7 +188,7 @@ public class CalendarEventCorrectFilenamesTask extends UpdateTaskAdapter {
         }
         return updated;
     }
-    
+
     private static List<List<Event>> sortBySeriesId(Collection<List<Event>> eventCollections) {
         List<List<Event>> sortedCollections = new ArrayList<List<Event>>(eventCollections);
         java.util.Collections.sort(sortedCollections, (events1, events2) -> {
@@ -217,7 +218,7 @@ public class CalendarEventCorrectFilenamesTask extends UpdateTaskAdapter {
         }
         return eventsByUID;
     }
-    
+
     private static Map<String, List<Event>> getEventsWithUid(Connection connection, int cid, Collection<String> uids) throws SQLException {
         if (null == uids || uids.isEmpty()) {
             return java.util.Collections.emptyMap();

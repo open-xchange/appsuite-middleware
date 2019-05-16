@@ -153,6 +153,9 @@ public final class UUIDs {
      * @throws IllegalArgumentException If passed string in invalid
      */
     public static UUID fromUnformattedString(final String unformattedString) {
+        if (null == unformattedString) {
+            throw new IllegalArgumentException("string must nnot be null");
+        }
         return toUUID(decodeHex(unformattedString));
     }
 

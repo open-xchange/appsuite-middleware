@@ -357,7 +357,7 @@ public class IMAPDefaultFolderChecker {
                                 char sep = IMAPCommandsCollection.getSeparator(tmp, MailProperties.getInstance().getDefaultSeparator());
                                 try {
                                     IMAPCommandsCollection.createFolder(tmp, sep, FOLDER_TYPE);
-                                } catch (MessagingException e) {
+                                } catch (@SuppressWarnings("unused") MessagingException e) {
                                     IMAPCommandsCollection.createFolder(tmp, sep, Folder.HOLDS_MESSAGES);
                                 }
                                 ListLsubCache.addSingle(INBOX, accountId, tmp, session, ignoreSubscription);
@@ -479,7 +479,9 @@ public class IMAPDefaultFolderChecker {
             if (size > 0) {
                 // Determine the SPECIAL-USE entry to use
                 ListLsubEntry entry = size == 1 ? entries.iterator().next() : getByNameOrFullName(MailAccount.DEFAULT_ID == accountId, index, names, fullNames, entries);
-
+                if (entry == null) {
+                    return null;
+                }
                 // Check entry
                 ListLsubEntry cached = ListLsubCache.getCachedLISTEntry(entry.getFullName(), accountId, imapStore, session, ignoreSubscription);
                 if (!cached.exists()) {
@@ -1042,6 +1044,7 @@ public class IMAPDefaultFolderChecker {
      * @param index The index
      * @throws MessagingException If create attempt fails
      */
+    @SuppressWarnings("unused")
     protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index, TIntObjectMap<String> specialUseInfo) throws MessagingException {
         if (!f.exists()) {
             try {
@@ -1290,7 +1293,7 @@ public class IMAPDefaultFolderChecker {
         if (null != folder) {
             try {
                 folder.close(false);
-            } catch (Exception e) {
+            } catch (@SuppressWarnings("unused") Exception e) {
                 // Ignore
             }
         }

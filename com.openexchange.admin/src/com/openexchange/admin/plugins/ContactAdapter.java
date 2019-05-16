@@ -79,7 +79,7 @@ public class ContactAdapter extends Contact {
 
     @Override
     public final int getObjectID() {
-        return delegate.getId();
+        return delegate.getId().intValue();
     }
 
     @Override

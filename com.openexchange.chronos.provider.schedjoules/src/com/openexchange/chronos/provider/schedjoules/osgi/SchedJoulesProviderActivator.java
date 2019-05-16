@@ -54,6 +54,7 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.schedjoules.BasicSchedJoulesCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.SchedJoulesUserServiceInterceptor;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -73,21 +74,15 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, AdministrativeCalendarAccountService.class, SchedJoulesService.class, DatabaseService.class };
+        return new Class<?>[] { UserService.class, 
+                                AdministrativeCalendarAccountService.class, 
+                                SchedJoulesService.class, 
+                                DatabaseService.class, 
+                                CalendarUtilities.class };
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
@@ -96,15 +91,10 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
         registerService(UserServiceInterceptor.class, new SchedJoulesUserServiceInterceptor(this));
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
         Services.setServiceLookup(null);
-        
+
         super.stopBundle();
     }
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -89,10 +87,10 @@ public final class FolderDefaultValuesForDelTablesTasks extends UpdateTaskAdapte
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             if (!com.openexchange.tools.update.Tools.hasDefaultValue(connection, "del_oxfolder_tree", "fname")) {
                 PreparedStatement stmt = null;
@@ -115,16 +113,18 @@ public final class FolderDefaultValuesForDelTablesTasks extends UpdateTaskAdapte
             }
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mobility Configuration Servlet
 Bundle-SymbolicName: com.openexchange.eas.provisioning.json
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -24,6 +24,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.session,

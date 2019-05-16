@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.sql;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -638,7 +639,7 @@ public class Executor {
         return stringBuilder.toString();
     }
 
-    public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch,
+    public List<Contact> select(Connection connection, @SuppressWarnings("unused") Table table, int contextID, ContactSearchObject contactSearch,
         ContactField[] fields, SortOptions sortOptions, int forUser) throws SQLException, OXException {
         /*
          * construct query string
@@ -746,8 +747,7 @@ public class Executor {
             stmt.setInt(1, contextID);
             resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
-                final int parentContactObjectID = resultSet.getInt(
-                		Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel());
+                Integer parentContactObjectID = I(resultSet.getInt(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()));
                 if (resultSet.wasNull()) {
                 	throw new IllegalArgumentException("need " + DistListMemberField.PARENT_CONTACT_ID + "in fields");
                 }
@@ -1140,7 +1140,7 @@ public class Executor {
         }
     }
 
-    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws OXException, SQLException {
+    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws SQLException {
         if (null != objectIDs && objectIDs.length > 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("DELETE FROM object_use_count WHERE cid=?");
@@ -1170,7 +1170,7 @@ public class Executor {
         }
     }
 
-    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws OXException, SQLException {
+    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws SQLException {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM object_use_count WHERE cid=?");
         if (Integer.MIN_VALUE != objectID) {
@@ -1289,13 +1289,13 @@ public class Executor {
             }
             long start = System.currentTimeMillis();
             ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
+            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), Long.valueOf(System.currentTimeMillis() - start));
             return resultSet;
         } catch (StringLiteralSQLException e) {
             // Cannot return any match
             return EmptyResultSet.getInstance();
         } catch (SQLException e) {
-            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
     }
@@ -1307,10 +1307,10 @@ public class Executor {
             }
             long start = System.currentTimeMillis();
             final int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
+            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), I(rowCount), Long.valueOf(System.currentTimeMillis() - start));
             return rowCount;
         } catch (SQLException e) {
-            LOG.warn("Error executing \"{}\": {}", stmt, e.getMessage());
+            LOG.debug("Error executing \"{}\": {}", stmt.toString(), e.getMessage());
             throw e;
         }
     }

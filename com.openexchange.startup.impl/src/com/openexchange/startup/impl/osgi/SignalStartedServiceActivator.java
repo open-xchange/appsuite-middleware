@@ -54,6 +54,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link SignalStartedServiceActivator}
@@ -75,12 +76,12 @@ public final class SignalStartedServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class[] { VersionService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(signalStartedRegistrationRef, context));
+        track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(signalStartedRegistrationRef, context, getServiceSafe(VersionService.class)));
         openTrackers();
     }
 

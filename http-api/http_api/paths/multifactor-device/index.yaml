@@ -1,0 +1,9 @@
+requests:
+  - AllRequest.yaml
+  - Delete.yaml
+  - Rename.yaml
+  - StartRegistration.yaml
+  - FinishRegistration.yaml
+  - StartAuthentication.yaml
+  - FinishAuthentication.yaml
+

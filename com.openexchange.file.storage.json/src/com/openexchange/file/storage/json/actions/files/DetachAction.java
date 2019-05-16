@@ -65,11 +65,8 @@ public class DetachAction extends AbstractWriteAction {
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP, Param.ID);
-
         final String[] conflicted = request.getFileAccess().removeVersion(request.getId(), request.getVersions());
-
         final File file = request.getFileAccess().getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
-
         return result(conflicted, file.getSequenceNumber(), request);
     }
 

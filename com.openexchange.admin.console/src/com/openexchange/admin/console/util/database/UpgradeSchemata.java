@@ -72,9 +72,10 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
+import com.openexchange.admin.plugin.hosting.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -85,7 +86,6 @@ import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.schemamove.mbean.SchemaMoveRemote;
 import com.openexchange.groupware.update.tools.Constants;
 import com.openexchange.java.Strings;
 
@@ -121,11 +121,11 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
     private SchemaMoveRemote schemaMoveUtil;
     private MBeanServerConnection mbeanConnection;
     private String startFromSchema;
-    private List<String> skippedSchemata = new ArrayList<>();
+    private final List<String> skippedSchemata = new ArrayList<>();
 
     /**
      * Entry point
-     * 
+     *
      * @param args The command line arguments
      */
     @SuppressWarnings("unused")
@@ -135,7 +135,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Initialises a new {@link UpgradeSchemata}.
-     * 
+     *
      * @param args The command line arguments
      */
     public UpgradeSchemata(String[] args) {
@@ -158,8 +158,8 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.console.ObjectNamingAbstraction#getObjectName()
+     *
+     * @see com.openexchange.admin.plugin.hosting.console.ObjectNamingAbstraction#getObjectName()
      */
     @Override
     protected String getObjectName() {
@@ -169,7 +169,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
     //////////////////////// HELPERS //////////////////////////
     /**
      * Initialises the RMI services
-     * 
+     *
      * @throws NotBoundException if the required RMI services are absent
      * @throws RemoteException if the RMI registry cannot be contacted
      * @throws MalformedURLException if the names or the required RMI services are not appropriately formatted URLs
@@ -183,7 +183,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Executes the command
-     * 
+     *
      * @param parser The {@link AdminParser}
      * @throws InvalidDataException
      * @throws InvalidCredentialsException
@@ -228,7 +228,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Lists all known schemata
-     * 
+     *
      * @return The known schemata
      * @throws RemoteException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
      * @throws StorageException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
@@ -258,7 +258,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Filters the specified database schemata and removes those that are present in the 'skippedSchemata'
-     * 
+     *
      * @param databases The database schemata array
      * @param comparator The comparator to be used to perform the search
      * @return The filtered schemata
@@ -295,7 +295,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Run the updates on the specified schema
-     * 
+     *
      * @param schemaName The schema name for which to run the updates
      * @throws InstanceNotFoundException if the required MBean does not exist in the registry
      * @throws MBeanException if an error during the runUpdate method is occurred
@@ -312,7 +312,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
         System.err.println("\nErrors while running updates for schema '" + schemaName + "': ");
         String message = failures.toString();
-        message = message.replaceAll("\\\\R", System.getProperty("line.separator"));
+        message = Strings.replaceSequenceWith(message, "\\R", Strings.getLineSeparator());
         System.err.println(message);
 
         if (!force) {
@@ -323,7 +323,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Enables the schema with the specified name
-     * 
+     *
      * @param schemaName
      * @throws StorageException
      * @throws NoSuchObjectException
@@ -341,7 +341,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Changes the server
-     * 
+     *
      * @param schemaName
      * @throws RemoteException
      * @throws StorageException
@@ -356,7 +356,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Disables the schema with the specified name
-     * 
+     *
      * @param schemaName
      * @throws TargetDatabaseException
      * @throws StorageException
@@ -375,7 +375,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Registers the server
-     * 
+     *
      * @throws RemoteException
      * @throws StorageException
      * @throws InvalidCredentialsException
@@ -441,7 +441,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Create an {@link MBeanServerConnection}
-     * 
+     *
      * @param parser The {@link AdminParser} to extract the optional JMX user and password
      * @return The {@link MBeanServerConnection}
      * @throws MalformedURLException if the URL is malformed
@@ -472,7 +472,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Checks the arguments
-     * 
+     *
      * @param parser The {@link AdminParser}
      */
     private void checkAndSetArguments(AdminParser parser) {
@@ -508,7 +508,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Parses the host from the specified {@link CLIOption}
-     * 
+     *
      * @param parser The {@link AdminParser}
      * @param option The {@link CLIOption}
      * @param defaultValue The default value
@@ -524,7 +524,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Parses the port from the specified {@link CLIOption}
-     * 
+     *
      * @param parser The {@link AdminParser}
      * @param option The {@link CLIOption}
      * @param defaultValue The default value
@@ -553,7 +553,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     /**
      * Set additional options
-     * 
+     *
      * @param parser the {@link AdminParser}
      */
     private void setOptions(AdminParser parser) {

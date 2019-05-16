@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The share servlet
 Bundle-SymbolicName: com.openexchange.share.servlet
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
@@ -60,8 +60,9 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail.transport.config,
  com.openexchange.notification,
  com.openexchange.osgi,
+ com.openexchange.password.mechanism,
+ com.openexchange.password.mechanism.stock,
  com.openexchange.passwordchange,
- com.openexchange.passwordmechs,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,

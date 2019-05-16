@@ -161,7 +161,7 @@ public class AccessCombinationNameCache {
                         throw new OXException(new Exception("Invalid access combinations found in config file!"));
                     }
                     try {
-                        meth.invoke(us, true);
+                        meth.invoke(us, Boolean.TRUE);
                     } catch (IllegalArgumentException e) {
                         LOG.error("Illegal argument passed to method!", e);
                     } catch (IllegalAccessException e) {

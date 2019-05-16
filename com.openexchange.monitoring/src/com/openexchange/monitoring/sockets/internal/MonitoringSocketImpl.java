@@ -60,9 +60,11 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketImpl;
+import java.net.SocketTimeoutException;
 import com.openexchange.java.delegate.DelegationExecutionException;
 import com.openexchange.java.delegate.Delegator;
 import com.openexchange.monitoring.sockets.ConnectFailure;
+import com.openexchange.monitoring.sockets.TimeoutFailure;
 
 /**
  * {@link MonitoringSocketImpl}
@@ -138,6 +140,12 @@ public class MonitoringSocketImpl extends SocketImpl {
                 SocketMonitoringSystem.getInstance().connectError(getSocket0(), new ConnectFailure(connectException, millis));
                 throw connectException;
             }
+            if (cause instanceof SocketTimeoutException) {
+                SocketTimeoutException timeoutException = (SocketTimeoutException) cause;
+                long millis = System.currentTimeMillis() - st;
+                SocketMonitoringSystem.getInstance().readTimedOut(getSocket0(), new TimeoutFailure(timeoutException, millis));
+                throw timeoutException;
+            }
             if (cause instanceof IOException) {
                 throw (IOException) cause;
             }
@@ -160,6 +168,12 @@ public class MonitoringSocketImpl extends SocketImpl {
                 SocketMonitoringSystem.getInstance().connectError(getSocket0(), new ConnectFailure(connectException, millis));
                 throw connectException;
             }
+            if (cause instanceof SocketTimeoutException) {
+                SocketTimeoutException timeoutException = (SocketTimeoutException) cause;
+                long millis = System.currentTimeMillis() - st;
+                SocketMonitoringSystem.getInstance().readTimedOut(getSocket0(), new TimeoutFailure(timeoutException, millis));
+                throw timeoutException;
+            }
             if (cause instanceof IOException) {
                 throw (IOException) cause;
             }
@@ -181,6 +195,12 @@ public class MonitoringSocketImpl extends SocketImpl {
                 long millis = System.currentTimeMillis() - st;
                 SocketMonitoringSystem.getInstance().connectError(getSocket0(), new ConnectFailure(connectException, millis));
                 throw connectException;
+            }
+            if (cause instanceof SocketTimeoutException) {
+                SocketTimeoutException timeoutException = (SocketTimeoutException) cause;
+                long millis = System.currentTimeMillis() - st;
+                SocketMonitoringSystem.getInstance().readTimedOut(getSocket0(), new TimeoutFailure(timeoutException, millis));
+                throw timeoutException;
             }
             if (cause instanceof IOException) {
                 throw (IOException) cause;

@@ -144,6 +144,9 @@ public class InfostoreTestManager implements TestManager {
 
     @Override
     public void cleanUp() {
+        if (createdEntities.isEmpty()) {
+            return;
+        }
         List<String> objectIDs = new ArrayList<String>(createdEntities.size());
         List<String> folderIDs = new ArrayList<String>(createdEntities.size());
         for (File metadata : createdEntities) {
@@ -194,17 +197,6 @@ public class InfostoreTestManager implements TestManager {
     }
 
     public void copyAction(String id, String folderId, File data) throws OXException, IOException, JSONException {
-        CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
-        copyRequest.setFailOnError(getFailOnError());
-        CopyInfostoreResponse copyResponse = getClient().execute(copyRequest);
-        lastResponse = copyResponse;
-        if (!lastResponse.hasError()) {
-            data.setId(copyResponse.getID());
-            createdEntities.add(data);
-        }
-    }
-
-    public void copyAction(String id, String folderId, File data, java.io.File file) throws OXException, IOException, JSONException {
         CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(id, folderId, data);
         copyRequest.setFailOnError(getFailOnError());
         CopyInfostoreResponse copyResponse = getClient().execute(copyRequest);
@@ -436,7 +428,7 @@ public class InfostoreTestManager implements TestManager {
             file.setTitle(jsonFile.get(0).toString());
             file.setId(jsonFile.get(1).toString());
             file.setDescription(jsonFile.get(2).toString());
-            file.setLastModified(new Date((Long) jsonFile.get(3)));
+            file.setLastModified(new Date(((Long) jsonFile.get(3)).longValue()));
 
             found.add(file);
         }
@@ -467,8 +459,7 @@ public class InfostoreTestManager implements TestManager {
         return createFile;
     }
 
-    public static File createFile(int folderId, String fileName, String mimeType) throws Exception {
-        //        long now = System.currentTimeMillis();
+    public static File createFile(int folderId, String fileName, String mimeType) {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(folderId));
         file.setTitle(fileName);

@@ -49,23 +49,22 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.zip.ZipUtility;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.ziputil.ZipMaker;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -113,7 +112,8 @@ public class ZipDocumentsAction extends AbstractFileAction {
         // Get file/folder access
         IDBasedFileAccess fileAccess = request.getFileAccess();
         IDBasedFolderAccess folderAccess = request.getFolderAccess();
-
+        // Perform scan
+        scan(request, idVersionPairs, fileAccess, folderAccess, recursive);
         // Initialize ZIP maker for folder resource
         ZipMaker zipMaker = new ZipMaker(idVersionPairs, recursive, fileAccess, folderAccess);
 
@@ -121,15 +121,7 @@ public class ZipDocumentsAction extends AbstractFileAction {
         zipMaker.checkThreshold(threshold());
 
         AJAXRequestData ajaxRequestData = request.getRequestData();
-        if (ajaxRequestData.setResponseHeader("Content-Type", "application/zip")) {
-            // Set HTTP response headers
-            {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("attachment");
-                DownloadUtility.appendFilenameParameter("documents.zip", "application/zip", ajaxRequestData.getUserAgent(), sb);
-                ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-            }
-
+        if (ZipUtility.setHttpResponseHeaders("documents.zip", ajaxRequestData)) {
             // Write ZIP archive
             long bytesWritten = 0;
             try {
@@ -141,50 +133,24 @@ public class ZipDocumentsAction extends AbstractFileAction {
             // Signal direct response
             AJAXRequestResult result = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
             if (bytesWritten != 0) {
-                result.setResponseProperty("X-Content-Size", bytesWritten);
+                result.setResponseProperty("X-Content-Size", L(bytesWritten));
             }
             return result;
         }
 
-        // No direct response possible
+        // No direct response possible. Create ThresholdFileHolder...
+        ThresholdFileHolder fileHolder = ZipUtility.prepareThresholdFileHolder("documents.zip");
+        try {
+            // Create ZIP archive
+            zipMaker.writeZipArchive(fileHolder.asOutputStream());
 
-        // Create archive
-        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-        fileHolder.setDisposition("attachment");
-        fileHolder.setName("documents.zip");
-        fileHolder.setContentType("application/zip");
-        fileHolder.setDelivery("download");
-
-        // Create ZIP archive
-        zipMaker.writeZipArchive(fileHolder.asOutputStream());
-
-        ajaxRequestData.setFormat("file");
-        return new AJAXRequestResult(fileHolder, "file");
-    }
-
-    private List<IdVersionPair> parsePairs(JSONArray jPairs) throws JSONException, OXException {
-        int len = jPairs.length();
-        List<IdVersionPair> idVersionPairs = new ArrayList<IdVersionPair>(len);
-        for (int i = 0; i < len; i++) {
-            JSONObject tuple = jPairs.getJSONObject(i);
-
-            // Identifier
-            String id = tuple.optString(Param.ID.getName(), null);
-
-            // Folder
-            String folderId = tuple.optString(Param.FOLDER_ID.getName(), null);
-
-            // Version
-            String version = tuple.optString(Param.VERSION.getName(), FileStorageFileAccess.CURRENT_VERSION);
-
-            // Check validity
-            if (null == id && null == folderId) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("body", "Invalid resource identifier: " + tuple);
-            }
-
-            idVersionPairs.add(new IdVersionPair(id, version, folderId));
+            ajaxRequestData.setFormat("file");
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null;
+            return requestResult;
+        } finally {
+            Streams.close(fileHolder);
         }
-        return idVersionPairs;
     }
 
 }

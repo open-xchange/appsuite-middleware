@@ -69,6 +69,7 @@ import com.openexchange.subscribe.oauth.AbstractOAuthSubscribeService;
  */
 public class YahooSubscribeService extends AbstractOAuthSubscribeService {
 
+    public static final String SOURCE_ID = "com.openexchange.subscribe.socialplugin.yahoo";
     private final ServiceLookup services;
 
     /**
@@ -78,7 +79,7 @@ public class YahooSubscribeService extends AbstractOAuthSubscribeService {
      * @param services The {@link ServiceLookup}
      */
     public YahooSubscribeService(OAuthServiceMetaData metadata, ServiceLookup services) {
-        super(metadata, "com.openexchange.subscribe.socialplugin.yahoo", FolderObject.CONTACT, "Yahoo!", services);
+        super(metadata, SOURCE_ID, FolderObject.CONTACT, "Yahoo!", services);
         this.services = services;
     }
 

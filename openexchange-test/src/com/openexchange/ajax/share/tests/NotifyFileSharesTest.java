@@ -51,7 +51,6 @@ package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
-import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.NotifyFileRequest;
@@ -76,19 +75,19 @@ public class NotifyFileSharesTest extends ShareTest {
     @Test
     public void testNotifyGuest() throws Exception {
         testNotifyGuest(getDefaultFolder(FolderObject.INFOSTORE));
-        testNotifyGuest(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
+        testNotifyGuest(insertPublicFolder(FolderObject.INFOSTORE).getObjectID());
     }
 
     @Test
     public void testNotifyGroup() throws Exception {
         testNotifyGroup(getDefaultFolder(FolderObject.INFOSTORE));
-        testNotifyGroup(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
+        testNotifyGroup(insertPublicFolder(FolderObject.INFOSTORE).getObjectID());
     }
 
     @Test
     public void testNotifyUser() throws Exception {
         testNotifyUser(getDefaultFolder(FolderObject.INFOSTORE));
-        testNotifyUser(insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE).getObjectID());
+        testNotifyUser(insertPublicFolder(FolderObject.INFOSTORE).getObjectID());
     }
 
     private void testNotifyGuest(int parent) throws Exception {

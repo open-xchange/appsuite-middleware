@@ -138,6 +138,10 @@ public enum EventField {
      */
     GEO,
     /**
+     * The privileges attendees have to modify the event.
+     */
+    ATTENDEE_PRIVILEGES,
+    /**
      * The start date of the event.
      */
     START_DATE,

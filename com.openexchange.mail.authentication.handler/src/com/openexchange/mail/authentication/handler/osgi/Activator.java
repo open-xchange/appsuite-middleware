@@ -82,7 +82,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(AuthenticationFailedHandler.class, new DefaultAuthenticationFailedHandler(getService(SessiondService.class)));
+        registerService(AuthenticationFailedHandler.class, new DefaultAuthenticationFailedHandler(getServiceSafe(SessiondService.class)));
     }
 
 }

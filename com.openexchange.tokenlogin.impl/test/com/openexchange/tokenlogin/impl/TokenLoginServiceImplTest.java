@@ -49,6 +49,7 @@
 
 package com.openexchange.tokenlogin.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -153,7 +154,7 @@ public class TokenLoginServiceImplTest {
         PowerMockito.mockStatic(Services.class);
 
         // BEHAVIOUR
-        PowerMockito.when(session.getContextId()).thenReturn(424242669);
+        PowerMockito.when(I(session.getContextId())).thenReturn(I(424242669));
         PowerMockito.when(session.getSessionID()).thenReturn("8a07c5a2e4974a75ae70bd9a36198f03");
     }
 
@@ -343,7 +344,7 @@ public class TokenLoginServiceImplTest {
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
-        Assert.assertEquals(true, initSecrets.get(SECRET_TOKEN).getParameters().get("accessPassword"));
+        Assert.assertEquals(Boolean.TRUE, initSecrets.get(SECRET_TOKEN).getParameters().get("accessPassword"));
     }
 
     @Test
@@ -371,7 +372,7 @@ public class TokenLoginServiceImplTest {
 
         Map<String, TokenLoginSecret> initSecrets = this.tokenLoginServiceImpl.initSecrets(file);
 
-        Assert.assertEquals(true, initSecrets.get(secret).getParameters().get("accessPassword"));
+        Assert.assertEquals(Boolean.TRUE, initSecrets.get(secret).getParameters().get("accessPassword"));
     }
 
     @Test(expected = IllegalArgumentException.class)

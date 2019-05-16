@@ -186,9 +186,6 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().equals(this, e);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getDisplayMessage() {
         return this.displayMessage;

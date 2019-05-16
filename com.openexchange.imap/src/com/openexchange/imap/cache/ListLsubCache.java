@@ -238,7 +238,7 @@ public final class ListLsubCache {
                         synchronized (collection) {
                             collection.clear(enforceNewConnection);
                         }
-                    } catch (Exception e) {
+                    } catch (@SuppressWarnings("unused") Exception e) {
                         // Ignore
                     }
                 }
@@ -586,7 +586,7 @@ public final class ListLsubCache {
 
             ListLsubCollection collection = getFrom(f);
             return collection.toString();
-        } catch (Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             return null;
         }
     }

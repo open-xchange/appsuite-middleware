@@ -121,7 +121,7 @@ public class ListAction extends ContactAction {
             	}
             }
         }
-        if (null != contacts && 1 < contacts.size()) {
+        if (1 < contacts.size()) {
             /*
              * sort loaded contacts in the order they were requested
              */
@@ -136,8 +136,7 @@ public class ListAction extends ContactAction {
                 }
             }
             return new AJAXRequestResult(sortedContacts, lastModified, "contact");
-        } else {
-        	return new AJAXRequestResult(contacts, lastModified, "contact");
         }
+        return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 }

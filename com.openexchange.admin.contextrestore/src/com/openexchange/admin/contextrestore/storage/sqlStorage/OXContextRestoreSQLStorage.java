@@ -61,5 +61,5 @@ import com.openexchange.admin.contextrestore.storage.interfaces.OXContextRestore
  *
  */
 public abstract class OXContextRestoreSQLStorage extends OXContextRestoreStorageInterface {
-
+    // Empty
 }

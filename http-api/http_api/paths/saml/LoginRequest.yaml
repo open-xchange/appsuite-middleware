@@ -1,0 +1,58 @@
+/login?action=samlLogin:
+  get:
+    operationId: samlLogin
+    tags:
+      - Login
+      - SAML
+    summary: Create App Suite session after SAML login flow
+    description: |
+      This API call is typically the result of a redirect created by the server. It does not
+      need to be explicitly implemented by clients!
+
+      After a successful SAML login flow, the client (web browser) is redirected
+      to this endpoint, where the actual App Suite session gets created. As a result,
+      the user gets redirected to `https://<webmail-domain>/<login-path>#session=<session-id>`.
+      The redirect response has App Suite session cookies set.
+    parameters:
+      - in: query
+        name: token
+        type: string
+        description: A valid session reservation token
+        required: true
+      - in: query
+        name: client
+        type: string
+        description: |
+          Identifier of the client using the HTTP/JSON interface.
+          Default: Value of configuration property `com.openexchange.ajax.login.http-auth.client`
+        required: false
+        default:
+      - in: query
+        name: clientUserAgent
+        type: string
+        description: Parameter to override the user agent used for session creation. By default the `User-Agent` request header is evaluated.
+        required: false
+      - in: query
+        name: loginPath
+        type: string
+        description: |
+          The login path to be set on the resulting `Location` response header as part of the redirect response.
+          Default: Value of configuration property `com.openexchange.UIWebPath`.
+        required: false
+      - in: query
+        name: shard
+        type: string
+        description: Shard identifier to route the requiest accordingly
+    responses:
+      200:
+        description: A html error page
+      302:
+        description: In case of a succes the middleware answers with a redirect to for bootstrapping the client session
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            type: string
+      400:
+        description: In case the token is missing
+      403:
+        description: In case the login is not allowed

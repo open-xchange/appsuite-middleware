@@ -57,13 +57,21 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.file.storage.MediaStatus;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.URLHelper;
+import com.openexchange.java.GeoLocation;
 
+/**
+ * Parses a <code>DocumentMetadata</code> from its JSON representation
+ *
+ * @deprecated Only used for testing
+ */
+@Deprecated
 public class JSONDocumentMetadata implements DocumentMetadata {
 
     private static final long serialVersionUID = -5016635593135118691L;
@@ -607,6 +615,131 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
     @Override
     public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Date getCaptureDate() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCaptureDate(Date captureDate) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public GeoLocation getGeoLocation() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setGeoLocation(GeoLocation geoLocation) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long getWidth() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setWidth(long width) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long getHeight() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setHeight(long height) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getCameraMake() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraMake(String cameraMake) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getCameraModel() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraModel(String s) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Long getCameraIsoSpeed() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraIsoSpeed(long isoSpeed) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Double getCameraAperture() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraAperture(double aperture) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Double getCameraExposureTime() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraExposureTime(double exposureTime) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Double getCameraFocalLength() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setCameraFocalLength(double focalLength) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Map<String, Object> getMediaMeta() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setMediaMeta(Map<String, Object> mediaMeta) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MediaStatus getMediaStatus() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setMediaStatus(MediaStatus infostoreMediaStatus) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MediaStatus getMediaStatusForClient(com.openexchange.session.Session session) {
         throw new UnsupportedOperationException();
     }
 

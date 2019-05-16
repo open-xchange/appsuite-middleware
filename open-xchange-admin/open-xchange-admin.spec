@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -163,6 +163,31 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-147
     ox_remove_property CREATE_CONTEXT_USE_UNIT /opt/open-xchange/etc/plugin/hosting.properties
 
+    SCR=SCR-322.admin
+    ox_scr_todo ${SCR} && {
+      prop_file=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+      orig_line='# publication (Permission to publish content of folders)'
+      new_line='# publication (Permission to publish content of folders, Deprecated with v7.10.2, will have no impact) [DEPRECATED]'
+      $(contains "^${orig_line}$" ${prop_file}) && {
+        sed -i -e "s/${orig_line}/${new_line}/" ${prop_file}
+      }
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-338
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/plugin/hosting.properties
+      prop_key=CONTEXT_STORAGE
+      old_default=com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage
+      new_default=com.openexchange.admin.plugin.hosting.storage.mysqlStorage.OXContextMySQLStorage
+      curr_val=$(ox_read_property ${prop_key} ${pfile})
+      if [ "${old_default}" = "${curr_val}" ]
+      then
+        ox_set_property ${prop_key} ${new_default} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
 fi
 ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
@@ -188,28 +213,16 @@ ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
-* Mon May 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-05-13 (5235)
-* Wed Apr 24 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-04-29 (5211)
-* Tue Mar 26 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-04-01 (5180)
-* Tue Mar 12 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-03-11 (5149)
-* Thu Feb 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-02-25 (5133)
-* Thu Feb 07 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-02-11 (5108)
-* Tue Jan 29 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-31 (5103)
-* Mon Jan 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-28 (5076)
-* Tue Jan 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-14 (5023)
-* Fri Nov 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
-RC 1 for 7.10.1 release
-* Fri Nov 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Second preview for 7.10.1 release
+* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.2 release
+* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.2 release
+* Tue Apr 30 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.2 release
+* Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.2 release
+* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
 * Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>

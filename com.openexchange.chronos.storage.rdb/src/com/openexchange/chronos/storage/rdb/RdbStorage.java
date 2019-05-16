@@ -87,9 +87,6 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public abstract class RdbStorage extends CalendarStorageWarnings {
 
-    /** A named logger instance */
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbStorage.class);
-
     protected final Context context;
     protected final DBProvider dbProvider;
     protected final DBTransactionPolicy txPolicy;
@@ -238,13 +235,12 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
     protected static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
-        } else {
-            String statementString = String.valueOf(stmt);
-            long start = System.currentTimeMillis();
-            ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
-            return resultSet;
         }
+        String statementString = String.valueOf(stmt);
+        long start = System.currentTimeMillis();
+        ResultSet resultSet = stmt.executeQuery();
+        LOG.debug("executeQuery: {} - {} ms elapsed.", statementString, L(System.currentTimeMillis() - start));
+        return resultSet;
     }
 
     /**
@@ -256,13 +252,12 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
     protected static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeUpdate();
-        } else {
-            String statementString = String.valueOf(stmt);
-            long start = System.currentTimeMillis();
-            int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
-            return rowCount;
         }
+        String statementString = String.valueOf(stmt);
+        long start = System.currentTimeMillis();
+        int rowCount = stmt.executeUpdate();
+        LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", statementString, I(rowCount), L(System.currentTimeMillis() - start));
+        return rowCount;
     }
 
     /**
@@ -393,30 +388,6 @@ public abstract class RdbStorage extends CalendarStorageWarnings {
      */
     protected static String asString(Integer id) {
         return null == id ? null : id.toString();
-    }
-
-    /**
-     * Gets an SQL clause for the given number of placeholders, i.e. either <code>=?</code> if <code>count</code> is <code>1</code>, or
-     * an <code>IN</code> clause like <code>IN (?,?,?,?)</code> in case <code>count</code> is greater than <code>1</code>.
-     *
-     * @param count The number of placeholders to append
-     * @return The placeholder string
-     * @throws IllegalArgumentException if count is <code>0</code> or negative
-     */
-    protected static String getPlaceholders(int count) {
-        if (0 >= count) {
-            throw new IllegalArgumentException("count");
-        }
-        if (1 == count) {
-            return "=?";
-        }
-        StringBuilder stringBuilder = new StringBuilder(6 + 2 * count);
-        stringBuilder.append(" IN (?");
-        for (int i = 1; i < count; i++) {
-            stringBuilder.append(",?");
-        }
-        stringBuilder.append(')');
-        return stringBuilder.toString();
     }
 
     private <O, E extends Enum<E>> MappedIncorrectString<O> getMappedIncorrectString(IncorrectStringSQLException e, DbMapper<O, E> mapper) {

@@ -52,6 +52,7 @@ package com.openexchange.smtp.filler;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -74,6 +75,11 @@ import com.sun.mail.smtp.SMTPMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMTPMessageFiller extends MimeMessageFiller {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SMTPMessageFiller.class);
+    }
 
     private final ISMTPProperties smtpProperties;
 
@@ -127,6 +133,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
                     smtpMessage.setFrom(new QuotedInternetAddress(envelopeFrom));
                 } catch (MessagingException e) {
                     // Failed to parse envelope-from
+                    LoggerHolder.LOG.trace("Failed to parse envelope-from", e);
                 }
             }
         }

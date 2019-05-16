@@ -478,10 +478,6 @@ public class Executor extends Assert {
         return parameter.getURLParameters();
     }
 
-    private static InputStream createBody(final Object body) throws UnsupportedCharsetException {
-        return new ByteArrayInputStream(body.toString().getBytes(Charsets.UTF_8));
-    }
-
     private static byte[] createBodyBytes(final Object body) throws UnsupportedCharsetException {
         return body.toString().getBytes(Charsets.UTF_8);
     }

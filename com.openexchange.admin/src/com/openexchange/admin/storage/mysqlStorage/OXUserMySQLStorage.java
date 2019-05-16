@@ -66,12 +66,10 @@ import static com.openexchange.java.Autoboxing.i;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -142,7 +140,6 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -168,6 +165,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
@@ -304,12 +302,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         // SQL resources
         Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean autocommit = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
 
             stmt = con.prepareStatement("UPDATE user_mail_account SET personal=? WHERE cid=? AND user=? AND id=?");
             if (Strings.isEmpty(personal)) {
@@ -325,7 +321,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             stmt = null;
 
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
 
             // Invalidate cache
             try {
@@ -350,11 +346,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (rollback) {
+            if (rollback > 0) {
+            if (rollback == 1) {
                 rollback(con);
             }
-            if (autocommit) {
-                autocommit(con);
+            autocommit(con);
             }
             releaseWriteContextConnection(con, ctx, cache);
         }
@@ -366,12 +362,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         // SQL resources
         Connection con = leaseConnectionForContext(contextId, cache);
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean autocommit = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN
-            autocommit = true;
-            rollback = true;
+            rollback = 1;
             // First drop
             if (null != capsToDrop && !capsToDrop.isEmpty()) {
                 for (final String cap : capsToDrop) {
@@ -494,7 +488,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = null;
             }
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
 
             // Invalidate cache
             {
@@ -502,7 +496,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (null != cacheService) {
                     try {
                         final Cache jcs = cacheService.getCache("UserConfiguration");
-                        CacheKey key = jcs.newCacheKey(ctx.getId(), user.getId().toString(), String.valueOf(false));
+                        CacheKey key = jcs.newCacheKey(ctx.getId().intValue(), user.getId().toString(), String.valueOf(false));
                         jcs.remove(key);
                     } catch (final OXException e) {
                         LOG.error("", e);
@@ -527,10 +521,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (rollback) {
-                rollback(con);
-            }
-            if (autocommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
                 autocommit(con);
             }
             releaseWriteContextConnection(con, ctx, cache);
@@ -622,13 +616,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             if (usrdata.isConvertDriveUserFolders()) {
                 convertDriveUserFolders(ctx, usrdata, con);
-            }
-
-            if (usrdata.getDisplay_name() != null) {
-                // update folder name via ox api if 'display name' was changed
-                final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
-
-                OXFolderAdminHelper.propagateUserModification(userId, changedfields, System.currentTimeMillis(), con, con, contextId);
             }
 
             storeFolderTree(ctx, con, usrdata, userId);
@@ -734,7 +721,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
         // Invalidate alias cache
         UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-        aliasStorage.invalidateAliases(ctx.getId(), userId);
+        aliasStorage.invalidateAliases(ctx.getId().intValue(), userId);
 
         CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
@@ -867,64 +854,64 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             rs.close();
 
-            final String passwd = cache.encryptPassword(usrdata);
-
+            PasswordDetails passwordDetails = cache.encryptPassword(usrdata);
             PreparedStatement stmt = null;
             try {
-                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin,filestore_id,filestore_owner,filestore_name,quota_max) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO user (cid,id,userPassword,passwordMech,salt,shadowLastChange,mail,timeZone,preferredLanguage,mailEnabled,imapserver,smtpserver,contactId,homeDirectory,uidNumber,gidNumber,loginShell,imapLogin,filestore_id,filestore_owner,filestore_name,quota_max) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setString(3, passwd);
-                stmt.setString(4, usrdata.getPasswordMech());
+                stmt.setString(3, passwordDetails.getEncodedPassword());
+                stmt.setString(4, passwordDetails.getPasswordMech());
+                stmt.setBytes(5, passwordDetails.getSalt());
 
                 if (usrdata.getPassword_expired() == null) {
                     usrdata.setPassword_expired(Boolean.FALSE);
                 }
-                stmt.setInt(5, getintfrombool(usrdata.getPassword_expired().booleanValue()));
+                stmt.setInt(6, getintfrombool(usrdata.getPassword_expired().booleanValue()));
 
-                stmt.setString(6, usrdata.getPrimaryEmail());
+                stmt.setString(7, usrdata.getPrimaryEmail());
 
                 final String timezone = usrdata.getTimezone();
                 if (null != timezone) {
-                    stmt.setString(7, timezone);
+                    stmt.setString(8, timezone);
                 } else {
                     String fallbackTimeZone = cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_TIMEZONE, DEFAULT_TIMEZONE_CREATE);
-                    stmt.setString(7, fallbackTimeZone);
+                    stmt.setString(8, fallbackTimeZone);
                 }
 
                 // language cannot be null, that's checked in checkCreateUserData()
                 final String lang = usrdata.getLanguage();
-                stmt.setString(8, lang);
+                stmt.setString(9, lang);
 
                 // mailenabled
                 if (usrdata.getMailenabled() == null) {
                     usrdata.setMailenabled(Boolean.TRUE);
                 }
-                stmt.setBoolean(9, usrdata.getMailenabled().booleanValue());
+                stmt.setBoolean(10, usrdata.getMailenabled().booleanValue());
 
                 // imap and smtp server
                 String imapServer = usrdata.getImapServerString();
                 if (null == imapServer) {
                     imapServer = DEFAULT_IMAP_SERVER_CREATE;
                 }
-                stmt.setString(10, URIParser.parse(imapServer, URIDefaults.IMAP).toString());
+                stmt.setString(11, URIParser.parse(imapServer, URIDefaults.IMAP).toString());
 
                 String smtpServer = usrdata.getSmtpServerString();
                 if (null == smtpServer) {
                     smtpServer = DEFAULT_SMTP_SERVER_CREATE;
                 }
-                stmt.setString(11, URIParser.parse(smtpServer, URIDefaults.SMTP).toString());
+                stmt.setString(12, URIParser.parse(smtpServer, URIDefaults.SMTP).toString());
 
-                stmt.setInt(12, contactId);
+                stmt.setInt(13, contactId);
 
                 String homedir = "/home"; //prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
                 homedir += "/" + usrdata.getName();
-                stmt.setString(13, homedir);
+                stmt.setString(14, homedir);
 
                 if (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) {
-                    stmt.setInt(14, uid_number);
+                    stmt.setInt(15, uid_number);
                 } else {
-                    stmt.setInt(14, NOBODY);
+                    stmt.setInt(15, NOBODY);
                 }
 
                 final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
@@ -950,48 +937,48 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     final int gid_number = tool.getGidNumberOfGroup(ctx, def_group_id, con);
                     if (-1 == gid_number) {
                         // Specified group does not exist
-                        stmt.setInt(15, NOGROUP);
+                        stmt.setInt(16, NOGROUP);
                     } else {
-                        stmt.setInt(15, gid_number);
+                        stmt.setInt(16, gid_number);
                     }
                 } else {
-                    stmt.setInt(15, NOGROUP);
+                    stmt.setInt(16, NOGROUP);
                 }
 
-                stmt.setString(16, LOGINSHELL);
+                stmt.setString(17, LOGINSHELL);
 
                 if (usrdata.getImapLogin() != null) {
-                    stmt.setString(17, usrdata.getImapLogin());
+                    stmt.setString(18, usrdata.getImapLogin());
                 } else {
-                    stmt.setNull(17, java.sql.Types.VARCHAR);
+                    stmt.setNull(18, java.sql.Types.VARCHAR);
                 }
 
                 boolean fileStorageSet = false;
                 {
                     Integer fsId = usrdata.getFilestoreId();
                     if (fsId != null && -1 != fsId.intValue()) {
-                        stmt.setInt(18, fsId.intValue());
+                        stmt.setInt(19, fsId.intValue());
 
                         Integer fsOwner = usrdata.getFilestoreOwner();
                         if (fsOwner != null && -1 != fsOwner.intValue()) {
-                            stmt.setInt(19, fsOwner.intValue());
+                            stmt.setInt(20, fsOwner.intValue());
                         } else {
-                            stmt.setInt(19, 0);
+                            stmt.setInt(20, 0);
                         }
 
                         String filestore_name = usrdata.getFilestore_name();
                         if (null != filestore_name) {
-                            stmt.setString(20, filestore_name);
+                            stmt.setString(21, filestore_name);
                         } else {
-                            stmt.setString(20, FileStorages.getNameForUser(userId, contextId));
+                            stmt.setString(21, FileStorages.getNameForUser(userId, contextId));
                         }
 
                         fileStorageSet = true;
                     } else {
                         // No file storage information
-                        stmt.setInt(18, 0);
                         stmt.setInt(19, 0);
-                        stmt.setNull(20, java.sql.Types.VARCHAR);
+                        stmt.setInt(20, 0);
+                        stmt.setNull(21, java.sql.Types.VARCHAR);
                     }
                 }
 
@@ -1001,9 +988,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         if (quota_max_temp != -1) {
                             quota_max_temp = quota_max_temp << 20;
                         }
-                        stmt.setLong(21, quota_max_temp);
+                        stmt.setLong(22, quota_max_temp);
                     } else {
-                        stmt.setLong(21, -1);
+                        stmt.setLong(22, -1);
                     }
                 }
 
@@ -1315,16 +1302,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
             throw new StorageException(e.toString(), e);
-        } catch (final NoSuchAlgorithmException e) {
-            // Here we throw without rollback, because at the point this
-            // exception is thrown
-            // no database activity has happened
-            throw new StorageException(e);
-        } catch (final UnsupportedEncodingException e) {
-            // Here we throw without rollback, because at the point this
-            // exception is thrown
-            // no database activity has happened
-            throw new StorageException(e);
         } catch (final IllegalArgumentException e) {
             LOG.error("IllegalArgument Error", e);
             throw new StorageException(e);
@@ -1369,10 +1346,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } else {
             isAllowed = getConfigViewValue(0, contextId, "com.openexchange.mail.remoteContentPerDefault", null);
         }
+
+        int flegs = flags;
         if (null != isAllowed && isAllowed.booleanValue()) {
-            flags |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
+            flegs |= UserSettingMail.INT_ALLOW_HTML_IMAGES;
         }
-        return flags;
+        return flegs;
     }
 
     /**
@@ -1463,7 +1442,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         {
             Boolean check = getConfigViewValue(userId, ctx.getId().intValue(), "com.openexchange.mail.useStaticDefaultFolders", Boolean.FALSE);
 
-            if (check != null && check) {
+            if (check != null && check.booleanValue()) {
                 String lang = user.getLanguage().toUpperCase();
                 // Drafts
                 String defaultName = prop.getUserProp("DRAFTS_MAILFOLDER_" + lang, "Drafts");
@@ -1608,20 +1587,20 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public int create(final Context ctx, final User usrdata, final UserModuleAccess moduleAccess) throws StorageException {
         int context_id = ctx.getId().intValue();
         Connection write_ox_con = leaseConnectionForContext(context_id, cache);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             final int internal_user_id = nextId(context_id, com.openexchange.groupware.Types.PRINCIPAL, write_ox_con);
             final int contact_id = nextId(context_id, com.openexchange.groupware.Types.CONTACT, write_ox_con);
             final int uid_number = (Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1")) > 0) ? nextId(context_id, com.openexchange.groupware.Types.UID_NUMBER, write_ox_con) : -1;
 
             write_ox_con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             lock(context_id, write_ox_con);
 
             final int userId = create(ctx, usrdata, moduleAccess, write_ox_con, internal_user_id, contact_id, uid_number);
             write_ox_con.commit();
-            rollback = false;
+            rollback = 2;
             LOG.info("User {} created!", Integer.toString(userId));
             return userId;
         } catch (final DataTruncation dt) {
@@ -1634,10 +1613,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             LOG.error("", e);
             throw e;
         } finally {
-            if (rollback) {
-                Databases.rollback(write_ox_con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(write_ox_con);
+                }
+                autocommit(write_ox_con);
             }
-            autocommit(write_ox_con);
             releaseWriteContextConnection(write_ox_con, ctx, cache);
         }
     }
@@ -2266,6 +2247,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 LOG.debug("Delete user {}({}) from contacts ...", user.getId(), ctx.getId());
                 int contactID = getContactIdByUserId(contextId, userId, write_ox_con);
+                stmt = write_ox_con.prepareStatement("INSERT INTO del_contacts (creating_date, created_from, changing_date, changed_from, fid, cid, intfield01, uid, filename) SELECT pc.creating_date, pc.created_from, ?, pc.changed_from, pc.fid, pc.cid, pc.intfield01, pc.uid, pc.filename FROM prg_contacts pc WHERE cid = ? AND intfield01 = ?");
+                stmt.setLong(1, System.currentTimeMillis());
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, contactID);
+                stmt.executeUpdate();
+                stmt.close();
                 stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts_image WHERE cid = ? AND intfield01 = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, contactID);
@@ -2274,6 +2261,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = write_ox_con.prepareStatement("DELETE FROM prg_contacts WHERE cid = ? AND userid = ?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
+                stmt.executeUpdate();
+                stmt.close();
+
+                String eventId = FolderObject.SYSTEM_LDAP_FOLDER_ID + "-" + contactID;
+                stmt = write_ox_con.prepareStatement("DELETE FROM calendar_alarm WHERE cid = ? AND event = ?");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, eventId);
+                stmt.executeUpdate();
+                stmt.close();
+                stmt = write_ox_con.prepareStatement("DELETE FROM calendar_alarm_trigger WHERE cid = ? AND eventId = ?");
+                stmt.setInt(1, contextId);
+                stmt.setString(2, eventId);
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -2358,17 +2357,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int contextId = ctx.getId().intValue();
                 Connection con = leaseWriteContextConnectionWithoutTimeout(contextId, cache);
                 condition.resetTransactionRollbackException();
-                boolean rollback = false;
+                int rollback = 0;
                 try {
                     startTransaction(con);
-                    rollback = true;
+                    rollback = 1;
 
                     lock(contextId, con);
 
                     delete(ctx, users, destUser, con);
 
                     con.commit();
-                    rollback = false;
+                    rollback = 2;
 
                     for (final User user : users) {
                         try {
@@ -2394,10 +2393,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     LOG.error("", e);
                     throw e;
                 } finally {
-                    if (rollback) {
-                        rollback(con);
+                    if (rollback > 0) {
+                        if (rollback == 1) {
+                            rollback(con);
+                        }
+                        autocommit(con);
                     }
-                    autocommit(con);
                     releaseWriteContextConnectionWithoutTimeout(con, contextId, cache);
                 }
             } while (retry(condition, users, ctx));
@@ -2807,7 +2808,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             String query = sb.toString();
             stmt = read_ox_con.prepareStatement(query);
-            stmt.setInt(1, context.getId());
+            stmt.setInt(1, context.getId().intValue());
             stmt.setString(2, "%" + aliasDomain);
 
             rs = stmt.executeQuery();
@@ -2842,7 +2843,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setString(1, pair.getSecond());
                 stmt.setLong(2, now);
                 stmt.setInt(3, contextId);
-                stmt.setInt(4, pair.getFirst());
+                stmt.setInt(4, pair.getFirst().intValue());
                 stmt.addBatch();
                 cache.removeFolderObject(pair.getFirst().intValue(), ContextStorage.getStorageContext(contextId));
             }
@@ -2892,7 +2893,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         translatedName = nb.advance().toString();
                     }
                 }
-                result.add(new Pair<>(folderId, translatedName));
+                result.add(new Pair<>(I(folderId), translatedName));
             }
             return result;
         } finally {

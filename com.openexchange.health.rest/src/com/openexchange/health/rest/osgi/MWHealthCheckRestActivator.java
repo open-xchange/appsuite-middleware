@@ -53,6 +53,7 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.health.MWHealthCheckService;
 import com.openexchange.health.rest.MWHealthCheckRestEndpoint;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link MWHealthCheckRestActivator}
@@ -64,7 +65,7 @@ public class MWHealthCheckRestActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class };
+        return new Class<?>[] { MWHealthCheckService.class, LeanConfigurationService.class, VersionService.class };
     }
 
     @Override

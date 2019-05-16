@@ -49,6 +49,7 @@
 
 package com.openexchange.rss.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -297,6 +298,7 @@ public class RssAction implements AJAXActionService {
                 warnings.add(oxe);
             } catch (UnsupportedEncodingException e) {
                 /* yeah, right... not happening for UTF-8 */
+                LOG.trace("", e);
             } catch (IOException e) {
                 OXException oxe;
                 if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
@@ -315,7 +317,7 @@ public class RssAction implements AJAXActionService {
                     if (Strings.isNotEmpty(exceptionMessage) && exceptionMessage.contains("exceeded")) {
                         ConfigurationService configService = Services.getService(ConfigurationService.class);
                         int maximumAllowedSize = configService.getIntProperty("com.openexchange.messaging.rss.feed.size", 4194304);
-                        OXException oxe = RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), maximumAllowedSize);
+                        OXException oxe = RssExceptionCodes.RSS_SIZE_EXCEEDED.create(FileUtils.byteCountToDisplaySize(maximumAllowedSize), I(maximumAllowedSize));
                         if (1 == urls.size()) {
                             throw oxe;
                         }
@@ -388,6 +390,7 @@ public class RssAction implements AJAXActionService {
             }
             return checkUrl(URLDecoder.decode(urlString, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
+            LOG.trace("", e);
             return urlString;
         }
     }

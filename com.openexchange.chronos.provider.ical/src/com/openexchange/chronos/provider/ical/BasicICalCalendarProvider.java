@@ -77,6 +77,7 @@ import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
 import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
@@ -124,22 +125,24 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
     }
 
     @Override
-    public void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
     public void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // Update default alarms
+        BasicCachingCalendarAccess connect = (BasicCachingCalendarAccess) connect(session, account, parameters);
+        connect.updateDefaultAlarms();
+    }
+
+    @Override
+    public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    public void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
@@ -258,7 +261,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
          */
         JSONObject internalConfig = new JSONObject();
         internalConfig.putSafe(NAME, Strings.isNotEmpty(settings.getName()) ? settings.getName() : "Calendar");
-        internalConfig.putSafe("subscribed", settings.isSubscribed());
+        internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
         String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
         if (Strings.isNotEmpty(color)) {
             internalConfig.putSafe("color", color);
@@ -274,7 +277,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
                 if (usedForSync && false == CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
                     throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
                 }
-                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync);
+                internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync));
             }
         }
         return internalConfig;
@@ -332,7 +335,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
             changed = true;
         }
         if (settings.containsSubscribed() && settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
-            internalConfig.putSafe("subscribed", settings.isSubscribed());
+            internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
             changed = true;
         }
         return changed ? internalConfig : null;

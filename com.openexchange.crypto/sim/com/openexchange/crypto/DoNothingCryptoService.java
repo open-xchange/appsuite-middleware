@@ -49,8 +49,9 @@
 
 package com.openexchange.crypto;
 
+import java.io.InputStream;
+import java.security.Key;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link DoNothingCryptoService}
@@ -64,10 +65,14 @@ public class DoNothingCryptoService implements CryptoService {
         return encryptedPayload;
     }
 
-
     @Override
     public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
         return data.toString();
+    }
+
+    @Override
+    public String decrypt(String encryptedPayload, Key key) throws OXException {
+        return encryptedPayload;
     }
 
     @Override
@@ -78,6 +83,21 @@ public class DoNothingCryptoService implements CryptoService {
     @Override
     public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
         return null;
+    }
+
+    @Override
+    public String encrypt(String data, Key key) throws OXException {
+        return data;
+    }
+
+    @Override
+    public InputStream encryptingStreamFor(InputStream in, Key key) throws OXException {
+        return in;
+    }
+
+    @Override
+    public InputStream decryptingStreamFor(InputStream in, Key key) throws OXException {
+        return in;
     }
 
 }

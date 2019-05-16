@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,6 +99,10 @@ public enum UserAttribute implements Attribute {
      * The 'passwordMech' column
      */
     PASSWORD_MECH("password-mechanism", "passwordMech", String.class),
+    /**
+     * The 'salt' column
+     */
+    SALT("salt", "salt", Byte.class),
     /**
      * The quota column
      */

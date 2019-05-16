@@ -103,7 +103,7 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		this.columnMap = new TIntObjectHashMap<E>(this.mappings.size());
         for (final Entry<E, ? extends JsonMapping<? extends Object, O>> entry : this.mappings.entrySet()) {
             if (entry.getValue().getColumnID() != null) {
-                this.columnMap.put(entry.getValue().getColumnID(), entry.getKey());
+                this.columnMap.put(entry.getValue().getColumnID().intValue(), entry.getKey());
             }
         }
         this.mappedFields = mappings.keySet().toArray(newArray(mappings.keySet().size()));

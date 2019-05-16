@@ -63,7 +63,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -162,7 +161,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         printServerException(e, parser);
     }
 
-    protected final void printNotBoundResponse(final Integer id, final Integer ctxid, final NotBoundException nbe){
+    protected final void printNotBoundResponse(@SuppressWarnings("unused") final Integer id, @SuppressWarnings("unused") final Integer ctxid, final NotBoundException nbe){
         System.err.println("RMI module "+nbe.getMessage()+" not available on server");
     }
 
@@ -272,9 +271,6 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         } else if (e instanceof NoSuchResourceException) {
             printServerException(id, ctxid, e, parser);
             sysexit(SYSEXIT_NO_SUCH_RESOURCE);
-        } else if (e instanceof NoSuchPublicationException) {
-            printServerException(id, ctxid, e, parser);
-            sysexit(SYSEXIT_NO_SUCH_PUBLICATION);
         } else if (e instanceof DuplicateExtensionException) {
             final DuplicateExtensionException exc = (DuplicateExtensionException) e;
             printServerException(id, ctxid, exc, parser);

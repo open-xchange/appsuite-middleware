@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.config;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 
@@ -61,51 +62,55 @@ import com.openexchange.net.HostList;
 public class MailProxyConfig {
 
     private static MailProxyConfig INSTANCE = new MailProxyConfig();
-    private HostList imapHostList;
-    private HostList smtpHostList;
 
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
     public static MailProxyConfig getInstance() {
         return INSTANCE;
-    }
-
-    private MailProxyConfig() {
-        // hide constructor
     }
 
     private static final String IMAP_NON_PROXY_HOST = "mail.imap.proxy.nonProxyHosts";
     private static final String SMTP_NON_PROXY_HOST = "mail.smtp.proxy.nonProxyHosts";
 
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<HostList> imapHostList;
+    private final AtomicReference<HostList> smtpHostList;
+
+    /**
+     * Initializes a new {@link MailProxyConfig}.
+     */
+    private MailProxyConfig() {
+        super();
+        imapHostList = new AtomicReference<HostList>();
+        smtpHostList = new AtomicReference<HostList>();
+    }
 
     public HostList getImapNonProxyHostList() {
-        if(imapHostList == null) {
-            synchronized (this) {
-                if(imapHostList == null) {
-                    String property = System.getProperty(IMAP_NON_PROXY_HOST);
-                    if (Strings.isEmpty(property)) {
-                        imapHostList = HostList.EMPTY;
-                    } else {
-                        imapHostList = HostList.valueOf(property.replace('|', ','));
-                    }
-                }
-            }
-        }
-        return imapHostList;
+        return getHostListFrom(true);
     }
 
     public HostList getSmtpNonProxyHostList() {
-        if(smtpHostList == null) {
-            synchronized (this) {
-                if(smtpHostList == null) {
-                    String property = System.getProperty(SMTP_NON_PROXY_HOST);
-                    if (Strings.isEmpty(property)) {
-                        smtpHostList = HostList.EMPTY;
-                    } else {
-                        smtpHostList = HostList.valueOf(property.replace('|', ','));
-                    }
+        return getHostListFrom(false);
+    }
+
+    private HostList getHostListFrom(boolean imap) {
+        AtomicReference<HostList> hostListReference = imap ? imapHostList : smtpHostList;
+        HostList hostList = hostListReference.get();
+        if (hostList == null) {
+            synchronized (hostListReference) {
+                hostList = hostListReference.get();
+                if (hostList == null) {
+                    String property = System.getProperty(imap ? IMAP_NON_PROXY_HOST : SMTP_NON_PROXY_HOST);
+                    hostList = Strings.isEmpty(property) ? HostList.EMPTY : HostList.valueOf(property.replace('|', ','));
+                    hostListReference.set(hostList);
                 }
             }
         }
-        return smtpHostList;
+        return hostList;
     }
 
 }

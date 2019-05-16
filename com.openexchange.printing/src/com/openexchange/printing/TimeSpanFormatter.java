@@ -57,12 +57,12 @@ import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link CalendarFormatter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */
 public class TimeSpanFormatter extends DateFormatter {
-	
+
 	private final Map<String, Object> timespanThingy;
 
 	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
@@ -76,26 +76,26 @@ public class TimeSpanFormatter extends DateFormatter {
 
 
 	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
-	
+
 		if (isFullTime) {
 			endDate = new Date(endDate.getTime() - 1000);
 		}
-	
-		if (differentDays(startDate, endDate)) {
-			if (isFullTime) {
-				return String.format("%s - %s", formatDate(startDate, utc),
-						formatDate(endDate, utc));
-			} else {
-				return String.format("%s - %s", formatDate(startDate),
-						formatDate(endDate));
-			}
-		} else {
+
+		if (!differentDays(startDate, endDate)) {
 			return formatDate(startDate);
 		}
+
+        if (isFullTime) {
+        	return String.format("%s - %s", formatDate(startDate, utc),
+        			formatDate(endDate, utc));
+        }
+
+        return String.format("%s - %s", formatDate(startDate),
+        		formatDate(endDate));
 	}
 	public String formatDate(Map<String, Object> appointment) {
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
+		Date startDate = new Date(((Long) appointment.get("start_date")).longValue());
+		Date endDate = new Date(((Long) appointment.get("end_date")).longValue());
 		return formatDate(startDate, endDate, isFullTime());
 	}
 
@@ -103,8 +103,8 @@ public class TimeSpanFormatter extends DateFormatter {
 		if (isFullTime()) {
 			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
 		}
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
+		Date startDate = new Date(((Long) appointment.get("start_date")).longValue());
+		Date endDate = new Date(((Long) appointment.get("end_date")).longValue());
 		return formatInterval(startDate, endDate, isFullTime());
 	}
 
@@ -116,7 +116,7 @@ public class TimeSpanFormatter extends DateFormatter {
 
 	private boolean isFullTime() {
 		Boolean fullTime = (Boolean) timespanThingy.get("full_time");
-		return fullTime == null || fullTime;
+		return fullTime == null || fullTime.booleanValue();
 	}
 
 }

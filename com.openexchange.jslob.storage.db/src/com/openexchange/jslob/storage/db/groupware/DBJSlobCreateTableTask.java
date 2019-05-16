@@ -80,10 +80,10 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
 
             final String[] tableNames = DBJSlobCreateTableService.getTablesToCreate();
             final String[] createStmts = DBJSlobCreateTableService.getCreateStmts();
@@ -94,22 +94,26 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
                     }
                     stmt = writeCon.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();
+                    closeSQLStuff(stmt);
+                    stmt = null;
                 } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
 
             writeCon.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.autocommit(writeCon);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.autocommit(writeCon);
+                }
+                closeSQLStuff(stmt);
             }
-            closeSQLStuff(stmt);
         }
     }
 

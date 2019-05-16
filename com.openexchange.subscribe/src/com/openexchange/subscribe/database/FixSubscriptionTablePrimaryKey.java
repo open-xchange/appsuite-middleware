@@ -49,10 +49,9 @@
 
 package com.openexchange.subscribe.database;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -82,27 +81,29 @@ public final class FixSubscriptionTablePrimaryKey extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             if (Tools.existsPrimaryKey(con, TABLE, COLUMNS)) {
                 return;
             }
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             Tools.dropPrimaryKey(con, TABLE);
             Tools.createPrimaryKey(con, TABLE, COLUMNS);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
     }
 }

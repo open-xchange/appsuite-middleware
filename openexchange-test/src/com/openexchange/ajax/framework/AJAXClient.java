@@ -194,6 +194,7 @@ public class AJAXClient {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unused")
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();

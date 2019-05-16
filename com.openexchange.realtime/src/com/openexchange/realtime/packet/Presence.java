@@ -52,7 +52,6 @@ package com.openexchange.realtime.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import com.google.common.base.Predicate;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
@@ -64,7 +63,7 @@ import com.openexchange.realtime.util.ElementPath;
  * <p>
  * This class allows access to the default Presence specific fields and knows how to access the default payload fields within the associated
  * PayloadTrees. Extensions to Presence Stanza can be queried via the {@link Presence#getExtensions()} function and programmatically
- * extracted from the Stanza via {@link Stanza#getPayload(com.openexchange.realtime.util.ElementPath)} function.
+ * extracted from the Stanza via {@link Stanza#getPayloadTrees(ElementPath)} function.
  * </p>
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -102,9 +101,7 @@ public class Presence extends Stanza {
 
     public static final ElementPath PRIORITY_PATH = new ElementPath("priority");
 
-
-
-    private static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
+    static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
 
     /** Predicate to filter extension elements from {@link Stanza#payloads} */
     private transient Predicate<PayloadTree> defaultsPredicate = null;
@@ -118,7 +115,10 @@ public class Presence extends Stanza {
 
                 @Override
                 public boolean apply(PayloadTree input) {
-                    return defaultElements.contains(input.getElementPath());
+                    if (null != input) {
+                        return defaultElements.contains(input.getElementPath());
+                    }
+                    return false;
                 }
             };
         }
@@ -132,7 +132,10 @@ public class Presence extends Stanza {
 
                 @Override
                 public boolean apply(PayloadTree input) {
-                    return !defaultElements.contains(input.getElementPath());
+                    if (null != input) {
+                        return !defaultElements.contains(input.getElementPath());
+                    }
+                    return true;
                 }
             };
         }
@@ -151,28 +154,6 @@ public class Presence extends Stanza {
         setMessage(message);
         setState(state);
         setPriority(priority);
-    }
-
-    /**
-     * Initializes a new {@link Presence} based on another Presence. This will produce a deep copy up to the leafs of the PayloadTreeNode,
-     * more exactly the data Portion of the PayloadElement in the PayloadTreeNode as we are dealing with Objects that must not neccessarily
-     * implement Cloneable or Serializable.
-     * 
-     * @param other The Presence to copy, must not be null
-     * @throws IllegalArgumentException if the other Presence is null
-     */
-    public Presence(Presence other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Other Presence must not be null.");
-        }
-        super.setFrom(other.getFrom());
-        super.setTo(other.getTo());
-        this.error = other.error;
-        this.message = other.message;
-        this.payloads = other.deepCopyPayloads();
-        this.priority = other.priority;
-        this.state = other.state;
-        this.type = other.type;
     }
 
     /**
@@ -266,7 +247,7 @@ public class Presence extends Stanza {
      */
     public void setPriority(byte priority) {
         this.priority = priority;
-        writeThrough(PRIORITY_PATH, priority);
+        writeThrough(PRIORITY_PATH, Byte.valueOf(priority));
     }
 
     /**
@@ -288,7 +269,7 @@ public class Presence extends Stanza {
     }
 
     @Override
-    public void initializeDefaults() throws OXException {
+    public void initializeDefaults() {
         Initializer initializer = new Initializer();
         Collection<PayloadTree> defaultPayloads = getDefaultPayloads();
         initializer.initializeFromDefaults(defaultPayloads);
@@ -312,9 +293,8 @@ public class Presence extends Stanza {
          * Initialize the default Stanza fields from PayloadTrees contained in the Stanza
          * 
          * @param defaultPayloads the PayloadTrees containing the PayloadElements needed to initialize the default Stanza fields
-         * @throws OXException when the Stanza couldn't be initialized
          */
-        public void initializeFromDefaults(Collection<PayloadTree> defaultPayloads) throws OXException {
+        public void initializeFromDefaults(Collection<PayloadTree> defaultPayloads) {
             initShow(defaultPayloads);
             initStatus(defaultPayloads);
             initPriority(defaultPayloads);
@@ -363,7 +343,7 @@ public class Presence extends Stanza {
                 if (!(data instanceof Byte)) {
                     throw new IllegalStateException("Payload not transformed yet");
                 }
-                setPriority((Byte) data);
+                setPriority(((Byte) data).byteValue());
             }
         }
 
@@ -551,5 +531,4 @@ public class Presence extends Stanza {
         return true;
     }
 
-    
 }

@@ -64,12 +64,12 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.AttendeePrivileges;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
@@ -723,6 +723,28 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeGeo();
             }
         });
+        mappings.put(EventField.ATTENDEE_PRIVILEGES, new DefaultMapping<AttendeePrivileges, Event>() {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsAttendeePrivileges();
+            }
+
+            @Override
+            public void set(Event object, AttendeePrivileges value) throws OXException {
+                object.setAttendeePrivileges(value);
+            }
+
+            @Override
+            public AttendeePrivileges get(Event object) {
+                return object.getAttendeePrivileges();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeAttendeePrivileges();
+            }
+        });
         mappings.put(EventField.START_DATE, new DefaultMapping<DateTime, Event>() {
 
             @Override
@@ -1028,12 +1050,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public boolean equals(Event event1, Event event2) {
-                try {
-                    return CalendarUtils.getAttendeeUpdates(event1.getAttendees(), event2.getAttendees()).isEmpty();
-                } catch (OXException e) {
-                    LoggerFactory.getLogger(EventMapper.class).warn("Unable to compare attendees from event with id {} and id {}.", event1.getId(), event2.getId(), e);
-                }
-                return false;
+                return CalendarUtils.getAttendeeUpdates(event1.getAttendees(), event2.getAttendees()).isEmpty();
             }
 
             @Override

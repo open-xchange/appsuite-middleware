@@ -75,7 +75,7 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.TasksApi;
 
 /**
- * 
+ *
  * {@link Bug58023Test}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -93,7 +93,7 @@ public class Bug58023Test extends AbstractAPIClientSession {
 //        apiClient.login(testUser.getLogin(), testUser.getPassword());
         tasksApi = new TasksApi(apiClient);
         foldersApi = new FoldersApi(apiClient);
-        privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), apiClient.getSession(), generateFolderBody(), "1", Module.TASK.getName()).getData();
+        privateTaskFolder = foldersApi.createFolder(getPrivateTaskFolder(), apiClient.getSession(), generateFolderBody(), "1", Module.TASK.getName(), null).getData();
     }
 
     public String getPrivateTaskFolder() throws ApiException {

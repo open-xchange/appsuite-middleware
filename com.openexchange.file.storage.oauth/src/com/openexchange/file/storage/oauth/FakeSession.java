@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 
 /**
@@ -185,4 +186,10 @@ final class FakeSession implements Session, Serializable {
     public Set<String> getParameterNames() {
         return parameters.keySet();
     }
+
+    @Override
+    public Origin getOrigin() {
+        return Origin.SYNTHETIC;
+    }
+
 }

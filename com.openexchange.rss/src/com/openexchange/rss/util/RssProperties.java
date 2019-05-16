@@ -159,7 +159,7 @@ public class RssProperties {
             if (Strings.isNotEmpty(token)) {
                 try {
                     tmp.add(Integer.valueOf(token.trim()));
-                } catch (NumberFormatException e) {
+                } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     // Ignore
                 }
             }

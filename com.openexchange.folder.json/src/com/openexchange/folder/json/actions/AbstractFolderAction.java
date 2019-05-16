@@ -95,6 +95,7 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.session.Session;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
@@ -129,6 +130,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     @Override
     public final AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
+            parsePushTokenParameter(request);
             return doPerform(request, session);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -368,7 +370,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     }
 
     static final class OAuthContentTypes {
-        
+
         private OAuthContentTypes() {
             throw new IllegalStateException("Utility class");
         }
@@ -515,7 +517,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         return contentTypes;
     }
 
-    private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "yes", "on", "1", "y")));
+    private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("true", "yes", "on", "1", "y")));
 
     /**
      * Parses string to boolean.
@@ -706,6 +708,18 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
         updateData.setFolder(folder);
         return updateData;
+    }
+
+    /**
+     * Retrieves the optional pushToken parameter from the request and adds it to the session
+     *
+     * @param request The request of the action
+     */
+    private void parsePushTokenParameter(AJAXRequestData request) {
+        String pushToken = request.getParameter("pushToken");
+        if (Strings.isNotEmpty(pushToken)) {
+            request.getSession().setParameter(Session.PARAM_PUSH_TOKEN, pushToken);
+        }
     }
 
     /**

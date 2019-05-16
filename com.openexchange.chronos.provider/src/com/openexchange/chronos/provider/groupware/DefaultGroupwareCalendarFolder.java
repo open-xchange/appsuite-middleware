@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.groupware;
 
 import java.util.Date;
+import java.util.Map;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 
@@ -67,6 +68,7 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
     private int createdBy;
     private Date creationDate;
     private GroupwareFolderType folderType;
+    private Map<String, Object> meta;
 
     /**
      * Initializes a new {@link DefaultGroupwareCalendarFolder}.
@@ -90,6 +92,7 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
             createdBy = groupwareFolder.getCreatedBy();
             creationDate = groupwareFolder.getCreationDate();
             folderType = groupwareFolder.getType();
+            meta = groupwareFolder.getMeta();
         }
     }
 
@@ -145,6 +148,15 @@ public class DefaultGroupwareCalendarFolder extends DefaultCalendarFolder implem
 
     public void setFolderType(GroupwareFolderType folderType) {
         this.folderType = folderType;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
 }

@@ -49,10 +49,9 @@
 
 package com.openexchange.pluginsloaded.mbean.osgi;
 
-import javax.management.ObjectName;
 import org.slf4j.Logger;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
+import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 import com.openexchange.pluginsloaded.mbean.PluginsLoadedMBean;
@@ -66,35 +65,31 @@ import com.openexchange.pluginsloaded.mbean.impl.PluginsLoadedMBeanImpl;
  * @since v7.8.4
  */
 public class PluginsLoadedActivator extends HousekeepingActivator {
-    
+
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PluginsLoadedActivator.class);
-    
+
     public PluginsLoadedActivator(){
         super();
     }
-    
+
     @Override
     protected boolean stopOnServiceUnavailability() {
         return true;
     }
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class, PluginsLoadedService.class };
+        return new Class<?>[] { PluginsLoadedService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ManagementService managementService = getService(ManagementService.class);
         PluginsLoadedService pluginsLoadedService = getService(PluginsLoadedService.class);
-        
-        try {
-            final ObjectName objectName = Managements.getObjectName(PluginsLoadedMBean.class.getName(), PluginsLoadedMBean.DOMAIN);
-            managementService.registerMBean(objectName, new PluginsLoadedMBeanImpl(pluginsLoadedService));
-            LOGGER.info("Registered MBean {}", PluginsLoadedMBean.class.getName());
-        } catch (Exception e) {
-            LOGGER.warn("Could not register MBean {}", PluginsLoadedMBean.class.getName(), e);
-        }
+        track(ManagementService.class, new HousekeepingManagementTracker(   context, 
+                                                                            PluginsLoadedMBean.class.getName(), 
+                                                                            PluginsLoadedMBean.DOMAIN, 
+                                                                            new PluginsLoadedMBeanImpl(pluginsLoadedService)));
+        openTrackers();
     }
 
 }

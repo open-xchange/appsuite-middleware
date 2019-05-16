@@ -1,3 +1,8 @@
+* 2018-11-07 - daniel.becker@open-xchange.com
+
+ - MW-1098 - open-xchange-meta-pubsub required the deleted
+   open-xchange-publish package. Therefore removed it.
+
 * 2013-10-16 - choeger@open-xchange.com
 
  - Bugfix #29300 - open-xchange-meta-ui-ox6 package requires all languages

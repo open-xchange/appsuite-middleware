@@ -81,8 +81,8 @@ import com.openexchange.user.UserService;
  */
 public class SecretRecoveryActivator extends HousekeepingActivator {
 
-    private volatile WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
-    private volatile WhiteboardSecretService whiteboardSecretService;
+    private WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
+    private WhiteboardSecretService whiteboardSecretService;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -90,7 +90,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         /*
          * Get ranking of currently applicable SecretService reference
          */
@@ -190,7 +190,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
         final WhiteboardEncryptedItemDetector detector = whiteboardEncryptedItemDetector;
         if (null != detector) {

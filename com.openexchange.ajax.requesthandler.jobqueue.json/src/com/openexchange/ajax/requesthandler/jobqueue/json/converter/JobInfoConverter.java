@@ -98,8 +98,8 @@ public class JobInfoConverter implements ResultConverter {
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
         try {
-            if (Collection.class.isInstance(resultObject)) {
-                Collection<JobInfo> jobInfos = (Collection<JobInfo>) resultObject;
+            if (resultObject instanceof Collection) {
+                @SuppressWarnings("unchecked") Collection<JobInfo> jobInfos = (Collection<JobInfo>) resultObject;
                 JSONArray jCollection = new JSONArray(jobInfos.size());
                 for (JobInfo jobInfo : jobInfos) {
                     jCollection.put(writeSingleJobInfo(jobInfo));
@@ -109,7 +109,7 @@ public class JobInfoConverter implements ResultConverter {
                 result.setResultObject(writeSingleJobInfo((JobInfo) resultObject), "json");
             }
         } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(x, x.getMessage());
         }
     }
 

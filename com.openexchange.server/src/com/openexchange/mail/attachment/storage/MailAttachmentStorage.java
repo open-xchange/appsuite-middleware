@@ -126,16 +126,6 @@ public interface MailAttachmentStorage {
     void removeAttachment(String id, Session session) throws OXException;
 
     /**
-     * Gets the download URI for the mail attachment denoted by given identifier
-     *
-     * @param id The identifier of the attachment held in storage
-     * @param session The associated session
-     * @return The download URI
-     * @throws OXException If download URI cannot be returned
-     */
-    DownloadUri getDownloadUri(String id, Session session) throws OXException;
-
-    /**
      * Discards the the mail attachment denoted by given identifier and associated URI's resource as well
      *
      * @param id The identifier of the attachment held in storage

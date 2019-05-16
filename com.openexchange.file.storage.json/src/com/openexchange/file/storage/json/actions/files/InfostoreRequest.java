@@ -92,6 +92,13 @@ public interface InfostoreRequest {
     boolean getBoolParameter(final String name);
 
     /**
+     * Checks if client requests to pre-generate previews.
+     *
+     * @return <code>true</code> to pre-generate previews; otherwise <code>false</code>
+     */
+    boolean isPregeneratePreviews();
+
+    /**
      * Gets the request data if available.
      *
      * @return The request data or <code>null</code>

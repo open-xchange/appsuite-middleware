@@ -51,6 +51,7 @@ package com.openexchange.drive.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
@@ -60,12 +61,13 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
@@ -96,6 +98,7 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DriveActivator}
@@ -104,7 +107,8 @@ import com.openexchange.user.UserService;
  */
 public class DriveActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveActivator.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DriveActivator.class);
 
     /**
      * Initializes a new {@link DriveActivator}.
@@ -116,10 +120,16 @@ public class DriveActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class, CapabilityService.class,
-            IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class,
+            IDBasedFolderAccessFactory.class, EventAdmin.class, ThreadPoolService.class, TimerService.class, ConfigurationService.class,
             UserService.class, GroupService.class, ModuleSupport.class, ShareService.class, ContextService.class, ShareNotificationService.class,
-            ContactService.class, ContactUserStorage.class, ConfigViewFactory.class, FolderService.class
+            ContactService.class, ContactUserStorage.class, FolderService.class, DispatcherPrefixService.class, LeanConfigurationService.class,
+            VersionService.class
         };
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
     @Override
@@ -129,7 +139,6 @@ public class DriveActivator extends HousekeepingActivator {
          * set references
          */
         DriveServiceLookup.set(this);
-        DriveConfig.getInstance().start();
         BucketInputStream.setTokenBucket(new DriveTokenBucket());
         /*
          * register Drive client info
@@ -153,12 +162,13 @@ public class DriveActivator extends HousekeepingActivator {
         /*
          * schedule cluster-wide periodic checksum cleanup task
          */
+        final BundleContext context = this.context;
         track(ClusterTimerService.class, new ServiceTrackerCustomizer<ClusterTimerService, ClusterTimerService>() {
 
-            private volatile PeriodicChecksumCleaner checksumCleaner;
+            private PeriodicChecksumCleaner checksumCleaner;
 
             @Override
-            public ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
+            public synchronized ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
                 LOG.debug("Initializing periodic checksum cleaner task");
                 ClusterTimerService timerService = context.getService(reference);
                 long interval = DriveConfig.getInstance().getChecksumCleanerInterval();
@@ -176,7 +186,7 @@ public class DriveActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+            public synchronized void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
                 LOG.debug("Stopping periodic checksum cleaner task");
                 PeriodicChecksumCleaner checksumCleaner = this.checksumCleaner;
                 if (null != checksumCleaner) {
@@ -193,7 +203,6 @@ public class DriveActivator extends HousekeepingActivator {
         LOG.info("stopping bundle: \"com.openexchange.drive\"");
         BucketInputStream.setTokenBucket(null);
         DelayedChecksumEventListener.getInstance().stop();
-        DriveConfig.getInstance().stop();
         DriveServiceLookup.set(null);
         super.stopBundle();
     }

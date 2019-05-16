@@ -67,8 +67,8 @@ public class GroupFixtureFactory implements FixtureFactory<Group> {
     }
 
     @Override
-    public Fixtures<Group> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
-        return new GroupFixtures(fixtureName, entries, fixtureLoader);
+    public Fixtures<Group> createFixture(final Map<String, Map<String, String>> entries) {
+        return new GroupFixtures(entries, fixtureLoader);
     }
 
     private class GroupFixtures extends DefaultFixtures<Group> implements Fixtures<Group> {
@@ -77,7 +77,7 @@ public class GroupFixtureFactory implements FixtureFactory<Group> {
 
         private final Map<String, Fixture<Group>> groupMap = new HashMap<String, Fixture<Group>>();
 
-        public GroupFixtures(final String fixtureName, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
+        public GroupFixtures(final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
             super(Group.class, values, fixtureLoader);
             this.entries = values;
         }

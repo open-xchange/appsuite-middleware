@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.basic
 Bundle-SymbolicName: com.openexchange.find.basic
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -72,7 +72,6 @@ Import-Package: com.davekoelle,
  com.openexchange.mail.utils,
  com.openexchange.mailaccount,
  com.openexchange.osgi,
- com.openexchange.resource,
  com.openexchange.search,
  com.openexchange.search.internal.operands,
  com.openexchange.server,

@@ -123,6 +123,24 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for the inverse of {@link Boolean#valueOf(boolean)} that uses cached instances.
+     * @param b boolean value to be converted to a Boolean object.
+     * @return <code>Boolean.TRUE</code> if b == false, <code>Boolean.FALSE</code> otherwise.
+     */
+    public static Boolean NOT(final boolean b) {
+        return Boolean.valueOf(!b);
+    }
+
+    /**
+     * Short method name for the inverse of {@link Boolean#booleanValue()}.
+     * @param b {@link Boolean} object to be converted to a boolean value.
+     * @return <code>true</code> if b == Boolean.TRUE, <code>false</code> otherwise.
+     */
+    public static boolean not(final Boolean b) {
+        return !b.booleanValue();
+    }
+
+    /**
      * Short method name for {@link Float#valueOf(float)} that uses cached instances.
      * @param f float value to be converted to a Float object.
      * @return Float object.
@@ -133,6 +151,24 @@ public final class Autoboxing {
 
     public static float f(final Float f) {
         return f.floatValue();
+    }
+
+    /**
+     * Short method name for {@link Double#valueOf(double)} that uses cached instances.
+     * @param d double value to be converted to a Double object.
+     * @return Double object.
+     */
+    public static Double D(final double d) {
+        return Double.valueOf(d);
+    }
+
+    /**
+     * Short method name for {@link Double#doubleValue()}.
+     * @param b {@link Double} object to be converted to a double value.
+     * @return double value.
+     */
+    public static double b(final Double d) {
+        return d.doubleValue();
     }
 
     /**
@@ -329,7 +365,7 @@ public final class Autoboxing {
      * @return A {@code Boolean} instance representing {@code b}
      */
     public static Boolean valueOf(boolean b) {
-        return Boolean.valueOf(b);
+        return (b ? Boolean.TRUE : Boolean.FALSE);
     }
 
     /**

@@ -49,18 +49,27 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.owasp.esapi.codecs.MySQLCodec;
-import org.owasp.esapi.codecs.MySQLCodec.Mode;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.AbstractStringSearchTerm;
 import com.openexchange.groupware.infostore.search.AndTerm;
+import com.openexchange.groupware.infostore.search.CameraApertureTerm;
+import com.openexchange.groupware.infostore.search.CameraExposureTimeTerm;
+import com.openexchange.groupware.infostore.search.CameraFocalLengthTerm;
+import com.openexchange.groupware.infostore.search.CameraIsoSpeedTerm;
+import com.openexchange.groupware.infostore.search.CameraMakeTerm;
+import com.openexchange.groupware.infostore.search.CameraModelTerm;
+import com.openexchange.groupware.infostore.search.CaptureDateTerm;
 import com.openexchange.groupware.infostore.search.CategoriesTerm;
 import com.openexchange.groupware.infostore.search.ColorLabelTerm;
 import com.openexchange.groupware.infostore.search.ComparablePattern;
@@ -73,9 +82,11 @@ import com.openexchange.groupware.infostore.search.FileMd5SumTerm;
 import com.openexchange.groupware.infostore.search.FileMimeTypeTerm;
 import com.openexchange.groupware.infostore.search.FileNameTerm;
 import com.openexchange.groupware.infostore.search.FileSizeTerm;
+import com.openexchange.groupware.infostore.search.HeightTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedTerm;
 import com.openexchange.groupware.infostore.search.LastModifiedUtcTerm;
 import com.openexchange.groupware.infostore.search.LockedUntilTerm;
+import com.openexchange.groupware.infostore.search.MediaDateTerm;
 import com.openexchange.groupware.infostore.search.MetaTerm;
 import com.openexchange.groupware.infostore.search.ModifiedByTerm;
 import com.openexchange.groupware.infostore.search.NotTerm;
@@ -88,6 +99,7 @@ import com.openexchange.groupware.infostore.search.TitleTerm;
 import com.openexchange.groupware.infostore.search.UrlTerm;
 import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
+import com.openexchange.groupware.infostore.search.WidthTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.tools.session.ServerSession;
@@ -103,17 +115,15 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private static final String INFOSTORE = "infostore.";
     private static final String DOCUMENT = "infostore_document.";
     private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version";
-    private static final char[] IMMUNE = new char[] { ' ', '%', '_' };
-    private static final char[] IMMUNE_WILDCARDS = new char[] { ' ', '%', '_', '\\' };
     private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = ImmutableSet.<Class<? extends SearchTerm<?>>> of(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class);
 
     private final StringBuilder filterBuilder;
-    private final MySQLCodec codec;
+    private final List<Object> parameters;
     private final Metadata sortedBy;
     private final int dir;
     private final int start;
     private final int end;
-    private final String prefix;
+    private final String cols;
     private final List<Integer> readAllFolders;
     private final List<Integer> readOwnFolders;
     private final ServerSession session;
@@ -134,18 +144,15 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     public ToMySqlQueryVisitor(ServerSession session, List<Integer> readAllFolders, List<Integer> readOwnFolders, String cols, Metadata sortedBy, int dir, int start, int end) {
         super();
         this.filterBuilder = new StringBuilder(1024);
-        this.codec = new MySQLCodec(Mode.STANDARD);
+        this.parameters = new ArrayList<Object>();
+        this.cols = cols;
         this.sortedBy = sortedBy;
         this.dir = dir;
         this.start = start;
         this.end = end;
-
         this.readAllFolders = readAllFolders;
         this.readOwnFolders = readOwnFolders;
         this.session = session;
-
-        // Build prefix
-        this.prefix = new StringBuilder(cols.length() + PREFIX.length()).append(cols).append(PREFIX).toString();
     }
 
     protected ToMySqlQueryVisitor(ServerSession session,  int[] allFolderIds, int[] ownFolderIds, String cols, Metadata sortedBy, int dir, int start, int end) {
@@ -160,9 +167,58 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
             cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
     }
 
-    public String getMySqlQuery() {
-        StringBuilder queryBuilder = new StringBuilder(8192).append(prefix);
-        SearchEngineImpl.appendFoldersAsUnion(session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
+    /**
+     * Prepares a statement using the passed connection for this visitor's SQL query containing of the filters from the visited search
+     * terms, as well as further clauses for the searched folders, limits and sort options. The remembered parameters for constant
+     * operands of the search term are set in the statement implicitly.
+     *
+     * @param connection The database connection to use for creating the prepared statement
+     * @param distinct <code>true</code> to use the <code>DISTINCT</code> modified for the <code>SELECT</code> statements, <code>false</code>, otherwise
+     * @return The ready to use prepared statement with the parameters set
+     */
+    public PreparedStatement prepareStatement(Connection connection, boolean distinct) throws SQLException {
+        /*
+         * build query & inject DISTINCT keyword(s) as needed
+         */
+        StringBuilder queryBuilder = new StringBuilder(8192);
+        int filterCount = appendMySqlQuery(queryBuilder);        
+        if (distinct) {
+            queryBuilder = injectDistinctInQuery(queryBuilder);
+        }
+        /*
+         * prepare statement and set parameters
+         */
+        PreparedStatement stmt = null;
+        boolean close = false;
+        try {
+            stmt = connection.prepareStatement(queryBuilder.toString());
+            close = true;
+            int parameterIndex = 1;
+            for (int i = 0; i < filterCount; i++) {
+                for (Object parameter : parameters) {
+                    stmt.setObject(parameterIndex++, parameter);
+                }
+            }
+            close = false;
+            return stmt;
+        } finally {
+            if (close) {
+                Databases.closeSQLStuff(stmt);
+            }
+        }
+    }
+    
+    /**
+     * Constructs and appends this visitor's SQL query containing the prefix, the filters from the visited search terms, as well as further
+     * clauses for the searched folders, limits and sort options.
+     *
+     * @param queryBuilder The string builder to append the query to
+     * @return The number of times the <i>filter</i> query from the visited search terms was actually appended
+     */
+    private int appendMySqlQuery(StringBuilder queryBuilder) {
+        queryBuilder.append(cols).append(PREFIX);
+        int filterCount = SearchEngineImpl.appendFoldersAsUnion(
+            session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
         if (null != sortedBy && dir != InfostoreSearchEngine.NOT_SET) {
             queryBuilder.append(" ORDER BY ").append(sortedBy.getName());
             if (dir == InfostoreSearchEngine.ASC) {
@@ -174,7 +230,14 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         if (start >= 0 && end >= 0 && start < end) {
             queryBuilder.append(" LIMIT ").append(start).append(",").append(end);
         }
-        return queryBuilder.toString();
+        return filterCount;
+    }
+
+    private static StringBuilder injectDistinctInQuery(StringBuilder queryBuilder) {
+        for (int pos = 0; (pos = queryBuilder.indexOf("SELECT", pos)) >= 0;) {
+            queryBuilder.insert(pos + 5, " DISTINCT");
+        }
+        return queryBuilder;
     }
 
     private static List<SearchTerm<?>> prepareTerms(List<SearchTerm<?>> terms) {
@@ -321,9 +384,33 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     }
 
     @Override
+    public void visit(CameraModelTerm cameraModelTerm) {
+        String field = "camera_model";
+        parseStringSearchTerm(cameraModelTerm, field);
+    }
+
+    @Override
+    public void visit(CameraMakeTerm cameraMakeTerm) {
+        String field = "camera_make";
+        parseStringSearchTerm(cameraMakeTerm, field);
+    }
+
+    @Override
     public void visit(LastModifiedTerm lastModifiedTerm) {
         String comp = getComparionType(lastModifiedTerm.getPattern());
         filterBuilder.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
+    }
+
+    @Override
+    public void visit(MediaDateTerm mediaDateTerm) throws OXException {
+        String comp = getComparionType(mediaDateTerm.getPattern());
+        filterBuilder.append("COALESCE(").append(DOCUMENT).append("capture_date").append(',').append(DOCUMENT).append("last_modified").append(')').append(comp).append(mediaDateTerm.getPattern().getPattern().getTime()).append(" ");
+    }
+
+    @Override
+    public void visit(CaptureDateTerm captureDateTerm) throws OXException {
+        String comp = getComparionType(captureDateTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("capture_date").append(comp).append(captureDateTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
@@ -358,6 +445,42 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     public void visit(FileSizeTerm fileSizeTerm) {
         String comp = getComparionType(fileSizeTerm.getPattern());
         filterBuilder.append(DOCUMENT).append("file_size").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraIsoSpeedTerm cameraIsoSpeedTerm) throws OXException {
+        String comp = getComparionType(cameraIsoSpeedTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_iso_speed").append(comp).append(cameraIsoSpeedTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraApertureTerm cameraApertureTerm) throws OXException {
+        String comp = getComparionType(cameraApertureTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_aperture").append(comp).append(cameraApertureTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraExposureTimeTerm cameraExposureTimeTerm) throws OXException {
+        String comp = getComparionType(cameraExposureTimeTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_exposure_time").append(comp).append(cameraExposureTimeTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(CameraFocalLengthTerm cameraFocalLengthTerm) throws OXException {
+        String comp = getComparionType(cameraFocalLengthTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("camera_focal_length").append(comp).append(cameraFocalLengthTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(HeightTerm heightTerm) throws OXException {
+        String comp = getComparionType(heightTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("height").append(comp).append(heightTerm.getPattern().getPattern()).append(" ");
+    }
+
+    @Override
+    public void visit(WidthTerm widthTerm) throws OXException {
+        String comp = getComparionType(widthTerm.getPattern());
+        filterBuilder.append(DOCUMENT).append("width").append(comp).append(widthTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
@@ -438,7 +561,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         // Encode pattern
         String fieldName = new StringBuilder(DOCUMENT).append(field).toString();
         if (useLike) {
-            pattern = codec.encode(IMMUNE_WILDCARDS, replaceWildcards(pattern));
+            pattern = replaceWildcards(pattern);
             if (searchTerm.isSubstringSearch()) {
                 boolean notStartsWithPercent = !pattern.startsWith("%");
                 boolean notEndsWithPercent = !pattern.endsWith("%");
@@ -454,26 +577,39 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
                     pattern = tmp.toString();
                 }
             }
-        } else {
-            pattern = codec.encode(IMMUNE, pattern);
         }
 
-        // Check for case-insensitive search
+        // Check for case-insensitive search, append to query builder & remember parameter
         if (searchTerm.isIgnoreCase()) {
-            fieldName = new StringBuilder("UPPER(").append(fieldName).append(')').toString();
-            pattern = new StringBuilder("UPPER('").append(pattern).append("')").toString();
+            filterBuilder.append("UPPER(").append(fieldName).append(')').append(useLike ? " LIKE " : " = ").append("UPPER(?)");
         } else {
-            // Surround with single quotes
-            pattern = new StringBuilder(pattern.length() + 2).append('\'').append(pattern).append('\'').toString();
+            filterBuilder.append(fieldName).append(useLike ? " LIKE ?" : " = ?");
         }
+        parameters.add(pattern);
+    }
 
-        // Append to query builder
-        filterBuilder.append(fieldName);
-        if (useLike) {
-            filterBuilder.append(" LIKE ").append(pattern);
-        } else {
-            filterBuilder.append(" = ").append(pattern);
-        }
+    /**
+     * Gets the remembered and prepared constant operators from the visited search terms.
+     * <p/>
+     * <b>Note:</b> Only useful for tests.
+     * 
+     * @return A preview of the remembered parameters, or an empty list if there are none
+     */
+    protected List<Object> previewParameters() {
+        return Collections.unmodifiableList(parameters);
+    }
+
+    /**
+     * Gets a preview of the constructed SQL query.
+     * <p/>
+     * <b>Note:</b> Only useful for tests.
+     *
+     * @return A preview of the SQL query
+     */
+    protected String previewMySqlQuery() {
+        StringBuilder queryBuilder = new StringBuilder();
+        appendMySqlQuery(queryBuilder);
+        return queryBuilder.toString();
     }
 
 }

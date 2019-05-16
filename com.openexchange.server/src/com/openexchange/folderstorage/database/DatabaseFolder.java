@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -215,56 +216,56 @@ public class DatabaseFolder extends AbstractFolder {
 
     private static Type getType(final int type) {
         switch (type) {
-        case FolderObject.SYSTEM_TYPE:
-            return SystemType.getInstance();
-        case FolderObject.PRIVATE:
-            return PrivateType.getInstance();
-        case FolderObject.PUBLIC:
-            return PublicType.getInstance();
-        case FolderObject.TRASH:
-            return TrashType.getInstance();
-        case FolderObject.PICTURES:
-            return PicturesType.getInstance();
-        case FolderObject.DOCUMENTS:
-            return DocumentsType.getInstance();
-        case FolderObject.MUSIC:
-            return MusicType.getInstance();
-        case FolderObject.VIDEOS:
-            return VideosType.getInstance();
-        case FolderObject.TEMPLATES:
-            return TemplatesType.getInstance();
-        default:
-            return null;
+            case FolderObject.SYSTEM_TYPE:
+                return SystemType.getInstance();
+            case FolderObject.PRIVATE:
+                return PrivateType.getInstance();
+            case FolderObject.PUBLIC:
+                return PublicType.getInstance();
+            case FolderObject.TRASH:
+                return TrashType.getInstance();
+            case FolderObject.PICTURES:
+                return PicturesType.getInstance();
+            case FolderObject.DOCUMENTS:
+                return DocumentsType.getInstance();
+            case FolderObject.MUSIC:
+                return MusicType.getInstance();
+            case FolderObject.VIDEOS:
+                return VideosType.getInstance();
+            case FolderObject.TEMPLATES:
+                return TemplatesType.getInstance();
+            default:
+                return null;
         }
     }
 
     private static ContentType getContentType(final int module) {
         switch (module) {
-        case FolderObject.SYSTEM_MODULE:
-            return SystemContentType.getInstance();
-        case FolderObject.CALENDAR:
-            return CalendarContentType.getInstance();
-        case FolderObject.CONTACT:
-            return ContactContentType.getInstance();
-        case FolderObject.TASK:
-            return TaskContentType.getInstance();
-        case FolderObject.INFOSTORE:
-            return InfostoreContentType.getInstance();
-        case FolderObject.UNBOUND:
-            return UnboundContentType.getInstance();
-        case FolderObject.PICTURES:
-            return PicturesContentType.getInstance();
-        case FolderObject.DOCUMENTS:
-            return DocumentsContentType.getInstance();
-        case FolderObject.MUSIC:
-            return MusicContentType.getInstance();
-        case FolderObject.VIDEOS:
-            return VideosContentType.getInstance();
-        case FolderObject.TEMPLATES:
-            return TemplatesContentType.getInstance();
-        default:
-            LOG.warn("Unknown database folder content type: {}", module);
-            return SystemContentType.getInstance();
+            case FolderObject.SYSTEM_MODULE:
+                return SystemContentType.getInstance();
+            case FolderObject.CALENDAR:
+                return CalendarContentType.getInstance();
+            case FolderObject.CONTACT:
+                return ContactContentType.getInstance();
+            case FolderObject.TASK:
+                return TaskContentType.getInstance();
+            case FolderObject.INFOSTORE:
+                return InfostoreContentType.getInstance();
+            case FolderObject.UNBOUND:
+                return UnboundContentType.getInstance();
+            case FolderObject.PICTURES:
+                return PicturesContentType.getInstance();
+            case FolderObject.DOCUMENTS:
+                return DocumentsContentType.getInstance();
+            case FolderObject.MUSIC:
+                return MusicContentType.getInstance();
+            case FolderObject.VIDEOS:
+                return VideosContentType.getInstance();
+            case FolderObject.TEMPLATES:
+                return TemplatesContentType.getInstance();
+            default:
+                LOG.warn("Unknown database folder content type: {}", I(module));
+                return SystemContentType.getInstance();
         }
     }
 
@@ -319,16 +320,16 @@ public class DatabaseFolder extends AbstractFolder {
         final String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
         return null == sessionId ? null : ServerSessionAdapter.valueOf(SessiondService.SERVICE_REFERENCE.get().getSession(sessionId));
     }
-    
+
     /**
      * Determine if the current user can see this folder because of his non system permissions. Group
      * permissions are also considered.
-     * 
+     *
      * @return true, if this folder is hidden, false if the user has the permission to see this folder
      */
     public boolean isHidden() {
         final Type type = this.getType();
-        if(SystemType.getInstance().equals(type) || (PublicType.getInstance().equals(type) && this.isDefault())) {
+        if (SystemType.getInstance().equals(type) || (PublicType.getInstance().equals(type) && this.isDefault())) {
             return false;
         }
         try {
@@ -349,11 +350,11 @@ public class DatabaseFolder extends AbstractFolder {
         }
         return true;
     }
-    
+
     /**
      * Checks if the current user has visibility permissions granted through at least one system
      * permission for this folder. Group permissions are considered also.
-     * 
+     *
      * @return true, if at least one permission has the system flag and is visible. false otherwise
      */
     public boolean isVisibleThroughSystemPermissions() {
@@ -361,7 +362,7 @@ public class DatabaseFolder extends AbstractFolder {
             ServerSession session = getSession();
             if (null != session) {
                 List<Integer> entities = Arrays.stream(session.getUser().getGroups()).boxed().collect(Collectors.toList());
-                entities.add(session.getUserId());
+                entities.add(I(session.getUserId()));
                 for (OCLPermission permission : folderObject.getPermissions()) {
                     if (entities.contains(Integer.valueOf(permission.getEntity())) && permission.isFolderVisible() && permission.isSystem()) {
                         return true;

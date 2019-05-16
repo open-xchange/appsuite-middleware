@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -131,7 +131,7 @@ public class ContextManager extends AbstractManager {
      * @throws Exception if the context cannot be created or any other error is occurred
      */
     public Context create(Credentials contextAdminCredentials, long maxQuota) throws Exception {
-        return create(getNextFreeContextId(), maxQuota, contextAdminCredentials);
+        return create(ContextFactory.getRandomContextId(), maxQuota, contextAdminCredentials);
     }
 
     /**
@@ -183,7 +183,7 @@ public class ContextManager extends AbstractManager {
     public Context create(Context context, User contextAdmin, Credentials authCredentials) throws Exception {
         prerequisites();
         if (context.getId() == null || context.getId().intValue() <= 0) {
-            context.setId(new Integer(getNextFreeContextId()));
+            context.setId(new Integer(ContextFactory.getRandomContextId()));
         }
         OXContextInterface contextInterface = getContextInterface();
         Context ctx = contextInterface.create(context, contextAdmin, authCredentials);
@@ -203,7 +203,7 @@ public class ContextManager extends AbstractManager {
     public Context create(Context context, User contextAdmin, String combinationName) throws Exception {
         prerequisites();
         if (context.getId() == null || context.getId().intValue() <= 0) {
-            context.setId(new Integer(getNextFreeContextId()));
+            context.setId(new Integer(ContextFactory.getRandomContextId()));
         }
         OXContextInterface contextInterface = getContextInterface();
         Context ctx = contextInterface.create(context, contextAdmin, combinationName, getMasterCredentials());
@@ -384,22 +384,6 @@ public class ContextManager extends AbstractManager {
     public int getAdminId(Context context) throws Exception {
         OXContextInterface contextInterface = getContextInterface();
         return contextInterface.getAdminId(context, getMasterCredentials());
-    }
-
-    /**
-     * Searches and returns the next available free context identifier
-     * 
-     * @return The context identifier
-     * @throws Exception if an error occurs
-     */
-    public int getNextFreeContextId() throws Exception {
-        int pos = 5;
-        int ret = -1;
-        while (ret == -1) {
-            ret = search(String.valueOf(pos)).length == 0 ? pos : -1;
-            pos = pos + 3;
-        }
-        return ret;
     }
 
     /**

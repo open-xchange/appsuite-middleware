@@ -507,20 +507,6 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
-     *
-     * @return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
-     */
-    protected Map<ElementPath, List<PayloadTree>> deepCopyPayloads() {
-        HashMap<ElementPath, List<PayloadTree>> copiedPayloads = new HashMap<ElementPath, List<PayloadTree>>();
-        for (PayloadTree tree : getPayloadTrees()) {
-            PayloadTree copiedTree = new PayloadTree(tree);
-            addPayloadToMap(copiedTree, copiedPayloads);
-        }
-        return copiedPayloads;
-    }
-
-    /**
      * Gets the selector that is used to identify GroupDispatcher instances on the server side.
      * Example: If you join a chatroom or a collaboratively edited document yo may receive messages from this chatroom. Those messages will
      * contain the sender of the message and a selector that idenifies the chatroom that distributed the message to you. Clients have to

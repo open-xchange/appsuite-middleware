@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: iCal4j implementation of iCal data conversion services
 Bundle-SymbolicName: com.openexchange.data.conversion.ical.ical4j
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Activator: com.openexchange.data.conversion.ical.ical4j.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -40,11 +40,6 @@ Import-Package: com.google.common.annotations,
  com.openexchange.tools,
  com.openexchange.user,
  com.openexchange.version,
- edu.emory.mathcs.backport.java.util,
- edu.emory.mathcs.backport.java.util.concurrent,
- edu.emory.mathcs.backport.java.util.concurrent.atomic,
- edu.emory.mathcs.backport.java.util.concurrent.helpers,
- edu.emory.mathcs.backport.java.util.concurrent.locks,
  javax.mail.internet,
  javax.mail.internet.idn,
  net.fortuna.ical4j.data,

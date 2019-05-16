@@ -134,14 +134,17 @@ final class StringUtil {
 
     private static final Pattern REGEX_PAIR;
     static {
-        String quotedString = "\"(?:\\\"|.)*\"";
-        String token = "\\p{Graph}+";
+        String quotedString = "\"(?:(?:\\\\\\\")|[^\"])+?\"";
+        String token = "[[\\p{L}\\p{ASCII}]&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
         String comment = "\\([^)]*\\)";
 
         String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
 
-        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
+        //REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=[\"]?(" + VALUE + ")[\"]?( |;|$)");
+          REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")(?:\r?\n)?( |;|$)");
     }
+
+    private static final int MAX_NUMBER_OF_ATTRIBUTES = 250;
 
     /**
      * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to the specified {@link T} collector.
@@ -156,13 +159,14 @@ final class StringUtil {
             add(kv, kv, collector);
             return collector;
         }
+
         Matcher m = REGEX_PAIR.matcher(element);
-        while (m.find()) {
+        int maxAttrs = MAX_NUMBER_OF_ATTRIBUTES;
+        while (maxAttrs-- > 0 && m.find()) {
             String key = m.group(1);
             String value = m.group(2);
             add(key, value, collector);
         }
-
         return collector;
     }
 

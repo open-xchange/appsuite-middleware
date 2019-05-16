@@ -93,13 +93,13 @@ public class AllAction extends AbstractListingAction {
 
         List<Field> columns = request.getFieldsToLoad();
         boolean copy = false;
-        if(!columns.contains(File.Field.FOLDER_ID)) {
+        if (!columns.contains(File.Field.FOLDER_ID)) {
             columns = new ArrayList<File.Field>(columns);
             columns.add(File.Field.FOLDER_ID);
             copy = true;
         }
-        if(!columns.contains(File.Field.ID)) {
-            if(!copy) {
+        if (!columns.contains(File.Field.ID)) {
+            if (!copy) {
                 columns = new ArrayList<File.Field>(columns);
                 copy = true;
             }

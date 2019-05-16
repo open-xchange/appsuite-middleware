@@ -78,7 +78,7 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection writeCon = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             String typeName = Tools.getColumnTypeName(writeCon, "jsonStorage", "data");
             if ("MEDIUMBLOB".equalsIgnoreCase(typeName)) {
@@ -88,19 +88,22 @@ public class DBJSlobIncreaseBlobSizeTask extends UpdateTaskAdapter {
 
             // Change to MEDIUMBLOB
             writeCon.setAutoCommit(false); // BEGIN
-            rollback = true;
+            rollback = 1;
 
             Column column = new Column("data", "MEDIUMBLOB");
             Tools.modifyColumns(writeCon, "jsonStorage", column);
 
             writeCon.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(writeCon);
+                }
                 Databases.autocommit(writeCon);
             }
         }

@@ -73,7 +73,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug32994Test.class,
     Bug34499Test.class,
     Bug36687Test.class,
-
+    JPCSVImportTest.class,
+    
     // Overall bug tests.
     Bug6825Test.class,
     Bug9209Test.class,
@@ -81,5 +82,5 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
 })
 public final class ImportExportServerSuite {
-
+    // empty
 }

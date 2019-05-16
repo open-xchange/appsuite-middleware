@@ -70,6 +70,7 @@ public class Bug16249Test extends AttachmentTest {
 
     private int folderId;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

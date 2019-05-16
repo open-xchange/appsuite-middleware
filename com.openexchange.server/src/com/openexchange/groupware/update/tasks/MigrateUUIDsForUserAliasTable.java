@@ -81,10 +81,10 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(connection);
-            rollback = true;
+            rollback = 1;
 
             if (!Tools.columnExists(connection, "user_alias", "uuid")) {
                 // Create the 'uuid' column
@@ -100,14 +100,16 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             insertUUIDs(connection);
             // Commit changes
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
 
     }

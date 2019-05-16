@@ -33,3 +33,14 @@ properties:
       file: schedjoules.properties
       packageName: open-xchange-subscribe
       tags: ["Calendar", "SchedJoules"]
+    - key: com.openexchange.calendar.schedjoules.connectionTimeout
+      description: |
+        Defines the connection timeout of a connection to the SchedJoules servers in milliseconds.
+      defaultValue: 30000
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]

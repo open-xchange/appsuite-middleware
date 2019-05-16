@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -61,6 +62,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarExtendDNColumnTaskV2}
@@ -94,10 +96,10 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             LOG.info("Starting {}", CalendarExtendDNColumnTaskV2.class.getSimpleName());
             modifyColumnInTable("prg_date_rights", con);
@@ -105,16 +107,18 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
             LOG.info("{} finished.", CalendarExtendDNColumnTaskV2.class.getSimpleName());
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 
@@ -135,7 +139,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
                     // A column whose VARCHAR size shall possibly be changed
                     final int size = rs.getInt("COLUMN_SIZE");
                     if (size >= DESIRED_SIZE) {
-                        LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName, name, size, DESIRED_SIZE);
+                        LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName, name, I(size), I(DESIRED_SIZE));
                         return;
                     }
                 }
@@ -150,7 +154,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         // ALTER TABLE...
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_MODIFY, "#TABLE#", tableName));
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw wrapSQLException(e);

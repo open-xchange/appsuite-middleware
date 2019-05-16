@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
@@ -134,6 +135,7 @@ public class CopySharedFilesPermissionRemovalTest extends AbstractSharedFilesTes
                     break;
                 }
             }
+            assertNotNull(matchingPermission);
             ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userDestFolder.getObjectID(), matchingPermission.getEntity());
             checkGuestPermission(lGuestPermission, guest);
             String shareURL = discoverShareURL(guest);

@@ -110,6 +110,15 @@ public final class TmpFileFileHolder implements IFileHolder {
         tasks = new LinkedList<Runnable>();
     }
 
+    /**
+     * Gets the auto-managed flag
+     *
+     * @return The auto-managed flag
+     */
+    public boolean isAutoManaged() {
+        return autoManaged;
+    }
+
     @Override
     public List<Runnable> getPostProcessingTasks() {
         return tasks;
@@ -137,7 +146,7 @@ public final class TmpFileFileHolder implements IFileHolder {
         super.finalize();
         try {
             close();
-        } catch (final Exception ignore) {
+        } catch (@SuppressWarnings("unused") Exception ignore) {
             // Ignore
         }
     }
@@ -205,8 +214,8 @@ public final class TmpFileFileHolder implements IFileHolder {
         try {
             digestStream = new DigestInputStream(new FileInputStream(tempFile), MessageDigest.getInstance("MD5"));
             byte[] buf = new byte[8192];
-            for (int read; (read = digestStream.read(buf, 0, 8192)) > 0;) {
-                ;
+            while (digestStream.read(buf, 0, 8192) > 0) {
+                // Nothing
             }
             byte[] digest = digestStream.getMessageDigest().digest();
             return jonelo.jacksum.util.Service.format(digest);

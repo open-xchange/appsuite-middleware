@@ -295,5 +295,70 @@ public class FileFieldHandling {
             return handler.handle(Field.ORIGIN, args);
         }
 
+        @Override
+        public Object captureDate(Object... args) {
+            return handler.handle(Field.CAPTURE_DATE, args);
+        }
+
+        @Override
+        public Object geolocation(Object... args) {
+            return handler.handle(Field.GEOLOCATION, args);
+        }
+
+        @Override
+        public Object width(Object... args) {
+            return handler.handle(Field.WIDTH, args);
+        }
+
+        @Override
+        public Object height(Object... args) {
+            return handler.handle(Field.HEIGHT, args);
+        }
+
+        @Override
+        public Object cameraMake(Object... args) {
+            return handler.handle(Field.CAMERA_MAKE, args);
+        }
+
+        @Override
+        public Object cameraModel(Object... args) {
+            return handler.handle(Field.CAMERA_MODEL, args);
+        }
+
+        @Override
+        public Object cameraIsoSpeed(Object... args) {
+            return handler.handle(Field.CAMERA_ISO_SPEED, args);
+        }
+
+        @Override
+        public Object cameraAperture(Object... args) {
+            return handler.handle(Field.CAMERA_APERTURE, args);
+        }
+
+        @Override
+        public Object cameraExposureTime(Object... args) {
+            return handler.handle(Field.CAMERA_EXPOSURE_TIME, args);
+        }
+
+        @Override
+        public Object cameraFocalLength(Object... args) {
+            return handler.handle(Field.CAMERA_FOCAL_LENGTH, args);
+        }
+
+        @Override
+        public Object mediaMeta(Object... args) {
+            return handler.handle(Field.MEDIA_META, args);
+        }
+
+        @Override
+        public Object mediaStatus(Object[] args) {
+            return handler.handle(Field.MEDIA_STATUS, args);
+        }
+
+        @Override
+        public Object mediaDate(Object[] args) {
+            return handler.handle(Field.MEDIA_DATE, args);
+        }
+
     }
 }

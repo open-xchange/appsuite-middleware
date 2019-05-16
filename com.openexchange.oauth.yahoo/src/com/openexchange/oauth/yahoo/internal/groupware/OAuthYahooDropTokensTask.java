@@ -84,7 +84,7 @@ public class OAuthYahooDropTokensTask extends UpdateTaskAdapter {
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");
-            statement.setString(parameterIndex++, KnownApi.YAHOO.getFullName());
+            statement.setString(parameterIndex++, KnownApi.YAHOO.getServiceId());
 
             statement.execute();
         } catch (SQLException e) {

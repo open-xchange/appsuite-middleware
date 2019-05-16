@@ -67,8 +67,6 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
     private static final String delTaskTableName = "del_task";
     private static final String delTaskFolderTableName = "del_task_folder";
     private static final String delTaskParticipantTableName = "del_task_participant";
-    // TODO drop this table with the upcoming major release after 7.8.0.
-    private static final String delTaskEParticipantTableName = "del_task_eparticipant";
 
     private static final String createTaskTable = "CREATE TABLE task ("
        + "cid INT4 UNSIGNED NOT NULL,"
@@ -221,16 +219,6 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
-    // TODO drop this table with the upcoming major release after 7.8.0.
-    private static final String createDelTaskEParticipantTable = "CREATE TABLE del_task_eparticipant ("
-       + "cid INT4 UNSIGNED NOT NULL,"
-       + "task INT4 UNSIGNED NOT NULL,"
-       + "mail VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-       + "display_name VARCHAR(255),"
-       + "PRIMARY KEY (cid,task,mail),"
-       + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
-       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-
     /**
      * Initializes a new {@link CreateTaskTables}.
      */
@@ -246,14 +234,14 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
     @Override
     public String[] tablesToCreate() {
         return new String[] { taskTableName, taskFolderTableName, taskParticipantTableName, taskEParticipantTableName,
-            taskRemovedParticipantTableName, delTaskTableName, delTaskFolderTableName, delTaskParticipantTableName,
-            delTaskEParticipantTableName };
+            taskRemovedParticipantTableName, delTaskTableName, delTaskFolderTableName, delTaskParticipantTableName
+        };
     }
 
     @Override
     protected String[] getCreateStatements() {
         return new String[] { createTaskTable, createTaskFolderTable, createTaskParticipantTable, createTaskEParticipantTable,
-            createTaskRemovedParticipantTable, createDelTaskTable, createDelTaskFolderTable, createDelTaskParticipantTable,
-            createDelTaskEParticipantTable };
+            createTaskRemovedParticipantTable, createDelTaskTable, createDelTaskFolderTable, createDelTaskParticipantTable
+        };
     }
 }

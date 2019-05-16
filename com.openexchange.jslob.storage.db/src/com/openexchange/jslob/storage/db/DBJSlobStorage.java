@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob.storage.db;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -394,7 +395,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             committed = true;
         } catch (final Exception e) {
             final Logger logger = org.slf4j.LoggerFactory.getLogger(DBJSlobStorage.class);
-            logger.warn("Failed to delete corrupt JSlobs from service {} (user={}, context={}): {}", serviceId, userId, contextId, ids, e);
+            logger.warn("Failed to delete corrupt JSlobs from service {} (user={}, context={}): {}", serviceId, I(userId), I(contextId), ids, e);
         } finally {
             if (!committed) {
                 Databases.rollback(con);

@@ -81,6 +81,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.json.JSONAssertion;
 
 /**
@@ -132,7 +133,7 @@ public class FileWriterTest extends FileTest {
         assertEquals(1337, array.getLong(8));
         assertEquals("folder 3", array.getString(9));
         assertEquals("Id 23", array.getString(10));
-        assertEquals(true, array.getBoolean(11));
+        assertEquals(Boolean.TRUE, Autoboxing.valueOf(array.getBoolean(11)));
         assertEquals(D("Today at 10:00").getTime(), array.getLong(12));
         assertEquals(D("Today at 10:00").getTime(), array.getLong(13));
         assertEquals(D("Today at 18:00").getTime(), array.getLong(14));

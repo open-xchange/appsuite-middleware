@@ -68,7 +68,7 @@ public final class OXAutoCIDMySQLStorage extends OXAutoCIDSQLStorage {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAutoCIDMySQLStorage.class);
 
     static {
-        cache = ClientAdminThreadExtended.cache;
+        cache = ClientAdminThreadExtended.autocontextidCache;
     }
 
     public OXAutoCIDMySQLStorage() {

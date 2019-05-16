@@ -243,12 +243,11 @@ public class StorageTransfer {
              * copy all versions
              */
             return copyFileVersions(sourceFileAccess, file, targetFileAccess, targetFolderID);
-        } else {
-            /*
-             * copy current version only
-             */
-            return copyCurrentVersion(sourceFileAccess, file, targetFileAccess, targetFolderID);
         }
+        /*
+         * copy current version only
+         */
+        return copyCurrentVersion(sourceFileAccess, file, targetFileAccess, targetFolderID);
     }
 
     private List<OXException> collectWarnings(File sourceFile, FileStorageFolder[] sourcePath, FolderID targetFolderID) throws OXException {

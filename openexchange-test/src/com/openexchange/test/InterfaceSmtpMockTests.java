@@ -60,27 +60,27 @@ import com.openexchange.ajax.share.ShareAJAXSuite;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * 
+ *
  * {@link InterfaceSmtpMockTests}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.4
  */
 @RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({ 
-    OnboardingAJAXSuite.class, 
-    OAuthProviderSmtpTests.class, 
+@Suite.SuiteClasses({
+    OnboardingAJAXSuite.class,
+    OAuthProviderSmtpTests.class,
     ShareAJAXSuite.class,
 })
 public final class InterfaceSmtpMockTests {
-    
+
     @BeforeClass
     public static void before() throws Exception {
         SmtpMockSetup.init();
     }
-    
+
     @AfterClass
-    public static void after() throws Exception {
+    public static void after() {
         SmtpMockSetup.restore();
     }
 

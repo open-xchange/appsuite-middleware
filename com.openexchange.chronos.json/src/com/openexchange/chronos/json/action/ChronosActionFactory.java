@@ -71,7 +71,7 @@ public class ChronosActionFactory implements AJAXActionServiceFactory {
 
     public ChronosActionFactory(ServiceLookup services) {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builderWithExpectedSize(14);
         actions.put("get", new GetAction(services));
         actions.put("all", new AllAction(services));
         actions.put("list", new ListAction(services));
@@ -82,9 +82,11 @@ public class ChronosActionFactory implements AJAXActionServiceFactory {
         actions.put("updates", new UpdatesAction(services));
         actions.put("move", new MoveAction(services));
         actions.put("getAttachment", new GetAttachment(services));
+        actions.put("zipAttachments", new ZipAttachments(services));
         actions.put("freeBusy", new FreeBusyAction(services));
         actions.put("needsAction", new NeedsActionAction(services));
         actions.put("resolve", new ResolveAction(services));
+        actions.put("changeOrganizer", new ChangeOrganizerAction(services));
         this.actions = actions.build();
     }
 

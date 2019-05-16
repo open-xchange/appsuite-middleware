@@ -66,7 +66,6 @@ import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,7 +109,7 @@ public class CalendarResultConverter extends EventResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    protected JSONObject convertCalendarResult(CalendarResult calendarResult, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    protected JSONObject convertCalendarResult(CalendarResult calendarResult, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         JSONObject result = new JSONObject(3);
         try {
             result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertCreateResults(calendarResult.getCreations(), timeZoneID, session, requestedFields, extendedEntities));
@@ -122,7 +121,7 @@ public class CalendarResultConverter extends EventResultConverter {
         return result;
     }
 
-    private JSONObject convertCalendarResult(UpdatesResult calendarResult, String timeZoneID, Session session, Set<EventField> fields, boolean extendedEntities) throws OXException {
+    private JSONObject convertCalendarResult(UpdatesResult calendarResult, String timeZoneID, ServerSession session, Set<EventField> fields, boolean extendedEntities) throws OXException {
         JSONObject result = new JSONObject(2);
         try {
             result.put(ChronosCalendarResultJsonFields.Updates.NEW, convertEvents(calendarResult.getNewAndModifiedEvents(), timeZoneID, session, fields, extendedEntities));
@@ -133,7 +132,7 @@ public class CalendarResultConverter extends EventResultConverter {
         return result;
     }
 
-    protected JSONArray convertCreateResults(List<CreateResult> results, String timeZoneID, Session session, Set<EventField> fields, boolean extendedEntities) throws OXException {
+    protected JSONArray convertCreateResults(List<CreateResult> results, String timeZoneID, ServerSession session, Set<EventField> fields, boolean extendedEntities) throws OXException {
         JSONArray events = new JSONArray(results.size());
         for (CreateResult createResult : results) {
             events.put(convertEvent(createResult.getCreatedEvent(), timeZoneID, session, fields, extendedEntities));
@@ -141,7 +140,7 @@ public class CalendarResultConverter extends EventResultConverter {
         return events;
     }
 
-    protected JSONArray convertUpdateResults(List<UpdateResult> results, String timeZoneID, Session session, Set<EventField> fields, boolean extendedEntities) throws OXException {
+    protected JSONArray convertUpdateResults(List<UpdateResult> results, String timeZoneID, ServerSession session, Set<EventField> fields, boolean extendedEntities) throws OXException {
         JSONArray events = new JSONArray(results.size());
         for (UpdateResult updateResult : results) {
             events.put(convertEvent(updateResult.getUpdate(), timeZoneID, session, fields, extendedEntities));
@@ -149,7 +148,7 @@ public class CalendarResultConverter extends EventResultConverter {
         return events;
     }
 
-    protected JSONArray convertDeleteResults(List<DeleteResult> results, String timeZoneID, Session session, Set<EventField> fields, boolean extendedEntities) throws OXException {
+    protected JSONArray convertDeleteResults(List<DeleteResult> results, String timeZoneID, ServerSession session, Set<EventField> fields, boolean extendedEntities) throws OXException {
         JSONArray events = new JSONArray(results.size());
         for (DeleteResult deleteResult : results) {
             events.put(convertEvent(deleteResult.getOriginal(), timeZoneID, session, fields, extendedEntities));

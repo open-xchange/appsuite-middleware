@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.contexts.impl.sql;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -90,8 +91,7 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
         Connection con = params.getConnection();
 
         // Start task processing
-        boolean restoreAutocommit = false;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             if (Tools.existsPrimaryKey(con, "contextAttribute", new String[] { "cid", "name" })) {
                 // PRIMARY KEY already changed
@@ -99,22 +99,21 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
             }
 
             Databases.startTransaction(con);
-            restoreAutocommit = true;
-            rollback = true;
+            rollback = 1;
 
             doPerform(con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            if (restoreAutocommit) {
+            if (rollback > 0) {
+                if (1==rollback) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
         }
@@ -197,14 +196,14 @@ public final class ChangePrimaryKeyForContextAttribute extends UpdateTaskAdapter
 
             String newValue = taxonomies.stream().collect(Collectors.joining(","));
             update(attribute, newValue, con);
-            LOGGER.warn("Found multiple values for 'taxonomy/types' in context {}. The values found {} will be merged to '{}'.", attribute.contextId, Strings.concat(";", dupValues), newValue);
+            LOGGER.warn("Found multiple values for 'taxonomy/types' in context {}. The values found {} will be merged to '{}'.", I(attribute.contextId), Strings.concat(";", dupValues), newValue);
         } else {
             String newValue = deleteAllButLast(attribute, values, con);
             if (attribute.name.startsWith("config/")) {
-                LOGGER.warn("Found duplicate configuration for config '{}' in context {}. Will keep value '{}'.", attribute.name, attribute.contextId, newValue);
+                LOGGER.warn("Found duplicate configuration for config '{}' in context {}. Will keep value '{}'.", attribute.name, I(attribute.contextId), newValue);
                 return;
             }
-            LOGGER.warn("Found multiple values for setting '{}' in context {}. Previous values {} will be reduced to '{}'.", attribute.name, attribute.contextId, Strings.concat(";", dupValues), newValue);
+            LOGGER.warn("Found multiple values for setting '{}' in context {}. Previous values {} will be reduced to '{}'.", attribute.name, I(attribute.contextId), Strings.concat(";", dupValues), newValue);
         }
     }
 

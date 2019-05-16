@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.appointment.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -75,7 +76,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
     private Changes generateDefaultChangeException() {
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.RECURRENCE_POSITION, I(2));
         changes.put(Appointment.START_DATE, D("31/12/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("31/12/2008 2:00", utc));
         return changes;
@@ -91,7 +92,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3); // this should end last year in March
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2); // this should be the appointment in February
+        changes.put(Appointment.RECURRENCE_POSITION, I(2)); // this should be the appointment in February
         changes.put(Appointment.START_DATE, D("1/5/2008 1:00"));
         changes.put(Appointment.END_DATE, D("1/5/2008 2:00"));
 
@@ -104,7 +105,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 1);
+        changes.put(Appointment.RECURRENCE_POSITION, I(1));
         changes.put(Appointment.START_DATE, D("1/1/2008 23:00", utc));
         changes.put(Appointment.END_DATE, D("1/1/2008 23:59", utc));
 
@@ -129,7 +130,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.RECURRENCE_POSITION, I(2));
         changes.put(Appointment.START_DATE, D("1/1/2008 23:00", utc));
         changes.put(Appointment.END_DATE, D("1/1/2008 23:59", utc));
 
@@ -143,7 +144,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.RECURRENCE_POSITION, I(2));
         changes.put(Appointment.START_DATE, D("2/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("2/1/2008 2:00", utc));
 
@@ -157,7 +158,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3);
 
         Changes changes = new Changes();
-        changes.put(Appointment.RECURRENCE_POSITION, 2);
+        changes.put(Appointment.RECURRENCE_POSITION, I(2));
         changes.put(Appointment.START_DATE, D("3/1/2008 1:00", utc));
         changes.put(Appointment.END_DATE, D("3/1/2008 2:00", utc));
 
@@ -172,7 +173,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setFullTime(true);
 
         Changes changes = generateDefaultChangeException();
-        changes.put(Appointment.FULL_TIME, false);
+        changes.put(Appointment.FULL_TIME, Boolean.FALSE);
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
@@ -210,7 +211,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         app.setOccurrence(3);
 
         Changes changes = generateDefaultChangeException();
-        changes.put(Appointment.FULL_TIME, false);
+        changes.put(Appointment.FULL_TIME, Boolean.FALSE);
 
         Expectations expectations = new Expectations(changes);
         positiveAssertionOnChangeException.check(app, changes, expectations);
@@ -218,7 +219,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Appointment exception = positiveAssertionOnChangeException.getChangeException();
         changes = new Changes();
-        changes.put(Appointment.FULL_TIME, true);
+        changes.put(Appointment.FULL_TIME, Boolean.FALSE);
 
         positiveAssertionOnUpdate.check(exception, changes, new Expectations(changes));
 
@@ -255,7 +256,6 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         assertFalse("Should not contain the resource in the whole series", java.util.Arrays.asList(series.getParticipants()).contains(resParticipant));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void testShouldKeepChangeInParticipantsLimitedToException() throws Exception {
         Appointment app = generateDailyAppointment();
@@ -291,7 +291,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
         Appointment app = generateDailyAppointment();
         app.setOccurrence(3);
 
-        int recurrencePos = 2;
+        Integer recurrencePos = I(2);
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, recurrencePos);
         changes.put(Appointment.START_DATE, D("3/1/2008 0:00", utc));
@@ -302,7 +302,7 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         Appointment series = positiveAssertionOnChangeException.getSeries().clone();
 
-        catm.createDeleteException(folder.getObjectID(), series.getObjectID(), recurrencePos);
+        catm.createDeleteException(folder.getObjectID(), series.getObjectID(), recurrencePos.intValue());
         assertTrue("Should get exception when trying to get create delete exception on top of change exception", catm.hasLastException());
 
         OXException expected1 = new OXException(11);
@@ -318,8 +318,8 @@ public class TestsForCreatingChangeExceptions extends ManagedAppointmentTest {
 
         catm.insert(app);
 
-        int recurrencePos = 2;
-        catm.createDeleteException(app, recurrencePos);
+        Integer recurrencePos = I(2);
+        catm.createDeleteException(app, recurrencePos.intValue());
 
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, recurrencePos);

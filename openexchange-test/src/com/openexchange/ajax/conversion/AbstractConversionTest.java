@@ -53,7 +53,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.exception.OXException;
 
@@ -67,7 +66,7 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link AbstractConversionTest}
-     * 
+     *
      * @param name
      */
     public AbstractConversionTest() {
@@ -77,32 +76,32 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
     /**
      * @return the private contact folder of the user.
      */
-    protected int getPrivateContactFolder() throws OXException, IOException, SAXException, JSONException {
+    protected int getPrivateContactFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getPrivateContactFolder();
     }
 
     /**
      * @return the private calendar folder of the user.
      */
-    protected int getPrivateCalendarFolder() throws OXException, IOException, SAXException, JSONException {
+    protected int getPrivateCalendarFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getPrivateAppointmentFolder();
     }
 
     /**
      * @return the private task folder of the user.
      */
-    protected int getPrivateTaskFolder() throws OXException, IOException, SAXException, JSONException {
+    protected int getPrivateTaskFolder() throws OXException, IOException, JSONException {
         return getClient().getValues().getPrivateTaskFolder();
     }
 
-    protected TimeZone getTimeZone() throws OXException, IOException, SAXException, JSONException {
+    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
         return getClient().getValues().getTimeZone();
     }
 
     protected String parseMailId(String input) {
         try {
             Long.parseLong(input);
-        } catch (final NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") final NumberFormatException e) {
             int pos = input.lastIndexOf('/');
             if (pos == -1) {
                 pos = input.lastIndexOf('.');
@@ -113,7 +112,7 @@ public abstract class AbstractConversionTest extends AbstractAJAXSession {
             final String substr = input.substring(pos + 1);
             try {
                 Long.parseLong(substr);
-            } catch (final NumberFormatException e1) {
+            } catch (@SuppressWarnings("unused") final NumberFormatException e1) {
                 fail("UNKNOWN FORMAT FOR MAIL ID: " + input);
             }
             return substr;

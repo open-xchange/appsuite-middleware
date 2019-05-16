@@ -121,10 +121,14 @@ public class LabelHelper {
             this.timezone = TimeZone.getDefault(); // Fallback
         }
 
-        if (mail.actionIsDoneOnMyBehalf()) {
-            delegationState = new OnMyBehalf();
-        } else if (mail.actionIsDoneOnBehalfOfAnother()) {
-            delegationState = new OnBehalfOfAnother();
+        if (null != mail) {
+            if (mail.actionIsDoneOnMyBehalf()) {
+                delegationState = new OnMyBehalf();
+            } else if (mail.actionIsDoneOnBehalfOfAnother()) {
+                delegationState = new OnBehalfOfAnother();
+            } else {
+                delegationState = new OnNoOnesBehalf();
+            }
         } else {
             delegationState = new OnNoOnesBehalf();
         }
@@ -238,7 +242,7 @@ public class LabelHelper {
         }
         return delegationState.getUpdateIntroduction();
     }
-    
+
     public String getComment() {
         if (mail.getActor().isVirtual()) {
             return "";

@@ -166,7 +166,7 @@ public class EnhancedEvent {
         if (status == null) {
             return undecided;
         }
-        switch (status) {
+        switch (status.intValue()) {
             /*
              * Legacy from CalendarObject
              * public static final int ACCEPT = 1;
@@ -188,7 +188,7 @@ public class EnhancedEvent {
     }
 
     private SimpleParticipant resolveResource(Map<String, Object> participant) throws OXException {
-        Resource resource = services.getService(ResourceService.class).getResource((Integer)participant.get("id"), ctx);
+        Resource resource = services.getService(ResourceService.class).getResource(((Integer)participant.get("id")).intValue(), ctx);
 
 
         return new SimpleParticipant()
@@ -196,7 +196,7 @@ public class EnhancedEvent {
     }
 
     private SimpleParticipant resolveUser(Map<String, Object> userO) throws OXException {
-        User user = services.getService(UserService.class).getUser((Integer)userO.get("id"), ctx);
+        User user = services.getService(UserService.class).getUser(((Integer)userO.get("id")).intValue(), ctx);
 
         return new SimpleParticipant()
             .setDisplayName(user.getDisplayName())

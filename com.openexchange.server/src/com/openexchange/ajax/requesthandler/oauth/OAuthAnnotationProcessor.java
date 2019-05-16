@@ -96,7 +96,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
                 if (method.isAnnotationPresent(OAuthScopeCheck.class)) {
                     if (hasScopeCheckSignature(method)) {
                         try {
-                            if ((boolean) method.invoke(action, requestData, session, oAuthAccess)) {
+                            if (((Boolean) method.invoke(action, requestData, session, oAuthAccess)).booleanValue()) {
                                 return;
                             }
                         } catch (InvocationTargetException e) {
@@ -111,7 +111,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
                             throw new OXException(e);
                         }
                     } else {
-                        LOG.warn("Method '" + action.getClass() + "." + method.getName() + "' is annotated with @OAuthScopeCheck but its signature is invalid!");
+                        LOG.warn("Method ''{}.{}'' is annotated with @OAuthScopeCheck but its signature is invalid!", action.getClass(), method.getName());
                     }
                 }
             }

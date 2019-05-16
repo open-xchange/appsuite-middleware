@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.importers;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -209,9 +210,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         Contact contactObj = vCardImport.getContact();
                         contactObj.setParentFolderID(contactFolderId);
                         if(maxSimilarity!=null){
-                            Contact duplicate = checkSimilarity(session, contactObj, Float.valueOf(maxSimilarity));
+                            Contact duplicate = checkSimilarity(session, contactObj, Float.parseFloat(maxSimilarity));
                             if (duplicate != null) {
-                                importResult.setException(ImportExportExceptionCodes.CONTACT_TOO_SIMILAR.create(contactObj.getUid(), duplicate.getUid(), duplicate.getParentFolderID()));
+                                importResult.setException(ImportExportExceptionCodes.CONTACT_TOO_SIMILAR.create(contactObj.getUid(), duplicate.getUid(), I(duplicate.getParentFolderID())));
                                 list.add(importResult);
                                 continue;
                             }
@@ -235,7 +236,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     }
                     list.add(importResult);
                 } else {
-                    importResult.setException(ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit));
+                    importResult.setException(ImportExportExceptionCodes.LIMIT_EXCEEDED.create(I(limit)));
                     list.add(importResult);
                     break;
                 }

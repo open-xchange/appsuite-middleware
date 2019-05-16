@@ -107,7 +107,7 @@ public class ProgressStatusImpl implements ProgressState {
             long now = System.currentTimeMillis();
             if (now > lastLogTime + logTimeDistance) {
                 lastLogTime = now;
-                LOG.info("Update task {} finished {}% on schema {}{}", taskName, (state * 100 / total), schema, '.');
+                LOG.info("Update task {} finished {}% on schema {}.", taskName, Integer.valueOf((state * 100 / total)), schema);
             }
         }
     }

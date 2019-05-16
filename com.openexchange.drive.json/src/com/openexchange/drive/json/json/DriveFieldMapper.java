@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.json.json;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.EnumMap;
 import com.openexchange.drive.DriveAction;
@@ -103,7 +104,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
         EnumMap<DriveFileField, JsonMapping<? extends Object, DriveFileMetadata>> mappings = new
             EnumMap<DriveFileField, JsonMapping<? extends Object, DriveFileMetadata>>(DriveFileField.class);
 
-        mappings.put(DriveFileField.CHECKSUM, new StringMapping<DriveFileMetadata>("checksum", COLUMN_CHECKSUM) {
+        mappings.put(DriveFileField.CHECKSUM, new StringMapping<DriveFileMetadata>("checksum", I(COLUMN_CHECKSUM)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -126,7 +127,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.NAME, new StringMapping<DriveFileMetadata>("name", COLUMN_NAME) {
+        mappings.put(DriveFileField.NAME, new StringMapping<DriveFileMetadata>("name", I(COLUMN_NAME)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -149,7 +150,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.CONTENT_TYPE, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_CONTENT_TYPE, COLUMN_CONTENT_TYPE) {
+        mappings.put(DriveFileField.CONTENT_TYPE, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_CONTENT_TYPE, I(COLUMN_CONTENT_TYPE)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -172,7 +173,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.MODIFIED, new DateMapping<DriveFileMetadata>(DriveAction.PARAMETER_MODIFIED, COLUMN_MODIFIED) {
+        mappings.put(DriveFileField.MODIFIED, new DateMapping<DriveFileMetadata>(DriveAction.PARAMETER_MODIFIED, I(COLUMN_MODIFIED)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -195,7 +196,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.CREATED, new DateMapping<DriveFileMetadata>(DriveAction.PARAMETER_CREATED, COLUMN_CREATED) {
+        mappings.put(DriveFileField.CREATED, new DateMapping<DriveFileMetadata>(DriveAction.PARAMETER_CREATED, I(COLUMN_CREATED)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -218,7 +219,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.DIRECT_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_DIRECT_LINK, COLUMN_DIRECT_LINK) {
+        mappings.put(DriveFileField.DIRECT_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_DIRECT_LINK, I(COLUMN_DIRECT_LINK)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -241,7 +242,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.DIRECT_LINK_FRAGMENTS, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_DIRECT_LINK_FRAGMENTS, COLUMN_DIRECT_LINK_FRAGMENTS) {
+        mappings.put(DriveFileField.DIRECT_LINK_FRAGMENTS, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_DIRECT_LINK_FRAGMENTS, I(COLUMN_DIRECT_LINK_FRAGMENTS)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -264,7 +265,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.PREVIEW_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_PREVIEW_LINK, COLUMN_PREVIEW_LINK) {
+        mappings.put(DriveFileField.PREVIEW_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_PREVIEW_LINK, I(COLUMN_PREVIEW_LINK)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {
@@ -287,7 +288,7 @@ public class DriveFieldMapper extends DefaultJsonMapper<DriveFileMetadata, Drive
             }
         });
 
-        mappings.put(DriveFileField.THUMBNAIL_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_THUMBNAIL_LINK, COLUMN_THUMBNAIL_LINK) {
+        mappings.put(DriveFileField.THUMBNAIL_LINK, new StringMapping<DriveFileMetadata>(DriveAction.PARAMETER_THUMBNAIL_LINK, I(COLUMN_THUMBNAIL_LINK)) {
 
             @Override
             public boolean isSet(DriveFileMetadata object) {

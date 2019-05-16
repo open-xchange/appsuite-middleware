@@ -74,34 +74,36 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             String columnName = getColumnName();
             Column columnToAdd = new Column(columnName, getColumnDefinition());
             for (String table : getTableNames()) {
                 if (false == Tools.columnExists(con, table, columnName)) {
-                    if (false == rollback) {
+                    if (0 == rollback) {
                         // Transaction not yet started
                         con.setAutoCommit(false);
-                        rollback = true;
+                        rollback = 1;
                     }
 
                     Tools.addColumns(con, table, columnToAdd);
                 }
             }
 
-            if (rollback) {
+            if (rollback == 1) {
                 // Transaction has been started
                 con.commit();
-                rollback = false;
+                rollback = 2;
             }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

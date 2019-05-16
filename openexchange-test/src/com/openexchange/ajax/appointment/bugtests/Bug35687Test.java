@@ -72,6 +72,7 @@ public class Bug35687Test extends AbstractAJAXSession {
     private FolderObject folder;
     private Appointment app;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

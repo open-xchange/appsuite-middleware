@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -26,8 +26,7 @@ Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
 
 %description
-Adds the feature to subscribe to third party services or
-publications to the backend installation.
+Adds the feature to subscribe to third party services to the backend installation.
 
 Authors:
 --------
@@ -50,9 +49,6 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-2470
-    ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
-
     # SoftwareChange_Request-2942
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
@@ -67,35 +63,21 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
-%config(noreplace) /opt/open-xchange/etc/mslivesubscribe.properties
 %doc docs/
 
 %changelog
-* Mon May 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-05-13 (5235)
-* Wed Apr 24 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-04-29 (5211)
-* Tue Mar 26 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-04-01 (5180)
-* Tue Mar 12 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-03-11 (5149)
-* Thu Feb 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-02-25 (5133)
-* Thu Feb 07 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-02-11 (5108)
-* Tue Jan 29 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-31 (5103)
-* Mon Jan 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-28 (5076)
-* Tue Jan 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-14 (5023)
-* Fri Nov 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
-RC 1 for 7.10.1 release
-* Fri Nov 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Second preview for 7.10.1 release
+* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.2 release
+* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.2 release
+* Tue Apr 30 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.2 release
+* Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.2 release
+* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
 * Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>

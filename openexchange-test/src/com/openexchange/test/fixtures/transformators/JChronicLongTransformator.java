@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.fixtures.FixtureLoader;
@@ -65,6 +66,6 @@ public class JChronicLongTransformator extends JChronicDateTransformator {
     @Override
     public Object transform(final String value) throws OXException {
         final Date date = (Date) super.transform(value);
-        return date.getTime();
+        return L(date.getTime());
     }
 }

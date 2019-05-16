@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Groupware Tools
 Bundle-SymbolicName: com.openexchange.groupware.tools
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.openexchange.groupware.tools.alias,
@@ -18,6 +18,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.log,
@@ -48,5 +49,6 @@ Import-Package: com.fasterxml.jackson.core,
  gnu.trove.strategy,
  javax.mail.internet,
  org.apache.commons.logging,
+ org.jdom2,
  org.json,
  org.slf4j

@@ -944,7 +944,8 @@ public class IMAPStore extends Store
         }
 
 	    // No response code given... Assume an authentication/authorization issue
-	    throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
+	    Response offendingResponse = cex.getResponse();
+        throw new AuthenticationFailedException(null == offendingResponse ? cex.getMessage() : offendingResponse.getRest(), cex);
 	} catch (ProtocolException pex) { // any other exception
 	    // failure in login command, close connection to server
 	    if (protocol != null) {

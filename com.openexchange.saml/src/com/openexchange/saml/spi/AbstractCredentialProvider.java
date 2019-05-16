@@ -67,7 +67,6 @@ public abstract class AbstractCredentialProvider implements CredentialProvider {
 
     private final Credential decryptionCredential;
 
-
     /**
      * Initializes a new {@link KeyStoreCredentialProvider}.
      *
@@ -80,6 +79,17 @@ public abstract class AbstractCredentialProvider implements CredentialProvider {
         this.idpCertificateCredential = idpPublicKeyCredentials;
         this.signingCredential = signingPrivateKeyCredential;
         this.decryptionCredential = decryptionPrivateKeyCredential;
+    }
+    
+    @Override
+    public boolean hasValidationCredential() {
+        return hasValidationCredentials();
+    }
+    
+    @Override
+    public Credential getValidationCredential() {
+        List<Credential> validationCredentials = getValidationCredentials();
+        return validationCredentials != null && validationCredentials.isEmpty() == false ? validationCredentials.get(0) : null;
     }
 
     @Override

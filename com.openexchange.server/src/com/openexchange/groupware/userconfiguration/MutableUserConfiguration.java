@@ -223,15 +223,6 @@ public class MutableUserConfiguration extends UserConfiguration {
     }
 
     /**
-     * Sets if this user configuration indicates to enable publication.
-     *
-     * @param publication <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
-     */
-    public void setPublication(final boolean publication) {
-        setPermission(publication, PUBLICATION);
-    }
-
-    /**
      * Sets if this user is able to use Exchange Active Sync
      */
     public void setActiveSync(final boolean eas) {
@@ -295,11 +286,6 @@ public class MutableUserConfiguration extends UserConfiguration {
                 capabilities.remove(p.name().toLowerCase());
             }
         }
-    }
-
-    public static int getPermissionBits(Set<String> capabilities) {
-        // TODO Auto-generated method stub
-        return 0;
     }
 
     private static final long serialVersionUID = 1L;

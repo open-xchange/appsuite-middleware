@@ -49,6 +49,7 @@
 
 package com.openexchange.exception.interception.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -85,7 +86,7 @@ public class OXExceptionInterceptorTracker implements ServiceTrackerCustomizer<O
 
         context.ungetService(reference);
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OXExceptionInterceptorTracker.class);
-        logger.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", interceptor.getRanking(), interceptor.getClass());
+        logger.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", I(interceptor.getRanking()), interceptor.getClass());
         return null;
     }
 

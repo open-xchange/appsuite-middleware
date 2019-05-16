@@ -901,3 +901,39 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.compose.maxSpacesPerUser
+      description: |
+        Specifies the max. number of concurrently opened composition spaces that are allowed for a single user.
+      defaultValue: 20
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.maxIdleTimeMillis
+      description: |
+        Defines the time span in milliseconds a composition space may be idle before it gets deleted. If zero or less than zero is
+        specified, composition spaces may be idle forever. Can contain units of measurement: D(=days) W(=weeks) H(=hours) M(=minutes).
+        
+        Note that a look-up for expired composition spaces is performed on every login.
+      defaultValue: 1W
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]
+    - key: com.openexchange.mail.compose.security.encryptionEnabled
+      description: |
+        Specifies whether encryption of user-sensitive mail data should be performed, when user has capability "guard" enabled.
+      defaultValue: true
+      version: 7.10.2
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

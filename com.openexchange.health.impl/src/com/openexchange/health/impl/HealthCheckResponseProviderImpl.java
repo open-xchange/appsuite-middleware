@@ -49,6 +49,8 @@
 
 package com.openexchange.health.impl;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,12 +99,12 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
 
         @Override
         public HealthCheckResponseBuilder withData(String key, long value) {
-            return putData(key, value);
+            return putData(key, L(value));
         }
 
         @Override
         public HealthCheckResponseBuilder withData(String key, boolean value) {
-            return putData(key, value);
+            return putData(key, B(value));
         }
 
         @Override
@@ -124,23 +126,10 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
 
         @Override
         public HealthCheckResponse build() {
-            return new HealthCheckResponse() {
-
-                @Override
-                public State getState() {
-                    return state;
-                }
-
-                @Override
-                public String getName() {
-                    return name;
-                }
-
-                @Override
-                public Optional<Map<String, Object>> getData() {
-                    return Optional.ofNullable(data);
-                }
-            };
+            String name = this.name;
+            State state = this.state;
+            Map<String, Object> data = this.data;
+            return new HealthCheckResponseImpl(state, data, name);
         }
 
         private HealthCheckResponseBuilder putData(String key, Object value) {
@@ -150,7 +139,37 @@ public class HealthCheckResponseProviderImpl implements HealthCheckResponseProvi
             data.put(key, value);
             return this;
         }
+    }
 
+    private static class HealthCheckResponseImpl extends HealthCheckResponse {
+
+        private final State state;
+        private final Map<String, Object> data;
+        private final String name;
+
+        /**
+         * Initializes a new {@link HealthCheckResponseImpl}.
+         */
+        HealthCheckResponseImpl(State state, Map<String, Object> data, String name) {
+            this.state = state;
+            this.data = data;
+            this.name = name;
+        }
+
+        @Override
+        public State getState() {
+            return state;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public Optional<Map<String, Object>> getData() {
+            return Optional.ofNullable(data);
+        }
     }
 
 }

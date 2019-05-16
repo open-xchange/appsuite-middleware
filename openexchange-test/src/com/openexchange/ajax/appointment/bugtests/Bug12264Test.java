@@ -245,7 +245,7 @@ public class Bug12264Test extends AbstractAJAXSession {
     }
 
     //Private stuff
-    private void checkForNoEnd() throws Throwable {
+    private void checkForNoEnd() {
         if (appointment.containsUntil()) {
             assertNull("Until exists and is not null. Until: " + appointment.getUntil(), appointment.getUntil());
         }

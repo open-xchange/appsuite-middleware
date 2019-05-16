@@ -52,6 +52,7 @@ package com.openexchange.group.json.osgi;
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupActionFactory;
 import com.openexchange.group.json.anonymizer.GroupAnonymizer;
 import com.openexchange.group.json.resultconverter.GroupJsonResultConverter;
@@ -73,7 +74,7 @@ public final class GroupJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+        return new Class<?>[] { GroupService.class };
     }
 
     @Override

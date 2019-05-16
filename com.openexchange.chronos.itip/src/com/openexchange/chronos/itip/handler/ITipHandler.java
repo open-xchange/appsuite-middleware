@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.itip.handler;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -81,6 +83,8 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
@@ -91,7 +95,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
-import com.openexchange.session.Session;
 
 /**
  * {@link ITipHandler}
@@ -297,8 +300,44 @@ public class ITipHandler implements CalendarHandler {
             }
         }
 
+        if (isMove(update)) {
+            return;
+        }
+
         // Handle update
         handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
+    }
+
+    private static final EventField[] NOT_MOVE_EVENT_FIELDS;
+
+    static {
+        List<EventField> allitems = new ArrayList<>(Arrays.asList(EventField.values()));
+        allitems.removeAll(Arrays.asList(EventField.ATTENDEES, EventField.TIMESTAMP, EventField.LAST_MODIFIED));
+        NOT_MOVE_EVENT_FIELDS = allitems.toArray(new EventField[allitems.size()]);
+    }
+
+    /**
+     * 
+     * Checks if the {@link UpdateResult} only contains a move operation
+     *
+     * @param update The {@link UpdateResult} to check
+     * @return <code>true</code> if it is only a move operation, <code>false</code> otherwise
+     */
+    private boolean isMove(UpdateResult update) {
+        // @formatter:off
+        if(update.containsAnyChangeOf(NOT_MOVE_EVENT_FIELDS) ||
+           update.getAttendeeUpdates() == null || 
+           (update.getAttendeeUpdates().getAddedItems() != null && update.getAttendeeUpdates().getAddedItems().isEmpty() == false) ||
+           (update.getAttendeeUpdates().getRemovedItems() != null && update.getAttendeeUpdates().getRemovedItems().isEmpty() == false) ||
+           update.getAttendeeUpdates().getUpdatedItems() == null ||
+           update.getAttendeeUpdates().getUpdatedItems().size() != 1 || 
+           update.getAttendeeUpdates().getUpdatedItems().get(0).getUpdatedFields().size() != 1 || 
+           update.getAttendeeUpdates().getUpdatedItems().get(0).getUpdatedFields().iterator().next().equals(AttendeeField.FOLDER_ID) == false ) {
+            return false;
+        }
+        // @formatter:on
+
+        return true;
     }
 
     private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, Set<DeleteResult> ignore, CalendarEvent event) throws OXException {
@@ -330,8 +369,8 @@ public class ITipHandler implements CalendarHandler {
     }
 
     private void handle(CalendarEvent event, State.Type type, Event original, Event update, List<Event> exceptions) throws OXException {
-        Session session = event.getSession();
-        int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
+        CalendarSession session = getCalendarService().init(event.getSession(), event.getCalendarParameters());
+        int onBehalfOf = onBehalfOf(session, update, event.getCalendarUser());
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
         String comment = event.getCalendarParameters().get(CalendarParameters.PARAMETER_COMMENT, String.class);
 
@@ -375,8 +414,8 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private int onBehalfOf(int calendarUser, Session session) {
-        return calendarUser == session.getUserId() ? -1 : calendarUser;
+    private int onBehalfOf(CalendarSession session, Event event, int calendarUser) {
+        return calendarUser == session.getUserId() ? CalendarUtils.isOrganizer(event, calendarUser) ? -1 : event.getOrganizer().getEntity() : calendarUser;
     }
 
     private UpdateResult getExceptionMaster(CreateResult create, List<UpdateResult> updates) {
@@ -392,14 +431,13 @@ public class ITipHandler implements CalendarHandler {
      * @param master The master event to build an {@link EventUpdate} on
      * @param created The exception that has been created
      * @return <code>true</code> if the creation of the exception can be ignored.
-     * @throws OXException If operation fails
      */
-    private boolean isIgnorableException(UpdateResult master, CreateResult created) throws OXException {
+    private boolean isIgnorableException(UpdateResult master, CreateResult created) {
         EventUpdate eventUpdate = DefaultEventUpdate.builder() //@formatter:off
             .originalEvent(master.getUpdate())
             .updatedEvent(created.getCreatedEvent())
             .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.START_DATE, EventField.END_DATE, EventField.CREATED, EventField.RECURRENCE_RULE,
-                                EventField.RECURRENCE_ID, EventField.ALARMS, EventField.EXTENDED_PROPERTIES, EventField.CHANGE_EXCEPTION_DATES, EventField.ID)
+                                EventField.RECURRENCE_ID, EventField.ALARMS, EventField.EXTENDED_PROPERTIES, EventField.CHANGE_EXCEPTION_DATES, EventField.ID, EventField.ATTENDEE_PRIVILEGES)
             .considerUnset(true)
             .ignoreDefaults(true)
             .build(); //@formatter:on
@@ -426,7 +464,7 @@ public class ITipHandler implements CalendarHandler {
     }
 
     /**
-     *
+     * 
      * Compares if two DateTimes have the same hours and minutes set
      *
      * @param date1 One {@link DateTime}
@@ -444,5 +482,9 @@ public class ITipHandler implements CalendarHandler {
             return date1.getMinutes() == date2.getMinutes();
         }
         return false;
+    }
+
+    private CalendarService getCalendarService() throws OXException {
+        return Services.get().getServiceSafe(CalendarService.class);
     }
 }

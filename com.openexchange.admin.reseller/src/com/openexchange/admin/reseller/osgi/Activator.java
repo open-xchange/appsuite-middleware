@@ -66,6 +66,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
@@ -104,6 +105,7 @@ public class Activator extends HousekeepingActivator {
             registerService(OXUserPluginInterface.class, new OXResellerUserImpl(), props);
 
             track(DatabaseService.class, new DatabaseServiceCustomizer(context, ClientAdminThreadExtended.cache.getPool()));
+            track(DBMigrationExecutorService.class, new ResellerDBMigrationServiceTracker(this, context));
             openTrackers();
         } catch (final StorageException e) {
             LOG.error("Error while creating one instance for RMI interface", e);
@@ -127,6 +129,6 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, DatabaseService.class, DBMigrationExecutorService.class };
     }
 }

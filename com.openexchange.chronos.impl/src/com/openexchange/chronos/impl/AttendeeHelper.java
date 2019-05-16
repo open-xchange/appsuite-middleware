@@ -54,11 +54,11 @@ import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.filterByMembership;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAttendeeUpdates;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getResolvableEntities;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.chronos.impl.Utils.isSkipExternalAttendeeURIChecks;
 import static com.openexchange.java.Autoboxing.I;
@@ -71,13 +71,11 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AbstractCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
@@ -108,8 +106,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      */
     public static AttendeeHelper onNewEvent(CalendarSession session, CalendarFolder folder, Event event) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, null);
-        boolean resolveResourceIds = false == isGroupScheduled(event) || hasInternalOrganizer(session.getEntityResolver(), event);
-        attendeeHelper.processNewEvent(emptyForNull(event.getAttendees()), resolveResourceIds);
+        attendeeHelper.processNewEvent(emptyForNull(event.getAttendees()), getResolvableEntities(session, folder, event));
         return attendeeHelper;
     }
 
@@ -123,8 +120,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      */
     public static AttendeeHelper onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalEvent.getAttendees());
-        boolean resolveResourceIds = false == isGroupScheduled(originalEvent) || hasInternalOrganizer(session.getEntityResolver(), originalEvent);
-        attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()), resolveResourceIds);
+        attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()), getResolvableEntities(session, folder, originalEvent));
         return attendeeHelper;
     }
 
@@ -188,19 +184,16 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
         newAttendees.removeAll(attendeesToDelete);
         for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
-            Attendee originalAttendee = attendeeToUpdate.getOriginal();
-            newAttendees.remove(originalAttendee);
-            Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
-            newAttendees.add(newAttendee);
+            newAttendees.remove(attendeeToUpdate.getOriginal());
+            newAttendees.add(apply(attendeeToUpdate));
         }
         newAttendees.addAll(attendeesToInsert);
         return newAttendees;
     }
 
-    private void processNewEvent(List<Attendee> requestedAttendees, boolean resolveResourceIds) throws OXException {
+    private void processNewEvent(List<Attendee> requestedAttendees, int[] resolvableEntities) throws OXException {
         session.getEntityResolver().prefetch(requestedAttendees);
-        requestedAttendees = session.getEntityResolver().prepare(requestedAttendees, resolveResourceIds);
+        requestedAttendees = session.getEntityResolver().prepare(requestedAttendees, resolvableEntities);
         /*
          * always start with attendee for default calendar user in folder
          */
@@ -220,9 +213,9 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
         handleDefaultAttendee(isEnforceDefaultAttendee(session));
     }
 
-    private void processUpdatedEvent(List<Attendee> updatedAttendees, boolean resolveResourceIds) throws OXException {
+    private void processUpdatedEvent(List<Attendee> updatedAttendees, int[] resolvableEntities) throws OXException {
         session.getEntityResolver().prefetch(updatedAttendees);
-        updatedAttendees = session.getEntityResolver().prepare(updatedAttendees, resolveResourceIds);
+        updatedAttendees = session.getEntityResolver().prepare(updatedAttendees, resolvableEntities);
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = getAttendeeUpdates(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
@@ -273,8 +266,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
          * apply updated attendee data
          */
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
-            Attendee attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), null, (AttendeeField[]) null);
-            attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            Attendee attendee = apply(attendeeUpdate);
             if (attendeeUpdate.getUpdatedFields().contains(AttendeeField.URI)) {
                 if (false == isInternal(attendee) && false == isSkipExternalAttendeeURIChecks(session)) {
                     attendee = Check.requireValidEMail(attendee);
@@ -504,22 +496,16 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
     }
 
     /**
-     * Gets a value indicating whether the supplied event is organized by an <i>internal</i> entity or not.
+     * Instantiates a new attendee, takes over all <i>set</i> properties from the updated item in the supplied attendee update, then
+     * copies over any <i>static</i> property values from the original - so that the resulting attendee represents the attendee after
+     * the update.
      * 
-     * @param entityResolver The entity resolver to use
-     * @param event The event to check
-     * @return <code>true</code> if the event has an <i>internal</i> organizer, false, otherwise
+     * @param attendeeUpdate The attendee update to apply
+     * @return A new attendee instance representing the updated attendee
      */
-    private static boolean hasInternalOrganizer(EntityResolver entityResolver, Event event) {
-        if (null != event.getOrganizer()) {
-            try {
-                CalendarUser organizer = entityResolver.prepare(event.getOrganizer(), CalendarUserType.INDIVIDUAL);
-                return CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL);
-            } catch (OXException e) {
-                LOG.warn("Error checking if event has internal organizer", e);
-            }
-        }
-        return false;
+    private static Attendee apply(ItemUpdate<Attendee, AttendeeField> attendeeUpdate) throws OXException {
+        Attendee newAttendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), null, (AttendeeField[]) null);
+        return AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), newAttendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
     }
 
     private static boolean containsAllUris(List<Attendee> attendees, List<String> uris) {

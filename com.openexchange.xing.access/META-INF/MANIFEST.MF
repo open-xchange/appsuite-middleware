@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The XING access bundle
 Bundle-SymbolicName: com.openexchange.xing.access
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
+ com.openexchange.java,
  com.openexchange.oauth,
  com.openexchange.oauth.access,
  com.openexchange.oauth.impl.access.impl,

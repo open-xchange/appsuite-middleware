@@ -50,6 +50,7 @@
 package com.openexchange.pns.transport.wns.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
@@ -321,7 +322,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
                             stop = false;
                         } else if (code == 413) {
                             // The notification payload exceeds the 5000 byte size limit.
-                            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_TOTAL_BYTE_SIZE, -1);
+                            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(I(MAX_TOTAL_BYTE_SIZE), I(-1));
                         } else {
                             // All other...
                             String errorDescription = response.errorDescription;
@@ -334,7 +335,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
                             } else {
                                 deviceConnectionStatus = deviceConnectionStatus + " ";
                             }
-                            LOG.warn("Failed publishing push notification to {}device using channel URI {} with status code {}: {}", deviceConnectionStatus, channelUri, code, errorDescription);
+                            LOG.warn("Failed publishing push notification to {}device using channel URI {} with status code {}: {}", deviceConnectionStatus, channelUri, I(code), errorDescription);
                         }
                     }
 
@@ -397,7 +398,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
             }
         }
         if (length > MAX_TOTAL_BYTE_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_TOTAL_BYTE_SIZE, length);
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(I(MAX_TOTAL_BYTE_SIZE), L(length));
         }
 
         return tile;

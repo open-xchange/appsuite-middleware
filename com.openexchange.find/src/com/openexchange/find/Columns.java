@@ -48,6 +48,7 @@
  */
 package com.openexchange.find;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,7 +61,9 @@ import java.util.List;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class Columns {
+public class Columns implements Serializable{
+
+    private static final long serialVersionUID = -3440984967716322340L;
 
     private final List<Integer> intColumns;
 
@@ -118,7 +121,7 @@ public class Columns {
     public int[] getIntColumns() {
         int[] array = new int[intColumns.size()];
         for (int i = 0; i < array.length; i++) {
-            array[i] = intColumns.get(i);
+            array[i] = intColumns.get(i).intValue();
         }
         return array;
     }

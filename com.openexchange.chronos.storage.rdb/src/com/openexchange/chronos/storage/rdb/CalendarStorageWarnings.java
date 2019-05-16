@@ -56,11 +56,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.MappedProblematic;
+import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -107,6 +110,16 @@ public abstract class CalendarStorageWarnings {
     }
 
     /**
+     * Gets the severity threshold defining which unsupported data errors can be ignored.
+     * 
+     * @return The threshold defining up to which severity unsupported data errors can be ignored, or <code>null</code> if unsupported
+     *         data is not ignored at all
+     */
+    public ProblemSeverity getUnsupportedDataThreshold() {
+        return unsupportedDataThreshold;
+    }
+
+    /**
      * Keeps track of a warning that occurred when processing the data of a specific event.
      *
      * @param eventId The identifier of the event the warning is associated with
@@ -130,8 +143,12 @@ public abstract class CalendarStorageWarnings {
      * @param cause The optional initial cause
      * @return The added warning
      */
-    public OXException addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
+    public OXException addInvalidDataWarning(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
         OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
+        Mapping<? extends Object, Event> mapping = com.openexchange.chronos.common.mapping.EventMapper.getInstance().opt(field);
+        if (null != mapping) {
+            warning.addProblematic(new MappedProblematic<Event>(mapping));
+        }
         if (0 > ProblemSeverity.NORMAL.compareTo(severity)) {
             LOG.info(warning.getLogMessage());
         } else {
@@ -150,14 +167,14 @@ public abstract class CalendarStorageWarnings {
      * @param field The corresponding event field of the unsupported data
      * @param severity The problem severity
      * @param message The message providing details of the error
-     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
      */
     public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message) throws OXException {
         addUnsupportedDataError(eventId, field, severity, message, null);
     }
 
     /**
-     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
+     * Initializes and adds a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
      * <p/>
      * In case errors up to a certain problem severity can be ignored, an appropriate warning is tracked, otherwise, the error is raised.
      *
@@ -166,15 +183,40 @@ public abstract class CalendarStorageWarnings {
      * @param severity The problem severity
      * @param message The message providing details of the error
      * @param cause The optional initial cause
-     * @throws {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
      */
     public void addUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) throws OXException {
-        OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
+        OXException error = getUnsupportedDataError(eventId, field, severity, message, cause);
         if (null == unsupportedDataThreshold || 0 > unsupportedDataThreshold.compareTo(severity)) {
-            //            error.setCategory(Category.CATEGORY_ERROR);
             throw error;
         }
-        addInvalidDataWaring(eventId, field, severity, message, error);
+        addInvalidDataWarning(eventId, field, severity, message, error);
+    }
+
+    /**
+     * Initializes a new {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error that occurred when processing the data of a specific event.
+     * <p/>
+     * Any error arguments are also put into the exceptions argument collection, also, an appropriate {@link MappedProblematic} is added
+     * based on the given event field.
+     *
+     * @param eventId The identifier of the event the error is associated with
+     * @param field The corresponding event field of the unsupported data
+     * @param severity The problem severity
+     * @param message The message providing details of the error
+     * @param cause The optional initial cause
+     * @return The initialized {@link CalendarExceptionCodes#UNSUPPORTED_DATA}
+     */
+    public OXException getUnsupportedDataError(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
+        OXException error = CalendarExceptionCodes.UNSUPPORTED_DATA.create(cause, eventId, getReadableName(field), String.valueOf(severity), message);
+        error.setArgument("severity", severity);
+        error.setArgument("eventId", eventId);
+        error.setArgument("field", field);
+        error.setArgument("message", message);
+        Mapping<? extends Object, Event> mapping = com.openexchange.chronos.common.mapping.EventMapper.getInstance().opt(field);
+        if (null != mapping) {
+            error.addProblematic(new MappedProblematic<Event>(mapping));
+        }
+        return error;
     }
 
     /**

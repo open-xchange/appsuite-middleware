@@ -509,22 +509,24 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         DatabaseService databaseService = getService(CLAZZ_DB);
         int contextId = context.getContextId();
         Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = false;
+            rollback = 1;
 
             deleteAccounts(serviceId, accounts, genericConfIds, userId, context, optModifier, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             databaseService.backWritable(contextId, con);
         }
     }

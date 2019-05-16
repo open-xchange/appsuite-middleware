@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.sql.Connection;
@@ -1135,7 +1136,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             return readCon == null ? tasks.isFolderEmpty(ctx, folderId) : tasks.isFolderEmpty(ctx, readCon, folderId);
         } else if (module == FolderObject.CALENDAR) {
             CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-            calendarSession.set(Connection.class.getName(), readCon);
+            calendarSession.set(PARAMETER_CONNECTION(), readCon);
             return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(folderId));
         } else if (module == FolderObject.CONTACT) {
             ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
@@ -1745,13 +1746,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     /**
-     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, shares) for the supplied folder ID.
      *
      * @param wcon A "write" connection to the database
      * @param folder The deleted folder. Must be fully initialized.
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
      *            otherwise
-     * @return The number of removed subscriptions and publications
+     * @return The number of removed subscriptions
      * @throws OXException
      */
     private void deleteDependentEntities(Connection wcon, FolderObject folder, boolean handDown) throws OXException {
@@ -1771,13 +1772,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     /**
-     * Deletes any existing dependent entities (e.g. subscriptions, publications, shares) for the supplied folder ID.
+     * Deletes any existing dependent entities (e.g. subscriptions, shares) for the supplied folder ID.
      *
      * @param wcon A "write" connection to the database
      * @param folders The deleted folders. Must be fully initialized.
-     * @param handDown <code>true</code> to also remove the subscriptions and publications of any nested subfolder, <code>false</code>,
+     * @param handDown <code>true</code> to also remove the subscriptions of any nested subfolder, <code>false</code>,
      *            otherwise
-     * @return The number of removed subscriptions and publications
+     * @return The number of removed subscriptions
      * @throws OXException
      */
     private void deleteDependentEntities(Connection wcon, Collection<FolderObject> folders, boolean handDown) throws OXException {
@@ -1979,7 +1980,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             }
             /*
-             * Subscriptions & Publications
+             * Subscriptions
              */
             deleteDependentEntities(wc, storageFolders, false);
             /*
@@ -2035,7 +2036,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private void deleteContainedEvents(int folderId) throws OXException {
         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
-        calendarSession.set(Connection.class.getName(), writeCon);
+        calendarSession.set(PARAMETER_CONNECTION(), writeCon);
         calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderId), CalendarUtils.DISTANT_FUTURE);
     }
@@ -2058,7 +2059,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private void deleteContainedContacts(final int folderID) throws OXException {
-        ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
+        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        try {
+            ServerServiceRegistry.getInstance().getService(ContactService.class).deleteContacts(session, String.valueOf(folderID));
+        } finally {
+            session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+        }
     }
 
     private void deleteContainedDocuments(final int folderID) throws OXException {
@@ -2399,6 +2405,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     }
 
+    @SuppressWarnings("deprecation")
     private static int getPublishedMailAttachmentsFolder(final Session session) {
         if (null == session) {
             return -1;

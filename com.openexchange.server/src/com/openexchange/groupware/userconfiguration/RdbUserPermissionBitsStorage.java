@@ -59,7 +59,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceExceptionCode;
@@ -177,9 +176,13 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
         saveUserPermissionBits(perms.getPermissionBits(), perms.getUserId(), insert, perms.getContextId(), writeCon);
     }
 
+    /*-
+     *
     private static Context getContext(UserPermissionBits perms) throws OXException {
         return ContextStorage.getInstance().getContext(perms.getContextId());
     }
+     *
+     */
 
     private static final String SQL_SELECT = "SELECT user FROM user_configuration WHERE cid = ? AND user = ?";
 
@@ -343,7 +346,7 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
 
     private static final String LOAD_USER_CONFIGURATION = "SELECT permissions FROM user_configuration WHERE cid = ? AND user = ?";
 
-    private static final String LOAD_SOME_USER_CONFIGURATIONS = "SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (";
+    // private static final String LOAD_SOME_USER_CONFIGURATIONS = "SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (";
 
     private static final String COUNT_USERS_BY_PERMISSION =
         "SELECT COUNT(permissions) FROM user_configuration WHERE cid = ? AND permissions = ?";

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.folder.api_client;
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.rmi.server.UID;
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
     private static final String FOLDER = "default0%2FINBOX";
     private MailApi api;
     private final Map<Integer, MailDestinationData> IMPORTED_EMAILS = new HashMap<>();
-    private Long timestamp = 0l;
+    private Long timestamp = L(0);
     private FoldersApi folderApi;
     private String folderId;
 
@@ -103,7 +105,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null);
+        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null);
         Assert.assertNull(createFolder.getError());
         Assert.assertNotNull(createFolder.getData());
 
@@ -112,23 +114,23 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         for (int x = 0; x < 2; x++) {
             File f = new File(testMailDir, "bug.eml");
             Assert.assertTrue(f.exists());
-            MailImportResponse response = api.importMail(getApiClient().getSession(), folderId, f, null, true);
+            MailImportResponse response = api.importMail(getApiClient().getSession(), folderId, f, null, Boolean.TRUE);
             List<MailDestinationData> data = checkResponse(response);
             // data size should always be 1
             Assert.assertEquals(1, data.size());
-            IMPORTED_EMAILS.put(x, data.get(0));
+            IMPORTED_EMAILS.put(I(x), data.get(0));
             timestamp = response.getTimestamp();
         }
 
         // Mark first mail as unread
         MailUpdateBody mailUpdateBody = new MailUpdateBody();
-        mailUpdateBody.setClearFlags(32);
-        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(0).getId(), null);
+        mailUpdateBody.setClearFlags(I(32));
+        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(0)).getId(), null);
         // Mark second mail as deleted and unread
         mailUpdateBody = new MailUpdateBody();
-        mailUpdateBody.setSetFlags(2l);
-        mailUpdateBody.setClearFlags(32);
-        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(1).getId(), null);
+        mailUpdateBody.setSetFlags(L(2));
+        mailUpdateBody.setClearFlags(I(32));
+        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(I(1)).getId(), null);
 
     }
 
@@ -143,7 +145,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
                 body.add(mailListElement);
             }
             api.deleteMails(getApiClient().getSession(), body, timestamp);
-            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, true, false, false);
+            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         } finally {
             super.tearDown();
         }
@@ -176,7 +178,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
 
     // -------------------------   prepare config --------------------------------------
 
-    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+    private static final Map<String, String> CONFIG = new HashMap<>();
 
     static {
         CONFIG.put("com.openexchange.imap.ignoreDeleted", Boolean.FALSE.toString());

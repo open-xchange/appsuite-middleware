@@ -117,9 +117,9 @@ import net.freeutils.tnef.MAPIValue;
 import net.freeutils.tnef.RawInputStream;
 import net.freeutils.tnef.TNEFInputStream;
 import net.freeutils.tnef.TNEFUtils;
-import net.freeutils.tnef.mime.ContactHandler;
+import net.freeutils.tnef.mime.ContactConverter;
 import net.freeutils.tnef.mime.RawDataSource;
-import net.freeutils.tnef.mime.ReadReceiptHandler;
+import net.freeutils.tnef.mime.ReadReceiptConverter;
 import net.freeutils.tnef.mime.TNEFMime;
 
 /**
@@ -242,6 +242,7 @@ public final class MailMessageParser {
     private final List<OXException> warnings;
     private String mailId;
     private String folder;
+    private boolean reparsed;
 
     /**
      * Constructor
@@ -252,6 +253,7 @@ public final class MailMessageParser {
         inlineDetector = LENIENT_DETECTOR;
         mimeFilter = null;
         warnings = new ArrayList<OXException>(2);
+        reparsed = false;
     }
 
     /**
@@ -305,6 +307,7 @@ public final class MailMessageParser {
         stop = false;
         multipartDetected = false;
         subject = null;
+        reparsed = false;
         return this;
     }
 
@@ -360,6 +363,7 @@ public final class MailMessageParser {
                     MimeMessage mimeMessage = cloneMessage(mail, mail.getReceivedDate());
                     MailMessage reparsedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
                     reset();
+                    reparsed = true;
                     parseMailContent(reparsedMail, handler, prefix, 1);
                 }
             }
@@ -431,7 +435,7 @@ public final class MailMessageParser {
                 if (count == -1) {
                     throw MailExceptionCode.INVALID_MULTIPART_CONTENT.create();
                 }
-                if ((mailPart instanceof MimeMailPart) && ((MimeMailPart) mailPart).isEmptyStringMultipart()) {
+                if (!reparsed && (mailPart instanceof MimeMailPart) && ((MimeMailPart) mailPart).isEmptyStringMultipart()) {
                     // Need to reparse...
                     throw new InvalidMultipartException("Multipart initialized from an empty string");
                 }
@@ -622,14 +626,14 @@ public final class MailMessageParser {
                 /*
                  * Wrapping TNEF message
                  */
-                final net.freeutils.tnef.Message message = new net.freeutils.tnef.Message(tnefInputStream);
+                final net.freeutils.tnef.Message tnefMessage = new net.freeutils.tnef.Message(tnefInputStream);
                 /*
                  * Handle special conversion
                  */
-                final Attr messageClass = message.getAttribute(Attr.attMessageClass);
+                final Attr messageClass = tnefMessage.getAttribute(Attr.attMessageClass);
                 final String messageClassName;
                 if (messageClass == null) {
-                    final MAPIProp prop = message.getMAPIProps().getProp(MAPIProp.PR_MESSAGE_CLASS);
+                    final MAPIProp prop = tnefMessage.getMAPIProps().getProp(MAPIProp.PR_MESSAGE_CLASS);
                     messageClassName = null == prop ? "" : prop.getValue().toString();
                 } else {
                     messageClassName = ((String) messageClass.getValue());
@@ -641,11 +645,12 @@ public final class MailMessageParser {
                      */
                     final Multipart mp;
                     try {
-                        final Attr subjetcAttr = message.getAttribute(Attr.attSubject);
+                        final Attr subjetcAttr = tnefMessage.getAttribute(Attr.attSubject);
                         if (null == subjetcAttr) {
-                            message.addAttribute(new Attr(Attr.LVL_MESSAGE, Attr.atpText, Attr.attSubject, "vcard"));
+                            tnefMessage.addAttribute(new Attr(Attr.LVL_MESSAGE, Attr.atpText, Attr.attSubject, "vcard"));
                         }
-                        mp = ContactHandler.convert(message);
+                        net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ContactConverter().convert(tnefMessage, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
+                        mp = (Multipart) convertResult.getContent();
                     } catch (final RuntimeException e) {
                         LOG.error("Invalid TNEF contact", e);
                         return;
@@ -662,7 +667,8 @@ public final class MailMessageParser {
                      */
                     final Multipart mp;
                     try {
-                        mp = ReadReceiptHandler.convert(message);
+                        net.freeutils.tnef.mime.TNEFMimeMessage convertResult = new ReadReceiptConverter().convert(tnefMessage, new net.freeutils.tnef.mime.TNEFMimeMessage(MimeDefaultSession.getDefaultSession()));
+                        mp = (Multipart) convertResult.getContent();
                     } catch (final RuntimeException e) {
                         LOG.warn("Invalid TNEF read receipt", e);
                         return;
@@ -673,7 +679,7 @@ public final class MailMessageParser {
                      */
                     return;
                 } else if (TNEF2ICal.isVPart(messageClassName)) {
-                    final net.fortuna.ical4j.model.Calendar calendar = TNEF2ICal.tnef2VPart(message);
+                    final net.fortuna.ical4j.model.Calendar calendar = TNEF2ICal.tnef2VPart(tnefMessage);
                     if (null != calendar) {
                         /*
                          * VPart successfully converted. Generate appropriate body part.
@@ -731,7 +737,7 @@ public final class MailMessageParser {
                 /*
                  * Look for body. Usually the body is the RTF text.
                  */
-                final Attr attrBody = Attr.findAttr(message.getAttributes(), Attr.attBody);
+                final Attr attrBody = Attr.findAttr(tnefMessage.getAttributes(), Attr.attBody);
                 if (attrBody != null) {
                     final TNEFBodyPart bodyPart = new TNEFBodyPart();
                     final String value = (String) attrBody.getValue();
@@ -745,7 +751,7 @@ public final class MailMessageParser {
                  */
                 TNEFBodyPart rtfPart = null;
                 {
-                    final MAPIProps mapiProps = message.getMAPIProps();
+                    final MAPIProps mapiProps = tnefMessage.getMAPIProps();
                     if (mapiProps != null) {
                         final RawInputStream ris = (RawInputStream) mapiProps.getPropValue(MAPIProp.PR_RTF_COMPRESSED);
                         if (ris != null) {
@@ -776,7 +782,7 @@ public final class MailMessageParser {
                 /*
                  * Iterate TNEF attachments and nested messages
                  */
-                final List<?> attachments = message.getAttachments();
+                final List<?> attachments = tnefMessage.getAttachments();
                 final int s = attachments.size();
                 if (s > 0) {
                     final Iterator<?> iter = attachments.iterator();
@@ -856,7 +862,7 @@ public final class MailMessageParser {
                         /*
                          * Add TNEF attributes
                          */
-                        bodyPart.setTNEFAttributes(message.getAttributes());
+                        bodyPart.setTNEFAttributes(tnefMessage.getAttributes());
                         /*
                          * Translate TNEF attributes to MIME
                          */

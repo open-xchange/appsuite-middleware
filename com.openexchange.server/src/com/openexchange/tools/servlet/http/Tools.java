@@ -54,6 +54,7 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -1221,4 +1222,79 @@ public final class Tools {
         }
         return null == shardingSubdomains || shardingSubdomains.isEmpty() ? false : true;
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if given URI is the same domain or a sub-domain of the other or vice versa.
+     *
+     * @param uri The URI
+     * @param other The other URI
+     * @return <code>true</code> if same domain or sub-domain; otherwise <code>false</code>
+     */
+    public static boolean isSubdomainOfTheOther(URI uri, URI other) {
+        return isSubdomainOfTheOther(uri.getHost(), other);
+    }
+
+    /**
+     * Checks if given URI is the same domain or a sub-domain of specified host or vice versa.
+     *
+     * @param host The host
+     * @param other The URI
+     * @return <code>true</code> if same domain or sub-domain; otherwise <code>false</code>
+     */
+    public static boolean isSubdomainOfTheOther(String host, URI other) {
+        String firstHost = host;
+        if (firstHost == null) {
+            return false;
+        }
+
+        String secondHost = other.getHost();
+        if (secondHost == null) {
+            return false;
+        }
+
+        firstHost = Strings.asciiLowerCase(firstHost.startsWith("www.") ? firstHost.substring(4) : firstHost);
+        secondHost = Strings.asciiLowerCase(secondHost.startsWith("www.") ? secondHost.substring(4) : secondHost);
+
+        // Test if first one is a substring of the other
+        if (firstHost.contains(secondHost) || secondHost.contains(firstHost)) {
+            String[] longerHost;
+            String[] shorterHost;
+            {
+                String[] firstPieces = Strings.splitByDots(firstHost);
+                String[] secondPieces = Strings.splitByDots(secondHost);
+                if (firstPieces.length >= secondPieces.length) {
+                    longerHost = firstPieces;
+                    shorterHost = secondPieces;
+                } else {
+                    longerHost = secondPieces;
+                    shorterHost = firstPieces;
+                }
+            }
+
+            // Compare from the tail
+            int minLength = shorterHost.length;
+            int i = 1;
+            while (minLength > 0) {
+                String tail1 = longerHost[longerHost.length - i];
+                String tail2 = shorterHost[shorterHost.length - i];
+
+                if (tail1.equalsIgnoreCase(tail2)) {
+                    // Check next token
+                    minLength--;
+                } else {
+                    // Domains do not match
+                    return false;
+                }
+                i++;
+            }
+            if (minLength == 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

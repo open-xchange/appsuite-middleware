@@ -167,7 +167,7 @@ public final class MimeReplyTest {
 
             ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
 
-            MimeReply.generateReplyText(mailMessage, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, 0, list);
+            MimeReply.generateReplyText(mailMessage, retvalContentType, StringHelper.valueOf(locale), ltz, usm, session, 0, list);
 
             assertEquals("Unexpected number of reply texts", 1, list.size());
 
@@ -355,7 +355,7 @@ public final class MimeReplyTest {
             session.setContextId(1337);
             session.setUsername("17");
 
-            MimeReply.generateReplyText(mailMessage, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, 0, list);
+            MimeReply.generateReplyText(mailMessage, retvalContentType, StringHelper.valueOf(locale), ltz, usm, session, 0, list);
 
             assertEquals("Unexpected number of reply texts", 1, list.size());
 

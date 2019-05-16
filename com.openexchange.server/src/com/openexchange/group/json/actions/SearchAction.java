@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fields.SearchFields;
@@ -61,11 +60,11 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link SearchAction}
@@ -78,6 +77,7 @@ public final class SearchAction extends AbstractGroupAction {
 
     /**
      * Initializes a new {@link SearchAction}.
+     * 
      * @param services
      */
     public SearchAction(final ServiceLookup services) {
@@ -85,7 +85,7 @@ public final class SearchAction extends AbstractGroupAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException {
         if (!req.getSession().getUserPermissionBits().hasGroupware()) {
             return new AJAXRequestResult(new JSONArray(0), "json");
         }
@@ -100,11 +100,11 @@ public final class SearchAction extends AbstractGroupAction {
 
             String searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
             ServerSession session = req.getSession();
-            GroupStorage groupStorage = GroupStorage.getInstance();
+            GroupService servize = ServerServiceRegistry.getServize(GroupService.class, true);
             if ("*".equals(searchpattern)) {
-                groups = groupStorage.getGroups(true, session.getContext());
+                groups = servize.getGroups(session, true);
             } else {
-                groups = groupStorage.searchGroups(searchpattern, true, session.getContext());
+                groups = servize.searchGroups(session, searchpattern, true);
             }
         }
 
@@ -119,8 +119,6 @@ public final class SearchAction extends AbstractGroupAction {
                 timestamp = group.getLastModified();
             }
         }
-
         return new AJAXRequestResult(groupList, timestamp, "group");
     }
-
 }

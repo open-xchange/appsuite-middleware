@@ -147,12 +147,12 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         List<Event> eventsToDelete = new ArrayList<Event>(originalEvents.size());
         List<Entry<Event, Attendee>> attendeesToDeleteByEvent = new ArrayList<Entry<Event, Attendee>>();
         for (Event originalEvent : originalEvents) {
-            requireDeletePermissions(originalEvent);
             requireUpToDateTimestamp(originalEvent, clientTimestamp);
             if (deleteRemovesEvent(originalEvent)) {
                 /*
                  * deletion of not group-scheduled event / by organizer / last user attendee
                  */
+                requireDeletePermissions(originalEvent);
                 eventsToDelete.add(originalEvent);
             } else {
                 /*
@@ -162,6 +162,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
                 if (null == userAttendee) {
                     throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
                 }
+                requireDeletePermissions(originalEvent, userAttendee);
                 attendeesToDeleteByEvent.add(new AbstractMap.SimpleEntry<Event, Attendee>(originalEvent, userAttendee));
             }
         }

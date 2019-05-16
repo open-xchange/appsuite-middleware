@@ -107,7 +107,7 @@ public final class ReminderAJAXRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -126,7 +126,7 @@ public final class ReminderAJAXRequest {
         try {
             return Long.parseLong(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -136,7 +136,8 @@ public final class ReminderAJAXRequest {
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
-        return (V) request.getData();
+        @SuppressWarnings("unchecked") V v = (V) request.getData();
+        return v;
     }
 
     /**
@@ -174,7 +175,7 @@ public final class ReminderAJAXRequest {
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -186,7 +187,7 @@ public final class ReminderAJAXRequest {
         try {
             return new Date(Long.parseLong(parameter.trim()));
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -213,7 +214,7 @@ public final class ReminderAJAXRequest {
         try {
             return Integer.parseInt(parameter.trim());
         } catch (final NumberFormatException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
         }
     }
 
@@ -240,7 +241,7 @@ public final class ReminderAJAXRequest {
             try {
                 ret[i] = Integer.parseInt(sa[i].trim());
             } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, name, parameter);
             }
         }
         return ret;

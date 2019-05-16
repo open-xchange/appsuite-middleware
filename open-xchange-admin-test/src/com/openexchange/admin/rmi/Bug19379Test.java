@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.factory.ContextFactory;
 
 /**
  * {@link Bug19379Test}
@@ -70,83 +71,87 @@ public class Bug19379Test extends AbstractRMITest {
 
     @Test
     public void testAddSingleMapping() throws Exception {
+        final int contextId = ContextFactory.getRandomContextId();
         try {
-            Context c300 = createContext(300, createMappings("m1", "m2"));
+            Context context = createContext(contextId, createMappings("m1", "m2"));
 
             // check mappings
-            c300 = getContextManager().getData(new Context(I(300)));
-            assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2")));
+            context = getContextManager().getData(new Context(I(contextId)));
+            assertTrue(context.getLoginMappings().equals(createMappings(getContextName(contextId), "m1", "m2")));
 
             // add some mappings...
-            c300 = new Context(I(300));
+            context = new Context(I(contextId));
             // ALWAYS use contextID + mappings!
-            c300.setLoginMappings(createMappings("m1", "m2", "m4"));
-            getContextManager().change(c300);
+            context.setLoginMappings(createMappings("m1", "m2", "m4"));
+            getContextManager().change(context);
 
             // check mappings
-            c300 = getContextManager().getData(new Context(I(300)));
-            assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2", "m4")));
+            context = getContextManager().getData(new Context(I(contextId)));
+            assertTrue(context.getLoginMappings().equals(createMappings(getContextName(contextId), "m1", "m2", "m4")));
         } finally {
-            deleteContext(300);
+            deleteContext(contextId);
         }
     }
 
     @Test
     public void testChangeContextName() throws Exception {
+        final int contextId = ContextFactory.getRandomContextId();
         try {
-            Context c300 = createContext(300, createMappings("m2"));
+            Context context = createContext(contextId, createMappings("m2"));
 
             // check context name and mappings...
-            c300 = getContextManager().getData(new Context(I(300)));
-            assertEquals(c300.getName(), "300_test300.it");
-            assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m2")));
+            context = getContextManager().getData(new Context(I(contextId)));
+            assertEquals(context.getName(), contextId + "_test" + contextId + ".it");
+            assertTrue(context.getLoginMappings().equals(createMappings(getContextName(contextId), "m2")));
 
             // change contextName and mappings
-            c300 = new Context(I(300));
-            c300.setName("300_test333.it");
-            c300.setLoginMappings(createMappings("m1"));
-            getContextManager().change(c300);
+            context = new Context(I(contextId));
+            context.setName(contextId + "_test333.it");
+            context.setLoginMappings(createMappings("m1"));
+            getContextManager().change(context);
 
             // check context name and mappings
-            c300 = getContextManager().getData(new Context(I(300)));
-            assertTrue(c300.getLoginMappings().equals(createMappings("300_test333.it", "m1")));
+            context = getContextManager().getData(new Context(I(contextId)));
+            assertTrue(context.getLoginMappings().equals(createMappings(contextId+"_test333.it", "m1")));
         } finally {
-            deleteContext(300);
+            deleteContext(contextId);
         }
     }
 
     @Test
     public void testDuplicateContextMappings() throws Exception {
+        final int contextId1 = ContextFactory.getRandomContextId();
+        final int contextId2 = ContextFactory.getRandomContextId();
         try {
-            Context c300 = createContext(300, createMappings("m1", "m2"));
-            Context c500 = createContext(500, createMappings("m3"));
+            Context context1 = createContext(contextId1, createMappings("m1", "m2"));
+            Context context2 = createContext(contextId2, createMappings("m3"));
 
             // check context names and mappings...
-            c300 = getContextManager().getData(new Context(I(300)));
-            assertEquals(c300.getName(), "300_test300.it");
-            assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2")));
+            context1 = getContextManager().getData(new Context(I(contextId1)));
+            assertEquals(context1.getName(), contextId1 +"_test" + contextId1 +".it");
+            assertTrue(context1.getLoginMappings().equals(createMappings(getContextName(contextId1), "m1", "m2")));
 
-            c500 = getContextManager().getData(new Context(I(500)));
-            assertEquals(c500.getName(), "500_test500.it");
-            assertTrue(c500.getLoginMappings().equals(createMappings(getContextName(500), "m3")));
+            context2 = getContextManager().getData(new Context(I(contextId2)));
+            assertEquals(context2.getName(), contextId2 + "_test"+ contextId2 + ".it");
+            assertTrue(context2.getLoginMappings().equals(createMappings(getContextName(contextId2), "m3")));
 
             // now add an ILLEGAL mapping...
-            c300 = new Context(I(300));
-            // use same c500 contextName!
-            c300.setLoginMappings(createMappings("300", "m1", "m2", "m3"));
+            context1 = new Context(I(contextId1));
+            // use same contextId2 contextName!
+            context1.setLoginMappings(createMappings(Integer.toString(contextId1), "m1", "m2", "m3"));
             try {
-                getContextManager().change(c300);
+                getContextManager().change(context1);
                 fail("A StorageException must be thrown!");
             } catch (final StorageException e) {
                 // Found the duplicate login mapping
                 e.printStackTrace();
             }
             // check previous mappings
-            c300 = getContextManager().getData(new Context(I(300)));
-            assertTrue(c300.getLoginMappings().equals(createMappings(getContextName(300), "m1", "m2")));
+            context1 = getContextManager().getData(new Context(I(contextId1)));
+            assertTrue(context1.getLoginMappings().equals(createMappings(getContextName(contextId1), "m1", "m2")));
         } finally {
-            deleteContext(300);
-            deleteContext(500);
+            deleteContext(contextId1);
+            deleteContext(contextId2);
         }
     }
 

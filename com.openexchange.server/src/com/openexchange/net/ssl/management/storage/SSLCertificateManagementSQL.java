@@ -99,22 +99,24 @@ public class SSLCertificateManagementSQL {
         DatabaseService databaseService = getDatabaseService();
         Connection connection = databaseService.getWritable(contextId);
 
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             store(userId, contextId, certificate, connection);
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw SSLCertificateManagementExceptionCode.SQL_PROBLEM.create(e.getMessage(), e);
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
             databaseService.backWritable(connection);
         }
     }
@@ -323,7 +325,7 @@ public class SSLCertificateManagementSQL {
 
     /**
      * Deletes all SSL {@link Certificate} exceptions for the specified user
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException if an error is occurred

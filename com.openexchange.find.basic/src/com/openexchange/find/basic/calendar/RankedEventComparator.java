@@ -118,7 +118,7 @@ public class RankedEventComparator implements Comparator<Event>, Serializable {
         } else {
             double ranking1 = calculateRating(date1, relativeTo, timeZone);
             double ranking2 = calculateRating(date2, relativeTo, timeZone);
-            return ranking1 > ranking2 ? 1 : ranking1 == ranking2 ? 0 : -1;
+            return Double.compare(ranking1, ranking2);
         }
     }
 

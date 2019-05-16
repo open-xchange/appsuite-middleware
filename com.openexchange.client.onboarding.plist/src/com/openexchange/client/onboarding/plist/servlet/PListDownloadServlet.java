@@ -96,13 +96,12 @@ import com.openexchange.tools.webdav.WebDavServlet;
  */
 public class PListDownloadServlet extends WebDavServlet {
 
-    /**
-     * serialVersionUID
-     */
     private static final long serialVersionUID = -175037413514512006L;
 
-    public static final String SERVLET_PATH = "plist";
     private static final Logger LOG = LoggerFactory.getLogger(PListDownloadServlet.class);
+
+    /** The servlet path */
+    public static final String SERVLET_PATH = "plist";
 
     private final transient ServiceLookup lookup;
 
@@ -344,7 +343,7 @@ public class PListDownloadServlet extends WebDavServlet {
         if (Strings.isEmpty(hostName)) {
             try {
                 hostName = InetAddress.getLocalHost().getCanonicalHostName();
-            } catch (UnknownHostException e) {
+            } catch (@SuppressWarnings("unused") UnknownHostException e) {
                 // ignore
             }
         }

@@ -70,12 +70,12 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthFileStorageAccountEventHandler.class);
 
     private final KnownApi api;
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link OAuthFileStorageAccountEventHandler}.
-     * 
-     * 
+     *
+     *
      */
     public OAuthFileStorageAccountEventHandler(ServiceLookup services, KnownApi api) {
         super();
@@ -85,7 +85,7 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.osgi.service.event.EventHandler#handleEvent(org.osgi.service.event.Event)
      */
     @Override
@@ -98,9 +98,9 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(api.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("{} access removed for user {} in context {}", api.getShortName(), userId, contextId);
+                        OAuthAccessRegistry registry = registryService.get(api.getServiceId());
+                        if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
+                            LOG.debug("{} access removed for user {} in context {}", api.getDisplayName(), userId, contextId);
                         }
                     }
                 }

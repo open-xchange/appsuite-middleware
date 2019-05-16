@@ -79,6 +79,7 @@ public class Bug41995Test extends AbstractAJAXSession {
     private String origtz1;
     private String origtz2;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -128,6 +129,7 @@ public class Bug41995Test extends AbstractAJAXSession {
         assertEquals("Wrong end date.", appointment.getEndDate(), loaded.getEndDate());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.junit.Assert.assertEqualAttributes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -101,8 +102,8 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         super.setUp();
 
         session = Mockito.mock(Session.class);
-        Mockito.when(session.getUserId()).thenReturn(23);
-        Mockito.when(session.getContextId()).thenReturn(1);
+        Mockito.when(I(session.getUserId())).thenReturn(I(23));
+        Mockito.when(I(session.getContextId())).thenReturn(I(1));
 
         registry = new SimOAuthServiceMetaDataRegistry();
         registry.addService(new AbstractOAuthServiceMetaData() {
@@ -139,7 +140,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
             /*
              * (non-Javadoc)
-             * 
+             *
              * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
              */
             @Override

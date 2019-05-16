@@ -351,11 +351,6 @@ public final class ChronosTestTools {
             }
 
             @Override
-            public boolean isDebugEnabled() {
-                return false;
-            }
-
-            @Override
             public List<OXException> getWarnings() {
                 return null;
             }
@@ -408,16 +403,6 @@ public final class ChronosTestTools {
             @Override
             public CalendarService getCalendarService() {
                 return null;
-            }
-
-            @Override
-            public void debug(String message, Exception e) {
-                // empty
-            }
-
-            @Override
-            public void debug(String message) {
-                // empty
             }
 
             @Override

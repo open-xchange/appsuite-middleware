@@ -147,11 +147,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
 
         Connection writeCon = dbService.getWritableForGlobal(contextGroupId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             // Store feedback and feedback metadata
             writeCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             long fid = feedBackType.storeFeedback(feedback, writeCon);
             if (fid <= 0) {
@@ -163,14 +163,16 @@ public class FeedbackServiceImpl implements FeedbackService {
 
             saveFeedBackInternal(writeCon, builder.build(), contextGroupId == null ? "default" : contextGroupId);
             writeCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             LOG.error("Unable to store feedback data.", e);
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
             }
-            Databases.autocommit(writeCon);
             dbService.backWritableForGlobal(contextGroupId, writeCon);
         }
     }
@@ -290,10 +292,10 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
 
         Connection writeCon = dbService.getWritableForGlobal(ctxGroup);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             List<Long> typeIdsToDelete = getTypeIds(ctxGroup, filter, writeCon);
             if (typeIdsToDelete.size() > 0) {
@@ -302,14 +304,16 @@ public class FeedbackServiceImpl implements FeedbackService {
             }
 
             writeCon.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
             }
-            Databases.autocommit(writeCon);
             dbService.backWritableForGlobal(ctxGroup, writeCon);
         }
     }

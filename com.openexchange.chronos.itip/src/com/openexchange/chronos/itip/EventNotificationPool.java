@@ -76,10 +76,10 @@ import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.osgi.ExceptionUtils;
-import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -136,7 +136,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
+    public void enqueue(Event original, Event update, CalendarSession session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
         if (null == original || null == update || null == session) {
             throw new NullPointerException("Please specify an original event, a new event and a session");
         }
@@ -154,7 +154,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void fasttrack(Event event, Session session) throws OXException {
+    public void fasttrack(Event event, CalendarSession session) throws OXException {
         try {
             lock.lock();
             tick(I(session.getContextId()), event.getId(), true);
@@ -164,7 +164,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void aware(Event event, NotificationParticipant recipient, Session session) {
+    public void aware(Event event, NotificationParticipant recipient, CalendarSession session) {
         Map<NotificationParticipant, List<Event>> participants = sent.get(I(session.getContextId()));
         if (participants == null) {
             participants = new HashMap<NotificationParticipant, List<Event>>();
@@ -240,7 +240,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void drop(Event event, Session session) throws OXException {
+    public void drop(Event event, CalendarSession session) throws OXException {
         drop(I(session.getContextId()), event.getId());
     }
 
@@ -286,12 +286,12 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         private final Event     oldEvent;
         private final Event     newEvent;
-        private final Session   session;
+        private final CalendarSession   session;
         private final long      timestamp;
         private ITipEventUpdate diff;
         private int             sharedFolderOwner = -1;
 
-        public Update(Event oldEvent, Event newEvent, Session session, int sharedFolderOwner) {
+        public Update(Event oldEvent, Event newEvent, CalendarSession session, int sharedFolderOwner) {
             this.oldEvent = oldEvent;
             this.newEvent = newEvent;
             this.session = session;
@@ -299,7 +299,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             this.timestamp = System.currentTimeMillis();
         }
 
-        public Session getSession() {
+        public CalendarSession getSession() {
             return session;
         }
 
@@ -341,7 +341,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         private Event        mostRecent;
         private long         newestTime;
         private long         lastKnownStartDateForNextOccurrence;
-        private Session      session;
+        private CalendarSession      session;
         private CalendarUser principal;
         private String comment;
 
@@ -355,7 +355,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             super();
         }
 
-        public void remember(Event original, Event newEvent, Session session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
+        public void remember(Event original, Event newEvent, CalendarSession session, int sharedFolderOwner, CalendarUser principal, String comment) throws OXException {
             this.principal = principal;
             this.comment = comment;
             if (this.original == null) {
@@ -518,7 +518,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             });
 
             for (Update[] userScopedUpdate : userScopedUpdates) {
-                Session session = userScopedUpdate[1].getSession();
+                CalendarSession session = userScopedUpdate[1].getSession();
                 Event oldEvent = userScopedUpdate[0].getOldEvent();
                 Event newEvent = userScopedUpdate[1].getNewEvent();
                 ITipMailGenerator generator = generatorFactory.create(oldEvent, newEvent, session, userScopedUpdate[0].getSharedFolderOwner(), principal);

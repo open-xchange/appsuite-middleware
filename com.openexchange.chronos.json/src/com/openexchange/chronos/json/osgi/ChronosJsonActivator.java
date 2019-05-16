@@ -52,6 +52,8 @@ package com.openexchange.chronos.json.osgi;
 import static org.slf4j.LoggerFactory.getLogger;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
@@ -92,10 +94,13 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link ChronosJsonActivator}
@@ -110,8 +115,13 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
         return new Class<?>[] {
             IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class,
             CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class,
-            ContactService.class, ResourceService.class, GroupService.class
+            ContactService.class, ResourceService.class, GroupService.class, MimeTypeMap.class
         };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { ThreadPoolService.class, PrincipalUseCountService.class };
     }
 
     @Override
@@ -132,6 +142,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryTracker = new RankingAwareNearRegistryServiceTracker<>(context, ITipActionPerformerFactoryService.class, 0);
             rememberTracker(analyzerTracker);
             rememberTracker(factoryTracker);
+            trackService(AntiVirusService.class);
+            trackService(AntiVirusResultEvaluatorService.class);
             openTrackers();
             registerModule(new ITipActionFactory(this, analyzerTracker, factoryTracker), "chronos/itip");
 

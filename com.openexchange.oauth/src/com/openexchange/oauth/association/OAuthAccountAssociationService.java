@@ -55,7 +55,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link OAuthAccountAssociationService} - A (OSGi) service that can be called to get certain OAuth account associations.
+ * {@link OAuthAccountAssociationService} - A (OSGi) service that can be called to get OAuth account associations for a certain (OAuth) account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4

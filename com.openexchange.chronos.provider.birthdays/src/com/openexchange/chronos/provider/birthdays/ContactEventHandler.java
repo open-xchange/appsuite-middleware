@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.provider.birthdays.BirthdaysCalendarProvider.PROVIDER_ID;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Collection;
@@ -68,6 +69,7 @@ import com.openexchange.chronos.common.UpdateResultImpl;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.caching.AlarmHelper;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CreateResult;
@@ -252,7 +254,7 @@ public class ContactEventHandler implements EventHandler {
         return new DefaultCalendarEvent(context.getContextId(),
                                         account.getAccountId(),
                                         account.getUserId(),
-                                        Collections.singletonMap(account.getUserId(), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
+                                        Collections.singletonMap(I(account.getUserId()), Collections.singletonList(BasicCalendarAccess.FOLDER_ID)),
                                         creations,
                                         updates,
                                         deletions,

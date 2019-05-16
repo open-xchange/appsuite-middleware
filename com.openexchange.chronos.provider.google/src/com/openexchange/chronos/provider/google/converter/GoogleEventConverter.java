@@ -55,8 +55,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.google.api.services.calendar.model.Event.Creator;
 import com.google.api.services.calendar.model.Event.Reminders;
 import com.google.api.services.calendar.model.EventAttendee;
@@ -81,6 +84,8 @@ import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
 
 /**
  * {@link GoogleEventConverter}
@@ -91,6 +96,7 @@ import com.openexchange.exception.OXException;
 public class GoogleEventConverter {
 
     private static final GoogleEventConverter INSTANCE = new GoogleEventConverter();
+    static final Logger LOG = LoggerFactory.getLogger(GoogleEventConverter.class);
 
     private Map<EventField, GoogleMapping> mappings = null;
 
@@ -163,7 +169,7 @@ public class GoogleEventConverter {
                 Reminders reminders = from.getReminders();
                 if (reminders != null) {
                     List<Alarm> alarms = new ArrayList<>();
-                    if (reminders.getUseDefault()) {
+                    if (reminders.getUseDefault() != null && reminders.getUseDefault().booleanValue()) {
                         return;
                     }
                     if (reminders.getOverrides() != null) {
@@ -215,7 +221,7 @@ public class GoogleEventConverter {
             public Attendee convert(EventAttendee from) {
                 Attendee result = new Attendee();
                 convert(from, result);
-                if (from.getResource() != null && from.getResource()) {
+                if (from.getResource() != null && from.getResource().booleanValue()) {
                     result.setCuType(CalendarUserType.RESOURCE);
                 } else {
                     result.setCuType(CalendarUserType.INDIVIDUAL);
@@ -245,7 +251,7 @@ public class GoogleEventConverter {
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getAttendees() != null) {
                     for (EventAttendee att : from.getAttendees()) {
-                        if (att.getSelf() != null && att.getSelf()) {
+                        if (att.getSelf() != null && att.getSelf().booleanValue()) {
                             to.setCalendarUser(convert(att, new CalendarUser()));
                         }
                     }
@@ -258,7 +264,7 @@ public class GoogleEventConverter {
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getAttendees() != null) {
                     for (EventAttendee att : from.getAttendees()) {
-                        if (att.getOrganizer() != null && att.getOrganizer()) {
+                        if (att.getOrganizer() != null && att.getOrganizer().booleanValue()) {
                             to.setOrganizer(convert(att));
                         }
                     }
@@ -437,8 +443,12 @@ public class GoogleEventConverter {
                      * E.g.: 4qebqgd7o0nrqdlnqhberc4d3l_20171025T173000Z
                      */
                     String dateTimeStr = from.getId().substring(from.getId().indexOf("_") + 1);
-                    RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
-                    to.setRecurrenceId(recId);
+                    try {
+                        RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
+                        to.setRecurrenceId(recId);
+                    } catch (IllegalArgumentException e) {
+                        LOG.debug("Enexpected id format: '{}'. Unable to parse recurrence id.", dateTimeStr);
+                    }
                 }
             }
         });
@@ -472,7 +482,7 @@ public class GoogleEventConverter {
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getSequence() != null) {
-                    to.setSequence(from.getSequence());
+                    to.setSequence(Autoboxing.i(from.getSequence()));
                 }
             }
         });
@@ -584,7 +594,11 @@ public class GoogleEventConverter {
 
         public DateTime convert(EventDateTime from) {
             if (from.getDateTime() == null) {
-                return new DateTime(from.getDate().getValue());
+                String timeZoneStr = from.getTimeZone();
+                TimeZone tz = Strings.isEmpty(timeZoneStr) ? TimeZone.getDefault() : TimeZone.getTimeZone(timeZoneStr);
+                java.util.Calendar cal = java.util.Calendar.getInstance(tz);
+                cal.setTimeInMillis(from.getDate().getValue());
+                return new DateTime(cal.get(java.util.Calendar.YEAR), cal.get(java.util.Calendar.MONTH), cal.get(java.util.Calendar.DAY_OF_MONTH));
             }
             return new DateTime(from.getDateTime().getValue());
         }

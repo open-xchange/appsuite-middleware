@@ -49,13 +49,13 @@
 
 package com.openexchange.database.migration.osgi;
 
+import java.rmi.Remote;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.database.migration.internal.BundlePackageScanClassResolver;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.database.migration.internal.DBMigrationMonitor;
-import com.openexchange.database.migration.mbean.MBeanRegisterer;
-import com.openexchange.management.ManagementService;
+import com.openexchange.database.migration.rmi.DBMigrationRMIServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.ServiceLocator;
@@ -89,14 +89,11 @@ public class DBMigrationActivator extends HousekeepingActivator {
          * instantiate & register services
          */
         DBMigrationExecutorServiceImpl executorService = new DBMigrationExecutorServiceImpl();
-        MBeanRegisterer registerer = new MBeanRegisterer(context, executorService);
-        executorService.setRegisterer(registerer);
+        DBMigrationRMIServiceImpl rmiService = new DBMigrationRMIServiceImpl(executorService);
+        executorService.setRegisterer(rmiService);
         registerService(DBMigrationMonitorService.class, DBMigrationMonitor.getInstance());
         registerService(DBMigrationExecutorService.class, executorService);
-        /*
-         * register utility mbean for migrations once the management service appears
-         */
-        track(ManagementService.class, registerer);
+        registerService(Remote.class, rmiService);
         openTrackers();
     }
 

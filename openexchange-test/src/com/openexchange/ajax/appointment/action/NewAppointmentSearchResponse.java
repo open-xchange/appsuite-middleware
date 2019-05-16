@@ -62,8 +62,6 @@ import com.openexchange.test.CTMUtils;
  */
 public class NewAppointmentSearchResponse extends AbstractAJAXResponse {
 
-    private Appointment[] appointmentObj;
-
     private final int[] columns;
 
     private final TimeZone timeZone;

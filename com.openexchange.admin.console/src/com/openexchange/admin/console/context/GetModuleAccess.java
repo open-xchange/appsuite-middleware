@@ -117,7 +117,6 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.getEditPassword()));
         datarow.add(String.valueOf(access.isCollectEmailAddresses()));
         datarow.add(String.valueOf(access.isMultipleMailAccounts()));
-        datarow.add(String.valueOf(access.isPublication()));
         datarow.add(String.valueOf(access.isSubscription()));
         datarow.add(String.valueOf(access.isActiveSync()));
         datarow.add(String.valueOf(access.isUSM()));
@@ -149,7 +148,6 @@ public class GetModuleAccess extends ContextAbstraction {
         columnnames.add(UserAbstraction.OPT_ACCESS_EDIT_PASSWORD);
         columnnames.add(UserAbstraction.OPT_ACCESS_COLLECT_EMAIL_ADDRESSES);
         columnnames.add(UserAbstraction.OPT_ACCESS_MULTIPLE_MAIL_ACCOUNTS);
-        columnnames.add(UserAbstraction.OPT_ACCESS_PUBLICATION);
         columnnames.add(UserAbstraction.OPT_ACCESS_SUBSCRIPTION);
         columnnames.add(UserAbstraction.OPT_ACCESS_ACTIVE_SYNC);
         columnnames.add(UserAbstraction.OPT_ACCESS_USM);

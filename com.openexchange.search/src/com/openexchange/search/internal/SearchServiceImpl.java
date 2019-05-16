@@ -115,6 +115,7 @@ public final class SearchServiceImpl implements SearchService {
 
         m.put(SingleOperation.GREATER_THAN, new SingleTermMatcher() {
 
+            @SuppressWarnings({ "rawtypes", "unchecked" })
             @Override
             public <C> boolean matches(final Operand<?>[] operands, final C candidate, final SearchAttributeFetcher<C> attributeFetcher) {
                 final Object value1 = getValue(operands[0], candidate, attributeFetcher);
@@ -132,6 +133,7 @@ public final class SearchServiceImpl implements SearchService {
 
         m.put(SingleOperation.LESS_THAN, new SingleTermMatcher() {
 
+            @SuppressWarnings({ "rawtypes", "unchecked" })
             @Override
             public <C> boolean matches(final Operand<?>[] operands, final C candidate, final SearchAttributeFetcher<C> attributeFetcher) {
                 final Object value1 = getValue(operands[0], candidate, attributeFetcher);

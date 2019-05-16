@@ -84,9 +84,9 @@ public interface SearchIterator<T> extends Closeable {
     void close();
 
     /**
-     * This iterator's size
+     * This iterator's size.
      *
-     * @return The size
+     * @return The size or <code>-1</code> if no size can be determined
      */
     int size();
 

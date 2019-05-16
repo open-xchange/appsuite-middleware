@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.FallbackSubscriptionService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -82,16 +83,17 @@ public class DeleteSubscriptionAction extends AbstractSubscribeAction {
         for (int i = 0, size = ids.length(); i < size; i++) {
             final int id = ids.getInt(i);
             final SubscriptionSource s = getDiscovery(subscribeRequest.getServerSession()).getSource(context, id);
-            if (s == null) {
-                continue;
-            }
-            final SubscribeService subscribeService = s.getSubscribeService();
             final Subscription subscription = new Subscription();
             subscription.setContext(context);
             subscription.setId(id);
             if (null == subscription.getSession()) {
                 subscription.setSession(subscribeRequest.getServerSession());
             }
+            if (s == null) {
+                FallbackSubscriptionService.getInstance().unsubscribe(subscription);
+                continue;
+            }
+            final SubscribeService subscribeService = s.getSubscribeService();
             subscribeService.unsubscribe(subscription);
         }
         return new AJAXRequestResult(Integer.valueOf(1), "json");

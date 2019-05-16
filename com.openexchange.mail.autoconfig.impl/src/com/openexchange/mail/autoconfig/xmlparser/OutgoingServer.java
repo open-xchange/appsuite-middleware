@@ -59,7 +59,7 @@ public class OutgoingServer extends Server {
     private OutgoingType type;
 
     public enum OutgoingType {
-        SMTP(Server.SMTP);
+        SMTP(Server.SMTP_STRING);
 
         private final String keyword;
 
@@ -68,7 +68,7 @@ public class OutgoingServer extends Server {
         }
 
         public static OutgoingType getOutgoingType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.SMTP)) {
+            if (keyword.equalsIgnoreCase(Server.SMTP_STRING)) {
                 return SMTP;
             }
             return null;

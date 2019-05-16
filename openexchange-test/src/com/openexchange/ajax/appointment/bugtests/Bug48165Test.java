@@ -79,6 +79,7 @@ public class Bug48165Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -106,7 +107,7 @@ public class Bug48165Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug48165() throws Exception {
+    public void testBug48165() {
         ctm2.insert(conflict);
         catm.insert(series);
 
@@ -133,6 +134,7 @@ public class Bug48165Test extends AbstractAJAXSession {
         assertTrue("Expect conflict.", found);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

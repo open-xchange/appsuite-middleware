@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
@@ -89,7 +90,7 @@ public class GetTest extends FileActionTest {
      public void testWithVersionNumber() throws OXException {
         request().param("id", "12").param("version", "2");
 
-        fileAccess().expectCall("getFileMetadata", "12", 2).andReturn(new DefaultFile());
+        fileAccess().expectCall("getFileMetadata", "12", I(2)).andReturn(new DefaultFile());
 
         perform();
 

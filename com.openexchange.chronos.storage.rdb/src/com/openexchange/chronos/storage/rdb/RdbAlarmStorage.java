@@ -52,6 +52,7 @@ package com.openexchange.chronos.storage.rdb;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +83,7 @@ import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -363,6 +365,85 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return 0 < updated;
     }
 
+    @Override
+    public long getLatestTimestamp(int userId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND user = ? AND account = ?")) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, userId);
+                stmt.setInt(parameterIndex++, accountId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public long getLatestTimestamp(String eventId, int userId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            try (PreparedStatement stmt = connection.prepareStatement("SELECT MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND event = ? AND user = ? AND account = ?")) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setString(parameterIndex++, eventId);
+                stmt.setInt(parameterIndex++, userId);
+                stmt.setInt(parameterIndex++, accountId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public Map<String, Long> getLatestTimestamp(List<String> eventIds, int userId) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            StringBuilder sql = new StringBuilder("SELECT event, MAX(timestamp) FROM calendar_alarm WHERE cid = ? AND user = ? AND account = ? AND event");
+            sql.append(Databases.getPlaceholders(eventIds.size())).append(" GROUP BY event;");
+            try (PreparedStatement stmt = connection.prepareStatement(sql.toString())) {
+                int parameterIndex = 1;
+                stmt.setInt(parameterIndex++, context.getContextId());
+                stmt.setInt(parameterIndex++, userId);
+                stmt.setInt(parameterIndex++, accountId);
+                for (String eventId : eventIds) {
+                    stmt.setString(parameterIndex++, eventId);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    Map<String, Long> retval = new HashMap<>();
+                    while (rs.next()) {
+                        retval.put(rs.getString("event"), L(rs.getLong("MAX(timestamp)")));
+                    }
+                    return retval;
+                }
+            }
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     private int insertAlarm(Connection connection, int cid, int account, String eventId, int userId, Alarm alarm) throws OXException {
         AlarmField[] mappedFields = MAPPER.getMappedFields();
         String sql = new StringBuilder()
@@ -529,7 +610,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_alarm WHERE cid=? AND account=? AND event")
-            .append(getPlaceholders(eventIds.size())).append(';');
+            .append(Databases.getPlaceholders(eventIds.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
@@ -647,7 +728,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * @param alarm The alarm to adjust
      * @return The (possibly adjusted) alarm reference
      */
-    private Alarm adjustPriorSave(String eventId, Alarm alarm) {
+    private Alarm adjustPriorSave(String eventId, Alarm alarm) throws OXException {
         /*
          * get or initialize new extended properties container
          */
@@ -671,6 +752,10 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         if (alarm.containsAttendees()) {
             encdodeAttendees(eventId, extendedProperties, alarm.getAttendees());
         }
+        /*
+         * validate properties afterwards
+         */
+        MAPPER.validateAll(alarm);
         return alarm;
     }
 
@@ -693,7 +778,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             try {
                 attendee = entityProcessor.adjustAfterLoad(attendee);
             } catch (OXException e) {
-                addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
+                addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing " + attendee, e);
             }
             attendees.add(attendee);
         }
@@ -724,7 +809,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                 try {
                     attachment.setSize(Long.parseLong(sizeParameter.getValue()));
                 } catch (NumberFormatException e) {
-                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
+                    addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.TRIVIAL, "Error parsing attachment size parameter", e);
                 }
             }
             ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
@@ -734,7 +819,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                     fileHolder.write(BaseEncoding.base64().decode((String) attachmentProperty.getValue()));
                     attachment.setData(fileHolder);
                 } catch (IllegalArgumentException | OXException e) {
-                    addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                    addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                     Streams.close(fileHolder);
                 }
             } else {
@@ -769,7 +854,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                         parameters.add(new ExtendedPropertyParameter("ENCODING", "BASE64"));
                         parameters.add(new ExtendedPropertyParameter("VALUE", "BINARY"));
                     } catch (IOException | OXException e) {
-                        addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                        addInvalidDataWarning(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
                         value = null;
                     }
                 } else {

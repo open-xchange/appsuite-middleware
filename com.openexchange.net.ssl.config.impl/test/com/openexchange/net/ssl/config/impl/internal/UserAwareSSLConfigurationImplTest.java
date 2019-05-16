@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -98,9 +99,9 @@ public class UserAwareSSLConfigurationImplTest {
 
     private UserAwareSSLConfigurationService userAwareSSLConfigurationService;
 
-    private int userId = 111;
+    private final int userId = 111;
 
-    private int contextId = 2;
+    private final int contextId = 2;
 
     @Before
     public void setUp() throws Exception {
@@ -109,7 +110,7 @@ public class UserAwareSSLConfigurationImplTest {
         Mockito.when(this.configViewFactory.getView(userId, contextId)).thenReturn(configView);
         Mockito.when(this.configView.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class)).thenReturn(booleanProp);
         Mockito.when(this.contextService.getContext(contextId)).thenReturn(this.context);
-        Mockito.when(this.context.getContextId()).thenReturn(this.contextId);
+        Mockito.when(I(this.context.getContextId())).thenReturn(I(this.contextId));
         Mockito.when(this.configService.getProperty("com.openexchange.net.ssl.trustlevel", "all")).thenReturn("false");
     }
 

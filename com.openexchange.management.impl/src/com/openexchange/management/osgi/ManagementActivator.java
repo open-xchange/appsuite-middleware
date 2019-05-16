@@ -65,6 +65,7 @@ import com.openexchange.management.internal.ManagementInit;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * {@link ManagementActivator} - Activator for management bundle
@@ -87,7 +88,7 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, SSLSocketFactoryProvider.class };
+        return new Class<?>[] { ConfigurationService.class, SSLSocketFactoryProvider.class, PasswordMechRegistry.class };
     }
 
     @Override

@@ -73,7 +73,7 @@ public class OXUserResolver implements UserResolver {
     }
 
     @Override
-    public List<User> findUsers(final List<String> mails, final Context ctx) throws OXException, OXException {
+    public List<User> findUsers(final List<String> mails, final Context ctx) throws OXException {
         final List<User> users = new ArrayList<User>();
         if (mails.isEmpty()) {
             return users;
@@ -94,7 +94,7 @@ public class OXUserResolver implements UserResolver {
     }
 
     @Override
-    public User loadUser(final int userId, final Context ctx) throws OXException, OXException {
+    public User loadUser(final int userId, final Context ctx) throws OXException {
         if (null == userService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
         }

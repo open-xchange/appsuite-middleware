@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.comparison;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.ajax.mail.filter.api.dao.MatchType;
 import com.openexchange.ajax.mail.filter.api.dao.comparison.argument.UnderComparisonArgument;
 
@@ -62,39 +63,24 @@ public class UnderComparison extends AbstractComparison implements Comparison<Un
 
     /**
      * Initialises a new {@link UnderComparison}.
-     * 
+     *
      * @param size The size
      */
     public UnderComparison(int size) {
         super(MatchType.under);
-        addArgument(UnderComparisonArgument.size, size);
+        addArgument(UnderComparisonArgument.size, I(size));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getMatchType()
-     */
     @Override
     public MatchType getMatchType() {
         return MatchType.over;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#setArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument, java.lang.Object)
-     */
     @Override
     public void setArgument(UnderComparisonArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.comparison.Comparison#getArgument(com.openexchange.ajax.mail.filter.api.dao.comparison.argument.ComparisonArgument)
-     */
     @Override
     public Object getArgument(UnderComparisonArgument argument) {
         return getArguments().get(argument);

@@ -19,7 +19,8 @@ public class Bug17513Test extends AbstractManagedContactTest {
         try {
             getClient().execute(new InsertRequest(json));
             fail = true;
-        } catch (AssertionError e) {
+        } catch (@SuppressWarnings("unused") AssertionError e) {
+            // ignore
         }
         if (fail) {
             fail("Should fail, because the date is not in a format the OX can parse");

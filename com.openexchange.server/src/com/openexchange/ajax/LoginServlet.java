@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -166,7 +167,31 @@ public class LoginServlet extends AJAXServlet {
     /**
      * The default error page template
      */
-    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    private static final String ERROR_PAGE_TEMPLATE =
+        // @formatter:off
+            "<html>\n" +
+            "<script type=\"text/javascript\">\n" +
+            "// Display normal HTML for 5 seconds, then redirect via referrer.\n" +
+            "setTimeout(redirect,5000);\n" +
+            "function redirect(){\n" +
+            " var referrer=document.referrer;\n" +
+            " var redirect_url;\n" +
+            " // If referrer already contains failed parameter, we don't add a 2nd one.\n" +
+            " if(referrer.indexOf(\"login=failed\")>=0){\n" +
+            "  redirect_url=referrer;\n" + " }else{\n" +
+            "  // Check if referrer contains multiple parameter\n" +
+            "  if(referrer.indexOf(\"?\")<0){\n" +
+            "   redirect_url=referrer+\"?login=failed\";\n" +
+            "  }else{\n" +
+            "   redirect_url=referrer+\"&login=failed\";\n" +
+            "  }\n" + " }\n" + " // Redirect to referrer\n" +
+            " window.location.href=redirect_url;\n" +
+            "}\n" + "</script>\n" +
+            "<body>\n" +
+            "<h1>ERROR_MESSAGE</h1>\n" +
+            "</body>\n" +
+            "</html>\n";
+        // @formatter:on
 
     /**
      * <code>"open-xchange-session-"</code>
@@ -187,6 +212,11 @@ public class LoginServlet extends AJAXServlet {
      * <code>"open-xchange-public-session-"</code>
      */
     public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
+
+    /**
+     * <code>"open-xchange-shard"</code>
+     */
+    public static final String SHARD_COOKIE_NAME = "open-xchange-shard".intern();
 
     public static final String ACTION_FORMLOGIN = "formlogin";
 
@@ -459,7 +489,7 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", I(context.getContextId()), I(user.getId()));
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -468,7 +498,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -631,7 +661,7 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", I(context.getContextId()), I(user.getId()));
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -640,7 +670,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", I(session.getContextId()), I(session.getUserId()));
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -946,6 +976,19 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /**
+     * Writes the (groupware's) shard cookie to specified HTTP servlet response whose name is
+     * <code>"open-xchange-shard"</code>.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
+        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session)));
+    }
+
+    /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
      *
@@ -960,6 +1003,7 @@ public class LoginServlet extends AJAXServlet {
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
         resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
+        writeShardCookie(resp, session, secure, serverName);
         session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
     }
 
@@ -1077,8 +1121,7 @@ public class LoginServlet extends AJAXServlet {
         } else {
             shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
         }
-        boolean shareTransientSessions = Boolean.valueOf(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
+        boolean shareTransientSessions = Boolean.parseBoolean(config.getInitParameter(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName()));
         return new ShareLoginConfiguration(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
-
 }

@@ -183,7 +183,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) {
+    public SortedSet<String> getDocumentFileStoreLocationsPerContext(final Context ctx) {
         final SortedSet<String> locations = new TreeSet<String>();
         for (final List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
             for (final DocumentMetadata metadata : versions) {

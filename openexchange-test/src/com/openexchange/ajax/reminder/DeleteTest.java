@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.reminder;
 
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNotEquals;
 import java.util.Calendar;
 import java.util.TimeZone;
 import org.junit.Test;
@@ -94,7 +94,7 @@ public class DeleteTest extends ReminderTest {
                 pos = a;
             }
         }
-        assertNotSame("Reminder not found.", -1, pos);
+        assertNotEquals("Reminder not found.", -1, pos);
         remTm.delete(reminderObj[pos]);
     }
 
@@ -130,6 +130,6 @@ public class DeleteTest extends ReminderTest {
                 pos = a;
             }
         }
-        assertNotSame("Reminder not found.", -1, pos);
+        assertNotEquals("Reminder not found.", -1, pos);
     }
 }

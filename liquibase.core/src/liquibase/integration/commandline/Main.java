@@ -606,21 +606,20 @@ public class Main {
                     if (classpathEntry.endsWith(".war")) {
                         addWarFileClasspathEntries(classPathFile, urls);
                     } else if (classpathEntry.endsWith(".ear")) {
-                        JarFile earZip = new JarFile(classPathFile);
-
-                        Enumeration<? extends JarEntry> entries = earZip.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry entry = entries.nextElement();
-                            if (entry.getName().toLowerCase().endsWith(".jar")) {
-                                File jar = extract(earZip, entry);
-                                urls.add(new URL("jar:" + jar.toURL() + "!/"));
-                                jar.deleteOnExit();
-                            } else if (entry.getName().toLowerCase().endsWith("war")) {
-                                File warFile = extract(earZip, entry);
-                                addWarFileClasspathEntries(warFile, urls);
+                        try (JarFile earZip = new JarFile(classPathFile);) {
+                            Enumeration<? extends JarEntry> entries = earZip.entries();
+                            while (entries.hasMoreElements()) {
+                                JarEntry entry = entries.nextElement();
+                                if (entry.getName().toLowerCase().endsWith(".jar")) {
+                                    File jar = extract(earZip, entry);
+                                    urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                                    jar.deleteOnExit();
+                                } else if (entry.getName().toLowerCase().endsWith("war")) {
+                                    File warFile = extract(earZip, entry);
+                                    addWarFileClasspathEntries(warFile, urls);
+                                }
                             }
                         }
-
                     } else {
                         urls.add(new File(classpathEntry).toURL());
                     }
@@ -655,14 +654,15 @@ public class Main {
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
         URL url = new URL("jar:" + classPathFile.toURL() + "!/WEB-INF/classes/");
         urls.add(url);
-        JarFile warZip = new JarFile(classPathFile);
-        Enumeration<? extends JarEntry> entries = warZip.entries();
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            if (entry.getName().startsWith("WEB-INF/lib") && entry.getName().toLowerCase().endsWith(".jar")) {
-                File jar = extract(warZip, entry);
-                urls.add(new URL("jar:" + jar.toURL() + "!/"));
-                jar.deleteOnExit();
+        try (JarFile warZip = new JarFile(classPathFile);) {
+            Enumeration<? extends JarEntry> entries = warZip.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                if (entry.getName().startsWith("WEB-INF/lib") && entry.getName().toLowerCase().endsWith(".jar")) {
+                    File jar = extract(warZip, entry);
+                    urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                    jar.deleteOnExit();
+                }
             }
         }
     }

@@ -51,7 +51,6 @@ package com.openexchange.ajax.mail;
 
 import java.io.IOException;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.exception.OXException;
@@ -84,7 +83,7 @@ public enum MailFolder {
         return null;
     }
 
-    public String getFolder(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
+    public String getFolder(AJAXClient client) throws OXException, IOException, JSONException {
         UserValues values = client.getValues();
         switch (this) {
             case INBOX:

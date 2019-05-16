@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.ajax.requesthandler.AJAXRequestDataTools.parseBoolParameter;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.mail.mime.MimeTypes.equalPrimaryTypes;
 import java.io.IOException;
@@ -217,7 +218,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             boolean saveToDisk;
             {
                 String saveParam = req.getParameter(PARAMETER_SAVE);
-                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(PARAMETER_DELIVERY)));
+                saveToDisk = parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(PARAMETER_DELIVERY)));
             }
             boolean filter;
             {
@@ -280,7 +281,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                             }
 
                             mailPart = ret;
-                            boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                            boolean exactLength = calculateExactLength(req);
                             if (exactLength) {
                                 sink = new ThresholdFileHolder();
                                 InputStream in = Streams.getNonEmpty(ret.getInputStream());
@@ -337,7 +338,12 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         // Read HTML content
                         final byte[] bytes;
                         {
-                            String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                            String htmlContent;
+                            if (null == sink) {
+                                htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                            } else {
+                                htmlContent = MessageUtility.readStream(new FileHolderInputStreamProvider(sink), cs, false, MailProperties.getInstance().getBodyDisplaySize());
+                            }
                             if (htmlContent.length() > HtmlServices.htmlThreshold()) {
                                 // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
                                 OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
@@ -370,7 +376,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         if (isEmpty(mailPart.getFileName())) {
                             mailPart.setFileName(MailMessageParser.generateFilename(sequenceId, getBaseType(mailPart)));
                         }
-                        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                        boolean exactLength = calculateExactLength(req);
                         if (exactLength) {
                             if (null == sink) {
                                 sink = new ThresholdFileHolder();
@@ -398,7 +404,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                     }
 
-                    boolean exactLength = AJAXRequestDataTools.parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+                    boolean exactLength = calculateExactLength(req);
                     if (exactLength) {
                         sink = new ThresholdFileHolder();
                         InputStream in = Streams.getNonEmpty(mailPart.getInputStream());
@@ -417,8 +423,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 // Read from stream
                 if (saveToDisk) {
                     if (null == sink) {
-                        @SuppressWarnings("resource")
-                        FileHolder tmp = new FileHolder(isClosure, size, baseType, filename);
+                        @SuppressWarnings("resource") FileHolder tmp = new FileHolder(isClosure, size, baseType, filename);
                         tmp.setDelivery("download");
                         fileHolder = tmp;
                     } else {
@@ -444,7 +449,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 Streams.close(sink);
                 sink = null;
             }
-
+            scan(req, fileHolder, Strings.isEmpty(imageContentId) ? getUniqueId(folderPath, uid, mailPart) : imageContentId);
             if (null != markUnseen && markUnseen.booleanValue()) {
                 fileHolder.addPostProcessingTask(new Runnable() {
 
@@ -487,6 +492,21 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         }
     }
 
+    /**
+     * Determine whether to calculate the exact length of an e-mail attachment.
+     * It does so by first examining whether the <code>scan</code> URL parameter
+     * is set and if it is whether it is set to <code>true</code>. In that case
+     * <code>true</code> is returned. Otherwise, the URL parameter <code>exact_length</code>
+     * is evaluated and its value is returned instead.
+     *
+     * @param req The {@link com.openexchange.ajax.request.MailRequest}
+     * @return <code>true</code> if the exact length of the e-mail attachment should be
+     *         calculated, <code>false</code> otherwise
+     */
+    private boolean calculateExactLength(MailRequest req) {
+        return parseBoolParameter(req.getParameter("scan")) || parseBoolParameter(req.getParameter("exact_length")) || clientRequestsRange(req);
+    }
+
     private String getBaseType(MailPart mailPart) {
         return getContentType(mailPart, false);
     }
@@ -494,11 +514,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     private String getContentType(MailPart mailPart, boolean includeCharsetParameterIfText) {
         ContentType contentType = mailPart.getContentType();
         if (includeCharsetParameterIfText && contentType.containsCharsetParameter() && contentType.startsWith("text/")) {
-            return new ContentType()
-                .setPrimaryType(contentType.getPrimaryType())
-                .setSubType(contentType.getSubType())
-                .setCharsetParameter(contentType.getCharsetParameter())
-                .toString();
+            return new ContentType().setPrimaryType(contentType.getPrimaryType()).setSubType(contentType.getSubType()).setCharsetParameter(contentType.getCharsetParameter()).toString();
         }
         return contentType.getBaseType();
     }
@@ -622,7 +638,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 //Check for encryption
                 final boolean encrypt = req.optBool("encrypt");
                 if (encrypt) {
-                    storeProps.put("encrypt", true);
+                    storeProps.put("encrypt", Boolean.TRUE);
                 }
             }
 
@@ -661,6 +677,30 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class FileHolderInputStreamProvider implements com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider {
+
+        private final IFileHolder fileHolder;
+
+        FileHolderInputStreamProvider(IFileHolder fileHolder) {
+            this.fileHolder = fileHolder;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            try {
+                return fileHolder.getStream();
+            } catch (OXException e) {
+                Throwable cause = e.getCause();
+                throw (cause instanceof IOException) ? ((IOException) cause) : new IOException(null == cause ? e : cause);
+            }
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+    } // End of class FileHolderInputStreamProvider
 
     private static final class ReconnectingInputStreamClosure implements IFileHolder.InputStreamClosure {
 

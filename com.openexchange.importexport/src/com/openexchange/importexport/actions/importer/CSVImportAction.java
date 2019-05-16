@@ -52,6 +52,7 @@ package com.openexchange.importexport.actions.importer;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -99,13 +100,16 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                 LOG.error("Directory {} supposedly containing import mappers information wasn't actually a directory, defaulting to deprecated mappers as fallback.", path);
                 return imp;
             }
-            final File[] files = dir.listFiles();
+            final File[] files = dir.listFiles(new FilenameFilter() {
+
+                @Override
+                public boolean accept(File directory, String name) {
+                    return name.endsWith(".properties");
+                }
+            });
 
             int mapperAmount = 0;
             for (final File file : files) {
-                if (!file.getName().endsWith(".properties")) {
-                    continue;
-                }
                 final Properties props = new Properties();
                 final InputStream in = new BufferedInputStream(new FileInputStream(file), 65536);
                 try {

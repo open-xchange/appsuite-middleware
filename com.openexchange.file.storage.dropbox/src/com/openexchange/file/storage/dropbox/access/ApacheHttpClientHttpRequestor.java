@@ -75,10 +75,11 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import com.dropbox.core.http.HttpRequestor;
+import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ApacheHttpClientHttpRequestor} - Implements the <code>HttpRequestor</code> from Dropbox SDK utilizing Apache HttpClient.
@@ -97,7 +98,7 @@ public class ApacheHttpClientHttpRequestor extends HttpRequestor {
         HttpClients.ClientConfig config = HttpClients.ClientConfig.newInstance();
         config.setConnectionTimeout((int) DEFAULT_CONNECT_TIMEOUT_MILLIS);
         config.setSocketReadTimeout((int) DEFAULT_READ_TIMEOUT_MILLIS);
-        config.setUserAgent("Open-Xchange Dropbox HttpClient v" + Version.getInstance().getVersionString());
+        config.setUserAgent("Open-Xchange Dropbox HttpClient v" + DropboxServices.getService(VersionService.class).getVersionString());
         return HttpClients.getHttpClient(config);
     }
 

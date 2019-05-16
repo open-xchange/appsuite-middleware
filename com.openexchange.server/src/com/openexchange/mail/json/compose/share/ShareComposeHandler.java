@@ -91,6 +91,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
@@ -172,7 +173,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      * @return The share options or <code>null</code>
      */
     private JSONObject optShareAttachmentOptions(ComposeRequest composeRequest) {
-        return composeRequest.getJsonMail().optJSONObject("share_attachments");
+        JSONObject jsonMail = composeRequest.getJsonMail();
+        if (jsonMail != null) {
+            return jsonMail.optJSONObject("share_attachments");
+        }
+
+        Map<String, Object> parameters = composeRequest.getParameters();
+        if (null != parameters) {
+            return (JSONObject) parameters.get("share_attachments");
+        }
+
+        return null;
     }
 
     /**
@@ -315,20 +326,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Collect recipients
         Set<Recipient> recipients;
         {
-            Set<InternetAddress> addresses = new HashSet<>();
-            addresses.addAll(Arrays.asList(source.getTo()));
+            Set<InternetAddress> addresses = new HashSet<>(Arrays.asList(source.getTo()));
             addresses.addAll(Arrays.asList(source.getCc()));
             addresses.addAll(Arrays.asList(source.getBcc()));
 
-            UserService userService = ServerServiceRegistry.getServize(UserService.class);
-            if (null == userService) {
-                throw ServiceExceptionCode.absentService(UserService.class);
-            }
             Context ctx = composeRequest.getContext();
 
             recipients = new LinkedHashSet<>(addresses.size());
             for (InternetAddress address : addresses) {
-                User user = resolveToUser(address, ctx, userService);
+                User user = resolveToUser(address, ctx);
                 String personal = address.getPersonal();
                 String sAddress = address.getAddress();
                 recipients.add(null == user ? Recipient.createExternalRecipient(personal, sAddress) : Recipient.createInternalRecipient(personal, sAddress, user));
@@ -361,11 +367,12 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         // Some state variables
         StoredAttachmentsControl attachmentsControl = null;
-        boolean rollback = true;
+        boolean rollback = false;
         Map<String, ThresholdFileHolder> previewImages = null;
         try {
             // Store attachments associated with compose context
             attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, context);
+            rollback = true;
 
             // The share target for an anonymous user
             ShareTarget folderTarget = attachmentsControl.getFolderTarget();
@@ -463,10 +470,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
     }
 
-    private User resolveToUser(InternetAddress address, Context ctx, UserService userService) throws OXException {
-        User user;
+    private User resolveToUser(InternetAddress address, Context ctx) throws OXException {
+        User user = null;
         try {
-            user = userService.searchUser(IDNA.toIDN(address.getAddress()), ctx);
+            user = UserStorage.getInstance().searchUser(IDNA.toIDN(address.getAddress()), ctx);
         } catch (final OXException e) {
             /*
              * Unfortunately UserService.searchUser() throws an exception if no user could be found matching given email address.
@@ -558,6 +565,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             case "image/jpeg":
             case "image/gif":
             case "image/svg":
+            case "image/heif":
+            case "image/heic":
                 thumbnailName = THUMBNAIL_IMAGE;
                 break;
             case "application/pdf":
@@ -582,7 +591,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             case "application/vnd.oasis.opendocument.text":
                 thumbnailName = THUMBNAIL_WORD;
                 break;
-            default: thumbnailName = THUMBNAIL_DEFAULT;
+            default:
+                thumbnailName = THUMBNAIL_DEFAULT;
         }
         String thumbnail = templatePath + java.io.File.separator + thumbnailName;
         InputStream in = null;

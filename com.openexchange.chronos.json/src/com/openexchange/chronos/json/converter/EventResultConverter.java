@@ -51,10 +51,10 @@ package com.openexchange.chronos.json.converter;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -85,7 +85,11 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -96,7 +100,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link EventResultConverter}
  *
@@ -161,7 +164,7 @@ public class EventResultConverter implements ResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    protected JSONObject convertEvent(Event event, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    protected JSONObject convertEvent(Event event, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == event) {
             return null;
         }
@@ -177,69 +180,21 @@ public class EventResultConverter implements ResultConverter {
         }
         try {
             JSONObject result = EventMapper.getInstance().serialize(event, fields.toArray(new EventField[fields.size()]), timeZoneID, session);
-            Map<Integer, JSONObject> contactsToLoad = new HashMap<Integer, JSONObject>();
-
-            if(extendedEntities && result.has(ChronosJsonFields.ATTENDEES)) {
-                JSONArray jsonArray = result.getJSONArray(ChronosJsonFields.ATTENDEES);
-                Iterator<Object> iterator = jsonArray.iterator();
-                ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-                while(iterator.hasNext()) {
-                    JSONObject attendee = (JSONObject) iterator.next();
-                    int entity = attendee.optInt(ChronosJsonFields.Attendee.ENTITY);
-                    if (0 >= entity) {
-                        continue;
-                    }
-                    CalendarUserType cuType = new CalendarUserType(attendee.optString(ChronosJsonFields.Attendee.CU_TYPE, CalendarUserType.INDIVIDUAL.getValue()));
-                    if (CalendarUserType.INDIVIDUAL.matches(cuType)) {
-                        contactsToLoad.put(I(entity), attendee);
-                    } else if (CalendarUserType.ROOM.matches(cuType) || CalendarUserType.RESOURCE.matches(cuType)) {
-                        try {
-                            Resource resource = requireService(ResourceService.class, services).getResource(entity, serverSession.getContext());
-                            attendee.put(ChronosJsonFields.Attendee.RESOURCE, ResourceWriter.writeResource(resource));
-                        } catch (OXException e) {
-                            LOG.warn("Error getting underlying resource for attendee {}", attendee, e);
-                        }
-                    } else if (CalendarUserType.GROUP.matches(cuType)) {
-
-                        try {
-                            JSONObject jsonObject = new JSONObject();
-                            Group group = requireService(GroupService.class, services).getGroup(serverSession.getContext(), entity);
-                            new GroupWriter().writeGroup(group, jsonObject);
-                            attendee.put(ChronosJsonFields.Attendee.GROUP, jsonObject);
-                        } catch (OXException e) {
-                            LOG.warn("Error getting underlying group for attendee {}", attendee, e);
-                        }
-                    }
-                }
+            if (extendedEntities) {
+                /*
+                 * also resolve via email address for externally organized events
+                 */
+                JSONObject jsonOrganizer = result.optJSONObject(ChronosJsonFields.ORGANIZER);
+                boolean resolveExternals = null != jsonOrganizer && 0 >= jsonOrganizer.optInt(ChronosJsonFields.Attendee.ENTITY);
+                extendEntities(session, timeZoneID, result, resolveExternals);
             }
-
-            if (0 < contactsToLoad.size()) {
-                SearchIterator<Contact> users = null;
-                try {
-                    users = requireService(ContactService.class, services).getUsers(session, I2i(contactsToLoad.keySet()), CONTACT_FIELDS_TO_LOAD);
-                    while (users.hasNext()) {
-                        Contact con = users.next();
-                        JSONObject attendee = contactsToLoad.get(I(con.getInternalUserId()));
-                        if (attendee == null) {
-                            LOG.warn("Unable to find attendee for contact with id {}", I(con.getInternalUserId()));
-                            continue;
-                        }
-                        attendee.put(ChronosJsonFields.Attendee.CONTACT, serialize(con, CalendarUtils.optTimeZone(timeZoneID, TimeZones.UTC), session));
-                    }
-                } catch (OXException e) {
-                    LOG.warn("Error resolving contacts for internal user attendees", e);
-                } finally {
-                    SearchIterators.close(users);
-                }
-            }
-
             return result;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
 
-    protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    protected JSONArray convertEvents(List<Event> events, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == events) {
             return null;
         }
@@ -248,6 +203,135 @@ public class EventResultConverter implements ResultConverter {
             jsonArray.put(convertEvent(event, timeZoneID, session, requestedFields, extendedEntities));
         }
         return jsonArray;
+    }
+
+    /**
+     * Enriches the attendees within the supplied event with detailed information about the underlying groupware resource.
+     *
+     * @param session The session
+     * @param timeZoneID The timezone identifier to use
+     * @param jsonEvent The JSON representation of the event being converted
+     * @param resolveExternals <code>true</code> to also try to resolve external attendees per email address, <code>false</code>, otherwise
+     */
+    private void extendEntities(ServerSession session, String timeZoneID, JSONObject jsonEvent, boolean resolveExternals) {
+        Map<Integer, JSONObject> userAttendeesPerId = new HashMap<Integer, JSONObject>();
+        Map<Integer, JSONObject> resourceAttendeesPerId = new HashMap<Integer, JSONObject>();
+        Map<Integer, JSONObject> groupAttendeesPerId = new HashMap<Integer, JSONObject>();
+        Map<String, JSONObject> userAttendeesPerEmail = new HashMap<String, JSONObject>();
+        /*
+         * collect resolvable attendees
+         */
+        JSONArray jsonAttendees = jsonEvent.optJSONArray(ChronosJsonFields.ATTENDEES);
+        if (null != jsonAttendees) {
+            for (int i = 0; i < jsonAttendees.length(); i++) {
+                JSONObject jsonAttendee = jsonAttendees.optJSONObject(i);
+                if (null == jsonAttendee) {
+                    continue;
+                }
+                CalendarUserType cuType = new CalendarUserType(jsonAttendee.optString(ChronosJsonFields.Attendee.CU_TYPE, CalendarUserType.INDIVIDUAL.getValue()));
+                int entity = jsonAttendee.optInt(ChronosJsonFields.Attendee.ENTITY, -1);
+                if (0 <= entity) {
+                    if (CalendarUserType.INDIVIDUAL.matches(cuType)) {
+                        userAttendeesPerId.put(I(entity), jsonAttendee);
+                    } else if (CalendarUserType.ROOM.matches(cuType) || CalendarUserType.RESOURCE.matches(cuType)) {
+                        resourceAttendeesPerId.put(I(entity), jsonAttendee);
+                    } else if (CalendarUserType.GROUP.matches(cuType)) {
+                        groupAttendeesPerId.put(I(entity), jsonAttendee);
+                    }
+                } else if (resolveExternals && CalendarUserType.INDIVIDUAL.matches(cuType) && 
+                    Strings.isEmpty(jsonAttendee.optString(ChronosJsonFields.Attendee.CN, null))) {
+                    String email = CalendarUtils.optEMailAddress(jsonAttendee.optString(ChronosJsonFields.Attendee.URI, null));
+                    if (Strings.isNotEmpty(email)) {
+                        userAttendeesPerEmail.put(email, jsonAttendee);
+                    }
+                }
+            }
+        }
+        /*
+         * resolve & apply extended entity information
+         */
+        addGroupDetailsFromId(session.getContext(), groupAttendeesPerId);
+        addResourceDetailsFromId(session.getContext(), resourceAttendeesPerId);
+        addContactDetailsFromId(session, timeZoneID, userAttendeesPerId);
+        addContactDetailsFromEmail(session, timeZoneID, userAttendeesPerEmail);
+    }
+
+    private void addGroupDetailsFromId(Context context, Map<Integer, JSONObject> attendeesPerId) {
+        if (null == attendeesPerId || attendeesPerId.isEmpty()) {
+            return;
+        }
+        for (Entry<Integer, JSONObject> entry : attendeesPerId.entrySet()) {
+            try {
+                Group group = requireService(GroupService.class, services).getGroup(context, i(entry.getKey()));
+                JSONObject jsonObject = new JSONObject();
+                new GroupWriter().writeGroup(group, jsonObject);
+                entry.getValue().put(ChronosJsonFields.Attendee.GROUP, jsonObject);
+            } catch (OXException | JSONException e) {
+                LOG.warn("Error adding group details for attendee", e);
+            }
+        }
+    }
+
+    private void addResourceDetailsFromId(Context context, Map<Integer, JSONObject> attendeesPerId) {
+        if (null == attendeesPerId || attendeesPerId.isEmpty()) {
+            return;
+        }
+        for (Entry<Integer, JSONObject> entry : attendeesPerId.entrySet()) {
+            try {
+                Resource resource = requireService(ResourceService.class, services).getResource(i(entry.getKey()), context);
+                entry.getValue().put(ChronosJsonFields.Attendee.RESOURCE, ResourceWriter.writeResource(resource));
+            } catch (OXException | JSONException e) {
+                LOG.warn("Error adding resource details for attendee", e);
+            }
+        }
+    }
+
+    private void addContactDetailsFromEmail(Session session, String timeZoneID, Map<String, JSONObject> attendeesPerEmail) {
+        if (null == attendeesPerEmail || attendeesPerEmail.isEmpty()) {
+            return;
+        }
+        for (Entry<String, JSONObject> entry : attendeesPerEmail.entrySet()) {
+            ContactSearchObject contactSearch = new ContactSearchObject();
+            contactSearch.setExactMatch(true);
+            contactSearch.setAllEmail(entry.getKey());
+            contactSearch.setOrSearch(true);
+            contactSearch.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            SearchIterator<Contact> users = null;
+            try {
+                users = requireService(ContactService.class, services).searchUsers(session, contactSearch, CONTACT_FIELDS_TO_LOAD, null);
+                if (users.hasNext()) {
+                    Contact con = users.next();
+                    entry.getValue().put(ChronosJsonFields.Attendee.CONTACT, serialize(con, CalendarUtils.optTimeZone(timeZoneID, TimeZones.UTC), session));
+                }
+            } catch (OXException | JSONException e) {
+                LOG.warn("Error adding contact details for internal user attendees", e);
+            } finally {
+                SearchIterators.close(users);
+            }
+        }
+    }
+
+    private void addContactDetailsFromId(Session session, String timeZoneID, Map<Integer, JSONObject> attendeesPerId) {
+        if (null == attendeesPerId || attendeesPerId.isEmpty()) {
+            return;
+        }
+        SearchIterator<Contact> users = null;
+        try {
+            users = requireService(ContactService.class, services).getUsers(session, I2i(attendeesPerId.keySet()), CONTACT_FIELDS_TO_LOAD);
+            while (users.hasNext()) {
+                Contact con = users.next();
+                JSONObject attendee = attendeesPerId.get(I(con.getInternalUserId()));
+                if (attendee == null) {
+                    LOG.warn("Unable to find attendee for contact with id {}", I(con.getInternalUserId()));
+                    continue;
+                }
+                attendee.put(ChronosJsonFields.Attendee.CONTACT, serialize(con, CalendarUtils.optTimeZone(timeZoneID, TimeZones.UTC), session));
+            }
+        } catch (OXException | JSONException e) {
+            LOG.warn("Error adding contact details for internal user attendees", e);
+        } finally {
+            SearchIterators.close(users);
+        }
     }
 
     protected static String getTimeZoneID(AJAXRequestData requestData, ServerSession session) {

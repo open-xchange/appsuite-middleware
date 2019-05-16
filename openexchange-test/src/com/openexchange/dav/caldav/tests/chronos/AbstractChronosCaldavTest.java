@@ -111,6 +111,7 @@ import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.testing.httpclient.models.EventId;
 import net.fortuna.ical4j.model.component.Available;
 import net.fortuna.ical4j.model.component.VAvailability;
 
@@ -126,6 +127,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
 
     protected static final int TIMEOUT = 10000;
 
+    @SuppressWarnings("hiding")
     private String folderId;
 
     @Parameter(value = 0)
@@ -331,13 +333,28 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
 
         return putICal(getCaldavFolder(), resourceName, iCal);
     }
-
+    
+    public void rememberEvent(String id) {
+        EventId eventId = new EventId();
+        eventId.setFolder(getDefaultFolderID());
+        eventId.setId(id);
+        rememberEventId(eventId);
+    }
+    
     private String getCaldavFolder(){
         String defaultFolderID = getDefaultFolderID();
         if(defaultFolderID.indexOf("/")!=-1){
             defaultFolderID = defaultFolderID.substring(defaultFolderID.lastIndexOf("/")+1, defaultFolderID.length());
         }
         return defaultFolderID;
+    }
+    
+    protected String getCaldavFolder(String folderId) {
+        String result = folderId;
+        if (result.indexOf("/") != -1) {
+            result = result.substring(result.lastIndexOf("/") + 1, result.length());
+        }
+        return result;
     }
 
     protected int putICal(String folderID, String resourceName, String iCal) throws Exception {
@@ -508,6 +525,26 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
             release(get);
         }
     }
+    
+    protected ICalResource get(WebDAVClient client, String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
+        GetMethod get = null;
+        try {
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            get = new GetMethod(getBaseUri() + href);
+            if (null != ifNoneMatchEtag) {
+                get.addRequestHeader(Headers.IF_NONE_MATCH, ifNoneMatchEtag);
+            }
+            if (null != ifMatchEtag) {
+                get.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            Assert.assertEquals("response code wrong", StatusCodes.SC_OK, client.executeMethod(get));
+            byte[] responseBody = get.getResponseBody();
+            assertNotNull("got no response body", responseBody);
+            return new ICalResource(new String(responseBody, Charsets.UTF_8), href, get.getResponseHeader("ETag").getValue());
+        } finally {
+            release(get);
+        }
+    }
 
     private static String urlEncode(String name) throws URISyntaxException {
         return new URI(null, name, null).toString();
@@ -531,6 +568,22 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
             release(put);
         }
     }
+    
+    protected int putICalUpdate(WebDAVClient client, String folderID, String resourceName, String iCal, String ifMatchEtag) throws Exception {
+        PutMethod put = null;
+        try {
+            String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
+            put = new PutMethod(getBaseUri() + href);
+            if (null != ifMatchEtag) {
+                put.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            put.setRequestEntity(new StringRequestEntity(iCal, "text/calendar", null));
+            return client.executeMethod(put);
+        } finally {
+            release(put);
+        }
+    }
+    
 
     protected int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;

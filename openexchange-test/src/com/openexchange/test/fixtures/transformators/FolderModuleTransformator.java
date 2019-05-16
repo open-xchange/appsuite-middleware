@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.ajax.Folder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -61,30 +62,25 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderModuleTransformator implements Transformator {
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.test.fixtures.transformators.Transformator#transform(java.lang.String)
-     */
     @Override
     public Object transform(String value) throws OXException {
         if (value.equalsIgnoreCase(Folder.MODULE_CALENDAR)) {
-            return FolderObject.CALENDAR;
+            return I(FolderObject.CALENDAR);
         }
         if (value.equalsIgnoreCase(Folder.MODULE_CONTACT)) {
-            return FolderObject.CONTACT;
+            return I(FolderObject.CONTACT);
         }
         if (value.equalsIgnoreCase(Folder.MODULE_INFOSTORE)) {
-            return FolderObject.INFOSTORE;
+            return I(FolderObject.INFOSTORE);
         }
         if (value.equalsIgnoreCase(Folder.MODULE_MAIL)) {
-            return FolderObject.MAIL;
+            return I(FolderObject.MAIL);
         }
         if (value.equalsIgnoreCase(Folder.MODULE_TASK)) {
-            return FolderObject.TASK;
+            return I(FolderObject.TASK);
         }
         if (value.equalsIgnoreCase(Folder.MODULE_SYSTEM)) {
-            return FolderObject.SYSTEM_TYPE;
+            return I(FolderObject.SYSTEM_TYPE);
         }
         return Integer.valueOf(value);
     }

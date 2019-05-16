@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.additional;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -128,12 +129,12 @@ public class AdditionalCopyTask implements CopyUserTaskService {
         final ObjectMapping<Integer> contactMapping = copyTools.checkAndExtractGenericMapping(Contact.class.getName());
         final Integer srcContact = contactMapping.getSource(srcUsr.getContactId());
         if (srcContact == null) {
-            throw UserCopyExceptionCodes.USER_CONTACT_MISSING.create(srcUsr.getId(), srcCtxId);
+            throw UserCopyExceptionCodes.USER_CONTACT_MISSING.create(I(srcUsr.getId()), srcCtxId);
         }
 
         final Integer dstContact = contactMapping.getDestination(srcContact);
         if (dstContact == null) {
-            throw UserCopyExceptionCodes.USER_CONTACT_MISSING.create(srcUsr.getId(), dstCtxId);
+            throw UserCopyExceptionCodes.USER_CONTACT_MISSING.create(I(srcUsr.getId()), dstCtxId);
         }
 
         correctUsersContactId(dstCon, i(dstUsrId), i(dstCtxId), i(dstContact));

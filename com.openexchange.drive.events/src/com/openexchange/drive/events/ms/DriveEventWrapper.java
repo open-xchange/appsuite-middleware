@@ -103,9 +103,8 @@ public class DriveEventWrapper {
         String pushToken = (String)map.get("__pushToken");
         if (null != folderIDs && null != contextID) {
             return new DriveEventImpl(contextID.intValue(), new HashSet<String>(Arrays.asList(folderIDs)), true, pushToken);
-        } else {
-            return null;
-        }
+        } 
+        return null;
     }
 
     private DriveEventWrapper() {

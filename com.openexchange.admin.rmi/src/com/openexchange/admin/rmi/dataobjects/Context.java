@@ -146,7 +146,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
      */
     public Context(final int id, final String name) {
         super();
-        this.id = id;
+        this.id = Integer.valueOf(id);
         this.name = name;
     }
 
@@ -221,22 +221,14 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         if (null == mapping) {
             return false;
         }
-        if (null != this.login_mappings) {
-            return this.login_mappings.remove(mapping);
-        } else {
-            return false;
-        }
+        return null != this.login_mappings ? this.login_mappings.remove(mapping) : false;
     }
 
     public final boolean removeLoginMappings(final Collection<String> mapping) {
         if (null == mapping) {
             return false;
         }
-        if (null != this.login_mappings) {
-            return this.login_mappings.removeAll(mapping);
-        } else {
-            return false;
-        }
+        return null != this.login_mappings ? this.login_mappings.removeAll(mapping) : false;
     }
 
     public final HashSet<String> getLoginMappings() {
@@ -374,7 +366,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         initExtendable();
         this.id = null;
         this.name = null;
-        this.enabled = false;
+        this.enabled = Boolean.FALSE;
         this.filestore_id = null;
         this.average_size = null;
         this.maintenanceReason = null;

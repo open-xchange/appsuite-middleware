@@ -62,6 +62,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
@@ -301,6 +302,11 @@ public class LdapGlobalFolderCreator {
             @Override
             public Set<String> getParameterNames() {
                 return Collections.emptySet();
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return null;
             }
         };
     }

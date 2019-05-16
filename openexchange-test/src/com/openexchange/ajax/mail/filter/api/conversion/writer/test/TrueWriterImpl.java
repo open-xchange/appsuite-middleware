@@ -52,7 +52,6 @@ package com.openexchange.ajax.mail.filter.api.conversion.writer.test;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.mail.filter.api.dao.test.Test;
-import com.openexchange.ajax.mail.filter.api.dao.test.TrueTest;
 import com.openexchange.ajax.mail.filter.api.dao.test.argument.TestArgument;
 import com.openexchange.ajax.mail.filter.api.dao.test.argument.TrueTestArgument;
 
@@ -71,15 +70,8 @@ public class TrueWriterImpl extends AbstractWriterImpl<TrueTestArgument> {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.writer.JSONWriter#write(java.lang.Object, org.json.JSONObject)
-     */
     @Override
     public JSONObject write(Test<? extends TestArgument> type, JSONObject jsonObject) throws JSONException {
-        final TrueTest trueTest = (TrueTest) type;
-
         final JSONObject jsonObj = new JSONObject();
         jsonObj.put("id", type.getTestCommand().name().toLowerCase());
 

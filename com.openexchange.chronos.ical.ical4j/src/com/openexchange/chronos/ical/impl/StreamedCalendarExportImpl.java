@@ -67,10 +67,12 @@ import com.openexchange.chronos.FreeBusyData;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.StreamedCalendarExport;
+import com.openexchange.chronos.ical.ical4j.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.version.VersionService;
 import net.fortuna.ical4j.data.FoldingWriter;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;
@@ -220,12 +222,12 @@ public class StreamedCalendarExportImpl implements StreamedCalendarExport {
 
     private ProdId getProdID() {
         StringBuilder sb = new StringBuilder();
-        sb.append("-//").append(com.openexchange.version.Version.NAME).append("//");
-        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
-        if (Strings.isEmpty(versionString)) {
+        sb.append("-//").append(VersionService.NAME).append("//");
+        VersionService versionService = Services.getService(VersionService.class);
+        if (versionService == null) {
             sb.append("<unknown version>");
         } else {
-            sb.append(versionString);
+            sb.append(versionService.getVersionString());
         }
         sb.append("//EN");
         return new ProdId(sb.toString());

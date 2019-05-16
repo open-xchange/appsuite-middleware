@@ -1,6 +1,7 @@
 
 package com.openexchange.push.dovecot.rest;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
+import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
@@ -153,27 +155,20 @@ public class DovecotPushRESTService {
                                 try {
                                     session = Hazelcasts.executeByMembersAndFilter(new PortableSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
                                 } catch (ExecutionException e) {
-                                    Throwable cause = e.getCause();
-                                    if (cause instanceof RuntimeException) {
-                                        throw ((RuntimeException) cause);
-                                    }
-                                    if (cause instanceof Error) {
-                                        throw (Error) cause;
-                                    }
-                                    throw new IllegalStateException("Not unchecked", cause);
+                                    throw handleExecutionError(e);
                                 }
                             }
                         }
                     }
 
                     if (null == session) {
-                        LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", userId, contextId);
+                        LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", I(userId), I(contextId));
                     } else {
                         Map<String, Object> props = new LinkedHashMap<String, Object>(4);
                         props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
                         setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unseen", -1), props);
                         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
-                        LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
+                        LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", I(userId), I(contextId));
                     }
                 }
             }
@@ -182,6 +177,14 @@ public class DovecotPushRESTService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private OXException handleExecutionError(ExecutionException e) {
+        Throwable cause = e.getCause();
+        if (cause instanceof RuntimeException || cause instanceof Error) {
+            return PushExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
+        return PushExceptionCodes.UNEXPECTED_ERROR.create(new IllegalStateException("Not unchecked", cause), cause.getMessage());
     }
 
     private void sendViaNotificationService(int userId, int contextId, long uid, String folder, JSONObject data, PushNotificationService pushNotificationService) throws OXException {
@@ -271,7 +274,11 @@ public class DovecotPushRESTService {
         try {
             return new int[] { Integer.parseInt(userAndContext.substring(0, pos)), Integer.parseInt(userAndContext.substring(pos + 1)) };
         } catch (NumberFormatException e) {
-            LOGGER.error("Could not parse user and context identifiers from \"{}\"", userAndContext, e);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.error("Could not parse user and context identifiers from \"{}\"", userAndContext, e);
+            } else {
+                LOGGER.error("Could not parse user and context identifiers from \"{}\"", userAndContext);
+            }
             return null;
         }
     }

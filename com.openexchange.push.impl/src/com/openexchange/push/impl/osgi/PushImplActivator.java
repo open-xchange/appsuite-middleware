@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.osgi;
 
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
@@ -68,8 +69,6 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
@@ -86,8 +85,8 @@ import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableS
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
-import com.openexchange.push.impl.mbean.PushMBeanImpl;
-import com.openexchange.push.mbean.PushMBean;
+import com.openexchange.push.impl.jobqueue.PermanentListenerJobQueue;
+import com.openexchange.push.impl.rmi.PushRMIServiceImpl;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -99,9 +98,9 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushImplActivator extends HousekeepingActivator  {
+public final class PushImplActivator extends HousekeepingActivator {
 
-    private volatile PermanentListenerRescheduler rescheduler;
+    private PermanentListenerRescheduler rescheduler;
 
     /**
      * Initializes a new {@link PushImplActivator}.
@@ -116,7 +115,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
         try {
             log.info("starting bundle: com.openexchange.push.impl");
@@ -137,9 +136,6 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(CryptoService.class);
             trackService(HazelcastInstance.class);
             trackService(ObfuscatorService.class);
-
-            // Track management service & register MBean
-            track(ManagementService.class, new HousekeepingManagementTracker(context, PushMBean.class.getName(), PushMBean.DOMAIN, new PushMBeanImpl()));
 
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
@@ -179,6 +175,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PushCreateTableTask()));
 
             registerService(PushListenerService.class, pushManagerRegistry);
+            registerService(Remote.class, new PushRMIServiceImpl());
 
             // Register event handler to detect removed sessions
             Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
@@ -192,7 +189,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.push.impl");
@@ -202,6 +199,8 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 rescheduler.stop();
                 this.rescheduler = null;
             }
+
+            PermanentListenerJobQueue.getInstance().stop();
 
             Services.setServiceLookup(null);
             removeService(CredentialStorageProvider.class);

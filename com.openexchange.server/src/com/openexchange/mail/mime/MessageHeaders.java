@@ -224,4 +224,24 @@ public final class MessageHeaders {
 
     public static final HeaderName AUTHENTICATION_RESULTS = HeaderName.valueOf(HDR_AUTHENTICATION_RESULTS);
 
+    /** "X-OX-Shared-Attachments" */
+    public static final String HDR_X_OX_SHARED_ATTACHMENTS = "X-OX-Shared-Attachments";
+
+    public static final HeaderName X_OX_SHARED_ATTACHMENTS = HeaderName.valueOf(HDR_X_OX_SHARED_ATTACHMENTS);
+
+    /** "X-OX-Security" */
+    public static final String HDR_X_OX_SECURITY = "X-OX-Security";
+
+    public static final HeaderName X_OX_SECURITY = HeaderName.valueOf(HDR_X_OX_SECURITY);
+
+    /** "X-OX-Meta" */
+    public static final String HDR_X_OX_META = "X-OX-Meta";
+
+    public static final HeaderName X_OX_META = HeaderName.valueOf(HDR_X_OX_META);
+
+    /** "X-OX-Read-Receipt" */
+    public static final String HDR_X_OX_READ_RECEIPT = "X-OX-Read-Receipt";
+
+    public static final HeaderName X_OX_READ_RECEIPT = HeaderName.valueOf(HDR_X_OX_READ_RECEIPT);
+
 }

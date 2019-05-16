@@ -67,6 +67,7 @@ import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.InetAddresses;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
@@ -143,7 +144,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             HttpResponse rsp = httpclient.execute(target, req);
             int statusCode = rsp.getStatusLine().getStatusCode();
             if (statusCode != 200) {
-                LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", statusCode);
+                LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", Autoboxing.I(statusCode));
 
                 // Try 2nd URL
                 {
@@ -159,7 +160,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                 rsp = httpclient.execute(target, req);
                 statusCode = rsp.getStatusLine().getStatusCode();
                 if (statusCode != 200) {
-                    LOG.info("Could not retrieve config XML from main domain. Return code was: {}", statusCode);
+                    LOG.info("Could not retrieve config XML from main domain. Return code was: {}",  Autoboxing.I(statusCode));
                     return null;
                 }
             }
@@ -178,7 +179,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             }
 
             // If 'forceSecure' is true, ensure that both - mail and transport settings - either support SSL or STARTTLS
-            if (forceSecure && ((!autoconfig.isMailSecure() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure() && !autoconfig.isTransportStartTls()))) {
+            if (skipDueToForcedSecure(forceSecure, autoconfig)) {
                 // Either mail or transport do not support a secure connection (or neither of them)
                 return null;
             }

@@ -105,8 +105,9 @@ public class Bug58051Test extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
-        checkGuestPermission(guestPermission, guest);
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
+        assertNotNull("No guest permission entitiy", guest);
+        checkPermissions(guestPermission, guest.toObjectPermission());
         /*
          * check access to share
          */

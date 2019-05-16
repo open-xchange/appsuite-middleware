@@ -78,9 +78,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class MyServlet extends DataServlet {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -8914926421736440078L;
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MyServlet.class);
@@ -95,16 +92,12 @@ public final class MyServlet extends DataServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException,
-        IOException {
-
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         final Response response = new Response();
         final Session session = getSessionObject(req);
 
         try {
-
-            final String action = parseMandatoryStringParameter(req,PARAMETER_ACTION);
+            final String action = parseMandatoryStringParameter(req, PARAMETER_ACTION);
             JSONObject jsonObj;
 
             try {
@@ -117,9 +110,8 @@ public final class MyServlet extends DataServlet {
             }
             final Context ctx = ContextStorage.getInstance().getContext(session);
             final MyServletRequest proRequest = new MyServletRequest(session, ctx);
-            final Object responseObj = proRequest.action(action, jsonObj,req);
+            final Object responseObj = proRequest.action(action, jsonObj);
             response.setData(responseObj);
-
         } catch (final OXException e) {
             LOG.error("", e);
             response.setException(e);
@@ -130,7 +122,5 @@ public final class MyServlet extends DataServlet {
         }
 
         writeResponse(response, resp, session);
-
     }
-
 }

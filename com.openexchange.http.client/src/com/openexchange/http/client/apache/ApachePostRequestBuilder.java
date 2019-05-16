@@ -61,7 +61,7 @@ import com.openexchange.http.client.builder.HTTPPostRequestBuilder;
 
 public class ApachePostRequestBuilder extends CommonApacheHTTPRequest<HTTPPostRequestBuilder>implements HTTPPostRequestBuilder {
 
-    private RequestEntity requestEntity = null;;
+    private RequestEntity requestEntity = null;
     protected Map<String, String> urlParameters = new TreeMap<String, String>();
 
 	public ApachePostRequestBuilder(final ApacheClientRequestBuilder coreBuilder) {

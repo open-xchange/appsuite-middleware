@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.css;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.util.AbstractMap;
@@ -390,7 +391,7 @@ public final class CSSMatcher {
             return false;
         }
         final int diff = pos - off;
-        LOG.debug("Next '{' is {} characters away -- {}", diff, (diff <= 2048 ? "Continue" : "Abort"));
+        LOG.debug("Next '{' is {} characters away -- {}", I(diff), (diff <= 2048 ? "Continue" : "Abort"));
         return diff <= MAX_ALLOWED_CSS_SELECTOR_SIZE;
     }
 
@@ -801,13 +802,13 @@ public final class CSSMatcher {
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 final String prefix = cssElemsBuffer.toString();
                 cssElemsBuffer.setLength(0);
-                
+
                 // Check matched part, in case the font attribute is messing around
                 cssElemsBuffer.append(css.substring(m.start(), m.end()));
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
                 final String match = cssElemsBuffer.toString();
                 cssElemsBuffer.setLength(0);
-                
+
                 // Check block part
                 {
                     int i = m.end();
@@ -817,7 +818,7 @@ public final class CSSMatcher {
                     lastPos = i + 1;
                 }
                 modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
-                
+
                 if (Strings.isNotEmpty(match)) {
                     cssElemsBuffer.insert(0, match).append('}').append('\n');
                     // Add to main builder
@@ -1068,7 +1069,7 @@ public final class CSSMatcher {
 
         if (false == m.find()) {
             // Found no single CSS element...
-            return true;
+            return modified;
         }
 
         StringBuilder elemBuilder = new StringBuilder(128);

@@ -66,7 +66,10 @@ import com.openexchange.chronos.ical.ICalExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.VCalendar;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
+import com.openexchange.chronos.ical.ical4j.osgi.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
+import com.openexchange.version.VersionService;
 import net.fortuna.ical4j.extensions.property.WrCalName;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
@@ -234,10 +237,12 @@ public class CalendarExportImpl implements CalendarExport {
         /*
          * export alarms as sub-components
          */
-        List<Alarm> alarms = event.getAlarms();
-        if (null != alarms && 0 < alarms.size()) {
-            for (Alarm alarm : alarms) {
-                vEvent.getAlarms().add(exportAlarm(alarm));
+        if (!Autoboxing.b(parameters.get(ICalParameters.IGNORE_ALARM, Boolean.class, Boolean.FALSE))) {
+            List<Alarm> alarms = event.getAlarms();
+            if (null != alarms && 0 < alarms.size()) {
+                for (Alarm alarm : alarms) {
+                    vEvent.getAlarms().add(exportAlarm(alarm));
+                }
             }
         }
         return vEvent;
@@ -267,9 +272,8 @@ public class CalendarExportImpl implements CalendarExport {
      *
      * @param availability The {@link Availability} to export
      * @return The exported {@link VAvailability} component
-     * @throws OXException if an error is occurred
      */
-    private VAvailability exportAvailability(Availability availability) throws OXException {
+    private VAvailability exportAvailability(Availability availability) {
         VAvailability vAvailability = mapper.exportAvailability(availability, parameters, warnings);
         ICalUtils.removeProperties(vAvailability, parameters.get(ICalParameters.IGNORED_PROPERTIES, String[].class));
         // TODO: Track timezones of availability/available components
@@ -312,11 +316,14 @@ public class CalendarExportImpl implements CalendarExport {
     private static VCalendar initCalendar() {
         VCalendar vCalendar = new VCalendar();
         vCalendar.getProperties().add(Version.VERSION_2_0);
-        String versionString = com.openexchange.version.Version.getInstance().optVersionString();
-        if (null == versionString) {
+        VersionService versionService = Services.getService(VersionService.class);
+        String versionString = null; 
+        if (null == versionService) {
             versionString = "<unknown version>";
+        } else {
+            versionString = versionService.getVersionString();
         }
-        vCalendar.getProperties().add(new ProdId("-//" + com.openexchange.version.Version.NAME + "//" + versionString + "//EN"));
+        vCalendar.getProperties().add(new ProdId("-//" + VersionService.NAME + "//" + versionString + "//EN"));
         return vCalendar;
     }
 

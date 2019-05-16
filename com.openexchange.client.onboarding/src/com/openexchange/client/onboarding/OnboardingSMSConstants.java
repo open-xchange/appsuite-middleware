@@ -58,6 +58,10 @@ package com.openexchange.client.onboarding;
  */
 public class OnboardingSMSConstants {
 
+    private OnboardingSMSConstants() {
+        super();
+    }
+
     public static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
 
     public static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";

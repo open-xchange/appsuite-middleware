@@ -147,7 +147,7 @@ public class OXContextRestoreException extends Exception {
          * One of the given filenames cannot be found
          */
         CONFIGDB_FILE_NOT_FOUND("Temp file for confidb values cannot be found"),
-        
+
         /**
          * The context with identifier '%1$s' is the last context in the database schema and thus it cannot be deleted/restored.
          */
@@ -208,9 +208,8 @@ public class OXContextRestoreException extends Exception {
                 }
             }
             return super.toString();
-        } else {
-            return super.toString();
         }
+        return super.toString();
     }
 
     @Override
@@ -225,10 +224,8 @@ public class OXContextRestoreException extends Exception {
                 }
             }
             return super.getMessage();
-        } else {
-            return super.getMessage();
         }
-
+        return super.getMessage();
     }
 
 }

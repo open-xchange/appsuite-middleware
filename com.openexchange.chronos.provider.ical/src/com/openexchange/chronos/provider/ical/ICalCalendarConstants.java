@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.ical;
 
+import com.openexchange.chronos.provider.CalendarProviders;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 
 /**
  * {@link ICalCalendarConstants}
@@ -58,14 +60,14 @@ package com.openexchange.chronos.provider.ical;
  */
 public class ICalCalendarConstants {
 
-    public static final String PROVIDER_ID = "ical";
+    public static final String PROVIDER_ID = CalendarProviders.ID_ICAL;
 
-    public static final String URI = "uri";
+    public static final String URI = CommonCalendarConfigurationFields.URI;
     public static final String ETAG = "etag";
     public static final String LAST_LAST_MODIFIED = "lastLastModified";
-    public static final String NAME = "name";
-    public static final String DESCRIPTION = "description";
-    public static final String REFRESH_INTERVAL = "refreshInterval";
+    public static final String NAME = CommonCalendarConfigurationFields.NAME;
+    public static final String DESCRIPTION = CommonCalendarConfigurationFields.DESCRIPTION;
+    public static final String REFRESH_INTERVAL = CommonCalendarConfigurationFields.REFRESH_INTERVAL;
     public static final String EXTENDED_PROPERTIES = "extendedProperties";
 
     private ICalCalendarConstants() {

@@ -20,7 +20,7 @@ public class Bug22059Test extends ManagedAppointmentTest {
     @Test
     public void testIt() throws Exception {
         ICalImportResponse icalResponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical, false));
-        assertFalse("Should work", icalResponse.hasError());
+        assertFalse("Expected no errors but contained the following: "+icalResponse.getErrorMessage(), icalResponse.hasError());
         assertTrue("Should import one", icalResponse.getImports().length == 1);
         int oid = Integer.parseInt(icalResponse.getImports()[0].getObjectId());
         GetResponse getResponse = getClient().execute(new GetRequest(folder.getObjectID(), oid));

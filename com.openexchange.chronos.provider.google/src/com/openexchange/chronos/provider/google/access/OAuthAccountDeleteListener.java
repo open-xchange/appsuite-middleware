@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.google.access;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthA
                     accountsToDelete.add(acc);
                 }
             } catch (JSONException e) {
-                LOG.warn("Unable to check google calendar account with id %s for user %s in context %s: %s", acc.getAccountId(), user, cid, e.getMessage());
+                LOG.warn("Unable to check google calendar account with id %s for user %s in context %s: %s", I(acc.getAccountId()), I(user), I(cid), e.getMessage());
             }
         }
 

@@ -77,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -111,11 +112,11 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         this.util = util;
     }
 
-    
+
     // TODO: Principal
     @Override
     public List<NotificationParticipant> resolveAllRecipients(Event original, Event update, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
-        final NotificationConfiguration defaultConfiguration = getDefaultConfiguration(user, ctx);
+        final NotificationConfiguration defaultConfiguration = getDefaultConfiguration();
 
         final Map<Integer, Attendee> userIds = new HashMap<Integer, Attendee>();
         final List<Attendee> externalParticipants = new ArrayList<>();
@@ -126,16 +127,18 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         List<Attendee> attendees = update.getAttendees();
         if (attendees != null) {
             for (final Attendee attendee : attendees) {
-                if (CalendarUtils.isInternalUser(attendee)) {
-                    userIds.put(I(attendee.getEntity()), attendee);
-                } else if (CalendarUtils.isExternalUser(attendee)) {
+                if (CalendarUtils.isInternal(attendee)) {
+                    if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                        resourceIds.add(I(attendee.getEntity()));
+                    } else if (false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
+                        userIds.put(I(attendee.getEntity()), attendee);
+                    }
+                } else {
                     String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
                     if (!externalGuardian.contains(mail)) {
                         externalParticipants.add(attendee);
                         externalGuardian.add(mail);
                     }
-                } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType())) {
-                    resourceIds.add(I(attendee.getEntity()));
                 }
             }
         }
@@ -144,11 +147,13 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             attendees = original.getAttendees();
             if (attendees != null) {
                 for (Attendee attendee : attendees) {
-                    if (CalendarUtils.isInternalUser(attendee)) {
-                        if (!userIds.containsKey(I(attendee.getEntity()))) {
-                            userIds.put(I(attendee.getEntity()), attendee);
+                    if (CalendarUtils.isInternal(attendee)) {
+                        if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                            resourceIds.add(I(attendee.getEntity()));
+                        } else if (false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
+                            userIds.putIfAbsent(I(attendee.getEntity()), attendee);
                         }
-                    } else if (CalendarUtils.isExternalUser(attendee)) {
+                    } else {
                         String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
                         if (!externalGuardian.contains(mail)) {
                             externalParticipants.add(attendee);
@@ -162,7 +167,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
         CalendarUser organizer = determineOrganizer(original, update, ctx, session.getUserId());
         String organizerMail = CalendarUtils.extractEMailAddress(organizer.getEMail());
-        if (organizerMail.toLowerCase().startsWith("mailto:")) {
+        if (Strings.isNotEmpty(organizerMail) && organizerMail.toLowerCase().startsWith("mailto:")) {
             organizerMail = organizerMail.substring(7);
         }
 
@@ -351,8 +356,9 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         if (confirmations != null) {
             for (Attendee p : confirmations) {
                 String mail = CalendarUtils.extractEMailAddress(p.getUri());
-                if (null != mail && CalendarUtils.isExternalUser(p))
+                if (null != mail && CalendarUtils.isExternalUser(p)) {
                     statusMap.put(mail, p);
+                }
             }
         }
 
@@ -379,9 +385,9 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             retval.add(participant);
         }
 
-        if (!foundOrganizer) {
+        if (!foundOrganizer && Strings.isNotEmpty(organizerMail)) {
             /*
-             * Organizer does not attend the event. Nevertheless notify the organizer.
+             * Organizer does not attend the event. Nevertheless notify the organizer (if email address is available).
              */
             boolean isInternal = CalendarUtils.isInternal(organizer, CalendarUserType.INDIVIDUAL);
             final NotificationParticipant notificationOrganizer = new NotificationParticipant(ITipRole.ORGANIZER, !isInternal, organizerMail, isInternal ? organizer.getEntity() : 0);
@@ -425,7 +431,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             return update.getCreatedBy();
         }
         // Use current user as fall back
-        LOG.debug("Unable to resolve organizer for appointment: " + update.getId() + " in context " + ctx.getContextId() + ". Using current user as organizer");
+        LOG.debug("Unable to resolve organizer for appointment: {} in context {}. Using current user as organizer", update.getId(), Autoboxing.I(ctx.getContextId()));
         User defaultOrganizer = userService.getUser(userId, ctx);
         CalendarUser cu = new CalendarUser();
         cu.setCn(defaultOrganizer.getDisplayName());
@@ -480,7 +486,7 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         return resourceParticipants;
     }
 
-    protected NotificationConfiguration getDefaultConfiguration(final User user, final Context ctx) {
+    protected NotificationConfiguration getDefaultConfiguration() {
         final NotificationConfiguration configuration = new NotificationConfiguration();
 
         configuration.setIncludeHTML(true); // TODO: pay attention to user

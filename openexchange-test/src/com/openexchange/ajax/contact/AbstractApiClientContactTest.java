@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.contact;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -115,7 +117,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         super.setUp();
         contactsApi = new ContactsApi(apiClient);
         contactFolderId = getDefaultFolder(apiClient.getSession(), new FoldersApi(apiClient));
-        userId = apiClient.getUserId();
+        userId = getUserId();
 
         UserResponse resp = new UserApi(apiClient).getUser(apiClient.getSession(), String.valueOf(userId));
         assertNull(resp.getErrorDesc(), resp.getError());
@@ -190,7 +192,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
             return (String) privateList.get(0).get(0);
         }
         for (ArrayList<?> folder : privateList) {
-            if ((Boolean) folder.get(1)) {
+            if (((Boolean) folder.get(1)).booleanValue()) {
                 return (String) folder.get(0);
             }
         }
@@ -319,20 +321,20 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         contactObj.setCompany("Internal Test AG");
         contactObj.setEmail1("hebert.meier@open-xchange.com");
         contactObj.setFolderId(contactFolderId);
-        contactObj.setMarkAsDistributionlist(false);
+        contactObj.setMarkAsDistributionlist(Boolean.FALSE);
         contactObj.setDistributionList(null);
         return contactObj;
     }
 
     protected ContactData createCompleteContactObject() throws Exception {
         final ContactData contactObj = new ContactData();
-        contactObj.setPrivateFlag(true);
+        contactObj.setPrivateFlag(Boolean.TRUE);
         contactObj.setCategories("categories");
         contactObj.setFirstName("given name");
         contactObj.setLastName("surname");
-        contactObj.setAnniversary(dateTime);
+        contactObj.setAnniversary(L(dateTime));
         contactObj.setAssistantName("assistant name");
-        contactObj.setBirthday(dateTime);
+        contactObj.setBirthday(L(dateTime));
         contactObj.setBranches("branches");
         contactObj.setBusinessCategory("business categorie");
         contactObj.setCellularTelephone1("cellular telephone1");
@@ -420,7 +422,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         contactObj.setUserfield18("Userfield18");
         contactObj.setUserfield19("Userfield19");
         contactObj.setUserfield20("Userfield20");
-        contactObj.setDefaultAddress(1);
+        contactObj.setDefaultAddress(I(1));
         contactObj.setUid("uid");
 
         contactObj.setFolderId(contactFolderId);
@@ -440,6 +442,13 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         return contactObj;
     }
 
+    /**
+     * Creates and remembers the given contact and returns its id
+     * 
+     * @param contactObj The {@link ContactData}
+     * @return The contact id
+     * @throws Exception
+     */
     public String createContact(final ContactData contactObj) throws Exception {
         ContactUpdateResponse response = contactsApi.createContact(apiClient.getSession(), contactObj);
         assertNull(response.getErrorDesc(), response.getError());
@@ -464,8 +473,8 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         }
         if(!body.isEmpty()) {
             try {
-                contactsApi.deleteContacts(getSessionId(), Long.MAX_VALUE, body);
-            } catch(Exception e) {
+                contactsApi.deleteContacts(getSessionId(), Long.valueOf(Long.MAX_VALUE), body);
+            } catch(@SuppressWarnings("unused") Exception e) {
                 // ignore
             }
         }
@@ -503,7 +512,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
             if (null != inputStream) {
                 try {
                     inputStream.close();
-                } catch (final Exception e) {
+                } catch (@SuppressWarnings("unused") final Exception e) {
                     // Ignore
                 }
             }
@@ -530,14 +539,14 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
             if (null != inputStream) {
                 try {
                     inputStream.close();
-                } catch (final Exception e) {
+                } catch (@SuppressWarnings("unused") final Exception e) {
                     // Ignore
                 }
             }
         }
     }
 
-    private HashSet<String> distributionlist2String(final List<DistributionListMember> distributionListEntry) throws Exception {
+    private HashSet<String> distributionlist2String(final List<DistributionListMember> distributionListEntry) {
         if (distributionListEntry == null) {
             return null;
         }
@@ -551,7 +560,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         return hs;
     }
 
-    private String entry2String(final DistributionListMember entry) throws Exception {
+    private String entry2String(final DistributionListMember entry) {
         final StringBuffer sb = new StringBuffer();
         sb.append("ID" + entry.getId());
         sb.append("D" + entry.getDisplayName());

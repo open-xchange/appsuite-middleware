@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.apn2.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -109,23 +110,29 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
     protected abstract String getServiceID();
 
     /**
-     * Gets the APNS HTTP/2 options to use.
+     * Gets the APNS HTTP/2 options to use for specified context and user.
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return The options
      * @throws OXException If options cannot be returned
      */
-    protected abstract ApnsHttp2Options getOptions() throws OXException;
+    protected abstract ApnsHttp2Options getOptions(int contextId, int userId) throws OXException;
 
     /**
      * Gets the APNS HTTP/2 client for specified options.
      *
      * @param options The APNS HTTP/2 options
-     * @return The appropriate client
+     * @return The appropriate client, or <code>null</code> if no client is available for the supplied options
      */
     private ApnsClient getClient(ApnsHttp2Options options) {
+        if (null == options) {
+            return null;
+        }
+
         try {
             return ApnsHttp2Utility.getApnsClient(options);
-        } catch (OXException e) {
+        } catch (Exception e) {
             LoggerHolder.LOG.error("Unable to create APNS HTTP/2 client for service {}", getServiceID(), e);
         }
         return null;
@@ -153,26 +160,27 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
             return;
         }
 
-        // Get the APNS HTTP/2 options to use
-        ApnsHttp2Options options;
-        try {
-            options = getOptions();
-        } catch (OXException e) {
-            LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID(), e);
-            return;
-        }
-
-        // Get the APNS HTTP/2 client to use
-        ApnsClient client = getClient(options);
-        if (null == client) {
-            // Nothing to do
-            return;
-        }
-
         // Send push notification & handle response
         ThreadPoolService threadPool = services.getService(ThreadPoolService.class);
         if (null == threadPool || numOfSubscriptions == 1) {
             for (Subscription subscription : subscriptions) {
+
+                // Get the APNS HTTP/2 options to use
+                ApnsHttp2Options options;
+                try {
+                    options = getOptions(subscription.getContextID(), subscription.getUserID());
+                } catch (OXException e) {
+                    LoggerHolder.LOG.error("Unable to get APNS HTTP/2 options for service {} for user {} in context {}", getServiceID(), I(subscription.getUserID()), I(subscription.getContextID()), e);
+                    return;
+                }
+
+                // Get the APNS HTTP/2 client to use
+                ApnsClient client = getClient(options);
+                if (null == client) {
+                    // Nothing to do
+                    return;
+                }
+
                 Task<Void> task = new SubscriptionDeliveryTask(subscription, event, options, client, services);
                 try {
                     ThreadPools.execute(task);
@@ -186,6 +194,23 @@ public abstract class ApnsHttp2DriveEventPublisher implements DriveEventPublishe
             }
         } else {
             for (Subscription subscription : subscriptions) {
+
+                // Get the APNS HTTP/2 options to use
+                ApnsHttp2Options options;
+                try {
+                    options = getOptions(subscription.getContextID(), subscription.getUserID());
+                } catch (OXException e) {
+                    LoggerHolder.LOG.error("unable to get APNS HTTP/2 options for service {}", getServiceID(), e);
+                    return;
+                }
+
+                // Get the APNS HTTP/2 client to use
+                ApnsClient client = getClient(options);
+                if (null == client) {
+                    // Nothing to do
+                    return;
+                }
+
                 Task<Void> task = new SubscriptionDeliveryTask(subscription, event, options, client, services);
                 threadPool.submit(task, CallerRunsBehavior.getInstance());
             }

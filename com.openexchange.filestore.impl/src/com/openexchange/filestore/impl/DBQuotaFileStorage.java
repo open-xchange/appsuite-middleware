@@ -293,10 +293,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             // Grab the current usage from database
             int ownerId = ownerInfo.getOwnerId();
@@ -364,21 +364,23 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException s) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-
-                if (null != unifiedQuotaService && null != toRestore) {
-                    unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
-                }
-            }
-            Databases.autocommit(con);
             Databases.closeSQLStuff(rs);
             Databases.closeSQLStuff(sstmt);
             Databases.closeSQLStuff(ustmt);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+
+                    if (null != unifiedQuotaService && null != toRestore) {
+                        unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                    }
+                }
+                Databases.autocommit(con);
+            }
             db.backWritable(contextId, con);
         }
         return false;
@@ -447,10 +449,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             long toReleaseBy = released;
 
@@ -509,21 +511,23 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException s) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-
-                if (null != unifiedQuotaService && null != toRestore) {
-                    unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
-                }
-            }
-            Databases.autocommit(con);
             Databases.closeSQLStuff(rs);
             Databases.closeSQLStuff(sstmt);
             Databases.closeSQLStuff(ustmt);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+
+                    if (null != unifiedQuotaService && null != toRestore) {
+                        unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                    }
+                }
+                Databases.autocommit(con);
+            }
             db.backWritable(contextId, con);
         }
     }
@@ -800,10 +804,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             unifiedQuotaService = getHighestRankedBackendService(effectiveUserId, contextId);
             if (unifiedQuotaService != null) {
@@ -825,21 +829,23 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException s) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
         } catch (RuntimeException s) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(s);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-
-                if (null != unifiedQuotaService && null != toRestore) {
-                    unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
-                }
-            }
-            Databases.autocommit(con);
             Databases.closeSQLStuff(stmt);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+
+                    if (null != unifiedQuotaService && null != toRestore) {
+                        unifiedQuotaService.setUsage(toRestore.longValue(), SERVICE_ID_APPSUITE_DRIVE, effectiveUserId, contextId);
+                    }
+                }
+                Databases.autocommit(con);
+            }
             db.backWritable(contextId, con);
         }
     }

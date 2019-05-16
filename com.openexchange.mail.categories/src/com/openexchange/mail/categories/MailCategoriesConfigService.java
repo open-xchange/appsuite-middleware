@@ -66,6 +66,7 @@ public interface MailCategoriesConfigService {
     public static final String TOPIC_REORGANIZE = "TOPIC_MAIL_REORGANIZE";
     public static final String PROP_USER_ID = "userId";
     public static final String PROP_CONTEXT_ID = "ctxId";
+
     /**
      * Retrieves all category configurations for the given user
      *
@@ -160,7 +161,7 @@ public interface MailCategoriesConfigService {
 
     /**
      * Remove all old category flags from the given emails and add the new one.
-     * 
+     *
      * @param session The user session
      * @param mails The mails to flag
      * @param category The category identifier
@@ -170,7 +171,7 @@ public interface MailCategoriesConfigService {
 
     /**
      * Retrieves the init status, which can be 'notyetstarted', 'running' or 'finished';
-     * 
+     *
      * @param session The user session
      * @return The status of the init process
      * @throws OXException

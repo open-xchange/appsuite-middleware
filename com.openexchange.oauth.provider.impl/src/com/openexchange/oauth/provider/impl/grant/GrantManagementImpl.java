@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.grant;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.oauth.provider.authorizationserver.client.ClientManagement.MAX_CLIENTS_PER_USER;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
@@ -112,7 +113,7 @@ public class GrantManagementImpl implements GrantManagement {
         // Check if user is allowed to create more grants
         int distinctGrants = grantStorage.countDistinctGrants(contextId, userId);
         if (distinctGrants >= MAX_CLIENTS_PER_USER) {
-            throw OAuthProviderExceptionCodes.GRANTS_EXCEEDED.create(userId, contextId, MAX_CLIENTS_PER_USER);
+            throw OAuthProviderExceptionCodes.GRANTS_EXCEEDED.create(I(userId), I(contextId), I(MAX_CLIENTS_PER_USER));
         }
 
         // Adjust scope based on users permissions

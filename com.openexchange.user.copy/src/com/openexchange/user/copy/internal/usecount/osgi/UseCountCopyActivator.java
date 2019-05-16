@@ -74,12 +74,12 @@ public class UseCountCopyActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         serviceRegistration = context.registerService(CopyUserTaskService.class, new UseCountCopyTask(), null);
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
         }

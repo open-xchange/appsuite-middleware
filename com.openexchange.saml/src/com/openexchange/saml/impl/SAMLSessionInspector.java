@@ -91,7 +91,7 @@ public class SAMLSessionInspector implements SessionInspectorService {
                     throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
                 }
             } catch (NumberFormatException e) {
-                LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER, parameter);
+                LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER, parameter, e);
             }
         }
 

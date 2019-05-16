@@ -79,11 +79,11 @@ public class CachingContextStorage extends ContextStorage {
 
     public static volatile CachingContextStorage parent;
 
-    private final ContextStorage persistantImpl;
+    private final RdbContextStorage persistantImpl;
 
     private boolean started;
 
-    public CachingContextStorage(final ContextStorage persistantImpl) {
+    public CachingContextStorage(final RdbContextStorage persistantImpl) {
         super();
         this.persistantImpl = persistantImpl;
     }
@@ -98,10 +98,15 @@ public class CachingContextStorage extends ContextStorage {
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
             LOG.trace("Cache MISS. Login info: {}", loginInfo);
-            contextId = I(persistantImpl.getContextId(loginInfo));
-            if (NOT_FOUND != contextId.intValue()) {
+            ContextExtended context = persistantImpl.getContext(loginInfo);
+            if (null == context) {
+                contextId = I(NOT_FOUND);
+            } else {
+                context = triggerUpdate(context);
+                contextId = I(context.getContextId());
                 try {
                     cache.put(loginInfo, contextId, false);
+                    cache.put(contextId, context, false);
                 } catch (final OXException e) {
                     LOG.error("", e);
                 }
@@ -196,14 +201,17 @@ public class CachingContextStorage extends ContextStorage {
 
     @Override
     public void invalidateContexts(int[] contextIDs) throws OXException {
+        if (contextIDs == null || contextIDs.length == 0) {
+            return;
+        }
+
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null == cacheService) {
             // Cache not initialized.
             return;
         }
-        /*
-         * gather cache keys to invalidate
-         */
+
+        // Gather cache keys to invalidate
         Cache cache = cacheService.getCache(REGION_NAME);
         List<Serializable> keys = new LinkedList<Serializable>();
         for (int contextID : contextIDs) {
@@ -241,31 +249,34 @@ public class CachingContextStorage extends ContextStorage {
     }
 
     private ContextExtended load(final int contextId) throws OXException {
-        final ContextExtended retval = CachingContextStorage.parent.getPersistantImpl().loadContext(contextId);
+        final ContextExtended retval = persistantImpl.loadContext(contextId);
+        return triggerUpdate(retval);
+    }
 
+    private ContextExtended triggerUpdate(ContextExtended context) {
         // TODO We should introduce a logic layer above this context storage
         // layer. That layer should then trigger the update tasks.
         // Nearly all accesses to the ContextStorage need then to be replaced
         // with an access to the ContextService.
         Updater updater = Updater.getInstance();
         try {
-            UpdateStatus status = updater.getStatus(retval.getContextId());
-            retval.setUpdating(status.blockingUpdatesRunning());
+            UpdateStatus status = updater.getStatus(context.getContextId());
+            context.setUpdating(status.blockingUpdatesRunning());
             if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
                 if (denyImplicitUpdateOnContextLoad()) {
-                    retval.setUpdateNeeded(true);
+                    context.setUpdateNeeded(true);
                 } else {
-                    retval.setUpdating(true);
-                    updater.startUpdate(retval);
+                    context.setUpdating(true);
+                    updater.startUpdate(context);
                 }
             }
         } catch (OXException e) {
             if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
-                LOG.warn("Switching to read only mode for context {} because master database is down.", contextId, e);
-                retval.setReadOnly(true);
+                LOG.warn("Switching to read only mode for context {} because master database is down.", I(context.getContextId()), e);
+                context.setReadOnly(true);
             }
         }
-        return retval;
+        return context;
     }
 
     private boolean denyImplicitUpdateOnContextLoad() {

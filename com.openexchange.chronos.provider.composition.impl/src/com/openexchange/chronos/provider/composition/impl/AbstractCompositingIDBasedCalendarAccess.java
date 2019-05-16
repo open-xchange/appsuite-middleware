@@ -49,10 +49,10 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId;
+import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeEventIdsPerAccountId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
@@ -71,6 +71,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.json.JSONObject;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DefaultErrorAwareCalendarResult;
 import com.openexchange.chronos.common.DefaultEventsResult;
@@ -84,6 +85,7 @@ import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
@@ -118,7 +120,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     protected final List<OXException> warnings;
 
     private final CalendarProviderRegistry providerRegistry;
-    private final Map<String, Object> parameters;
+    private final CalendarParameters parameters;
     private final ConcurrentMap<Integer, CalendarAccess> connectedAccesses;
 
     /**
@@ -133,7 +135,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         this.services = services;
         this.providerRegistry = providerRegistry;
         this.session = ServerSessionAdapter.valueOf(session);
-        this.parameters = new HashMap<String, Object>();
+        this.parameters = new DefaultCalendarParameters();
         this.connectedAccesses = new ConcurrentHashMap<Integer, CalendarAccess>();
         this.warnings = new ArrayList<OXException>();
     }
@@ -198,29 +200,27 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
 
     @Override
     public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
-        return this;
+        return parameters.set(parameter, value);
     }
 
     @Override
     public <T> T get(String parameter, Class<T> clazz) {
-        return get(parameter, clazz, null);
+        return parameters.get(parameter, clazz);
     }
 
     @Override
     public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
-        Object value = parameters.get(parameter);
-        return null == value ? defaultValue : clazz.cast(value);
+        return parameters.get(parameter, clazz, defaultValue);
     }
 
     @Override
     public boolean contains(String parameter) {
-        return parameters.containsKey(parameter);
+        return parameters.contains(parameter);
     }
 
     @Override
     public Set<Entry<String, Object>> entrySet() {
-        return Collections.unmodifiableSet(parameters.entrySet());
+        return parameters.entrySet();
     }
 
     /**
@@ -321,7 +321,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             if (null == provider) {
                 throw CalendarExceptionCodes.PROVIDER_NOT_AVAILABLE.create(account.getProviderId());
             }
-            access = provider.connect(session, account, this);
+            access = provider.connect(session, account, parameters);
             CalendarAccess existingAccess = connectedAccesses.put(I(account.getAccountId()), access);
             if (null != existingAccess) {
                 access.close();
@@ -423,6 +423,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             /*
              * load each account separately as fallback & track errors
              */
+            LOG.debug("Error batch-loading referenced accounts, loading individually as fallback.", e);
             for (Entry<Integer, List<String>> entry : folderIdsPerAccountId.entrySet()) {
                 try {
                     foldersIdsPerAccount.put(getAccount(i(entry.getKey())), entry.getValue());
@@ -615,7 +616,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         try {
             JSONObject internalConfig = account.getInternalConfiguration();
             if (null != internalConfig) {
-                return internalConfig.optString("name", fallbackName);
+                return internalConfig.optString(CommonCalendarConfigurationFields.NAME, fallbackName);
             }
         } catch (Exception e) {
             LOG.debug("Error getting display name for calendar account \"{}\": {}", account.getProviderId(), e.getMessage());
@@ -648,7 +649,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     protected <T extends CalendarAccess> boolean supports(CalendarAccount account, Class<T> extensionClass) {
         CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
         if (null == provider) {
-            LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), account.getAccountId());
+            LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), I(account.getAccountId()));
             return false;
         }
         for (CalendarCapability capability : provider.getCapabilities()) {
@@ -659,10 +660,10 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         return false;
     }
 
-    protected <T extends CalendarAccess> boolean supports(CalendarAccount account, CalendarCapability capability) {
+    protected boolean supports(CalendarAccount account, CalendarCapability capability) {
         CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
         if (null == provider) {
-            LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), account.getAccountId());
+            LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), I(account.getAccountId()));
             return false;
         }
         return provider.getCapabilities().contains(capability);

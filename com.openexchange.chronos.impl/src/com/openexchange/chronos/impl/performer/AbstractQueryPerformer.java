@@ -53,21 +53,17 @@ import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import java.util.Collections;
+import static com.openexchange.tools.arrays.Arrays.contains;
+import static com.openexchange.tools.arrays.Arrays.remove;
 import java.util.List;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
-import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
@@ -76,9 +72,6 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.Quota;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link AbstractQueryPerformer}
@@ -125,41 +118,6 @@ public abstract class AbstractQueryPerformer {
         return matches(event.getCalendarUser(), userId) || matches(event.getCreatedBy(), userId) || isAttendee(event, userId) || isOrganizer(event, userId);
     }
 
-    protected List<Event> readEventsInFolder(CalendarFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
-        requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdTerm(session, folder));
-        if (null != objectIDs) {
-            if (0 == objectIDs.length) {
-                return Collections.emptyList();
-            } else if (1 == objectIDs.length) {
-                searchTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectIDs[0]));
-            } else {
-                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                for (String objectID : objectIDs) {
-                    orTerm.addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, objectID));
-                }
-                searchTerm.addSearchTerm(orTerm);
-            }
-        }
-        if (null != updatedSince) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, updatedSince));
-        }
-        /*
-         * perform search & userize the results
-         */
-        EventField[] fields = getFields(session);
-        if (tombstones) {
-            List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
-            return storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-        } else {
-            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-            return storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        }
-    }
-
     /**
      * Get the configured quota and the actual usage of the underlying calendar account.
      *
@@ -184,8 +142,75 @@ public abstract class AbstractQueryPerformer {
      * 
      * @return The event post processor
      */
-    protected EventPostProcessor postProcessor() throws OXException {
+    protected EventPostProcessor postProcessor() {
         return new EventPostProcessor(session, storage, getSelfProtection());
+    }
+
+    /**
+     * Initializes a new event post processor, implicitly supplying further data for the calendar user attendee and event flags as needed.
+     * <p/>
+     * <b>Note:</b> Should only be used if different fields were used before when querying the event storage. In case all attendee data is
+     * not explicitly requested, the post-processor is enriched with data for the calendar user attendee implicitly.
+     * 
+     * @param eventIds The identifiers of the events being processed
+     * @param calendarUserId The identifier of the underlying calendar user
+     * @param requestedFields The fields as requested by the client
+     * @param queriedFields The fields loaded from the storage
+     * @return The event post processor, enriched with further data as needed
+     * @see {@link AbstractQueryPerformer#getFieldsForStorage(EventField[])}
+     */
+    protected EventPostProcessor postProcessor(String[] eventIds, int calendarUserId, EventField[] requestedFields, EventField[] queriedFields) throws OXException {
+        EventPostProcessor postProcessor = postProcessor();
+        /*
+         * always supply essential data for actual calendar user attendee, unless already requested explicitly
+         */
+        if (false == contains(queriedFields, EventField.ATTENDEES)) {
+            Attendee attendee = new Attendee();
+            attendee.setEntity(calendarUserId);
+            AttendeeField[] fields = {
+                AttendeeField.ENTITY, AttendeeField.CU_TYPE, AttendeeField.FOLDER_ID, AttendeeField.PARTSTAT, AttendeeField.HIDDEN
+            };
+            postProcessor.setUserAttendeeInfo(storage.getAttendeeStorage().loadAttendee(eventIds, attendee, fields));
+        }
+        /*
+         * supply info for event flag generation as needed
+         */
+        if (contains(requestedFields, EventField.FLAGS)) {
+            if (false == contains(queriedFields, EventFlag.ATTACHMENTS)) {
+                postProcessor.setAttachmentsFlagInfo(storage.getAttachmentStorage().hasAttachments(eventIds));
+            }
+            if (false == contains(queriedFields, EventFlag.ALARMS)) {
+                postProcessor.setAlarmsFlagInfo(storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds));
+            }
+            if (false == contains(queriedFields, EventField.ATTENDEES)) {
+                postProcessor.setScheduledFlagInfo(storage.getAttendeeStorage().loadAttendeeCounts(eventIds, null));
+            }
+        }
+        return postProcessor;
+    }
+    
+    /**
+     * Gets the event fields to pass down to the storage in case a subsequent <i>post-processing</i> of the events
+     * will take place, based on the supplied calendar parameters.
+     * <p/>
+     * <b>Note:</b> Only in case the resulting events are <i>post-processed</i>, and information for event flag generation will be
+     * fetched separately, a different set of fields may be queried from the storage.
+     * 
+     * @param requestedFields The event fields as requested from the client
+     * @return The event fields to hand down to the storage when querying event data
+     */
+    protected static EventField[] getFieldsForStorage(EventField[] requestedFields) {
+        if (null == requestedFields || contains(requestedFields, EventField.ATTENDEES) || false == contains(requestedFields, EventField.FLAGS)) {
+            /*
+             * all attendees, or no event flags requested, no special handling needed
+             */
+            return getFields(requestedFields);
+        }
+        /*
+         * event flags are requested, but not all attendees; temporary remove flags field to supply info for event flag generation
+         * afterwards, also ensure to include further fields relevant for event flag generation
+         */
+        return getFields(remove(requestedFields, EventField.FLAGS), EventField.STATUS, EventField.TRANSP);
     }
 
 }

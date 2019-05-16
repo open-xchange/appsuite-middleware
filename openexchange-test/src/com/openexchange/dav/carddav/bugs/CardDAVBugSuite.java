@@ -80,7 +80,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug48463Test.class,
     Bug54026Test.class,
     Bug58220Test.class,
-    Bug61859Test.class
+    Bug61859Test.class,
+    //Bug61873Test.class Disabled as long as the bug is not fixed (See also MW-1166)
 }) // @formatter:on
 public final class CardDAVBugSuite {
 

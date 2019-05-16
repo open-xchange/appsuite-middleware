@@ -50,6 +50,7 @@
 package com.openexchange.contact.internal;
 
 import static com.openexchange.contact.internal.Tools.parse;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -73,7 +74,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -349,11 +349,19 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * pass through to storage
          */
+        boolean isUserContact = updatedContact.getInternalUserId() > 0;
+        Context storageContext = isUserContact ? Tools.getContext(session) : null;
+        if (isUserContact) {
+            beforeUserUpdate(storageContext, updatedContact);
+        }
         storage.update(session, folderID, objectID, delta, lastRead);
         /*
          * merge back differences to supplied contact
          */
         ContactMapper.getInstance().mergeDifferences(contact, delta);
+        if (isUserContact) {
+            afterUserUpdate(storageContext, updatedContact);
+        }
         /*
          * broadcast event
          */
@@ -369,7 +377,7 @@ public class ContactServiceImpl extends DefaultContactService {
         int userID = session.getUserId();
         int contextId = session.getContextId();
         ContactStorage storage = Tools.getStorage(session, folderID);
-        final Context storageContext = ContextStorage.getStorageContext(contextId);
+        final Context storageContext = Tools.getContext(session);
         /*
          * check supplied contact
          */
@@ -383,7 +391,7 @@ public class ContactServiceImpl extends DefaultContactService {
         if (FolderObject.SYSTEM_LDAP_FOLDER_ID != parse(folderID) ||
             contact.containsParentFolderID() && 0 < contact.getParentFolderID() &&
             FolderObject.SYSTEM_LDAP_FOLDER_ID != contact.getParentFolderID()) {
-            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(FolderObject.SYSTEM_LDAP_FOLDER_ID, contextId, userID);
+            throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(FolderObject.SYSTEM_LDAP_FOLDER_ID), I(contextId), I(userID));
         }
         /*
          * check currently stored contact
@@ -433,10 +441,9 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * pass through to storage
          */
-        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        beforeUserUpdate(storageContext, storedContact, interceptors);
+        beforeUserUpdate(storageContext, storedContact);
         storage.update(session, folderID, objectID, delta, lastRead);
-        afterUserUpdate(storageContext, updatedContact, interceptors);
+        afterUserUpdate(storageContext, updatedContact);
         /*
          * merge back differences to supplied contact
          */
@@ -613,7 +620,7 @@ public class ContactServiceImpl extends DefaultContactService {
     }
 
     @Override
-    protected <O> SearchIterator<Contact> doGetContacts(final boolean deleted, final Session session, final String folderID, final String[] ids,
+    protected SearchIterator<Contact> doGetContacts(final boolean deleted, final Session session, final String folderID, final String[] ids,
         final ContactField[] fields, SortOptions sortOptions, final Date since) throws OXException {
         int contextID = session.getContextId();
         /*
@@ -1013,7 +1020,7 @@ public class ContactServiceImpl extends DefaultContactService {
     protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
-        parameters.put(AutocompleteParameters.USER_ID, userID);
+        parameters.put(AutocompleteParameters.USER_ID, I(userID));
         /*
          * check supplied search
          */
@@ -1117,14 +1124,14 @@ public class ContactServiceImpl extends DefaultContactService {
         }
     }
 
-    private void beforeUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
+    private void beforeUserUpdate(Context context, Contact userContact) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptorRegistry.getInterceptors()) {
             interceptor.beforeUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }
 
-    private void afterUserUpdate(Context context, Contact userContact, List<UserServiceInterceptor> interceptors) throws OXException {
-        for (UserServiceInterceptor interceptor : interceptors) {
+    private void afterUserUpdate(Context context, Contact userContact) throws OXException {
+        for (UserServiceInterceptor interceptor : interceptorRegistry.getInterceptors()) {
             interceptor.afterUpdate(context, null, userContact, UserServiceInterceptor.EMPTY_PROPS);
         }
     }

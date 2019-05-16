@@ -74,6 +74,7 @@ public class Alarm {
     private String description;
     private String summary;
     private List<Attendee> attendees;
+    private long timestamp;
 
     private final EnumSet<AlarmField> setFields;
 
@@ -539,9 +540,66 @@ public class Alarm {
         return setFields.contains(AlarmField.ATTENDEES);
     }
 
+    /**
+     * Gets the timestamp of the alarm.
+     * 
+     * @return The timestamp
+     */
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    /**
+     * Sets the timestamp of the alarm.
+     * 
+     * @param The timestamp
+     */
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+        setFields.add(AlarmField.TIMESTAMP);
+    }
+
+    /**
+     * Gets a value indicating whether the timestamp of the alarm has been set or not.
+     *
+     * @return <code>true</code> if the timestamp is set, <code>false</code>, otherwise
+     */
+    public boolean containsTimestamp() {
+        return setFields.contains(AlarmField.TIMESTAMP);
+    }
+
+    /**
+     * Removes the last modified of the alarm.
+     */
+    public void removeTimestamp() {
+        this.timestamp = 0;
+        setFields.remove(AlarmField.TIMESTAMP);
+    }
+
     @Override
     public String toString() {
         return "Alarm [action=" + action + ", trigger=" + trigger + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((acknowledged == null) ? 0 : acknowledged.hashCode());
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
+        result = prime * result + ((attachments == null) ? 0 : attachments.hashCode());
+        result = prime * result + ((attendees == null) ? 0 : attendees.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((extendedProperties == null) ? 0 : extendedProperties.hashCode());
+        result = prime * result + id;
+        result = prime * result + (int) (timestamp ^ (timestamp >>> 32));
+        result = prime * result + ((relatedTo == null) ? 0 : relatedTo.hashCode());
+        result = prime * result + ((repeat == null) ? 0 : repeat.hashCode());
+        result = prime * result + ((setFields == null) ? 0 : setFields.hashCode());
+        result = prime * result + ((summary == null) ? 0 : summary.hashCode());
+        result = prime * result + ((trigger == null) ? 0 : trigger.hashCode());
+        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+        return result;
     }
 
 }

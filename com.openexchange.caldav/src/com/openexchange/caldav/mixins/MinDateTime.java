@@ -121,7 +121,7 @@ public class MinDateTime extends SingleXMLPropertyMixin {
                 Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, null);
                 calendar.add(Calendar.DATE, -1 * days);
                 minDateTime = CalendarUtils.truncateTime(calendar).getTime();
-            } catch (NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 /*
                  * no numerical value, fall back to static constants, otherwise
                  */

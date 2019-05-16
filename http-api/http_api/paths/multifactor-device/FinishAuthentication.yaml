@@ -1,0 +1,25 @@
+/multifactor/device?action=finishAuthentication:
+  put:
+    operationId: multifactorDeviceActionfinishAuthentication
+    tags:
+      - Multifactor
+    summary: Finishes authentication against a multifactor device 
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamMultifactorProviderName"
+      - $ref: "#/parameters/QueryParamMultifactorDeviceId"
+      - in: body
+        name: body
+        description: | 
+            The information required to finish the registration of a new multifactor device.
+        required: true
+        schema:
+          $ref: "#/definitions/MultifactorFinishAuthenticationData"
+    responses:
+        200:
+          description: |
+            In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          schema:
+            $ref: "#/definitions/CommonResponse"

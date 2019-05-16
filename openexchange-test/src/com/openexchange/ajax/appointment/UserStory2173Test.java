@@ -91,6 +91,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -126,6 +127,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
         appointmentPublic.setIgnoreConflicts(true);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

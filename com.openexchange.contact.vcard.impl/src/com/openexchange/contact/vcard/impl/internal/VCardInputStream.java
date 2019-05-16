@@ -122,7 +122,7 @@ public class VCardInputStream extends FilterInputStream {
         super.close();
     }
 
-    private void checkSize(long size) throws IOException {
+    private void checkSize(@SuppressWarnings("unused") long size) throws IOException {
         if (0 < maxSize && currentSize > maxSize) {
             throw new IOException(VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.create(Long.valueOf(maxSize)));
         }

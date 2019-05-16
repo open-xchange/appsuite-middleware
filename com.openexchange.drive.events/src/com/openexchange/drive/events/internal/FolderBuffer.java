@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.events.internal;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -110,7 +111,7 @@ public class FolderBuffer {
         }
         long now = System.currentTimeMillis();
         long timeSinceFirstEvent = now - firstEventTime;
-        LOG.trace("isDue(): now={}, firstEventTime={}, lastEventTime={}, timeSinceFirstEvent={}, timeSinceLastEvent={}", now, firstEventTime, lastEventTime, timeSinceFirstEvent, (now - lastEventTime));
+        LOG.trace("isDue(): now={}, firstEventTime={}, lastEventTime={}, timeSinceFirstEvent={}, timeSinceLastEvent={}", L(now), L(firstEventTime), L(lastEventTime), L(timeSinceFirstEvent), L((now - lastEventTime)));
         if (timeSinceFirstEvent > maxDelayTime) {
             return true; // max delay time exceeded
         }

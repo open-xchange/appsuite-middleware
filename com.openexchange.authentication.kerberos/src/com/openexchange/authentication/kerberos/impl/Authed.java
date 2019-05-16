@@ -104,6 +104,7 @@ public class Authed implements Authenticated, SessionEnhancement, ResponseEnhanc
 
     @Override
     public Header[] getHeaders() {
+        final ClientPrincipal principal = this.principal;
         if (null != principal.getResponseTicket()) {
             return new Header[] {
                 new Header() {

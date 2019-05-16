@@ -89,10 +89,10 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             final List<String> tables = Arrays.asList(
                 "pop3_storage_deleted",
@@ -107,16 +107,18 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
 
         // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<

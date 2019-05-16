@@ -73,4 +73,4 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath @classpath@"
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.ajax.requesthandler.converters.preview.cache.console.PreviewCacheTool $@
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.ajax.requesthandler.converters.preview.cache.console.ClearPreviewCacheTool $@

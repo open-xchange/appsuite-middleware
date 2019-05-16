@@ -49,7 +49,9 @@
 
 package com.openexchange.file.storage.meta;
 
+import java.util.Date;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
+import com.openexchange.file.storage.File;
 
 
 /**
@@ -66,7 +68,7 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object colorLabel(final Object... args) {
-        return md( args ).getColorLabel();
+        return Integer.valueOf(md( args ).getColorLabel());
     }
 
     @Override
@@ -81,12 +83,12 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object createdBy(final Object... args) {
-        return md( args ).getCreatedBy();
+        return Integer.valueOf(md( args ).getCreatedBy());
     }
 
     @Override
     public Object currentVersion(final Object... args) {
-        return md( args ).isCurrentVersion();
+        return Boolean.valueOf(md( args ).isCurrentVersion());
     }
 
     @Override
@@ -106,7 +108,7 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object fileSize(final Object... args) {
-        return md( args ).getFileSize();
+        return Long.valueOf(md( args ).getFileSize());
     }
 
     @Override
@@ -141,17 +143,17 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object modifiedBy(final Object... args) {
-        return md( args ).getModifiedBy();
+        return Integer.valueOf(md( args ).getModifiedBy());
     }
 
     @Override
     public Object numberOfVersions(final Object... args) {
-        return md( args ).getNumberOfVersions();
+        return Integer.valueOf(md( args ).getNumberOfVersions());
     }
 
     @Override
     public Object sequenceNumber(final Object... args) {
-        return md( args ).getSequenceNumber();
+        return Long.valueOf(md( args ).getSequenceNumber());
     }
 
     @Override
@@ -186,12 +188,79 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object shareable(Object... args) {
-        return md(args).isShareable();
+        return Boolean.valueOf(md(args).isShareable());
     }
 
     @Override
     public Object origin(Object... args) {
         return md(args).getOrigin();
+    }
+
+    @Override
+    public Object captureDate(Object... args) {
+        return md(args).getCaptureDate();
+    }
+
+    @Override
+    public Object geolocation(Object... args) {
+        return md(args).getGeoLocation();
+    }
+
+    @Override
+    public Object width(Object... args) {
+        return md(args).getWidth();
+    }
+
+    @Override
+    public Object height(Object... args) {
+        return md(args).getHeight();
+    }
+
+    @Override
+    public Object cameraMake(Object... args) {
+        return md(args).getCameraMake();
+    }
+
+    @Override
+    public Object cameraModel(Object... args) {
+        return md(args).getCameraModel();
+    }
+
+    @Override
+    public Object cameraIsoSpeed(Object... args) {
+        return md(args).getCameraIsoSpeed();
+    }
+
+    @Override
+    public Object cameraAperture(Object... args) {
+        return md(args).getCameraAperture();
+    }
+
+    @Override
+    public Object cameraExposureTime(Object... args) {
+        return md(args).getCameraExposureTime();
+    }
+
+    @Override
+    public Object cameraFocalLength(Object... args) {
+        return md(args).getCameraFocalLength();
+    }
+
+    @Override
+    public Object mediaMeta(Object... args) {
+        return md(args).getMediaMeta();
+    }
+
+    @Override
+    public Object mediaStatus(Object[] args) {
+        return md(args).getMediaStatus();
+    }
+
+    @Override
+    public Object mediaDate(Object[] args) {
+        File file = md(args);
+        Date captureDate = file.getCaptureDate();
+        return null == captureDate ? file.getLastModified() : captureDate;
     }
 
 }

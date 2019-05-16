@@ -104,6 +104,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -1368,6 +1369,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         @Override
         public Set<String> getParameterNames() {
             return parameters.keySet();
+        }
+
+        @Override
+        public Origin getOrigin() {
+            return Origin.SYNTHETIC;
         }
     }
 }

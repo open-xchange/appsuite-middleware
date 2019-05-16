@@ -462,7 +462,7 @@ public class Streams {
             return 0L;
         }
         try {
-            final int blen = 2048;
+            final int blen = 65536;
             final byte[] buf = new byte[blen];
             long count = 0;
             for (int read; (read = in.read(buf, 0, blen)) > 0;) {
@@ -633,7 +633,7 @@ public class Streams {
     }
 
     /**
-     * Checks if specified are ASCII-only.
+     * Checks if specified bytes are ASCII-only.
      *
      * @param bytes The bytes to check
      * @return <code>true</code> if ASCII-only; otherwise <code>false</code>

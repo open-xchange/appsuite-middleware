@@ -116,7 +116,7 @@ public final class AllFetch {
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail error occurs
          */
-        public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException;
+        public void handleItem(Item item, MailMessage m, IMAPConfig config, org.slf4j.Logger logger) throws OXException;
     }
 
     /**
@@ -129,7 +129,7 @@ public final class AllFetch {
         INTERNALDATE("INTERNALDATE", INTERNALDATE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
+            public void handleItem(Item item, MailMessage m, IMAPConfig config, org.slf4j.Logger logger) {
                 m.setReceivedDate(((INTERNALDATE) item).getDate());
             }
         }),
@@ -139,7 +139,7 @@ public final class AllFetch {
         UID("UID", UID.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
+            public void handleItem(Item item, MailMessage m, IMAPConfig config, org.slf4j.Logger logger) {
                 m.setMailId(Long.toString(((UID) item).uid));
             }
         }),
@@ -149,7 +149,7 @@ public final class AllFetch {
         FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException {
+            public void handleItem(Item item, MailMessage m, IMAPConfig config, org.slf4j.Logger logger) throws OXException {
                 MimeMessageConverter.parseFlags((FLAGS) item, config.getCapabilities().hasAttachmentMarker(), m);
             }
         }),
@@ -159,7 +159,7 @@ public final class AllFetch {
         SIZE("RFC822.SIZE", RFC822SIZE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
+            public void handleItem(Item item, MailMessage m, IMAPConfig config, org.slf4j.Logger logger) {
                 m.setSize(((RFC822SIZE) item).size);
             }
         }),
@@ -171,8 +171,8 @@ public final class AllFetch {
         ENVELOPE("ENVELOPE", ENVELOPE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
-                final com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
+            public void handleItem(Item item, MailMessage m, IMAPConfig config, org.slf4j.Logger logger) {
+                com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
                 // Date
                 m.setSentDate(envelope.date);
                 // Bcc, Cc, To, and From
@@ -189,11 +189,11 @@ public final class AllFetch {
                 m.setSubject(MimeMessageUtility.decodeEnvelopeSubject(envelope.subject), true);
             }
 
-            private String addrs2String(final InternetAddress[] addrs) {
+            private String addrs2String(InternetAddress[] addrs) {
                 if (null == addrs || addrs.length == 0) {
                     return null;
                 }
-                final StringBuilder sb = new StringBuilder(addrs.length * 16);
+                StringBuilder sb = new StringBuilder(addrs.length * 16);
                 sb.append(addrs[0].toString());
                 for (int i = 1; i < addrs.length; i++) {
                     sb.append(", ").append(addrs[i].toString());
@@ -204,12 +204,10 @@ public final class AllFetch {
         });
 
         private final String item;
-
         private final Class<? extends Item> itemClass;
-
         private final FetchItemHandler itemHandler;
 
-        private LowCostItem(final String item, final Class<? extends Item> itemClass, final FetchItemHandler itemHandler) {
+        private LowCostItem(String item, Class<? extends Item> itemClass, FetchItemHandler itemHandler) {
             this.item = item;
             this.itemClass = itemClass;
             this.itemHandler = itemHandler;
@@ -260,7 +258,7 @@ public final class AllFetch {
      * @return All messages from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static MailMessage[] fetchAll(final IMAPFolder imapFolder, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
+    public static MailMessage[] fetchAll(IMAPFolder imapFolder, boolean ascending, IMAPConfig config, Session session) throws MessagingException {
         return fetchLowCost(imapFolder, ITEMS, ascending, config, session);
     }
 
@@ -277,8 +275,8 @@ public final class AllFetch {
      * @return All messages from given IMAP folder
      * @throws MessagingException If an error occurs in underlying protocol
      */
-    public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final LowCostItem[] items, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
-        final int messageCount = imapFolder.getMessageCount();
+    public static MailMessage[] fetchLowCost(IMAPFolder imapFolder, LowCostItem[] items, boolean ascending, IMAPConfig config, Session session) throws MessagingException {
+        int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
              * Empty folder...
@@ -288,7 +286,7 @@ public final class AllFetch {
         return (MailMessage[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
-            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 /*-
                  * Arguments:  sequence set
                  * message data item names or macro
@@ -299,9 +297,9 @@ public final class AllFetch {
                  *             NO - fetch error: can't fetch that data
                  *             BAD - command unknown or arguments invalid
                  */
-                final String command;
+                String command;
                 {
-                    final StringBuilder sb = new StringBuilder(64);
+                    StringBuilder sb = new StringBuilder(64);
                     sb.append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
                     appendFetchCommand(items, sb);
                     sb.append(')');
@@ -310,30 +308,30 @@ public final class AllFetch {
                 /*
                  * Perform command
                  */
-                final Response[] r = performCommand(protocol, command);
-                final int len = r.length - 1;
-                final Response response = r[len];
-                final List<MailMessage> l = new ArrayList<MailMessage>(len);
+                Response[] r = performCommand(protocol, command);
+                int len = r.length - 1;
+                Response response = r[len];
+                List<MailMessage> l = new ArrayList<MailMessage>(len);
                 if (response.isOK()) {
-                    // final int recentCount = imapFolder.getNewMessageCount();
-                    final String fullname = imapFolder.getFullName();
+                    // int recentCount = imapFolder.getNewMessageCount();
+                    String fullname = imapFolder.getFullName();
                     for (int j = 0; j < len; j++) {
-                        final Response resp = r[j];
+                        Response resp = r[j];
                         if (resp instanceof FetchResponse) {
-                            final FetchResponse fr = (FetchResponse) resp;
+                            FetchResponse fr = (FetchResponse) resp;
                             try {
-                                final MailMessage m = new IDMailMessage(null, fullname);
+                                MailMessage m = new IDMailMessage(null, fullname);
                                 // m.setRecentCount(recentCount);
-                                for (final LowCostItem lowCostItem : items) {
-                                    final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
+                                for (LowCostItem lowCostItem : items) {
+                                    Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                     try {
                                         lowCostItem.getItemHandler().handleItem(item, m, config, LOG);
-                                    } catch (final OXException e) {
+                                    } catch (OXException e) {
                                         LOG.error("", e);
                                     }
                                 }
                                 l.add(m);
-                            } catch (final ProtocolException e) {
+                            } catch (@SuppressWarnings("unused") ProtocolException e) {
                                 // Ignore that FETCH response
                             }
                             r[j] = null;
@@ -355,7 +353,7 @@ public final class AllFetch {
                         if (IMAPCommandsCollection.getTotal((IMAPStore) imapFolder.getStore(), imapFolder.getFullName()) <= 0) {
                             return new MailMessage[0];
                         }
-                    } catch (final MessagingException e) {
+                    } catch (MessagingException e) {
                         LOG.warn("STATUS command failed. Throwing original exception: {}", response, e);
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
@@ -367,7 +365,7 @@ public final class AllFetch {
                 }
                 Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
                 return l.toArray(new MailMessage[l.size()]);
-                // } catch (final MessagingException e) {
+                // } catch (MessagingException e) {
                 // throw new ProtocolException(e.getMessage(), e);
             }
         }));
@@ -380,7 +378,7 @@ public final class AllFetch {
      * @param sbout The output stream written to in the meantime
      * @param tracerState The trace state
      */
-    protected static void restoreTracerFor(final IMAPProtocol protocol, final SBOutputStream sbout, final IMAPTracer.TracerState tracerState) {
+    protected static void restoreTracerFor(IMAPProtocol protocol, SBOutputStream sbout, IMAPTracer.TracerState tracerState) {
         if (null == tracerState) {
             return;
         }
@@ -390,27 +388,19 @@ public final class AllFetch {
                 /*
                  * Trace was enabled before, thus write trace to previous output stream to maintain debug logs properly.
                  */
-                final StringBuilder sb = sbout.getTrace();
+                StringBuilder sb = sbout.getTrace();
                 try {
                     /*
                      * DON'T CLOSE THE WRITER BECAUSE IT CLOSES UNDERLYING STREAM, TOO!!!
                      */
-                    final OutputStreamWriter writer = new OutputStreamWriter(tracerState.getOut(), "UTF-8");
+                    OutputStreamWriter writer = new OutputStreamWriter(tracerState.getOut(), "UTF-8");
                     writer.write(sb.toString());
                     writer.flush();
-                } catch (final IOException e) {
+                } catch (@SuppressWarnings("unused") IOException e) {
                     // Writing trace to stream failed...
                 }
             }
-        } catch (final SecurityException e) {
-            LOG.error("", e);
-        } catch (final IllegalArgumentException e) {
-            LOG.error("", e);
-        } catch (final NoSuchFieldException e) {
-            LOG.error("", e);
-        } catch (final IllegalAccessException e) {
-            LOG.error("", e);
-        } catch (final RuntimeException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
     }
@@ -422,18 +412,10 @@ public final class AllFetch {
      * @param sbout The output stream to write to
      * @return The trace state
      */
-    protected static IMAPTracer.TracerState traceStateFor(final IMAPProtocol protocol, final SBOutputStream sbout) {
+    protected static IMAPTracer.TracerState traceStateFor(IMAPProtocol protocol, SBOutputStream sbout) {
         try {
             return IMAPTracer.enableTrace(protocol, sbout);
-        } catch (final SecurityException e) {
-            LOG.error("", e);
-        } catch (final IllegalArgumentException e) {
-            LOG.error("", e);
-        } catch (final NoSuchFieldException e) {
-            LOG.error("", e);
-        } catch (final IllegalAccessException e) {
-            LOG.error("", e);
-        } catch (final RuntimeException e) {
+        } catch (Exception e) {
             LOG.error("", e);
         }
         return null;
@@ -445,10 +427,10 @@ public final class AllFetch {
     protected static final Comparator<MailMessage> ASC_COMP = new Comparator<MailMessage>() {
 
         @Override
-        public int compare(final MailMessage m1, final MailMessage m2) {
-            final Date d1 = m1.getReceivedDate();
-            final Date d2 = m2.getReceivedDate();
-            final Integer refComp = compareReferences(d1, d2);
+        public int compare(MailMessage m1, MailMessage m2) {
+            Date d1 = m1.getReceivedDate();
+            Date d2 = m2.getReceivedDate();
+            Integer refComp = compareReferences(d1, d2);
             return (refComp == null ? d1.compareTo(d2) : refComp.intValue());
         }
     };
@@ -459,10 +441,10 @@ public final class AllFetch {
     protected static final Comparator<MailMessage> DESC_COMP = new Comparator<MailMessage>() {
 
         @Override
-        public int compare(final MailMessage m1, final MailMessage m2) {
-            final Date d1 = m1.getReceivedDateDirect();
-            final Date d2 = m2.getReceivedDateDirect();
-            final Integer refComp = compareReferences(d1, d2);
+        public int compare(MailMessage m1, MailMessage m2) {
+            Date d1 = m1.getReceivedDateDirect();
+            Date d2 = m2.getReceivedDateDirect();
+            Integer refComp = compareReferences(d1, d2);
             return (refComp == null ? d1.compareTo(d2) : refComp.intValue()) * (-1);
         }
     };
@@ -476,7 +458,7 @@ public final class AllFetch {
      *         <code>1</code> if first reference is not <code>null</code> but the second is, an {@link Integer} of <code>0</code> if both
      *         references are <code>null</code>, or returns <code>null</code> if both references are not <code>null</code>
      */
-    protected static Integer compareReferences(final Object o1, final Object o2) {
+    protected static Integer compareReferences(Object o1, Object o2) {
         if ((o1 == null)) {
             return (o2 == null) ? /* both null */Integer.valueOf(0) : Integer.valueOf(-1);
         }
@@ -486,7 +468,7 @@ public final class AllFetch {
     /**
      * An {@link OutputStream} writing to a {@link StringBuilder} instance.
      */
-    private static final class SBOutputStream extends OutputStream {
+    protected static final class SBOutputStream extends OutputStream {
 
         private final StringBuilder sb;
 
@@ -499,12 +481,12 @@ public final class AllFetch {
         }
 
         @Override
-        public void write(final int b) throws IOException {
+        public void write(int b) throws IOException {
             sb.append((char) (b & 0xFF));
         }
 
         @Override
-        public void write(final byte b[], final int off, final int len) throws IOException {
+        public void write(byte b[], int off, int len) throws IOException {
             if (b == null) {
                 throw new NullPointerException("data is null");
             } else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
@@ -512,7 +494,7 @@ public final class AllFetch {
             } else if (len == 0) {
                 return;
             }
-            final char[] chars = new char[len];
+            char[] chars = new char[len];
             for (int i = 0; i < chars.length; i++) {
                 chars[i] = (char) (b[off + i] & 0xFF);
             }
@@ -542,8 +524,8 @@ public final class AllFetch {
      * @param session The session
      * @return The item associated with given class in specified <i>FETCH</i> response.
      */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName, final IMAPConfig config, final Session session) throws ProtocolException {
-        final I retval = optItemOf(clazz, fetchResponse);
+    static <I extends Item> I getItemOf(Class<? extends I> clazz, FetchResponse fetchResponse, String itemName, IMAPConfig config, Session session) throws ProtocolException {
+        I retval = optItemOf(clazz, fetchResponse);
         if (null == retval) {
             throw missingFetchItem(itemName, config, session);
         }
@@ -559,10 +541,10 @@ public final class AllFetch {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    static <I extends Item> I optItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
-        final int len = fetchResponse.getItemCount();
+    static <I extends Item> I optItemOf(Class<? extends I> clazz, FetchResponse fetchResponse) {
+        int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
-            final Item item = fetchResponse.getItem(i);
+            Item item = fetchResponse.getItem(i);
             if (clazz.isInstance(item)) {
                 return clazz.cast(item);
             }
@@ -579,8 +561,8 @@ public final class AllFetch {
      * @param session The session
      * @return A new protocol exception with appropriate message.
      */
-    static ProtocolException missingFetchItem(final String itemName, final IMAPConfig config, final Session session) {
-        final StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
+    static ProtocolException missingFetchItem(String itemName, IMAPConfig config, Session session) {
+        StringBuilder sb = new StringBuilder(128).append("Missing ").append(itemName).append(" item in FETCH response.");
         sb.append(" Login=").append(config.getLogin()).append(", server=").append(config.getServer());
         sb.append(", user=").append(session.getUserId()).append(", context=").append(session.getContextId());
         return new ProtocolException(sb.toString());
@@ -592,8 +574,8 @@ public final class AllFetch {
      * @param items The items
      * @return The string representation
      */
-    public static String getFetchCommand(final LowCostItem[] items) {
-        final StringBuilder command = new StringBuilder(64);
+    public static String getFetchCommand(LowCostItem[] items) {
+        StringBuilder command = new StringBuilder(64);
         appendFetchCommand(items, command);
         return command.toString();
     }
@@ -604,7 +586,7 @@ public final class AllFetch {
      * @param items The items
      * @return The string representation
      */
-    public static void appendFetchCommand(final LowCostItem[] items, final StringBuilder command) {
+    public static void appendFetchCommand(LowCostItem[] items, StringBuilder command) {
         command.append(items[0].getItemString());
         for (int i = 1; i < items.length; i++) {
             command.append(' ').append(items[i].getItemString());

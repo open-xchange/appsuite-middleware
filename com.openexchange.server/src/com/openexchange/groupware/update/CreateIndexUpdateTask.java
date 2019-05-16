@@ -77,26 +77,28 @@ public abstract class CreateIndexUpdateTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             if (hasIndex(con)) {
                 return;
             }
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             createIndex(con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

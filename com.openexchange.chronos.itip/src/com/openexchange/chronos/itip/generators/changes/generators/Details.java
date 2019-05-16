@@ -75,15 +75,14 @@ public class Details implements ChangeDescriptionGenerator {
 
     private static final EventField[] FIELDS = { EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION };
 
-    private static final Map<EventField, String> MESSAGE_MAP = new HashMap<EventField, String>() {
-
-        {
-            put(EventField.SUMMARY, Messages.HAS_CHANGED_TITLE);
-            put(EventField.LOCATION, Messages.HAS_CHANGED_LOCATION);
-            put(EventField.DESCRIPTION, Messages.HAS_CHANGED_NOTE);
-            //put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
-        }
-    };
+    private static final Map<EventField, String> MESSAGE_MAP = new HashMap<EventField, String>(4, 0.9f);
+    
+    static {
+        MESSAGE_MAP.put(EventField.SUMMARY, Messages.HAS_CHANGED_TITLE);
+        MESSAGE_MAP.put(EventField.LOCATION, Messages.HAS_CHANGED_LOCATION);
+        MESSAGE_MAP.put(EventField.DESCRIPTION, Messages.HAS_CHANGED_NOTE);
+        //put(TIMEZONE, Messages.HAS_CHANGED_TIMEZONE);
+    }
 
     @Override
     public List<Sentence> getDescriptions(Context ctx, Event original, Event updated, ITipEventUpdate diff, Locale locale, TimeZone timezone) throws OXException {

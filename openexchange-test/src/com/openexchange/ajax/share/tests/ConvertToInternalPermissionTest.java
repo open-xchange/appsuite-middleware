@@ -162,7 +162,7 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         /*
          * check that no share was created for internal user
          */
-        ExtendedPermissionEntity entity = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity entity = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         assertEquals(RecipientType.USER, entity.getType());
     }
 }

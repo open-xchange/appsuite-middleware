@@ -57,8 +57,6 @@ import com.openexchange.groupware.container.UserParticipant;
 
 public class Bug6055Test extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug6055Test.class);
-
     @Test
     public void testBug6055() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testBug6055");

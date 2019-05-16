@@ -59,6 +59,11 @@ package com.openexchange.mail.categories;
 public class MailCategoriesConstants {
 
     /**
+     * Prevents instantiation
+     */
+    private MailCategoriesConstants() {}
+
+    /**
      * General mail categories switch property name
      */
     public static final String MAIL_CATEGORIES_SWITCH = "com.openexchange.mail.categories.enabled";
@@ -72,7 +77,7 @@ public class MailCategoriesConstants {
      * The system category identifiers property name
      */
     public static final String MAIL_CATEGORIES_IDENTIFIERS = "com.openexchange.mail.categories.identifiers";
-    
+
     /**
      * The user category identifiers property name
      */

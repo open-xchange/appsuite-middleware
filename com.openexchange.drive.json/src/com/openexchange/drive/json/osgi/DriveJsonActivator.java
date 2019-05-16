@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.BodyParser;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveService;
@@ -89,7 +90,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveService.class, DriveEventService.class,
+        return new Class<?>[] { DriveService.class, DriveEventService.class, LeanConfigurationService.class,
             ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class,
             ShareNotificationService.class, DatabaseService.class, ShareService.class
         };
@@ -135,13 +136,12 @@ public class DriveJsonActivator extends AJAXModuleActivator {
         trackService(HostnameService.class);
         openTrackers();
         /*
-         * register blocking long polling listener factory if allowed by configuration
+         * register blocking long polling listener factory
          *
          */
-        if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.drive.events.blockingLongPolling.enabled", false)) {
-            LOG.info("Registering blocking long polling listener factory...");
-            registerService(LongPollingListenerFactory.class, new BlockingListenerFactory());
-        }
+        LOG.info("Registering blocking long polling listener factory...");
+        registerService(LongPollingListenerFactory.class, new BlockingListenerFactory(this));
+
         registerService(BodyParser.class, UploadActionBodyParser.getInstance());
     }
 

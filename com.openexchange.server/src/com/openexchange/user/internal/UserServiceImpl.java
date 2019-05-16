@@ -49,8 +49,10 @@
 
 package com.openexchange.user.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -66,8 +68,9 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
@@ -83,15 +86,15 @@ public final class UserServiceImpl implements UserService {
 
     private final UserServiceInterceptorRegistry interceptorRegistry;
 
-    private final PasswordMechFactory passwordMechFactory;
+    private final PasswordMechRegistry passwordMechRegistry;
 
     /**
      * Initializes a new {@link UserServiceImpl}
      */
-    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechFactory factory) {
+    public UserServiceImpl(UserServiceInterceptorRegistry interceptorRegistry, PasswordMechRegistry registry) {
         super();
         this.interceptorRegistry = interceptorRegistry;
-        this.passwordMechFactory = factory;
+        this.passwordMechRegistry = registry;
 
     }
 
@@ -183,7 +186,7 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(context, created, interceptors);
+        afterCreate(context, created, interceptors, UserServiceInterceptor.EMPTY_PROPS);
         return userId;
     }
 
@@ -195,7 +198,7 @@ public final class UserServiceImpl implements UserService {
         int userId = UserStorage.getInstance().createUser(con, context, user);
         UserImpl created = new UserImpl(user);
         created.setId(userId);
-        afterCreate(context, created, interceptors);
+        afterCreate(context, created, interceptors, Collections.singletonMap(UserServiceInterceptor.PROP_CONNECTION, con));
         return userId;
     }
 
@@ -298,8 +301,11 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
-        IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-        return iPasswordMech.check(password, user.getUserPassword());
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
+        if (passwordMech == null) {
+            throw PasswordMechExceptionCodes.UNKNOWN_PASSWORD_MECHANISM.create(user.getPasswordMech(), I(user.getId()));
+        }
+        return passwordMech.check(password, user.getUserPassword(), user.getSalt());
     }
 
     private void beforeCreate(Context context, User user, List<UserServiceInterceptor> interceptors) throws OXException {
@@ -310,11 +316,11 @@ public final class UserServiceImpl implements UserService {
         }
     }
 
-    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors) {
+    private void afterCreate(Context context, User user, List<UserServiceInterceptor> interceptors, Map<String, Object> properties) {
         if (!user.isGuest()) {
             for (UserServiceInterceptor interceptor : interceptors) {
                 try {
-                    interceptor.afterCreate(context, user, null);
+                    interceptor.afterCreate(context, user, null, properties);
                 } catch (OXException e) {
                     LOG.error("Error while calling interceptor.", e);
                 }
@@ -420,8 +426,8 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public void updatePassword(User user, Context context) throws OXException {
-        IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-        UserStorage.getInstance().updatePassword(null, context, user.getId(), iPasswordMech, user.getUserPassword());
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
+        UserStorage.getInstance().updatePassword(null, context, user.getId(), passwordMech, user.getUserPassword(), user.getSalt());
     }
 
     /**
@@ -429,7 +435,7 @@ public final class UserServiceImpl implements UserService {
      */
     @Override
     public void updatePassword(Connection connection, User user, Context context) throws OXException {
-        IPasswordMech iPasswordMech = passwordMechFactory.get(user.getPasswordMech());
-        UserStorage.getInstance().updatePassword(connection, context, user.getId(), iPasswordMech, user.getUserPassword());
+        PasswordMech passwordMech = passwordMechRegistry.get(user.getPasswordMech());
+        UserStorage.getInstance().updatePassword(connection, context, user.getId(), passwordMech, user.getUserPassword(), user.getSalt());
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -93,10 +94,11 @@ public class LdapExecutor  {
 
     public List<LdapResult> search(String baseDN, String filter, String[] attributeNames, SortKey[] sortKeys, int maxResults) throws OXException {
         SearchControls searchControls = factory.createSearchControls(attributeNames, maxResults);
-        if (null == baseDN) {
-            baseDN = getDefaultNamingContext();
+        String bseDN = baseDN;
+        if (null == bseDN) {
+            bseDN = getDefaultNamingContext();
         }
-        return search(baseDN, filter, searchControls, sortKeys, false);
+        return search(bseDN, filter, searchControls, sortKeys, false);
     }
 
     public List<LdapResult> searchDeleted(String filter, String[] attributeNames, SortKey[] sortKeys, int maxResults) throws OXException {
@@ -115,7 +117,7 @@ public class LdapExecutor  {
                 Date start = new Date();
                 LOG.debug("Search [{}]: {}", baseDN, filter);
                 List<LdapResult> ldapResults = LdapResult.getResults(context.search(baseDN, filter, searchControls));
-                LOG.debug("Got {} results, {}ms eleapsed.", ldapResults.size(), (new Date().getTime() - start.getTime()));
+                LOG.debug("Got {} results, {}ms eleapsed.", I(ldapResults.size()), Long.valueOf(System.currentTimeMillis() - start.getTime()));
                 results.addAll(ldapResults);
                 cookie = extractPagedResultsCookie();
             } while (null != cookie);
@@ -151,7 +153,7 @@ public class LdapExecutor  {
             LOG.debug("Search []: (objectClass=*)");
             Date start = new Date();
             List<LdapResult> ldapResults = LdapResult.getResults(context.search("", "(objectClass=*)", searchControls));
-            LOG.debug("Got {} results, {}ms eleapsed.", ldapResults.size(), (new Date().getTime() - start.getTime()));
+            LOG.debug("Got {} results, {}ms eleapsed.", I(ldapResults.size()), Long.valueOf(System.currentTimeMillis() - start.getTime()));
             for (LdapResult ldapResult : ldapResults) {
                 String defaultNamingContext = (String)ldapResult.getAttribute("defaultNamingContext");
                 if (null != defaultNamingContext) {

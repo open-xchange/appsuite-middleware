@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -54,7 +54,6 @@ import java.io.File;
 import java.text.ParseException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
@@ -89,6 +88,12 @@ public class Bug58814Test extends AbstractChronosTest {
         super();
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        eventManager.setIgnoreConflicts(true);
+    }
+
     /**
      * Create a non-full day series with no time and no timezone information on the 'until' property
      * of the recurrence frequency and change it to a full day series.
@@ -96,10 +101,9 @@ public class Bug58814Test extends AbstractChronosTest {
      * @throws ApiException
      * @throws ParseException
      * @throws ChronosApiException
-     * @throws InvalidRecurrenceRuleException
      */
     @Test
-    public void testNonFullDayToFullDay() throws ApiException, ParseException, ChronosApiException, InvalidRecurrenceRuleException {
+    public void testNonFullDayToFullDay() throws ApiException, ParseException, ChronosApiException {
         RecurringFrequency frequency = RecurringFrequency.WEEKLY;
         Weekday weekday = Weekday.MO;
         long now = System.currentTimeMillis();
@@ -108,7 +112,7 @@ public class Bug58814Test extends AbstractChronosTest {
         DateTimeData endDate = DateTimeUtil.getDateTime(now + TimeUnit.HOURS.toMillis(2));
         DateTimeData until = DateTimeUtil.getDateTimeWithoutTimeInformation(untilTimestamp);
         // Create the non-full day event series
-        EventData event = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "Bug 58814 - testNonFullDayToFullDay", startDate, endDate, until, frequency, weekday, defaultFolderId);
+        EventData event = EventFactory.createSeriesEvent(getCalendaruser(), "Bug 58814 - testNonFullDayToFullDay", startDate, endDate, until, frequency, weekday, defaultFolderId);
         EventData createdEvent = eventManager.createEvent(event);
 
         // Ensure that the 'until' part was successfully adjusted to match the 'start' part type
@@ -131,12 +135,10 @@ public class Bug58814Test extends AbstractChronosTest {
      * Create a full day series and change it to a non-full day series.
      * 
      * @throws ApiException
-     * @throws ParseException
      * @throws ChronosApiException
-     * @throws InvalidRecurrenceRuleException
      */
     @Test
-    public void testFullDayToNonFullDay() throws ApiException, ParseException, ChronosApiException {
+    public void testFullDayToNonFullDay() throws ApiException, ChronosApiException {
         RecurringFrequency frequency = RecurringFrequency.WEEKLY;
         Weekday weekday = Weekday.FR;
         long now = System.currentTimeMillis();
@@ -146,7 +148,7 @@ public class Bug58814Test extends AbstractChronosTest {
         DateTimeData until = DateTimeUtil.getDateTime(untilTimestamp);
         DateTimeData expectedUntil = DateTimeUtil.getDateTimeWithoutTimeInformation(untilTimestamp);
         // Create the full day event series
-        EventData event = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "Bug 58814 - testFullDayToNonFullDay", startDate, endDate, until, frequency, weekday, defaultFolderId);
+        EventData event = EventFactory.createSeriesEvent(getCalendaruser(), "Bug 58814 - testFullDayToNonFullDay", startDate, endDate, until, frequency, weekday, defaultFolderId);
         EventData createdEvent = eventManager.createEvent(event);
 
         // Ensure that the 'until' part was successfully adjusted to match the 'start' part type
@@ -175,7 +177,7 @@ public class Bug58814Test extends AbstractChronosTest {
         ICalImportExportManager importExportManager = new ICalImportExportManager(exportApi, importApi);
 
         Asset asset = assetManager.getAsset(AssetType.ics, "bug58814.ics");
-        String response = importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
+        String response = importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), Boolean.TRUE, Boolean.FALSE);
         
         List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);
         eventManager.rememberEventIds(eventIds);

@@ -49,6 +49,7 @@
 
 package com.openexchange.push.malpoll;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -210,7 +211,7 @@ public final class MALPollPushListenerRegistry {
             try {
                 MALPollDBUtility.dropMailIDs(key.cid, key.user);
             } catch (final OXException e) {
-                LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", key.user, key.cid, e);
+                LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", I(key.user), I(key.cid), e);
             }
         }
         return true;
@@ -224,7 +225,7 @@ public final class MALPollPushListenerRegistry {
         try {
             MALPollDBUtility.dropMailIDs(key.cid, key.user);
         } catch (final OXException e) {
-            LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", key.user, key.cid, e);
+            LOG.error("DB tables could not be cleansed for removed push listener. User={}, context={}", I(key.user), I(key.cid), e);
         }
         return true;
     }

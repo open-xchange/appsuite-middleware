@@ -78,12 +78,11 @@ public class PreviewCacheCreateTableTask extends UpdateTaskAdapter {
     public void perform(final PerformParameters params) throws OXException {
         Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean restoreAutoCommit = false;
+        int rollback = 0;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            restoreAutoCommit = true;
-            rollback = true;
+            rollback = 1;
+
             final String[] tableNames = PreviewCacheCreateTableService.getTablesToCreate();
             final String[] createStmts = PreviewCacheCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -96,18 +95,19 @@ public class PreviewCacheCreateTableTask extends UpdateTaskAdapter {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
+
             writeCon.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(writeCon);
-            }
             closeSQLStuff(stmt);
-            if (restoreAutoCommit) {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(writeCon);
+                }
                 Databases.autocommit(writeCon);
             }
         }

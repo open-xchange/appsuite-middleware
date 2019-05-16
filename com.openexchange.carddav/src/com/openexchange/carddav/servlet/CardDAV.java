@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.servlet;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.slf4j.LoggerFactory.getLogger;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
@@ -100,18 +101,13 @@ public class CardDAV extends DAVServlet {
         try {
             ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
             ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.carddav.enabled", boolean.class);
-            if (property.isDefined() && property.get()) {
+            if (property.isDefined() && property.get().booleanValue()) {
                 OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
-                if (oAuthAccess == null) {
-                    // basic auth took place
-                    return true;
-                } else {
-                    return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
-                }
+                return oAuthAccess == null ? true : oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
             }
         } catch (OXException e) {
             getLogger(CardDAV.class).error("Error checking if CardDAV is enabled for user {} in context {}: {}",
-                session.getUserId(), session.getContextId(), e.getMessage(), e);
+                I(session.getUserId()), I(session.getContextId()), e.getMessage(), e);
         }
         return false;
     }

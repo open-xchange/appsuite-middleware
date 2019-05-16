@@ -51,6 +51,7 @@ package com.openexchange.chronos.itip.sender;
 
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.itip.generators.NotificationMail;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -70,5 +71,5 @@ public interface MailSenderService {
      * @param comment An optional user comment
      * @throws OXException If mail can't be send
      */
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException;
+    public void sendMail(NotificationMail mail, CalendarSession session, CalendarUser principal, String comment) throws OXException;
 }

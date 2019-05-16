@@ -49,8 +49,7 @@
 
 package com.openexchange.saml.impl;
 
-import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
-import static com.openexchange.tools.servlet.http.Tools.filter;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -108,9 +107,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
     private static final Logger LOG = LoggerFactory.getLogger(SAMLLoginRequestHandler.class);
 
     private final LoginConfigurationLookup loginConfigurationLookup;
-
     private final SAMLBackend backend;
-
     private final ServiceLookup services;
 
     /**
@@ -130,9 +127,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         try {
             doSsoLogin(req, resp, loginConfiguration);
         } catch (OXException e) {
-            String errorPage = loginConfiguration.getErrorPageTemplate().replace("ERROR_MESSAGE", filter(e.getMessage()));
-            resp.setContentType(CONTENTTYPE_HTML);
-            resp.getWriter().write(errorPage);
+            LoginTools.useErrorPageTemplateOrSendException(e, loginConfiguration.getErrorPageTemplate(), req, resp);
         }
     }
 
@@ -175,7 +170,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
         {
             // try autologin with SessionIndex
-            String sessionIndexAutologinRedirect = trySessionIndexAutoLogin(req, resp, reservation, backend);
+            String sessionIndexAutologinRedirect = trySessionIndexAutoLogin(req, reservation, backend);
             if (null != sessionIndexAutologinRedirect) {
                 resp.sendRedirect(sessionIndexAutologinRedirect);
                 return;
@@ -250,7 +245,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         return loginResult;
     }
 
-    private Authenticated enhanceAuthenticated(Authenticated authenticated, final String samlCookieValue, final Map<String, String> reservationState) {
+    Authenticated enhanceAuthenticated(Authenticated authenticated, final String samlCookieValue, final Map<String, String> reservationState) {
         if (reservationState != null) {
             String samlAuthenticated = reservationState.get(SAMLSessionParameters.AUTHENTICATED);
             if (samlAuthenticated != null && Boolean.parseBoolean(samlAuthenticated)) {
@@ -367,9 +362,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                                     uiWebPath = loginConfiguration.getUiWebPath();
                                 }
                                 return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
-                            } else {
-                                LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
                             }
+                            LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
                         } catch (OXException e) {
                             LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
                         }
@@ -390,7 +384,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         return null;
     }
 
-    private String trySessionIndexAutoLogin(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Reservation reservation, SAMLBackend samlBackend) throws OXException {
+    private String trySessionIndexAutoLogin(HttpServletRequest httpRequest, Reservation reservation, SAMLBackend samlBackend) throws OXException {
         if (samlBackend.getConfig().isSessionIndexAutoLoginEnabled()) {
             SessiondService sessiondService = services.getService(SessiondService.class);
 
@@ -399,9 +393,8 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             if (null == state) {
                 LOG.debug("Reservation does not have any state");
                 return null;
-            } else {
-                sessionIndex = state.get(SAMLSessionParameters.SESSION_INDEX);
             }
+            sessionIndex = state.get(SAMLSessionParameters.SESSION_INDEX);
             if (null == sessionIndex) {
                 LOG.debug("Reservation state does not include a SessionIndex");
                 return null;
@@ -431,11 +424,10 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
                         if (Strings.isEmpty(uiWebPath)) {
                             uiWebPath = loginConfiguration.getUiWebPath();
                         }
-                        LOG.debug("Session '{}' is the same for user '{}' in context '{}'",session.getSessionID(), session.getUserId(), session.getContextId());
+                        LOG.debug("Session '{}' is the same for user '{}' in context '{}'",session.getSessionID(), I(session.getUserId()), I(session.getContextId()));
                         return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
-                    } else {
-                        LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
                     }
+                    LOG.debug("Session in SAML auto-login cookie is different to authInfo user and context");
                 } catch (OXException e) {
                     LOG.debug("Ignoring SAML auto-login attempt for session '{}' due to failed IP or secret check", sessionString, e);
                 }

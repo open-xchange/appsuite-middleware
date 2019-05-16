@@ -479,7 +479,6 @@ public class ReportClientBase extends AbstractJMXTools {
             put("COLLECT_EMAIL_ADDRESSES", "access-collect-email-addresses");
             put("MULTIPLE_MAIL_ACCOUNTS", "access-multiple-mail-accounts");
             put("SUBSCRIPTION", "access-subscription");
-            put("PUBLICATION", "access-publication");
             put("ACTIVE_SYNC", "access-active-sync");
             put("USM", "access-usm");
             put("OLOX20", "access-olox20");

@@ -65,6 +65,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -166,6 +167,13 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 analysis.addChange(change);
                 return analysis;
             }
+            if (isOrganizerChange(original, update)) {
+                analysis.addAnnotation(new ITipAnnotation(Messages.UNALLOWED_ORGANIZER_CHANGE, locale));
+                analysis.recommendAction(ITipAction.IGNORE);
+                change.setType(ITipChange.Type.UPDATE);
+                analysis.addChange(change);
+                return analysis;
+            }
             change.setType(ITipChange.Type.UPDATE);
             change.setCurrentEvent(original);
             differ = doAppointmentsDiffer(update, original);
@@ -215,7 +223,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         for (Event exception : message.exceptions()) {
             exception = session.getUtilities().copyEvent(exception, (EventField[]) null);
 
-            final Event matchingException = findAndRemoveMatchingException(master, exception, exceptions);
+            final Event matchingException = findAndRemoveMatchingException(exception, exceptions);
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
@@ -462,4 +470,20 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         return update;
     }
+
+    /**
+     * Check if the organizer is changed. If so stop processing.
+     * 
+     * @param analysis The {@link ITipAnalysis}
+     * @param locale The users {@link Locale}
+     * @return <code>true</code> when the organizer is changed, <code>false</code> otherwise
+     */
+    private boolean isOrganizerChange(Event originalEvent, Event updatedEvent) {
+        Organizer original = originalEvent.getOrganizer();
+        if (null != original) {
+            return false == CalendarUtils.matches(original, updatedEvent.getOrganizer());
+        }
+        return false;
+    }
+
 }

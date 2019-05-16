@@ -503,6 +503,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 sig.put("verified", res.isVerified());
                 sig.put("missing", res.isMissing());
                 sig.put("date", res.getDate());
+                sig.put("issuerKeyId", res.getIssuerKeyId());
+                sig.put("issuerKeyFingerprint",res.getIssuerKeyFingerprint());
+                sig.put("issuerUserIds", res.getIssuerUserIds());
+                if (res.getError() != null) {
+                    sig.put("error", res.getError());
+                }
                 signatures.put(sig);
             }
             json.put("signatures", signatures);
@@ -1711,7 +1717,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 } catch (final RuntimeException e) {
                     LOG.warn("A runtime error occurred.", e);
                 } catch (OXException e) {
-                    LOG.debug("Unable to parse special part: " + e.getMessage(), e);
+                    LOG.debug("Unable to parse special part: {}", e.getMessage(), e);
                 }
             }
         }

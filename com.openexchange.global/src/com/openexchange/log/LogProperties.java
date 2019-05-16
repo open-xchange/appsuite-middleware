@@ -232,6 +232,12 @@ public final class LogProperties {
          */
         FILE_STORAGE_SERVICE_ID("com.openexchange.file.storage.serviceId"),
         /**
+         * com.openexchange.file.storage.pregeneratePreviews
+         * <p>
+         * A special log property that signals that previews are requested while requesting a list of Drive files
+         */
+        FILE_STORAGE_PREGENERATE_PREVIEWS("com.openexchange.file.storage.pregeneratePreviews"),
+        /**
          * com.openexchange.mail.host
          */
         MAIL_HOST("com.openexchange.mail.host"),
@@ -602,6 +608,25 @@ public final class LogProperties {
         MDC.remove(LogProperties.Name.SESSION_CONTEXT_ID.getName());
         MDC.remove(LogProperties.Name.SESSION_CLIENT_ID.getName());
         // MDC.remove(LogProperties.Name.SESSION_SESSION.getName());
+    }
+
+    /**
+     * Puts user/context identifier properties.
+     *
+     * @param session The user identifier
+     * @param contextId The context identifier
+     */
+    public static void putUserProperties(final int userId, final int contextId) {
+        MDC.put(LogProperties.Name.SESSION_USER_ID.getName(), Integer.toString(userId));
+        MDC.put(LogProperties.Name.SESSION_CONTEXT_ID.getName(), Integer.toString(contextId));
+    }
+
+    /**
+     * Removes user/context identifier properties.
+     */
+    public static void removeUserProperties() {
+        MDC.remove(LogProperties.Name.SESSION_USER_ID.getName());
+        MDC.remove(LogProperties.Name.SESSION_CONTEXT_ID.getName());
     }
 
     private static String getLoggableString(String str) {

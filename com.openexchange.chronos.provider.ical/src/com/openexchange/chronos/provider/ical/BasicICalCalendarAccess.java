@@ -49,36 +49,35 @@
 
 package com.openexchange.chronos.provider.ical;
 
-import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
-import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
-import static com.openexchange.chronos.provider.ical.ICalCalendarConstants.PROVIDER_ID;
-import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
 import org.json.JSONObject;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
+import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -89,7 +88,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
+public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implements PersonalAlarmAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicICalCalendarAccess.class);
 
@@ -105,7 +104,10 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
      * @param parameters The calendar parameters
      */
     public BasicICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+        super(  session,
+                account,
+                parameters,
+                Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
@@ -114,28 +116,15 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
     @Override
     public CalendarSettings getSettings() {
         JSONObject internalConfig = account.getInternalConfiguration();
-        ExtendedProperties extendedProperties = new ExtendedProperties();
-        extendedProperties.add(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, true));
-        extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
-        if (CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            extendedProperties.add(USED_FOR_SYNC(B(internalConfig.optBoolean("usedForSync", false)), false));
-        } else {
-            extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
-        }
-        extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
-        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
-        CalendarSettings settings = new CalendarSettings();
-        settings.setLastModified(account.getLastModified());
-        settings.setConfig(account.getUserConfiguration());
-        settings.setName(internalConfig.optString("name", "Calendar"));
-        settings.setExtendedProperties(extendedProperties);
+
+        CalendarSettings settings = getCalendarSettings(getExtendedProperties());
         settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
-        settings.setError(optAccountError());
+
         return settings;
     }
 
     @Override
-    protected long getRefreshInterval() throws OXException {
+    protected long getRefreshInterval() {
         JSONObject userConfig = account.getUserConfiguration();
         if (userConfig != null && userConfig.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
             try {
@@ -215,7 +204,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
                 Duration duration = org.dmfs.rfc5545.Duration.parse(refreshInterval);
                 long refreshIntervalFromFeed = TimeUnit.MILLISECONDS.toMinutes(duration.toMillis());
                 if (0 == persistedInterval || persistedInterval != refreshIntervalFromFeed) {
-                    iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, refreshIntervalFromFeed);
+                    iCalConfig.putSafe(ICalCalendarConstants.REFRESH_INTERVAL, L(refreshIntervalFromFeed));
                 }
             } catch (IllegalArgumentException e) {
                 LOG.error("Unable to parse and persist calendars refresh interval {}.", refreshInterval, e);
@@ -248,5 +237,15 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
     public List<OXException> getWarnings() {
         // TODO implement get warning
         return null;
+    }
+
+    @Override
+    public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
+        return updateAlarmsInternal(eventID, alarms, clientTimestamp);
+    }
+
+    @Override
+    public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
+        return getAlarmTriggersInternal(actions);
     }
 }

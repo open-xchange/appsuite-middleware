@@ -55,13 +55,14 @@ import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
  * Combines all group tests.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
     FunctionTest.class,
     Bug11659Test.class,
+    GroupUseCountTest.class
 })
 public final class GroupTestSuite {
 

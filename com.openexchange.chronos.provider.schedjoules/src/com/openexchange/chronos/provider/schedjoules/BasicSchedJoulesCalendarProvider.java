@@ -53,11 +53,13 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.ITEM_ID;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.LOCALE;
-import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.NAME;
 import static com.openexchange.chronos.provider.schedjoules.SchedJoulesFields.REFRESH_INTERVAL;
 import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -72,9 +74,12 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.basic.CommonCalendarConfigurationFields;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProviderExceptionCodes;
 import com.openexchange.chronos.provider.schedjoules.osgi.Services;
@@ -96,7 +101,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvider {
 
-    public static final String PROVIDER_ID = "schedjoules";
+    public static final String PROVIDER_ID = CalendarProviders.ID_SCHEDJOULES;
     private static final String DISPLAY_NAME = "SchedJoules";
 
     /**
@@ -131,22 +136,23 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     }
 
     @Override
-    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
     protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        BasicCachingCalendarAccess connect = (BasicCachingCalendarAccess) connect(session, account, parameters);
+        connect.updateDefaultAlarms();
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
     @Override
-    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) {
         // nothing to do
     }
 
@@ -162,7 +168,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
          */
         JSONObject userConfig = settings.getConfig();
         if (null == userConfig) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(I(-1), I(session.getUserId()), I(session.getContextId()));
         }
         String locale = getLocale(session, userConfig);
         int itemId = getItemId(session, userConfig);
@@ -177,9 +183,9 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         CalendarSettings proposedSettings = new CalendarSettings();
         JSONObject proposedConfig = new JSONObject();
         ExtendedProperties proposedExtendedProperties = new ExtendedProperties();
-        proposedConfig.putSafe(ITEM_ID, itemId);
+        proposedConfig.putSafe(ITEM_ID, I(itemId));
         proposedConfig.putSafe(LOCALE, locale);
-        proposedConfig.putSafe(REFRESH_INTERVAL, refreshInterval);
+        proposedConfig.putSafe(REFRESH_INTERVAL, L(refreshInterval));
         if (null != color) {
             proposedExtendedProperties.add(COLOR(color, false));
         }
@@ -205,7 +211,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
         String locale = getLocale(session, userConfig);
         userConfig.putSafe(SchedJoulesFields.LOCALE, locale);
-        userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, getRefreshInterval(session, userConfig));
+        userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, L(getRefreshInterval(session, userConfig)));
 
         JSONObject item = fetchItem(session.getContextId(), getItemId(session, userConfig), locale);
         /*
@@ -214,17 +220,17 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         JSONObject internalConfig = new JSONObject();
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue)) {
-            internalConfig.putSafe(SchedJoulesFields.COLOR, colorValue);
+            internalConfig.putSafe(CommonCalendarConfigurationFields.COLOR, colorValue);
         }
         Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
         if (null != usedForSync && CachingCalendarUtils.canBeUsedForSync(PROVIDER_ID, session)) {
-            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, usedForSync.booleanValue());
+            internalConfig.putSafe(USED_FOR_SYNC_LITERAL, B(usedForSync.booleanValue()));
         }
         try {
             if (Strings.isNotEmpty(settings.getName())) {
-                internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
+                internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, settings.getName());
             } else {
-                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
+                internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, item.getString(CommonCalendarConfigurationFields.NAME));
             }
 
             internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
@@ -249,12 +255,12 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         boolean changed = applyLocaleChange(session, account, settings, internalConfig);
         // Check & apply changes to extended properties
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
-        if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(SchedJoulesFields.COLOR))) {
-            internalConfig.putSafe(SchedJoulesFields.COLOR, colorValue);
+        if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(CommonCalendarConfigurationFields.COLOR))) {
+            internalConfig.putSafe(CommonCalendarConfigurationFields.COLOR, colorValue);
             changed = true;
         }
-        if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt(SchedJoulesFields.NAME))) {
-            internalConfig.putSafe(SchedJoulesFields.NAME, settings.getName());
+        if (Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt(CommonCalendarConfigurationFields.NAME))) {
+            internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, settings.getName());
             changed = true;
         }
         Boolean usedForSync = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
@@ -270,13 +276,8 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return changed ? internalConfig : null;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#triggerCacheInvalidation(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
-     */
     @Override
-    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) {
         return false;
     }
 
@@ -307,11 +308,11 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             if (false == l.equals(locale)) {
                 JSONObject item = fetchItem(session.getContextId(), getItemId(session, account, userConfig), locale);
                 internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
-                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
+                internalConfig.putSafe(CommonCalendarConfigurationFields.NAME, item.getString(CommonCalendarConfigurationFields.NAME));
                 return true;
             }
         } catch (MalformedURLException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(e, account.getAccountId());
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(e, I(account.getAccountId()));
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -360,7 +361,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     private int getItemId(Session session, JSONObject userConfig) throws OXException {
         int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
         if (0 == itemId) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(I(-1), I(session.getUserId()), I(session.getContextId()));
         }
         return itemId;
     }
@@ -376,7 +377,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     private long getRefreshInterval(Session session, JSONObject userConfig) throws OXException {
         long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
         if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(I(-1), I(session.getUserId()), I(session.getContextId()));
         }
         return refreshInterval;
     }
@@ -394,17 +395,17 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             SchedJoulesService schedJoulesService = Services.getService(SchedJoulesService.class);
             JSONValue jsonValue = schedJoulesService.getPage(contextId, itemId, locale, Collections.emptySet()).getData();
             if (!jsonValue.isObject()) {
-                throw SchedJoulesProviderExceptionCodes.PAGE_DOES_NOT_DENOTE_TO_JSON.create(itemId);
+                throw SchedJoulesProviderExceptionCodes.PAGE_DOES_NOT_DENOTE_TO_JSON.create(I(itemId));
             }
 
             JSONObject page = jsonValue.toObject();
             if (!page.hasAndNotNull(SchedJoulesFields.URL)) {
-                throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(itemId);
+                throw SchedJoulesProviderExceptionCodes.NO_CALENDAR.create(I(itemId));
             }
             return page;
         } catch (OXException e) {
             if (SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.equals(e)) {
-                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, itemId);
+                throw SchedJoulesProviderExceptionCodes.CALENDAR_DOES_NOT_EXIST.create(e, I(itemId));
             }
             throw e;
         }

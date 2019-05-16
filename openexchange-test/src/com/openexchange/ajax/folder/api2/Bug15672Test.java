@@ -81,6 +81,7 @@ public class Bug15672Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -95,6 +96,7 @@ public class Bug15672Test extends AbstractAJAXSession {
         response.fillObject(folder);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

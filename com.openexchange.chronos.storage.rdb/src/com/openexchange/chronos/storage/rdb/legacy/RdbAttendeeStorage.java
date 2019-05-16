@@ -83,6 +83,7 @@ import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.AttendeeMapper;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -358,16 +359,16 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         /*
                          * invalid calendar user; possibly a no longer existing user - add as external attendee as fallback if possible
                          */
-                        Attendee externalAttendee = asExternal(userAttendee);
+                        Attendee externalAttendee = CalendarUtils.asExternal(userAttendee, AttendeeMapper.getInstance().getMappedFields());
                         if (null == externalAttendee) {
-                            externalAttendee = asExternal(find(internalAttendees, userAttendee.getEntity()));
+                            externalAttendee = CalendarUtils.asExternal(find(internalAttendees, userAttendee.getEntity()), AttendeeMapper.getInstance().getMappedFields());
                         }
                         if (null != externalAttendee) {
                             attendees.add(entityResolver.applyEntityData(externalAttendee));
                             String message = "Falling back to external attendee representation for non-existent user " + userAttendee;
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
+                            addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, message, e);
                         } else {
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + userAttendee, e);
+                            addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.NORMAL, "Skipping non-existent user " + userAttendee, e);
                         }
                         continue;
                     }
@@ -394,13 +395,13 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         /*
                          * no suitable entry in prg_date_rights (anymore), skip attendee
                          */
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping orphaned user attendee " + userAttendee, null);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping orphaned user attendee " + userAttendee, null);
                     } else {
                         /*
                          * no suitable entry in prg_date_rights (anymore), take over as individual user attendee
                          */
                         attendees.add(userAttendee);
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Preserving orphaned user attendee " + userAttendee, null);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Preserving orphaned user attendee " + userAttendee, null);
                     }
                 }
             }
@@ -415,7 +416,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                         /*
                          * duplicate calendar user; just skip
                          */
-                        addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping duplicate " + internalAttendee, null);
+                        addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, "Skipping duplicate " + internalAttendee, null);
                         continue;
                     }
                     try {
@@ -425,7 +426,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                             /*
                              * invalid calendar user; possibly a no longer existing group or resource - skip
                              */
-                            addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, "Skipping non-existent " + internalAttendee, e);
+                            addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.MINOR, "Skipping non-existent " + internalAttendee, e);
                             continue;
                         }
                         throw e;
@@ -464,7 +465,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
                 CalendarUserType probedCUType = entityResolver.probeCUType(entity);
                 if (null != probedCUType && false == probedCUType.equals(cuType)) {
                     String message = "Auto-correcting stored calendar user type for " + internalAttendee + " to \"" + probedCUType + '"';
-                    addInvalidDataWaring(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, message, e);
+                    addInvalidDataWarning(eventId, EventField.ATTENDEES, ProblemSeverity.TRIVIAL, message, e);
                     internalAttendee.setCuType(probedCUType);
                     return internalAttendee;
                 }
@@ -610,7 +611,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         };
         int updated = 0;
         for (String deleteStatement : deleteStatements) {
-            String sql = new StringBuilder().append(deleteStatement).append(getPlaceholders(objectIDs.size())).append(';').toString();
+            String sql = new StringBuilder().append(deleteStatement).append(Databases.getPlaceholders(objectIDs.size())).append(';').toString();
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 int parameterIndex = 1;
                 stmt.setInt(parameterIndex++, contextID);
@@ -852,26 +853,6 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             }
             return entity;
         }
-    }
-
-    /**
-     * Initializes a new attendee based on the supplied internal attendee and copies over all properties, excluding the internal entity identifier field.
-     *
-     * @param internalAttendee The internal attendee to get an external representation for
-     * @return The external attendee, or <code>null</code> if no external representation is possible due to missing mandatory data
-     */
-    private static Attendee asExternal(Attendee internalAttendee) throws OXException {
-        if (null == internalAttendee) {
-            return null;
-        }
-        String email = CalendarUtils.extractEMailAddress(internalAttendee.getUri());
-        if (Strings.isEmpty(email)) {
-            return null;
-        }
-        Attendee attendee = AttendeeMapper.getInstance().copy(internalAttendee, new Attendee(), AttendeeMapper.getInstance().getMappedFields());
-        attendee.removeEntity();
-        attendee.setUri(CalendarUtils.getURI(email));
-        return attendee;
     }
 
     /**

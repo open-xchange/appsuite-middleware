@@ -78,7 +78,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class ConfigActivator extends HousekeepingActivator {
 
-    private volatile ServiceReference<ManagedService> managedServiceReference;
+    private ServiceReference<ManagedService> managedServiceReference;
 
     /**
      * Default constructor
@@ -93,7 +93,7 @@ public final class ConfigActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
         logger.info("starting bundle: com.openexchange.configread");
         try {
@@ -147,7 +147,7 @@ public final class ConfigActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ConfigActivator.class);
         logger.info("stopping bundle: com.openexchange.configread");
         try {
@@ -158,7 +158,7 @@ public final class ConfigActivator extends HousekeepingActivator {
                 managedServiceReference = null;
             }
 
-            cleanUp();
+            super.stopBundle();
             FileWatcher.dropTimer();
             ConfigurationImpl.setConfigReference(null);
         } catch (Throwable t) {

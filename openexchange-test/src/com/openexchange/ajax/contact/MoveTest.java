@@ -62,8 +62,8 @@ import com.openexchange.groupware.container.FolderObject;
 public class MoveTest extends AbstractContactTest {
 
     private FolderObject folder;
-    private Integer targetFolder;
-    private Integer objectId;
+    private int targetFolder = -1;
+    private int objectId = -1;
 
     @Test
     public void testMove2PrivateFolder() throws Exception {
@@ -111,7 +111,7 @@ public class MoveTest extends AbstractContactTest {
     @After
     public void tearDown() throws Exception {
         try {
-            if (objectId != null && targetFolder != null) {
+            if (objectId > 0 && targetFolder > 0) {
                 deleteContact(objectId, targetFolder, true);
             }
             if (folder != null) {

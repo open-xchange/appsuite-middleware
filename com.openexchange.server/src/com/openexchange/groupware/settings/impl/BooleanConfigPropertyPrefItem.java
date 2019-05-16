@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.impl;
 
 import com.openexchange.config.ConfigurationService;
 
-
 /**
  * {@link BooleanConfigPropertyPrefItem}
  *
@@ -61,17 +60,16 @@ public class BooleanConfigPropertyPrefItem extends ConfigurationPropertyPreferen
 
     private static final String TRUE = "true";
 
-    public BooleanConfigPropertyPrefItem(String key, ConfigurationService config, String...path) {
+    public BooleanConfigPropertyPrefItem(String key, ConfigurationService config, String... path) {
         super(key, config, path);
     }
 
     @Override
     public Object convert(String property) {
-        if(property == null) {
+        if (property == null) {
             return null;
         }
-        return TRUE.equalsIgnoreCase(property);
+        return TRUE.equalsIgnoreCase(property) ? Boolean.TRUE : Boolean.FALSE;
     }
-
 
 }

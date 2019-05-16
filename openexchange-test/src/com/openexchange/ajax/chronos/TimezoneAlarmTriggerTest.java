@@ -57,6 +57,7 @@ import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
@@ -82,6 +83,12 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
         super();
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        eventManager = new EventManager(defaultUserApi, folderId);
+    }
+    
     @Test
     public void testTrigger() throws ApiException, ParseException, ChronosApiException {
         int currentTriggers = getAlarmTriggers().size();
@@ -99,8 +106,8 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 1. Test alarm related to start
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"), folderId);
-            EventData event = eventManager.createEvent(toCreate);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"), folderId);
+            EventData event = eventManager.createEvent(toCreate, true);
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
@@ -117,8 +124,8 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 2. Test alarm related to end
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END), folderId);
-            EventData event = eventManager.createEvent(toCreate);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END), folderId);
+            EventData event = eventManager.createEvent(toCreate, true);
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
@@ -145,8 +152,8 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 1. Test alarm related to start
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"), folderId);
-            EventData event = eventManager.createEvent(toCreate);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"), folderId);
+            EventData event = eventManager.createEvent(toCreate, true);
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
@@ -163,8 +170,8 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 2. Test alarm related to end
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.END), folderId);
-            EventData event = eventManager.createEvent(toCreate);
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.END), folderId);
+            EventData event = eventManager.createEvent(toCreate, true);
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days

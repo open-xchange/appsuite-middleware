@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.spi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
@@ -147,7 +148,8 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractOIDCBackend implements OIDCBackend {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackend.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackend.class);
 
     protected static final String AUTH_RESPONSE = "auth_response";
 
@@ -294,7 +296,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (null == idToken) {
             throw OXException.general("Missing IDToken");
         }
-        
+
         String subject = "";
         try {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
@@ -317,17 +319,19 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
         LOG.trace("loadUserFromServer(String subject: {})", subject);
         ContextService contextService = Services.getService(ContextService.class);
+        UserService userService = Services.getService(UserService.class);
         String[] userData = subject.split("@");
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
         }
         int contextId = contextService.getContextId(userData[1]);
-        return new AuthenticationInfo(contextId, Integer.parseInt(userData[0]));
+        int userId = userService.getUserId(userData[0], contextService.getContext(contextId));
+        return new AuthenticationInfo(contextId, userId);
     }
 
     @Override
     public void updateSession(Session session, Map<String, String> tokenMap) throws OXException {
-        LOG.trace("updateSession(Session session: {}, Map<String, String> tokenMap.size(): {})", session.getSessionID(), tokenMap.size());
+        LOG.trace("updateSession(Session session: {}, Map<String, String> tokenMap.size(): {})", session.getSessionID(), I(tokenMap.size()));
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (lock == null) {
             lock = Session.EMPTY_LOCK;
@@ -489,7 +493,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     private void handleException(HttpServletResponse response, boolean respondWithJson, OXException oxException, int sc) throws OXException, IOException {
-        LOG.trace("handleException (HttpServletResponse response, boolean respondWithJson {}, OXException oxException {}, int sc {})", respondWithJson, oxException, sc);
+        LOG.trace("handleException (HttpServletResponse response, boolean respondWithJson {}, OXException oxException {}, int sc {})", respondWithJson ? Boolean.TRUE : Boolean.FALSE, oxException, I(sc));
         if (respondWithJson) {
             throw oxException;
         }
@@ -497,7 +501,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     private boolean performCookieLogin(HttpServletRequest request, HttpServletResponse response, Reservation reservation, boolean respondWithJson) throws IOException {
-        LOG.trace("performCookieLogin(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), respondWithJson);
+        LOG.trace("performCookieLogin(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), respondWithJson ? Boolean.TRUE : Boolean.FALSE);
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.getBackendConfig().autologinCookieMode());
 
         if (autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT) {
@@ -511,8 +515,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         return false;
     }
 
-    private boolean getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Reservation reservation, Cookie oidcAtologinCookie, boolean respondWithJson) throws OXException, IOException {
-        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, Cookie oidcAtologinCookie: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null", respondWithJson);
+    private boolean getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Reservation reservation, Cookie oidcAtologinCookie, boolean respondWithJson) throws IOException {
+        LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, Cookie oidcAtologinCookie: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null", respondWithJson ? Boolean.TRUE : Boolean.FALSE);
         if (oidcAtologinCookie != null) {
             try {
                 Session session = OIDCTools.getSessionFromAutologinCookie(oidcAtologinCookie, request);
@@ -553,8 +557,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LOG.trace("writeSessionDataAsJson(Session session {}, HttpServletResponse response)", session.getSessionID());
         JSONObject json = new JSONObject();
         json.putSafe("session", session.getSessionID());
-        json.putSafe("user_id", session.getUserId());
-        json.putSafe("context_id", session.getContextId());
+        json.putSafe("user_id", I(session.getUserId()));
+        json.putSafe("context_id", I(session.getContextId()));
         response.setStatus(HttpServletResponse.SC_OK);
         response.setCharacterEncoding(Charsets.UTF_8_NAME);
         response.setContentType("application/json");
@@ -564,7 +568,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     private LoginResult loginUser(HttpServletRequest request, final Context context, final User user, final Map<String, String> state, final String oidcAutologinCookieValue) throws OXException {
-        LOG.trace("loginUser(HttpServletRequest request: {}, final Context context: {}, final User user: {}, final Map<String, String> state.size: {}, final String oidcAutologinCookieValue: {})", request.getRequestURI(), context.getContextId(), user.getId(), state.size(), oidcAutologinCookieValue);
+        LOG.trace("loginUser(HttpServletRequest request: {}, final Context context: {}, final User user: {}, final Map<String, String> state.size: {}, final String oidcAutologinCookieValue: {})", request.getRequestURI(), I(context.getContextId()), I(user.getId()), I(state.size()), oidcAutologinCookieValue);
         final LoginRequest loginRequest = this.getLoginRequest(request, user.getId(), context.getContextId(), getLoginConfiguration());
 
         return LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
@@ -592,8 +596,8 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         });
     }
 
-    private Authenticated getDefaultAuthenticated(final Context context, final User user) {
-        LOG.trace("getDefaultAuthenticated(final Context context: {}, final User user: {})", context.getContextId(), user.getId());
+    Authenticated getDefaultAuthenticated(final Context context, final User user) {
+        LOG.trace("getDefaultAuthenticated(final Context context: {}, final User user: {})", I(context.getContextId()), I(user.getId()));
         return new Authenticated() {
 
             @Override
@@ -638,7 +642,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     }
 
     private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, JSONException {
-        LOG.trace("sendRedirect(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response, boolean respondWithJson {})", session.getSessionID(), request.getRequestURI(), respondWithJson);
+        LOG.trace("sendRedirect(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response, boolean respondWithJson {})", session.getSessionID(), request.getRequestURI(), respondWithJson ? Boolean.TRUE : Boolean.FALSE);
         if (respondWithJson) {
             this.writeSessionDataAsJson(session, response);
         } else {

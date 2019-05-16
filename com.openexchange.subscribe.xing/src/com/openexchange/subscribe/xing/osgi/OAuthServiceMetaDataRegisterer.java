@@ -52,6 +52,7 @@ package com.openexchange.subscribe.xing.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthServiceMetaData;
 
 /**
@@ -73,7 +74,7 @@ public class OAuthServiceMetaDataRegisterer implements ServiceTrackerCustomizer<
      */
     public OAuthServiceMetaDataRegisterer(final BundleContext context, final XingSubscribeActivator activator) {
         super();
-        xingIdentifier = "com.openexchange.oauth.xing";
+        xingIdentifier = KnownApi.XING.getServiceId();
         this.context = context;
         this.activator = activator;
     }

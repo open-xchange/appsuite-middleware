@@ -307,14 +307,16 @@ public abstract class ComposedMailMessage extends MailMessage {
                     } else if (ComposedPartType.DATA.equals(composedMailPart.getType())) {
                         ((DataMailPart) (composedMailPart)).close();
                     } else if (ComposedPartType.FILE.equals(composedMailPart.getType())) {
-                        final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
-                        if (f.exists() && !f.delete()) {
-                            LOG.warn("Temporary store file '{}' could not be deleted.", f.getName());
+                        if (composedMailPart instanceof UploadFileMailPart) {
+                            final File f = ((UploadFileMailPart) (composedMailPart)).getUploadFile();
+                            if (f.exists() && !f.delete()) {
+                                LOG.warn("Temporary store file '{}' could not be deleted.", f.getName());
+                            }
                         }
                     }
                 }
             }
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error("", e);
         }
     }

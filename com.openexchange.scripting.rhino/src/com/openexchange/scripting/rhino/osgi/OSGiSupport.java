@@ -83,7 +83,7 @@ public class OSGiSupport {
 		}
 	}
 
-	public OSGiSupport register(String service, final Scriptable implementation) throws ClassNotFoundException {
+	public OSGiSupport register(String service, final Scriptable implementation) {
 		try {
 			Context cx = Context.enter();
 
@@ -100,10 +100,11 @@ public class OSGiSupport {
 	}
 
 	private static final class Expectation {
-		private ServiceTracker tracker = null;
-		private Object service = null;
+
+		private ServiceTracker<Object, Object> tracker = null;
+		Object service = null;
 		private List<Expectation> otherExpectations;
-		private BundleContext context;
+		BundleContext context;
 		private Function function;
 		private Scriptable scope;
 		private boolean tracking;
@@ -112,25 +113,24 @@ public class OSGiSupport {
 			this.context = context;
 			this.otherExpectations = otherExpectations;
 			final Expectation that = this;
-			this.tracker = new ServiceTracker(context, serviceType, new ServiceTrackerCustomizer() {
+			this.tracker = new ServiceTracker<>(context, serviceType, new ServiceTrackerCustomizer<Object, Object>() {
 
 				@Override
-				public Object addingService(ServiceReference reference) {
+				public Object addingService(ServiceReference<Object> reference) {
 					that.service = that.context.getService(reference);
 					that.resolve();
 					return that.service;
 				}
 
 				@Override
-				public void modifiedService(ServiceReference reference,
-						Object service) {
+				public void modifiedService(ServiceReference<Object> reference, Object service) {
 					// Nothing to do
 
 				}
 
 				@Override
-				public void removedService(ServiceReference reference,
-						Object service) {
+				public void removedService(ServiceReference<Object> reference, Object service) {
+				    that.context.ungetService(reference);
 				}
 			});
 			this.scope = scope;
@@ -143,10 +143,9 @@ public class OSGiSupport {
 			for (Expectation e : otherExpectations) {
 				if (!e.isSatisfied()) {
 					return;
-				} else {
-					args[i++] = e.service;
-					e.stop();
 				}
+                args[i++] = e.service;
+                e.stop();
 			}
 			try {
 				Context cx = Context.enter();

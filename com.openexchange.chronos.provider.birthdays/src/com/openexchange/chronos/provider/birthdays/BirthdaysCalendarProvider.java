@@ -51,12 +51,15 @@ package com.openexchange.chronos.provider.birthdays;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,9 +76,12 @@ import com.openexchange.chronos.provider.AdministrativeCalendarProvider;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.AlarmHelper;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
@@ -100,7 +106,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoProvisioningCalendarProvider, AdministrativeCalendarProvider {
 
     /** The identifier of the calendar provider */
-    public static final String PROVIDER_ID = "birthdays";
+    public static final String PROVIDER_ID = CalendarProviders.ID_BIRTHDAYS;
 
     private final ServiceLookup services;
 
@@ -211,7 +217,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         if (Strings.isNotEmpty(settings.getName())) {
             internalConfig.putSafe("name", settings.getName());
         }
-        internalConfig.putSafe("subscribed", settings.isSubscribed());
+        internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
         return internalConfig;
     }
 
@@ -229,10 +235,21 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
         if (settings.containsExtendedProperties()) {
+
             Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
             if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt("color"))) {
                 internalConfig.putSafe("color", colorValue);
                 changed = true;
+            }
+            if (settings.getExtendedProperties().contains(USED_FOR_SYNC_LITERAL)) {
+                Boolean value = optPropertyValue(settings.getExtendedProperties(), USED_FOR_SYNC_LITERAL, Boolean.class);
+                if (false == Objects.equals(value, internalConfig.opt(USED_FOR_SYNC_LITERAL))) {
+                    if (Boolean.TRUE.equals(value) && false == CachingCalendarUtils.canBeUsedForSync(BirthdaysCalendarProvider.PROVIDER_ID, session, true)) {
+                        throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(USED_FOR_SYNC_LITERAL);
+                    }
+                    internalConfig.putSafe(USED_FOR_SYNC_LITERAL, value);
+                    changed = true;
+                }
             }
         }
         if (settings.containsName() && Strings.isNotEmpty(settings.getName()) && false == settings.getName().equals(internalConfig.opt("name"))) {
@@ -240,7 +257,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
             changed = true;
         }
         if (settings.containsSubscribed() && settings.isSubscribed() != internalConfig.optBoolean("subscribed", true)) {
-            internalConfig.putSafe("subscribed", settings.isSubscribed());
+            internalConfig.putSafe("subscribed", B(settings.isSubscribed()));
             changed = true;
         }
         return changed ? internalConfig : null;
@@ -341,11 +358,12 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
             event = eventConverter.getSeriesMaster(contact);
         }
 
-        return new AlarmHelper(services, context, account).applyAlarms(event);
+        AlarmHelper alarmHelper = new AlarmHelper(services, context, account);
+        return alarmHelper.applyAlarms(event);
     }
 
     @Override
-    public void touchEvent(Context context, CalendarAccount account, String eventId) throws OXException {
+    public void touchEvent(Context context, CalendarAccount account, String eventId) {
         // nothing to do
     }
 

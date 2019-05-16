@@ -62,6 +62,8 @@ import com.openexchange.ajax.requesthandler.HTTPRequestInputStreamProvider;
  */
 public class UploadActionBodyParser implements BodyParser{
 
+    private static final String UPLOAD = "upload";
+    private static final String DRIVE = "drive";
     private static final UploadActionBodyParser INSTANCE = new UploadActionBodyParser();
 
     @Override
@@ -76,7 +78,7 @@ public class UploadActionBodyParser implements BodyParser{
 
     @Override
     public boolean accepts(AJAXRequestData requestData) {
-        return requestData.getModule().equals("drive") && requestData.getAction().equals("upload");
+        return DRIVE.equals(requestData.getModule()) && UPLOAD.equals(requestData.getAction());
     }
 
     public static UploadActionBodyParser getInstance() {

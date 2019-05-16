@@ -51,6 +51,7 @@ package com.openexchange.dav.mixins;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.optPropertyValue;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Element;
@@ -227,19 +228,19 @@ public class CalendarColor extends SingleXMLPropertyMixin {
             case "custom":
                 return null;
             case "blue":
-                return 2;
+                return I(2);
             case "purple":
-                return 3;
+                return I(3);
             case "red":
-                return 5;
+                return I(5);
             case "orange":
-                return 6;
+                return I(6);
             case "yellow":
-                return 7;
+                return I(7);
             case "green":
-                return 9;
+                return I(9);
             case "brown":
-                return 10;
+                return I(10);
             default:
                 return null;
         }

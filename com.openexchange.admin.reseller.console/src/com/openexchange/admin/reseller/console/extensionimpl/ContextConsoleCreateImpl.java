@@ -52,8 +52,8 @@ package com.openexchange.admin.reseller.console.extensionimpl;
 import java.util.HashMap;
 import java.util.HashSet;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.console.user.UserAbstraction.CSVConstants;
@@ -76,7 +76,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
         private int index;
 
-        private boolean required;
+        private final boolean required;
 
         private ResellerConstants(final String string, final boolean required) {
             this.string = string;
@@ -104,7 +104,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
 
         @Override
         public void setRequired(boolean required) {
-            this.required = required;
+            throw new UnsupportedOperationException("setRequired() is not supported for ResellerConstants." + this.name() + " enum constant");
         }
 
     }
@@ -237,10 +237,9 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
      *
      * @param addres
      * @return might return null
-     * @throws InvalidDataException
      * @throws OXResellerException
      */
-    private HashSet<Restriction> getRestrictions(final HashSet<Restriction> addres) throws InvalidDataException, OXResellerException {
+    private HashSet<Restriction> getRestrictions(final HashSet<Restriction> addres) throws OXResellerException {
         HashSet<Restriction> restrictions = null;
         if (!addres.isEmpty()) {
             final HashSet<Restriction> dbres = new HashSet<Restriction>();

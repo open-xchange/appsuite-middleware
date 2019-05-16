@@ -113,7 +113,7 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
                 return analysis;
             }
             exceptions = util.getExceptions(master, session);
-            Event existingException = findAndRemoveMatchingException(master, exception, exceptions);
+            Event existingException = findAndRemoveMatchingException(exception, exceptions);
             if (existingException != null) {
                 change.setCurrentEvent(existingException);
                 analysis.recommendActions(ITipAction.IGNORE, ITipAction.ACCEPT_AND_REPLACE);

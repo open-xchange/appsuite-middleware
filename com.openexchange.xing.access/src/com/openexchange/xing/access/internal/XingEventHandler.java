@@ -85,8 +85,8 @@ public final class XingEventHandler implements EventHandler {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
+                        OAuthAccessRegistry registry = registryService.get(KnownApi.XING.getServiceId());
+                        if (registry.removeIfLast(contextId.intValue(), userId.intValue())) {
                             LOG.debug("XING session removed for user {} in context {}", userId, contextId);
                         }
                     }

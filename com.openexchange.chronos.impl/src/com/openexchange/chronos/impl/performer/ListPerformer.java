@@ -52,13 +52,12 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getOccurrence;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
+import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
@@ -66,6 +65,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -115,23 +115,45 @@ public class ListPerformer extends AbstractQueryPerformer {
     }
 
     private List<Event> readEventsInFolder(CalendarFolder folder, List<EventID> eventIDs) throws OXException {
-        Set<String> objectIDs = new HashSet<String>(eventIDs.size());
+        List<String> objectIds = new ArrayList<String>(eventIDs.size());
         for (EventID eventID : eventIDs) {
             if (folder.getId().equals(eventID.getFolderID())) {
-                objectIDs.add(eventID.getObjectID());
+                objectIds.add(eventID.getObjectID());
             }
         }
-        List<Event> events = readEventsInFolder(folder, objectIDs.toArray(new String[objectIDs.size()]), false, null);
+        if (0 == objectIds.size()) {
+            return Collections.emptyList();
+        }
+        /*
+         * get events with reduced fields & load additional event data for post processor dynamically
+         */
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        EventField[] fields = getFieldsForStorage(requestedFields);
+        List<Event> events = storage.getEventStorage().loadEvents(objectIds, fields);
+        events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
+        EventPostProcessor postProcessor = postProcessor(objectIds.toArray(new String[objectIds.size()]), folder.getCalendarUserId(), requestedFields, fields);
+        /*
+         * generate resulting events
+         */
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
+            /*
+             * lookup loaded event data, post-process event & check permissions
+             */
             Event event = find(events, eventID.getObjectID());
+            if (null != event) {
+                event = postProcessor.process(event, folder).getFirstEvent();
+                postProcessor.clear();
+            }
             if (null == event) {
-                continue;
+                continue; // skip
             }
             Check.eventIsVisible(folder, event);
+            Check.eventIsInFolder(event, folder);
+            /*
+             * retrieve targeted event occurrence if specified
+             */
             RecurrenceId recurrenceId = eventID.getRecurrenceID();
-            event.setFolderId(folder.getId());
-            event = anonymizeIfNeeded(session, event);
             if (null != recurrenceId) {
                 if (isSeriesMaster(event)) {
                     if (null != storage.getEventStorage().loadException(event.getId(), recurrenceId, new EventField[] { EventField.ID })) {
@@ -140,7 +162,6 @@ public class ListPerformer extends AbstractQueryPerformer {
                     Event occurrence = getOccurrence(session.getRecurrenceService(), event, recurrenceId);
                     if (null == occurrence) {
                         throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(eventID.getObjectID(), recurrenceId);
-
                     }
                     orderedEvents.add(occurrence);
                 } else if (recurrenceId.equals(event.getRecurrenceId())) {

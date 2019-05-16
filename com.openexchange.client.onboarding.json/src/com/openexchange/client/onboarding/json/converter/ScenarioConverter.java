@@ -131,7 +131,7 @@ public class ScenarioConverter implements ResultConverter {
                     throw ServiceExceptionCode.absentService(OnboardingService.class);
                 }
 
-                Collection<DeviceAwareScenario> scenarios = (Collection<DeviceAwareScenario>) resultObject;
+                @SuppressWarnings("unchecked") Collection<DeviceAwareScenario> scenarios = (Collection<DeviceAwareScenario>) resultObject;
                 JSONArray jScenarios = new JSONArray(scenarios.size());
                 for (DeviceAwareScenario scenario : scenarios) {
                     jScenarios.put(toJson(scenario, requestData, session, onboardingService));

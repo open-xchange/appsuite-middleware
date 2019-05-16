@@ -49,6 +49,8 @@
 
 package com.openexchange.snippet.mime;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
@@ -565,7 +567,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         if (null != quota) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
             if (null != amountQuota && (amountQuota.isExceeded() || amountQuota.willExceed(1))) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
             }
             // Check if size is already exceeded
             Quota sizeQuota = quota.getQuota(QuotaType.SIZE);
@@ -1011,7 +1013,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             {
                 Connection con = databaseService.getWritable(contextId);
                 PreparedStatement stmt = null;
-                boolean rollback = false;
+                int rollback = 0;
                 try {
                     /*-
                      * Update DB, too
@@ -1022,7 +1024,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                      */
                     final String dummyId = "--" + identifier;
                     con.setAutoCommit(false); // BEGIN
-                    rollback = true;
+                    rollback = 1;
                     stmt = con.prepareStatement("INSERT INTO snippet (cid, user, id, accountId, displayName, module, type, shared, lastModified, refId, refType, size) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " + FS_TYPE + ", ?)");
                     int pos = 0;
                     stmt.setInt(++pos, contextId);
@@ -1064,13 +1066,15 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     stmt.setString(++pos, dummyId);
                     stmt.executeUpdate();
                     con.commit(); // COMMIT
-                    rollback = false;
+                    rollback = 2;
                 } finally {
-                    if (rollback) {
-                        Databases.rollback(con);
-                    }
                     Databases.closeSQLStuff(stmt);
-                    Databases.autocommit(con);
+                    if (rollback > 0) {
+                        if (rollback == 1) {
+                            Databases.rollback(con);
+                        }
+                        Databases.autocommit(con);
+                    }
                     databaseService.backWritable(contextId, con);
                 }
             }
@@ -1109,20 +1113,25 @@ public final class MimeSnippetManagement implements SnippetManagement {
             return Collections.emptySet();
         }
 
-        Set<String> set = new HashSet<String>(2);
+        Set<String> result = new HashSet<String>(2);
         do {
             String imageUri = matcher.group(1);
             if (!imageUri.startsWith("cid:")) {
-                ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(imageUri);
-                if (null != imageLocation) {
-                    String imageId = imageLocation.getImageId();
-                    if (null != imageId) {
-                        set.add(imageId);
+                try {
+                    ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(imageUri);
+                    if (null != imageLocation) {
+                        String imageId = imageLocation.getImageId();
+                        if (null != imageId) {
+                            result.add(imageId);
+                        }
                     }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.debug("Unable to find image location for uri: {}", imageUri);
+                    // Probably an external image
                 }
             }
         } while (matcher.find());
-        return set;
+        return result;
     }
 
     private static void deleteSafe(String file, FileStorage fileStorage) {
@@ -1195,7 +1204,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
             deleteSnippet(identifier, userId, contextId, con);
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(MimeSnippetManagement.class);
-            logger.warn("Failed to delete snippet {} for user {} in context {}", identifier, userId, contextId, e);
+            logger.warn("Failed to delete snippet {} for user {} in context {}", identifier, I(userId), I(contextId), e);
         }
     }
 

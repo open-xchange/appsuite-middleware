@@ -79,7 +79,6 @@ public class ExceptionUtils {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionUtils.class);
 
     private static final String MARKER = " ---=== /!\\ ===--- ";
-    private static AtomicReference<Date> lastOOM = new AtomicReference<>();
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be re-thrown and swallows all others.
@@ -112,7 +111,7 @@ public class ExceptionUtils {
      * @param oom The OutOfMemoryError instance
      */
     public static void handleOOM(final OutOfMemoryError oom) {
-        lastOOM.set(new Date());
+        LAST_OOME_REFERENCE.set(new Date());
         String message = oom.getMessage();
         if ("unable to create new native thread".equalsIgnoreCase(message)) {
             if (null == System.getProperties().put("__thread_dump_created", Boolean.TRUE)) {
@@ -261,6 +260,7 @@ public class ExceptionUtils {
      * @param classes The exception classes
      * @return <code>true</code> if any of specified exception (classes) occurs in exception chain; otherwise <code>false</code>
      */
+    @SafeVarargs
     public static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
         if (null == e || null == classes || 0 == classes.length) {
             return false;
@@ -298,10 +298,35 @@ public class ExceptionUtils {
         return null == next ? false : isEitherOf(next, classes);
     }
 
-    public static Date getLastOOM() {
-        if (null == lastOOM) {
+    /**
+     * Extracts the first occurrence of given exception class from exception chain of given {@link Throwable} instance.
+     *
+     * @param e The {@link Throwable} instance whose exception chain is supposed to be traversed
+     * @param clazz The exception class to look-up
+     * @return The first occurrence or <code>null</code>
+     */
+    public static <E extends Exception> E extractFrom(Throwable e, Class<E> clazz) {
+        if (null == e || null == clazz) {
             return null;
         }
-        return lastOOM.get();
+
+        if (clazz.isInstance(e)) {
+            @SuppressWarnings("unchecked") E exc = (E) e;
+            return exc;
+        }
+
+        Throwable next = e.getCause();
+        return null == next ? null : extractFrom(next, clazz);
+    }
+
+    private static final AtomicReference<Date> LAST_OOME_REFERENCE = new AtomicReference<>();
+
+    /**
+     * Gets the date when the last <code>OutOfMemoryError</code> occurred.
+     *
+     * @return The date of last OOME occurrence or <code>null</code>
+     */
+    public static Date getLastOOM() {
+        return LAST_OOME_REFERENCE.get();
     }
 }

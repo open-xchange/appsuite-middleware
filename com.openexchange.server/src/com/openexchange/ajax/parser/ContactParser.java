@@ -123,6 +123,7 @@ public class ContactParser extends CommonParser {
             distributionlist[a].setDisplayname(parseString(entry, ContactFields.DISPLAY_NAME));
             distributionlist[a].setEmailaddress(parseString(entry, DistributionListFields.MAIL));
             distributionlist[a].setEmailfield(parseInt(entry, DistributionListFields.MAIL_FIELD));
+            distributionlist[a].setSortName(parseString(entry, DistributionListFields.SORT_NAME));
         }
         oxobject.setDistributionList(distributionlist);
     }

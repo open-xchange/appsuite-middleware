@@ -104,7 +104,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
      * @param body The body structure information
      * @throws IOException If an I/O error occurs
      */
-    public IMAPMailPart(final ByteArray byteArray, final BODYSTRUCTURE body, final String fullName) throws IOException {
+    public IMAPMailPart(ByteArray byteArray, BODYSTRUCTURE body, String fullName) throws IOException {
         super();
         ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
         try {
@@ -127,7 +127,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
      * @param body The body structure information
      * @throws IOException If an I/O error occurs while loading content
      */
-    public IMAPMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body, final String fullName, final boolean loadContent) throws IOException {
+    public IMAPMailPart(IMAPMessage msg, String sectionId, boolean peek, BODYSTRUCTURE body, String fullName, boolean loadContent) throws IOException {
         super();
         if (loadContent) {
             ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
@@ -158,7 +158,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
 
     @Override
     public void loadContent() throws OXException {
-        final InputStreamProvider inp = this.inProvider;
+        InputStreamProvider inp = this.inProvider;
         if (!(inp instanceof ThresholdInputStreamProvider)) {
             ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
             try {
@@ -177,11 +177,11 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
 
     @Override
     public InputStream getInputStream() throws OXException {
-        final String encoding = getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
+        String encoding = getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
         if (null != encoding) {
             try {
                 return MimeUtility.decode(inProvider.getInputStream(), encoding);
-            } catch (final MessagingException e) {
+            } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
         }
@@ -244,7 +244,7 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
      *
      * @param bodystructure The body structure information
      */
-    public void applyBodyStructure(final BODYSTRUCTURE bodystructure) {
+    public void applyBodyStructure(BODYSTRUCTURE bodystructure) {
         if (null == bodystructure) {
             return;
         }
@@ -287,19 +287,19 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
             }
         }
         {
-            final String encoding = bodystructure.encoding;
+            String encoding = bodystructure.encoding;
             if (null != encoding) {
                 setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, encoding);
             }
         }
         {
-            final String fileName = bodystructure.attachment;
+            String fileName = bodystructure.attachment;
             if (null != fileName) {
                 getContentDisposition().setFilenameParameter(fileName);
             }
         }
         {
-            final int size = bodystructure.size;
+            int size = bodystructure.size;
             if (size > 0) {
                 setSize(size);
             }
@@ -307,25 +307,25 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
     }
 
     @Override
-    public void opened(final ConnectionEvent e) {
+    public void opened(ConnectionEvent e) {
         // Ignore
     }
 
     @Override
-    public void disconnected(final ConnectionEvent e) {
+    public void disconnected(ConnectionEvent e) {
         // Ignore
     }
 
     @Override
-    public void closed(final ConnectionEvent e) {
+    public void closed(ConnectionEvent e) {
         if (ConnectionEvent.CLOSED == e.getType()) {
-            final Object source = e.getSource();
+            Object source = e.getSource();
             if (source instanceof IMAPFolder) {
-                final IMAPFolder imapFolder = (IMAPFolder) source;
+                @SuppressWarnings("resource") IMAPFolder imapFolder = (IMAPFolder) source;
                 if (fullName.equals(imapFolder.getFullName())) {
                     try {
                         loadContent();
-                    } catch (final OXException x) {
+                    } catch (@SuppressWarnings("unused") OXException x) {
                         // Ignore
                     }
                 }

@@ -54,11 +54,12 @@ import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.test.TestInit;
 
-public class AttachmentTest extends AbstractAJAXSession {
+public abstract class AttachmentTest extends AbstractAJAXSession {
 
     protected File testFile = null;
     protected File testFile2 = null;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

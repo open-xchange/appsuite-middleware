@@ -59,6 +59,8 @@ import javax.management.ObjectName;
  */
 public final class Constants {
 
+    public static final String REPORTING_DOMAIN = "com.openexchange.reporting";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Constants.class);
 
     public static final ObjectName REPORTING_NAME = initReportingName();
@@ -82,7 +84,7 @@ public final class Constants {
     private static ObjectName getObjectName(String name) {
         ObjectName retval = null;
         try {
-            retval = new ObjectName("com.openexchange.reporting", "name", name);
+            retval = new ObjectName(REPORTING_DOMAIN, "name", name);
         } catch (MalformedObjectNameException | NullPointerException e) {
             LOG.error("", e);
         }

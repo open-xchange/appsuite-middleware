@@ -49,14 +49,12 @@
 
 package com.openexchange.groupware.update.tools.console;
 
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.groupware.update.UpdateTaskService;
+import com.openexchange.groupware.update.tools.console.comparators.LastModifiedComparator;
 import com.openexchange.tools.console.TableWriter.ColumnFormat;
 import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
@@ -65,6 +63,7 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @deprecated Use {@link ListUpdateTasksCLT} instead. Scheduled to be removed on the next release.
  */
 public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
 
@@ -87,7 +86,7 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      * Initialises a new {@link ListExecutedTasksCLT}.
      */
     public ListExecutedTasksCLT() {
-        super("listExecutedTasks", "Lists executed update tasks of a schema.");
+        super("listExecutedTasks -n <schemaName>" + BASIC_MASTER_ADMIN_USAGE, "Lists executed update tasks of a schema. This command line tool is due to deprecation with the next release. Use the 'listUpdateTasks' instead.");
     }
 
     /*
@@ -97,9 +96,7 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
      */
     @Override
     protected void addOptions(Options options) {
-        Option schemaOption = new Option("n", "name", true, "A valid schema name.");
-        schemaOption.setType(String.class);
-        options.addOption(schemaOption);
+        options.addOption(createArgumentOption("n", "name", "schemaName", String.class, "A valid schema name.", false));
     }
 
     /*
@@ -111,21 +108,7 @@ public final class ListExecutedTasksCLT extends AbstractUpdateTasksCLT<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
         List<Map<String, Object>> executedTasksList = updateTaskService.getExecutedTasksList(schemaName);
-        writeCompositeList(executedTasksList, COLUMNS, FORMATS, new Comparator<List<Object>>() {
-
-            @Override
-            public int compare(List<Object> o1, List<Object> o2) {
-                Object object1 = o1.get(2);
-                Object object2 = o2.get(2);
-                if (null == object1) {
-                    return null == object2 ? 0 : -1;
-                }
-                if (null == object2) {
-                    return 1;
-                }
-                return ((Date) object1).compareTo((Date) object2);
-            }
-        });
+        writeCompositeList(executedTasksList, COLUMNS, FORMATS, new LastModifiedComparator());
         return null;
     }
 

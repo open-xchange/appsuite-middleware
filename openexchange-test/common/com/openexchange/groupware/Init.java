@@ -124,8 +124,6 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderInitialization;
 import com.openexchange.folder.internal.FolderServiceImpl;
 import com.openexchange.group.GroupService;
-import com.openexchange.group.internal.GroupInit;
-import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.configuration.ParticipantConfig;
@@ -164,9 +162,9 @@ import com.openexchange.net.ssl.config.impl.internal.TrustAllSSLConfigurationSer
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.ServiceListings;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
+import com.openexchange.password.mechanism.impl.mech.PasswordMechRegistryImpl;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
-import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -193,6 +191,8 @@ import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.test.TestInit;
+import com.openexchange.threadpool.CorePoolSize;
+import com.openexchange.threadpool.CorePoolSize.Behavior;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.DelegateExecutorService;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
@@ -212,7 +212,7 @@ import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
@@ -283,10 +283,6 @@ public final class Init {
          */
         com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
         /**
-         * Resource storage init
-         */
-        com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
-        /**
          * Notification Configuration
          */
         com.openexchange.groupware.notify.NotificationConfig.getInstance(),
@@ -305,8 +301,6 @@ public final class Init {
         TransportPropertiesInit.getInstance(),
 
         SessiondInit.getInstance(),
-
-        new GroupInit(),
 
     };
 
@@ -550,7 +544,9 @@ public final class Init {
 
     private static void startVersionBundle() throws Exception {
         // Using some static version because access to c.o.version bundle manifest is not possible currently.
-        Version.getInstance().setNumbers(new Numbers("0.0.0", "0"));
+        com.openexchange.version.internal.VersionServiceImpl versionService = new com.openexchange.version.internal.VersionServiceImpl("01.01.2019", new Numbers("0.0.0", "0"));
+        TestServiceRegistry.getInstance().addService(VersionService.class, versionService);
+        services.put(VersionService.class, versionService);
     }
 
     public static void startAndInjectConfigBundle() {
@@ -587,7 +583,7 @@ public final class Init {
         if (null == TestServiceRegistry.getInstance().getService(ThreadPoolService.class)) {
             final ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
             final ThreadPoolProperties props = new ThreadPoolProperties().init(config);
-            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(props.getCorePoolSize(), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior(), 60000, 20000);
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(new CorePoolSize(props.getCorePoolSize(), props.isEnforceCorePoolSize() ? Behavior.AS_IS : Behavior.ADJUST_IF_NEEDED), props.getMaximumPoolSize(), props.getKeepAliveTime(), props.getWorkQueue(), props.getWorkQueueSize(), props.isBlocking(), props.getRefusedExecutionBehavior(), 60000, 20000);
             services.put(ThreadPoolService.class, threadPool);
             TestServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
             ThreadPoolActivator.REF_THREAD_POOL.set(threadPool);
@@ -604,13 +600,14 @@ public final class Init {
 
     private static void startAndInjectBasicServices() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(UserService.class)) {
+            com.openexchange.password.mechanism.osgi.Services.setServiceLookup(LOOKUP);
             final UserService us = new UserServiceImpl(new UserServiceInterceptorRegistry(null) {
 
                 @Override
                 public synchronized List<UserServiceInterceptor> getInterceptors() {
                     return Collections.emptyList();
                 }
-            }, new PasswordMechFactoryImpl());
+            }, new PasswordMechRegistryImpl(TestServiceRegistry.getInstance().getService(ConfigurationService.class)));
             services.put(UserService.class, us);
             TestServiceRegistry.getInstance().addService(UserService.class, us);
         }
@@ -893,7 +890,7 @@ public final class Init {
 
     private static void startAndInjectResourceService() {
         if (null == TestServiceRegistry.getInstance().getService(ResourceService.class)) {
-            final ResourceService resources = ResourceServiceImpl.getInstance();
+            final ResourceService resources = new ResourceServiceImpl();
             services.put(ResourceService.class, resources);
             TestServiceRegistry.getInstance().addService(ResourceService.class, resources);
         }
@@ -901,9 +898,10 @@ public final class Init {
 
     private static void startAndInjectGroupService() {
         if (null == TestServiceRegistry.getInstance().getService(GroupService.class)) {
-            final GroupService us = new GroupServiceImpl();
-            services.put(GroupService.class, us);
-            TestServiceRegistry.getInstance().addService(GroupService.class, us);
+            // TODO properly inject group service
+//            final GroupService us = new GroupServiceImpl();
+//            services.put(GroupService.class, us);
+//            TestServiceRegistry.getInstance().addService(GroupService.class, us);
         }
     }
 

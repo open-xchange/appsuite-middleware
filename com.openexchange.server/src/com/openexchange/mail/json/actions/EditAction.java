@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.AddressException;
@@ -64,7 +65,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
@@ -144,7 +145,7 @@ public final class EditAction extends AbstractMailAction {
                         // Huh... No drafts folder in default account
                         throw MailExceptionCode.FOLDER_NOT_FOUND.create("Drafts");
                     }
-                    LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", accountId, session.getUserId(), session.getContextId());
+                    LOG.warn("Mail account {} for user {} in context {} has no drafts folder. Saving draft to default account's draft folder.", I(accountId), I(session.getUserId()), I(session.getContextId()));
                     // No drafts folder in detected mail account; auto-save to default account
                     accountId = MailAccount.DEFAULT_ID;
                 }
@@ -164,7 +165,7 @@ public final class EditAction extends AbstractMailAction {
                 msgIdentifier = msi.saveDraft(composedMail, false, accountId);
 
                 if (null != csid && null != msgref) {
-                    CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                    OldCompositionSpace space = OldCompositionSpace.getCompositionSpace(csid, session);
                     space.addCleanUp(msgref);
                 }
             }

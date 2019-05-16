@@ -74,8 +74,6 @@ import com.openexchange.session.Session;
  */
 public class RdbContactQuotaProvider implements QuotaProvider {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbContactQuotaProvider.class);
-
     private static final String MODULE_ID = "contact";
 
     public RdbContactQuotaProvider() {
@@ -104,21 +102,21 @@ public class RdbContactQuotaProvider implements QuotaProvider {
 
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
-        if ("0".equals(accountID)) {
-            DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
-            Connection connection = null;
-            try {
-                connection = dbService.getReadOnly(session.getContextId());
-                return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(getAmountQuota(session, new Executor(), connection));
-            } catch (SQLException e) {
-                throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                if (null != connection) {
-                    dbService.backReadOnly(session.getContextId(), connection);
-                }
-            }
-        } else {
+        if (!"0".equals(accountID)) {
             throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
+        }
+
+        DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
+        Connection connection = null;
+        try {
+            connection = dbService.getReadOnly(session.getContextId());
+            return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(getAmountQuota(session, new Executor(), connection));
+        } catch (SQLException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != connection) {
+                dbService.backReadOnly(session.getContextId(), connection);
+            }
         }
     }
 

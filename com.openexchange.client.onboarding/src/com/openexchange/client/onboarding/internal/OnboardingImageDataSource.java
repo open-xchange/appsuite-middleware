@@ -163,7 +163,8 @@ public class OnboardingImageDataSource implements ImageDataSource {
                     properties.put(DataProperties.PROPERTY_NAME, "image." + mimeType.substring(mimeType.indexOf('/') + 1));
 
                     InputStream in = sink.getClosingStream();
-                    SimpleData<D> data = new SimpleData<D>((D) (in), properties);
+                    @SuppressWarnings("unchecked") D d = (D) (in);
+                    SimpleData<D> data = new SimpleData<D>(d, properties);
 
                     error = false;
                     return data;
@@ -192,7 +193,8 @@ public class OnboardingImageDataSource implements ImageDataSource {
                     properties.put(DataProperties.PROPERTY_NAME, file.getName());
 
                     InputStream in = sink.getClosingStream();
-                    SimpleData<D> data = new SimpleData<D>((D) (in), properties);
+                    @SuppressWarnings("unchecked") D d = (D) (in);
+                    SimpleData<D> data = new SimpleData<D>(d, properties);
 
                     error = false;
                     return data;
@@ -240,7 +242,8 @@ public class OnboardingImageDataSource implements ImageDataSource {
                     properties.put(DataProperties.PROPERTY_NAME, null != fileName ? fileName : "image." + mimeType.substring(mimeType.indexOf('/') + 1));
 
                     InputStream in = sink.getClosingStream();
-                    SimpleData<D> data = new SimpleData<D>((D) (in), properties);
+                    @SuppressWarnings("unchecked") D d = (D) (in);
+                    SimpleData<D> data = new SimpleData<D>(d, properties);
 
                     error = false;
                     return data;

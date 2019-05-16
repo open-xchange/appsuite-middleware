@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.ldap.id;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.openexchange.contact.storage.ldap.LdapExceptionCodes;
@@ -74,7 +75,8 @@ public class DynamicIDResolver extends DefaultLdapIDResolver {
         this.storage = storage;
         this.session = session;
         if (session.containsParameter(PARAMETER_LDAP_IDS)) {
-            this.ids = (BiMap<String, Integer>)session.getParameter(PARAMETER_LDAP_IDS);
+            @SuppressWarnings("unchecked") BiMap<String, Integer> biMap = (BiMap<String, Integer>)session.getParameter(PARAMETER_LDAP_IDS);
+            this.ids = biMap;
         } else {
             this.ids = HashBiMap.create();
             session.setParameter(PARAMETER_LDAP_IDS, ids);
@@ -93,7 +95,7 @@ public class DynamicIDResolver extends DefaultLdapIDResolver {
                 }
             }
         }
-        return contactID;
+        return contactID.intValue();
     }
 
     @Override
@@ -108,7 +110,7 @@ public class DynamicIDResolver extends DefaultLdapIDResolver {
                 }
             }
             if (null == ldapID) {
-                throw LdapExceptionCodes.NO_MAPPED_LDAP_ID.create(contactID, folderID, contextID);
+                throw LdapExceptionCodes.NO_MAPPED_LDAP_ID.create(I(contactID), I(folderID), I(contextID));
             }
         }
         return ldapID;

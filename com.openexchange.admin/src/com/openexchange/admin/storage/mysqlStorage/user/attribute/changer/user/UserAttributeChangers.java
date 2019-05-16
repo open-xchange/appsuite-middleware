@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,9 +50,9 @@
 package com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.user;
 
 import static com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorageCommon.isEmpty;
-import java.io.UnsupportedEncodingException;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -66,6 +66,7 @@ import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.Attrib
 import com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.UserAttributeChanger;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.java.Strings;
+import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -77,7 +78,7 @@ import com.openexchange.tools.net.URIParser;
  */
 public class UserAttributeChangers extends AbstractUserAttributeChangers {
 
-    private final AdminCache adminCache;
+    final AdminCache adminCache;
     private static final String TABLE = "user";
 
     /**
@@ -88,11 +89,6 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
         this.adminCache = adminCache;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.storage.mysqlStorage.user.attribute.changer.AbstractUserAttributeChangers#initialiseChangers()
-     */
     @Override
     protected Map<Attribute, UserAttributeChanger> initialiseChangers() {
         Map<UserAttribute, UserAttributeChanger> c = new HashMap<>();
@@ -149,7 +145,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     return false;
                 }
                 int lastChange = passwordExpired.booleanValue() ? 0 : -1;
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, lastChange), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.SHADOW_LAST_CHANGE, I(lastChange)), connection);
             }
         });
         c.put(UserAttribute.IMAP_SERVER, new AbstractUserAttributeChanger() {
@@ -204,8 +200,13 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     return false;
                 }
                 try {
-                    return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.USER_PASSWORD, adminCache.encryptPassword(userData)), connection);
-                } catch (NoSuchAlgorithmException | UnsupportedEncodingException | StorageException e) {
+                    PasswordDetails passwordDetails = adminCache.encryptPassword(userData);
+                    Map<Attribute, Object> attributes = new HashMap<>();
+                    attributes.put(UserAttribute.USER_PASSWORD, passwordDetails.getEncodedPassword());
+                    attributes.put(UserAttribute.SALT, passwordDetails.getSalt());
+                    attributes.put(UserAttribute.PASSWORD_MECH, passwordDetails.getPasswordMech());
+                    return setAttributes(userId, contextId, TABLE, attributes, connection);
+                } catch (StorageException e) {
                     // TODO: throw storage exception?
                 }
                 return false;
@@ -236,7 +237,7 @@ public class UserAttributeChangers extends AbstractUserAttributeChangers {
                     quota_max_temp = quota_max_temp << 20;
                 }
 
-                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.QUOTA, quota_max_temp), connection);
+                return setAttributes(userId, contextId, TABLE, Collections.singletonMap(UserAttribute.QUOTA, L(quota_max_temp)), connection);
             }
         });
         return Collections.unmodifiableMap(c);

@@ -56,8 +56,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordmechs.IPasswordMech;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 
 /**
  * Default file implementation for admin auth.
@@ -84,10 +84,10 @@ public class OXAuthFileStorage extends OXAuthStorageInterface {
            master.getPassword() != null && authdata.getPassword() != null &&
            master.getLogin().equals(authdata.getLogin())) {
             try {
-                PasswordMechFactory factory = AdminServiceRegistry.getInstance().getService(PasswordMechFactory.class);
+                PasswordMechRegistry factory = AdminServiceRegistry.getInstance().getService(PasswordMechRegistry.class);
                 if (factory != null) {
-                    IPasswordMech passwordMech = factory.get(master.getPasswordMech());
-                    return passwordMech.check(authdata.getPassword(), master.getPassword());
+                    PasswordMech passwordMech = factory.get(master.getPasswordMech());
+                    return passwordMech.check(authdata.getPassword(), master.getPassword(), master.getSalt());
                 }
             } catch (OXException e) {
                 log.error("", e);

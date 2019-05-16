@@ -49,8 +49,8 @@
 
 package com.openexchange.mobile.configuration.json.action.sms.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.MalformedURLException;
-import java.util.Map;
 import org.apache.xmlrpc.XmlRpcException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -99,7 +99,7 @@ public class ActionSMS implements ActionService {
 			smssend.setSMSNumber(to_formatted);
 
 		} catch (final Exception e) {
-			LOG.error("Invalid recipient detected. SMS to recipient {} (unformatted nr:{}) could not be send for user {} in context {}", to_formatted, to, userid, cid, e);
+			LOG.error("Invalid recipient detected. SMS to recipient {} (unformatted nr:{}) could not be send for user {} in context {}", to_formatted, to, I(userid), I(cid), e);
 			provisioningResponse.setMessage("Invalid recipient number detected.");
 			provisioningResponse.setSuccess(false);
 		}
@@ -117,22 +117,22 @@ public class ActionSMS implements ActionService {
 
 		// send sms and check response code
 		try {
-			final Map map = smssend.send();
+			smssend.send();
 			if(smssend.wasSuccessfull()){
 				provisioningResponse.setMessage("SMS sent successfully...");
 				provisioningResponse.setSuccess(true);
-				LOG.info("SMS to recipient {} (unformatted nr:{}) sent successfully for user {} in context {}", to_formatted, to, userid, cid);
+				LOG.info("SMS to recipient {} (unformatted nr:{}) sent successfully for user {} in context {}", to_formatted, to, I(userid), I(cid));
 			}else{
 				provisioningResponse.setMessage("SMS could not be sent. Details: "+smssend.getErrorMessage());
 				provisioningResponse.setSuccess(false);
-				LOG.error("API error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid);
+				LOG.error("API error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid));
 			}
 		} catch (final MalformedURLException e) {
-			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid,e);
+			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid), e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
 		} catch (final XmlRpcException e) {
-			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid,e);
+			LOG.error("internal error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, I(userid), I(cid),e);
 			provisioningResponse.setMessage("Internal error occured while sending SMS...");
 			provisioningResponse.setSuccess(false);
 		}

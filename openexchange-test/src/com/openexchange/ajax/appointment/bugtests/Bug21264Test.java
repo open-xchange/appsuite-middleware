@@ -59,7 +59,6 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.exception.OXException;
@@ -76,8 +75,6 @@ import com.openexchange.groupware.container.UserParticipant;
  */
 public final class Bug21264Test extends AbstractAJAXSession {
 
-    @SuppressWarnings("hiding")
-    private AJAXClient client;
     private TimeZone timeZone;
     private Appointment app;
 
@@ -85,10 +82,10 @@ public final class Bug21264Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         timeZone = getClient().getValues().getTimeZone();
         app = new Appointment();
         app.setTitle("Test for bug 21264");
@@ -104,6 +101,7 @@ public final class Bug21264Test extends AbstractAJAXSession {
         response.fillAppointment(app);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Server Bundle
 Bundle-SymbolicName: com.openexchange.drive.impl
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.drive.impl.osgi.DriveActivator
@@ -17,13 +17,14 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.clientinfo,
  com.openexchange.cluster.timer,
  com.openexchange.config,
- com.openexchange.config.cascade,
+ com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.contact,
  com.openexchange.contact.storage,
  com.openexchange.context,
  com.openexchange.conversion,
  com.openexchange.database,
+ com.openexchange.dispatcher,
  com.openexchange.drive,
  com.openexchange.exception,
  com.openexchange.file.storage,

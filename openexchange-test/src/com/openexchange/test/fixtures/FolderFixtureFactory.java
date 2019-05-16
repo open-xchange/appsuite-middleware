@@ -70,7 +70,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
     }
 
     @Override
-    public Fixtures<FolderObject> createFixture(String fixtureName, Map<String, Map<String, String>> entries) {
+    public Fixtures<FolderObject> createFixture(Map<String, Map<String, String>> entries) {
         return new FolderFixtures(entries, fixtureLoader);
     }
 

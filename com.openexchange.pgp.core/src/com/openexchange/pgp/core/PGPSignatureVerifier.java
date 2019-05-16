@@ -49,6 +49,8 @@
 
 package com.openexchange.pgp.core;
 
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -93,6 +95,49 @@ public class PGPSignatureVerifier {
      */
     private PGPPublicKey getPublicKey(PGPSignature signature) throws Exception {
         return this.keyRetrievalStrategy.getPublicKey(signature.getKeyID());
+    }
+
+    /**
+     * Gets the ID of the master key for a given PGPPublicKey
+     *
+     * This method searches for sub-key-binding on the given public key and return the ID of the issuer key.
+     *
+     * @param publicKey The public key to get the master key ID from
+     * @return The ID of the publicKey's master key, or null if the mater key could not be determined.
+     */
+    private static Long getPublicMasterKeyId(PGPPublicKey publicKey) {
+
+        if(publicKey.isMasterKey()) {
+            //The given key is the actual master key
+            return L(publicKey.getKeyID());
+        }
+
+        //Get the subkey binding and return the ID of the master key
+        @SuppressWarnings("rawtypes") Iterator subkeyBinding = publicKey.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
+        if(subkeyBinding.hasNext()) {
+            PGPSignature signature = (PGPSignature)subkeyBinding.next();
+            return L(signature.getKeyID());
+        }
+        return null;
+    }
+
+    /**
+     * Tries to obtain the master key for the given key
+     *
+     * @param key The key to obtain the master key from
+     * @return The key if it is an master key, the master-key obtained from sub-key-binding signatures, or null if no binding found
+     * @throws Exception
+     */
+    private PGPPublicKey getMasterKey(PGPPublicKey key) throws Exception {
+        if(key.isMasterKey()) {
+           return key;
+        }
+        Long masterKeyId = getPublicMasterKeyId(key);
+        if(masterKeyId != null) {
+            return this.keyRetrievalStrategy.getPublicKey(l(masterKeyId));
+        }
+
+        return null;
     }
 
     /**
@@ -152,11 +197,27 @@ public class PGPSignatureVerifier {
             while (iterator.hasNext()) {
                 PGPSignature signature = iterator.next();
                 if(keysForSignature.containsKey(signature)) {
-                    ret.add(new PGPSignatureVerificationResult(signature, signature.verify()));
+                    PGPPublicKey issuerKey = keysForSignature.get(signature);
+                    Iterator<String> userIds = null;
+                    PGPPublicKey masterKey = getMasterKey(issuerKey);
+                    if(masterKey != null) {
+                        userIds = masterKey.getUserIDs();
+                    }
+                    PGPSignatureVerificationResult verificationResult = new PGPSignatureVerificationResult(signature, signature.verify());
+                    verificationResult.setIssuerKey(issuerKey);
+                    if (userIds != null) {
+                        //Adding user-id so that it is possible for a caller to determine who created this signature
+                        while(userIds.hasNext()) {
+                            verificationResult.addIssuerUserId(userIds.next());
+                        }
+                    }
+                    ret.add(verificationResult);
                 }
                 else {
                     //Key not found; KeyRetrievalStrategy is responsible for logging this;
-                    ret.add(new PGPSignatureVerificationResult(signature, false));
+                    final boolean verified = false;
+                    final boolean keyMissing = true;
+                    ret.add(new PGPSignatureVerificationResult(signature, verified, keyMissing));
                 }
             }
             return ret;

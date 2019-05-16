@@ -49,6 +49,7 @@
 
 package com.openexchange.xing.json.actions;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class NewsFeedAction extends AbstractXingAction {
 			}
 		}
 		XingAPI<WebAuthSession> xingAPI = xingOAuthAccess.getXingAPI();
-		Map<String, Object> networkFeed = xingAPI.getNetworkFeed(xingOAuthAccess.getXingUserId(), optAggregate, optSince, optUntil, optUserFields);
+		Map<String, Object> networkFeed = xingAPI.getNetworkFeed(xingOAuthAccess.getXingUserId(), B(optAggregate), optSince, optUntil, optUserFields);
 		JSONObject result = (JSONObject) JSONCoercion.coerceToJSON(networkFeed);
 
 		return new AJAXRequestResult(result);

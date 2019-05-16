@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -130,6 +131,9 @@ public class ContactJSONResultConverter implements ResultConverter {
             	 * result contains a Map<String, List<Contact>> to decide between deleted and modified contacts
             	 */
                 @SuppressWarnings("unchecked") final Map<String, List<Contact>> contactMap = (Map<String, List<Contact>>) resultObject;
+                if (contactMap == null) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(Map.class.getName(), "null");
+                }
                 final List<Contact> modified = contactMap.get("modified");
                 final List<Contact> deleted = contactMap.get("deleted");
                 JSONArray jsonArray = convertListOfContacts(modified, fields, timeZoneID, session);
@@ -142,6 +146,9 @@ public class ContactJSONResultConverter implements ResultConverter {
             	 * A list of contacts to convert
             	 */
                 @SuppressWarnings("unchecked") final List<Contact> contacts = (List<Contact>) resultObject;
+                if (contacts == null) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(Map.class.getName(), "null");
+                }
                 resultObject = convertListOfContacts(contacts, fields, timeZoneID, session);
             }
         }

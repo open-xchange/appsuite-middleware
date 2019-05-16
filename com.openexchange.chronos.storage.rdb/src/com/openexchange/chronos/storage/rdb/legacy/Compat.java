@@ -151,11 +151,11 @@ public class Compat {
                      */
                     String email = CalendarUtils.extractEMailAddress(event.getOrganizer().getUri());
                     if (Strings.isEmpty(email)) {
-                        eventStorage.addInvalidDataWaring(event.getId(), EventField.ORGANIZER, ProblemSeverity.NORMAL, "Skipping non-existent user " + event.getOrganizer(), e);
+                        eventStorage.addInvalidDataWarning(event.getId(), EventField.ORGANIZER, ProblemSeverity.NORMAL, "Skipping non-existent user " + event.getOrganizer(), e);
                         event.setOrganizer(null);
                     } else {
                         String message = "Falling back to external attendee representation for non-existent user " + event.getOrganizer();
-                        eventStorage.addInvalidDataWaring(event.getId(), EventField.ORGANIZER, ProblemSeverity.MINOR, message, e);
+                        eventStorage.addInvalidDataWarning(event.getId(), EventField.ORGANIZER, ProblemSeverity.MINOR, message, e);
                         Organizer organizer = new Organizer();
                         organizer.setUri(CalendarUtils.getURI(email));
                         event.setOrganizer(eventStorage.getEntityResolver().applyEntityData(organizer, CalendarUserType.INDIVIDUAL));
@@ -250,7 +250,7 @@ public class Compat {
                     message += " | " + recurrenceData;
                     recurrenceData = null;
                 }
-                eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.MAJOR, message, e);
+                eventStorage.addInvalidDataWarning(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.MAJOR, message, e);
             }
             /*
              * adjust the recurrence master's actual start- and enddate
@@ -311,7 +311,7 @@ public class Compat {
                     recurrenceId = getRecurrenceID(Services.getService(RecurrenceService.class, true), recurrenceData, recurrencePosition);
                 } catch (OXException e) {
                     if (CalendarExceptionCodes.INVALID_RRULE.equals(e) || CalendarExceptionCodes.INVALID_RECURRENCE_ID.equals(e)) {
-                        eventStorage.addInvalidDataWaring(event.getId(), EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
+                        eventStorage.addInvalidDataWarning(event.getId(), EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence position \"" + recurrencePosition + '"', e);
                     } else {
                         throw e;
                     }
@@ -418,7 +418,7 @@ public class Compat {
                 recurrenceIDs.add(getRecurrenceID(recurrenceService, recurrenceData, date));
             } catch (OXException e) {
                 if (CalendarExceptionCodes.INVALID_RRULE.equals(e) || CalendarExceptionCodes.INVALID_RECURRENCE_ID.equals(e)) {
-                    eventStorage.addInvalidDataWaring(eventId, EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
+                    eventStorage.addInvalidDataWarning(eventId, EventField.RECURRENCE_ID, ProblemSeverity.MINOR, "Skipping invalid recurrence date position \"" + date.getTime() + '"', e);
                 } else {
                     throw e;
                 }

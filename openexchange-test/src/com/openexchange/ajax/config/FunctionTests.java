@@ -79,6 +79,7 @@ public class FunctionTests extends AbstractAJAXSession {
 
     private AJAXClient client;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -93,7 +94,7 @@ public class FunctionTests extends AbstractAJAXSession {
     @Test
     public void testMaxUploadIdleTimeout() throws Throwable {
         final int value = client.execute(new GetRequest(Tree.MaxUploadIdleTimeout)).getInteger();
-        LOG.info("Max upload idle timeout: {}", value);
+        LOG.info("Max upload idle timeout: {}", I(value));
         assertTrue("Got no value for the maxUploadIdleTimeout configuration " + "parameter.", value > 0);
     }
 

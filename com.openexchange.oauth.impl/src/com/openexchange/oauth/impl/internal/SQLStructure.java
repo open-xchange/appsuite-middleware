@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -90,7 +91,7 @@ public class SQLStructure {
         SERVICE_ID("serviceId"),
         SCOPE("scope"),
         IDENTITY("identity");
-        
+
         public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
 
         private final Column column;
@@ -136,7 +137,7 @@ public class SQLStructure {
                     Set<OAuthScope> enabledScopes = account.getEnabledScopes();
                     String[] scopes = new String[enabledScopes.size()];
                     int index = 0;
-                    for (OAuthScope s : enabledScopes){ 
+                    for (OAuthScope s : enabledScopes){
                         scopes[index++] = s.getOXScope().name();
                     }
                     return Strings.concat(" ", scopes);
@@ -174,7 +175,7 @@ public class SQLStructure {
 
     /**
      * Performs an UPDATE for the specified account.
-     * 
+     *
      * @param account The account
      * @param contextId The context identifier
      * @param user The user identifier
@@ -190,7 +191,7 @@ public class SQLStructure {
                 values.add(o);
             }
         }
-        update.WHERE(new EQUALS(OAUTH_COLUMN.CID.getColumn(), contextId).AND(new EQUALS(OAUTH_COLUMN.ID.getColumn(), account.getId())));
+        update.WHERE(new EQUALS(OAUTH_COLUMN.CID.getColumn(), I(contextId)).AND(new EQUALS(OAUTH_COLUMN.ID.getColumn(), I(account.getId()))));
         return update;
     }
 }

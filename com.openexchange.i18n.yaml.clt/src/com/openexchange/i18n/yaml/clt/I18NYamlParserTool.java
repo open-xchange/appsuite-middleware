@@ -256,4 +256,13 @@ public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
         return "parsei18nyaml";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getContext()
+     */
+    @Override
+    protected Void getContext() {
+        return null;
+    }
 }

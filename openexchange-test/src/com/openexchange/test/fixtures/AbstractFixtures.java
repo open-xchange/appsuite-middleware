@@ -67,18 +67,18 @@ import com.openexchange.test.fixtures.transformators.Transformator;
 public abstract class AbstractFixtures<T> implements Fixtures<T> {
 
     private Class<T> klass = null;
-    private final Map<Class, Transformator> transformators = new HashMap<Class, Transformator>();
+    private final Map<Class<?>, Transformator> transformators = new HashMap<Class<?>, Transformator>();
     private final Map<String, Transformator> attributeTransformators = new HashMap<String, Transformator>();
 
     private final Map<String, List<String>> synonyms = new HashMap<String, List<String>>();
     private final List<String> entryNames;
 
-    public AbstractFixtures(final Class<T> klass, final Map values) {
+    public AbstractFixtures(final Class<T> klass, final Map<String, ?> values) {
         this.klass = klass;
         this.entryNames = new ArrayList<String>(values.keySet());
     }
 
-    public void addTransformator(final Transformator transformator, final Class into) {
+    public void addTransformator(final Transformator transformator, final Class<?> into) {
         transformators.put(into, transformator);
     }
 
@@ -103,7 +103,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         return entryNames;
     }
 
-    protected void apply(final T bean, final Map attributes) throws OXException {
+    protected void apply(final T bean, final Map<String, ?> attributes) throws OXException {
         for (Object o : attributes.keySet()) {
             String value = null;
             if (attributes.containsKey(o) && null != attributes.get(o)) {
@@ -125,9 +125,8 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
                 } catch (IllegalArgumentException e) {
                     if (i < setters.length) {
                         continue;
-                    } else {
-                        throw new FixtureException(e);
                     }
+                    throw new FixtureException(e);
                 } catch (IllegalAccessException e) {
                     throw new FixtureException(e);
                 } catch (InvocationTargetException e) {
@@ -137,7 +136,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         }
     }
 
-    private Transformator getTransformator(final Class aClass, final String attribute) throws OXException {
+    private Transformator getTransformator(final Class<?> aClass, final String attribute) throws OXException {
         if (attributeTransformators.containsKey(attribute)) {
             return attributeTransformators.get(attribute);
         }
@@ -147,25 +146,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         return transformators.get(aClass);
     }
 
-    private Method discoverSetter(final String attribute) throws OXException {
-
-        final List<String> methodNames = new ArrayList<String>();
-        methodNames.add(IntrospectionTools.setterName(attribute));
-        for (String synonym : getSynonyms(attribute)) {
-            methodNames.add(IntrospectionTools.setterName(synonym));
-        }
-
-        for (Method method : klass.getMethods()) {
-            for (String acceptableName : methodNames) {
-                if (method.getName().equalsIgnoreCase(acceptableName) && method.getParameterTypes().length == 1) {
-                    return method;
-                }
-            }
-        }
-        throw new FixtureException("Don't know how to set attribute " + attribute);
-    }
-
-    private Method[] discoverSetters(final String attribute) throws OXException {
+    private Method[] discoverSetters(final String attribute) {
         final List<String> methodNames = new ArrayList<String>();
         methodNames.add(IntrospectionTools.setterName(attribute));
         methodNames.add(IntrospectionTools.adderName(attribute));
@@ -182,16 +163,15 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
         }
         if (0 < methods.size()) {
             return methods.toArray(new Method[methods.size()]);
-        } else {
-            return new Method[0];
         }
+        return new Method[0];
     }
 
     private List<String> getSynonyms(final String attribute) {
         if (synonyms.containsKey(attribute)) {
             return synonyms.get(attribute);
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     private class StringConstructorTransformator implements Transformator {

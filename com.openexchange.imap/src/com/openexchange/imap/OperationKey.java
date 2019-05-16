@@ -168,6 +168,7 @@ public final class OperationKey implements Serializable {
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
+            @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 synchronizeWriteAccesses = null;

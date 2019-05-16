@@ -223,7 +223,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
                 reseller2Types.put(AdvertisementConfigService.RESELLER_ALL, possibleTypes);
             }
         } catch (OXException e) {
-            LOG.error("Unable to reload reseller types: " + e.getMessage(), e);
+            LOG.error("Unable to reload reseller types", e);
             return;
         }
         CacheService cacheService = Services.getService(CacheService.class);
@@ -233,7 +233,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
                 cache = cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION);
                 cache.clear();
             } catch (OXException e) {
-                LOG.error("Unable to clear advertisement cache: " + e.getMessage(), e);
+                LOG.error("Unable to clear advertisement cache", e);
                 return;
             }
 

@@ -56,9 +56,11 @@ package com.openexchange.modules.model;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Attribute<T extends Model<T>> {
-    public Object get(T thing);
-    public void set(T thing, Object value);
 
-    public String getName();
-    public Class getType();
+    Object get(T thing);
+    void set(T thing, Object value);
+
+    String getName();
+    Class<?> getType();
+
 }

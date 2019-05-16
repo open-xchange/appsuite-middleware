@@ -62,29 +62,20 @@ public enum CPType {
     MONTHLYVIEW("MonthView", 3),
     YEARLYVIEW("YearView", 4);
 
-    private String name;
+    private final String name;
+    private final int number;
 
-    private int number;
-
-    public void setName(String name) {
+    private CPType(String name, int number) {
         this.name = name;
+        this.number = number;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setNumber(int number) {
-        this.number = number;
-    }
-
     public int getNumber() {
         return number;
-    }
-
-    CPType(String name, int number) {
-        this.setName(name);
-        this.setNumber(number);
     }
 
     /**

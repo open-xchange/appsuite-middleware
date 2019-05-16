@@ -26,3 +26,28 @@ properties:
     readOnly: true
     items:
       type: string
+  associations:
+    type: array
+    description: The account associations of the OAuth account.
+    readOnly: true
+    items:
+      type: object
+      title: association
+      properties:
+        module: 
+          type: string
+          description: The module of the account.
+        folder:
+          type: string
+          description: The folder of the account.
+        scopes:
+          type: array
+          description: The scopes for this account.
+          items:
+            type: string
+        name:
+          type: string
+          description: The display name of the account.
+        id:
+          type: string
+          description: The account's identifier.

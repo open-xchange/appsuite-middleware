@@ -65,21 +65,21 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 
 /**
- * 
+ *
  * {@link MockRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 public class MockRequest implements AJAXRequest<MockResponse> {
-    
+
     private boolean failOnError = true;
-    private String uri;
-    private InputStream response;
-    private int statusCode;
-    private Map<String, String> responseHeaders;
-    private int delay;
-    private MockRequestMethod method;
+    private final String uri;
+    private final InputStream response;
+    private final int statusCode;
+    private final Map<String, String> responseHeaders;
+    private final int delay;
+    private final MockRequestMethod method;
 
     public MockRequest(String uri, InputStream response) {
         this(uri, response, HttpStatus.SC_OK);
@@ -90,7 +90,7 @@ public class MockRequest implements AJAXRequest<MockResponse> {
     }
 
     public MockRequest(String uri, InputStream response, int statusCode, Map<String, String> responseHeaders) {
-        this(uri, response, statusCode, java.util.Collections.emptyMap(), 0);
+        this(uri, response, statusCode, responseHeaders, 0);
     }
 
     public MockRequest(String uri, InputStream response, int statusCode, Map<String, String> responseHeaders, int delay) {

@@ -62,6 +62,7 @@ import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link DriveTemp}
@@ -69,12 +70,12 @@ import com.openexchange.file.storage.FileStoragePermission;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DriveTemp {
-	
+
 	private final SyncSession session;
-	
+
 	private Boolean hasParent;
 	private FileStorageFolder parentFolder;
-	
+
     /**
      * Initializes a new {@link DriveTemp}.
      *
@@ -84,7 +85,7 @@ public class DriveTemp {
 		super();
 		this.session = session;
 	}
-	
+
     /**
      * Gets a value indicating whether the special temporary ".drive" folder for uploads is or would be available or not. This method only
      * checks if such a folder would be available based on the synchronization settings, it does not yet create it.
@@ -110,10 +111,10 @@ public class DriveTemp {
     	}
     	return false;
     }
-    
+
     /**
      * Gets the path to the special temporary ".drive" folder, optionally creating it if the folder would be supported and it not yet exists.
-     * 
+     *
      * @return The path to the temporary ".drive" folder, or <code>null</code> if the drive folder is not supported
      */
     public String getPath(boolean createIfNeeded) throws OXException {
@@ -133,13 +134,13 @@ public class DriveTemp {
         }
         return null;
     }
-    
+
     private boolean checkPermissions(FileStorageFolder tempFolder) throws OXException {
         FileStoragePermission ownPermission = tempFolder.getOwnPermission();
         if (null != ownPermission) {
             if (false == ownPermission.isAdmin()) {
                 return false;
-            }            
+            }
             if (FileStoragePermission.CREATE_SUB_FOLDERS > ownPermission.getFolderPermission() ||
                 FileStoragePermission.WRITE_ALL_OBJECTS > ownPermission.getFolderPermission() ||
                 FileStoragePermission.DELETE_ALL_OBJECTS > ownPermission.getDeletePermission()) {
@@ -151,9 +152,9 @@ public class DriveTemp {
                         newPermission.setAdmin(true);
                         newPermission.setAllPermissions(MAX_PERMISSION, MAX_PERMISSION, MAX_PERMISSION, MAX_PERMISSION);
                         newPermission.setEntity(session.getServerSession().getUserId());
-                        newPermissions.add(newPermission);                        
+                        newPermissions.add(newPermission);
                     } else {
-                        newPermissions.add(permission);                        
+                        newPermissions.add(permission);
                     }
                 }
                 DefaultFileStorageFolder toUpdate = new DefaultFileStorageFolder();
@@ -164,36 +165,36 @@ public class DriveTemp {
         }
         return true;
     }
-    
+
     private FileStorageFolder getParentFolder() throws OXException {
     	if (null == parentFolder && null == hasParent) {
     		parentFolder = determineParentForTempFolder(session);
-    		hasParent = null != parentFolder;
+    		hasParent = Autoboxing.valueOf(null != parentFolder);
     	}
     	return parentFolder;
     }
 
     /**
      * Determines a suitable parent folder in which the temporary ".drive" folder might be created (or is already existing in).
-     * 
+     *
      * @param session The sync session
-     * @return The suitable parent folder for the temporary ".drive" folder, or <code>null</code> if there is none 
+     * @return The suitable parent folder for the temporary ".drive" folder, or <code>null</code> if there is none
      */
     private static FileStorageFolder determineParentForTempFolder(SyncSession session) throws OXException {
         /*
          * check configuration first
          */
-        if (false == DriveConfig.getInstance().isUseTempFolder()) {
+        if (false == DriveConfig.getInstance().isUseTempFolder(session.getServerSession().getContextId(), session.getServerSession().getUserId())) {
             session.trace("Temporary folder for upload is disabled by configuration.");
             return null;
-        }        
+        }
     	/*
     	 * determine parent folder for temp folder
     	 */
-    	FileStorageFolder parentFolder = null;            	
+    	FileStorageFolder parentFolder = null;
     	if ("9".equals(session.getRootFolderID())) {
     		/*
-    		 * fall back to temp folder below personal folder in case the root folder points to the root file storage folder 
+    		 * fall back to temp folder below personal folder in case the root folder points to the root file storage folder
     		 */
     		FileStorageFolder personalFolder = null;
     		try {
@@ -203,7 +204,7 @@ public class DriveTemp {
     				session.trace("No personal folder found for root folder \"{}\".");
     			} else {
     				session.trace("Error checking for personal folder: " + e.getMessage());
-    			}            			
+    			}
     		}
     		if (null != personalFolder) {
     			if (null == session.getStorage().getPath(personalFolder.getId())) {
@@ -220,16 +221,16 @@ public class DriveTemp {
     		/*
     		 * try and use root folder as parent by default
     		 */
-    		parentFolder = session.getStorage().getFolder(DriveConstants.ROOT_PATH);            		
+    		parentFolder = session.getStorage().getFolder(DriveConstants.ROOT_PATH);
     	}
     	/*
     	 * check permissions & determine potential temp path
     	 */
-    	if (null == parentFolder || null != parentFolder.getOwnPermission() && 
+    	if (null == parentFolder || null != parentFolder.getOwnPermission() &&
 			FileStoragePermission.CREATE_SUB_FOLDERS > parentFolder.getOwnPermission().getFolderPermission()) {
     		session.trace("Temp folder not available, no suitable parent folder found");
     		return null;
-    	} 
+    	}
     	return parentFolder;
     }
 

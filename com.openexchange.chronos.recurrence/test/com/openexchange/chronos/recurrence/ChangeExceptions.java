@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.recurrence;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -271,7 +272,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         List<Event> changeExceptions = new ArrayList<Event>();
         changeExceptions.add(change);
 
-        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, 3, changeExceptions);
+        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, I(3), changeExceptions);
         int count = 0;
         while (instances.hasNext()) {
             Event instance = instances.next();
@@ -307,7 +308,7 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         List<Event> changeExceptions = new ArrayList<Event>();
         changeExceptions.add(change);
 
-        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, 3, changeExceptions);
+        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, I(3), changeExceptions);
         int count = 0;
         while (instances.hasNext()) {
             Event instance = instances.next();

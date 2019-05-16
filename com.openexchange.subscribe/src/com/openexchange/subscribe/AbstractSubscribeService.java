@@ -49,6 +49,8 @@
 
 package com.openexchange.subscribe;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -124,12 +126,12 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
                 if(userId == -1) {
                     subscriptions.add(subscription);
-                } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId())) {
+                } else if (canSee.containsKey(subscription.getFolderId()) && canSee.get(subscription.getFolderId()).booleanValue()) {
                     subscriptions.add(subscription);
                 } else {
                     final EffectivePermission folderPermission = FOLDERS.get().getFolderPermission(Integer.parseInt(subscription.getFolderId()), userId, context.getContextId());
                     final boolean visible = folderPermission.isFolderVisible() ;
-                    canSee.put(subscription.getFolderId(), visible);
+                    canSee.put(subscription.getFolderId(), B(visible));
                     if(visible) {
                         subscriptions.add(subscription);
                     }
@@ -201,6 +203,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
+    @SuppressWarnings("unused")
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         // Empty body
     }
@@ -208,7 +211,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     @Override
     public boolean knows(final Context ctx, final int subscriptionId) throws OXException {
         final Subscription subscription = STORAGE.get().getSubscription(ctx, subscriptionId);
-        if (subscription == null) {
+        if (subscription == null || subscription.getSource() == null) {
             return false;
         }
         if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
@@ -240,7 +243,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         }
     }
 
-    public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) throws OXException {
+    public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) {
         final SecretEncryptionFactoryService encryptionFactoryService = ENCRYPTION_FACTORY.get();
         if (encryptionFactoryService == null) {
             return;
@@ -398,6 +401,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     /**
      * Override if possible to allow pipelined processing of the subscription's content.
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public SearchIterator<?> loadContent(Subscription subscription) throws OXException {
         Collection<?> collection = getContent(subscription);
@@ -444,7 +448,7 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         for (Subscription existingSubscription : subscriptions) {
             Map<String, Object> existingConfiguration = existingSubscription.getConfiguration();
             if (null != existingConfiguration && isEqualConfiguration(configuration, existingConfiguration)) {
-                throw SubscriptionErrorMessage.DUPLICATE_SUBSCRIPTION.create(subscription.getSource().getId(), subscription.getUserId(), subscription.getContext().getContextId());
+                throw SubscriptionErrorMessage.DUPLICATE_SUBSCRIPTION.create(subscription.getSource().getId(), I(subscription.getUserId()), I(subscription.getContext().getContextId()));
             }
         }
     }

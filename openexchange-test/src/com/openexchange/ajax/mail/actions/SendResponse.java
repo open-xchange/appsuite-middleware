@@ -79,6 +79,7 @@ public final class SendResponse extends AbstractAJAXResponse {
      * @return Folder and ID of sent mail which is located in default "Sent"
      *         folder
      */
+    @SuppressWarnings("unused")
     public String[] getFolderAndID() {
         if (null == folderAndID) {
             final String str;

@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.oauth;
 
 import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager.newInstanceFor;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -208,10 +209,10 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             try {
                 for (FileStorageAccount deleteMe : toDelete) {
                     accountManager.deleteAccount(deleteMe, session);
-                    LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), iUserId, iContextId);
+                    LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getDisplayName(), deleteMe.getId(), iUserId, iContextId);
                     boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId(), id);
                     if (purged) {
-                        LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), iUserId, iContextId);
+                        LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getDisplayName(), deleteMe.getId(), iUserId, iContextId);
                     }
                 }
             } finally {
@@ -219,7 +220,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 session.setParameter(OAuthConstants.SESSION_PARAM_UPDATE_SCOPES, null);
             }
         } catch (Exception e) {
-            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getName(), Integer.valueOf(id), iUserId, iContextId, e);
+            LOG.warn("Could not delete possibly existing {} accounts associated with deleted OAuth account {} for user {} in context {}", api.getDisplayName(), Integer.valueOf(id), iUserId, iContextId, e);
         }
     }
 
@@ -230,7 +231,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onBeforeFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
@@ -241,7 +242,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageAccountDeleteListener#onAfterFileStorageAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
      */
     @Override
@@ -273,7 +274,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
                 account = storage.getAccount(session, accountId);
             } catch (OXException e) {
                 if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
-                    LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, session.getUserId(), session.getContextId());
+                    LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", I(accountId), I(session.getUserId()), I(session.getContextId()));
                     return;
                 }
                 throw e;
@@ -298,7 +299,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Fetches the optional updateScopes session parameter and evaluates it's value
-     * 
+     *
      * @param session the session
      * @return The value of the optional 'updateScopes' session parameter. Returns <code>true</code> as fall-back.
      */
@@ -308,10 +309,10 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             return true;
         }
         if (updateScopesValue instanceof Boolean) {
-            return (boolean) updateScopesValue;
+            return ((Boolean) updateScopesValue).booleanValue();
         }
         if (updateScopesValue instanceof String) {
-            return Boolean.valueOf((String) updateScopesValue);
+            return Boolean.parseBoolean((String) updateScopesValue);
         }
         return true;
     }
@@ -338,16 +339,16 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         if (null == compositeAccountManager) {
             FileStorageAccountManager manager = getAccountManager0();
             if (null == manager) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
-            }
-            return manager.getAccount(accountId, session);
-        } else {
-            FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
-            if (null == manager) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, I(session.getUserId()), I(session.getContextId()));
             }
             return manager.getAccount(accountId, session);
         }
+
+        FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
+        if (null == manager) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, I(session.getUserId()), I(session.getContextId()));
+        }
+        return manager.getAccount(accountId, session);
     }
 
     /**
@@ -421,7 +422,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Retrieves a {@link Session} for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link Session} or <code>null</code> if none exists
@@ -444,7 +445,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Returns the {@link OAuthScope} for this provider
-     * 
+     *
      * @return the {@link OAuthScope} for this provider
      */
     protected abstract OAuthScope getScope();

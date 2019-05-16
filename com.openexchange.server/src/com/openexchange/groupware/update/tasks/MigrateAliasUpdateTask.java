@@ -75,10 +75,10 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection conn = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             conn.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             if (false == Tools.tableExists(conn, "user_alias")) {
                 createTable(conn);
@@ -89,16 +89,18 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
                 insertAliases(conn, aliases);
             }
             conn.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(conn);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(conn);
+                }
+                Databases.autocommit(conn);
             }
-            Databases.autocommit(conn);
         }
     }
 

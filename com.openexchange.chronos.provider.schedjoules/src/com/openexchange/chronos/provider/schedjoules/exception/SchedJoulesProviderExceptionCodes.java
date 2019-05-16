@@ -62,10 +62,10 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionCode {
     /**
-     * <li>The requested page does not denote to a calendar</li>
-     * <li>The page with the id '%$1s' does not denote to a calendar</li>
+     * <li>The requested page does not denote a calendar</li>
+     * <li>The page with the id '%$1s' does not denote a calendar</li>
      */
-    NO_CALENDAR("The page with the id '%1$s' does not denote to a calendar", SchedJoulesProviderExceptionMessages.NO_CALENDAR_MSG, CATEGORY_USER_INPUT, 1),
+    NO_CALENDAR("The page with the id '%1$s' does not denote a calendar", SchedJoulesProviderExceptionMessages.NO_CALENDAR_MSG, CATEGORY_USER_INPUT, 1),
     /**
      * <li>You have no access to this calendar.</li>
      * <li>No access to calendar with id '%1$s'</li>
@@ -147,7 +147,7 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
 
     /**
      * Initialises a new {@link SchedJoulesProviderExceptionCodes}.
-     * 
+     *
      * @param message The exception message
      * @param displayMessage The display message
      * @param category The {@link Category}
@@ -159,7 +159,7 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
 
     /**
      * Initialises a new {@link SchedJoulesProviderExceptionCodes}.
-     * 
+     *
      * @param message The exception message
      * @param displayMessage The display message
      * @param category The {@link Category}

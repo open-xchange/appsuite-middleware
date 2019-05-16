@@ -85,10 +85,10 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             progress.setTotal(getTotalRows(con));
             if (!Tools.columnExists(con, "user_attribute", "uuid")) {
@@ -114,16 +114,18 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
             // Tools.createForeignKey(con, "user_attribute", new String[] {"cid", "id"}, "user", new String[] {"cid", "id"});
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 

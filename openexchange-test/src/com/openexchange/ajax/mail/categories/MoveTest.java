@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import org.json.JSONException;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -68,7 +67,7 @@ import com.openexchange.exception.OXException;
 public class MoveTest extends AbstractMailCategoriesTest {
 
     @Test
-    public void testShouldMoveToAnotherCategory() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldMoveToAnotherCategory() throws OXException, IOException, JSONException {
         MailTestManager manager = new MailTestManager(getAjaxClient(), false);
         getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();
@@ -82,7 +81,7 @@ public class MoveTest extends AbstractMailCategoriesTest {
     }
 
     @Test
-    public void testShouldNotMoveToNonExistentCategory() throws OXException, IOException, SAXException, JSONException {
+    public void testShouldNotMoveToNonExistentCategory() throws OXException, IOException, JSONException {
         MailTestManager manager = new MailTestManager(getAjaxClient(), false);
         getAjaxClient().execute(new NewMailRequest(getInboxFolder(), EML, -1, true));
         String origin = values.getInboxFolder();

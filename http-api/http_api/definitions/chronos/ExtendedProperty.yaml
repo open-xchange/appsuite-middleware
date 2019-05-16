@@ -1,0 +1,6 @@
+type: object
+description: An additional event property
+additionalProperties:
+  type: string
+example:
+  value: default

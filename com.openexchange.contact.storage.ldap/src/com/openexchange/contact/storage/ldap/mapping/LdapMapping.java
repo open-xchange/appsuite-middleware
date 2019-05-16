@@ -57,6 +57,7 @@ import com.openexchange.contact.storage.ldap.internal.LdapResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
+import com.openexchange.java.Strings;
 
 /**
  * {@link LdapMapping}
@@ -138,8 +139,8 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
     }
 
     public String getAlternativeLdapAttributeName(boolean suppressOptions) {
-        return null != alternativeLdapAttributeName && suppressOptions ?
-            this.alternativeLdapAttributeName.split(";")[0] : this.alternativeLdapAttributeName;
+        return suppressOptions && null != alternativeLdapAttributeName ?
+            Strings.splitBySemiColon(this.alternativeLdapAttributeName)[0] : this.alternativeLdapAttributeName;
     }
 
     public boolean isBinary() {
@@ -173,7 +174,8 @@ public abstract class LdapMapping<T> extends DefaultMapping<T, Contact> implemen
      */
     public String encodeForFilter(Object value, LdapIDResolver idResolver) throws OXException {
         try {
-            return encode((T)value, idResolver);
+            @SuppressWarnings("unchecked") T t = (T) value;
+            return encode(t, idResolver);
         } catch (ClassCastException e) {
             throw LdapExceptionCodes.ERROR.create(e, "Error encoding value for '" + this + "'");
         }

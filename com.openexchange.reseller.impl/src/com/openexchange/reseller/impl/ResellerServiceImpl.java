@@ -128,7 +128,7 @@ public class ResellerServiceImpl implements ResellerService {
         try {
             List<ResellerAdmin> ret = new ArrayList<>(admins.length);
             for (final ResellerAdmin adm : admins) {
-                prep = con.prepareStatement("SELECT sid, pid, name, displayName, password, passwordMech FROM subadmin WHERE sid=?");
+                prep = con.prepareStatement("SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin WHERE sid=?");
                 prep.setInt(1, adm.getId().intValue());
                 rs = prep.executeQuery();
                 if (!rs.next()) {
@@ -143,7 +143,9 @@ public class ResellerServiceImpl implements ResellerService {
                                                             .parentId(parentId)
                                                             .displayname(rs.getString("displayName"))
                                                             .password(rs.getString("password"))
-                                                            .passwordMech(rs.getString("passwordMech"));
+                                                            .passwordMech(rs.getString("passwordMech"))
+                                                            .salt(rs.getString("salt"))
+                                                            ;
 
                 rs.close();
                 prep.close();
@@ -197,7 +199,7 @@ public class ResellerServiceImpl implements ResellerService {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            String query = "SELECT sid, pid, name, displayName, password, passwordMech FROM subadmin";
+            String query = "SELECT sid, pid, name, displayName, password, passwordMech, salt FROM subadmin";
             prep = con.prepareStatement(query);
             rs = prep.executeQuery();
 
@@ -210,6 +212,7 @@ public class ResellerServiceImpl implements ResellerService {
                     .displayname(rs.getString("displayName"))
                     .password(rs.getString("password"))
                     .passwordMech(rs.getString("passwordMech"))
+                    .salt(rs.getString("salt"))
                     .build();
                 ret.add(newadm);
             }

@@ -163,10 +163,10 @@ public class CalendarConfigImpl implements CalendarConfig {
     public boolean isRestrictAllowedAttendeeChanges() {
         return getConfigValue("com.openexchange.calendar.restrictAllowedAttendeeChanges", Boolean.class, Boolean.TRUE).booleanValue();
     }
-
+    
     @Override
-    public boolean isRestrictAllowedAttendeeChangesPublic() {
-        return getConfigValue("com.openexchange.calendar.restrictAllowedAttendeeChangesPublic", Boolean.class, Boolean.TRUE).booleanValue();
+    public boolean isOrganizerChangeAllowed() {
+        return getConfigValue("com.openexchange.calendar.allowChangeOfOrganizer", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     private CalendarUserSettings getUserSettings(int userId) {

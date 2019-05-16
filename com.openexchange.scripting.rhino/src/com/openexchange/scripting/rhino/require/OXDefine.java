@@ -59,7 +59,9 @@ import org.mozilla.javascript.Wrapper;
 
 public class OXDefine extends ScriptableObject implements Function {
 
-	private final DependencyResolver resolver;
+    private static final long serialVersionUID = -5616106335225629625L;
+
+    private final DependencyResolver resolver;
 	private final String defaultModuleName;
 
 	public OXDefine(String defaultModuleName, DependencyResolver resolver) {
@@ -122,6 +124,7 @@ public class OXDefine extends ScriptableObject implements Function {
 		}
 
 		final String theId = id;
+		final DependencyResolver resolver = this.resolver;
 		DeferredResolution.awaitResolution(cx, scope, thisObj, resolved, factory, new Callback() {
 
 			@Override

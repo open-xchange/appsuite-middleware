@@ -77,23 +77,25 @@ public class CalendarEventAddRDateColumnTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             Tools.checkAndAddColumns(connection, "calendar_event", new Column("rDate", "TEXT DEFAULT NULL"));
             Tools.checkAndAddColumns(connection, "calendar_event_tombstone", new Column("rDate", "TEXT DEFAULT NULL"));
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 

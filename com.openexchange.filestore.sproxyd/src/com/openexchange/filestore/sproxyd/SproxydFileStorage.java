@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.sproxyd;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -205,7 +206,7 @@ public class SproxydFileStorage implements FileStorage {
             }
             long currentSize = lastChunk.getOffset() + lastChunk.getLength();
             if (offset != currentSize) {
-                throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
+                throw FileStorageCodes.INVALID_OFFSET.create(L(offset), name, L(currentSize));
             }
             return upload(documentId, file, offset);
         } finally {
@@ -265,7 +266,7 @@ public class SproxydFileStorage implements FileStorage {
              */
             Chunk chunk = chunks.get(0);
             if (offset >= chunk.getLength() || length >= 0 && length > chunk.getLength() - offset) {
-                throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
+                throw FileStorageCodes.INVALID_RANGE.create(L(offset), L(length), name, L(chunk.getLength()));
             }
             long rangeStart = 0 < offset ? offset : 0;
             long rangeEnd = (0 < length ? rangeStart + length : chunk.getLength()) - 1;
@@ -278,7 +279,7 @@ public class SproxydFileStorage implements FileStorage {
         Chunk lastChunk = chunks.get(size - 1);
         long totalLength = lastChunk.getOffset() + lastChunk.getLength();
         if (offset >= totalLength || length >= 0 && length > totalLength - offset) {
-            throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
+            throw FileStorageCodes.INVALID_RANGE.create(L(offset), L(length), name, L(totalLength));
         }
         long rangeStart = 0 < offset ? offset : 0;
         long rangeEnd = (0 < length ? rangeStart + length : totalLength) - 1;

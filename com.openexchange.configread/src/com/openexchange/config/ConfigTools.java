@@ -92,7 +92,7 @@ public class ConfigTools {
         if (NON_PERSISTENT_IDENTIFIER.equals(tmp.toLowerCase())) {
             return NON_PERSISTENT_VALUE;
         }
-        return (int) (TimeSpanParser.parseTimespan(tmp).longValue() / 1000);
+        return (int) (TimeSpanParser.parseTimespanToPrimitive(tmp) / 1000);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ConfigTools {
      *
      * @param span The span description or special identifier <code>"web-browser"</code> to let the Cookie be deleted when the Web browser
      *            exits
-     * @return The parsed time span in milliseconds or <code>-1</code> to let the Cookie be deleted when the Web browser exits
+     * @return The parsed time span in milliseconds or <code>-1</code>.
      */
     public static long parseTimespan(final String span) {
         if (null == span) {
@@ -119,7 +119,7 @@ public class ConfigTools {
         if (NON_PERSISTENT_IDENTIFIER.equals(tmp.toLowerCase())) {
             return NON_PERSISTENT_VALUE;
         }
-        return TimeSpanParser.parseTimespan(tmp).longValue();
+        return TimeSpanParser.parseTimespanToPrimitive(tmp);
     }
 
     /**

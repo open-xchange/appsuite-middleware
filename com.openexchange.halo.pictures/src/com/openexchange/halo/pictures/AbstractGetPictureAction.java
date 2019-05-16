@@ -120,10 +120,26 @@ abstract class AbstractGetPictureAction implements ETagAwareAJAXActionService {
         }
     }
 
+    /**
+     * Gets the {@link ContactPicture}
+     *
+     * @param req The {@link AJAXRequestData}
+     * @param session The user's {@link ServerSession}
+     * @return The {@link ContactPicture}
+     * @throws OXException
+     */
     private ContactPicture getPicture(AJAXRequestData req, ServerSession session) throws OXException {
         return getPictureResource(req, session, false);
     }
 
+    /**
+     * Gets the etag of the {@link ContactPicture}
+     *
+     * @param req The {@link AJAXRequestData}
+     * @param session The user's {@link ServerSession}
+     * @return The etag of the {@link ContactPicture}
+     * @throws OXException
+     */
     private String getPictureETag(AJAXRequestData req, ServerSession session) throws OXException {
         return getPictureResource(req, session, true);
     }

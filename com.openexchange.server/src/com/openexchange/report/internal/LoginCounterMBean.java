@@ -50,7 +50,6 @@
 package com.openexchange.report.internal;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import javax.management.MBeanException;
 import com.openexchange.report.LoginCounterService;
@@ -62,7 +61,7 @@ import com.openexchange.report.LoginCounterService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LoginCounterMBean {
-    
+
     /**
      * The key to receive the summed up number of logins.
      */
@@ -76,27 +75,12 @@ public interface LoginCounterMBean {
      *
      * @param startDate The start time
      * @param endDate The end time
-     * @param aggregate Set to <code>true</code> if you want to aggregate the sum of logins by users. 
-     * That means that the sum value does not contain duplicate logins caused by multiple clients of one user.
-     * This also means that the sum value likely does not match the addition of all single values.
+     * @param aggregate Set to <code>true</code> if you want to aggregate the sum of logins by users.
+     *            That means that the sum value does not contain duplicate logins caused by multiple clients of one user.
+     *            This also means that the sum value likely does not match the addition of all single values.
      * @param regex A regular expression to filter results by client identifiers. May be <code>null</code> to not filter clients at all.
      * @return The number of logins happened in specified range by client identifier.
      * @throws MBeanException If an error occurs while counting
      */
     public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException;
-
-    /**
-     * Gets the time stamp of last login for specified user for given client.
-     * <p>
-     * The number of milliseconds since January 1, 1970, 00:00:00 GMT.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param client The client identifier
-     * @return The time stamp of last login as UTC <code>long</code><br>
-     *         (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
-     * @throws MBeanException If retrieval fails
-     */
-    List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException;
-
 }

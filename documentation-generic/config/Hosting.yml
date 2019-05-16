@@ -1,0 +1,97 @@
+feature_name: Hosting
+properties:
+    - key: CONTEXT_STORAGE
+      description: |
+        The full classpath of the context storage class.
+      defaultValue: com.openexchange.admin.plugin.hosting.storage.mysqlStorage.OXContextMySQLStorage
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]
+    - key: UTIL_STORAGE
+      description: |
+        The full classpath of the util storage class.
+      defaultValue: com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]
+    - key: AVERAGE_CONTEXT_SIZE
+      description: |
+        The average size of a context in MB
+      defaultValue: 200
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]
+    - key: CONTEXTS_PER_SCHEMA
+      description: |
+        The maximum amount of contexts per database schema
+      defaultValue: 1000
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting", "Limit"]
+    - key: CHECK_CONTEXT_LOGIN_MAPPING_REGEXP
+      description: |
+        A regex pattern of allowed chars in login mapping names
+      defaultValue: '[$%\\.+a-zA-Z0-9_-]'
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]
+    - key: NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME
+      description: |
+        Default access combination template name for newly created contexts!
+        See also "ModuleAccessDefinitions" file for details!
+        If the name is NOT defined in "ModuleAccessDefinitions" file , fallback will be used!
+      defaultValue: webmail_plus
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]
+    - key: SCHEMA_MOVE_MAINTENANCE_REASON
+      description: |
+        The reason ID to use when contexts are disabled due to a schema move. This id will not be 
+        stored in the 'reason_text' table but must not conflict with existing reasons. Otherwise
+        wrong contexts may get enabled after a schema move.
+      defaultValue: 1431655765
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]
+    - key: LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB
+      description: |
+        Controls whether to acquire a lock or not when writing context data into associated payload
+        database to ultimately serialize concurrent write operations. This avoids possible deadlock
+        situations that may occur on concurrent context create operations that are not resolvable
+        through performing a retry strategy with exponential back-off.
+      defaultValue: false
+      version:
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: hosting.properties
+      packageName: open-xchange-admin
+      tags: ["Hosting"]

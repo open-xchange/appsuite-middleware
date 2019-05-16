@@ -38,15 +38,14 @@ public class Document {
     /**
      * Gets the filename of this document's file. This is just the last name in
      * the pathname's name sequence.
-     * 
+     *
      * @return the filename, or null if the document doesn't contain a file
      */
     public String getName() {
         if (this.containsFile()) {
             return this.getFile().getName();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -150,9 +149,8 @@ public class Document {
     public boolean isCurrent() {
         if (this.containsParent()) {
             return this.equals(this.parent.getCurrentVersion());
-        } else {
-            return false;
         }
+        return false;
     }
 
     public int getVersionNumber() {
@@ -175,10 +173,9 @@ public class Document {
      */
     public String getLocalPath() {
         if (this.containsPath()) {
-            return String.format("%s%s%s", datapath, File.separatorChar, this.getPath().replaceAll("[/\\\\]+", "\\" + File.separatorChar));
-        } else {
-            return null;
+            return String.format("%s%s%s", datapath, Character.valueOf(File.separatorChar), this.getPath().replaceAll("[/\\\\]+", "\\" + File.separatorChar));
         }
+        return null;
     }
 
     /**
@@ -193,9 +190,8 @@ public class Document {
         }
         if (this.containsPath()) {
             return String.format("%s%s%s", seleniumDataPath, seleniumSeparator, this.getPath().replaceAll("[/\\\\]+", "\\" + seleniumSeparator));
-        } else {
-            return null;
         }
+        return null;
     }
 
     public boolean containsPath() {

@@ -51,6 +51,7 @@ package com.openexchange.user;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
@@ -66,6 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessiondService;
@@ -209,13 +211,18 @@ public class Bug36228Test {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
             @Override
             public String getUserAgent() {
                 return "User-Agent";
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return null;
             }
         });
     }

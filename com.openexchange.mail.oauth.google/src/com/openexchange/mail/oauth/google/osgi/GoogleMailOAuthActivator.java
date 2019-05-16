@@ -50,9 +50,11 @@
 package com.openexchange.mail.oauth.google.osgi;
 
 import com.openexchange.mail.oauth.MailOAuthProvider;
+import com.openexchange.mail.oauth.google.GoogleMailOAuthAccountAssociationProvider;
 import com.openexchange.mail.oauth.google.GoogleMailOAuthProvider;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-
 
 /**
  * {@link GoogleMailOAuthActivator}
@@ -71,12 +73,12 @@ public class GoogleMailOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { MailAccountStorageService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerService(MailOAuthProvider.class, new GoogleMailOAuthProvider());
+        registerService(OAuthAccountAssociationProvider.class, new GoogleMailOAuthAccountAssociationProvider(this));
     }
-
 }

@@ -122,34 +122,32 @@ class UpdateTaskCollection {
      * @return The {@link SeparatedTasks}
      */
     SeparatedTasks separateTasks(List<UpdateTaskV2> tasks) {
-        final List<UpdateTaskV2> blocking = new ArrayList<UpdateTaskV2>();
-        final List<UpdateTaskV2> background = new ArrayList<UpdateTaskV2>();
+        ImmutableList.Builder<UpdateTaskV2> blocking = null;
+        ImmutableList.Builder<UpdateTaskV2> background = null;
         for (UpdateTaskV2 toExecute : tasks) {
             switch (toExecute.getAttributes().getConcurrency()) {
                 case BLOCKING:
+                    if (blocking == null) {
+                        blocking = ImmutableList.builder();
+                    }
                     blocking.add(toExecute);
                     break;
                 case BACKGROUND:
+                    if (background == null) {
+                        background = ImmutableList.builder();
+                    }
                     background.add(toExecute);
                     break;
                 default:
                     OXException e = UpdateExceptionCodes.UNKNOWN_CONCURRENCY.create(toExecute.getClass().getName());
                     LOG.error("", e);
+                    if (blocking == null) {
+                        blocking = ImmutableList.builder();
+                    }
                     blocking.add(toExecute);
             }
         }
-        return new SeparatedTasks() {
-
-            @Override
-            public List<UpdateTaskV2> getBlocking() {
-                return blocking;
-            }
-
-            @Override
-            public List<UpdateTaskV2> getBackground() {
-                return background;
-            }
-        };
+        return new SeparatedTasksImpl(blocking == null ? Collections.emptyList() : blocking.build(), background == null ? Collections.emptyList() : background.build());
     }
 
     /**
@@ -167,7 +165,7 @@ class UpdateTaskCollection {
         if (blocking) {
             retval.addAll(tasks.getBlocking());
         } else {
-            if (tasks.getBlocking().size() > 0) {
+            if (tasks.hasBlocking()) {
                 throw UpdateExceptionCodes.BLOCKING_FIRST.create(Strings.join(tasks.getBlocking(), ","), Strings.join(tasks.getBackground(), ","));
             }
             retval.addAll(tasks.getBackground());
@@ -289,6 +287,42 @@ class UpdateTaskCollection {
             }
         }
         return null == filtered ? Collections.emptyList() : filtered;
+    }
+
+    private static class SeparatedTasksImpl implements SeparatedTasks {
+
+        private final List<UpdateTaskV2> blocking;
+        private final boolean hasBlocking;
+        private final List<UpdateTaskV2> background;
+        private final boolean hasBackground;
+
+        SeparatedTasksImpl(List<UpdateTaskV2> blocking, List<UpdateTaskV2> background) {
+            super();
+            this.blocking = blocking;
+            hasBlocking = !blocking.isEmpty();
+            this.background = background;
+            hasBackground = !background.isEmpty();
+        }
+
+        @Override
+        public List<UpdateTaskV2> getBlocking() {
+            return blocking;
+        }
+
+        @Override
+        public List<UpdateTaskV2> getBackground() {
+            return background;
+        }
+
+        @Override
+        public boolean hasBlocking() {
+            return hasBlocking;
+        }
+
+        @Override
+        public boolean hasBackground() {
+            return hasBackground;
+        }
     }
 
 }

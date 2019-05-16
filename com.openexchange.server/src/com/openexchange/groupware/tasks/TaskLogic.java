@@ -71,7 +71,7 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -87,6 +87,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -491,7 +492,7 @@ public final class TaskLogic {
             switch (participant.getType()) {
                 case Participant.GROUP:
                     final GroupParticipant group = (GroupParticipant) participant;
-                    final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
+                    final int[] member = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, group.getIdentifier()).getMember();
                     if (member.length == 0) {
                         throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
                     }
@@ -529,7 +530,7 @@ public final class TaskLogic {
                     break;
                 case Participant.GROUP:
                     final GroupParticipant group = (GroupParticipant) participant;
-                    final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
+                    final int[] member = ServerServiceRegistry.getServize(GroupService.class, true).getGroup(ctx, group.getIdentifier()).getMember();
                     if (member.length == 0) {
                         throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
                     }

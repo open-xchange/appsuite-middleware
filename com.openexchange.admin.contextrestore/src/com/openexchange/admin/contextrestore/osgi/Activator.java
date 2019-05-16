@@ -51,12 +51,11 @@ package com.openexchange.admin.contextrestore.osgi;
 
 import java.rmi.Remote;
 import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.contextrestore.rmi.impl.OXContextRestore;
 import com.openexchange.admin.daemons.AdminDaemonService;
+import com.openexchange.admin.plugin.hosting.rmi.impl.OXContext;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.impl.OXContext;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,8 +73,7 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Activator.class);
         try {
-            final BundleContext context = this.context;
-            AdminCache.compareAndSetBundleContext(null, context);
+            AdminCache.compareAndSetBundleContext(null, this.context);
             final ConfigurationService service = getService(ConfigurationService.class);
             // Parse ConfigDB name from "writeUrl" property in file configdb.properties
             {
@@ -88,7 +86,7 @@ public class Activator extends HousekeepingActivator {
             }
             // Continue
             AdminCache.compareAndSetConfigurationService(null, service);
-            OXContextInterfaceReference.set(new OXContext(context));
+            OXContextInterfaceReference.set(new OXContext());
             // Register service
             registerService(Remote.class, new OXContextRestore());
             log.info("RMI Interface for context restore registered.");

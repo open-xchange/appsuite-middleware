@@ -85,7 +85,7 @@ public final class ExtendedIMAPFolder extends IMAPFolder {
      * @param sep The separator character
      */
     public ExtendedIMAPFolder(final IMAPFolder imapFolder, final char sep) {
-        super(imapFolder.getFullName(), sep, (IMAPStore) imapFolder.getStore(), false);
+        super(imapFolder.getFullName(), sep, (IMAPStore) imapFolder.getStore(), Boolean.FALSE);
         this.imapFolder = imapFolder;
     }
 

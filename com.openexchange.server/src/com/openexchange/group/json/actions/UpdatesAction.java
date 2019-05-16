@@ -52,15 +52,15 @@ package com.openexchange.group.json.actions;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -79,11 +79,11 @@ public final class UpdatesAction extends AbstractGroupAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        GroupStorage groupStorage = GroupStorage.getInstance();
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException {
+        GroupService groupService = ServerServiceRegistry.getServize(GroupService.class, true);
         Date modifiedSince = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        Group[] modifiedGroups = groupStorage.listModifiedGroups(modifiedSince, req.getSession().getContext());
-        Group[] deletedGroups = groupStorage.listDeletedGroups(modifiedSince, req.getSession().getContext());
+        Group[] modifiedGroups = groupService.listModifiedGroups(req.getSession().getContext(), modifiedSince);
+        Group[] deletedGroups = groupService.listDeletedGroups(req.getSession().getContext(), modifiedSince);
 
         List<Group> modified = new LinkedList<Group>();
         List<Group> deleted= new LinkedList<Group>();

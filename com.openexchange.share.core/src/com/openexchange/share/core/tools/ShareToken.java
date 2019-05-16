@@ -49,6 +49,7 @@
 
 package com.openexchange.share.core.tools;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -150,7 +151,7 @@ public class ShareToken {
      */
     public String getToken() {
         return String.format("%1$08x%2$08x%3$s",
-            contextID ^ getContextObfuscator(baseToken), userID ^ getUserObfuscator(baseToken), baseToken);
+            I(contextID ^ getContextObfuscator(baseToken)), I(userID ^ getUserObfuscator(baseToken)), baseToken);
     }
 
     /**

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -63,11 +62,9 @@ import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -241,13 +238,12 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                  */
                 Map<Integer, List<Alarm>> seriesMasterAlarms = storage.getAlarmStorage().loadAlarms(originalSeriesMaster);
                 Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
+                Map<Integer, List<Alarm>> newExceptionAlarms = prepareExceptionAlarms(seriesMasterAlarms);
                 Check.quotaNotExceeded(storage, session);
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
                 storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
-                for (Entry<Integer, List<Alarm>> entry : seriesMasterAlarms.entrySet()) {
-                    insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
-                }
+                insertAlarms(newExceptionEvent, newExceptionAlarms, true);
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
                 resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
                 /*

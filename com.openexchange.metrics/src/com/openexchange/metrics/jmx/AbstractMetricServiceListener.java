@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -182,6 +182,9 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         Hashtable<String, String> properties = new Hashtable<>();
         properties.put("type", metricDescriptor.getGroup());
         properties.put("name", metricDescriptor.getName());
+        if(metricDescriptor.getDimensions() != null && metricDescriptor.getDimensions().isEmpty() == false) {
+            properties.putAll(metricDescriptor.getDimensions());
+        }
 
         return ObjectName.getInstance(DOMAIN_NAME, properties);
     }

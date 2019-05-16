@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.apns_http2.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
@@ -123,7 +124,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
 
         public Builder mutableContent(boolean mutable) {
             if (mutable) {
-                aps.put("mutable-content", 1);
+                aps.put("mutable-content", I(1));
             } else {
                 aps.remove("mutable-content");
             }
@@ -137,7 +138,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
 
         public Builder contentAvailable(boolean contentAvailable) {
             if (contentAvailable) {
-                aps.put("content-available", 1);
+                aps.put("content-available", I(1));
             } else {
                 aps.remove("content-available");
             }
@@ -179,7 +180,7 @@ public class ApnsHttp2Notification extends SimpleApnsPushNotification {
         }
 
         public Builder badge(int badge) {
-            aps.put("badge", badge);
+            aps.put("badge", I(badge));
             return this;
         }
 

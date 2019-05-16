@@ -60,7 +60,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
@@ -163,7 +162,7 @@ public class Bug14111Test extends AbstractAJAXSession {
         }
     }
 
-    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, JSONException {
         final Calendar cal = (Calendar) calendar.clone();
         final Appointment appointmentObj = new Appointment();
 

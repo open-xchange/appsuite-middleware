@@ -1,0 +1,79 @@
+feature_name: Anti-Virus
+properties:
+    - key: com.openexchange.antivirus.enabled
+      description: |
+        Defines whether the Anti-Virus capability is enabled.
+      defaultValue: false
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: true
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
+    - key: com.openexchange.antivirus.server
+      description: |
+        Defines the address of ICAP server, i.e. where the Anti-Virus service is running.
+      defaultValue: localhost
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
+    - key: com.openexchange.antivirus.port
+      description: |
+        Defines the port at which the ICAP server is listening.
+      defaultValue: 1344
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
+    - key: com.openexchange.antivirus.service
+      description: |
+        Defines Anti-Virus's service name
+      defaultValue: avscan
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
+    - key: com.openexchange.antivirus.mode
+      description: |
+        Dictates the operation mode of the service. In 'streaming' mode
+        the data stream that will reach the end-point-client after will
+        be coming from the ICAP/AV server. In 'double-fetch' mode the
+        data stream will have to be fetched from the storage twice (one
+        for scanning and one for delivering to the end-point-client).
+        The streaming mode is still at an experimental phase.
+      defaultValue: double-fetch
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
+    - key: com.openexchange.antivirus.maxFileSize
+      description: |
+        Defines the maximum file size (in MB) that is acceptable for the underlying
+        Anti-Virus service to scan. Files larger than that size will NOT be scanned
+        and an appropriate warning will be displayed to the user.
+      defaultValue: 100
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]
+    - key: com.openexchange.icap.client.socketTimeout
+      description: |
+        Defines the default socket time-out in milliseconds.
+      defaultValue: 5000
+      version: 7.10.1
+      reloadable: true
+      configcascadeAware: false
+      file: antivirus.properties
+      packageName: open-xchange-core
+      tags: ["Anti-Virus", "ICAP"]

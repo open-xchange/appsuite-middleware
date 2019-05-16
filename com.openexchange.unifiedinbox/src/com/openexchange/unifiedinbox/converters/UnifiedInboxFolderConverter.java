@@ -49,6 +49,7 @@
 
 package com.openexchange.unifiedinbox.converters;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
@@ -280,7 +281,7 @@ public final class UnifiedInboxFolderConverter {
                     retval[i] =
                         new int[] { mf.getMessageCount(), mf.getUnreadMessageCount(), mf.getDeletedMessageCount(), mf.getNewMessageCount() };
                 } else {
-                    LOG.debug("Missing folder \"{}\" in account {}", fullnames[i], accountId);
+                    LOG.debug("Missing folder \"{}\" in account {}", fullnames[i], I(accountId));
                 }
             }
         } catch (final OXException e) {

@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos.factory;
 
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
+import com.openexchange.testing.httpclient.models.CalendarUser;
 
 /**
  * {@link AttendeeFactory}
@@ -66,7 +67,7 @@ public final class AttendeeFactory {
      * @param cuType the {@link CuTypeEnum}
      * @return The new {@link Attendee}
      */
-    public static Attendee createAttendee(int userId, CuTypeEnum cuType) {
+    public static Attendee createAttendee(Integer userId, CuTypeEnum cuType) {
         Attendee attendee = new Attendee();
         attendee.entity(userId);
         attendee.cuType(cuType);
@@ -80,7 +81,7 @@ public final class AttendeeFactory {
      * @param userId The user identifier
      * @return The new {@link Attendee}
      */
-    public static Attendee createIndividual(int userId) {
+    public static Attendee createIndividual(Integer userId) {
         return createAttendee(userId, CuTypeEnum.INDIVIDUAL);
     }
 
@@ -97,5 +98,19 @@ public final class AttendeeFactory {
         return attendee;
     }
 
+    /**
+     * Converts an {@link Attendee} to an organizer.
+     * 
+     * @param attendee The attendee to convert
+     * @return THe organizer as {@link CalendarUser} object
+     */
+    public static CalendarUser createOrganizerFrom(Attendee attendee) {
+        CalendarUser c = new CalendarUser();
+        c.cn(attendee.getCn());
+        c.email(attendee.getEmail());
+        c.entity(attendee.getEntity());
+        c.uri(attendee.getUri());
+        return c;
+    }
 
 }

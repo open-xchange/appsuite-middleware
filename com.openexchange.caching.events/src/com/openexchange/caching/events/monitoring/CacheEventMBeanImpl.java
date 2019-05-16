@@ -67,8 +67,8 @@ public class CacheEventMBeanImpl extends StandardMBean implements CacheEventMBea
     /** Window size for average calculation: 1 hour */
     private static final long WINDOW_SIZE = 60L * 60000L;
 
-    private final LinkedBlockingDeque<Measurement> measurements;
-    private final CacheEventMonitor monitor;
+    final LinkedBlockingDeque<Measurement> measurements;
+    final CacheEventMonitor monitor;
     private final Timer timer;
 
     /**
@@ -135,6 +135,13 @@ public class CacheEventMBeanImpl extends StandardMBean implements CacheEventMBea
     }
 
     private final class MeasureTask extends TimerTask {
+
+        /**
+         * Initializes a new {@link CacheEventMBeanImpl.MeasureTask}.
+         */
+        MeasureTask() {
+            super();
+        }
 
         @Override
         public void run() {

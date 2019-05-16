@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,11 +83,11 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         PreparedStatement stmt = null;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             for (String column : OBSOLETE_COLUMNS) {
                 int type = Tools.getColumnType(con, TABLE, column);
@@ -148,17 +147,19 @@ public class UserClearDelTablesTask extends UpdateTaskAdapter {
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
     }
 

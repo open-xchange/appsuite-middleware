@@ -184,18 +184,19 @@ public class RemoteClientManagementImpl implements RemoteClientManagement {
 
     private void authenticate(Credentials credentials) throws RemoteClientManagementException, InvalidCredentialsException {
         try {
-            if (credentials == null) {
-                credentials = new Credentials("", "");
+            Credentials auth = credentials;
+            if (auth == null) {
+                auth = new Credentials("", "");
             }
 
-            new BasicAuthenticator().doAuthentication(credentials);
+            BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
         } catch (StorageException e) {
             LOGGER.error("Error while authenticating master admin", e);
             throw new RemoteClientManagementException(e.getMessage());
         }
     }
 
-    private static List<ClientDto> clients2RMI(List<Client> clients) throws RemoteClientManagementException {
+    private static List<ClientDto> clients2RMI(List<Client> clients) {
         if (clients == null) {
             return null;
         }
@@ -207,7 +208,7 @@ public class RemoteClientManagementImpl implements RemoteClientManagement {
         return rmiClients;
     }
 
-    private static ClientDto client2RMI(Client client) throws RemoteClientManagementException {
+    private static ClientDto client2RMI(Client client) {
         if (client == null) {
             return null;
         }
@@ -237,7 +238,7 @@ public class RemoteClientManagementImpl implements RemoteClientManagement {
         return clone;
     }
 
-    private static IconDto icon2RMI(Icon icon) throws RemoteClientManagementException {
+    private static IconDto icon2RMI(Icon icon) {
         if (icon == null) {
             return null;
         }

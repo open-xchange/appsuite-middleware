@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.diagnostics.osgi;
 
 import java.rmi.Remote;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.diagnostics.DiagnosticService;
@@ -72,21 +71,11 @@ public class DiagnosticsActivator extends HousekeepingActivator {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
     @Override
     protected Class<?>[] getNeededServices() {
         return EMPTY_CLASSES;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
         Logger logger = LoggerFactory.getLogger(DiagnosticsActivator.class);
@@ -96,16 +85,11 @@ public class DiagnosticsActivator extends HousekeepingActivator {
         registerService(Remote.class, new RemoteDiagnosticServiceImpl(diagnosticService));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         Logger logger = LoggerFactory.getLogger(DiagnosticsActivator.class);
         logger.info("Unregistering DiagnosticService");
         unregisterService(DiagnosticService.class);
-        super.stop(context);
+        super.stopBundle();
     }
 }

@@ -138,11 +138,6 @@ public abstract class BasicCommandlineOptions {
 
     public static final int SYSEXIT_UNABLE_TO_PARSE = 114;
 
-    /**
-     * Used when a publication does not exists
-     */
-    public static final int SYSEXIT_NO_SUCH_PUBLICATION = 115;
-
     protected static final int DEFAULT_CONTEXT = 1;
     protected static final char OPT_NAME_CONTEXT_SHORT = 'c';
     protected static final String OPT_NAME_CONTEXT_LONG = "contextid";
@@ -468,7 +463,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final void setInServerOption(final AdminParser admp, final NeededQuadState needed) {
-        this.inServerOption = setLongOpt(admp, OPT_NAME_IN_SERVER_LONG, "Whether check should be limited to the registered server this provisioning node is running in", false, false);
+        this.inServerOption = setLongOpt(admp, OPT_NAME_IN_SERVER_LONG, "Whether check should be limited to the registered server this provisioning node is running in", false, NeededQuadState.needed == needed ? true : false);
     }
 
     // ------------------------------------------------------------------------------------- //

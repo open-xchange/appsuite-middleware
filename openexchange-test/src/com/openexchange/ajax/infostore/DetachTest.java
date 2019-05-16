@@ -1,6 +1,7 @@
 
 package com.openexchange.ajax.infostore;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -9,7 +10,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,12 +23,12 @@ import com.openexchange.test.TestInit;
 public class DetachTest extends InfostoreAJAXTest {
 
     private String origId;
-    
+
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        final long FAR_FUTURE = Long.MAX_VALUE;
 
         origId = Iterables.get(itm.getCreatedEntities(), 0).getId();
         com.openexchange.file.storage.File org = itm.getAction(origId);
@@ -63,7 +63,7 @@ public class DetachTest extends InfostoreAJAXTest {
         itm.revert(file.getId());
         assertFalse(itm.getLastResponse().hasError());
         assertNotNull(itm.getLastResponse().getTimestamp());
-        checkVersions(origId, "0", 0);;
+        checkVersions(origId, "0", 0);
     }
 
     public void checkVersions(String objectId, String version, int numberoOfVersions) throws Exception {
@@ -77,12 +77,12 @@ public class DetachTest extends InfostoreAJAXTest {
 
         com.openexchange.file.storage.File obj2 = itm.getAction(objectId);
 
-        final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[] { 1, 2, 3 }));
+        final Set<Integer> versions = new HashSet<Integer>(Arrays.asList(new Integer[] { I(1), I(2), I(3) }));
 
         final int[] notDetached = ftm.detach(objectId, obj2.getLastModified(), new int[] { 1, 2, 3 });
         assertEquals(versions.size(), notDetached.length);
         for (final int lId : notDetached) {
-            assertTrue(versions.remove(lId));
+            assertTrue(versions.remove(I(lId)));
         }
         assertTrue(versions.isEmpty());
     }
@@ -94,11 +94,11 @@ public class DetachTest extends InfostoreAJAXTest {
         final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 1, 3, 5, 6 });
         assertEquals(0, notDetached.length);
 
-        List<com.openexchange.file.storage.File> versions = itm.versions(origId, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
+        itm.versions(origId, new int[] { Metadata.VERSION, Metadata.CURRENT_VERSION }, Metadata.VERSION, Order.DESCENDING);
         AbstractAJAXResponse lastResponse = itm.getLastResponse();
         assertFalse(lastResponse.hasError());
         // Current Version reverts to 4 (being the newest available version
-        VersionsTest.assureVersions(new Integer[] { 2, 4 }, lastResponse, 4);
+        VersionsTest.assureVersions(new Integer[] { I(2), I(4) }, lastResponse, I(4));
 
         com.openexchange.file.storage.File obj = itm.getAction(origId);
 
@@ -146,7 +146,7 @@ public class DetachTest extends InfostoreAJAXTest {
         data.setDescription("other_desc");
         itm.newAction(data, upload);
 
-        final int[] notDetached = ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 5 });
+        ftm.detach(origId, new Date(Long.MAX_VALUE), new int[] { 5 });
 
     }
 }

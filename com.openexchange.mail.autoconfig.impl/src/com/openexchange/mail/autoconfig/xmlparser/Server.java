@@ -57,7 +57,7 @@ package com.openexchange.mail.autoconfig.xmlparser;
 public abstract class Server {
 
     public static enum SocketType {
-        PLAIN(Server.PLAIN), STARTTLS(Server.STARTTLS), SSL(Server.SSL);
+        PLAIN(Server.PLAIN_STRING), STARTTLS(Server.STARTTLS_STRING), SSL(Server.SSL_STRING);
 
         private final String keyword;
 
@@ -66,13 +66,13 @@ public abstract class Server {
         }
 
         public static SocketType getSocketType(String keyword) {
-            if (keyword.equalsIgnoreCase(Server.PLAIN)) {
+            if (keyword.equalsIgnoreCase(Server.PLAIN_STRING)) {
                 return PLAIN;
             }
-            if (keyword.equalsIgnoreCase(Server.STARTTLS)) {
+            if (keyword.equalsIgnoreCase(Server.STARTTLS_STRING)) {
                 return STARTTLS;
             }
-            if (keyword.equalsIgnoreCase(Server.SSL)) {
+            if (keyword.equalsIgnoreCase(Server.SSL_STRING)) {
                 return SSL;
             }
             return null;
@@ -93,11 +93,11 @@ public abstract class Server {
 
     public static final String TYPE = "type";
 
-    public static final String POP3 = "pop3";
+    public static final String POP3_STRING = "pop3";
 
-    public static final String IMAP = "imap";
+    public static final String IMAP_STRING = "imap";
 
-    public static final String SMTP = "smtp";
+    public static final String SMTP_STRING = "smtp";
 
     public static final String HOSTNAME = "hostname";
 
@@ -105,11 +105,11 @@ public abstract class Server {
 
     public static final String SOCKET_TYPE = "socketType";
 
-    public static final String PLAIN = "plain";
+    public static final String PLAIN_STRING = "plain";
 
-    public static final String STARTTLS = "STARTTLS";
+    public static final String STARTTLS_STRING = "STARTTLS";
 
-    public static final String SSL = "SSL";
+    public static final String SSL_STRING = "SSL";
 
     public static final String USERNAME = "username";
 

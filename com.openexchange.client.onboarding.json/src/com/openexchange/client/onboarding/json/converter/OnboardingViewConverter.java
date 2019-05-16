@@ -318,7 +318,7 @@ public class OnboardingViewConverter implements ResultConverter {
                                 } else {
                                     LOGGER.warn("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
                                 }
-                                actionId = null;
+                                // actionId = null; // Can only be null at this location
                             }
                         } else {
                             actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
@@ -343,7 +343,7 @@ public class OnboardingViewConverter implements ResultConverter {
                             actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
                         } catch (OXException e) {
                             LOGGER.warn("Failed to retrieve link for action '{}' and will therefore be ignored.", compositeActionId, e);
-                            actionId = null;
+                            // actionId = null; // Can only be null at this location
                         }
                     }
                     break;

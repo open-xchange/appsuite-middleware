@@ -54,6 +54,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.json.JSONException;
+import org.junit.Assert;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractUploadParser;
 
@@ -83,6 +84,7 @@ public class NewInfostoreParser extends AbstractUploadParser<NewInfostoreRespons
 
     @Override
     protected NewInfostoreResponse createResponse(Response response) throws JSONException {
+        Assert.assertNotNull(response);
         return new NewInfostoreResponse(response);
     }
 }

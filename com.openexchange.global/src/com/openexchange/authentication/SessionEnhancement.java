@@ -62,8 +62,10 @@ public interface SessionEnhancement {
 
     /**
      * Sets custom properties in specified {@link Session}.
+     * <p>
+     * Most likely specified session is an instance of <code>SessionDescription</code> providing more possibilities to modify spawned session.
      *
-     * @param session The session to enhance
+     * @param session The session (description) to enhance
      */
     public void enhanceSession(Session session);
 

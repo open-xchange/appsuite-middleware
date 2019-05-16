@@ -122,6 +122,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
         return "/ajax/account";
     }
 
+    @SuppressWarnings("serial")
     private MailAccount wrap(final MailAccountDescription acc) {
         return new MailAccount() {
 

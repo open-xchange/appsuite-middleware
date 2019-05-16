@@ -55,7 +55,6 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.mail.contenttypes.MailContentType;
 import com.openexchange.exception.OXException;
@@ -72,7 +71,7 @@ public class ReplyTest extends AbstractReplyTest {
     }
 
     @Test
-    public void testShouldReplyToSenderOnly() throws OXException, IOException, SAXException, JSONException, OXException {
+    public void testShouldReplyToSenderOnly() throws OXException, IOException, JSONException, OXException {
         AJAXClient client2 = null;
         try {
             // note: doesn't work the other way around on the dev system, because only the first account is set up correctly.

@@ -484,6 +484,26 @@ public abstract class DelegatingEvent extends Event {
     public boolean containsGeo() {
         return delegate.containsGeo();
     }
+    
+    @Override
+    public AttendeePrivileges getAttendeePrivileges() {
+        return delegate.getAttendeePrivileges();
+    }
+
+    @Override
+    public void setAttendeePrivileges(AttendeePrivileges value) {
+        delegate.setAttendeePrivileges(value);
+    }
+
+    @Override
+    public void removeAttendeePrivileges() {
+        delegate.removeAttendeePrivileges();
+    }
+
+    @Override
+    public boolean containsAttendeePrivileges() {
+        return delegate.containsAttendeePrivileges();
+    }
 
     @Override
     public DateTime getStartDate() {

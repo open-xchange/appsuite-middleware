@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.mail.filter.tests.api;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
+import java.io.IOException;
 import java.rmi.Naming;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.json.JSONException;
 import org.junit.Assume;
 import org.junit.Test;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -87,7 +90,7 @@ public class AdminListTest extends AbstractMailFilterTest {
     public void setUp() throws Exception {
         super.setUp();
         adminClient = new AJAXClient(admin);
-        Context ctx = new Context(getClient().getValues().getContextId());
+        Context ctx = getContext();
         ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "true");
 
         TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
@@ -101,13 +104,21 @@ public class AdminListTest extends AbstractMailFilterTest {
         Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         Set<String> emptySet = Collections.emptySet();
-        usrInterface.changeCapabilities(new Context(getClient().getValues().getContextId()), user, cap, emptySet, emptySet, userCreds);
+        usrInterface.changeCapabilities(getContext(), user, cap, emptySet, emptySet, userCreds);
+    }
+
+    private Context getContext() throws OXException, IOException, JSONException {
+        return getContext(getClient());
+    }
+
+    private Context getContext(AJAXClient client) throws OXException, IOException, JSONException {
+        return new Context(I(client.getValues().getContextId()));
     }
 
     @Override
     public void tearDown() throws Exception {
         try {
-            Context ctx = new Context(getClient().getValues().getContextId());
+            Context ctx = getContext();
             ctx.setUserAttribute("config", "com.openexchange.mail.adminMailLoginEnabled", "false");
             TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
             Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());
@@ -120,7 +131,7 @@ public class AdminListTest extends AbstractMailFilterTest {
             Credentials userCreds = new Credentials(admin.getUser(), admin.getPassword());
             OXUserInterface usrInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
             Set<String> emptySet = Collections.emptySet();
-            usrInterface.changeCapabilities(new Context(adminClient.getValues().getContextId()), user, emptySet, cap, emptySet, userCreds);
+            usrInterface.changeCapabilities(getContext(adminClient), user, emptySet, cap, emptySet, userCreds);
             if (rid > 0) {
                 mailFilterAPI.deleteRule(rid);
             }

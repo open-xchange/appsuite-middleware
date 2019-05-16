@@ -311,7 +311,7 @@ public class ThreadPoolJobQueueService implements JobQueueService {
     public JobInfo require(UUID id, int userId, int contextId) throws OXException {
         JobInfo jobInfo = get(id, userId, contextId);
         if (null == jobInfo) {
-            throw JobQueueExceptionCodes.NO_SUCH_JOB.create(UUIDs.getUnformattedString(id), userId, contextId);
+            throw JobQueueExceptionCodes.NO_SUCH_JOB.create(UUIDs.getUnformattedString(id), I(userId), I(contextId));
         }
         return jobInfo;
     }

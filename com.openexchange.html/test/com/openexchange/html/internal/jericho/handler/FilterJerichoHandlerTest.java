@@ -49,6 +49,8 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -99,7 +101,7 @@ public class FilterJerichoHandlerTest {
     public void testSetMaxContentSize_infiniteWithMinusOne_setInfinite() {
         filterJerichoHandler.setMaxContentSize(-1);
 
-        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        int valueFromField = ((Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize")).intValue();
         Assert.assertEquals(-1, valueFromField);
     }
 
@@ -107,7 +109,7 @@ public class FilterJerichoHandlerTest {
     public void testSetMaxContentSize_infiniteWithMinusZero_setInfinite() {
         filterJerichoHandler.setMaxContentSize(0);
 
-        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        int valueFromField = ((Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize")).intValue();
         Assert.assertEquals(0, valueFromField);
     }
 
@@ -115,7 +117,7 @@ public class FilterJerichoHandlerTest {
     public void testSetMaxContentSize_lessThanMinimum_setMinimum10000() {
         filterJerichoHandler.setMaxContentSize(555);
 
-        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        int valueFromField = ((Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize")).intValue();
         Assert.assertEquals(10000, valueFromField);
     }
 
@@ -123,7 +125,7 @@ public class FilterJerichoHandlerTest {
     public void testSetMaxContentSize_validMaxSize_setMaxSize() {
         filterJerichoHandler.setMaxContentSize(22222);
 
-        int valueFromField = (Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize");
+        int valueFromField = ((Integer) MockUtils.getValueFromField(filterJerichoHandler, "maxContentSize")).intValue();
         Assert.assertEquals(22222, valueFromField);
     }
 
@@ -213,33 +215,33 @@ public class FilterJerichoHandlerTest {
 
     @Test
     public void testMarkCssStart_DepthCalculatedCorrectly() throws Exception {
-        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
-        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.isNull());
-        Whitebox.setInternalState(spyOnHandler, "depth", 1);
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), B(ArgumentMatchers.anyBoolean()), ArgumentMatchers.anyMap());
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), B(ArgumentMatchers.anyBoolean()), ArgumentMatchers.isNull());
+        Whitebox.setInternalState(spyOnHandler, "depth", I(1));
         StartTag startTag = PowerMockito.mock(StartTag.class);
         spyOnHandler.markCssStart(startTag);
-        int depth = (int) Whitebox.getInternalState(spyOnHandler, "depth");
+        int depth = ((Integer) Whitebox.getInternalState(spyOnHandler, "depth")).intValue();
         assertTrue("depth attribute is not 2", depth == 2);
     }
 
     @Test
     public void testMarkCssStart_SkiplevelBiggerZeroToReturn() throws Exception {
-        Whitebox.setInternalState(spyOnHandler, "skipLevel", 1);
+        Whitebox.setInternalState(spyOnHandler, "skipLevel", I(1));
         StartTag startTag = PowerMockito.mock(StartTag.class);
         spyOnHandler.markCssStart(startTag);
-        int skipLevel = (int) Whitebox.getInternalState(spyOnHandler, "skipLevel");
+        int skipLevel = ((Integer) Whitebox.getInternalState(spyOnHandler, "skipLevel")).intValue();
         assertTrue("skipLevel attribute is not 2", skipLevel == 2);
-        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(0)).invoke("addStartTag", ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
+        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(0)).invoke("addStartTag", ArgumentMatchers.any(StartTag.class), B(ArgumentMatchers.anyBoolean()), ArgumentMatchers.anyMap());
     }
 
     @Test
     public void testMarkCssStart_StartTagAddedAndCssSet() throws Exception {
-        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(ArgumentMatchers.any(StartTag.class), B(ArgumentMatchers.anyBoolean()), ArgumentMatchers.anyMap());
         StartTag startTag = PowerMockito.mock(StartTag.class);
         Mockito.when(startTag.getName()).thenReturn("style");
         spyOnHandler.markCssStart(startTag);
-        boolean isCss = (boolean) Whitebox.getInternalState(spyOnHandler, "isCss");
+        boolean isCss = ((Boolean) Whitebox.getInternalState(spyOnHandler, "isCss")).booleanValue();
         assertTrue("CSS flag not set", isCss);
-        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(1)).invoke("addStartTag", ArgumentMatchers.any(StartTag.class), ArgumentMatchers.anyBoolean(), ArgumentMatchers.anyMap());
+        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(1)).invoke("addStartTag", ArgumentMatchers.any(StartTag.class), B(ArgumentMatchers.anyBoolean()), ArgumentMatchers.anyMap());
     }
 }

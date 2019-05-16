@@ -10,11 +10,10 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.groupware.container.Appointment;
 
 public class Bug10733Test extends AppointmentTest {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Bug10733Test.class);
 
     @Test
     public void testBug10733() throws Exception {
@@ -41,7 +40,7 @@ public class Bug10733Test extends AppointmentTest {
         final boolean hasError = insertResponse.hasError();
         assertTrue("error message expected", hasError);
 
-        final JSONObject jsonObj = insertResponse.getResponse().getJSON();
+        final JSONObject jsonObj = ResponseWriter.getJSON(insertResponse.getResponse());
 
         final String errorCode = jsonObj.getString("code");
 

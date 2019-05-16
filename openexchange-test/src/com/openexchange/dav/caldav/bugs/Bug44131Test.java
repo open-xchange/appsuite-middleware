@@ -84,15 +84,17 @@ public class Bug44131Test extends CalDAVTest {
     private CalendarTestManager manager2;
     private AJAXClient client3;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         manager2 = new CalendarTestManager(getClient2());
         manager2.setFailOnError(true);
-        
+
         client3 = new AJAXClient(testContext.acquireUser());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

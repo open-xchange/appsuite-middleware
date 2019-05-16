@@ -94,7 +94,7 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
         assertNull(response.getErrorDesc(), response.getError());
         FindQueryResponseData responseData = response.getData();
         assertNotNull(responseData);
-        assertTrue("No results found", responseData.getSize() > 0);
+        assertTrue("No results found", responseData.getSize().intValue() > 0);
     }
 
     /**
@@ -112,6 +112,6 @@ public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProvider
         assertNull(response.getErrorDesc(), response.getError());
         FindQueryResponseData responseData = response.getData();
         assertNotNull(responseData);
-        assertTrue("No results found", responseData.getSize() > 0);
+        assertTrue("No results found", responseData.getSize().intValue() > 0);
     }
 }

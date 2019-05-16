@@ -19,6 +19,7 @@
 
 package org.apache.jsieve;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.slf4j.Logger;
 
 
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
  */
 public final class ScriptCoordinate {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptCoordinate.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScriptCoordinate.class);
 
     private final int startLineNumber;
     private final int startColumnNumber;
@@ -142,8 +143,8 @@ public final class ScriptCoordinate {
      * @param logger <code>Log</code>, not null
      */
     public void logDiagnosticsInfo(Logger logger) {
-        logger.info("Expression starts line {} column {}", startLineNumber, startColumnNumber);
-        logger.info("Expression ends line {} column {}", endLineNumber, endColumnNumber);
+        logger.info("Expression starts line {} column {}", I(startLineNumber), I(startColumnNumber));
+        logger.info("Expression ends line {} column {}", I(endLineNumber), I(endColumnNumber));
     }
 
     /**
@@ -151,7 +152,7 @@ public final class ScriptCoordinate {
      * @param logger <code>Log</code>, not null
      */
     public void debugDiagnostics(Logger logger) {
-        logger.debug("Expression starts line {} column {}", startLineNumber, startColumnNumber);
-        logger.debug("Expression ends line {} column {}", endLineNumber, endColumnNumber);
+        logger.debug("Expression starts line {} column {}", I(startLineNumber), I(startColumnNumber));
+        logger.debug("Expression ends line {} column {}", I(endLineNumber), I(endColumnNumber));
     }
 }

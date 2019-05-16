@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_REFERENCE;
 import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_TYPE;
 import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_URL;
@@ -596,7 +597,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             vars.put(VARIABLE_PREVIEW, previewImages);
             vars.put(VARIABLE_FILE_NAMES, filenameMapping);
             if (moreFiles > 0) {
-                vars.put(VARIABLE_MORE_FILES, moreFiles == 1 ? translator.translate(NotificationStrings.DRIVE_MAIL_ONE_MORE_FILE) : String.format(translator.translate(NotificationStrings.DRIVE_MAIL_MORE_FILES), moreFiles));
+                vars.put(VARIABLE_MORE_FILES, moreFiles == 1 ? translator.translate(NotificationStrings.DRIVE_MAIL_ONE_MORE_FILE) : String.format(translator.translate(NotificationStrings.DRIVE_MAIL_MORE_FILES), I(moreFiles)));
             }
         }
 

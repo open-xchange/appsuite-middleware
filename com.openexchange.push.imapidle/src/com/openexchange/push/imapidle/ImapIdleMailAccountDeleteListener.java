@@ -49,6 +49,7 @@
 
 package com.openexchange.push.imapidle;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -84,7 +85,7 @@ public final class ImapIdleMailAccountDeleteListener implements MailAccountDelet
                 instance.stopListener(false, true, user, cid);
             } catch (Exception e) {
                 Logger logger = org.slf4j.LoggerFactory.getLogger(ImapIdleMailAccountDeleteListener.class);
-                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", user, cid);
+                logger.warn("Failed to stop IMAP-IDLE listener for user {} in context {}", I(user), I(cid));
             }
         }
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.find.facet;
 
+import java.io.Serializable;
 import java.util.List;
 import com.openexchange.i18n.I18nService;
 
@@ -60,7 +61,7 @@ import com.openexchange.i18n.I18nService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public interface FacetType {
+public interface FacetType extends Serializable {
 
     /**
      * Gets the id of this type, that uniquely identifies

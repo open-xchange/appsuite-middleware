@@ -87,7 +87,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactFolderUpdaterStrategy.class);
 
-    private static final int SQL_INTERFACE = 1;
+    private static final int CONTACT_SERVICE = 1;
 
     private static final int TARGET = 2;
 
@@ -177,13 +177,17 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void closeSession(final Object session) {
-        // Nothing to do
+        if(session instanceof Map<?,?>) {
+            @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
+            Session ses = (Session) userInfo.get(I(SESSION));
+            ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+        }
     }
 
     @Override
     public Collection<Contact> getData(final TargetFolderDefinition target, final Object session) throws OXException {
         List<Contact> contacts = new ArrayList<Contact>();
-        Object sqlInterface = getFromSession(SQL_INTERFACE, session);
+        Object sqlInterface = getFromSession(CONTACT_SERVICE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
         if (sqlInterface instanceof ContactService && targetFolderSession instanceof Session) {
             SearchIterator<Contact> searchIterator = null;
@@ -216,7 +220,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @Override
     public void save(final Contact newElement, final Object session, Collection<OXException> errors) throws OXException {
-        Object sqlInterface = getFromSession(SQL_INTERFACE, session);
+        Object sqlInterface = getFromSession(CONTACT_SERVICE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
         if ((sqlInterface instanceof ContactService) && (targetFolderSession instanceof Session)) {
             TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
@@ -241,15 +245,15 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     @SuppressWarnings("unchecked")
     private Object getFromSession(final int key, final Object session) {
-        return ((Map<Integer, Object>) session).get(key);
+        return ((Map<Integer, Object>) session).get(I(key));
     }
 
     @Override
     public Object startSession(final TargetFolderDefinition target) {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
-        userInfo.put(SQL_INTERFACE, contactService);
-        userInfo.put(TARGET, target);
+        userInfo.put(I(CONTACT_SERVICE), contactService);
+        userInfo.put(I(TARGET), target);
         Session session = null;
         if (target instanceof SessionAwareTargetFolderDefinition) {
             session = ((SessionAwareTargetFolderDefinition) target).getSession();
@@ -257,13 +261,14 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (session == null) {
             session = new TargetFolderSession(target);
         }
-        userInfo.put(SESSION, session);
+        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        userInfo.put(I(SESSION), session);
         return userInfo;
     }
 
     @Override
     public void update(final Contact original, final Contact update, final Object session) throws OXException {
-        Object sqlInterface = getFromSession(SQL_INTERFACE, session);
+        Object sqlInterface = getFromSession(CONTACT_SERVICE, session);
         Object targetFolderSession = getFromSession(SESSION, session);
         if (sqlInterface instanceof ContactService && targetFolderSession instanceof Session) {
             update.setParentFolderID(original.getParentFolderID());

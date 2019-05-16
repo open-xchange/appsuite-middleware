@@ -55,6 +55,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.EventNotificationPoolService;
 import com.openexchange.chronos.itip.generators.NotificationMail;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
@@ -73,8 +74,8 @@ public class PoolingMailSenderService implements MailSenderService {
     }
 
     @Override
-    public void sendMail(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
-        if (!mail.shouldBeSent()) {
+    public void sendMail(NotificationMail mail, CalendarSession session, CalendarUser principal, String comment) throws OXException {
+        if (!mail.shouldBeSent(session)) {
             return;
         }
         try {
@@ -126,7 +127,7 @@ public class PoolingMailSenderService implements MailSenderService {
      * @param session The {@link Session}
      * @throws OXException In case sending fails
      */
-    private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal, String comment) throws OXException {
+    private void poolAwareDirectSend(NotificationMail mail, CalendarSession session, CalendarUser principal, String comment) throws OXException {
         pool.aware(mail.getEvent(), mail.getRecipient(), session);
         delegate.sendMail(mail, session, principal, comment);
     }

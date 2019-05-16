@@ -50,6 +50,7 @@
 
 package com.openexchange.hazelcast.osgi;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
@@ -100,11 +101,11 @@ public class HazelcastActivator implements BundleActivator {
 
     private boolean stopped; // Guarded by synchronized
 
-    volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
-    volatile ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
-    volatile ServiceTracker<ManagementService, ManagementService> managementTracker;
-    volatile ServiceRegistration<HazelcastInstance> serviceRegistration;
-    volatile HazelcastInstance hazelcastInstance;
+    ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
+    ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
+    ServiceTracker<ManagementService, ManagementService> managementTracker;
+    ServiceRegistration<HazelcastInstance> serviceRegistration;
+    HazelcastInstance hazelcastInstance;
 
     /**
      * Initializes a new {@link HazelcastActivator}.
@@ -115,13 +116,12 @@ public class HazelcastActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
         /*
          * track HazelcastConfigurationService
          */
-        synchronized (this) {
-            stopped = false;
-        }
+        stopped = false;
+        final HazelcastActivator hzActivator = this;
         ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> customizer =
             new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
 
@@ -130,12 +130,14 @@ public class HazelcastActivator implements BundleActivator {
                 HazelcastConfigurationService configService = context.getService(reference);
                 try {
                     if (configService.isEnabled()) {
-                        HazelcastInstance hazelcast = startHazelcastInstance(configService);
-                        // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
-                        if (null != hazelcast) {
-                            serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
-                            hazelcastInstance = hazelcast;
-                            HazelcastMBeanImpl.setHazelcastInstance(hazelcast);
+                        synchronized (hzActivator) {
+                            HazelcastInstance hazelcast = startHazelcastInstance(configService);
+                            // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
+                            if (null != hazelcast) {
+                                serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
+                                hazelcastInstance = hazelcast;
+                                HazelcastMBeanImpl.setHazelcastInstance(hazelcast);
+                            }
                         }
                     } else {
                         String lf = Strings.getLineSeparator();
@@ -278,7 +280,7 @@ public class HazelcastActivator implements BundleActivator {
                 shutDownTask.cancel(true);
                 hazelcast.getLifecycleService().terminate();
             }
-            LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, (System.currentTimeMillis() - start), lf);
+            LOG.info("{}Hazelcast:{}    Shutdown completed after {} msec.{}", lf, lf, L(System.currentTimeMillis() - start), lf);
         }
     }
 
@@ -321,7 +323,7 @@ public class HazelcastActivator implements BundleActivator {
         OutOfMemoryErrorDispatcher.setServerHandler(handler);
         long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
-        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
+        LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, L(System.currentTimeMillis() - hzStart), lf);
         this.hazelcastInstance = hazelcast;
         return hazelcast;
     }

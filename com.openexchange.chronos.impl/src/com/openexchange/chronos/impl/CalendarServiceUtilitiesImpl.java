@@ -52,21 +52,18 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.performer.ChangeExceptionsPerformer;
 import com.openexchange.chronos.impl.performer.CountEventsPerformer;
 import com.openexchange.chronos.impl.performer.ForeignEventsPerformer;
-import com.openexchange.chronos.impl.performer.GetPerformer;
 import com.openexchange.chronos.impl.performer.ResolvePerformer;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -136,12 +133,13 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public String resolveByFilename(CalendarSession session, String filename) throws OXException {
+    public String resolveByUID(CalendarSession session, String uid, int calendarUserId) throws OXException {
         return new InternalCalendarStorageOperation<String>(session) {
 
             @Override
             protected String execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolvePerformer(session, storage).resolveByFilename(filename);
+                EventID eventID = new ResolvePerformer(session, storage).resolveByUid(uid, calendarUserId);
+                return null == eventID ? null : eventID.getObjectID();
             }
         }.executeQuery();
     }
@@ -211,36 +209,6 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
                 return new ResolvePerformer(session, storage).resolve(folderId, resourceNames);
             }
         }.executeQuery();
-    }
-
-    static EventsResult resolveEvent(CalendarSession session, CalendarStorage storage, String folderId, String id) {
-        /*
-         * get event & any overridden instances in folder
-         */
-        try {
-            Event event = new GetPerformer(session, storage).perform(folderId, id, null);
-            List<Event> events = new ArrayList<Event>();
-            events.add(event);
-            if (isSeriesMaster(event)) {
-                events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folderId, id));
-            }
-            return new DefaultEventsResult(events);
-        } catch (OXException e) {
-            if ("CAL-4041".equals(e.getErrorCode())) {
-                /*
-                 * "Event not found in folder..." -> try to load detached occurrences
-                 */
-                try {
-                    List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folderId, id);
-                    if (0 < detachedOccurrences.size()) {
-                        return new DefaultEventsResult(detachedOccurrences);
-                    }
-                } catch (OXException x) {
-                    // ignore
-                }
-            }
-            return new DefaultEventsResult(e);
-        }
     }
 
 }

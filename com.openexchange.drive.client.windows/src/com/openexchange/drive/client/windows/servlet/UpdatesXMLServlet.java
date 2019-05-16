@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 
 /**
- * 
+ *
  * {@link UpdatesXMLServlet} is a servlet which provides update informations about the drive client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -123,7 +123,7 @@ public class UpdatesXMLServlet extends OXServlet {
                     map = driveUpdate.getTemplateValues(serverUrl, Utils.getUserName(session), branding);
                 } catch (NullPointerException e) {
                     LOG.error("Branding properties imcomplete!");
-                    throw new BrandingException(BrandingException.MISSING_PROPERTIES);
+                    throw BrandingExceptionCodes.MISSING_PROPERTIES.create();
                 }
                 writer = resp.getWriter();
                 writeHead(writer);

@@ -49,9 +49,16 @@
 
 package com.openexchange.chronos.storage.rdb.resilient;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.storage.rdb.CalendarStorageWarnings;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
+import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.server.ServiceLookup;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
@@ -107,15 +114,145 @@ public abstract class RdbResilientStorage extends CalendarStorageWarnings {
      * @param runnable The runnable to perform
      * @param failurePredicate The failure predicate to decide whether the operation should be retried or not
      */
-    protected static void runWithRetries(CheckedRunnable runnable, Predicate<? extends Throwable> failurePredicate) throws OXException {
+    protected void runWithRetries(CheckedRunnable runnable, Predicate<? extends Throwable> failurePredicate) throws OXException {
         try {
             Failsafe.with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(failurePredicate)).run(runnable);
         } catch (FailsafeException e) {
             if (OXException.class.isInstance(e.getCause())) {
                 throw (OXException) e.getCause();
             }
-            throw e;
+        } catch (UnsupportedOperationException e) {
+            if (false == handleUnsupportedDataError(e)) {
+                throw e;
+            }
         }
+    }
+
+    /**
+     * Tries to handle an exception that occurred during inserting data automatically.
+     *
+     * @param objectsPerEventId The objects being stored, mapped to the identifier of the event they're stored for
+     * @param failure The exception
+     * @return <code>true</code> if the data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
+     */
+    protected <O> boolean handleObjectsPerEventId(Map<String, ? extends Collection<O>> objectsPerEventId, Throwable failure) {
+        if (null != objectsPerEventId) {
+            for (Entry<String, ? extends Collection<O>> entry : objectsPerEventId.entrySet()) {
+                if (handleObjects(entry.getKey(), entry.getValue(), failure)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tries to handle an exception that occurred during inserting data automatically.
+     *
+     * @param eventId The identifier of the event where data is stored for
+     * @param objects The objects being stored
+     * @param failure The exception
+     * @return <code>true</code> if the data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
+     */
+    protected <O> boolean handleObjects(String eventId, Collection<O> objects, Throwable failure) {
+        if (null != objects) {
+            for (O object : objects) {
+                if (handle(eventId, object, failure)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tries to handle an exception that occurred during inserting data automatically.
+     *
+     * @param eventId The identifier of the event where data is stored for
+     * @param mappedObjects The objects being stored, mapped to an arbitrary key
+     * @param failure The exception
+     * @return <code>true</code> if the data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
+     */
+    protected <O> boolean handleMappedObjects(String eventId, Map<?, ? extends Collection<O>> mappedObjects, Throwable failure) {
+        if (null != mappedObjects) {
+            for (Collection<O> objects : mappedObjects.values()) {
+                if (handleObjects(eventId, objects, failure)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tries to handle an exception that occurred during inserting data automatically.
+     *
+     * @param eventId The identifier of the event where data is stored for
+     * @param object The object being stored
+     * @param failure The exception
+     * @return <code>true</code> if the data was adjusted so that the operation should be tried again, <code>false</code>, otherwise
+     */
+    protected <O> boolean handle(String eventId, O object, Throwable failure) {
+        if (false == OXException.class.isInstance(failure)) {
+            return false;
+        }
+        OXException e = (OXException) failure;
+        try {
+            switch (e.getErrorCode()) {
+                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
+                case "RDB-0002": // An SQL error cause by an illegal or unsupported character string: ...
+                    return handleIncorrectStrings && handleIncorrectString(eventId, object, e);
+                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
+                    return handleTruncations && handleTruncation(eventId, object, e);
+                default:
+                    return false;
+            }
+        } catch (Exception x) {
+            LOG.warn("Unexpected error during automatic handling of {}", e.getErrorCode(), x);
+            addWarning(eventId, CalendarExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage()));
+            return false;
+        }
+    }
+
+    private <O> boolean handleIncorrectString(String eventId, O object, OXException e) throws OXException {
+        LOG.debug("Incorrect string detected while storing calendar data, replacing problematic characters and trying again.", e);
+        if (MappedIncorrectString.replace(e.getProblematics(), object, "")) {
+            addWarning(eventId, e);
+            return true;
+        }
+        return false;
+    }
+
+    private <O> boolean handleTruncation(String eventId, O object, OXException e) throws OXException {
+        LOG.debug("Data truncation detected while storing calendar data, trimming problematic fields and trying again.");
+        if (MappedTruncation.truncate(e.getProblematics(), object)) {
+            addWarning(eventId, e);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Tries to handle an {@link UnsupportedOperationException} caused by an {@link CalendarExceptionCodes#UNSUPPORTED_DATA} error. In case
+     * the error could be handled, an appropriate warning is tracked (up to the configured problem severity), otherwise, the error is
+     * raised.
+     * 
+     * @param e The unsupported operation exception to handle
+     * @return <code>true</code> if handled, <code>false</code>, otherwise
+     */
+    private boolean handleUnsupportedDataError(UnsupportedOperationException e) throws OXException {
+        if (OXException.class.isInstance(e.getCause())) {
+            OXException cause = (OXException) e.getCause();
+            if (CalendarExceptionCodes.UNSUPPORTED_DATA.equals(cause)) {
+                ProblemSeverity severity = (ProblemSeverity) cause.getArgument("severity");
+                String eventId = (String) cause.getArgument("eventId");
+                EventField field = (EventField) cause.getArgument("field");
+                String message = (String) cause.getArgument("message");
+                addUnsupportedDataError(eventId, field, severity, message, cause.getCause());
+                return true;
+            }
+        }
+        return false;
     }
 
 }

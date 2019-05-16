@@ -50,134 +50,68 @@
 package com.openexchange.file.storage.boxcom.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.BoxFileStorageService;
-import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.oauth.BoxOAuthAccountAssociationProvider;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
+import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer;
 import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link BoxServiceRegisterer}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<FileStorageAccountManagerProvider, FileStorageAccountManagerProvider> {
-
-    private final BundleContext context;
-    private FileStorageAccountManagerProvider provider;
-    private BoxFileStorageService service;
-    private ServiceRegistration<FileStorageService> serviceRegistration;
-    private ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
-    private ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration; // guarded by synchronized
+public final class BoxServiceRegisterer extends AbstractCloudStorageServiceRegisterer {
 
     /**
      * Initializes a new {@link BoxServiceRegisterer}.
      */
-    public BoxServiceRegisterer(final BundleContext context) {
-        super();
-        this.context = context;
+    public BoxServiceRegisterer(BundleContext context, ServiceLookup services) {
+        super(context, services);
     }
 
-    /** For testing only */
-    public BoxFileStorageService getService() {
-        return service;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup)
+     */
     @Override
-    public FileStorageAccountManagerProvider addingService(final ServiceReference<FileStorageAccountManagerProvider> reference) {
-        final FileStorageAccountManagerProvider provider = context.getService(reference);
-        if (!provider.supports(BoxConstants.ID)) {
-            context.ungetService(reference);
-            return null;
-        }
-        synchronized (this) {
-            BoxFileStorageService service = this.service;
-            if (null == service) {
-                /*
-                 * Try to create Box.com service
-                 */
-                service = new BoxFileStorageService(Services.getServices());
-                this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
-                this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new BoxOAuthAccountAssociationProvider(service), null);
-                this.service = service;
-                this.provider = provider;
-            } else {
-                /*
-                 * Already created before, but new provider
-                 */
-                CompositeFileStorageAccountManagerProvider compositeProvider = service.getCompositeAccountManager();
-                if (null == compositeProvider) {
-                    compositeProvider = new CompositeFileStorageAccountManagerProvider();
-                    compositeProvider.addProvider(this.provider);
-                    unregisterService(null);
-                    service = new BoxFileStorageService(Services.getServices(), compositeProvider);
-                    this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                    this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
-                    this.associationProviderRegistration = context.registerService(OAuthAccountAssociationProvider.class, new BoxOAuthAccountAssociationProvider(service), null);
-                    this.service = service;
-                    this.provider = compositeProvider;
-                }
-                compositeProvider.addProvider(provider);
-            }
-        }
-        return provider;
+    protected AbstractOAuthFileStorageService getCloudFileStorageService() {
+        return new BoxFileStorageService(getServiceLookup());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getCloudFileStorageService(com.openexchange.server.ServiceLookup, com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider)
+     */
     @Override
-    public void modifiedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
-        // Ignore
+    protected AbstractOAuthFileStorageService getCloudFileStorageService(CompositeFileStorageAccountManagerProvider compositeProvider) {
+        return new BoxFileStorageService(getServiceLookup(), compositeProvider);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getOAuthAccountAssociationProvider(com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService)
+     */
     @Override
-    public void removedService(final ServiceReference<FileStorageAccountManagerProvider> reference, final FileStorageAccountManagerProvider provider) {
-        if (null != provider) {
-            synchronized (this) {
-                final CompositeFileStorageAccountManagerProvider compositeProvider = this.service.getCompositeAccountManager();
-                if (null == compositeProvider) {
-                    unregisterService(reference);
-                } else {
-                    compositeProvider.removeProvider(provider);
-                    if (!compositeProvider.hasAnyProvider()) {
-                        unregisterService(reference);
-                    }
-                }
-            }
-        }
+    protected OAuthAccountAssociationProvider getOAuthAccountAssociationProvider(AbstractOAuthFileStorageService storageService) {
+        return new BoxOAuthAccountAssociationProvider((BoxFileStorageService) storageService);
     }
 
-    private void unregisterService(final ServiceReference<FileStorageAccountManagerProvider> ref) {
-        ServiceRegistration<FileStorageService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
-        }
-
-        ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;
-        if (null != listenerRegistration) {
-            this.listenerRegistration = null;
-            listenerRegistration.unregister();
-        }
-
-        ServiceRegistration<OAuthAccountAssociationProvider> associationProviderRegistration = this.associationProviderRegistration;
-        if (null != associationProviderRegistration) {
-            this.associationProviderRegistration = null;
-            associationProviderRegistration.unregister();
-        }
-
-        ServiceReference<FileStorageAccountManagerProvider> reference = ref;
-        if (null != reference) {
-            context.ungetService(reference);
-        }
-
-        this.service = null;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageServiceRegisterer#getProviderId()
+     */
+    @Override
+    protected String getProviderId() {
+        return BoxConstants.ID;
     }
 
 }

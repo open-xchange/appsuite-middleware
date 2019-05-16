@@ -52,6 +52,7 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -84,7 +85,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
         FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID
     };
 
-    private static Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionAddGuestGroup.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionAddGuestGroup.class);
 
     /**
      * Default constructor.
@@ -172,7 +173,7 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
                     stmt.setInt(2, folderID);
                     stmt.addBatch();
                 } else {
-                    log.warn("System folder {} not found in context {}, skipping.", folderID, contextID);
+                    log.warn("System folder {} not found in context {}, skipping.", I(folderID), I(contextID));
                 }
             }
             /*

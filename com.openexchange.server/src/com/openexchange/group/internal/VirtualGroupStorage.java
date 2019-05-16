@@ -67,7 +67,7 @@ import com.openexchange.groupware.contexts.Context;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class VirtualGroupStorage extends GroupStorage {
+public final class VirtualGroupStorage implements GroupStorage {
 
     /**
      * Underlying group storage handling groups except group with identifier 0.
@@ -90,15 +90,39 @@ public final class VirtualGroupStorage extends GroupStorage {
      */
     @Override
     public Group getGroup(final int gid, final Context ctx) throws OXException {
-        final Group retval;
-        if (GroupStorage.GROUP_ZERO_IDENTIFIER == gid) {
-            retval = GroupTools.getGroupZero(ctx);
-        } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == gid) {
-            retval = GroupTools.getGuestGroup(ctx);
-        } else {
-            retval = delegate.getGroup(gid, ctx);
+        return getGroup(gid, true, ctx);
+    }
+
+    @Override
+    public Group getGroup(final int gid, boolean loadMembers, final Context ctx) throws OXException {
+        return getGroup(new int[] { gid }, loadMembers, ctx)[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Group[] getGroup(int[] gid, Context context) throws OXException {
+        return getGroup(gid, true, context);
+    }
+
+    public Group[] getGroup(int[] gid, boolean loadMembers, Context context) throws OXException {
+        final List<Group> retval = new ArrayList<>();
+        for (int i = 0; i < gid.length; i++) {
+            int j = gid[i];
+            Group found = null;
+            if (GroupStorage.GROUP_ZERO_IDENTIFIER == j) {
+                found = GroupTools.getGroupZero(context, loadMembers);
+            } else if (GroupStorage.GUEST_GROUP_IDENTIFIER == j) {
+                found = GroupTools.getGuestGroup(context, loadMembers);
+            } else {
+                found = delegate.getGroup(j, loadMembers, context);
+            }
+            if (found != null) {
+                retval.add(found);
+            }
         }
-        return retval;
+        return retval.stream().toArray(Group[]::new);
     }
 
     /**
@@ -108,8 +132,8 @@ public final class VirtualGroupStorage extends GroupStorage {
     public Group[] getGroups(final boolean loadMembers, final Context ctx) throws OXException {
         final Group[] groups = delegate.getGroups(loadMembers, ctx);
         final Group[] retval = new Group[groups.length + 2];
-        retval[0] = GroupTools.getGroupZero(ctx);
-        retval[1] = GroupTools.getGuestGroup(ctx);
+        retval[0] = GroupTools.getGroupZero(ctx, loadMembers);
+        retval[1] = GroupTools.getGuestGroup(ctx, loadMembers);
         System.arraycopy(groups, 0, retval, 2, groups.length);
         return retval;
     }
@@ -143,9 +167,9 @@ public final class VirtualGroupStorage extends GroupStorage {
     @Override
     public Group[] searchGroups(final String pattern, final boolean loadMembers, final Context ctx) throws OXException {
         final Pattern pat = Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE);
-        final Group zero = GroupTools.getGroupZero(ctx);
+        final Group zero = GroupTools.getGroupZero(ctx, loadMembers);
         final Matcher zeroMatch = pat.matcher(zero.getDisplayName());
-        final Group guests = GroupTools.getGuestGroup(ctx);
+        final Group guests = GroupTools.getGuestGroup(ctx, loadMembers);
         final Matcher guestsMatch = pat.matcher(guests.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
         groups.addAll(Arrays.asList(delegate.searchGroups(pattern, loadMembers, ctx)));
@@ -186,8 +210,7 @@ public final class VirtualGroupStorage extends GroupStorage {
         delegate.deleteGroup(ctx, con, groupId, lastRead);
     }
 
-    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
-        '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] { '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
 
     /**
      * Converts specified wild-card string to a regular expression
@@ -224,5 +247,4 @@ public final class VirtualGroupStorage extends GroupStorage {
         s.append('$');
         return (s.toString());
     }
-
 }

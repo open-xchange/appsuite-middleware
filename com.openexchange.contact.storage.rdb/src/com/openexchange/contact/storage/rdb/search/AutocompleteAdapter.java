@@ -301,9 +301,8 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
      * @param tokens The tokenized query as supplied by the client
      * @param checkPatternLength <code>true</code> to check each pattern length against the configured restrictions, <code>false</code>, otherwise
      * @return The patterns
-     * @throws OXException
      */
-    static List<String> preparePatterns(List<String> tokens) throws OXException {
+    static List<String> preparePatterns(List<String> tokens) {
         List<String> resultingPatterns = new ArrayList<String>();
         for (String pattern : tokens) {
             pattern = StringCollection.prepareForSearch(pattern, false, true, true);
@@ -373,7 +372,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
                 try {
                     contacFields.add(ContactField.valueOf(field));
                 } catch (IllegalArgumentException ex) {
-                    LOG.warn("\"" + field + "\" is not a valid column and will be skipped!");
+                    LOG.warn("\"{}\" is not a valid column and will be skipped!", field);
                 }
             }
         } catch (OXException ex) {

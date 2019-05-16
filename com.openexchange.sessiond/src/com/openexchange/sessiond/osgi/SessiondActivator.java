@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.osgi;
 
+import java.rmi.Remote;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -76,7 +77,9 @@ import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
@@ -86,13 +89,16 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.event.SessiondEventHandler;
 import com.openexchange.sessiond.impl.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionMetricHandler;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondMBeanImpl;
+import com.openexchange.sessiond.impl.SessiondRMIServiceImpl;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
 import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
+import com.openexchange.sessiond.rest.SessiondRESTService;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleanerFactory;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplierFactory;
 import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactory;
@@ -117,7 +123,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
         final BundleContext context;
         final SessiondActivator activator;
-        private volatile ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
+        private ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker;
 
         HazelcastConfTracker(BundleContext context, SessiondActivator activator) {
             super();
@@ -126,7 +132,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
         }
 
         @Override
-        public HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
+        public synchronized HazelcastConfigurationService addingService(ServiceReference<HazelcastConfigurationService> reference) {
             final HazelcastConfigurationService hzConfig = context.getService(reference);
 
             try {
@@ -188,7 +194,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
         }
 
         @Override
-        public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
+        public synchronized void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
             ServiceTracker<HazelcastInstance, HazelcastInstance> hzInstanceTracker = this.hzInstanceTracker;
             if (null != hzInstanceTracker) {
                 hzInstanceTracker.close();
@@ -281,6 +287,18 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             Services.setServiceLookup(this);
             final BundleContext context = this.context;
             SessiondInit.getInstance().start();
+            track(MetricService.class, new SimpleRegistryListener<MetricService>() {
+
+                @Override
+                public void added(ServiceReference<MetricService> ref, MetricService service) {
+                    SessionMetricHandler.registerMetrics(service);
+                }
+
+                @Override
+                public void removed(ServiceReference<MetricService> ref, MetricService service) {
+                    SessionMetricHandler.unregisterMetrics(service);
+                }
+            });
 
             // Create & register portable factories
             registerService(CustomPortableFactory.class, new PortableContextSessionsCleanerFactory());
@@ -300,7 +318,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             }
 
             // Initialize service instance
-            final SessiondService serviceImpl = /*new InvalidatedAwareSessiondService*/(new SessiondServiceImpl());
+            final SessiondService serviceImpl = /* new InvalidatedAwareSessiondService */(new SessiondServiceImpl());
             SessiondService.SERVICE_REFERENCE.set(serviceImpl);
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
@@ -309,6 +327,8 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
+            registerService(Remote.class, new SessiondRMIServiceImpl());
+            registerService(SessiondRESTService.class, new SessiondRESTService(this));
 
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new HousekeepingManagementTracker(context, SessiondMBean.MBEAN_NAME, SessiondMBean.SESSIOND_DOMAIN, new SessiondMBeanImpl()));
@@ -374,6 +394,10 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             SessiondService.SERVICE_REFERENCE.set(null);
             TokenSessionContainer.getInstance().setNotActiveExceptionHandler(null);
             // Stop sessiond
+            MetricService metricService = getOptionalService(MetricService.class);
+            if (metricService != null) {
+                SessionMetricHandler.unregisterMetrics(metricService);
+            }
             SessiondInit.getInstance().stop();
             // Clear service registry
             Services.setServiceLookup(null);

@@ -85,6 +85,11 @@ public class SAMLLoginTools {
     public static final String PARAM_LOGIN_PATH = "loginPath";
 
     /**
+     * The <code>shard</code> parameter name.
+     */
+    public static final String PARAM_SHARD = "shard";
+
+    /**
      * The <code>samlLogin</code> login action.
      */
     public static final String ACTION_SAML_LOGIN = "samlLogin";
@@ -148,7 +153,7 @@ public class SAMLLoginTools {
      * @param loginConfiguration The login configuration
      * @throws {@link SessionExceptionCodes#SESSION_EXPIRED}
      */
-    public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, LoginConfiguration loginConfiguration) throws OXException {
+    public static void validateSession(HttpServletRequest httpRequest, Session session, String cookieHash, @SuppressWarnings("unused") LoginConfiguration loginConfiguration) throws OXException {
         // IP check
         SessionUtility.checkIP(session, httpRequest.getRemoteAddr());
 

@@ -121,7 +121,8 @@ public class ContactDisplayNameHelper {
             }
             return String.format(locale, template, firstName, lastName, department);
         }
-        return String.format(locale, template, contact.getDisplayName(), "", department);
+        String displayName = Strings.isEmpty(contact.getDisplayName()) ? "-" : contact.getDisplayName();
+        return String.format(locale, template, displayName, "", department);
     }
 
     /**
@@ -180,9 +181,9 @@ public class ContactDisplayNameHelper {
     private static boolean showDepartments() {
         LeanConfigurationService configService = ServerServiceRegistry.getServize(LeanConfigurationService.class);
         if (null == configService) {
-            boolean defaultValue = false;
+            Boolean defaultValue = (Boolean) ContactProperty.showDepartments.getDefaultValue();
             LOGGER.warn("No such service: {}. Assuming default value of '{}' for property '{}'", LeanConfigurationService.class.getName(), defaultValue, ContactProperty.showDepartments);
-            return defaultValue;
+            return defaultValue.booleanValue();
         }
         return configService.getBooleanProperty(ContactProperty.showDepartments);
     }

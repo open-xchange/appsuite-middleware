@@ -49,8 +49,8 @@
 
 package com.openexchange.jsieve.commands.test;
 
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.jsieve.commands.JSONMatchType;
 
 /**
@@ -64,12 +64,12 @@ public interface ITestCommand extends ICommand {
     /**
      * @return
      */
-    Hashtable<String, String> getMatchTypes();
+    Map<String, String> getMatchTypes();
 
     /**
      * @return
      */
-    Hashtable<String, String> getAddress();
+    Map<String, String> getAddress();
 
     /**
      * @return
@@ -84,7 +84,7 @@ public interface ITestCommand extends ICommand {
     /**
      * @return
      */
-    Hashtable<String, String> getComparator();
+    Map<String, String> getComparator();
 
     /**
      * @return
@@ -94,6 +94,6 @@ public interface ITestCommand extends ICommand {
     /**
      * @return
      */
-    Hashtable<String, String> getOtherArguments();
+    Map<String, String> getOtherArguments();
 
 }

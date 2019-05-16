@@ -181,3 +181,5 @@ parameter `action` of the request (except for the import bundle, which is named 
 **Non-browser clients don't need to interpret HTML or JavaScript.** The JSON data can be recognized by the outermost `({` and `})`, where the inner braces are part of the JSON value. 
 For example, the regular expression `\((\{.*\})\)` captures the entire JSON value in its first capturing group.
 
+The client can also send the `force_json_response` parameter to get errors in form of a normal json responses instead of html.
+

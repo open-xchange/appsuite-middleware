@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.io.FileInputStream;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import org.junit.After;
@@ -63,6 +64,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
@@ -199,13 +201,18 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
             @Override
             public String getUserAgent() {
                 return "User-Agent";
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return null;
             }
         });
     }
@@ -274,13 +281,18 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
             @Override
             public String getUserAgent() {
                 return "User-Agent";
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return null;
             }
         });
         sessiondCon.getSession(session.getSessionID());
@@ -350,13 +362,18 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
             @Override
             public String getUserAgent() {
                 return "User-Agent";
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return null;
             }
         });
         sessiondCon.removeSession(session.getSessionID());
@@ -426,13 +443,18 @@ public class SessiondTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 
             @Override
             public String getUserAgent() {
                 return "User-Agent";
+            }
+
+            @Override
+            public Origin getOrigin() {
+                return null;
             }
         });
         sessiondCon.getSession(session.getSessionID());

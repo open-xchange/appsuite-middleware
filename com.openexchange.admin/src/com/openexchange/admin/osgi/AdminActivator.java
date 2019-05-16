@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -63,7 +64,6 @@ import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
 import com.openexchange.admin.mysql.CreateCalendarTables;
 import com.openexchange.admin.mysql.CreateContactsTables;
-import com.openexchange.admin.mysql.CreateIcalVcardTables;
 import com.openexchange.admin.mysql.CreateInfostoreTables;
 import com.openexchange.admin.mysql.CreateLdap2SqlTables;
 import com.openexchange.admin.mysql.CreateMiscTables;
@@ -101,9 +101,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RankingAwareRegistryServiceTrackerCustomizer;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -112,11 +111,11 @@ import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 public class AdminActivator extends HousekeepingActivator {
 
-    private volatile AdminDaemon daemon;
+    private AdminDaemon daemon;
 
     /**
      * Initializes a new {@link AdminActivator}.
@@ -127,15 +126,15 @@ public class AdminActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, ThreadPoolService.class, PasswordMechRegistry.class, VersionService.class };
     }
 
     @Override
-    public void startBundle() throws Exception {
+    public synchronized void startBundle() throws Exception {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         AdminServiceRegistry.getInstance().addService(ThreadPoolService.class, getService(ThreadPoolService.class));
 
-        track(PasswordMechFactory.class, new RegistryServiceTrackerCustomizer<PasswordMechFactory>(context, AdminServiceRegistry.getInstance(), PasswordMechFactory.class));
+        track(PasswordMechRegistry.class, new RegistryServiceTrackerCustomizer<PasswordMechRegistry>(context, AdminServiceRegistry.getInstance(), PasswordMechRegistry.class));
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
 
@@ -147,7 +146,6 @@ public class AdminActivator extends HousekeepingActivator {
         });
 
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
-        track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         track(ConfigViewFactory.class, new RegistryServiceTrackerCustomizer<ConfigViewFactory>(context, AdminServiceRegistry.getInstance(), ConfigViewFactory.class));
         AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
@@ -234,35 +232,40 @@ public class AdminActivator extends HousekeepingActivator {
             log.info("Version: {}", headers.get("Bundle-Version"));
             log.info("Name: {}", headers.get("Bundle-SymbolicName"));
         }
-        log.info("Build: {}", Version.getInstance().getVersionString());
+        log.info("Build: {}", getServiceSafe(VersionService.class).getVersionString());
         log.info("Admindaemon successfully started.");
 
-        // The listener which is called if a new plugin is registered
-        final ServiceListener sl = new ServiceListener() {
-            @Override
-            public void serviceChanged(final ServiceEvent ev) {
-                log.info("Service: {}, {}", ev.getServiceReference().getBundle().getSymbolicName(), ev.getType());
-                switch (ev.getType()) {
-                    case ServiceEvent.REGISTERED:
-                    log.info("{} registered service", ev.getServiceReference().getBundle().getSymbolicName());
-                        break;
-                    default:
-                        break;
+        // The listener, which is called if a new plugin is registered
+        {
+            ServiceListener sl = new ServiceListener() {
+                @Override
+                public void serviceChanged(ServiceEvent ev) {
+                    String symbolicName = ev.getServiceReference().getBundle().getSymbolicName();
+                    log.info("Service: {}, {}", symbolicName, I(ev.getType()));
+                    switch (ev.getType()) {
+                        case ServiceEvent.REGISTERED:
+                            log.info("{} registered service", symbolicName);
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            };
+            String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
+            try {
+                context.addServiceListener(sl, filter);
+            } catch (InvalidSyntaxException e) {
+                log.warn("Filed adding service listener", e);
             }
-        };
-        final String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
-        try {
-            context.addServiceListener(sl, filter);
-        } catch (final InvalidSyntaxException e) {
-            e.printStackTrace();
         }
 
         // UserServiceInterceptor Bridge
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put("name", "OXUser");
-        props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
-        registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
+        {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("name", "OXUser");
+            props.put(Constants.SERVICE_RANKING, Integer.valueOf(200));
+            registerService(OXUserPluginInterface.class, new UserServiceInterceptorBridge(interceptorRegistry), props);
+        }
 
         //Register CreateTableServices
         registerService(CreateTableService.class, new CreateSequencesTables());
@@ -275,7 +278,6 @@ public class AdminActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateInfostoreTables());
         registerService(CreateTableService.class, new CreateAttachmentTables());
         registerService(CreateTableService.class, new CreateMiscTables());
-        registerService(CreateTableService.class, new CreateIcalVcardTables());
 
         // Register authenticator
         AuthenticatorImpl authenticator = new AuthenticatorImpl();
@@ -287,7 +289,7 @@ public class AdminActivator extends HousekeepingActivator {
      * {@inheritDoc}
      */
     @Override
-    public void stopBundle() throws Exception {
+    public synchronized void stopBundle() throws Exception {
         {
             TaskManager taskManager = TaskManager.getInstance();
             if (null != taskManager) {

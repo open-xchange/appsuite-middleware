@@ -271,13 +271,19 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             final DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
             if (mechanism == null) {
                 // Unknown or not parsable mechanism
-                unconsideredResults.add(parseUnknownMechs(element));
+                Map<String, String> unknownMechs = parseUnknownMechs(element);
+                if (unknownMechs != null && !unknownMechs.isEmpty()) {
+                    unconsideredResults.add(unknownMechs);
+                }
                 continue;
             }
             final BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegistry.get(mechanism);
             if (mechanismParser == null) {
                 // Not a valid mechanism, skip but add to the overall result
-                unconsideredResults.add(parseUnknownMechs(element));
+                Map<String, String> unknownMechs = parseUnknownMechs(element);
+                if (unknownMechs != null && !unknownMechs.isEmpty()) {
+                    unconsideredResults.add(unknownMechs);
+                }
                 continue;
             }
             results.add(mechanismParser.apply(attributes, overallResult));
@@ -292,6 +298,10 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
      */
     protected Map<String, String> parseUnknownMechs(final String element) {
         final List<MailAuthenticityAttribute> attributes = StringUtil.parseList(InterruptibleCharSequence.valueOf(element));
+        if (attributes.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         final Map<String, String> unknownResults = new HashMap<>();
         // First element is always the mechanism
         final MailAuthenticityAttribute mechanism = attributes.get(0);

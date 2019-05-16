@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
@@ -103,7 +104,7 @@ public class SendLinkAction extends AbstractShareAction {
          */
         ShareInfo shareInfo = getShareService().optLink(session, target);
         if (null == shareInfo) {
-            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
+            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(I(target.getModule()), target.getFolder(), target.getItem());
         }
         /*
          * process notification(s)

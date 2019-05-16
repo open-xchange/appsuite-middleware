@@ -56,6 +56,7 @@ import static com.openexchange.imagetransformation.java.transformations.Utils.ge
 import static com.openexchange.imagetransformation.java.transformations.Utils.readExifOrientation;
 import static com.openexchange.imagetransformation.java.transformations.Utils.removeTransparencyIfNeeded;
 import static com.openexchange.imagetransformation.java.transformations.Utils.selectImage;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.images.ImageTransformationUtility.canRead;
 import static com.openexchange.tools.images.ImageTransformationUtility.getImageFormat;
 import java.awt.Dimension;
@@ -586,7 +587,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                             int thumbnailWidth = reader.getThumbnailWidth(imageIndex, i);
                             int thumbnailHeight = reader.getThumbnailHeight(imageIndex, i);
                             if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
-                                LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)", thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
+                                LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)", I(thumbnailWidth), I(thumbnailHeight), I(requiredResolution.width), I(requiredResolution.height));
                                 /*
                                  * use thumbnail & skip any additional scale transformations / compressions
                                  */

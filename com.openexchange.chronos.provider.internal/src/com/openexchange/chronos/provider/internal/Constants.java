@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.internal;
 
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.groupware.container.FolderObject;
 
@@ -62,7 +63,7 @@ public enum Constants {
     ;
 
     /** The static identifier of the internal calendar provider */
-    public static final String PROVIDER_ID = "chronos";
+    public static final String PROVIDER_ID = CalendarProviders.ID_CHRONOS;
 
     /** The static identifier of the single default account in the internal calendar provider */
     public static final int ACCOUNT_ID = 0;

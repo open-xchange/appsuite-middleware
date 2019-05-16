@@ -49,6 +49,7 @@
 
 package com.openexchange.advertisement.impl.rmi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -174,7 +175,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         resultSet = stmt.executeQuery();
                         List<Integer> ids = new ArrayList<>();
                         while (resultSet.next()) {
-                            ids.add(resultSet.getInt(1));
+                            ids.add(I(resultSet.getInt(1)));
                         }
 
                         Databases.closeSQLStuff(stmt);
@@ -187,7 +188,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                             stmt = con.prepareStatement(sql);
                             int x = 1;
                             for (Integer id : ids) {
-                                stmt.setInt(x++, id);
+                                stmt.setInt(x++, id.intValue());
                             }
                         }
                         if (stmt.executeUpdate() > 0) {
@@ -233,7 +234,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         resultSet = stmt.executeQuery();
                         List<Integer> ids = new ArrayList<>();
                         while (resultSet.next()) {
-                            ids.add(resultSet.getInt(1));
+                            ids.add(I(resultSet.getInt(1)));
                         }
 
                         Databases.closeSQLStuff(stmt);
@@ -242,7 +243,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         stmt = con.prepareStatement(sql);
                         int x = 1;
                         for (Integer id : ids) {
-                            stmt.setInt(x++, id);
+                            stmt.setInt(x++, id.intValue());
                         }
                         stmt.setString(x, reseller);
                         if (stmt.executeUpdate() > 0) {

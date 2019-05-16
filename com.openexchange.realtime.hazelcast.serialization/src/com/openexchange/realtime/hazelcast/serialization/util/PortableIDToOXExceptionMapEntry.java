@@ -54,14 +54,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import org.osgi.framework.BundleContext;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.realtime.hazelcast.serialization.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.serialization.BundleClassResolver;
+import com.openexchange.serialization.ClassResolver;
+import com.openexchange.serialization.FilteringObjectStreamFactory;
 
 /**
  * {@link PortableIDToOXExceptionMapEntry} - Makes entries from IDMap portable by serializing them as pairs.
@@ -125,6 +130,8 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
             exception = getOXException(exceptionBytes);
         } catch (ClassNotFoundException cnfe) {
             throw new IOException(cnfe);
+        } catch (OXException e) {
+            throw new IOException(e);
         }
     }
 
@@ -168,12 +175,16 @@ public class PortableIDToOXExceptionMapEntry implements CustomPortable {
      * @return The deserialzed {@link OXException}
      * @throws IOException If reading the byte array fails
      * @throws ClassNotFoundException If the OSGI imports are too restrictive and not all classes that make up a {@link OXException}
-     *         subclass are accessible
+     *             subclass are accessible
+     * @throws OXException
      */
-    private static OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException {
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
-        final ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        return OXException.class.cast(objectInputStream.readObject());
+    private OXException getOXException(byte[] exceptionBytes) throws IOException, ClassNotFoundException, OXException {
+        BundleContext bundleContext = Services.getBundleContext();
+        ClassResolver bundleClassResolver = bundleContext == null ? null : new BundleClassResolver(bundleContext);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(exceptionBytes);
+        try (final ObjectInputStream objectInputStream = Services.getService(FilteringObjectStreamFactory.class).createFilteringStream(byteArrayInputStream, this, bundleClassResolver)) {
+            return OXException.class.cast(objectInputStream.readObject());
+        }
     }
 
 }

@@ -14,30 +14,28 @@ import com.openexchange.pgp.mail.impl.PGPMimeServiceImpl;
  */
 public class PGPMailActivator extends HousekeepingActivator {
 
-    private static Logger logger = org.slf4j.LoggerFactory.getLogger(PGPMailActivator.class);
-
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    /**
+     * Initializes a new {@link PGPMailActivator}.
      */
+    public PGPMailActivator() {
+        super();
+    }
+    
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return EMPTY_CLASSES;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
     @Override
     protected void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PGPMailActivator.class);
         logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
         registerService(PGPMimeService.class, new PGPMimeServiceImpl());
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
     @Override
     protected void stopBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PGPMailActivator.class);
         logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }

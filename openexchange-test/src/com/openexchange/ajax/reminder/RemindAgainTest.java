@@ -100,7 +100,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
         final com.openexchange.ajax.task.actions.InsertResponse insertR = client.execute(new com.openexchange.ajax.task.actions.InsertRequest(task, timeZone));
         try {
             targetId = insertR.getId();
-            final com.openexchange.ajax.task.actions.GetResponse getR = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId));
+            final com.openexchange.ajax.task.actions.GetResponse getR = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId));
             reload = getR.getTask(timeZone);
 
             /*
@@ -157,7 +157,7 @@ public class RemindAgainTest extends AbstractAJAXSession {
                 /*
                  * Delete task
                  */
-                reload = com.openexchange.ajax.task.TaskTools.get(client, new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId)).getTask(timeZone);
+                reload = client.execute(new com.openexchange.ajax.task.actions.GetRequest(folderId, targetId)).getTask(timeZone);
                 client.execute(new com.openexchange.ajax.task.actions.DeleteRequest(reload));
             }
         }

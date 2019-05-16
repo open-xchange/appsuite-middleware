@@ -79,11 +79,19 @@ public class JSONServiceRegistry implements ServiceLookup {
 
     @Override
     public <S> S getService(Class<? extends S> clazz) {
-        return SERVICES.get().getService(clazz);
+        final com.openexchange.server.ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.json\" not started?");
+        }
+        return serviceLookup.getService(clazz);
     }
 
     @Override
     public <S> S getOptionalService(Class<? extends S> clazz) {
-        return SERVICES.get().getOptionalService(clazz);
+        final com.openexchange.server.ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.json\" not started?");
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 }

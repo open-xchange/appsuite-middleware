@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -106,7 +107,7 @@ public class PerformAction extends AbstractMessagingAction {
         }
 
         if(output == null) {
-            return new AJAXRequestResult(1);
+            return new AJAXRequestResult(I(1));
         }
         return new AJAXRequestResult(writer.write(output, req.getAccountAddress(), session, DISPLAY_MODE));
 

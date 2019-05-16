@@ -49,9 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.database.Databases.startTransaction;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
@@ -89,7 +87,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
@@ -120,11 +118,11 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
-    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max, salt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
-    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ? WHERE cid = ? AND id = ?";
+    private static final String SQL_UPDATE_PASSWORD_AND_MECH = "UPDATE user SET userPassword = ?, passwordMech = ?, salt = ? WHERE cid = ? AND id = ?";
 
     /**
      * Default constructor.
@@ -252,6 +250,11 @@ public class RdbUserStorage extends UserStorage {
                 setStringOrNull(i++, stmt, null); // filestore_login
                 setStringOrNull(i++, stmt, null); // filestore_password
                 stmt.setLong(i++, 0); // quota_max
+            }
+            if (user.getSalt() == null) {
+                stmt.setNull(i++, java.sql.Types.VARBINARY);
+            } else {
+                stmt.setBytes(i++, user.getSalt());
             }
 
             stmt.executeUpdate();
@@ -520,7 +523,7 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain,shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy,filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
+                    stmt = con.prepareStatement(getIN("SELECT id,userPassword,mailEnabled,imapServer,imapLogin,smtpServer,mailDomain,shadowLastChange,mail,timeZone,preferredLanguage,passwordMech,contactId,guestCreatedBy,filestore_id,filestore_owner,filestore_name,filestore_login,filestore_passwd,quota_max,salt FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int userId : currentUserIds) {
@@ -563,6 +566,10 @@ public class RdbUserStorage extends UserStorage {
                                 quotaMax = -1L;
                             }
                             user.setFileStorageQuota(quotaMax);
+                        }
+                        {
+                            byte[] salt = result.getBytes(pos++);
+                            user.setSalt(salt);
                         }
 
                         users.put(user.getId(), user);
@@ -805,7 +812,7 @@ public class RdbUserStorage extends UserStorage {
         }
 
         // Proceed iterating users
-        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
         int[] userIds = users.keys();
         List<Set<String>> aliasList = userAlias.getAliases(contextId, userIds);
         int i = 0;
@@ -819,7 +826,7 @@ public class RdbUserStorage extends UserStorage {
                 for (String alias : aliases) {
                     try {
                         tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
-                    } catch (Exception e) {
+                    } catch (@SuppressWarnings("unused") Exception e) {
                         tmp.add(alias);
                     }
                 }
@@ -831,8 +838,9 @@ public class RdbUserStorage extends UserStorage {
     private static final UserMapper MAPPER = new UserMapper();
 
     @Override
-    protected void updateUserInternal(Connection con, final User user, final Context context) throws OXException {
+    protected void updateUserInternal(Connection connection, final User user, final Context context) throws OXException {
         try {
+            Connection con = connection;
             if (con == null) {
                 final DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
                 do {
@@ -842,40 +850,50 @@ public class RdbUserStorage extends UserStorage {
                         throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
                     }
                     condition.resetTransactionRollbackException();
-                    boolean rollback = false;
+                    int rollback = 0;
                     try {
                         startTransaction(con);
-                        rollback = true;
+                        rollback = 1;
+
                         updateUserInDB(con, user, context);
+
                         con.commit();
-                        rollback = false;
+                        rollback = 2;
                     } catch (final SQLException e) {
                         if (!condition.isFailedTransactionRollback(e)) {
                             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                         }
                     } finally {
-                        if (rollback) {
-                            rollback(con);
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                Databases.rollback(con);
+                            }
+                            Databases.autocommit(con);
                         }
-                        autocommit(con);
                         DBPool.closeWriterSilent(context, con);
                     }
                 } while (condition.checkRetry());
             } else {
                 boolean autoCommit = con.getAutoCommit();
                 if (autoCommit) {
+                    int rollback = 0;
                     try {
                         startTransaction(con);
+                        rollback = 1;
+
                         updateUserInDB(con, user, context);
+
                         con.commit();
-                    } catch (OXException e) {
-                        rollback(con);
-                        throw e;
+                        rollback = 2;
                     } catch (SQLException e) {
-                        rollback(con);
                         throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
                     } finally {
-                        autocommit(con);
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                Databases.rollback(con);
+                            }
+                            Databases.autocommit(con);
+                        }
                     }
                 } else {
                     updateUserInDB(con, user, context);
@@ -912,20 +930,20 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updatePasswordInternal(Context context, int userId, IPasswordMech mech, String password) throws OXException {
+    private void updatePasswordInternal(Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
-            updatePasswordInternal(con, context, userId, mech, password);
+            updatePasswordInternal(con, context, userId, mech, password, salt);
         } finally {
             DBPool.closeWriterSilent(context, con);
         }
     }
 
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
         if (connection == null) {
-            updatePasswordInternal(context, userId, mech, password);
+            updatePasswordInternal(context, userId, mech, password, salt);
             return;
         }
 
@@ -935,6 +953,7 @@ public class RdbUserStorage extends UserStorage {
             int pos = 1;
             stmt.setString(pos++, password);
             stmt.setString(pos++, mech != null ? mech.getIdentifier() : "");
+            stmt.setBytes(pos++, salt);
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
             stmt.execute();
@@ -1220,11 +1239,11 @@ public class RdbUserStorage extends UserStorage {
                     if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error("Old: {}, New: {}, Added: {}, Removed: {}, Changed: {}.", oldAttributes, attributes, added, removed, changed, e);
-                        LOG.error("Expected lines: {} Updated lines: {}", size1, lines1);
+                        LOG.error("Expected lines: {} Updated lines: {}", I(size1), I(lines1));
                         final TIntObjectMap<UserImpl> map = createSingleUserMap(userId);
                         loadAttributes(contextId, con, map, false);
                         for (int i : map.keys()) {
-                            LOG.error("User {}: {}", i, map.get(i).getAttributes());
+                            LOG.error("User {}: {}", I(i), map.get(i).getAttributes());
                         }
                         throw e;
                     }
@@ -1355,8 +1374,7 @@ public class RdbUserStorage extends UserStorage {
                 /*
                  * Use utf8*_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insensitive.
                  */
-                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ")
-                    .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
+                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ").append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
                 if (excludeUsers) {
                     /*
                      * exclude all regular users
@@ -1478,7 +1496,8 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(Connection con, final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+    public int[] listAllUser(Connection connection, final Context context, boolean includeGuests, boolean excludeUsers) throws OXException {
+        Connection con = connection;
         boolean closeCon = false;
         if (con == null) {
             try {
@@ -1498,7 +1517,8 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public int[] listAllUser(Connection con, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+    public int[] listAllUser(Connection connection, int contextID, boolean includeGuests, boolean excludeUsers) throws OXException {
+        Connection con = connection;
         DatabaseService databaseService = null;
         boolean closeCon = false;
         if (con == null) {
@@ -1607,6 +1627,7 @@ public class RdbUserStorage extends UserStorage {
     // -----------------------------------------------------------------------------------------
 
     public static final class ValuePair {
+
         public final String newValue;
         public final String oldValue;
 

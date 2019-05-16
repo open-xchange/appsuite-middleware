@@ -227,7 +227,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         validateActionResponse(response);
         return response;
     }
-    
+
     private void validateActionResponse(ActionResponse response) {
         Assert.assertThat("Excpected analyze-data", response.getData(), is(not(empty())));
     }
@@ -281,7 +281,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
     }
 
     protected Attendee createAttendee(TestUser convertee, ApiClient converteeClient) {
-        Attendee attendee = AttendeeFactory.createAttendee(converteeClient.getUserId().intValue(), CuTypeEnum.INDIVIDUAL);
+        Attendee attendee = AttendeeFactory.createAttendee(converteeClient.getUserId(), CuTypeEnum.INDIVIDUAL);
 
         attendee.cn(convertee.getUser());
         attendee.comment("Comment for user " + convertee.getUser());
@@ -300,7 +300,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
 
     protected EventData createEvent(EventData event) throws ApiException {
 
-        return chronosApi.createEvent(session, defaultFolderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, null, null, null, Boolean.FALSE).getData().getCreated().get(0);
+        return chronosApi.createEvent(session, defaultFolderId, event, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, null, null, null, Boolean.FALSE, null).getData().getCreated().get(0);
     }
 
     protected void deleteEvent(EventData data) throws Exception {

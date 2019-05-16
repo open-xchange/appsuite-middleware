@@ -49,6 +49,7 @@
 
 package com.openexchange.jolokia.osgi;
 
+import static com.openexchange.java.Autoboxing.B;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,7 +87,7 @@ public class StartupTest {
         Mockito.when(((DeferredActivator) myActivator).getService(ConfigurationService.class)).thenReturn(this.configurationService);
         Mockito.when(((DeferredActivator) myActivator).getService(HttpService.class)).thenReturn(this.httpService);
 
-        Mockito.when(this.configurationService.getBoolProperty("com.openexchange.jolokia.start", false)).thenReturn(true);
+        Mockito.when(B(this.configurationService.getBoolProperty("com.openexchange.jolokia.start", false))).thenReturn(B(true));
     }
 
      @Test
@@ -105,7 +106,7 @@ public class StartupTest {
 
      @Test
      public void testNameAndPasswordMissingShouldNotStart() throws Exception {
-        Mockito.when(this.configurationService.getBoolProperty("com.openexchange.jolokia.start", false)).thenReturn(false);
+        Mockito.when(B(this.configurationService.getBoolProperty("com.openexchange.jolokia.start", false))).thenReturn(B(false));
 
         myActivator.startBundle();
         Mockito.verify(myActivator, Mockito.times(1)).notStarted();

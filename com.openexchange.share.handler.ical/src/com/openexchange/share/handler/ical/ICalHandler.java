@@ -49,6 +49,7 @@
 
 package com.openexchange.share.handler.ical;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -225,7 +226,7 @@ public class ICalHandler extends HttpAuthShareHandler {
          */
         UserizedFolder folder = services.getService(FolderService.class).getFolder(
             FolderStorage.REAL_TREE_ID, target.getFolder(), share.getSession(), null);
-        
+
         /*
          * Prepare iCal export, apply calendar properties & add event data
          */
@@ -233,7 +234,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         ICalService iCalService = services.getService(ICalService.class);
         ICalParameters iCalParameters = iCalService.initParameters();
         iCalParameters.set(ICalParameters.DEFAULT_TIMEZONE, TimeZone.getTimeZone(share.getUser().getTimeZone()));
-        
+
         /*
          * Export events
          */
@@ -591,7 +592,7 @@ public class ICalHandler extends HttpAuthShareHandler {
                 byte[] bytes = BaseEncoding.base64Url().omitPadding().decode(eTag);
                 ByteBuffer buffer = ByteBuffer.wrap(bytes);
                 if (16 == buffer.remaining()) {
-                    return buffer.getLong(8);
+                    return L(buffer.getLong(8));
                 }
             } catch (IllegalArgumentException e) {
                 // ignore

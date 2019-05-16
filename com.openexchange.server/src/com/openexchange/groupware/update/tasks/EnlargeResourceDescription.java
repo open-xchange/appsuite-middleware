@@ -84,26 +84,28 @@ public final class EnlargeResourceDescription extends UpdateTaskAdapter {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EnlargeResourceDescription.class);
         log.info("Performing update task {}", EnlargeResourceDescription.class.getSimpleName());
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             for (final String table : new String[] { "resource", "del_resource" }) {
                 checkAndModifyColumns(con, table, new Column("description", "TEXT"));
             }
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final Exception e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
         log.info("{} successfully performed.", EnlargeResourceDescription.class.getSimpleName());
     }

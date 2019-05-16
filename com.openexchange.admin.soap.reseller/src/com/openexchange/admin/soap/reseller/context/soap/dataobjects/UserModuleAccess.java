@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="infostore" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="multipleMailAccounts" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="publicFolderEditable" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="publication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *          &lt;element name="publication" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="readCreateSharedFolders" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="subscription" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *         &lt;element name="syncml" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
@@ -118,6 +118,7 @@ public class UserModuleAccess {
     @XmlElement(nillable = true)
     protected Boolean publicFolderEditable;
     @XmlElement(nillable = true)
+    @Deprecated
     protected Boolean publication;
     @XmlElement(nillable = true)
     protected Boolean readCreateSharedFolders;
@@ -146,6 +147,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public Boolean isOLOX20() {
         return olox20;
     }
@@ -159,6 +161,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public void setOLOX20(Boolean value) {
         this.olox20 = value;
     }
@@ -546,7 +549,7 @@ public class UserModuleAccess {
     public void setPublicFolderEditable(Boolean value) {
         this.publicFolderEditable = value;
     }
-
+    
     /**
      * Ruft den Wert der publication-Eigenschaft ab.
      *
@@ -555,6 +558,7 @@ public class UserModuleAccess {
      *     {@link Boolean }
      *
      */
+    @Deprecated
     public Boolean isPublication() {
         return publication;
     }
@@ -567,6 +571,7 @@ public class UserModuleAccess {
      *     {@link Boolean }
      *
      */
+    @Deprecated
     public void setPublication(Boolean value) {
         this.publication = value;
     }
@@ -724,6 +729,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public Boolean isWebdavXml() {
         return webdavXml;
     }
@@ -737,6 +743,7 @@ public class UserModuleAccess {
      * @deprecated
      *
      */
+    @Deprecated
     public void setWebdavXml(Boolean value) {
         this.webdavXml = value;
     }

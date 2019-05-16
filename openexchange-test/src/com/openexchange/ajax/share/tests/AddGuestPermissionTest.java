@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
@@ -200,19 +201,21 @@ public class AddGuestPermissionTest extends ShareTest {
             if (folder == rootFolder) {
                 matchingRootPermission = matchingPermission;
             } else {
+                assertNotNull(matchingRootPermission);
                 assertEquals("Unexpected permission entity for subfolder " + folder.getObjectID(), matchingRootPermission.getEntity(), matchingPermission.getEntity());
                 assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getReadPermission(), matchingPermission.getReadPermission());
                 assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getWritePermission(), matchingPermission.getWritePermission());
                 assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getDeletePermission(), matchingPermission.getDeletePermission());
                 assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getFolderPermission(), matchingPermission.getFolderPermission());
                 assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getSystem(), matchingPermission.getSystem());
-                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.isFolderAdmin(), matchingPermission.isFolderAdmin());
-                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.isGroupPermission(), matchingPermission.isGroupPermission());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), B(matchingRootPermission.isFolderAdmin()), B(matchingPermission.isFolderAdmin()));
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), B(matchingRootPermission.isGroupPermission()), B(matchingPermission.isGroupPermission()));
             }
         }
         /*
          * discover & check guest
          */
+        assertNotNull(matchingRootPermission);
         ExtendedPermissionEntity guest = discoverGuestEntity(api, module, rootFolder.getObjectID(), matchingRootPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         /*
@@ -253,7 +256,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         /*
          * check access to share

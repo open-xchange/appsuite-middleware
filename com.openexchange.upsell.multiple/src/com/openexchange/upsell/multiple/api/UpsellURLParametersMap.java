@@ -49,6 +49,11 @@
 
 package com.openexchange.upsell.multiple.api;
 
+/**
+ *
+ * {@link UpsellURLParametersMap}
+ *
+ */
 public enum UpsellURLParametersMap {
 
     // parameters from UI/USER/SESSION
@@ -65,10 +70,19 @@ public enum UpsellURLParametersMap {
     MAP_ATTR_PURCHASE_TYPE ( "_PURCHASE_TYPE_"),
     MAP_ATTR_INVITE ( "_INVITE_");
 
-    public String propertyName;
+    private final String propertyName;
 
     private UpsellURLParametersMap(final String propertyName) {
         this.propertyName = propertyName;
+    }
+
+    /**
+     * Gets the propertyName
+     *
+     * @return The propertyName
+     */
+    public String getPropertyName() {
+        return propertyName;
     }
 
 }

@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link OSGIMessagingServiceRegistry}
@@ -80,12 +81,8 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
      */
     final ConcurrentMap<String, MessagingService> map;
 
-    /**
-     * The tracker instance.
-     */
-    private ServiceTracker<MessagingService,MessagingService> tracker;
-
-    private ServiceTracker<ConfigViewFactory,ConfigViewFactory> configTracker;
+    private volatile ServiceTracker<MessagingService,MessagingService> tracker;
+    private volatile ServiceTracker<ConfigViewFactory,ConfigViewFactory> configTracker;
 
     /**
      * Initializes a new {@link OSGIMessagingServiceRegistry}.
@@ -101,13 +98,18 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
      * @param context The bundle context
      */
     public void start(final BundleContext context) {
+        ServiceTracker<MessagingService,MessagingService> tracker = this.tracker;
         if (null == tracker) {
             tracker = new ServiceTracker<MessagingService,MessagingService>(context, MessagingService.class, new Customizer(context));
             tracker.open();
+            this.tracker = tracker;
         }
+
+        ServiceTracker<ConfigViewFactory,ConfigViewFactory> configTracker = this.configTracker;
         if (null == configTracker) {
             configTracker = new ServiceTracker<ConfigViewFactory,ConfigViewFactory>(context, ConfigViewFactory.class, null);
             configTracker.open();
+            this.configTracker = configTracker;
         }
     }
 
@@ -115,13 +117,16 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
      * Stops the tracker.
      */
     public void stop() {
+        ServiceTracker<MessagingService,MessagingService> tracker = this.tracker;
         if (null != tracker) {
             tracker.close();
-            tracker = null;
+            this.tracker = null;
         }
+
+        ServiceTracker<ConfigViewFactory,ConfigViewFactory> configTracker = this.configTracker;
         if (null != configTracker) {
             configTracker.close();
-            configTracker = null;
+            this.configTracker = null;
         }
     }
 
@@ -189,7 +194,15 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     }
 
     private ConfigView getView(final int user, final int context) throws OXException {
-        final ConfigViewFactory service = configTracker.getService();
+        ServiceTracker<ConfigViewFactory,ConfigViewFactory> configTracker = this.configTracker;
+        if (null == configTracker) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
+
+        ConfigViewFactory service = configTracker.getService();
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         return service.getView(user, context);
     }
 

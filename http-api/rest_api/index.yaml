@@ -30,6 +30,9 @@ securityDefinitions:
   contextAdminAuth:
     description: The API can be accessed via HTTP Basic Auth with context administrator credentials or reseller/master administrator credentials if MASTER_ACCOUNT_OVERRIDE is enabled.
     type: basic
+  masterAdminAuth:
+    description: The API can be accessed via HTTP Basic Auth with reseller/master administrator credentials.
+    type: basic
 paths:
   source: ./paths/
   

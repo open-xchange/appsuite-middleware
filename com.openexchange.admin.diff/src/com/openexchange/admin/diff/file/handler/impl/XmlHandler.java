@@ -65,7 +65,7 @@ import com.openexchange.admin.diff.util.ConfigurationFileSearch;
 
 /**
  * Handler for .xml configuration files
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.1
  */
@@ -114,7 +114,7 @@ public class XmlHandler extends AbstractFileHandler {
                     continue;
                 }
                 String difference = "";
-                Iterator<Difference> iterator = xmlDetailedDiff.getAllDifferences().iterator();
+                @SuppressWarnings("unchecked") Iterator<Difference> iterator = xmlDetailedDiff.getAllDifferences().iterator();
                 while (iterator.hasNext()) {
                     Difference next = iterator.next();
                     difference = difference.concat(next.toString() + "\n");

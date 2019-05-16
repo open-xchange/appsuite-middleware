@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.management.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -89,42 +90,45 @@ public class AddHashHostColumnUpdateTask extends UpdateTaskAdapter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
+            rollback = 1;
 
             Column hostHash = new Column("host_hash", "VARCHAR(64) CHARACTER SET latin1 COLLATE latin1_general_ci NULL");
             Tools.checkAndAddColumns(connection, TABLE_NAME, hostHash);
 
             int updated = setHostHashes(connection);
-            LOG.info("Calculated hashes for already existing hosts, {} rows affected.", updated);
+            LOG.info("Calculated hashes for already existing hosts, {} rows affected.", I(updated));
 
             Tools.dropPrimaryKey(connection, TABLE_NAME);
             Tools.createPrimaryKey(connection, TABLE_NAME, new String[] { "cid", "userid", "host_hash", "fingerprint" });
 
             connection.commit();
-            rollback = true;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
     }
 
     /**
      * Sets the hash for every host in the table
-     * 
+     *
      * @param connection The {@link Connection}
      * @throws SQLException if an SQL error is occurred
      */
@@ -146,7 +150,7 @@ public class AddHashHostColumnUpdateTask extends UpdateTaskAdapter {
 
     /**
      * Sets the hash for the specified hostname in the table
-     * 
+     *
      * @param connection the {@link Connection}
      * @param hostname The hostname for which to calculate the SHA-256
      * @throws SQLException if an SQL error is occurred
@@ -165,7 +169,7 @@ public class AddHashHostColumnUpdateTask extends UpdateTaskAdapter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override

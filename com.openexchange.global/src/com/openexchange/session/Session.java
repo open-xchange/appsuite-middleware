@@ -148,16 +148,16 @@ public interface Session {
      * ...
      * final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
      * if (null == lock) {
-     *  synchronized (session) {
-     *   ...
-     *  }
+     * synchronized (session) {
+     * ...
+     * }
      * } else {
-     *  lock.lock();
-     *  try {
-     *   ...
-     *  } finally {
-     *   lock.unlock();
-     *  }
+     * lock.lock();
+     * try {
+     * ...
+     * } finally {
+     * lock.unlock();
+     * }
      * }
      * </pre>
      */
@@ -184,18 +184,18 @@ public interface Session {
     public static final String PARAM_TOKEN = "__session.token".intern();
 
     /**
-     * The parameter to indicate a publication session.
-     *
-     * @type <code>java.lang.Boolean</code>
-     */
-    static final String PARAM_PUBLICATION = "__session.publication".intern();
-
-    /**
      * The parameter to indicate a guest session.
      *
      * @type <code>java.lang.Boolean</code>
      */
     public static final String PARAM_GUEST = "__session.guest".intern();
+
+    /**
+     * The parameter to indicate whether the session is allowed to delete/update/create objects in subscribed folders.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_SUBSCRIPTION_ADMIN = "__session.subscription.administrative";
 
     /**
      * The parameter for the cookie refresh time stamp.
@@ -219,7 +219,7 @@ public interface Session {
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
 
     /**
-     * The parameter that holds when the Oauth token expires.
+     * The parameter that holds when the OAuth token expires.
      *
      * @type <code>java.lang.String</code>
      */
@@ -266,6 +266,30 @@ public interface Session {
      * @type <code>java.lang.Boolean</code>
      */
     public static final String PARAM_IS_OAUTH = "__session.oauth".intern();
+
+    /**
+     * The session parameter used to hold the client's push token
+     */
+    public static final String PARAM_PUSH_TOKEN = "__session.pushtoken".intern();
+
+    /** 
+     * Parameter if multifactor authentication enabled for the user
+     */
+    public final static String MULTIFACTOR_PARAMETER = "multifactor".intern();
+
+    /**
+     * Parameter that the session has been multifactor authenticated successfully
+     */
+    public final static String MULTIFACTOR_AUTHENTICATED = "multifactorAuthenticated".intern();
+
+    /**
+     * Contains the time that the user last verified using multifactor.
+     *
+     * This parameter is not stored in session storage, and will be essentially set to 0 during a server change, or
+     * autologin. Used to check recent authentication for certain security critical functions.
+     *
+     */
+    public final static String MULTIFACTOR_LAST_VERIFIED = "multifactorSession";
 
     /**
      * @return the context identifier.
@@ -405,6 +429,7 @@ public interface Session {
      * The client is remembered through the whole session. It should identify what client uses the back-end. Normally this is the web
      * front-end but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
      * back-end during the login request.
+     * 
      * @return the client identifier of the client using the back-end.
      */
     String getClient();
@@ -431,4 +456,12 @@ public interface Session {
      * @return the names of all parameters in this session.
      */
     Set<String> getParameterNames();
+
+    /**
+     * Gets this session's origin.
+     *
+     * @return The origin or <code>null</code>
+     */
+    Origin getOrigin();
+
 }

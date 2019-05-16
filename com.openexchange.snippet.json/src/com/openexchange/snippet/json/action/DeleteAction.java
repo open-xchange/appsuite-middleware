@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.json.action;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -105,7 +106,7 @@ public final class DeleteAction extends SnippetAction {
                 try {
                     Snippet snippetToChange = management.getSnippet(id);
                     if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
-                        throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+                        throw SnippetExceptionCodes.UPDATE_DENIED.create(id, I(session.getUserId()), I(session.getContextId()));
                     }
 
                     toDelete.add(id);
@@ -126,7 +127,7 @@ public final class DeleteAction extends SnippetAction {
             {
                 Snippet snippetToChange = management.getSnippet(id);
                 if (!snippetToChange.isShared() && snippetToChange.getCreatedBy() != session.getUserId()) {
-                    throw SnippetExceptionCodes.UPDATE_DENIED.create(id, session.getUserId(), session.getContextId());
+                    throw SnippetExceptionCodes.UPDATE_DENIED.create(id, I(session.getUserId()), I(session.getContextId()));
                 }
             }
 

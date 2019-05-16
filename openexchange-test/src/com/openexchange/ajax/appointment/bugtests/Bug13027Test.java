@@ -68,7 +68,6 @@ import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -106,7 +105,6 @@ public class Bug13027Test extends AbstractAJAXSession {
 
     @Test
     public void testNegativeTimeZone() throws Exception {
-        AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("America/New York");
         String formerTimeZone = "Europe/Berlin";
@@ -122,7 +120,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             getClient().execute(setRequest);
 
             // Step 1
-            clear(tz, folderId, client);
+            clear(tz, folderId);
 
             // Step 2
             // Prepare appointment
@@ -167,7 +165,6 @@ public class Bug13027Test extends AbstractAJAXSession {
 
     @Test
     public void testPositiveTimeZone() throws Exception {
-        AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         String formerTimeZone = "Europe/Berlin";
@@ -183,7 +180,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             getClient().execute(setRequest);
 
             // Step 1
-            clear(tz, folderId, client);
+            clear(tz, folderId);
 
             // Step 2
             // Prepare appointment
@@ -228,7 +225,6 @@ public class Bug13027Test extends AbstractAJAXSession {
 
     @Test
     public void testUTC() throws Exception {
-        AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("UTC");
         String formerTimeZone = "Europe/Berlin";
@@ -244,7 +240,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             getClient().execute(setRequest);
 
             // Step 1
-            clear(tz, folderId, client);
+            clear(tz, folderId);
 
             // Step 2
             // Prepare appointment
@@ -289,7 +285,6 @@ public class Bug13027Test extends AbstractAJAXSession {
 
     @Test
     public void testBugAsWritten() throws Exception {
-        AJAXClient client = getClient();
         final int folderId = getClient().getValues().getPrivateAppointmentFolder();
         final TimeZone tz = TimeZone.getTimeZone("America/New York");
         String formerTimeZone = "Europe/Berlin";
@@ -305,7 +300,7 @@ public class Bug13027Test extends AbstractAJAXSession {
             getClient().execute(setRequest);
 
             // Step 1
-            clear(tz, folderId, client);
+            clear(tz, folderId);
 
             // Step 2
             // Prepare appointment
@@ -348,7 +343,7 @@ public class Bug13027Test extends AbstractAJAXSession {
         }
     }
 
-    private void clear(TimeZone tz, int folderId, AJAXClient client) throws Exception {
+    private void clear(TimeZone tz, int folderId) throws Exception {
         Calendar start = new GregorianCalendar();
         start.setTimeZone(tz);
         start.set(Calendar.YEAR, 2008);

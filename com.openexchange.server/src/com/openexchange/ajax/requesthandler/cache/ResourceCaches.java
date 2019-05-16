@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.cache;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -187,19 +187,16 @@ public class ResourceCaches {
 
     private static String toMD5(String eTag, StringBuilder sb) {
         try {
-            byte[] md5Bytes = sb.toString().getBytes("UTF-8");
+            byte[] md5Bytes = sb.toString().getBytes(StandardCharsets.UTF_8);
             String hashedParams = asHex(MessageDigest.getInstance("MD5").digest(md5Bytes));
             String prefix = eTag;
 
             // Ensure key size does not exceed 128 characters (current database limit)
             if (prefix.length() + 33 > 128) {
-                prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes()));
+                prefix = asHex(MessageDigest.getInstance("MD5").digest(prefix.getBytes(StandardCharsets.UTF_8)));
             }
             sb.setLength(0);
             return sb.append(prefix).append('-').append(hashedParams).toString();
-        } catch (UnsupportedEncodingException e) {
-            // Shouldn't happen
-            LOG.error("", e);
         } catch (NoSuchAlgorithmException e) {
             // Shouldn't happen
             LOG.error("", e);

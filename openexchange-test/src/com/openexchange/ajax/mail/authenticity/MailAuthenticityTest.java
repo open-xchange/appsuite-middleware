@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.mail.authenticity;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +91,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
     private static final String[] MAIL_NAMES = new String[] { PASS_ALL, PISHING, NONE, TRUSTED };
     private MailApi api;
     private final Map<String, MailDestinationData> IMPORTED_EMAILS = new HashMap<>();
-    private Long timestamp = 0l;
+    private Long timestamp = L(0);
     private ImageApi imageApi;
 
     private static final String DKIM = "dkim";
@@ -123,7 +125,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         for (String name : MAIL_NAMES) {
             f = new File(testMailDir, name);
             Assert.assertTrue(f.exists());
-            MailImportResponse response = api.importMail(getApiClient().getSession(), FOLDER, f, null, true);
+            MailImportResponse response = api.importMail(getApiClient().getSession(), FOLDER, f, null, Boolean.TRUE);
             List<MailDestinationData> data = checkResponse(response);
             // data size should always be 1
             Assert.assertEquals(1, data.size());
@@ -155,7 +157,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test pass all
          */
-        MailResponse resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null, null);
+        MailResponse resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         MailData mail = checkResponse(resp);
         AuthenticationResult authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
@@ -184,7 +186,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test pishing
          */
-        resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null, null);
+        resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         mail = checkResponse(resp);
         authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
@@ -215,7 +217,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test none
          */
-        resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, 0, null, false, null, null, null, null, null, null);
+        resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         mail = checkResponse(resp);
         authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
@@ -249,13 +251,13 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         /*
          * Test trusted domain
          */
-        MailResponse resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, 0, null, false, null, null, null, null, null, null);
+        MailResponse resp = api.getMail(getApiClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, I(0), null, Boolean.FALSE, null, null, null, null, null, null, null, null);
         MailData mail = checkResponse(resp);
         AuthenticationResult authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
         Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
         Assert.assertNotNull(authenticationResult.getTrusted());
-        Assert.assertTrue(authenticationResult.getTrusted());
+        Assert.assertTrue(authenticationResult.getTrusted().booleanValue());
         Assert.assertNotNull(authenticationResult.getImage());
 
         byte[] trustedMailPicture = imageApi.getTrustedMailPicture(authenticationResult.getImage());

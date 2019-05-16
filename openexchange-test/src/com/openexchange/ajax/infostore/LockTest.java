@@ -110,19 +110,17 @@ public class LockTest extends InfostoreAJAXTest {
     public void testLock() throws Exception {
         String id = file.getId();
         com.openexchange.file.storage.File file = itm.getAction(id);
-        Date lastModified = file.getLastModified();
 
         itm.lock(id);
         assertFalse(itm.getLastResponse().hasError());
-        assertNotNull(itm.getLastResponse().getTimestamp());
+        Date clientTimestamp = itm.getLastResponse().getTimestamp();
 
         file = itm.getAction(id);
         assertFalse(itm.getLastResponse().hasError());
         assertLocked((JSONObject) itm.getLastResponse().getData());
-        lastModified = file.getLastModified();
 
         // BUG 4232
-        itm.updateAction(file, new Field[] { Field.ID }, new Date(lastModified.getTime()));
+        itm.updateAction(file, new Field[] { Field.ID }, clientTimestamp);
 
         String idFromUpdate = (String) itm.getLastResponse().getData();
         assertEquals(id, idFromUpdate);

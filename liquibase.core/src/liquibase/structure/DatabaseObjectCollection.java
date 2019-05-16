@@ -13,8 +13,8 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
 public class DatabaseObjectCollection {
 
-    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new HashMap<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>>();
-    private Database database;
+    private final Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new HashMap<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>>();
+    private final Database database;
 
     public DatabaseObjectCollection(Database database) {
         this.database = database;
@@ -57,7 +57,7 @@ public class DatabaseObjectCollection {
         SortedSet<Set<DatabaseObject>> objectSets = new TreeSet<Set<DatabaseObject>>(new Comparator<Set<DatabaseObject>>() {
             @Override
             public int compare(Set<DatabaseObject> o1, Set<DatabaseObject> o2) {
-                int sizeComparison = Integer.valueOf(o1.size()).compareTo(o2.size());
+                int sizeComparison = Integer.compare(o1.size(), o2.size());
                 if (sizeComparison == 0) {
                     return o1.toString().compareTo(o2.toString());
                 }

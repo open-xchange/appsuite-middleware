@@ -65,7 +65,7 @@ import com.openexchange.realtime.synthetic.SyntheticChannelRunLoop;
 public class NaturalRunLoopComparator implements Comparator<SyntheticChannelRunLoop> {
     private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NaturalRunLoopComparator.class);
     private final static Pattern COMPARISON_PATTERN = Pattern.compile("(\\S+"+LOOP_NAMING_INFIX+")(\\d+)");
-    
+
     @Override
     public int compare(SyntheticChannelRunLoop o1, SyntheticChannelRunLoop o2) {
         Matcher matcher1 = COMPARISON_PATTERN.matcher(o1.getName());
@@ -73,10 +73,10 @@ public class NaturalRunLoopComparator implements Comparator<SyntheticChannelRunL
         try {
             if(matcher1.matches() && matcher2.matches()) {
                 int prefixComparison = matcher1.group(1).compareTo(matcher2.group(1));
-                if(prefixComparison != 0) {
+                if (prefixComparison != 0) {
                     return prefixComparison;
                 }
-                return Integer.valueOf(matcher1.group(2)).compareTo(Integer.valueOf(matcher2.group(2)));
+                return Integer.compare(Integer.parseInt(matcher1.group(2)), Integer.parseInt(matcher2.group(2)));
             }
         } catch (NumberFormatException | IllegalStateException | IndexOutOfBoundsException e) {
             LOG.warn("RunLoop name doesn't match pattern. Continuing with default String comparison");

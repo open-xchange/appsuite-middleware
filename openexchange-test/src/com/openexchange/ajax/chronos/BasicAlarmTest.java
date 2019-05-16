@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Collections;
+import java.util.HashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -59,6 +60,7 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.ExtendedProperties;
 
 /**
  *
@@ -84,7 +86,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testCreateSingleAlarm() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M"), folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testCreateSingleAlarm", AlarmFactory.createDisplayAlarm("-PT15M"), folderId), true);
         getAndAssertAlarms(expectedEventData, 1, folderId);
     }
 
@@ -94,7 +96,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
     @Test
     public void testAddSingleAlarm() throws Exception {
         // Create an event without an alarm
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testAddSingleAlarm", folderId), true);
         EventData actualEventData = getAndAssertAlarms(expectedEventData, 0, folderId);
 
         // Create the alarm as a delta for the event
@@ -116,7 +118,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testChangeAlarmTime() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M"), folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser().intValue(), "testChangeAlarmTime", AlarmFactory.createDisplayAlarm("-PT15M"), folderId), true);
         EventData actualEventData = getAndAssertAlarms(expectedEventData, 1, folderId);
 
         EventData updateData = new EventData();
@@ -138,7 +140,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
      */
     @Test
     public void testDifferentAlarmTypes() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testDifferentAlarmTypes", folderId));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser().intValue(), "testDifferentAlarmTypes", folderId), true);
         EventData actualEventData = getAndAssertAlarms(expectedEventData, 0, folderId);
 
         // Test display alarm
@@ -183,6 +185,11 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             alarm.setUid(changedAlarm.getUid());
             alarm.setId(changedAlarm.getId());
             alarm.setAttendees(changedAlarm.getAttendees());
+            ExtendedProperties properties = new ExtendedProperties();
+            HashMap<String, String> map = new HashMap<>();
+            map.put("value", "SERVER");
+            properties.put("ALARM-AGENT", map);
+            alarm.setExtendedProperties(properties);
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 

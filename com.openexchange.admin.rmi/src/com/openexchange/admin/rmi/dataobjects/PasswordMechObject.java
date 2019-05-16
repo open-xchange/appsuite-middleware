@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.dataobjects;
 
 /**
@@ -56,29 +57,29 @@ package com.openexchange.admin.rmi.dataobjects;
  */
 public interface PasswordMechObject {
 
-    public static final String CRYPT_MECH = "{CRYPT}".intern();
-    public static final String SHA_MECH = "{SHA}".intern();
-    public static final String BCRYPT_MECH = "{BCRYPT}".intern();
-
     /**
      * @return the passwordMech
      */
-    abstract String getPasswordMech();
+    String getPasswordMech();
 
     /**
-     * Represents the password encryption mechanism, value is a password
-     * mechanism. Currently supported mechanisms are "{CRYPT}" and "{SHA}",
-     * see {@link User.CRYPT_MECH} and {@link User.SHA_MECH}.
+     * Represents the password encryption mechanism, value is a password mechanism.
      *
-     * @param passwordMech
-     *                the passwordMech to set
+     * @param passwordMech The passwordMech to set
      */
-    abstract void setPasswordMech(final String passwordMech);
+    void setPasswordMech(String passwordMech);
 
     /**
-     * Return the password of this user object.
+     * Returns the password of this user object.
      *
      * @return A {@link String} containing the password
      */
-    abstract String getPassword();
+    String getPassword();
+
+    /**
+     * Returns the salt of this user object.
+     *
+     * @return A byte array containing the salt
+     */
+    byte[] getSalt();
 }

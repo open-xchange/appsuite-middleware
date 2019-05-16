@@ -62,12 +62,11 @@ public final class AppointmentTools extends ParticipantTools {
 
     /**
      * Compares the specified objects
-     * 
+     *
      * @param appointmentObj1 The expected {@link Appointment}
      * @param appointmentObj2 The actual {@link Appointment}
-     * @throws Exception if an error is occurred
      */
-    public static void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) throws Exception {
+    public static void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) {
         assertEquals("id is not equals", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
         assertEqualsAndNotNull("title is not equals", appointmentObj1.getTitle(), appointmentObj2.getTitle());
         assertEqualsAndNotNull("start is not equals", appointmentObj1.getStartDate(), appointmentObj2.getStartDate());
@@ -75,11 +74,11 @@ public final class AppointmentTools extends ParticipantTools {
         assertEqualsAndNotNull("location is not equals", appointmentObj1.getLocation(), appointmentObj2.getLocation());
         assertEquals("shown_as is not equals", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
         assertEquals("folder id is not equals", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
-        assertEquals("private flag is not equals", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
-        assertEquals("full time is not equals", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
+        assertTrue("private flag is not equals", appointmentObj1.getPrivateFlag() == appointmentObj2.getPrivateFlag());
+        assertTrue("full time is not equals", appointmentObj1.getFullTime() == appointmentObj2.getFullTime());
         assertEquals("label is not equals", appointmentObj1.getLabel(), appointmentObj2.getLabel());
         assertEquals("alarm is not equals", appointmentObj1.getAlarm(), appointmentObj2.getAlarm());
-        assertEquals("alarm flag is not equals", appointmentObj1.getAlarmFlag(), appointmentObj2.getAlarmFlag());
+        assertTrue("alarm flag is not equals", appointmentObj1.getAlarmFlag() == appointmentObj2.getAlarmFlag());
         assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(), appointmentObj2.getRecurrenceType());
         assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2.getInterval());
         assertEquals("days", appointmentObj1.getDays(), appointmentObj2.getDays());

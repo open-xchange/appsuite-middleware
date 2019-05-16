@@ -49,14 +49,15 @@
 
 package com.openexchange.subscribe;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
@@ -74,7 +75,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AbstractSubscribeTestEnvironment}
@@ -134,7 +134,7 @@ public abstract class AbstractSubscribeTestEnvironment {
         ajaxClient = new AJAXClient(testContext.acquireUser());
     }
 
-    private void initManagers() throws OXException, IOException, SAXException, JSONException {
+    private void initManagers() {
         folderMgr = new FolderTestManager(ajaxClient);
     }
 
@@ -166,11 +166,11 @@ public abstract class AbstractSubscribeTestEnvironment {
 
         final NewSubscriptionRequest subReq = new NewSubscriptionRequest(subscription, formDescription);
         NewSubscriptionResponse subResp = ajaxClient.execute(subReq);
-        int subId = (Integer) subResp.getData();
+        int subId = ((Integer) subResp.getData()).intValue();
 
         final RefreshSubscriptionRequest refreshReq = new RefreshSubscriptionRequest(subId, Integer.toString(folder.getObjectID()));
         ajaxClient.execute(refreshReq);
-        testFolders.put(sourceId, folder.getObjectID());
+        testFolders.put(sourceId, I(folder.getObjectID()));
     }
 
     /**
@@ -194,7 +194,7 @@ public abstract class AbstractSubscribeTestEnvironment {
                 for (Object o : array.asList()) {
                     LinkedHashMap<String, Object> json = (LinkedHashMap<String, Object>) o;
                     if (json.get("serviceId").equals(serviceId)) {
-                        accountId = (Integer) json.get("id");
+                        accountId = ((Integer) json.get("id")).intValue();
                     }
                 }
             }
@@ -211,11 +211,8 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @param parentId
      * @param userId
      * @return
-     * @throws OXException
-     * @throws IOException
-     * @throws JSONException
      */
-    private FolderObject createSubscriptionFolder(final String name, final int module, final int parentId, final int userId) throws OXException, IOException, JSONException {
+    private FolderObject createSubscriptionFolder(final String name, final int module, final int parentId, final int userId) {
         FolderObject object = folderMgr.generatePublicFolder(name, module, parentId, userId);
         folderMgr.insertFolderOnServer(object);
         return object;
@@ -256,7 +253,6 @@ public abstract class AbstractSubscribeTestEnvironment {
      * @param folderId
      * @return
      */
-    @SuppressWarnings("unchecked")
     private Subscription createSubscription(final DynamicFormDescription desc, final String sourceId, final int accountId, final int folderId) {
         SubscriptionSource source = new SubscriptionSource();
         source.setId(sourceId);
@@ -265,7 +261,7 @@ public abstract class AbstractSubscribeTestEnvironment {
         Subscription subscription = new Subscription();
         subscription.setSource(source);
         subscription.setFolderId(folderId);
-        subscription.setConfiguration(Collections.singletonMap("account", accountId));
+        subscription.setConfiguration(Collections.singletonMap("account", I(accountId)));
 
         return subscription;
     }

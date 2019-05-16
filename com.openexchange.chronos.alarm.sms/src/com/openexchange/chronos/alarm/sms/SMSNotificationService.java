@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.sms;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -108,7 +109,7 @@ public class SMSNotificationService implements AlarmNotificationService {
         User user = userService.getUser(userId, contextId);
         String phoneNumber = getPhoneNumber(alarm, user.getLocale());
         if(phoneNumber == null) {
-            LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", userId, contextId);
+            LOG.warn("Unable to send sms alarm for user {} in context {} because of a missing or invalid telephone number.", I(userId), I(contextId));
             return;
         }
         serviceLookup.getServiceSafe(SMSServiceSPI.class).sendMessage(new String[] { phoneNumber }, generateSMS(event, user), userId, contextId);
@@ -129,7 +130,7 @@ public class SMSNotificationService implements AlarmNotificationService {
                 PhoneNumber phoneNumber = phoneUtil.parse(uri, locale.getCountry());
                 return phoneUtil.format(phoneNumber, PhoneNumberFormat.E164);
             } catch (NumberParseException e) {
-                LOG.debug("Unable to parse phone number: " + e.getMessage());
+                LOG.debug("Unable to parse phone number: {}", e.getMessage());
                 return null;
             }
         }
@@ -143,12 +144,12 @@ public class SMSNotificationService implements AlarmNotificationService {
         }
         Translator translator = translatorFactory.translatorFor(locale);
         DateFormat df = CalendarUtils.isAllDay(event) ? DateFormat.getDateInstance(DateFormat.LONG, locale) : DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT, locale);
-        
+
         String timezone = null;
         if (!TimeZone.getTimeZone(user.getTimeZone()).equals(event.getStartDate().getTimeZone())) {
             timezone = event.getStartDate().getTimeZone().getDisplayName(true, TimeZone.SHORT);
         }
-        
+
         Calendar instance = Calendar.getInstance(event.getStartDate().getTimeZone());
         instance.setTimeInMillis(event.getStartDate().getTimestamp());
         String formattedStartDate = df.format(instance.getTime());

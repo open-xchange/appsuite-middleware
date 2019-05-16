@@ -49,6 +49,7 @@
 
 package com.openexchange.share.servlet.osgi;
 
+import java.nio.charset.StandardCharsets;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
@@ -63,8 +64,8 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
-import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -85,7 +86,7 @@ public class ShareServletActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ShareService.class, UserService.class, ContextService.class, SessiondService.class, PasswordMechFactory.class,
+            ShareService.class, UserService.class, ContextService.class, SessiondService.class, PasswordMechRegistry.class,
             ConfigurationService.class, ModuleSupport.class, GuestService.class, TranslatorFactory.class, BasicPasswordChangeService.class };
     }
 
@@ -110,7 +111,7 @@ public class ShareServletActivator extends HousekeepingActivator {
             registerService(Reloadable.class, registerer);
         }
         {
-            byte[] hashSalt = getService(ConfigurationService.class).getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+            byte[] hashSalt = getService(ConfigurationService.class).getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes(StandardCharsets.ISO_8859_1);
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
             PasswordResetServletRegisterer registerer = new PasswordResetServletRegisterer(context, hashSalt);
             track(filter, registerer);

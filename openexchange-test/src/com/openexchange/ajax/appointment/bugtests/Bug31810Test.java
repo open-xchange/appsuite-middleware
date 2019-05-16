@@ -74,6 +74,7 @@ public class Bug31810Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,7 +99,7 @@ public class Bug31810Test extends AbstractAJAXSession {
     }
 
     @Test
-    public void testBug31810() throws Exception {
+    public void testBug31810() {
         conflict.setFullTime(true);
         conflict.removeShownAs();
         catm.update(conflict);

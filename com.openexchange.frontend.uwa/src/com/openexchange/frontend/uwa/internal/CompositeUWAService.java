@@ -68,6 +68,7 @@ import com.openexchange.frontend.uwa.UWAWidget.Field;
 import com.openexchange.frontend.uwa.UWAWidgetExceptionCodes;
 import com.openexchange.frontend.uwa.UWAWidgetService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.modules.model.Attribute;
 import com.openexchange.modules.model.Tools;
 import com.openexchange.modules.storage.memory.MemoryStorage;
@@ -119,18 +120,19 @@ public class CompositeUWAService implements UWAWidgetService {
 
 
     private Map<String, Map<String, Object>> ensureType(final Object yaml) throws OXException {
-        if (Map.class.isInstance(yaml)) {
-            for(final Map.Entry<Object, Object> entry : ((Map<Object, Object>) yaml).entrySet()) {
-                final Object key = entry.getKey();
-                final Object value = entry.getValue();
-                if(!Map.class.isInstance(value)) {
-                    throw UWAWidgetExceptionCodes.INVALID_CONFIGURATION.create();
-                }
-            }
-        } else {
+        if (!Map.class.isInstance(yaml)) {
             throw UWAWidgetExceptionCodes.INVALID_CONFIGURATION.create();
         }
-        return (Map<String, Map<String, Object>>) yaml;
+
+        @SuppressWarnings("unchecked") Map<Object, Object> mYaml = (Map<Object, Object>) yaml;
+        for(final Map.Entry<Object, Object> entry : mYaml.entrySet()) {
+            final Object value = entry.getValue();
+            if (!Map.class.isInstance(value)) {
+                throw UWAWidgetExceptionCodes.INVALID_CONFIGURATION.create();
+            }
+        }
+        @SuppressWarnings("unchecked") Map<String, Map<String, Object>> retval = (Map<String, Map<String, Object>>) yaml;
+        return retval;
     }
 
 
@@ -140,13 +142,13 @@ public class CompositeUWAService implements UWAWidgetService {
     public List<UWAWidget> all() throws OXException {
         try {
             final List<UWAWidget> userWidgets = userScope.load();
-            Tools.set(userWidgets, UWAWidget.Field.PROTECTED, false);
+            Tools.set(userWidgets, UWAWidget.Field.PROTECTED, Autoboxing.valueOf(false));
 
             final List<UWAWidget> contextWidgets = contextScope.load();
-            Tools.set(contextWidgets, UWAWidget.Field.PROTECTED, true);
+            Tools.set(contextWidgets, UWAWidget.Field.PROTECTED, Autoboxing.valueOf(true));
 
             final List<UWAWidget> serverWidgets = serverScope.list();
-            Tools.set(serverWidgets, UWAWidget.Field.PROTECTED, true);
+            Tools.set(serverWidgets, UWAWidget.Field.PROTECTED, Autoboxing.valueOf(true));
 
             final List<UWAWidget> positionInformation = positions.load();
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.server.impl.Constants;
@@ -77,7 +78,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
 
         SpecificServiceChooser<T> chooser = getChooser(module);
         if(chooser == null) {
-            LOG.warn("Can't register services for module {} in tracker {}", module, getClass().getName());
+            LOG.warn("Can't register services for module {} in tracker {}", I(module), getClass().getName());
             return;
         }
         if (contextId == null && folderId == null) {
@@ -85,15 +86,15 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
             return;
         }
         if (contextId != null && folderId != null) {
-            chooser.removeForContextAndFolder(tracked, contextId, folderId);
+            chooser.removeForContextAndFolder(tracked, contextId.intValue(), folderId.intValue());
             return;
         }
         if (contextId != null) {
-            chooser.removeForContext(tracked, contextId);
+            chooser.removeForContext(tracked, contextId.intValue());
             return;
         }
         if (folderId != null) {
-            chooser.removeForFolder(tracked, folderId);
+            chooser.removeForFolder(tracked, folderId.intValue());
         }
     }
 
@@ -104,28 +105,28 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         Integer folderId = getInt(reference, Constants.OX_OVERRIDE_FOLDER);
         Integer ranking = getInt(reference, org.osgi.framework.Constants.SERVICE_RANKING);
         if(ranking == null) {
-            ranking = 0;
+            ranking = I(0);
         }
         SpecificServiceChooser<T> chooser = getChooser(module);
         if(chooser == null) {
-            LOG.error("Can't register services for module {} in tracker {}", module, getClass().getName());
+            LOG.error("Can't register services for module {} in tracker {}", I(module), getClass().getName());
             return;
         }
         try {
             if(contextId == null && folderId == null) {
-                chooser.registerForEverything(tracked, ranking);
+                chooser.registerForEverything(tracked, ranking.intValue());
                 return;
             }
             if(contextId != null && folderId != null) {
-                chooser.registerForContextAndFolder(tracked, ranking, contextId, folderId);
+                chooser.registerForContextAndFolder(tracked, ranking.intValue(), contextId.intValue(), folderId.intValue());
                 return;
             }
             if(contextId != null) {
-                chooser.registerForContext(tracked, ranking, contextId);
+                chooser.registerForContext(tracked, ranking.intValue(), contextId.intValue());
                 return;
             }
             if(folderId != null) {
-                chooser.registerForFolder(tracked, ranking, folderId);
+                chooser.registerForFolder(tracked, ranking.intValue(), folderId.intValue());
             }
 
         } catch (ServicePriorityConflictException x) {
@@ -150,7 +151,7 @@ public abstract class AttachmentPluginsTracker<T> extends ModuleSpecificServiceT
         if(Integer.class.isInstance(property))  {
             return (Integer) property;
         }
-        return Integer.parseInt(property.toString());
+        return Integer.valueOf(property.toString());
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.tokenlogin.impl.osgi;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -84,7 +85,7 @@ import com.openexchange.tokenlogin.impl.Services;
 
 /**
  * Unit tests for {@link TokenLoginActivator}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
@@ -96,7 +97,7 @@ public class TokenLoginActivatorTest {
      * Class under test
      */
     @InjectMocks
-    private TokenLoginActivator tokenLoginActivator = null;
+    private final TokenLoginActivator tokenLoginActivator = null;
 
     /**
      * {@link BundleContext} mock
@@ -137,10 +138,10 @@ public class TokenLoginActivatorTest {
 
         // SERVICES
         PowerMockito.when(this.configurationService.getProperty(ArgumentMatchers.anyString())).thenReturn("theStringPropertyValue");
-        PowerMockito.when(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true)).thenReturn(true);
+        PowerMockito.when(B(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true))).thenReturn(Boolean.TRUE);
         PowerMockito.when(this.configurationService.getPropertiesInFolder(ArgumentMatchers.anyString())).thenReturn(this.properties);
         PowerMockito.when(this.hazelcastConfigurationService.getConfig()).thenReturn(new com.hazelcast.config.Config());
-        PowerMockito.when(this.hazelcastConfigurationService.isEnabled()).thenReturn(true);
+        PowerMockito.when(B(this.hazelcastConfigurationService.isEnabled())).thenReturn(Boolean.TRUE);
 
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>();
         services.putIfAbsent(ConfigurationService.class, new SimpleServiceProvider<Object>(configurationService));
@@ -155,7 +156,7 @@ public class TokenLoginActivatorTest {
 
      @Test
      public void testStartBundle_EverythingFine_TwoServicesRegistered() throws Exception {
-        PowerMockito.when(hazelcastConfigurationService.isEnabled()).thenReturn(false);
+        PowerMockito.when(B(hazelcastConfigurationService.isEnabled())).thenReturn(Boolean.FALSE);
 
         this.tokenLoginActivator.startBundle();
 
@@ -165,7 +166,7 @@ public class TokenLoginActivatorTest {
 
      @Test
      public void testStartBundle_HazelcastDisabled_NoTrackerRegistered() throws Exception {
-        PowerMockito.when(hazelcastConfigurationService.isEnabled()).thenReturn(false);
+        PowerMockito.when(B(hazelcastConfigurationService.isEnabled())).thenReturn(Boolean.FALSE);
 
         this.tokenLoginActivator.startBundle();
 
@@ -182,7 +183,7 @@ public class TokenLoginActivatorTest {
 
      @Test
      public void testStartBundle_TokenLoginDisabled_NoTrackerRegistered() throws Exception {
-        PowerMockito.when(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true)).thenReturn(false);
+        PowerMockito.when(B(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true))).thenReturn(Boolean.FALSE);
 
         this.tokenLoginActivator.startBundle();
 
@@ -191,7 +192,7 @@ public class TokenLoginActivatorTest {
 
      @Test
      public void testStartBundle_TokenLoginDisabled_NoServiceRegistered() throws Exception {
-        PowerMockito.when(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true)).thenReturn(false);
+        PowerMockito.when(B(this.configurationService.getBoolProperty("com.openexchange.tokenlogin", true))).thenReturn(Boolean.FALSE);
 
         this.tokenLoginActivator.startBundle();
 

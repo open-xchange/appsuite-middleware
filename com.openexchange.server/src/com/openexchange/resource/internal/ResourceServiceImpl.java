@@ -56,6 +56,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.resource.storage.UsecountAwareResourceStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ResourceServiceImpl}
@@ -68,21 +72,6 @@ public final class ResourceServiceImpl implements ResourceService {
      * The permission path to access create, update, and delete methods
      */
     static final String PATH = "com.openexchange.resource.managerequest";
-
-    private static final ResourceServiceImpl instance = new ResourceServiceImpl();
-
-    /**
-     * Gets the singleton instance of {@link ResourceServiceImpl}
-     *
-     * @return The singleton instance of {@link ResourceServiceImpl}
-     */
-    public static ResourceServiceImpl getInstance() {
-        return instance;
-    }
-
-    private ResourceServiceImpl() {
-        super();
-    }
 
     @Override
     public void create(final User user, final Context ctx, final Resource resource) throws OXException {
@@ -101,27 +90,45 @@ public final class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Resource getResource(final int resourceId, final Context context) throws OXException {
-        return ResourceStorage.getInstance().getResource(resourceId, context);
+        return ServerServiceRegistry.getServize(ResourceStorage.class, true).getResource(resourceId, context);
     }
 
     @Override
     public Resource[] listModified(final Date modifiedSince, final Context context) throws OXException {
-        return ResourceStorage.getInstance().listModified(modifiedSince, context);
+        return ServerServiceRegistry.getServize(ResourceStorage.class, true).listModified(modifiedSince, context);
     }
 
     @Override
     public Resource[] listDeleted(final Date modifiedSince, final Context context) throws OXException {
-        return ResourceStorage.getInstance().listDeleted(modifiedSince, context);
+        return ServerServiceRegistry.getServize(ResourceStorage.class, true).listDeleted(modifiedSince, context);
     }
 
     @Override
     public Resource[] searchResources(final String pattern, final Context context) throws OXException {
-        return ResourceStorage.getInstance().searchResources(pattern, context);
+        return ServerServiceRegistry.getServize(ResourceStorage.class, true).searchResources(pattern, context);
     }
 
     @Override
     public Resource[] searchResourcesByMail(final String pattern, final Context context) throws OXException {
-        return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
+        return ServerServiceRegistry.getServize(ResourceStorage.class, true).searchResourcesByMail(pattern, context);
+    }
+
+    @Override
+    public Resource[] searchResources(Session session, String pattern) throws OXException {
+        ResourceStorage servize = ServerServiceRegistry.getServize(ResourceStorage.class, true);
+        if (servize instanceof UsecountAwareResourceStorage) {
+            return ((UsecountAwareResourceStorage) servize).searchResources(pattern, ServerSessionAdapter.valueOf(session).getContext(), session.getUserId());
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Resource[] searchResourcesByMail(Session session, String pattern) throws OXException {
+        ResourceStorage servize = ServerServiceRegistry.getServize(ResourceStorage.class, true);
+        if (servize instanceof UsecountAwareResourceStorage) {
+            return ((UsecountAwareResourceStorage) servize).searchResourcesByMail(pattern, ServerSessionAdapter.valueOf(session).getContext(), session.getUserId());
+        }
+        throw new UnsupportedOperationException();
     }
 
 }

@@ -56,6 +56,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
+/**
+ * Parses a <code>DocumentMetadata</code> from its JSON representation
+ *
+ * @deprecated Only used for testing
+ */
+@Deprecated
 public class InfostoreParser {
 
     /**

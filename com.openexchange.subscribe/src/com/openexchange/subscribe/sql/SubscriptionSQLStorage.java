@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.sql;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
@@ -119,22 +120,26 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
 
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
+
             delete(subscription, writeConnection);
+
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
@@ -290,23 +295,27 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
 
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
+
             final int id = save(subscription, writeConnection);
             subscription.setId(id);
+
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
@@ -319,22 +328,26 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
 
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
+
             update(subscription, writeConnection);
+
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
@@ -369,8 +382,8 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         values.add(subscription.getSource().getId());
         values.add(subscription.getFolderId());
         values.add(L(subscription.getLastUpdate()));
-        values.add(System.currentTimeMillis());
-        values.add(subscription.isEnabled());
+        values.add(L(System.currentTimeMillis()));
+        values.add(B(subscription.isEnabled()));
 
         new StatementBuilder().executeStatement(writeConnection, insert, values);
         return id;
@@ -403,7 +416,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
         }
         if (subscription.containsEnabled()) {
             update.SET("enabled", PLACEHOLDER);
-            values.add(subscription.isEnabled());
+            values.add(B(subscription.isEnabled()));
         }
 
         update.WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id", PLACEHOLDER)));
@@ -418,29 +431,31 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     @Override
     public void touch(Context ctx, int subscriptionId, long currentTimeMillis) throws OXException {
         Connection writeConnection = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             writeConnection = dbProvider.getWriteConnection(ctx);
             txPolicy.setAutoCommit(writeConnection, false);
-            rollback = true;
+            rollback = 1;
 
             new StatementBuilder().executeStatement(writeConnection,
                 new UPDATE(subscriptions)
                     .SET("last_update", PLACEHOLDER)
-                    .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id",  PLACEHOLDER))), Arrays.<Object>asList(currentTimeMillis, ctx.getContextId(), subscriptionId));
+                    .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("id",  PLACEHOLDER))), Arrays.<Object>asList(L(currentTimeMillis), I(ctx.getContextId()), I(subscriptionId)));
 
 
 
             txPolicy.commit(writeConnection);
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
-            if (writeConnection != null) {
-                if (rollback) {
+            if (rollback > 0) {
+                if (rollback == 1) {
                     Databases.rollback(writeConnection);
                 }
                 Databases.autocommit(writeConnection);
+            }
+            if (writeConnection != null) {
                 dbProvider.releaseWriteConnection(ctx, writeConnection);
             }
         }
@@ -615,7 +630,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             txPolicy.setAutoCommit(writeConnection, false);
             final DELETE delete = new DELETE().FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("source_id", PLACEHOLDER)).AND(new EQUALS("configuration_id", PLACEHOLDER)));
             final List<Object> values = new ArrayList<Object>(Arrays.asList(null, null, null));
-            values.set(0, ctx.getContextId());
+            values.set(0, I(ctx.getContextId()));
             values.set(1, sourceId);
 
             final List<Integer> configIds = storageService.search(ctx, query);
@@ -624,7 +639,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 final int deleted = new StatementBuilder().executeStatement(writeConnection, delete, values);
                 if(deleted == 1) {
                     // Delete the generic configuration only if the source_id matched
-                    storageService.delete(writeConnection, ctx, configId);
+                    storageService.delete(writeConnection, ctx, configId.intValue());
                     modified = true;
                 }
             }
@@ -641,9 +656,9 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
                 throw SQLException.create(e);
             }
             if (modified) {
-                dbProvider.releaseWriteConnectionAfterReading(ctx, writeConnection);
-            } else {
                 dbProvider.releaseWriteConnection(ctx, writeConnection);
+            } else {
+                dbProvider.releaseWriteConnectionAfterReading(ctx, writeConnection);
             }
         }
     }
@@ -653,7 +668,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
 
         final Map<String, Boolean> retval = new HashMap<String, Boolean>();
         for(final String folderId : folderIds) {
-            retval.put(folderId, false);
+            retval.put(folderId, Boolean.FALSE);
         }
 
         Connection readConnection = null;
@@ -676,7 +691,7 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
             resultSet = builder.executeQuery(readConnection, select, values);
             while(resultSet.next()) {
                 final String folderId = resultSet.getString(1);
-                retval.put(folderId, true);
+                retval.put(folderId, Boolean.TRUE);
             }
         } catch (final SQLException e) {
             throw SQLException.create(e);

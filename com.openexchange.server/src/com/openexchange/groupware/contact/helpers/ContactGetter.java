@@ -1032,7 +1032,7 @@ public class ContactGetter implements ContactSwitcher {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("NumberOfImages");
         }
         final Contact conObj = (Contact) objects[0];
-        return conObj.getNumberOfImages();
+        return I(conObj.getNumberOfImages());
     }
 
     @Override
@@ -1050,7 +1050,7 @@ public class ContactGetter implements ContactSwitcher {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("UseCount");
         }
         final Contact conObj = (Contact) objects[0];
-        return conObj.getUseCount();
+        return I(conObj.getUseCount());
     }
 
     @Override
@@ -1059,7 +1059,7 @@ public class ContactGetter implements ContactSwitcher {
             throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create("MarkAsDistributionList");
         }
         final Contact conObj = (Contact) objects[0];
-        return conObj.getMarkAsDistribtuionlist();
+        return conObj.getMarkAsDistribtuionlist() ? Boolean.TRUE : Boolean.FALSE;
     }
 
     @Override

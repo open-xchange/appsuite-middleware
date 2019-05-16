@@ -386,6 +386,9 @@ public class DateList implements List, Serializable {
 	}
 	
 	public final boolean equals(Object obj) {
+	    if (obj == null) {
+            return false;
+        }
 		if (!getClass().isAssignableFrom(obj.getClass())) {
 			return false;
 		}

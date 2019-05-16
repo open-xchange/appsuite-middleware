@@ -53,9 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -65,7 +63,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventData.FlagsEnum;
 import com.openexchange.time.TimeTools;
@@ -113,8 +110,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertTrue(flags.contains(FlagsEnum.SERIES));
             assertFalse(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
         /*
          * check series-related flags for each occurrence in 'get' response
@@ -126,8 +123,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertTrue(flags.contains(FlagsEnum.SERIES));
             assertFalse(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
     }
 
@@ -177,8 +174,8 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertFalse(flags.contains(FlagsEnum.SERIES));
             assertTrue(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
         /*
          * check series-related flags for each occurrence in 'get' response
@@ -190,36 +187,9 @@ public class RecurrenceFlagsTest extends AbstractChronosTest {
             assertNotNull(flags);
             assertFalse(flags.contains(FlagsEnum.SERIES));
             assertTrue(flags.contains(FlagsEnum.OVERRIDDEN));
-            assertEquals(0 == i, flags.contains(FlagsEnum.FIRST_OCCURRENCE));
-            assertEquals(4 == i, flags.contains(FlagsEnum.LAST_OCCURRENCE));
+            assertTrue((0 == i) == flags.contains(FlagsEnum.FIRST_OCCURRENCE));
+            assertTrue((4 == i) == flags.contains(FlagsEnum.LAST_OCCURRENCE));
         }
-    }
-
-    private static List<EventData> getEventsByUid(List<EventData> events, String uid) {
-        List<EventData> matchingEvents = new ArrayList<EventData>();
-        if (null != events) {
-            for (EventData event : events) {
-                if (uid.equals(event.getUid())) {
-                    matchingEvents.add(event);
-                }
-            }
-        }
-        matchingEvents.sort(new Comparator<EventData>() {
-
-            @Override
-            public int compare(EventData event1, EventData event2) {
-                String recurrenceId1 = event1.getRecurrenceId();
-                String recurrenceId2 = event2.getRecurrenceId();
-                if (null == recurrenceId1) {
-                    return null == recurrenceId2 ? 0 : -1;
-                }
-                if (null == recurrenceId2) {
-                    return 1;
-                }
-                return new DefaultRecurrenceId(recurrenceId1).compareTo(new DefaultRecurrenceId(recurrenceId2));
-            }
-        });
-        return matchingEvents;
     }
 
 }

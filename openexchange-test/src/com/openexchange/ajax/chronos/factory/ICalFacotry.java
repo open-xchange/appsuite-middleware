@@ -51,7 +51,6 @@ package com.openexchange.ajax.chronos.factory;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -103,23 +102,8 @@ public class ICalFacotry {
     }
 
     public static enum ProdID {
-        OX("-//Open-Xchange//7.10.0-Rev6//EN"),
-        MICROSOFT(""),;
-
-        private final String id;
-
-        /**
-         * Initializes a new {@link ICalFacotry.ProdID}.
-         * 
-         */
-        private ProdID(String id) {
-            this.id = id;
-        }
-
-        public String getId(Locale locale) {
-            // TODO Localize & set correct version
-            return id;
-        }
+        OX,
+        MICROSOFT;
     }
 
     /** {@link StringBuilder} instance to generate iCal */

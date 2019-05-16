@@ -104,8 +104,9 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 
 	@Override
 	public void setParameters(PreparedStatement stmt, int parameterIndex) throws SQLException {
-		for (Object parameter : parameters) {
-			stmt.setObject(parameterIndex++, parameter);
+	    int index = parameterIndex;
+	    for (Object parameter : parameters) {
+			stmt.setObject(index++, parameter);
 		}
 	}
 
@@ -191,9 +192,8 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
         String columnlabel = Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel();
         if (1 == folderIDs.length) {
             return columnlabel + "=" + folderIDs[0];
-        } else {
-            return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
         }
+        return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
     }
 
 	protected static String getEMailAutoCompleteClause() throws OXException {

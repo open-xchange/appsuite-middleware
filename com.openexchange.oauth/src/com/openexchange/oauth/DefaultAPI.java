@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth;
 
-
 /**
  * {@link DefaultAPI} - The default API implementation.
  *
@@ -60,22 +59,30 @@ package com.openexchange.oauth;
 public class DefaultAPI implements API {
 
     private final String serviceId;
-    private final String name;
+    private final String displayName;
     private final int hash;
+    private final String capability;
+    private final String url;
 
     /**
      * Initializes a new {@link DefaultAPI}.
      *
      * @param serviceId The service identifier
-     * @param name The API's name
+     * @param displayName The API's name
+     * @param aliases The optional aliases of the provider
      */
-    public DefaultAPI(String serviceId, String name){
-        this.serviceId=serviceId;
-        this.name=name;
+    public DefaultAPI(String serviceId, String displayName, String capability, String url) {
+        this.serviceId = serviceId;
+        this.displayName = displayName;
+        this.capability = capability;
+        this.url = url;
+
         int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + ((capability == null) ? 0 : capability.hashCode());
         hash = result;
     }
 
@@ -85,13 +92,18 @@ public class DefaultAPI implements API {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public String getURL() {
+        return url;
     }
 
     @Override
-    public int hashCode() {
-        return hash;
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public String getCapability() {
+        return capability;
     }
 
     @Override
@@ -106,11 +118,18 @@ public class DefaultAPI implements API {
             return false;
         }
         DefaultAPI other = (DefaultAPI) obj;
-        if (name == null) {
-            if (other.name != null) {
+        if (capability == null) {
+            if (other.capability != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!capability.equals(other.capability)) {
+            return false;
+        }
+        if (displayName == null) {
+            if (other.displayName != null) {
+                return false;
+            }
+        } else if (!displayName.equals(other.displayName)) {
             return false;
         }
         if (serviceId == null) {
@@ -118,6 +137,13 @@ public class DefaultAPI implements API {
                 return false;
             }
         } else if (!serviceId.equals(other.serviceId)) {
+            return false;
+        }
+        if (url == null) {
+            if (other.url != null) {
+                return false;
+            }
+        } else if (!url.equals(other.url)) {
             return false;
         }
         return true;
@@ -130,16 +156,21 @@ public class DefaultAPI implements API {
         if (serviceId != null) {
             builder.append("serviceId=").append(serviceId).append(", ");
         }
-        if (name != null) {
-            builder.append("name=").append(name);
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName);
+        }
+        if (capability != null) {
+            builder.append("capability=").append(capability);
+        }
+        if (url != null) {
+            builder.append("url=").append(url);
         }
         builder.append("]");
         return builder.toString();
     }
 
     @Override
-    public String getShortName() {
-        return name;
+    public int hashCode() {
+        return hash;
     }
-
 }

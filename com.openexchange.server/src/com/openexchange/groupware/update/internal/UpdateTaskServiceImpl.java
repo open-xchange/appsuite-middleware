@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,15 +53,19 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.SchemaInfo;
@@ -69,9 +73,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.TaskInfo;
+import com.openexchange.groupware.update.TaskStatus;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskService;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkit;
 import com.openexchange.groupware.update.tools.UpdateTaskToolkitJob;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.CanceledTimerTaskException;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -90,10 +97,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
     private final ConcurrentMap<String, UpdateTaskToolkitJob<?>> jobs;
     private ScheduledTimerTask timerTask; // Guarded by synchronized
 
-    private enum TaskMetadata {
-        taskName, successful, lastModified, uuid, schema, className;
-    }
-
     /**
      * Initialises a new {@link UpdateTaskServiceImpl}.
      */
@@ -102,11 +105,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         jobs = new ConcurrentHashMap<String, UpdateTaskToolkitJob<?>>(10, 0.9F, 1);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(int)
-     */
     @Override
     public List<Map<String, Object>> runUpdate(int contextId) throws RemoteException {
         try {
@@ -119,11 +117,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#runUpdate(java.lang.String)
-     */
     @Override
     public List<Map<String, Object>> runUpdate(String schemaName) throws RemoteException {
         try {
@@ -133,6 +126,10 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             return getFailures(updateProcess);
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -140,17 +137,12 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#runAllUpdates(boolean)
-     */
     @Override
-    public String runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException {
+    public TaskStatus runAllUpdates(boolean throwExceptionOnFailure) throws RemoteException {
         try {
             UpdateTaskToolkitJob<Void> job = UpdateTaskToolkit.runUpdateOnAllSchemas(throwExceptionOnFailure);
             addJob(job);
-            return job.getId();
+            return new TaskStatus(job.getId(), job.getStatusText());
         } catch (OXException e) {
             LOG.error("", e);
             throw new RemoteException(e.getPlainLogMessage(), e);
@@ -160,11 +152,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#forceUpdateTask(int, java.lang.String)
-     */
     @Override
     public void forceUpdateTask(int contextId, String taskName) throws RemoteException {
         try {
@@ -178,17 +165,16 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#forceUpdateTask(java.lang.String, java.lang.String)
-     */
     @Override
     public void forceUpdateTask(String schemaName, String taskName) throws RemoteException {
         try {
             UpdateTaskToolkit.forceUpdateTask(taskName, schemaName);
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -196,11 +182,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#forceUpdateTaskOnAllSchemata(java.lang.String)
-     */
     @Override
     public void forceUpdateTaskOnAllSchemata(String taskName) throws RemoteException {
         try {
@@ -214,11 +195,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getExecutedTasksList(java.lang.String)
-     */
     @Override
     public List<Map<String, Object>> getExecutedTasksList(String schemaName) throws RemoteException {
         SchemaStore store = SchemaStore.getInstance();
@@ -232,16 +208,15 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
             }
             List<Map<String, Object>> executedTasks = new ArrayList<>(tasks.length);
             for (ExecutedTask task : tasks) {
-                Map<String, Object> taskMap = new HashMap<>();
-                taskMap.put(TaskMetadata.taskName.name(), task.getTaskName());
-                taskMap.put(TaskMetadata.successful.name(), Boolean.toString(task.isSuccessful()));
-                taskMap.put(TaskMetadata.lastModified.name(), task.getLastModified());
-                taskMap.put(TaskMetadata.uuid.name(), task.getUUID().toString());
-                executedTasks.add(taskMap);
+                executedTasks.add(new TaskMetadataBuilder().withTaskName(task.getTaskName()).withSuccess(Boolean.valueOf(task.isSuccessful())).withLastModified(task.getLastModified()).withUUID(task.getUUID().toString()).build());
             }
             return executedTasks;
         } catch (OXException e) {
             LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
             throw new RemoteException(e.getPlainLogMessage(), e);
         } catch (RuntimeException | Error e) {
             LOG.error("", e);
@@ -249,11 +224,64 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getJobStatus(java.lang.String)
-     */
+    @Override
+    public List<Map<String, Object>> getPendingTasksList(String schemaName, boolean pending, boolean excluded, boolean namespaceAware) throws RemoteException {
+        SchemaStore store = SchemaStore.getInstance();
+        try {
+            SchemaInfo schemaInfo = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
+            ExecutedTask[] tasks = store.getExecutedTasks(schemaInfo.getPoolId(), schemaName);
+            if (null == tasks) {
+                tasks = new ExecutedTask[0];
+            } else {
+                Arrays.sort(tasks);
+            }
+
+            Map<String, Map<String, Object>> aux = new HashMap<>();
+            // First get the successfully executed tasks
+            Set<String> executedTasks = new HashSet<>();
+            Arrays.stream(tasks).filter(t -> t.isSuccessful()).forEach(t -> executedTasks.add(t.getTaskName()));
+
+            // Then collect all tasks from the different sets
+            if (pending) {
+                // Add all update tasks that are not in the executed set
+                UpdateTaskToolkit.getRegisteredUpdateTasks().stream().filter(t -> false == executedTasks.contains(t)).forEach(t -> aux.put(t, new TaskMetadataBuilder().withTaskName(t).withTaskState(TaskState.pending).withReason("Never executed").build()));
+                // Filter out duplicates
+                if (false == excluded) {
+                    UpdateTaskToolkit.getExcludedUpdateTasks().stream().filter(s -> aux.containsKey(s)).forEach(s -> aux.remove(s));
+                }
+                if (false == namespaceAware) {
+                    for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
+                        entry.getValue().stream().filter(s -> aux.containsKey(s)).forEach(s -> aux.remove(s));
+                    }
+                }
+            }
+
+            // Consider excluded via properties
+            if (excluded) {
+                UpdateTaskToolkit.getExcludedUpdateTasks().stream().filter(t -> false == executedTasks.contains(t) || false == aux.containsKey(t)).forEach(t -> aux.put(t, new TaskMetadataBuilder().withTaskName(t).withTaskState(TaskState.pending).withReason("Excluded via file 'excludedupdatetask.properties'").build()));
+            }
+
+            // Consider excluded via namespace
+            if (namespaceAware) {
+                for (Entry<String, Set<String>> entry : UpdateTaskToolkit.getNamespaceAwareUpdateTasks().entrySet()) {
+                    String reason = "Excluded via namespace '" + entry.getKey() + "'";
+                    entry.getValue().stream().filter(s -> false == executedTasks.contains(s)).forEach(s -> aux.put(s, new TaskMetadataBuilder().withTaskName(s).withTaskState(TaskState.pending).withReason(reason).build()));
+                }
+            }
+            return aux.values().parallelStream().collect(Collectors.toList());
+        } catch (OXException e) {
+            LOG.error("", e);
+            if (UpdateExceptionCodes.UNKNOWN_SCHEMA.equals(e)) {
+                // Specified schema was not found
+                throw new RemoteException(e.getPlainLogMessage() + " Consider running \"checkcountsconsistency\" if schema is known to exist.", e);
+            }
+            throw new RemoteException(e.getPlainLogMessage(), e);
+        } catch (RuntimeException | Error e) {
+            LOG.error("", e);
+            throw e;
+        }
+    }
+
     @Override
     public String getJobStatus(String jobId) throws RemoteException {
         UpdateTaskToolkitJob<?> job = jobs.get(jobId);
@@ -274,11 +302,6 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
         return "OK:" + stText;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.groupware.update.UpdateTaskService#getNamespaceAware()
-     */
     @Override
     public Map<String, Set<String>> getNamespaceAware() throws RemoteException {
         return UpdateTaskToolkit.getNamespaceAwareUpdateTasks();
@@ -288,7 +311,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /**
      * Schedules an update task job
-     * 
+     *
      * @param job The job to schedule
      */
     private void addJob(UpdateTaskToolkitJob<Void> job) {
@@ -330,7 +353,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /**
      * Drops the timer task if no jobs are running
-     * 
+     *
      * @return <code>true</code> if the timer task was dropped and the {@link TimerService} purged;
      *         <code>false</code> otherwise
      */
@@ -350,7 +373,7 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
     /**
      * Returns any failures the update task encountered
-     * 
+     *
      * @param updateProcess the {@link UpdateProcess}
      * @return the failures
      */
@@ -363,12 +386,162 @@ public class UpdateTaskServiceImpl implements UpdateTaskService {
 
         List<Map<String, Object>> failuresList = new ArrayList<>(failures.size());
         for (TaskInfo taskInfo : failures) {
-            Map<String, Object> failuresMap = new HashMap<>();
-            failuresMap.put(TaskMetadata.taskName.name(), taskInfo.getTaskName());
-            failuresMap.put(TaskMetadata.className.name(), taskInfo.getClass().getName());
-            failuresMap.put(TaskMetadata.schema.name(), taskInfo.getSchema());
-            failuresList.add(failuresMap);
+            failuresList.add(new TaskMetadataBuilder().withTaskName(taskInfo.getTaskName()).withClassName(taskInfo.getClass().getName()).withSchema(taskInfo.getSchema()).build());
         }
         return failuresList;
+    }
+
+    /////////////////////////////////// METADATA BUILDER ////////////////////////////////////////
+
+    private enum TaskMetadata {
+        taskName, state, reason, successful, lastModified, uuid, schema, className;
+    }
+
+    private enum TaskState {
+        running, pending, succeeded, failed
+    }
+
+    /**
+     * {@link TaskMetadataBuilder}
+     */
+    private static final class TaskMetadataBuilder {
+
+        private String taskName;
+        private String taskState;
+        private String reason;
+        private String className;
+        private String schema;
+        private Boolean isSuccessful;
+        private Date lastModified;
+        private String uuid;
+
+        /**
+         * Initialises a new {@link UpdateTaskServiceImpl.TaskMetadataBuilder}.
+         */
+        TaskMetadataBuilder() {
+            super();
+        }
+
+        /**
+         * Sets the specified task name
+         *
+         * @param taskName The task name to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withTaskName(String taskName) {
+            this.taskName = taskName;
+            return this;
+        }
+
+        /**
+         * Sets the specified task state
+         *
+         * @param taskState The task state to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withTaskState(TaskState taskState) {
+            this.taskState = taskState.name();
+            return this;
+        }
+
+        /**
+         * Sets the specified reason
+         *
+         * @param reason The reason to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withReason(String reason) {
+            this.reason = reason;
+            return this;
+        }
+
+        /**
+         * Sets the specified task class name
+         *
+         * @param className The task class name to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withClassName(String className) {
+            this.className = className;
+            return this;
+        }
+
+        /**
+         * Sets the specified schema name
+         *
+         * @param schema The schema name to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withSchema(String schema) {
+            this.schema = schema;
+            return this;
+        }
+
+        /**
+         * Sets whether the task was executed successfully
+         *
+         * @param successful whether the task was executed successfully
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withSuccess(Boolean successful) {
+            this.isSuccessful = successful;
+            return this;
+        }
+
+        /**
+         * Sets whether the last modified date of the task
+         *
+         * @param lastModified the last modified date of the task
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withLastModified(Date lastModified) {
+            this.lastModified = lastModified;
+            return this;
+        }
+
+        /**
+         * Sets the specified task UUID
+         *
+         * @param uuid The task uuid to set
+         * @return <code>this</code> instance for chained calls
+         */
+        final TaskMetadataBuilder withUUID(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
+
+        /**
+         * Builds an unmodifiable {@link Map} with the {@link TaskMetadata}
+         *
+         * @return an unmodifiable {@link Map} with the {@link TaskMetadata}
+         */
+        Map<String, Object> build() {
+            Map<String, Object> taskMap = new HashMap<>(8);
+            if (Strings.isNotEmpty(taskName)) {
+                taskMap.put(TaskMetadata.taskName.name(), taskName);
+            }
+            if (Strings.isNotEmpty(taskState)) {
+                taskMap.put(TaskMetadata.state.name(), taskState);
+            }
+            if (Strings.isNotEmpty(reason)) {
+                taskMap.put(TaskMetadata.reason.name(), reason);
+            }
+            if (Strings.isNotEmpty(className)) {
+                taskMap.put(TaskMetadata.className.name(), className);
+            }
+            if (Strings.isNotEmpty(schema)) {
+                taskMap.put(TaskMetadata.schema.name(), schema);
+            }
+            if (null != isSuccessful) {
+                taskMap.put(TaskMetadata.successful.name(), isSuccessful);
+            }
+            if (null != lastModified) {
+                taskMap.put(TaskMetadata.lastModified.name(), lastModified);
+            }
+            if (Strings.isNotEmpty(uuid)) {
+                taskMap.put(TaskMetadata.uuid.name(), uuid);
+            }
+            return Collections.unmodifiableMap(taskMap);
+        }
     }
 }

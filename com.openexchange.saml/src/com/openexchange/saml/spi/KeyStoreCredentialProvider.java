@@ -61,13 +61,11 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.opensaml.xml.security.credential.BasicCredential;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.credential.UsageType;
@@ -133,29 +131,30 @@ public class KeyStoreCredentialProvider extends AbstractCredentialProvider {
             }
             signingCredential = credentialFromKeyPair(keyStore, signingKeyAlias, signingKeyPassword, UsageType.SIGNING);
             encryptionCredential = credentialFromKeyPair(keyStore, decryptionKeyAlias, decryptionKeyPassword, UsageType.ENCRYPTION);
-        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException | CertificateEncodingException e) {
+        } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableEntryException e) {
             throw SAMLExceptionCode.CREDENTIAL_PROBLEM.create(e, e.getMessage());
-        } 
+        }
 
         return new KeyStoreCredentialProvider(idpCertificateCredentials, signingCredential, encryptionCredential);
     }
 
-    private static boolean loadCertificates(List<String> idpCertAliases, List<Credential> idpCertificateCredentials, KeyStore keyStore, boolean keystoreHasCertificates) throws KeyStoreException, CertificateEncodingException {
+    private static boolean loadCertificates(List<String> idpCertAliases, List<Credential> idpCertificateCredentials, KeyStore keyStore, boolean keystoreHasCertificates) throws KeyStoreException {
+        boolean retval = keystoreHasCertificates;
         BasicCredential idpCertificateCredential;
         for (String alias : idpCertAliases) {
             Certificate certificate = keyStore.getCertificate(alias);
             if (certificate != null) {
-                keystoreHasCertificates = true;
+                retval = true;
                 idpCertificateCredential = new BasicCredential();
                 idpCertificateCredential.setUsageType(UsageType.SIGNING);
                 idpCertificateCredential.setPublicKey(certificate.getPublicKey());
                 idpCertificateCredentials.add(idpCertificateCredential);
             }
         }
-        return keystoreHasCertificates;
+        return retval;
     }
 
-    private static BasicCredential credentialFromKeyPair(KeyStore keyStore, String alias, char[] password, UsageType type) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, OXException, CertificateEncodingException {
+    private static BasicCredential credentialFromKeyPair(KeyStore keyStore, String alias, char[] password, UsageType type) throws NoSuchAlgorithmException, UnrecoverableEntryException, KeyStoreException, OXException {
         if (Strings.isEmpty(alias)) {
             return null;
         }

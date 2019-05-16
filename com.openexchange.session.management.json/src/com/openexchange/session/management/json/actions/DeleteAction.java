@@ -79,7 +79,7 @@ public class DeleteAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         Object data = requestData.getData();
-        if (false == JSONArray.class.isInstance(data)) {
+        if (!(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 

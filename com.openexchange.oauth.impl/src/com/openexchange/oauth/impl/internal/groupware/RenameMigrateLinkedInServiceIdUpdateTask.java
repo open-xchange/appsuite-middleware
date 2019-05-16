@@ -75,7 +75,7 @@ public class RenameMigrateLinkedInServiceIdUpdateTask extends AbstractOAuthUpdat
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
         for (int contextId : performParameters.getContextsInSameSchema()) {
             try (PreparedStatement stmt = connection.prepareStatement("UPDATE oauthAccounts SET serviceId=? WHERE cid=? AND serviceId=?")) {
-                stmt.setString(1, KnownApi.LINKEDIN.getFullName());
+                stmt.setString(1, KnownApi.LINKEDIN.getServiceId());
                 stmt.setInt(2, contextId);
                 stmt.setString(3, "com.openexchange.socialplugin.linkedin");
                 stmt.execute();
@@ -84,7 +84,7 @@ public class RenameMigrateLinkedInServiceIdUpdateTask extends AbstractOAuthUpdat
             try (PreparedStatement stmt = connection.prepareStatement("UPDATE oauthAccounts SET scope=? WHERE cid=? AND serviceId=?")) {
                 stmt.setString(1, OXScope.contacts_ro.name());
                 stmt.setInt(2, contextId);
-                stmt.setString(3, KnownApi.LINKEDIN.getFullName());
+                stmt.setString(3, KnownApi.LINKEDIN.getServiceId());
                 stmt.execute();
             }
         }

@@ -179,7 +179,7 @@ public class EnhancedTaskOrAppointment {
 		if (status == null) {
 			return undecided;
 		}
-		switch (status) {
+		switch (status.intValue()) {
 		case CalendarObject.ACCEPT:
 			list = accepted;
 			break;
@@ -197,7 +197,7 @@ public class EnhancedTaskOrAppointment {
 	private SimpleParticipant resolveResource(Map<String, Object> participant)
 			throws OXException {
 		Resource resource = services.getService(ResourceService.class)
-				.getResource((Integer) participant.get("id"), ctx);
+				.getResource(((Integer) participant.get("id")).intValue(), ctx);
 
 		return new SimpleParticipant()
 				.setDisplayName(resource.getDisplayName());
@@ -206,7 +206,7 @@ public class EnhancedTaskOrAppointment {
 	private SimpleParticipant resolveUser(Map<String, Object> userO)
 			throws OXException {
 		User user = services.getService(UserService.class).getUser(
-				(Integer) userO.get("id"), ctx);
+				((Integer) userO.get("id")).intValue(), ctx);
 
 		return new SimpleParticipant().setDisplayName(user.getDisplayName())
 				.setMessage((String) userO.get("confirmmessage"));

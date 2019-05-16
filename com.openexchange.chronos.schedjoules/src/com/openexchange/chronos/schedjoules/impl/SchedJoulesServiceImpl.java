@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.schedjoules.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,7 +153,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         List<Integer> l = new ArrayList<>(split.length);
         for (String s : split) {
             try {
-                l.add(Integer.parseInt(s));
+                l.add(Integer.valueOf(s));
             } catch (NumberFormatException e) {
                 LOG.debug("The black-listed item id '{}' is not an integer. Ignoring", s, e);
             }
@@ -164,12 +166,12 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
      * Invalidates the pages and root cache
      */
     private void invalidateCaches() {
-        pagesCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(predicate.getKey().getItemId())).forEach(entry -> {
+        pagesCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(Integer.valueOf(predicate.getKey().getItemId()))).forEach(entry -> {
             if (entry.getValue().getItemData().isObject()) {
                 removeBlackListedItems(entry.getValue().getItemData().toObject());
             }
         });
-        rootItemIdCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(predicate.getValue().intValue()));
+        rootItemIdCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(predicate.getValue()));
     }
 
     /*
@@ -198,8 +200,8 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
                 int rootPageItemId = itemData.getInt("item_id");
 
                 pagesCache.put(new SchedJoulesCachedItemKey(contextId, rootPageItemId, locale), rootPage);
-                return rootPageItemId;
-            });
+                return I(rootPageItemId);
+            }).intValue();
             return getPage(contextId, itemId, locale, filteredFields);
         } catch (ExecutionException e) {
             throw handleExecutionException(e);
@@ -223,7 +225,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
      */
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId, String locale, Set<SchedJoulesPageField> filteredFields) throws OXException {
-        if (blacklistedItems.contains(pageId)) {
+        if (blacklistedItems.contains(Integer.valueOf(pageId))) {
             throw SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.create();
         }
         try {
@@ -314,10 +316,15 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
             return content;
         }
         try {
-            long startTime = System.currentTimeMillis();
-            removeBlackListedItems(content);
-            filterJSONObject(content, filteredFields);
-            LOG.trace("Filtered content in {} msec.", System.currentTimeMillis() - startTime);
+            if (LOG.isTraceEnabled()) {
+                long startTime = System.currentTimeMillis();
+                removeBlackListedItems(content);
+                filterJSONObject(content, filteredFields);
+                LOG.trace("Filtered content in {} msec.", L(System.currentTimeMillis() - startTime));
+            } else {
+                removeBlackListedItems(content);
+                filterJSONObject(content, filteredFields);
+            }
             return content;
         } catch (JSONException e) {
             throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e);
@@ -350,7 +357,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
                     continue;
                 }
                 int itemId = item.optInt(SchedJoulesPageField.ITEM_ID.getFieldName());
-                if (blacklistedItems.contains(itemId)) {
+                if (blacklistedItems.contains(Integer.valueOf(itemId))) {
                     itemsIterator.remove();
                 }
             }

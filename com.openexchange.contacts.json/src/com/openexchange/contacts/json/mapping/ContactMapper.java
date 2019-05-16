@@ -49,13 +49,16 @@
 
 package com.openexchange.contacts.json.mapping;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
@@ -97,7 +100,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactMapper.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactMapper.class);
     private static final ContactMapper INSTANCE = new ContactMapper();
 
     private ContactField[] allFields = null;
@@ -180,7 +183,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		final EnumMap<ContactField, JsonMapping<? extends Object, Contact>> mappings = new
 				EnumMap<ContactField, JsonMapping<? extends Object, Contact>>(ContactField.class);
 
-        mappings.put(ContactField.DISPLAY_NAME, new StringMapping<Contact>(ContactFields.DISPLAY_NAME, Contact.DISPLAY_NAME) {
+        mappings.put(ContactField.DISPLAY_NAME, new StringMapping<Contact>(ContactFields.DISPLAY_NAME, I(Contact.DISPLAY_NAME)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -203,7 +206,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SUR_NAME, new StringMapping<Contact>(ContactFields.LAST_NAME, Contact.SUR_NAME) {
+        mappings.put(ContactField.SUR_NAME, new StringMapping<Contact>(ContactFields.LAST_NAME, I(Contact.SUR_NAME)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -226,7 +229,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.GIVEN_NAME, new StringMapping<Contact>(ContactFields.FIRST_NAME, 501) {
+        mappings.put(ContactField.GIVEN_NAME, new StringMapping<Contact>(ContactFields.FIRST_NAME, I(501)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -249,7 +252,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MIDDLE_NAME, new StringMapping<Contact>(ContactFields.SECOND_NAME, 503) {
+        mappings.put(ContactField.MIDDLE_NAME, new StringMapping<Contact>(ContactFields.SECOND_NAME, I(503)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -272,7 +275,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SUFFIX, new StringMapping<Contact>(ContactFields.SUFFIX, 504) {
+        mappings.put(ContactField.SUFFIX, new StringMapping<Contact>(ContactFields.SUFFIX, I(504)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -295,7 +298,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TITLE, new StringMapping<Contact>(ContactFields.TITLE, 505) {
+        mappings.put(ContactField.TITLE, new StringMapping<Contact>(ContactFields.TITLE, I(505)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -318,7 +321,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STREET_HOME, new StringMapping<Contact>(ContactFields.STREET_HOME, 506) {
+        mappings.put(ContactField.STREET_HOME, new StringMapping<Contact>(ContactFields.STREET_HOME, I(506)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -341,7 +344,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSTAL_CODE_HOME, new StringMapping<Contact>(ContactFields.POSTAL_CODE_HOME, 507) {
+        mappings.put(ContactField.POSTAL_CODE_HOME, new StringMapping<Contact>(ContactFields.POSTAL_CODE_HOME, I(507)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -364,7 +367,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CITY_HOME, new StringMapping<Contact>(ContactFields.CITY_HOME, 508) {
+        mappings.put(ContactField.CITY_HOME, new StringMapping<Contact>(ContactFields.CITY_HOME, I(508)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -387,7 +390,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STATE_HOME, new StringMapping<Contact>(ContactFields.STATE_HOME, 509) {
+        mappings.put(ContactField.STATE_HOME, new StringMapping<Contact>(ContactFields.STATE_HOME, I(509)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -410,7 +413,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COUNTRY_HOME, new StringMapping<Contact>(ContactFields.COUNTRY_HOME, 510) {
+        mappings.put(ContactField.COUNTRY_HOME, new StringMapping<Contact>(ContactFields.COUNTRY_HOME, I(510)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -433,7 +436,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MARITAL_STATUS, new StringMapping<Contact>(ContactFields.MARITAL_STATUS, 512) {
+        mappings.put(ContactField.MARITAL_STATUS, new StringMapping<Contact>(ContactFields.MARITAL_STATUS, I(512)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -456,7 +459,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_CHILDREN, new StringMapping<Contact>(ContactFields.NUMBER_OF_CHILDREN, 513) {
+        mappings.put(ContactField.NUMBER_OF_CHILDREN, new StringMapping<Contact>(ContactFields.NUMBER_OF_CHILDREN, I(513)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -479,7 +482,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.PROFESSION, new StringMapping<Contact>(ContactFields.PROFESSION, 514) {
+        mappings.put(ContactField.PROFESSION, new StringMapping<Contact>(ContactFields.PROFESSION, I(514)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -502,7 +505,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NICKNAME, new StringMapping<Contact>(ContactFields.NICKNAME, 515) {
+        mappings.put(ContactField.NICKNAME, new StringMapping<Contact>(ContactFields.NICKNAME, I(515)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -525,7 +528,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SPOUSE_NAME, new StringMapping<Contact>(ContactFields.SPOUSE_NAME, 516) {
+        mappings.put(ContactField.SPOUSE_NAME, new StringMapping<Contact>(ContactFields.SPOUSE_NAME, I(516)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -548,7 +551,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NOTE, new StringMapping<Contact>(ContactFields.NOTE, 518) {
+        mappings.put(ContactField.NOTE, new StringMapping<Contact>(ContactFields.NOTE, I(518)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -571,7 +574,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COMPANY, new StringMapping<Contact>(ContactFields.COMPANY, 569) {
+        mappings.put(ContactField.COMPANY, new StringMapping<Contact>(ContactFields.COMPANY, I(569)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -594,7 +597,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.DEPARTMENT, new StringMapping<Contact>(ContactFields.DEPARTMENT, 519) {
+        mappings.put(ContactField.DEPARTMENT, new StringMapping<Contact>(ContactFields.DEPARTMENT, I(519)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -617,7 +620,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSITION, new StringMapping<Contact>(ContactFields.POSITION, 520) {
+        mappings.put(ContactField.POSITION, new StringMapping<Contact>(ContactFields.POSITION, I(520)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -640,7 +643,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMPLOYEE_TYPE, new StringMapping<Contact>(ContactFields.EMPLOYEE_TYPE, 521) {
+        mappings.put(ContactField.EMPLOYEE_TYPE, new StringMapping<Contact>(ContactFields.EMPLOYEE_TYPE, I(521)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -663,7 +666,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.ROOM_NUMBER, new StringMapping<Contact>(ContactFields.ROOM_NUMBER, 522) {
+        mappings.put(ContactField.ROOM_NUMBER, new StringMapping<Contact>(ContactFields.ROOM_NUMBER, I(522)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -686,7 +689,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STREET_BUSINESS, new StringMapping<Contact>(ContactFields.STREET_BUSINESS, 523) {
+        mappings.put(ContactField.STREET_BUSINESS, new StringMapping<Contact>(ContactFields.STREET_BUSINESS, I(523)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -709,7 +712,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSTAL_CODE_BUSINESS, new StringMapping<Contact>(ContactFields.POSTAL_CODE_BUSINESS, 525) {
+        mappings.put(ContactField.POSTAL_CODE_BUSINESS, new StringMapping<Contact>(ContactFields.POSTAL_CODE_BUSINESS, I(525)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -732,7 +735,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CITY_BUSINESS, new StringMapping<Contact>(ContactFields.CITY_BUSINESS, 526) {
+        mappings.put(ContactField.CITY_BUSINESS, new StringMapping<Contact>(ContactFields.CITY_BUSINESS, I(526)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -755,7 +758,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STATE_BUSINESS, new StringMapping<Contact>(ContactFields.STATE_BUSINESS, 527) {
+        mappings.put(ContactField.STATE_BUSINESS, new StringMapping<Contact>(ContactFields.STATE_BUSINESS, I(527)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -778,7 +781,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COUNTRY_BUSINESS, new StringMapping<Contact>(ContactFields.COUNTRY_BUSINESS, 528) {
+        mappings.put(ContactField.COUNTRY_BUSINESS, new StringMapping<Contact>(ContactFields.COUNTRY_BUSINESS, I(528)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -801,7 +804,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new StringMapping<Contact>(ContactFields.NUMBER_OF_EMPLOYEE, 529) {
+        mappings.put(ContactField.NUMBER_OF_EMPLOYEE, new StringMapping<Contact>(ContactFields.NUMBER_OF_EMPLOYEE, I(529)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -824,7 +827,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SALES_VOLUME, new StringMapping<Contact>(ContactFields.SALES_VOLUME, 530) {
+        mappings.put(ContactField.SALES_VOLUME, new StringMapping<Contact>(ContactFields.SALES_VOLUME, I(530)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -847,7 +850,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TAX_ID, new StringMapping<Contact>(ContactFields.TAX_ID, 531) {
+        mappings.put(ContactField.TAX_ID, new StringMapping<Contact>(ContactFields.TAX_ID, I(531)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -870,7 +873,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COMMERCIAL_REGISTER, new StringMapping<Contact>(ContactFields.COMMERCIAL_REGISTER, 532) {
+        mappings.put(ContactField.COMMERCIAL_REGISTER, new StringMapping<Contact>(ContactFields.COMMERCIAL_REGISTER, I(532)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -893,7 +896,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BRANCHES, new StringMapping<Contact>(ContactFields.BRANCHES, 533) {
+        mappings.put(ContactField.BRANCHES, new StringMapping<Contact>(ContactFields.BRANCHES, I(533)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -916,7 +919,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BUSINESS_CATEGORY, new StringMapping<Contact>(ContactFields.BUSINESS_CATEGORY, 534) {
+        mappings.put(ContactField.BUSINESS_CATEGORY, new StringMapping<Contact>(ContactFields.BUSINESS_CATEGORY, I(534)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -939,7 +942,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INFO, new StringMapping<Contact>(ContactFields.INFO, 535) {
+        mappings.put(ContactField.INFO, new StringMapping<Contact>(ContactFields.INFO, I(535)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -962,7 +965,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MANAGER_NAME, new StringMapping<Contact>(ContactFields.MANAGER_NAME, 536) {
+        mappings.put(ContactField.MANAGER_NAME, new StringMapping<Contact>(ContactFields.MANAGER_NAME, I(536)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -985,7 +988,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.ASSISTANT_NAME, new StringMapping<Contact>(ContactFields.ASSISTANT_NAME, 537) {
+        mappings.put(ContactField.ASSISTANT_NAME, new StringMapping<Contact>(ContactFields.ASSISTANT_NAME, I(537)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1008,7 +1011,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STREET_OTHER, new StringMapping<Contact>(ContactFields.STREET_OTHER, 538) {
+        mappings.put(ContactField.STREET_OTHER, new StringMapping<Contact>(ContactFields.STREET_OTHER, I(538)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1031,7 +1034,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.POSTAL_CODE_OTHER, new StringMapping<Contact>(ContactFields.POSTAL_CODE_OTHER, 540) {
+        mappings.put(ContactField.POSTAL_CODE_OTHER, new StringMapping<Contact>(ContactFields.POSTAL_CODE_OTHER, I(540)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1054,7 +1057,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CITY_OTHER, new StringMapping<Contact>(ContactFields.CITY_OTHER, 539) {
+        mappings.put(ContactField.CITY_OTHER, new StringMapping<Contact>(ContactFields.CITY_OTHER, I(539)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1077,7 +1080,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.STATE_OTHER, new StringMapping<Contact>(ContactFields.STATE_OTHER, 598) {
+        mappings.put(ContactField.STATE_OTHER, new StringMapping<Contact>(ContactFields.STATE_OTHER, I(598)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1100,7 +1103,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COUNTRY_OTHER, new StringMapping<Contact>(ContactFields.COUNTRY_OTHER, 541) {
+        mappings.put(ContactField.COUNTRY_OTHER, new StringMapping<Contact>(ContactFields.COUNTRY_OTHER, I(541)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1123,7 +1126,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_ASSISTANT, new StringMapping<Contact>(ContactFields.TELEPHONE_ASSISTANT, 568) {
+        mappings.put(ContactField.TELEPHONE_ASSISTANT, new StringMapping<Contact>(ContactFields.TELEPHONE_ASSISTANT, I(568)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1146,7 +1149,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_BUSINESS1, new StringMapping<Contact>(ContactFields.TELEPHONE_BUSINESS1, 542) {
+        mappings.put(ContactField.TELEPHONE_BUSINESS1, new StringMapping<Contact>(ContactFields.TELEPHONE_BUSINESS1, I(542)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1169,7 +1172,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_BUSINESS2, new StringMapping<Contact>(ContactFields.TELEPHONE_BUSINESS2, 543) {
+        mappings.put(ContactField.TELEPHONE_BUSINESS2, new StringMapping<Contact>(ContactFields.TELEPHONE_BUSINESS2, I(543)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1192,7 +1195,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FAX_BUSINESS, new StringMapping<Contact>(ContactFields.FAX_BUSINESS, 544) {
+        mappings.put(ContactField.FAX_BUSINESS, new StringMapping<Contact>(ContactFields.FAX_BUSINESS, I(544)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1215,7 +1218,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_CALLBACK, new StringMapping<Contact>(ContactFields.TELEPHONE_CALLBACK, 545) {
+        mappings.put(ContactField.TELEPHONE_CALLBACK, new StringMapping<Contact>(ContactFields.TELEPHONE_CALLBACK, I(545)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1238,7 +1241,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_CAR, new StringMapping<Contact>(ContactFields.TELEPHONE_CAR, 546) {
+        mappings.put(ContactField.TELEPHONE_CAR, new StringMapping<Contact>(ContactFields.TELEPHONE_CAR, I(546)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1261,7 +1264,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_COMPANY, new StringMapping<Contact>(ContactFields.TELEPHONE_COMPANY, 547) {
+        mappings.put(ContactField.TELEPHONE_COMPANY, new StringMapping<Contact>(ContactFields.TELEPHONE_COMPANY, I(547)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1284,7 +1287,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_HOME1, new StringMapping<Contact>(ContactFields.TELEPHONE_HOME1, 548) {
+        mappings.put(ContactField.TELEPHONE_HOME1, new StringMapping<Contact>(ContactFields.TELEPHONE_HOME1, I(548)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1307,7 +1310,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_HOME2, new StringMapping<Contact>(ContactFields.TELEPHONE_HOME2, 549) {
+        mappings.put(ContactField.TELEPHONE_HOME2, new StringMapping<Contact>(ContactFields.TELEPHONE_HOME2, I(549)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1330,7 +1333,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FAX_HOME, new StringMapping<Contact>(ContactFields.FAX_HOME, 550) {
+        mappings.put(ContactField.FAX_HOME, new StringMapping<Contact>(ContactFields.FAX_HOME, I(550)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1353,7 +1356,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_ISDN, new StringMapping<Contact>(ContactFields.TELEPHONE_ISDN, 559) {
+        mappings.put(ContactField.TELEPHONE_ISDN, new StringMapping<Contact>(ContactFields.TELEPHONE_ISDN, I(559)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1376,7 +1379,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CELLULAR_TELEPHONE1, new StringMapping<Contact>(ContactFields.CELLULAR_TELEPHONE1, 551) {
+        mappings.put(ContactField.CELLULAR_TELEPHONE1, new StringMapping<Contact>(ContactFields.CELLULAR_TELEPHONE1, I(551)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1399,7 +1402,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CELLULAR_TELEPHONE2, new StringMapping<Contact>(ContactFields.CELLULAR_TELEPHONE2, 552) {
+        mappings.put(ContactField.CELLULAR_TELEPHONE2, new StringMapping<Contact>(ContactFields.CELLULAR_TELEPHONE2, I(552)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1422,7 +1425,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_OTHER, new StringMapping<Contact>(ContactFields.TELEPHONE_OTHER, 553) {
+        mappings.put(ContactField.TELEPHONE_OTHER, new StringMapping<Contact>(ContactFields.TELEPHONE_OTHER, I(553)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1445,7 +1448,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FAX_OTHER, new StringMapping<Contact>(ContactFields.FAX_OTHER, 554) {
+        mappings.put(ContactField.FAX_OTHER, new StringMapping<Contact>(ContactFields.FAX_OTHER, I(554)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1468,7 +1471,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_PAGER, new StringMapping<Contact>(ContactFields.TELEPHONE_PAGER, 560) {
+        mappings.put(ContactField.TELEPHONE_PAGER, new StringMapping<Contact>(ContactFields.TELEPHONE_PAGER, I(560)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1491,7 +1494,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_PRIMARY, new StringMapping<Contact>(ContactFields.TELEPHONE_PRIMARY, 561) {
+        mappings.put(ContactField.TELEPHONE_PRIMARY, new StringMapping<Contact>(ContactFields.TELEPHONE_PRIMARY, I(561)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1514,7 +1517,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_RADIO, new StringMapping<Contact>(ContactFields.TELEPHONE_RADIO, 562) {
+        mappings.put(ContactField.TELEPHONE_RADIO, new StringMapping<Contact>(ContactFields.TELEPHONE_RADIO, I(562)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1537,7 +1540,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_TELEX, new StringMapping<Contact>(ContactFields.TELEPHONE_TELEX, 563) {
+        mappings.put(ContactField.TELEPHONE_TELEX, new StringMapping<Contact>(ContactFields.TELEPHONE_TELEX, I(563)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1560,7 +1563,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_TTYTDD, new StringMapping<Contact>(ContactFields.TELEPHONE_TTYTDD, 564) {
+        mappings.put(ContactField.TELEPHONE_TTYTDD, new StringMapping<Contact>(ContactFields.TELEPHONE_TTYTDD, I(564)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1583,7 +1586,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INSTANT_MESSENGER1, new StringMapping<Contact>(ContactFields.INSTANT_MESSENGER1, 565) {
+        mappings.put(ContactField.INSTANT_MESSENGER1, new StringMapping<Contact>(ContactFields.INSTANT_MESSENGER1, I(565)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1606,7 +1609,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INSTANT_MESSENGER2, new StringMapping<Contact>(ContactFields.INSTANT_MESSENGER2, 566) {
+        mappings.put(ContactField.INSTANT_MESSENGER2, new StringMapping<Contact>(ContactFields.INSTANT_MESSENGER2, I(566)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1629,7 +1632,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.TELEPHONE_IP, new StringMapping<Contact>(ContactFields.TELEPHONE_IP, 567) {
+        mappings.put(ContactField.TELEPHONE_IP, new StringMapping<Contact>(ContactFields.TELEPHONE_IP, I(567)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1652,7 +1655,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMAIL1, new StringMapping<Contact>(ContactFields.EMAIL1, 555) {
+        mappings.put(ContactField.EMAIL1, new StringMapping<Contact>(ContactFields.EMAIL1, I(555)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1675,7 +1678,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMAIL2, new StringMapping<Contact>(ContactFields.EMAIL2, 556) {
+        mappings.put(ContactField.EMAIL2, new StringMapping<Contact>(ContactFields.EMAIL2, I(556)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1698,7 +1701,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.EMAIL3, new StringMapping<Contact>(ContactFields.EMAIL3, 557) {
+        mappings.put(ContactField.EMAIL3, new StringMapping<Contact>(ContactFields.EMAIL3, I(557)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1721,7 +1724,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.URL, new StringMapping<Contact>(ContactFields.URL, 558) {
+        mappings.put(ContactField.URL, new StringMapping<Contact>(ContactFields.URL, I(558)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1744,7 +1747,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CATEGORIES, new StringMapping<Contact>(CommonFields.CATEGORIES, 100) {
+        mappings.put(ContactField.CATEGORIES, new StringMapping<Contact>(CommonFields.CATEGORIES, I(100)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1767,7 +1770,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD01, new StringMapping<Contact>(ContactFields.USERFIELD01, 571) {
+        mappings.put(ContactField.USERFIELD01, new StringMapping<Contact>(ContactFields.USERFIELD01, I(571)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1790,7 +1793,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD02, new StringMapping<Contact>(ContactFields.USERFIELD02, 572) {
+        mappings.put(ContactField.USERFIELD02, new StringMapping<Contact>(ContactFields.USERFIELD02, I(572)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1813,7 +1816,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD03, new StringMapping<Contact>(ContactFields.USERFIELD03, 573) {
+        mappings.put(ContactField.USERFIELD03, new StringMapping<Contact>(ContactFields.USERFIELD03, I(573)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1836,7 +1839,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD04, new StringMapping<Contact>(ContactFields.USERFIELD04, 574) {
+        mappings.put(ContactField.USERFIELD04, new StringMapping<Contact>(ContactFields.USERFIELD04, I(574)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1859,7 +1862,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD05, new StringMapping<Contact>(ContactFields.USERFIELD05, 575) {
+        mappings.put(ContactField.USERFIELD05, new StringMapping<Contact>(ContactFields.USERFIELD05, I(575)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1882,7 +1885,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD06, new StringMapping<Contact>(ContactFields.USERFIELD06, 576) {
+        mappings.put(ContactField.USERFIELD06, new StringMapping<Contact>(ContactFields.USERFIELD06, I(576)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1905,7 +1908,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD07, new StringMapping<Contact>(ContactFields.USERFIELD07, 577) {
+        mappings.put(ContactField.USERFIELD07, new StringMapping<Contact>(ContactFields.USERFIELD07, I(577)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1928,7 +1931,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD08, new StringMapping<Contact>(ContactFields.USERFIELD08, 578) {
+        mappings.put(ContactField.USERFIELD08, new StringMapping<Contact>(ContactFields.USERFIELD08, I(578)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1951,7 +1954,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD09, new StringMapping<Contact>(ContactFields.USERFIELD09, 579) {
+        mappings.put(ContactField.USERFIELD09, new StringMapping<Contact>(ContactFields.USERFIELD09, I(579)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1974,7 +1977,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD10, new StringMapping<Contact>(ContactFields.USERFIELD10, 580) {
+        mappings.put(ContactField.USERFIELD10, new StringMapping<Contact>(ContactFields.USERFIELD10, I(580)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -1997,7 +2000,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD11, new StringMapping<Contact>(ContactFields.USERFIELD11, 581) {
+        mappings.put(ContactField.USERFIELD11, new StringMapping<Contact>(ContactFields.USERFIELD11, I(581)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2020,7 +2023,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD12, new StringMapping<Contact>(ContactFields.USERFIELD12, 582) {
+        mappings.put(ContactField.USERFIELD12, new StringMapping<Contact>(ContactFields.USERFIELD12, I(582)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2043,7 +2046,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD13, new StringMapping<Contact>(ContactFields.USERFIELD13, 583) {
+        mappings.put(ContactField.USERFIELD13, new StringMapping<Contact>(ContactFields.USERFIELD13, I(583)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2066,7 +2069,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD14, new StringMapping<Contact>(ContactFields.USERFIELD14, 584) {
+        mappings.put(ContactField.USERFIELD14, new StringMapping<Contact>(ContactFields.USERFIELD14, I(584)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2089,7 +2092,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD15, new StringMapping<Contact>(ContactFields.USERFIELD15, 585) {
+        mappings.put(ContactField.USERFIELD15, new StringMapping<Contact>(ContactFields.USERFIELD15, I(585)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2112,7 +2115,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD16, new StringMapping<Contact>(ContactFields.USERFIELD16, 586) {
+        mappings.put(ContactField.USERFIELD16, new StringMapping<Contact>(ContactFields.USERFIELD16, I(586)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2135,7 +2138,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD17, new StringMapping<Contact>(ContactFields.USERFIELD17, 587) {
+        mappings.put(ContactField.USERFIELD17, new StringMapping<Contact>(ContactFields.USERFIELD17, I(587)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2158,7 +2161,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD18, new StringMapping<Contact>(ContactFields.USERFIELD18, 588) {
+        mappings.put(ContactField.USERFIELD18, new StringMapping<Contact>(ContactFields.USERFIELD18, I(588)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2181,7 +2184,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD19, new StringMapping<Contact>(ContactFields.USERFIELD19, 589) {
+        mappings.put(ContactField.USERFIELD19, new StringMapping<Contact>(ContactFields.USERFIELD19, I(589)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2204,7 +2207,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USERFIELD20, new StringMapping<Contact>(ContactFields.USERFIELD20, 590) {
+        mappings.put(ContactField.USERFIELD20, new StringMapping<Contact>(ContactFields.USERFIELD20, I(590)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2227,11 +2230,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>(DataFields.ID, DataObject.OBJECT_ID) {
+        mappings.put(ContactField.OBJECT_ID, new IntegerMapping<Contact>(DataFields.ID, I(DataObject.OBJECT_ID)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setObjectID(value);
+                contact.setObjectID(value.intValue());
             }
 
             @Override
@@ -2241,7 +2244,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getObjectID();
+                return I(contact.getObjectID());
             }
 
             @Override
@@ -2250,11 +2253,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_DISTRIBUTIONLIST, 594) {
+        mappings.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_DISTRIBUTIONLIST, I(594)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfDistributionLists(value);
+                contact.setNumberOfDistributionLists(value.intValue());
             }
 
             @Override
@@ -2264,7 +2267,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfDistributionLists();
+                return I(contact.getNumberOfDistributionLists());
             }
 
             @Override
@@ -2273,7 +2276,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, Contact.DISTRIBUTIONLIST) {
+        mappings.put(ContactField.DISTRIBUTIONLIST, new ArrayMapping<DistributionListEntryObject, Contact>(ContactFields.DISTRIBUTIONLIST, I(Contact.DISTRIBUTIONLIST)) {
 
 			@Override
 			public DistributionListEntryObject[] newArray(int size) {
@@ -2286,7 +2289,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public void set(Contact contact, DistributionListEntryObject[] value) throws OXException {
+            public void set(Contact contact, DistributionListEntryObject[] value) {
                 contact.setDistributionList(value);
 			}
 
@@ -2336,16 +2339,28 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 				JSONArray jsonArray = null;
 				DistributionListEntryObject[] distributionList = this.get(from);
 				if (null != distributionList) {
+                    List<DistributionListEntryObject> list = Arrays.asList(distributionList);
+                    Locale locale;
+                    try {
+                        locale = ServerSessionAdapter.valueOf(session).getUser().getLocale();
+                    } catch (OXException e) {
+                        LOG.error(e.getMessage(), e);
+                        locale = null;
+                    }
+                    Collections.sort(list, new SpecialAlphanumSortDistributionListMemberComparator(locale));
 					jsonArray = new JSONArray();
-			        for (int i = 0; i < distributionList.length; i++) {
+                    for (DistributionListEntryObject tmp : list) {
 			            JSONObject entry = new JSONObject();
-			            int emailField = distributionList[i].getEmailfield();
+                        int emailField = tmp.getEmailfield();
 			            if (DistributionListEntryObject.INDEPENDENT != emailField) {
-			                entry.put(DataFields.ID, distributionList[i].getEntryID());
-			                entry.put(FolderChildFields.FOLDER_ID, distributionList[i].getFolderID());
+                            entry.put(DataFields.ID, tmp.getEntryID());
+                            entry.put(FolderChildFields.FOLDER_ID, tmp.getFolderID());
 			            }
-			            entry.put(DistributionListFields.MAIL, distributionList[i].getEmailaddress());
-			            entry.put(ContactFields.DISPLAY_NAME, distributionList[i].getDisplayname());
+                        entry.put(DistributionListFields.MAIL, tmp.getEmailaddress());
+                        entry.put(ContactFields.DISPLAY_NAME, tmp.getDisplayname());
+                        if (tmp.containsSortName()) {
+                            entry.put(ContactFields.SORT_NAME, tmp.getSortName());
+                        }
 			            entry.put(DistributionListFields.MAIL_FIELD, emailField);
 			            jsonArray.put(entry);
 			        }
@@ -2354,11 +2369,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
 		});
 
-        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(FolderChildFields.FOLDER_ID, FolderChildObject.FOLDER_ID) {
+        mappings.put(ContactField.FOLDER_ID, new IntegerMapping<Contact>(FolderChildFields.FOLDER_ID, I(FolderChildObject.FOLDER_ID)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setParentFolderID(value);
+                contact.setParentFolderID(value.intValue());
             }
 
             @Override
@@ -2368,7 +2383,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getParentFolderID();
+                return I(contact.getParentFolderID());
             }
 
             @Override
@@ -2377,34 +2392,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-//        mappings.put(ContactField.CONTEXTID, new IntegerMapping<Contact>(null, 593) {
-//
-//            @Override
-//            public void set(Contact contact, Integer value) {
-//                contact.setContextId(value);
-//            }
-//
-//            @Override
-//            public boolean isSet(Contact contact) {
-//                return contact.containsContextId();
-//            }
-//
-//            @Override
-//            public Integer get(Contact contact) {
-//                return contact.getContextId();
-//            }
-//
-//            @Override
-//            public void remove(Contact contact) {
-//                contact.removeContextID();
-//            }
-//        });
-
-        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(CommonFields.PRIVATE_FLAG, CommonObject.PRIVATE_FLAG) {
+        mappings.put(ContactField.PRIVATE_FLAG, new BooleanMapping<Contact>(CommonFields.PRIVATE_FLAG, I(CommonObject.PRIVATE_FLAG)) {
 
             @Override
             public void set(Contact contact, Boolean value) {
-                contact.setPrivateFlag(value);
+                contact.setPrivateFlag(value.booleanValue());
             }
 
             @Override
@@ -2414,7 +2406,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Boolean get(Contact contact) {
-                return contact.getPrivateFlag();
+                return Boolean.valueOf(contact.getPrivateFlag());
             }
 
             @Override
@@ -2423,11 +2415,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>(DataFields.CREATED_BY, 2) {
+        mappings.put(ContactField.CREATED_BY, new IntegerMapping<Contact>(DataFields.CREATED_BY, I(2)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setCreatedBy(value);
+                contact.setCreatedBy(value.intValue());
             }
 
             @Override
@@ -2437,7 +2429,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getCreatedBy();
+                return I(contact.getCreatedBy());
             }
 
             @Override
@@ -2446,11 +2438,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>(DataFields.MODIFIED_BY, 3) {
+        mappings.put(ContactField.MODIFIED_BY, new IntegerMapping<Contact>(DataFields.MODIFIED_BY, I(3)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setModifiedBy(value);
+                contact.setModifiedBy(value.intValue());
             }
 
             @Override
@@ -2460,7 +2452,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getModifiedBy();
+                return I(contact.getModifiedBy());
             }
 
             @Override
@@ -2469,7 +2461,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.CREATION_DATE, new TimeMapping<Contact>(DataFields.CREATION_DATE, 4) {
+        mappings.put(ContactField.CREATION_DATE, new TimeMapping<Contact>(DataFields.CREATION_DATE, I(4)) {
 
             @Override
             public void set(Contact contact, Date value) {
@@ -2492,7 +2484,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(DataFields.LAST_MODIFIED, DataObject.LAST_MODIFIED) {
+        mappings.put(ContactField.LAST_MODIFIED, new TimeMapping<Contact>(DataFields.LAST_MODIFIED, I(DataObject.LAST_MODIFIED)) {
 
             @Override
             public void set(Contact contact, Date value) {
@@ -2515,7 +2507,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BIRTHDAY, new DateMapping<Contact>(ContactFields.BIRTHDAY, 511) {
+        mappings.put(ContactField.BIRTHDAY, new DateMapping<Contact>(ContactFields.BIRTHDAY, I(511)) {
 
             @Override
             public void set(Contact contact, Date value) {
@@ -2538,7 +2530,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.ANNIVERSARY, new DateMapping<Contact>(ContactFields.ANNIVERSARY, 517) {
+        mappings.put(ContactField.ANNIVERSARY, new DateMapping<Contact>(ContactFields.ANNIVERSARY, I(517)) {
 
             @Override
             public void set(Contact contact, Date value) {
@@ -2561,7 +2553,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.IMAGE1, new DefaultJsonMapping<byte[], Contact>(ContactFields.IMAGE1, Contact.IMAGE1) {
+        mappings.put(ContactField.IMAGE1, new DefaultJsonMapping<byte[], Contact>(ContactFields.IMAGE1, I(Contact.IMAGE1)) {
 
 			@Override
 			public void set(Contact contact, byte[] value) {
@@ -2584,7 +2576,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public void deserialize(JSONObject from, Contact to) throws JSONException, OXException {
+            public void deserialize(JSONObject from, Contact to) throws JSONException {
 				Object value = from.get(getAjaxName());
 				if (null == value || JSONObject.NULL.equals(value) || 0 == value.toString().length()) {
 					to.setImage1(null);
@@ -2636,7 +2628,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
         });
 
-        mappings.put(ContactField.IMAGE1_URL, new StringMapping<Contact>(ContactFields.IMAGE1_URL, Contact.IMAGE1_URL) {
+        mappings.put(ContactField.IMAGE1_URL, new StringMapping<Contact>(ContactFields.IMAGE1_URL, I(Contact.IMAGE1_URL)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2654,9 +2646,8 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
                     String url = ContactUtil.generateImageUrl(session, from);
                     if (url == null) {
                         return JSONObject.NULL;
-                    } else {
-                        return url;
                     }
+                    return url;
                 } catch (OXException e) {
                     throw new JSONException(e);
                 }
@@ -2673,7 +2664,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.IMAGE_LAST_MODIFIED, new DateMapping<Contact>("image_last_modified", 597) {
+        mappings.put(ContactField.IMAGE_LAST_MODIFIED, new DateMapping<Contact>("image_last_modified", I(597)) {
 
             @Override
             public void set(Contact contact, Date value) {
@@ -2696,11 +2687,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.INTERNAL_USERID, new IntegerMapping<Contact>(ContactFields.USER_ID, 524) {
+        mappings.put(ContactField.INTERNAL_USERID, new IntegerMapping<Contact>(ContactFields.USER_ID, I(524)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setInternalUserId(value);
+                contact.setInternalUserId(value.intValue());
             }
 
             @Override
@@ -2710,7 +2701,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getInternalUserId();
+                return I(contact.getInternalUserId());
             }
 
             @Override
@@ -2719,11 +2710,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.COLOR_LABEL, new IntegerMapping<Contact>(CommonFields.COLORLABEL, 102) {
+        mappings.put(ContactField.COLOR_LABEL, new IntegerMapping<Contact>(CommonFields.COLORLABEL, I(102)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setLabel(value);
+                contact.setLabel(value.intValue());
             }
 
             @Override
@@ -2733,7 +2724,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getLabel();
+                return I(contact.getLabel());
             }
 
             @Override
@@ -2742,7 +2733,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.FILE_AS, new StringMapping<Contact>(ContactFields.FILE_AS, Contact.FILE_AS) {
+        mappings.put(ContactField.FILE_AS, new StringMapping<Contact>(ContactFields.FILE_AS, I(Contact.FILE_AS)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2793,18 +2784,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         		if (isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			return super.serialize(from, timeZone, session);
-        		} else {
-        			return null;
         		}
+                return null;
         	}
 
         });
 
-        mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>(ContactFields.DEFAULT_ADDRESS, Contact.DEFAULT_ADDRESS) {
+        mappings.put(ContactField.DEFAULT_ADDRESS, new IntegerMapping<Contact>(ContactFields.DEFAULT_ADDRESS, I(Contact.DEFAULT_ADDRESS)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setDefaultAddress(value);
+                contact.setDefaultAddress(value.intValue());
             }
 
             @Override
@@ -2814,7 +2804,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getDefaultAddress();
+                return I(contact.getDefaultAddress());
             }
 
             @Override
@@ -2851,18 +2841,17 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         		if (isSet(from)) {
         			// only serialize if set; workaround for bug #13960
         			return super.serialize(from, timeZone, session);
-        		} else {
-        			return null;
         		}
+                return null;
         	}
 
         });
 
-        mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new BooleanMapping<Contact>(ContactFields.MARK_AS_DISTRIBUTIONLIST, 602) {
+        mappings.put(ContactField.MARK_AS_DISTRIBUTIONLIST, new BooleanMapping<Contact>(ContactFields.MARK_AS_DISTRIBUTIONLIST, I(602)) {
 
             @Override
             public void set(Contact contact, Boolean value) {
-                contact.setMarkAsDistributionlist(value);
+                contact.setMarkAsDistributionlist(value.booleanValue());
             }
 
             @Override
@@ -2872,7 +2861,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Boolean get(Contact contact) {
-                return contact.getMarkAsDistribtuionlist();
+                return Boolean.valueOf(contact.getMarkAsDistribtuionlist());
             }
 
             @Override
@@ -2881,11 +2870,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>(CommonFields.NUMBER_OF_ATTACHMENTS, 104) {
+        mappings.put(ContactField.NUMBER_OF_ATTACHMENTS, new IntegerMapping<Contact>(CommonFields.NUMBER_OF_ATTACHMENTS, I(104)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfAttachments(value);
+                contact.setNumberOfAttachments(value.intValue());
             }
 
             @Override
@@ -2895,7 +2884,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfAttachments();
+                return I(contact.getNumberOfAttachments());
             }
 
             @Override
@@ -2904,7 +2893,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping<Contact>(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME) {
+        mappings.put(ContactField.YOMI_FIRST_NAME, new StringMapping<Contact>(ContactFields.YOMI_FIRST_NAME, I(Contact.YOMI_FIRST_NAME)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2927,7 +2916,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping<Contact>(ContactFields.YOMI_LAST_NAME, Contact.YOMI_LAST_NAME) {
+        mappings.put(ContactField.YOMI_LAST_NAME, new StringMapping<Contact>(ContactFields.YOMI_LAST_NAME, I(Contact.YOMI_LAST_NAME)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2950,7 +2939,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.YOMI_COMPANY, new StringMapping<Contact>(ContactFields.YOMI_COMPANY, Contact.YOMI_COMPANY) {
+        mappings.put(ContactField.YOMI_COMPANY, new StringMapping<Contact>(ContactFields.YOMI_COMPANY, I(Contact.YOMI_COMPANY)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -2973,11 +2962,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.NUMBER_OF_IMAGES, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_IMAGES, 596) {
+        mappings.put(ContactField.NUMBER_OF_IMAGES, new IntegerMapping<Contact>(ContactFields.NUMBER_OF_IMAGES, I(596)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setNumberOfImages(value);
+                contact.setNumberOfImages(value.intValue());
             }
 
             @Override
@@ -2988,7 +2977,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getNumberOfImages();
+                return I(contact.getNumberOfImages());
             }
 
             @Override
@@ -2997,7 +2986,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new StringMapping<Contact>("image1_content_type", Contact.IMAGE1_CONTENT_TYPE) {
+        mappings.put(ContactField.IMAGE1_CONTENT_TYPE, new StringMapping<Contact>("image1_content_type", I(Contact.IMAGE1_CONTENT_TYPE)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3020,7 +3009,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new DateMapping<Contact>(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, 105) {
+        mappings.put(ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, new DateMapping<Contact>(CommonFields.LAST_MODIFIED_OF_NEWEST_ATTACHMENT_UTC, I(105)) {
 
             @Override
             public void set(Contact contact, Date value) {
@@ -3043,11 +3032,11 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.USE_COUNT, new IntegerMapping<Contact>(ContactFields.USE_COUNT, 608) {
+        mappings.put(ContactField.USE_COUNT, new IntegerMapping<Contact>(ContactFields.USE_COUNT, I(608)) {
 
             @Override
             public void set(Contact contact, Integer value) {
-                contact.setUseCount(value);
+                contact.setUseCount(value.intValue());
             }
 
             @Override
@@ -3057,7 +3046,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public Integer get(Contact contact) {
-                return contact.getUseCount();
+                return I(contact.getUseCount());
             }
 
             @Override
@@ -3066,7 +3055,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(DataFields.LAST_MODIFIED_UTC, DataObject.LAST_MODIFIED_UTC) {
+        mappings.put(ContactField.LAST_MODIFIED_UTC, new DateMapping<Contact>(DataFields.LAST_MODIFIED_UTC, I(DataObject.LAST_MODIFIED_UTC)) {
 
 			@Override
 			public boolean isSet(Contact contact) {
@@ -3074,7 +3063,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
 
 			@Override
-			public void set(Contact contact, Date value) throws OXException {
+            public void set(Contact contact, Date value) {
 				contact.setLastModified(value);
 			}
 
@@ -3089,7 +3078,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 			}
         });
 
-        mappings.put(ContactField.HOME_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_HOME, Contact.ADDRESS_HOME) {
+        mappings.put(ContactField.HOME_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_HOME, I(Contact.ADDRESS_HOME)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3112,7 +3101,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.BUSINESS_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_BUSINESS, Contact.ADDRESS_BUSINESS) {
+        mappings.put(ContactField.BUSINESS_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_BUSINESS, I(Contact.ADDRESS_BUSINESS)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3135,7 +3124,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.OTHER_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_OTHER, Contact.ADDRESS_OTHER) {
+        mappings.put(ContactField.OTHER_ADDRESS, new StringMapping<Contact>(ContactFields.ADDRESS_OTHER, I(Contact.ADDRESS_OTHER)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3158,7 +3147,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.UID, new StringMapping<Contact>(CommonFields.UID, CommonObject.UID) {
+        mappings.put(ContactField.UID, new StringMapping<Contact>(CommonFields.UID, I(CommonObject.UID)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3181,7 +3170,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
         });
 
-        mappings.put(ContactField.SORT_NAME, new StringMapping<Contact>(ContactFields.SORT_NAME, Contact.SPECIAL_SORTING) {
+        mappings.put(ContactField.SORT_NAME, new StringMapping<Contact>(ContactFields.SORT_NAME, I(Contact.SPECIAL_SORTING)) {
 
             @Override
             public void set(Contact contact, String value) {
@@ -3204,7 +3193,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             }
 
             @Override
-            public Object serialize(Contact from, TimeZone timeZone, Session session) throws JSONException, OXException {
+            public Object serialize(Contact from, TimeZone timeZone, Session session) throws OXException {
                 Object value;
                 if (null != session) {
                     value = from.getSortName(ServerSessionAdapter.valueOf(session).getUser().getLocale());
@@ -3225,7 +3214,10 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
         try {
             final QuotedInternetAddress addr = new QuotedInternetAddress(primaryAddress);
             final String sAddress = addr.getAddress();
-            final int pos = null == sAddress ? 0 : sAddress.indexOf('/');
+            if (sAddress == null) {
+                return addr.toUnicodeString();
+            }
+            final int pos = sAddress.indexOf('/');
             if (pos <= 0) {
                 // No slash character present
                 return addr.toUnicodeString();

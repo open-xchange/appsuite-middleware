@@ -49,16 +49,20 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.rmi.server.UID;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.configuration.asset.AssetManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -141,7 +145,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             if (eventIds != null) {
                 DeleteBody body = new DeleteBody();
                 body.setEvents(new ArrayList<>(eventIds));
-                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(System.currentTimeMillis()), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
+                defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
             }
             // Clean-up event manager
             eventManager.cleanUp();
@@ -149,7 +153,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
             try {
                 if (folderToDelete != null) {
-                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE);
+                    defaultUserApi.getFoldersApi().deleteFolders(defaultUserApi.getSession(), new ArrayList<>(folderToDelete), "0", Long.valueOf(System.currentTimeMillis()), "event", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
                 }
             } catch (Exception e) {
                 exception = e;
@@ -164,12 +168,11 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     }
 
     /**
-     * Keeps track of the specified {@link EventId} for the specified user
+     * Keeps track of the specified {@link EventId}
      *
-     * @param userApi The {@link UserApi}
      * @param eventId The {@link EventId}
      */
-    protected void rememberEventId(UserApi userApi, EventId eventId) {
+    protected void rememberEventId(EventId eventId) {
         if (eventIds == null) {
             eventIds = new HashSet<>();
         }
@@ -200,23 +203,23 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      */
     protected String createAndRememberNewFolder(UserApi api, String session, String parent, int entity) throws ApiException {
         FolderPermission perm = new FolderPermission();
-        perm.setEntity(entity);
-        perm.setGroup(false);
-        perm.setBits(403710016);
+        perm.setEntity(I(entity));
+        perm.setGroup(Boolean.FALSE);
+        perm.setBits(I(403710016));
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);
 
         NewFolderBodyFolder folderData = new NewFolderBodyFolder();
         folderData.setModule(EVENT_MODULE);
-        folderData.setSubscribed(true);
+        folderData.setSubscribed(Boolean.TRUE);
         folderData.setTitle("chronos_test_" + new UID().toString());
         folderData.setPermissions(permissions);
 
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE);
+        FolderUpdateResponse createFolder = api.getFoldersApi().createFolder(parent, session, body, "0", CALENDAR_MODULE, null);
         checkResponse(createFolder.getError(), createFolder.getErrorDesc(), createFolder.getData());
 
         String result = createFolder.getData();
@@ -297,7 +300,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             return (String) privateList.get(0).get(0);
         }
         for (ArrayList<?> folder : privateList) {
-            if ((Boolean) folder.get(1)) {
+            if (folder.get(1) != null && ((Boolean) folder.get(1)).booleanValue()) {
                 return (String) folder.get(0);
             }
         }
@@ -331,7 +334,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @throws Exception if the api call fails
      */
     @SuppressWarnings({ "unchecked" })
-    private ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
+    protected ArrayList<ArrayList<?>> getPrivateFolderList(FoldersApi foldersApi, String session, String module, String columns, String tree) throws Exception {
         FoldersVisibilityResponse visibleFolders = foldersApi.getVisibleFolders(session, module, columns, tree, null);
         if (visibleFolders.getError() != null) {
             throw new OXException(new Exception(visibleFolders.getErrorDesc()));
@@ -395,5 +398,41 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         UpdateBody body = new UpdateBody();
         body.setEvent(eventData);
         return body;
+    }
+    
+    protected static List<EventData> getEventsByUid(List<EventData> events, String uid) {
+        List<EventData> matchingEvents = new ArrayList<EventData>();
+        if (null != events) {
+            for (EventData event : events) {
+                if (uid.equals(event.getUid())) {
+                    matchingEvents.add(event);
+                }
+            }
+        }
+        matchingEvents.sort(new Comparator<EventData>() {
+
+            @Override
+            public int compare(EventData event1, EventData event2) {
+                String recurrenceId1 = event1.getRecurrenceId();
+                String recurrenceId2 = event2.getRecurrenceId();
+                if (null == recurrenceId1) {
+                    return null == recurrenceId2 ? 0 : -1;
+                }
+                if (null == recurrenceId2) {
+                    return 1;
+                }
+                return new DefaultRecurrenceId(recurrenceId1).compareTo(new DefaultRecurrenceId(recurrenceId2));
+            }
+        });
+        return matchingEvents;
+    }
+    
+    /**
+     * Returns the id of the calendar user of the default user api
+     *
+     * @return The id of the calendar user
+     */
+    protected int getCalendaruser() {
+        return i(defaultUserApi.getCalUser());
     }
 }

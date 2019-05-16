@@ -76,6 +76,7 @@ public class Bug42018Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -108,6 +109,7 @@ public class Bug42018Test extends AbstractAJAXSession {
         assertEquals("Expect exactly one delete exception", 1, loadedAppointment.getDeleteException().length);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

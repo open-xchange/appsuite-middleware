@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -281,13 +281,14 @@ public abstract class UserStorage {
      * @param userId The user id to change
      * @param mech The password mech to set
      * @param password The (encoded) password to set
+     * @param salt The salt 
      * @throws OXException if an error occurs.
      */
-    public void updatePassword(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
-        updatePasswordInternal(connection, context, userId, mech, password);
+    public void updatePassword(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
+        updatePasswordInternal(connection, context, userId, mech, password, salt);
     }
 
-    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException;
+    protected abstract void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException;
 
     /**
      * This method updates some values of a user, by re-using an existing database connection. In the given user object just set the user

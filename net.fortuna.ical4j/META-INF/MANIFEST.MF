@@ -5,8 +5,7 @@ Bundle-SymbolicName: net.fortuna.ical4j
 Bundle-Version: 1.0.6
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
-Import-Package: edu.emory.mathcs.backport.java.util.concurrent,
- org.apache.commons.codec,
+Import-Package: org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.cli,
  org.apache.commons.codec.digest,

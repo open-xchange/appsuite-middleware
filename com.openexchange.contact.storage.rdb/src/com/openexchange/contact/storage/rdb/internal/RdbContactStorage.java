@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -128,7 +129,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     }
 
     @Override
-    public boolean supports(final Session session, final String folderId) throws OXException {
+    public boolean supports(final Session session, final String folderId) {
         return true;
     }
 
@@ -210,7 +211,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (null != quota) {
                 long limit = quota.getLimit();
                 if (limit == 0 || (0 < limit && 1 + quota.getUsage() > limit)) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(quota.getUsage(), limit);
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(Long.valueOf(quota.getUsage()), Long.valueOf(limit));
                 }
             }
             /*
@@ -279,13 +280,13 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             final FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             final EffectivePermission permission = folder.getEffectiveUserPermission(serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
-                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(parse(folderId), session.getContextId(), serverSession.getUserId());
+                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(parse(folderId)), I(session.getContextId()), I(serverSession.getUserId()));
             }
             /*
              * delete contacts
              */
             if (0 == deleteContacts(serverSession, connection, folderID, new int[] { objectID }, lastRead.getTime())) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, session.getContextId());
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectID), I(session.getContextId()));
             }
             /*
              * commit
@@ -327,7 +328,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             final FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             final EffectivePermission permission = folder.getEffectiveUserPermission(serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
-                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, contextID, serverSession.getUserId());
+                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(folderID), I(contextID), I(serverSession.getUserId()));
             }
             final int[] objectIDs = getObjectIDs(contacts);
             /*
@@ -370,7 +371,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             final FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(folderID, false);
             final EffectivePermission permission = folder.getEffectiveUserPermission(serverSession.getUserId(), serverSession.getUserPermissionBits(), connection);
             if (false == permission.canDeleteOwnObjects()) {
-                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(folderID, session.getContextId(), serverSession.getUserId());
+                throw ContactExceptionCodes.NO_DELETE_PERMISSION.create(I(folderID), I(session.getContextId()), I(serverSession.getUserId()));
             }
             /*
              * delete contacts
@@ -412,22 +413,22 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 final FolderObject sourceFolder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
                 final EffectivePermission sourcePermission = sourceFolder.getEffectiveUserPermission(serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
                 if (false == sourcePermission.canReadOwnObjects()) {
-                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(parse(folderId), contextID, session.getUserId());
+                    throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(parse(folderId)), I(contextID), I(session.getUserId()));
                 }
                 final FolderObject targetFolder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(contact.getParentFolderID(), false);
                 final EffectivePermission targetPermission = targetFolder.getEffectiveUserPermission(serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
                 if (false == targetPermission.canWriteOwnObjects()) {
-                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contact.getObjectID(), contextID);
+                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(contact.getObjectID()), I(contextID));
                 }
             } else if (FolderObject.SYSTEM_LDAP_FOLDER_ID == parse(folderId)) {
                 if (false == OXFolderProperties.isEnableInternalUsersEdit() && session.getUserId() != serverSession.getContext().getMailadmin()) {
-                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), contextID);
+                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(parse(id)), I(contextID));
                 }
             } else {
                 final FolderObject folder = new OXFolderAccess(connection, serverSession.getContext()).getFolderObject(parse(folderId), false);
                 final EffectivePermission permission = folder.getEffectiveUserPermission(serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
                 if (false == permission.canWriteOwnObjects()) {
-                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(parse(id), contextID);
+                    throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(parse(id)), I(contextID));
                 }
             }
             /*
@@ -445,7 +446,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 update.setLastModified(new Date());
                 update.setModifiedBy(userID);
                 if (0 == executor.replaceToDeletedContactsAndUpdate(connection, contextID, Integer.MIN_VALUE, new int[] { objectID }, maxLastModified, update, new ContactField[] { ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED })) {
-                    throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(objectID, contextID);
+                    throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(objectID), I(contextID));
                 }
             }
             /*
@@ -457,7 +458,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              */
             if (0 == executor.update(connection, Table.CONTACTS, contextID, objectID, maxLastModified, contact, Fields.sort(queryFields.getContactDataFields()))) {
                 // TODO: check imagelastmodified also?
-                throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
+                throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(I(contextID), I(objectID));
             }
             /*
              * update distlist data if needed
@@ -829,7 +830,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
-    private <O> SearchIterator<Contact> getContacts(final Session session, final ContactSearchObject contactSearch, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
+    private SearchIterator<Contact> getContacts(final Session session, final ContactSearchObject contactSearch, final ContactField[] fields, final SortOptions sortOptions) throws OXException {
         /*
          * prepare select
          */
@@ -927,7 +928,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         return contacts;
     }
 
-    private List<Contact> mergeAttachmentData(final Connection connection, final int contextID, final List<Contact> contacts) throws SQLException, OXException {
+    private List<Contact> mergeAttachmentData(final Connection connection, final int contextID, final List<Contact> contacts) throws SQLException {
         final int[] objectIDs = getObjectIDsWithAttachments(contacts);
         if (null != objectIDs && 0 < objectIDs.length) {
             final Map<Integer, Date> attachmentData = executor.selectNewestAttachmentDates(connection, contextID, objectIDs);
@@ -1014,7 +1015,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     }
 
     @Override
-    public int createGuestContact(final int contextId, final Contact contact, Connection con) throws OXException {
+    public int createGuestContact(final int contextId, final Contact contact, Connection connection) throws OXException {
+        Connection con = connection;
         boolean newCon = false;
         DatabaseService dbService = null;
         if (null == con) {
@@ -1040,7 +1042,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     }
 
     @Override
-    public void deleteGuestContact(final int contextId, final int userId, final Date lastRead, Connection con) throws OXException {
+    public void deleteGuestContact(final int contextId, final int userId, final Date lastRead, Connection connection) throws OXException {
+        Connection con = connection;
         boolean newCon = false;
         DatabaseService dbService = null;
         if (null == con) {
@@ -1134,7 +1137,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 contact.setImage1(transformedImage);
             }
         } catch (OXException | IOException | NumberFormatException ex) {
-            LOG.error("Unable to resize contact image due to " + ex.getMessage(), ex);
+            LOG.error("Unable to resize contact image due to {}", ex.getMessage(), ex);
         }
     }
 
@@ -1177,7 +1180,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             final QueryFields queryFields = new QueryFields(contactFields, ContactField.CONTEXTID, ContactField.OBJECT_ID);
             contact = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, guestId, queryFields.getContactDataFields());
             if (null == contact) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(guestId, contextId);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(guestId), I(contextId));
             }
             if (queryFields.hasImageData() && 0 < contact.getNumberOfImages()) {
                 final Contact imageData = executor.selectSingle(con, Table.IMAGES, contextId, contact.getObjectID(), queryFields.getImageDataFields());
@@ -1215,17 +1218,17 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         final Connection connection = connectionHelper.getWritable();
         try {
             if (contact.containsParentFolderID() && FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID != contact.getParentFolderID()) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(contactId), I(contextId));
             }
             final Contact c = executor.selectSingle(connection, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED });
             if (c == null) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(contactId), I(contextId));
             }
             if (!c.containsInternalUserId() || userId != c.getInternalUserId()) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(contactId), I(contextId));
             }
             if (!c.containsParentFolderID() || FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID != c.getParentFolderID()) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(contactId), I(contextId));
             }
             if (!c.containsLastModified() || (null != lastRead && lastRead.before(c.getLastModified()))) {
                 throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create();
@@ -1241,7 +1244,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
-    private void updateGuestContact(final int contextId, final int userId, final int contactId, final Contact contact, Connection con) throws OXException {
+    private void updateGuestContact(final int contextId, final int userId, final int contactId, final Contact contact, Connection connection) throws OXException {
+        Connection con = connection;
         boolean newCon = false;
         DatabaseService dbService = null;
         if (null == con) {
@@ -1260,10 +1264,10 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         try {
             Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.CREATED_BY, ContactField.IMAGE_LAST_MODIFIED });
             if (null == toUpdate) {
-                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
+                throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(I(contactId), I(contextId));
             }
             if (toUpdate.getCreatedBy() != userId) {
-                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
+                throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(I(contactId), I(contextId));
             }
             long imageLastModified = Long.MIN_VALUE;
             if (toUpdate.getImageLastModified() != null) {
@@ -1310,7 +1314,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 if (null != executor.selectSingle(connection, Table.IMAGES, contextID, objectID, new ContactField[] { ContactField.OBJECT_ID })) {
                     // update previous image
                     if (0 == executor.update(connection, Table.IMAGES, contextID, objectID, maxLastModified, contact, queryFields.getImageDataFields(true))) {
-                        throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(contextID, objectID);
+                        throw ContactExceptionCodes.OBJECT_HAS_CHANGED.create(I(contextID), Integer.valueOf(objectID));
                     }
                 } else {
                     // create new image

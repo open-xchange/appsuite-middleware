@@ -67,7 +67,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.drive.client.windows.service.UpdaterExceptionCodes;
 import com.openexchange.drive.client.windows.service.internal.BrandingConfig;
 import com.openexchange.drive.client.windows.service.internal.Utils;
-import com.openexchange.drive.client.windows.servlet.BrandingException;
+import com.openexchange.drive.client.windows.servlet.BrandingExceptionCodes;
 import com.openexchange.exception.OXException;
 
 
@@ -137,7 +137,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
             File parent = null == path ? null : new File(path);
             if (null == parent || !parent.exists()) {
-                throw new BrandingException(BrandingException.MISSING_FOLDER);
+                throw BrandingExceptionCodes.MISSING_FOLDER.create();
             }
 
             FileFilter dirFilter = new FileFilter() {
@@ -247,7 +247,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
             }
 
         } catch (PatternSyntaxException e) {
-            LOG.error("Regex '" + regex + "' is invalid!");
+            LOG.error("Regex ''{}'' is invalid!", regex);
             throw UpdaterExceptionCodes.NO_FILES_AVAILABLE.create(e);
         }
         return null;

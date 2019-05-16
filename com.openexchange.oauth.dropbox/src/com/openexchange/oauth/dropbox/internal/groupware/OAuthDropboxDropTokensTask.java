@@ -83,7 +83,7 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
             int parameterIndex = 1;
             statement.setString(parameterIndex++, "");
             statement.setString(parameterIndex++, "");
-            statement.setString(parameterIndex++, KnownApi.DROPBOX.getFullName());
+            statement.setString(parameterIndex++, KnownApi.DROPBOX.getServiceId());
             statement.execute();
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

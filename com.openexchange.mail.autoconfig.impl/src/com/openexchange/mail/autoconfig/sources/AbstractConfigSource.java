@@ -201,4 +201,15 @@ public abstract class AbstractConfigSource implements ConfigSource {
         }
     }
 
+    /**
+     * Checks if secure connection is enforced but not available.
+     *
+     * @param forceSecure
+     * @param autoconfig
+     * @return
+     */
+    protected boolean skipDueToForcedSecure(boolean forceSecure, DefaultAutoconfig autoconfig) {
+        return forceSecure && ((!autoconfig.isMailSecure().booleanValue() && !autoconfig.isMailStartTls()) || (!autoconfig.isTransportSecure().booleanValue() && !autoconfig.isTransportStartTls()));
+    }
+
 }

@@ -51,6 +51,7 @@ package com.openexchange.dav.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.dav.DAVClientInfoProvider;
 import com.openexchange.dav.DAVServlet;
@@ -77,15 +78,15 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class DAVActivator extends HousekeepingActivator {
 
-    private volatile OSGiPropertyMixin mixin;
+    private OSGiPropertyMixin mixin;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class, GroupService.class, ResourceService.class, UserAgentParser.class };
+        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class, GroupService.class, ResourceService.class, UserAgentParser.class, ConfigViewFactory.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         HttpService httpService = getService(HttpService.class);
         /*
          * root
@@ -116,10 +117,11 @@ public class DAVActivator extends HousekeepingActivator {
          */
         registerService(ClientInfoProvider.class, new DAVClientInfoProvider(getService(UserAgentParser.class)), 0);
         openTrackers();
+        Services.setServiceLookup(this);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
             mixin.close();

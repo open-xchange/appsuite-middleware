@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.user;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.copy.internal.IntegerToObjectMapping;
 
@@ -65,6 +66,6 @@ public class UserMapping extends IntegerToObjectMapping<User> {
      */
     @Override
     public User getDestination(final User source) {
-        return getDestinationById(source.getId());
+        return getDestinationById(I(source.getId()));
     }
 }

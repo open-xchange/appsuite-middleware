@@ -21,8 +21,9 @@
       - in: query
         name: admin
         type: boolean
-        description: Defines whether the context admin should be included or not. Defaults to `true`.
+        description: (DEPRECATED) Defines whether the context admin should be included or not. Defaults to `true`.
         required: false
+#        deprecated: true
       - in: query
         name: collation
         type: string

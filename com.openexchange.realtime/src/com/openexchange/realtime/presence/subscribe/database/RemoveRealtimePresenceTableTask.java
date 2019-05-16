@@ -76,24 +76,26 @@ public class RemoveRealtimePresenceTableTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(connection);
-            rollback = true;
+            rollback = 1;
 
             if (Tools.tableExists(connection, "presenceSubscriptions")) {
                 Tools.dropTable(connection, "presenceSubscriptions");
             }
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
     }
 

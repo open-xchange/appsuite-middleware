@@ -52,7 +52,7 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 import java.sql.Connection;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.ResourceCacheMBeanImpl;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.rmi.ResourceCacheRMIServiceImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -82,14 +82,15 @@ public class PreviewCacheDeleteListener implements DeleteListener {
 
     protected void deleteContextEntries(final int contextId, final Connection writeCon) throws OXException {
         // Cleanse by instance
-        final ResourceCache resourceCache = ResourceCacheMBeanImpl.CACHE_REF.get();
-        if (null != resourceCache) {
-            try {
-                resourceCache.clearFor(contextId);
-            } catch (final Exception e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
-                logger.warn("Failed to clean resource cache for deleted context {}", Integer.valueOf(contextId), e);
-            }
+        final ResourceCache resourceCache = ResourceCacheRMIServiceImpl.CACHE_REF.get();
+        if (null == resourceCache) {
+            return;
+        }
+        try {
+            resourceCache.clearFor(contextId);
+        } catch (final Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
+            logger.warn("Failed to clean resource cache for deleted context {}", Integer.valueOf(contextId), e);
         }
     }
 
@@ -98,14 +99,15 @@ public class PreviewCacheDeleteListener implements DeleteListener {
         final int userId = event.getId();
 
         // Cleanse by instance
-        final ResourceCache resourceCache = ResourceCacheMBeanImpl.CACHE_REF.get();
-        if (null != resourceCache) {
-            try {
-                resourceCache.remove(userId, contextId);
-            } catch (final Exception e) {
-                final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
-                logger.warn("Failed to clean resource cache for deleted user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);
-            }
+        final ResourceCache resourceCache = ResourceCacheRMIServiceImpl.CACHE_REF.get();
+        if (null == resourceCache) {
+            return;
+        }
+        try {
+            resourceCache.remove(userId, contextId);
+        } catch (final Exception e) {
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
+            logger.warn("Failed to clean resource cache for deleted user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);
         }
     }
 

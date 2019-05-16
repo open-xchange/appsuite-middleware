@@ -49,6 +49,7 @@
 
 package com.openexchange.pgp.core;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -111,8 +112,8 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
     @Parameters(name = "{index} - Ascii-armored: {0}")
     public static Iterable parameters() {
         return Arrays.asList(new Object[][] {
-            { true /* Runs the tests in ASCII-Armored mode */},
-            { false /* Runs the tests in Binary-Mode */}
+            { Boolean.TRUE /* Runs the tests in ASCII-Armored mode */},
+            { Boolean.FALSE /* Runs the tests in Binary-Mode */}
         });
     }
 
@@ -172,7 +173,7 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         //-------------------------------------------------------------------------------------------------------------
         // Decrypting the symmetric encryption key from the obtained session data
 
-        PGPSessionDecrypter pgpSessionDecrypter = new PGPSessionDecrypter();
+        PGPSessionKeyExtractor pgpSessionDecrypter = new PGPSessionKeyExtractor();
         PGPPrivateKey privateKey = decodePrivateKey(testIdentity.getSecretKey(), TEST_IDENTITY_PASSWORD);
         byte[] symmetricKey = pgpSessionDecrypter.decryptSymmetricSessionKey(encryptedPgpSession, privateKey);
         assertTrue("The session key should have at least some data", symmetricKey.length > 0);
@@ -180,11 +181,11 @@ public class ExtractSessionPaketTest extends AbstractPGPTest {
         //-------------------------------------------------------------------------------------------------------------
 
         //Now trying to decrypt the PGP Data just with the knowledge of the session key
-        PGPSymmetricDecrypter symmetricDecrypter = new PGPSymmetricDecrypter(symmetricKey);
+        PGPSessionKeyDecrypter symmetricDecrypter = new PGPSessionKeyDecrypter(symmetricKey);
         ByteArrayOutputStream decryptedData = new ByteArrayOutputStream();
         PGPDecryptionResult result = symmetricDecrypter.decrypt(new ByteArrayInputStream(encryptedTestData), decryptedData);
         List<PGPSignatureVerificationResult> verifyResults = result.getSignatureVerificationResults();
-        assertNotNull("Verification results should be empty for non signed data", verifyResults.isEmpty());
+        assertNotNull("Verification results should be empty for non signed data", B(verifyResults.isEmpty()));
         assertArrayEquals("Decrypted data should be equals to plaintext data", decryptedData.toByteArray(), testData);
 
         //-------------------------------------------------------------------------------------------------------------

@@ -53,6 +53,16 @@ OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
 OXBUNDLES=$OXPREFIX/bundles
 
+usage() {
+    echo -e "Usage: checkconfigurationconsistency\n"
+    echo -e "  -h, --help   Shows this help screen\n"
+    echo -e "Checks the middleware's configuration for some well known configuration mistakes.\n"
+}
+
+if [[ $1 == "-h" || $1 == "--help" ]]; then
+    usage
+    exit 0
+fi
 
 test -f $OXFUNCTIONS || {
 	echo "missing common shell functions file"

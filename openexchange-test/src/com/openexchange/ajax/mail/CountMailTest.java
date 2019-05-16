@@ -67,6 +67,7 @@ public class CountMailTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

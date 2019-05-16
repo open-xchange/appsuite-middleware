@@ -55,9 +55,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.version.Version;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link VersionAction} - Outputs the version string.
@@ -78,7 +79,7 @@ public class VersionAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
-            String versionString = Version.getInstance().getVersionString();
+            String versionString = ServerServiceRegistry.getInstance().getService(VersionService.class, true).getVersionString();
             return new AJAXRequestResult(new JSONObject(1).put("version", versionString), "json");
         } catch (Exception e) {
             // Cannot occur

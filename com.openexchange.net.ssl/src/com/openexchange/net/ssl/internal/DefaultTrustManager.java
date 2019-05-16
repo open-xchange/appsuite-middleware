@@ -101,7 +101,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         {
             if (null == sslConfigService) {
-                LOG.warn("Absent service " + SSLConfigurationService.class.getName() + ". Assuming default JVM truststore is supposed to be used.");
+                LOG.warn("Absent service {}. Assuming default JVM truststore is supposed to be used.", SSLConfigurationService.class.getName());
                 useDefaultTruststore = true;
             } else {
                 useDefaultTruststore = sslConfigService.isDefaultTruststoreEnabled();

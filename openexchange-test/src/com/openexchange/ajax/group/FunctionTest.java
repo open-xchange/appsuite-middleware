@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.group;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -212,7 +213,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         CreateResponse createResponse = getClient().execute(new CreateRequest(group, true));
         int id = createResponse.getId();
         group.setIdentifier(id);
-        groupsToDelete.add(id);
+        groupsToDelete.add(I(id));
         group.setLastModified(createResponse.getTimestamp());
         Date lm = new Date(group.getLastModified().getTime() - 1);
 
@@ -226,7 +227,7 @@ public final class FunctionTest extends AbstractAJAXSession {
 
         DeleteResponse deleteResponse = getClient().execute(new DeleteRequest(group, true));
         if (deleteResponse.hasError()) {
-            groupsToDelete.remove(id);
+            groupsToDelete.remove(I(id));
         }
 
         UpdatesResponse updatesResponseAfterDeletion = getClient().execute(new UpdatesRequest(lm, true));

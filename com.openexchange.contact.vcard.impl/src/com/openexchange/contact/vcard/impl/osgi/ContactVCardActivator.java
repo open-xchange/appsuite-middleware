@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard.impl.osgi;
 
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
@@ -59,6 +60,7 @@ import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link ContactVCardActivator}
@@ -73,9 +75,15 @@ public class ContactVCardActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { VersionService.class };
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         VCardServiceLookup.set(this);
         final VCardParametersFactoryImpl vCardParametersFactory = new VCardParametersFactoryImpl();
+        final BundleContext context = this.context;
         track(ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
 
             @Override

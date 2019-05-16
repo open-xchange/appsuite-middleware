@@ -66,9 +66,13 @@ public class ModifyingPGPPublicKeyRing {
 
     List<PGPPublicKey> keys;
 
+    public ModifyingPGPPublicKeyRing () {
+        keys = new ArrayList<PGPPublicKey>();
+    }
+
     public ModifyingPGPPublicKeyRing(PGPPublicKeyRing ring) {
         Iterator<PGPPublicKey> it = ring.getPublicKeys();
-        keys = new ArrayList();
+        keys = new ArrayList<PGPPublicKey>();
         while (it.hasNext()) {
             keys.add((PGPPublicKey) it.next());
         }

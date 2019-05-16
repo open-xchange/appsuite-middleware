@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
@@ -119,10 +120,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             dataProperties.put("PreviewLanguage", previewLanguage);
 
             // Generate preview
-            PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
-            LOG.debug("Obtained preview for file {} with MIME type {} from {} for user {} in context {}", fileHolder.getName(), mimeType, previewService.getClass().getSimpleName(), session.getUserId(), session.getContextId());
-
-            return previewDocument;
+            return previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), previewOutput, session, 1);
         } catch (RuntimeException rte) {
             throw PreviewExceptionCodes.ERROR.create(rte, rte.getMessage());
         }
@@ -222,7 +220,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
                     // Apply result
                     result.setResultObject(responseFileHolder, "file");
-                    LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), contentType, eTag, session.getUserId(), session.getContextId());
+                    LOG.debug("Returned preview for file {} with MIME type {} from cache using ETag {} for user {} in context {}", cachedPreview.getFileName(), contentType, eTag, I(session.getUserId()), I(session.getContextId()));
                     return;
                 }
             }
@@ -274,14 +272,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                             mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
                             stream = fileHolder.getStream();
                             error = false;
-                            LOG.debug("Determined MIME type for file {} by content: {}", fileHolder.getName(), mimeType);
                         } finally {
                             if (error) {
                                 Streams.close(tfh);
                             }
                         }
-                    } else {
-                        LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                     }
                     ModifyableFileHolder mfh = new ModifyableFileHolder(fileHolder);
                     mfh.setContentType(mimeType);

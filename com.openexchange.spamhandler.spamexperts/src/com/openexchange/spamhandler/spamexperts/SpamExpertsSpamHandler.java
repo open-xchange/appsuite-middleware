@@ -49,6 +49,8 @@
 
 package com.openexchange.spamhandler.spamexperts;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.util.Properties;
 import javax.mail.MessagingException;
@@ -163,7 +165,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     @Override
     public void handleHam(int accountId, String spamFullName, String[] mailIDs, boolean move, Session session) throws OXException {
         LOG.debug("handleHam");
-        LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", accountId, spamFullName, move, session.toString());
+        LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", I(accountId), spamFullName, B(move), session.toString());
 
         // get access to internal mailstore
         MailService mailService = services.getOptionalService(MailService.class);
@@ -197,7 +199,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     @Override
     public void handleSpam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
         LOG.debug("handleSpam");
-        LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullName, move, session.toString());
+        LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", I(accountId), fullName, B(move), session.toString());
 
         // get access to internal mailstore
         MailService mailService = services.getOptionalService(MailService.class);

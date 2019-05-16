@@ -93,32 +93,35 @@ public final class ManagementInit implements Initialization {
             return;
         }
         final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-        final ConfigurationService c = getServiceRegistry().getService(ConfigurationService.class);
-        if (c == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ConfigurationService.class.getName());
+        final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
+        if (configurationService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
         /*
          * Configure
          */
         {
-            String bindAddress = c.getProperty("JMXBindAddress", "localhost");
+            String bindAddress = configurationService.getProperty("JMXBindAddress", "localhost");
             if (bindAddress == null) {
                 bindAddress = "localhost";
             }
-            final int jmxPort = c.getIntProperty("JMXPort", 9999);
+            final int jmxPort = configurationService.getIntProperty("JMXPort", 9999);
             agent.setJmxPort(jmxPort);
-            final int jmxServerPort = c.getIntProperty("JMXServerPort", -1);
+            final int jmxServerPort = configurationService.getIntProperty("JMXServerPort", -1);
             agent.setJmxServerPort(jmxServerPort);
-            agent.setJmxSinglePort(c.getBoolProperty("JMXSinglePort", false));
+            agent.setJmxSinglePort(configurationService.getBoolProperty("JMXSinglePort", false));
             agent.setJmxBindAddr(bindAddress);
-            String jmxLogin = c.getProperty("JMXLogin");
+            String jmxLogin = configurationService.getProperty("JMXLogin");
             if (jmxLogin != null && (jmxLogin = jmxLogin.trim()).length() > 0) {
-                String jmxPassword = c.getProperty("JMXPassword");
+                String jmxPassword = configurationService.getProperty("JMXPassword");
                 if (jmxPassword == null || (jmxPassword = jmxPassword.trim()).length() == 0) {
                     throw new IllegalArgumentException("JMX password not set");
                 }
                 agent.setJmxLogin(jmxLogin);
                 agent.setJmxPassword(jmxPassword);
+                String lHashAlgorithm = configurationService.getProperty("JMXPasswordHashAlgorithm", "SHA");
+                String hashAlgorithmSafe = Strings.isNotEmpty(lHashAlgorithm) ? lHashAlgorithm : "SHA"; // keep SHA as default for JMX
+                agent.setJmxPasswordHashAlgorithm(hashAlgorithmSafe);
             }
         }
         /*

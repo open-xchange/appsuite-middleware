@@ -85,7 +85,7 @@ public class AssociationWriter extends AbstractOAuthWriter {
             jAssociation.put(AccountField.ID.getName(), association.getId());
             jAssociation.put(AccountField.DISPLAY_NAME.getName(), association.getDisplayName());
             jAssociation.put(AccountField.SERVICE_ID.getName(), association.getServiceId());
-            jAssociation.put("type", association.getType().getId());
+            jAssociation.put("module", association.getModule());
             jAssociation.put("oauthAccontId", association.getOAuthAccountId());
             Status status = association.getStatus(session);
             jAssociation.put("status", status.getId());

@@ -74,7 +74,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     MailtoEncodingTest.class,
     GeoTest.class,
     AvailabilityTest.class, 
-    MoveTest.class
+    MoveTest.class,
+    SyncTokenTest.class
 }) // @formatter:on
 public final class CalDAVTestSuite {
 

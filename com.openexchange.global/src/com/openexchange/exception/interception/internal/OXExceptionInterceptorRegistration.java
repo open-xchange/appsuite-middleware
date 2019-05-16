@@ -49,6 +49,7 @@
 
 package com.openexchange.exception.interception.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -137,7 +138,7 @@ public class OXExceptionInterceptorRegistration {
         }
 
         if (isResponsibleInterceptorRegistered(interceptor)) {
-            LOG.error("Interceptor for the given ranking " + interceptor.getRanking() + " and desired module/action combination already registered! Discard the new one from type: " + interceptor.getClass());
+            LOG.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", I(interceptor.getRanking()), interceptor.getClass());
             return false;
         }
         this.interceptors.add(interceptor);

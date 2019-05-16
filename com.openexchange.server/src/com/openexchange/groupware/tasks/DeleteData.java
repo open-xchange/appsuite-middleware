@@ -148,23 +148,25 @@ public final class DeleteData {
 
     public void doDeleteHard(Session session, int folderId, StorageType type) throws OXException {
         Connection con = DBPool.pickupWriteable(ctx);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
             // Try to block simultaneous deleting of tasks by generating a new identifier.
             IDGenerator.getId(ctx, Types.TASK, con);
             TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
             deleteReminder(con);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw TaskExceptionCode.DELETE_FAILED.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
             DBPool.closeWriterSilent(ctx, con);
         }
     }

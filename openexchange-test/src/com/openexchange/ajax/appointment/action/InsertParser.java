@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractInsertParser;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
  *
@@ -88,7 +89,7 @@ public class InsertParser extends AbstractInsertParser<AppointmentInsertResponse
             } else if (data.has("conflicts")) {
                 parseConflicts(data, retval);
             } else if (isFailOnError()) {
-                fail("Missing created object identifier: " + response.getJSON());
+                fail("Missing created object identifier: " + ResponseWriter.getJSON(response));
             }
         }
         return retval;

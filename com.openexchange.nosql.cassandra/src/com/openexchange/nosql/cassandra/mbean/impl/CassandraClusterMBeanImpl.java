@@ -81,7 +81,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /**
      * Initialises a new {@link CassandraClusterMBeanImpl}.
-     * 
+     *
      * @param services
      * @param description
      * @param mbeanInterface
@@ -93,7 +93,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.beans.AbstractCassandraMBean#refresh()
      */
     @Override
@@ -108,10 +108,10 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
             LOGGER.error("Could not refresh the statistics for the Cassandra cluster .", e);
         }
     }
-    
+
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getHosts()
      */
     @Override
@@ -125,7 +125,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#geTokenRanges()
      */
     @Override
@@ -149,7 +149,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getClusterName()
      */
     @Override
@@ -159,77 +159,77 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getOpenConnections()
      */
     @Override
     public int getOpenConnections() {
-        return metrics.getOpenConnections().getValue();
+        return metrics.getOpenConnections().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getTrashedConnections()
      */
     @Override
     public int getTrashedConnections() {
-        return metrics.getTrashedConnections().getValue();
+        return metrics.getTrashedConnections().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getQueuedTasks()
      */
     @Override
     public int getQueuedTasks() {
-        return metrics.getExecutorQueueDepth().getValue();
+        return metrics.getExecutorQueueDepth().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getBlockingExecutorQueueTasks()
      */
     @Override
     public int getBlockingExecutorQueueTasks() {
-        return metrics.getBlockingExecutorQueueDepth().getValue();
+        return metrics.getBlockingExecutorQueueDepth().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getSchedulerQueueSize()
      */
     @Override
     public int getSchedulerQueueSize() {
-        return metrics.getTaskSchedulerQueueSize().getValue();
+        return metrics.getTaskSchedulerQueueSize().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getReconnectionSchedulerQueueSize()
      */
     @Override
     public int getReconnectionSchedulerQueueSize() {
-        return metrics.getReconnectionSchedulerQueueSize().getValue();
+        return metrics.getReconnectionSchedulerQueueSize().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getConnectedNodes()
      */
     @Override
     public int getConnectedNodes() {
-        return metrics.getConnectedToHosts().getValue();
+        return metrics.getConnectedToHosts().getValue().intValue();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getAuthenticationErrors()
      */
     @Override
@@ -239,7 +239,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getClientTimeouts()
      */
     @Override
@@ -249,7 +249,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getConnectionErrors()
      */
     @Override
@@ -259,7 +259,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnores()
      */
     @Override
@@ -269,7 +269,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnClientTimeout()
      */
     @Override
@@ -279,7 +279,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnConnectionError()
      */
     @Override
@@ -289,7 +289,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnOtherErrors()
      */
     @Override
@@ -299,7 +299,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnReadTimeout()
      */
     @Override
@@ -309,7 +309,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnUnavailable()
      */
     @Override
@@ -319,7 +319,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getIgnoresOnWriteTimeout()
      */
     @Override
@@ -329,7 +329,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getOthers()
      */
     @Override
@@ -339,7 +339,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getReadTimeouts()
      */
     @Override
@@ -349,7 +349,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetries()
      */
     @Override
@@ -359,7 +359,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnClientTimeout()
      */
     @Override
@@ -369,7 +369,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnConnectionTimeout()
      */
     @Override
@@ -379,7 +379,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnOtherErrors()
      */
     @Override
@@ -389,7 +389,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnReadTimeout()
      */
     @Override
@@ -399,7 +399,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnUnaavailable()
      */
     @Override
@@ -409,7 +409,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getRetriesOnWriteTimeout()
      */
     @Override
@@ -419,7 +419,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getSpeculativeExecutions()
      */
     @Override
@@ -429,7 +429,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getUnavailables()
      */
     @Override
@@ -439,7 +439,7 @@ public class CassandraClusterMBeanImpl extends AnnotatedDynamicStandardMBean imp
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.nosql.cassandra.CassandraClusterMBean#getWriteTimeouts()
      */
     @Override

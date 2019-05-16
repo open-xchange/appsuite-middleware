@@ -167,7 +167,7 @@ public class ExternalUserParticipant extends AbstractConfirmableParticipant impl
                 }
             }
         } else {
-            retval = Integer.valueOf(EXTERNAL_USER).compareTo(Integer.valueOf(part.getType()));
+            retval = Integer.compare(EXTERNAL_USER, part.getType());
         }
         return retval;
     }

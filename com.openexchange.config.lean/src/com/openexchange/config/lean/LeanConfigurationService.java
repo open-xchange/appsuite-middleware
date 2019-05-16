@@ -181,7 +181,7 @@ public interface LeanConfigurationService {
      * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
      *                  optional parameters in the full qualified name of the property with the value stored for
      *                  each path parameter.
-     * 
+     *
      * @return The integer value of the property
      */
     int getIntProperty(Property property, Map<String, String> optionals);
@@ -291,4 +291,5 @@ public interface LeanConfigurationService {
      * @return The {@link Long} value of the property
      */
     long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
+
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.boxcom;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -830,7 +831,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         @Override
         public void onProgressChanged(long numBytes, long totalBytes) {
             if (totalBytes > 0) {
-                LOGGER.debug("Uploaded {} of {} bytes in total", numBytes, totalBytes);
+                LOGGER.debug("Uploaded {} of {} bytes in total", L(numBytes), L(totalBytes));
             }
         }
     }

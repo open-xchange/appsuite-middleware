@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jsoup;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Map;
@@ -149,8 +150,9 @@ public class JsoupParser {
         // Check size
         int maxLength = checkSize ? HtmlServices.htmlThreshold() : 0;
         if (maxLength > 0 && html.length() > maxLength) {
-            LOG.info("HTML content is too big: max. '{}', but is '{}'.", maxLength, html.length());
-            throw HtmlExceptionCodes.TOO_BIG.create(maxLength, html.length());
+            Integer iMaxLength = I(maxLength); Integer iLength = I(html.length());
+            LOG.info("HTML content is too big: max. '{}', but is '{}'.", iMaxLength, iLength);
+            throw HtmlExceptionCodes.TOO_BIG.create(iMaxLength, iLength);
         }
 
         int timeout = htmlParseTimeoutSec;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mail.filter.api.dao.action;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.ajax.mail.filter.api.dao.ActionCommand;
 import com.openexchange.ajax.mail.filter.api.dao.action.argument.VacationActionArgument;
@@ -70,37 +71,22 @@ public class Vacation extends AbstractAction implements Action<VacationActionArg
 
     public Vacation(int days, List<String> addresses, String subject, String text) {
         this();
-        addArgument(VacationActionArgument.days, days);
+        addArgument(VacationActionArgument.days, I(days));
         addArgument(VacationActionArgument.addresses, addresses);
         addArgument(VacationActionArgument.subject, subject);
         addArgument(VacationActionArgument.text, text);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getActionCommand()
-     */
     @Override
     public ActionCommand getActionCommand() {
         return ActionCommand.vacation;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#setArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument, java.lang.Object)
-     */
     @Override
     public void setArgument(VacationActionArgument argument, Object value) {
         addArgument(argument, value);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.dao.action.Action#getArgument(com.openexchange.ajax.mail.filter.api.dao.action.argument.ActionArgument)
-     */
     @Override
     public Object getArgument(VacationActionArgument argument) {
         return getArguments().get(argument);

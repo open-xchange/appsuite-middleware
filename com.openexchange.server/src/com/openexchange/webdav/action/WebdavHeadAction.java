@@ -49,6 +49,8 @@
 
 package com.openexchange.webdav.action;
 
+import java.util.Date;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -71,6 +73,10 @@ public class WebdavHeadAction extends AbstractAction {
 		res.setHeader("ETag", resource.getETag());
 		res.setHeader("Accept-Ranges", "bytes");
 
+        Date lastModified = resource.getLastModified();
+        if (null != lastModified) {
+            res.setHeader("Last-Modified", Tools.formatHeaderDate(lastModified));
+        }
 	}
 
 }

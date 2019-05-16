@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.json.action;
 
-import java.io.IOException;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -57,8 +56,8 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetAttachment}
@@ -69,7 +68,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class GetAttachment extends ChronosAction {
 
     /**
-     * Initialises a new {@link GetAttachment}.
+     * Initializes a new {@link GetAttachment}.
      *
      * @param services
      */
@@ -77,26 +76,28 @@ public class GetAttachment extends ChronosAction {
         super(services);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.json.action.ChronosAction#perform(com.openexchange.chronos.provider.composition.IDBasedCalendarAccess, com.openexchange.ajax.requesthandler.AJAXRequestData)
-     */
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         // Gather the parameters
         EventID eventId = parseIdParameter(requestData);
-        String managedId = requestData.getParameter("managedId");
-        int mid = Integer.parseInt(managedId);
+        int managedId = parseAttachmentId(requestData);
 
         // Get the attachment and prepare the response
-        try (IFileHolder fileHolder = calendarAccess.getAttachment(eventId, mid)) {
+        IFileHolder fileHolder = null;
+        try {
+            fileHolder = calendarAccess.getAttachment(eventId, managedId);
+            boolean scanned = scan(requestData, fileHolder, getUniqueId(requestData, eventId, Integer.toString(managedId)));
+            if (scanned && false == fileHolder.repetitive()) {
+                fileHolder = calendarAccess.getAttachment(eventId, managedId);
+            }
             // Compose & return result
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             result.setHeader("ETag", calendarAccess.getSession().getContextId() + "-" + managedId);
+            fileHolder = null; // Avoid premature closing
             return result;
-        } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(fileHolder);
         }
     }
+
 }

@@ -61,14 +61,8 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class StartMockServerResponse extends AbstractAJAXResponse {
 
-    private boolean failOnError = true;
-
     public StartMockServerResponse(Response response) {
         super(response);
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
     }
 
 }

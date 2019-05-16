@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.internal.throttle;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -185,7 +186,7 @@ public class DriveTokenBucket implements TokenBucket {
             int permits = Math.min(maxPermists, overallBytesPerSecond - overallBucket.availablePermits());
             if (0 < permits) {
                 overallBucket.release(permits);
-                LOG.trace("Released {} permits for 'overall' bucket.", permits);
+                LOG.trace("Released {} permits for 'overall' bucket.", I(permits));
             }
         }
         /*
@@ -200,7 +201,7 @@ public class DriveTokenBucket implements TokenBucket {
                 int permits = Math.min(maxPermits, clientBytesPerSecond - bucket.availablePermits());
                 if (0 < permits) {
                     bucket.release(permits);
-                    LOG.trace("Released {} permits for bucket semaphore of session {}", permits, entry.getKey());
+                    LOG.trace("Released {} permits for bucket semaphore of session {}", I(permits), entry.getKey());
                 } else {
                     iterator.remove();
                     LOG.trace("Removed bucket semaphore for session {}", entry.getKey());

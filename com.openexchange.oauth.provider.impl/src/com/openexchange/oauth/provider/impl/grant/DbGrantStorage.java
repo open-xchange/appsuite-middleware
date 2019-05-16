@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.grant;
 
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -103,13 +104,13 @@ public class DbGrantStorage implements OAuthGrantStorage {
 
             List<Long> lms = new ArrayList<>(MAX_GRANTS_PER_CLIENT);
             while (rs.next()) {
-                lms.add(rs.getLong(1));
+                lms.add(L(rs.getLong(1)));
             }
 
             Databases.closeSQLStuff(rs, stmt);
             if (lms.size() >= MAX_GRANTS_PER_CLIENT) {
                 int index = ((lms.size() - (MAX_GRANTS_PER_CLIENT - 1)) - 1); // Get the most recent last_modified that needs to be deleted (LRU)
-                long minLastModified = lms.get(index);
+                long minLastModified = lms.get(index).longValue();
                 stmt = con.prepareStatement("DELETE FROM oauth_grant WHERE client = ? AND cid = ? AND user = ? AND last_modified <= ?");
                 stmt.setString(1, grant.getClientId());
                 stmt.setInt(2, grant.getContextId());

@@ -16,7 +16,7 @@
       - in: query
         name: type
         type: string
-        description: The type of the files to upload (e. g. 'infostore, 'pim')
+        description: The type of the files to upload (e. g. 'filestorage, 'pim')
         required: true
       - in: body
         name: body

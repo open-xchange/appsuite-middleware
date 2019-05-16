@@ -70,7 +70,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class HTTPDeferrerActivator extends HousekeepingActivator {
 
-    private volatile String alias;
+    private String alias;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -78,7 +78,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(HTTPDeferrerActivator.class);
         logger.info("Starting bundle com.openexchange.http.deferrer");
 
@@ -129,7 +129,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         HttpService service = getService(HttpService.class);
         if (null != service) {
             String alias = this.alias;

@@ -49,78 +49,41 @@
 
 package com.openexchange.oauth.boxcom.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.boxcom.BoxComOAuthScope;
 import com.openexchange.oauth.boxcom.BoxComOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
  * {@link BoxComOAuthActivator} - The activator for box.com OAuth service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxComOAuthActivator extends HousekeepingActivator {
+public final class BoxComOAuthActivator extends AbstractOAuthActivator {
 
     public BoxComOAuthActivator() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class };
+    protected OAuthServiceMetaData getOAuthServiceMetaData() {
+        return new BoxComOAuthServiceMetaData(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.osgi.AbstractOAuthActivator#getScopes()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(BoxComOAuthActivator.class);
-        try {
-            final BoxComOAuthServiceMetaData boxcomService = new BoxComOAuthServiceMetaData(this);
-            registerService(OAuthServiceMetaData.class, boxcomService);
-            registerService(Reloadable.class, boxcomService);
-
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "boxcom");
-            registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if ("boxcom".equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous() || session.getUser().isGuest()) {
-                            return false;
-                        }
-
-                        return boxcomService.isEnabled(session.getUserId(), session.getContextId());
-                    }
-
-                    return true;
-                }
-            }, properties);
-
-            getService(CapabilityService.class).declareCapability("boxcom");
-
-            // Register the scope
-            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-            scopeRegistry.registerScope(boxcomService.getAPI(), BoxComOAuthScope.drive);
-
-            log.info("Successfully initialized box.com OAuth service");
-        } catch (final Exception e) {
-            log.warn("Could not start-up box.com OAuth service", e);
-            throw e;
-        }
+    protected OAuthScope[] getScopes() {
+        return BoxComOAuthScope.values();
     }
 
 }

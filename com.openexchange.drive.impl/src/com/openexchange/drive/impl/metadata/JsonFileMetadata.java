@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.metadata;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -84,7 +85,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
 
     /** Simple class to delay initialization until needed */
     private static class LoggerHolder {
-        private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JsonFileMetadata.class);
+        static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JsonFileMetadata.class);
     }
 
     private final File file;
@@ -258,7 +259,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                         jumpActions.add("edit");
                     }
                 }
-            } else if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$") ||
+            } else if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff|heic|heif))$") ||
                 mimeType.matches("(?i)^audio\\/(mpeg|m4a|m4b|mp3|ogg|oga|opus|x-m4a)$")) {
                 jumpActions.add("preview");
             }
@@ -295,7 +296,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         } else {
             User user = session.getPermissionResolver().getUser(permission.getEntity());
             if (null == user) {
-                LoggerHolder.LOGGER.debug("Can't resolve user entity {} for file {}", permission.getEntity(), file);
+                LoggerHolder.LOGGER.debug("Can't resolve user entity {} for file {}", I(permission.getEntity()), file);
             } else if (user.isGuest()) {
                 GuestInfo guest = session.getPermissionResolver().getGuest(user.getId());
                 if (guest == null) {

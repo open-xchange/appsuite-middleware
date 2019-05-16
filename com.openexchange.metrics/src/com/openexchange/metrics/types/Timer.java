@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,7 +52,6 @@ package com.openexchange.metrics.types;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link Timer}
@@ -82,7 +81,7 @@ public interface Timer extends Metric {
 
     /**
      * Times and records the duration of event. This method is useful where the event may throw
-     * a certain catched exception, that is to be re-thrown immediately. Consider the following
+     * a certain caught exception, that is to be re-thrown immediately. Consider the following
      * code pattern:
      *
      * <pre>

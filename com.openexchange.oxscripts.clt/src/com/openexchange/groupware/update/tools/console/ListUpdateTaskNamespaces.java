@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -85,7 +85,7 @@ public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void>
      * Initialises a new {@link ListUpdateTaskNamespaces}.
      */
     private ListUpdateTaskNamespaces() {
-        super("listUpdateTaskNamespaces", FOOTER);
+        super("listUpdateTaskNamespaces -n " + BASIC_MASTER_ADMIN_USAGE, FOOTER);
     }
 
     /*
@@ -95,7 +95,7 @@ public final class ListUpdateTaskNamespaces extends AbstractUpdateTasksCLT<Void>
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("n", "namespaces-only", false, "Prints only the available namespaces without their update tasks");
+        options.addOption(createSwitch("n", "namespaces-only", "Prints only the available namespaces without their update tasks", false));
     }
 
     /*

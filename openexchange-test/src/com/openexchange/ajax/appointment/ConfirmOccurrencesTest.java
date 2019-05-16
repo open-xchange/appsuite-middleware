@@ -91,8 +91,6 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
 
     private int occurrence = 5;
 
-    private static int NOT_EXISTENT = -9999;
-
     private static final int[] COLS = new int[] {
         Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.TITLE,
         Appointment.CONFIRMATIONS, Appointment.USERS, Appointment.PARTICIPANTS, Appointment.RECURRENCE_POSITION };
@@ -152,7 +150,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.TENTATIVE, "tentative");
 
         Appointment loadedAppointment = catm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
 
         Appointment[] apps = catm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
@@ -185,7 +183,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm2.confirm(folderId2, exception.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline");
 
         Appointment loadedAppointment = catm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
 
         Appointment[] apps = catm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
@@ -211,7 +209,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
 
         Appointment loadedAppointment = catm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2, 0);
+        checkConfirmations(loadedAppointment, Appointment.TENTATIVE, "tentative", 2);
 
         Appointment[] apps = catm.all(client1.getValues().getPrivateAppointmentFolder(), D("01.02." + nextYear + " 08:00"), D("11.02." + nextYear + " 09:00"), COLS, false);
         for (Appointment app : apps) {
@@ -258,7 +256,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         }
 
         loadedAppointment = catm.get(exception);
-        checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline", 2, 0);
+        checkConfirmations(loadedAppointment, Appointment.DECLINE, "decline", 2);
 
         catm.confirm(folderId1, appointment.getObjectID(), catm.getLastModification(), Appointment.ACCEPT, "accept", this.occurrence);
         catm.confirmExternal(folderId1, appointment.getObjectID(), catm.getLastModification(), "external1@example.com", Appointment.ACCEPT, "accept", this.occurrence);
@@ -276,7 +274,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         }
 
         loadedAppointment = catm.get(exception);
-        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2, 0);
+        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2);
     }
 
     @Test
@@ -292,7 +290,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         ctm2.confirm(folderId2, appointment.getObjectID(), catm.getLastModification(), Appointment.DECLINE, "decline", this.occurrence);
 
         Appointment loadedAppointment = catm.get(appointment);
-        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2, 0);
+        checkConfirmations(loadedAppointment, Appointment.ACCEPT, "accept", 2);
 
         Appointment conflict = new Appointment();
         conflict.setTitle("Test for occurrence based confirmations. - CONFLICT");
@@ -315,13 +313,7 @@ public class ConfirmOccurrencesTest extends AbstractAJAXSession {
         assertFalse("Found conflict", foundBadConflict);
     }
 
-    // TODO tests for
-
     private void checkConfirmations(Appointment appointment, int status, String message, int participantAmount) {
-        this.checkConfirmations(appointment, status, message, participantAmount, NOT_EXISTENT);
-    }
-
-    private void checkConfirmations(Appointment appointment, int status, String message, int participantAmount, int expectedOccurrence) {
         assertEquals("Wrong amount of participants.", participantAmount, appointment.getConfirmations().length);
         assertEquals("Wrong amount of participants.", participantAmount, appointment.getUsers().length);
         for (ConfirmableParticipant p : appointment.getConfirmations()) {

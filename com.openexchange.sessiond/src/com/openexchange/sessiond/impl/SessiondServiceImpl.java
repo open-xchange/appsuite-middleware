@@ -99,7 +99,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getClient(),
             param.getClientToken(),
             param.isTransient(),
-            param.getEnhancement(),
+            param.getOrigin(),
+            param.getEnhancements(),
+
             param.getUserAgent());
     }
 
@@ -157,6 +159,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     @Override
     public void removeUserSessionsGlobally(int userId, int contextId) throws OXException {
         SessionHandler.removeUserSessionsGlobal(userId, contextId);
+    }
+
+    @Override
+    public Collection<String> removeSessions(SessionFilter filter) throws OXException {
+        return SessionHandler.removeLocalSessions(filter);
     }
 
     @Override
@@ -304,5 +311,4 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     public boolean isApplicableForSessionStorage(Session session) {
         return SessionHandler.useSessionStorage(session);
     }
-
 }

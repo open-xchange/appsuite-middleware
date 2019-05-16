@@ -94,6 +94,10 @@ public enum AccountField {
      * The available scopes of the provider
      */
     AVAILABLE_SCOPES("availableScopes"),
+    /**
+     * The associated accounts of the different modules
+     */
+    ASSOCIATIONS("associations")
     ;
 
     private final String name;

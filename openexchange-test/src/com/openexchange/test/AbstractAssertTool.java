@@ -60,13 +60,12 @@ public abstract class AbstractAssertTool extends Assert {
 
     /**
      * Asserts the expected and actual objects
-     * 
+     *
      * @param message The message if the assertion fails
      * @param expect The expected object
      * @param value The actual object
-     * @throws Exception if an error is occurred
      */
-    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) throws Exception {
+    public static void assertEqualsAndNotNull(final String message, final Object expect, final Object value) {
         if (expect == null) {
             return;
         }

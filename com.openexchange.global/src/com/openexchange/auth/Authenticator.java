@@ -51,6 +51,7 @@ package com.openexchange.auth;
 
 import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link Authenticator} - For administrative authentication.
@@ -58,6 +59,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
+@SingletonService
 public interface Authenticator {
 
     /**

@@ -112,7 +112,7 @@ public class ContactCollectOnMailTransport implements PreferencesItemService {
             }
 
             private Boolean getPrevValue(final Session session) throws OXException {
-                final Map<String, Object> map = (Map<String, Object>) session.getParameter("__serverUserSetting");
+                @SuppressWarnings("unchecked") Map<String, Object> map = (Map<String, Object>) session.getParameter("__serverUserSetting");
                 if (null != map) {
                     return (Boolean) map.get("contactCollectOnMailTransport");
                 }

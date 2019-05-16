@@ -449,6 +449,7 @@ public class Bug43376Test extends CalDAVTest {
             "UID:" + uid + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
             "CLASS:PUBLIC\r\n" +
+            "SEQUENCE:2\r\n" +
             "SUMMARY:RecurringReminder\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
@@ -478,6 +479,7 @@ public class Bug43376Test extends CalDAVTest {
             "UID:" + uid + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
             "CLASS:PUBLIC\r\n" +
+            "SEQUENCE:2\r\n" +
             "SUMMARY:RecurringReminder EDIT\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
@@ -505,6 +507,7 @@ public class Bug43376Test extends CalDAVTest {
             "UID:" + uid + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
             "CLASS:PUBLIC\r\n" +
+            "SEQUENCE:2\r\n" +
             "SUMMARY:RecurringReminder\r\n" +
             "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\r\n" +
             "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +

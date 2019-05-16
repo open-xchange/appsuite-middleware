@@ -110,6 +110,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
      * @return The access token or <code>null</code>
      * @throws OXException If determining the OAuth access token fails
      */
+    @SuppressWarnings("unused")
     protected String doGetAccessToken(Assertion assertion) throws OXException {
         return null;
     }
@@ -155,6 +156,7 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     /**
      * @see SAMLBackend#enhanceAuthenticated(Authenticated, Map)
      */
+    @SuppressWarnings("unused")
     protected Authenticated doEnhanceAuthenticated(Authenticated authenticated, Map<String, String> properties) {
         return null;
     }
@@ -273,20 +275,21 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
      * The implementation of the getStaticLoginRedirectLocation Method
      * @return the static redirect at login and relogin time
      */
+    @SuppressWarnings("unused")
     protected String doGetStaticLoginRedirectLocation(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         return null;
     }
 
     /**
      * Retrieves the {@link SAMLConfig} with the given id from the {@link SAMLConfigRegistry}.
+     *
      * @param path The {@link SAMLConfig} id
-     * @return the {@link SAMLConfig} or the default config if path is empty
+     * @return the {@link SAMLConfig} or the default configuration if path is empty
      */
     public SAMLConfig getConfig(String path) {
-        if(Strings.isEmpty(path)){
+        if (Strings.isEmpty(path)) {
             return SAMLConfigRegistryImpl.getInstance().getDefaultConfig();
-        } else {
-            return SAMLConfigRegistryImpl.getInstance().getConfigById(path);
         }
+        return SAMLConfigRegistryImpl.getInstance().getConfigById(path);
     }
 }

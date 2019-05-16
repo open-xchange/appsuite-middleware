@@ -51,7 +51,6 @@ package com.openexchange.folder.json.writer;
 
 import java.sql.Connection;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -91,8 +90,6 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
-import com.openexchange.publish.PublicationTarget;
-import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -959,15 +956,14 @@ public final class FolderWriter {
         for (String capability : capabilities) {
             try {
                 switch (capability) {
-                    case "publication":
-                        if (supportsPublications(folder)) {
-                            supportedCapabilities.add(capability);
-                        }
-                        break;
                     case "subscription":
                         if (supportsSubscriptions(folder)) {
                             supportedCapabilities.add(capability);
                         }
+                        break;
+                    case "publication":
+                        // Removed with MW-1089 in version 7.10.2
+                        LOG.info("Publication has been removed. Capability can't be applied");
                         break;
                     default:
                         supportedCapabilities.add(capability);
@@ -978,28 +974,6 @@ public final class FolderWriter {
             }
         }
         return supportedCapabilities;
-    }
-
-    /**
-     * Gets a value indicating whether a specific folder supports publications.
-     *
-     * @param folder The folder to check
-     * @return <code>true</code> if publications are supported, <code>false</code>, otherwise
-     */
-    private static boolean supportsPublications(UserizedFolder folder) throws OXException {
-        PublicationTargetDiscoveryService targetDiscoveryService = ServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
-        if (null != targetDiscoveryService) {
-            String module = String.valueOf(folder.getContentType());
-            Collection<PublicationTarget> targets = targetDiscoveryService.getTargetsForEntityType(module);
-            if (null != targets && 0 < targets.size()) {
-                for (PublicationTarget target : targets) {
-                    if (target.getPublicationService().isCreateModifyEnabled()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     /**

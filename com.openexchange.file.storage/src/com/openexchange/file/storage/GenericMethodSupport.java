@@ -92,11 +92,11 @@ public class GenericMethodSupport {
     }
 
     /**
-     * Parses a boolean value out of a specific element in the supplied generic parameter list. 
-     * 
+     * Parses a boolean value out of a specific element in the supplied generic parameter list.
+     *
      * @param i The index of the element in the parameter list
      * @param args The generic parameter list
-     * @return <code>true</code> if the <code>i</code>th element in the supplied parameter list is or can be parsed to {@link Boolean#TRUE}, <code>false</code>, otherwise  
+     * @return <code>true</code> if the <code>i</code>th element in the supplied parameter list is or can be parsed to {@link Boolean#TRUE}, <code>false</code>, otherwise
      */
     protected boolean bool(final int i, final Object... args) {
         if (null == args || i >= args.length || null == args[i]) {
@@ -133,6 +133,20 @@ public class GenericMethodSupport {
             return ((Number) o).longValue();
         }
         return Long.parseLong(o.toString());
+    }
+
+    protected double doubleValue(final int i, final Object... args) {
+        if (args[i] == null || args.length <= i) {
+            return -1;
+        }
+        return coerceToLong(args[i]);
+    }
+
+    private double coerceToDouble(final Object o) {
+        if (o instanceof Number) {
+            return ((Number) o).doubleValue();
+        }
+        return Double.parseDouble(o.toString());
     }
 
 }

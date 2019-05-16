@@ -72,6 +72,7 @@ public class Bug13788Test extends AbstractAJAXSession {
 
     private Appointment appointment, update;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,6 +111,7 @@ public class Bug13788Test extends AbstractAJAXSession {
         assertTrue("Lost fulltime flag.", loadedAppointment.getFullTime());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

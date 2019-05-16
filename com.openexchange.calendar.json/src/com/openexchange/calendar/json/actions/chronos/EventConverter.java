@@ -57,6 +57,8 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.compat.Appointment2Event.asString;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -744,20 +746,20 @@ public abstract class EventConverter {
                 appointment.setRecurringStart(pattern.getSeriesStart().longValue());
             }
             if (null != pattern.getDaysOfWeek()) {
-                appointment.setDays(pattern.getDaysOfWeek());
+                appointment.setDays(pattern.getDaysOfWeek().intValue());
             }
             if (null != pattern.getDayOfMonth()) {
-                appointment.setDayInMonth(pattern.getDayOfMonth());
+                appointment.setDayInMonth(pattern.getDayOfMonth().intValue());
             }
             if (null != pattern.getMonth()) {
-                appointment.setMonth(pattern.getMonth());
+                appointment.setMonth(pattern.getMonth().intValue());
             }
             if (null != pattern.getInterval()) {
-                appointment.setInterval(pattern.getInterval());
+                appointment.setInterval(pattern.getInterval().intValue());
             }
             appointment.setUntil(null != pattern.getSeriesEnd() ? new Date(pattern.getSeriesEnd().longValue()) : null);
             if (null != pattern.getOccurrences()) {
-                appointment.setOccurrence(pattern.getOccurrences());
+                appointment.setOccurrence(pattern.getOccurrences().intValue());
             }
         }
         if (null != event.getChangeExceptionDates()) {
@@ -833,11 +835,13 @@ public abstract class EventConverter {
      */
     public static Attendee getAttendee(Participant participant) {
         Attendee attendee = new Attendee();
-        if (0 < participant.getIdentifier()) {
-            attendee.setEntity(participant.getIdentifier());
-        }
         if (0 < participant.getType()) {
             attendee.setCuType(Appointment2Event.getCalendarUserType(participant.getType()));
+        }
+        if (CalendarUserType.GROUP.matches(attendee.getCuType()) && 0 <= participant.getIdentifier()) {
+            attendee.setEntity(participant.getIdentifier());
+        } else if (0 < participant.getIdentifier()) {
+            attendee.setEntity(participant.getIdentifier());
         }
         if (null != participant.getEmailAddress()) {
             attendee.setUri(Appointment2Event.getURI(participant.getEmailAddress()));
@@ -945,26 +949,26 @@ public abstract class EventConverter {
             } else if (SeriesPattern.MONTHLY_1.intValue() == appointment.getRecurrenceType() && appointment.containsDays()) {
                 pattern.setType(SeriesPattern.MONTHLY_2);
             } else {
-                pattern.setType(appointment.getRecurrenceType());
+                pattern.setType(I(appointment.getRecurrenceType()));
             }
         }
         if (appointment.containsDays()) {
-            pattern.setDaysOfWeek(appointment.getDays());
+            pattern.setDaysOfWeek(I(appointment.getDays()));
         }
         if (appointment.containsDayInMonth()) {
-            pattern.setDayOfMonth(appointment.getDayInMonth());
+            pattern.setDayOfMonth(I(appointment.getDayInMonth()));
         }
         if (appointment.containsMonth()) {
-            pattern.setMonth(appointment.getMonth());
+            pattern.setMonth(I(appointment.getMonth()));
         }
         if (appointment.containsInterval()) {
-            pattern.setInterval(appointment.getInterval());
+            pattern.setInterval(I(appointment.getInterval()));
         }
         if (appointment.containsUntil()) {
-            pattern.setSeriesEnd(null != appointment.getUntil() ? appointment.getUntil().getTime() : null);
+            pattern.setSeriesEnd(null != appointment.getUntil() ? L(appointment.getUntil().getTime()) : null);
         }
         if (appointment.containsOccurrence()) {
-            pattern.setOccurrences(appointment.getOccurrence());
+            pattern.setOccurrences(I(appointment.getOccurrence()));
         }
         if (appointment.containsFullTime()) {
             fulltime = appointment.getFullTime();
@@ -1022,13 +1026,13 @@ public abstract class EventConverter {
             cdo.setOccurrence(pattern.getOccurrences().intValue());
         }
         if (null != pattern.getDayOfMonth()) {
-            cdo.setDayInMonth(pattern.getDayOfMonth());
+            cdo.setDayInMonth(pattern.getDayOfMonth().intValue());
         }
         if (null != pattern.getDaysOfWeek()) {
-            cdo.setDays(pattern.getDaysOfWeek());
+            cdo.setDays(pattern.getDaysOfWeek().intValue());
         }
         if (null != pattern.getMonth()) {
-            cdo.setMonth(pattern.getMonth());
+            cdo.setMonth(pattern.getMonth().intValue());
         }
         RecurrenceChecker.check(cdo);
         new CalendarCollection().checkRecurring(cdo);

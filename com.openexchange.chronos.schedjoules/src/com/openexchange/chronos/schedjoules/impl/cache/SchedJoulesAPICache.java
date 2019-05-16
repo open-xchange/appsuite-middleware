@@ -103,7 +103,7 @@ public class SchedJoulesAPICache {
             String apiKeyHash = getHashedAPIKey(contextId);
             return apiCache.get(new SchedJoulesCachedAPIKey(apiKeyHash, contextId), () -> {
                 LOG.debug("Cache miss for key '{}', initialising new SchedJoules API.", apiKeyHash);
-                return new SchedJoulesAPI(getProperty(contextId, SchedJoulesProperty.scheme), getProperty(contextId, SchedJoulesProperty.host), getProperty(contextId, SchedJoulesProperty.apiKey));
+                return new SchedJoulesAPI(getProperty(contextId, SchedJoulesProperty.scheme), getProperty(contextId, SchedJoulesProperty.host), getProperty(contextId, SchedJoulesProperty.apiKey), getIntProperty(contextId, SchedJoulesProperty.connectionTimeout));
             });
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -127,8 +127,8 @@ public class SchedJoulesAPICache {
      *
      * @param contextId The context identifier
      * @param property The {@link SchedJoulesProperty} to get
-     * @return The API key
-     * @throws OXException if no API key is configured
+     * @return The value of the property
+     * @throws OXException if no property is configured
      */
     private String getProperty(int contextId, SchedJoulesProperty property) throws OXException {
         LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
@@ -137,5 +137,18 @@ public class SchedJoulesAPICache {
             throw SchedJoulesAPIExceptionCodes.CONFIGURATION_MISSING.create(property.getFQPropertyName());
         }
         return value;
+    }
+
+    /**
+     * Retrieves the desired {@link SchedJoulesProperty} for the specified context
+     *
+     * @param contextId The context identifier
+     * @param property The {@link SchedJoulesProperty} to get
+     * @return The integer property
+     * @throws OXException if no property is configured
+     */
+    private int getIntProperty(int contextId, SchedJoulesProperty property) throws OXException {
+        LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
+        return leanConfigService.getIntProperty(-1, contextId, property);
     }
 }

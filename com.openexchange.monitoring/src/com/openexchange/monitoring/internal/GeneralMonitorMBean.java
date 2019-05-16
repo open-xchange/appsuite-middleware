@@ -66,6 +66,7 @@ public interface GeneralMonitorMBean {
 
     public int getNumberOfIdleMailConnections();
 
+    @Deprecated
     public int getNumberOfActiveSessions();
 
     public Integer getNbObjects();

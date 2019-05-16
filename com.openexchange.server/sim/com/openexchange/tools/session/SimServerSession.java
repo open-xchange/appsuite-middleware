@@ -60,6 +60,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.session.Origin;
 
 /**
  * {@link SimServerSession}
@@ -255,4 +256,11 @@ public class SimServerSession implements ServerSession {
     public Set<String> getParameterNames() {
         return Collections.emptySet();
     }
+
+    @Override
+    public Origin getOrigin() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

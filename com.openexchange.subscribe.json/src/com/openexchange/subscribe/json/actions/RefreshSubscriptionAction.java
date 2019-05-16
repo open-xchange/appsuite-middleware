@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.FallbackSubscriptionService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import gnu.trove.set.TIntSet;
@@ -116,7 +117,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
                 subscribeRequest.getServerSession(),
                 parameters.optString("source"),
                 services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-            if ((subscription != null) && (ids.add(id))) {
+            if ((subscription != null) && (ids.add(id)) && false == subscription.getSource().getId().equalsIgnoreCase(FallbackSubscriptionService.ID)) {
                 subscriptionsToRefresh.add(subscription);
             }
         }

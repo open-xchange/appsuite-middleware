@@ -60,7 +60,6 @@ import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -72,7 +71,6 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug15986Test extends AbstractAJAXSession {
 
-    private AJAXClient client;
     private Appointment appointment;
     private TimeZone timeZone;
 
@@ -80,10 +78,10 @@ public class Bug15986Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
         timeZone = getClient().getValues().getTimeZone();
         appointment = new Appointment();
         appointment.setTitle("Appointment for bug 15986");
@@ -98,6 +96,7 @@ public class Bug15986Test extends AbstractAJAXSession {
         response.fillAppointment(appointment);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

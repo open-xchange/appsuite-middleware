@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -129,7 +130,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
 
         if (!service.isEnabled(user, contextId)) {
-            throw OAuthExceptionCodes.DISABLED_OAUTH_SERVICE_META_DATA.create(service.getDisplayName(), user, contextId);
+            throw OAuthExceptionCodes.DISABLED_OAUTH_SERVICE_META_DATA.create(service.getDisplayName(), I(user), I(contextId));
         }
 
         return service;

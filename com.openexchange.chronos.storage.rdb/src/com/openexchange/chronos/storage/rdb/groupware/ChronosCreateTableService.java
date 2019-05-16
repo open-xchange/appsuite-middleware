@@ -136,6 +136,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
+                "attendeePrivileges INT4 UNSIGNED DEFAULT NULL,"+
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "filename VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
@@ -187,6 +188,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "color VARCHAR(32) DEFAULT NULL," +
                 "url VARCHAR(767) DEFAULT NULL," +
                 "geo POINT DEFAULT NULL," +
+                "attendeePrivileges INT4 UNSIGNED DEFAULT NULL,"+
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
                 "filename VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
@@ -262,6 +264,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "triggerRelated VARCHAR(32) DEFAULT NULL," +
                 "triggerDuration VARCHAR(32) DEFAULT NULL," +
                 "triggerDate BIGINT(20) DEFAULT NULL," +
+                "timestamp BIGINT(20) NOT NULL DEFAULT 0," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY event_user (cid,account,event,user)" +

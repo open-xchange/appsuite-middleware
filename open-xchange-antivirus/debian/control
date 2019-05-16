@@ -1,0 +1,15 @@
+Source: open-xchange-antivirus
+Section: security
+Priority: optional
+Maintainer: Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.9.8
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-antivirus
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Anti-Virus
+ This package contains the ICAP client and the
+ Anti-Virus service implementation

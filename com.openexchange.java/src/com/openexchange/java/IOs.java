@@ -92,4 +92,76 @@ public class IOs {
         return cause instanceof IOException ? isConnectionReset((IOException) cause) : false;
     }
 
+    /**
+     * Checks if cause of specified exception indicates an unexpected end of file or end of stream during reading input.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if an EOF problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isEOFException(Exception e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.io.EOFException.class);
+    }
+
+    /**
+     * Checks if cause of specified exception indicates a connect problem.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if a connect problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isConnectException(Exception e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.ConnectException.class);
+    }
+
+    /**
+     * Checks if cause of specified exception indicates a timeout or connect problem.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if a timeout or connect problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutOrConnectException(Exception e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class, java.net.ConnectException.class);
+    }
+
+    /**
+     * Checks if cause of specified exception indicates a timeout problem.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if a timeout problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutException(Exception e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class);
+    }
+
+    @SafeVarargs
+    private static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
+        if (null == e || null == classes || 0 == classes.length) {
+            return false;
+        }
+
+        for (Class<? extends Exception> clazz : classes) {
+            if (clazz.isInstance(e)) {
+                return true;
+            }
+        }
+
+        Throwable next = e.getCause();
+        return null == next ? false : isEitherOf(next, classes);
+    }
+
 }

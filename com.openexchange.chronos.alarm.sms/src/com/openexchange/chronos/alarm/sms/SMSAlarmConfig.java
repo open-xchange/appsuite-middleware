@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.alarm.sms;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.Property;
 
@@ -67,21 +69,21 @@ public class SMSAlarmConfig {
      * With this property the admin can configure the average time needed by the sms system to send out the sms.
      * This way the sms should usually be send out on time and not a few seconds late.
      */
-    public static final Property SMS_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
+    public static final Property SMS_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", I(0));
 
     /**
      * Enabled or disables sms alarms.
      */
-    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", false);
+    public static final Property SMS_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", Boolean.FALSE);
 
     /**
      * The amount of sms allowed to be sent in a given timeframe (see {@link #SMS_LIMIT_TIME_FRAME})
      */
-    public static final Property SMS_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", 50);
+    public static final Property SMS_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", I(50));
 
     /**
      * The timeframe in milliseconds used for the amount limit (see {@link #SMS_LIMIT_AMOUNT}
      */
-    public static final Property SMS_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", 60000l);
+    public static final Property SMS_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", L(60000l));
 
 }

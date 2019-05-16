@@ -55,9 +55,12 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Collection;
-import org.junit.AfterClass;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.rules.Timeout;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -94,12 +97,8 @@ public abstract class AbstractRMITest {
     protected User superAdmin;
     protected User contextAdmin;
 
-    /**
-     * Initializes a new {@link AbstractRMITest}.
-     */
-    public AbstractRMITest() {
-        super();
-    }
+    @Rule
+    public Timeout globalTimeout = new Timeout(30, TimeUnit.SECONDS); // 30 seconds max per method tested
 
     /**
      * Initialises the test configuration and creates one context for the tests
@@ -114,8 +113,9 @@ public abstract class AbstractRMITest {
     /**
      * Clean up managers
      */
-    @AfterClass
-    public static void cleanUpManagers() throws Exception {
+    @SuppressWarnings("unused")
+    @After
+    public void tearDown() throws Exception {
         // perform any clean-ups here
         getContextManager().cleanUp();
         getUserManager().cleanUp();

@@ -65,8 +65,9 @@ import com.openexchange.ajax.mail.filter.api.response.DeleteScriptResponse;
  */
 public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptResponse> {
 
-    private String username;
-    private boolean failOnError = true;
+    private final String username;
+    @SuppressWarnings("hiding")
+    private final boolean failOnError = true;
 
     /**
      * Initialises a new {@link DeleteScriptRequest}.
@@ -77,7 +78,7 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
 
     /**
      * Initialises a new {@link DeleteScriptRequest}.
-     * 
+     *
      * @param username The username
      */
     public DeleteScriptRequest(String username) {
@@ -87,7 +88,7 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
     @Override
@@ -97,7 +98,7 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
     @Override
@@ -112,7 +113,7 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
     @Override
@@ -122,7 +123,7 @@ public class DeleteScriptRequest extends AbstractMailFilterRequest<DeleteScriptR
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
     @Override

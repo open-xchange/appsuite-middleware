@@ -72,13 +72,14 @@ public class Bug44895Test extends AbstractFolderTest {
 
     /**
      * Initializes a new {@link Bug44895Test}.
-     * 
+     *
      * @param name
      */
     public Bug44895Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -91,6 +92,7 @@ public class Bug44895Test extends AbstractFolderTest {
         resp.fillObject(calendarFolder);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

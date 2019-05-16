@@ -49,22 +49,22 @@
 
 package com.openexchange.mail.json.actions;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Closeable;
-import java.util.ArrayList;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.idn.IDNA;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -74,31 +74,28 @@ import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.antivirus.AntiVirusResult;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
+import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.Column;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.AddressUtility;
+import com.openexchange.mail.utils.ContactCollectorUtility;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mail.utils.MsisdnUtility;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.TransportAccount;
-import com.openexchange.objectusecount.IncrementArguments;
-import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -163,6 +160,32 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     /**
+     * Retrieves the specified service if available
+     *
+     * @return The specified service
+     * @throws OXException if the service is absent
+     */
+    protected <S> S optService(Class<? extends S> clazz) throws OXException {
+        return optService(clazz, true);
+    }
+
+    /**
+     * Retrieves the specified service if available
+     *
+     * @param clazz The service's class
+     * @param throwEx Whether to throw an exception on service's absence
+     * @return The specified service
+     * @throws OXException if the service is absent
+     */
+    protected <S> S optService(Class<? extends S> clazz, boolean throwEx) throws OXException {
+        S service = services.getOptionalService(clazz);
+        if (service == null && throwEx) {
+            throw ServiceExceptionCode.serviceUnavailable(clazz);
+        }
+        return service;
+    }
+
+    /**
      * Gets the mail interface.
      *
      * @param mailRequest The mail request
@@ -190,8 +213,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             MailServletInterface mailInterface = mailRequest.getMailServletInterface();
             if (mailInterface == null) {
                 MailServletInterface newMailInterface = decrypt || verify ? // If decrypting or verifying, get Crypto Aware MailServlet
-                    MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) :
-                    MailServletInterface.getInstance(mailRequest.getSession());
+                    MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) : MailServletInterface.getInstance(mailRequest.getSession());
                 mailRequest.setMailServletInterface(newMailInterface);
                 mailInterface = newMailInterface;
             }
@@ -200,9 +222,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
         MailServletInterface mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
-            MailServletInterface newMailInterface = decrypt || verify ?
-                MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) :
-                MailServletInterface.getInstance(mailRequest.getSession());
+            MailServletInterface newMailInterface = decrypt || verify ? MailServletInterface.getInstanceWithDecryptionSupport(mailRequest.getSession(), cryptoAuthentication) : MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
             if (null == mailInterface) {
                 mailInterface = newMailInterface;
@@ -258,7 +278,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         } catch (final OXException e) {
             //Bug 42565
             if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
-                throw AjaxExceptionCodes.HTTP_ERROR.create(404, e.getMessage());
+                throw AjaxExceptionCodes.HTTP_ERROR.create(I(404), e.getMessage());
             }
             throw e;
         } finally {
@@ -321,9 +341,6 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         }
     }
 
-    /** The prefix for puny-code encoded mail addresses */
-    private final static String ACE_PREFIX = "xn--";
-
     /**
      * Triggers the contact collector for specified mail's addresses.
      *
@@ -334,69 +351,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @throws OXException
      */
     public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean memorizeAddresses, boolean incrementUseCount) throws OXException {
-        // Sets to store user's alias addresses (which should not be considered) and cumulative addresses of specified mail collection
-        Set<InternetAddress> addrs = null;
-        Set<InternetAddress> aliases = null;
-
-        // Check whether contact-collector is supposed to be triggered
-        if (memorizeAddresses) {
-            ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
-            if (null != ccs) {
-                for (MailMessage mail : mails) {
-                    if (null != mail) {
-                        if (null == aliases) {
-                            aliases = AddressUtility.getAliases(session);
-                        }
-
-                        if (null == addrs) {
-                            addrs = AddressUtility.getFilteredAddresses(mail, aliases);
-                        } else {
-                            addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
-                        }
-                    }
-                }
-
-                if (null != addrs && !addrs.isEmpty()) {
-                    ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), false, session);
-                }
-            }
-        }
-
-        // Check whether to increment use-count
-        if (incrementUseCount) {
-            ObjectUseCountService useCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-            if (null != useCountService) {
-                if (null == addrs) {
-                    for (MailMessage mail : mails) {
-                        if (null != mail) {
-                            if (null == aliases) {
-                                aliases = AddressUtility.getAliases(session);
-                            }
-
-                            if (null == addrs) {
-                                addrs = AddressUtility.getFilteredAddresses(mail, aliases);
-                            } else {
-                                addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
-                            }
-                        }
-                    }
-                }
-
-                if (null != addrs && !addrs.isEmpty()) {
-                    Set<String> addressesToIncrementBy = new HashSet<>(addrs.size());
-                    for (InternetAddress addr : addrs) {
-                        String address = addr.getAddress();
-                        addressesToIncrementBy.add(address);
-                        if (address.indexOf(ACE_PREFIX) >= 0) {
-                            addressesToIncrementBy.add(QuotedInternetAddress.toIDN(address));
-                        }
-                    }
-
-                    IncrementArguments.Builder builder = new IncrementArguments.Builder(addressesToIncrementBy);
-                    useCountService.incrementObjectUseCount(session, builder.build());
-                }
-            }
-        }
+        ContactCollectorUtility.triggerContactCollector(session, mails, memorizeAddresses, incrementUseCount);
     }
 
     protected static final String VIEW_RAW = "raw";
@@ -475,78 +430,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @throws OXException If address cannot be resolved
      */
     protected static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
-        // Resolve "From" to proper mail account to select right transport server
-        int accountId = doResolveFrom2Account(session, from, checkTransportSupport);
-
-        if (accountId < 0) {
-            if (checkFrom && null != from) {
-                // Check aliases
-                try {
-                    final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
-                    final User user = session.getUser();
-                    final String[] aliases = user.getAliases();
-                    for (final String alias : aliases) {
-                        validAddrs.add(new QuotedInternetAddress(alias));
-                    }
-                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
-                        MsisdnUtility.addMsisdnAddress(validAddrs, session);
-                        final String address = from.getAddress();
-                        final int pos = address.indexOf('/');
-                        if (pos > 0) {
-                            from.setAddress(address.substring(0, pos));
-                        }
-                    }
-                    if (!validAddrs.contains(from)) {
-                        throw MailExceptionCode.INVALID_SENDER.create(from.toString());
-                    }
-                } catch (final AddressException e) {
-                    throw MimeMailException.handleMessagingException(e);
-                }
-            }
-            accountId = MailAccount.DEFAULT_ID;
-        }
-
-        return accountId;
-    }
-
-    private static int doResolveFrom2Account(ServerSession session, InternetAddress from, boolean checkTransportSupport) throws OXException {
-        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        int user = session.getUserId();
-        int cid = session.getContextId();
-
-        int accountId;
-        if (null == from) {
-            // No "From" address given. Assume primary account
-            accountId = MailAccount.DEFAULT_ID;
-        } else {
-            String address = from.getAddress();
-            if (address.indexOf("xn--") >= 0) { // The special ACE notation always starts with "xn--" prefix
-                // Seems to be in ACE notation; therefore try with its IDN representation
-                accountId = storageService.getTransportByPrimaryAddress(IDNA.toIDN(address), user, cid);
-                if (accountId < 0) {
-                    // Retry with ACE representation
-                    accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
-                }
-            } else {
-                accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
-            }
-
-            // Check if resolved to non-primary account and required "multiplemailaccounts" permission is granted
-            if (accountId > 0 && (false == session.getUserPermissionBits().isMultipleMailAccounts())) {
-                throw MailExceptionCode.INVALID_SENDER.create(from.toString());
-            }
-        }
-
-        if (checkTransportSupport && accountId >= 0) {
-            // Check if determined account supports mail transport
-            TransportAccount account = storageService.getTransportAccount(accountId, user, cid);
-            if (null == account.getTransportServer()) {
-                // Account does not support mail transport
-                throw MailExceptionCode.NO_TRANSPORT_SUPPORT.create(account.getName(), Integer.valueOf(accountId));
-            }
-        }
-
-        return accountId;
+        return MimeMessageFiller.resolveFrom2Account(session, from, checkTransportSupport, checkFrom);
     }
 
     protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
@@ -641,5 +525,111 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     protected boolean getIgnoreDeleted(MailRequest mailRequest, boolean defaultValue) {
         String parameter = mailRequest.getParameter("deleted");
         return parameter == null ? defaultValue : !AJAXRequestDataTools.parseBoolParameter(parameter);
+    }
+
+    /**
+     * Scans the attachments (optionally specified in the sequenceIds) of the mail with the specified unique identifier
+     * in the specified folder. If no sequence identifiers are specified, then all attachments of the mail will be scanned.
+     *
+     * @param request The {@link MailRequest}
+     * @param mailInterface the {@link MailServletInterface}
+     * @param folderPath the folder path of the mail
+     * @param uid The unique identifier of the mail
+     * @param sequenceIds The optional sequence identifiers of the attachment
+     * @throws OXException if one of the attachments is too large, or if the {@link AntiVirusService} is absent,
+     *             or if any of the attachments is infected, or if a timeout or any other error is occurred
+     */
+    protected void scanAttachments(MailRequest request, MailServletInterface mailInterface, String folderPath, String uid, String[] sequenceIds) throws OXException {
+        String scan = request.getParameter("scan");
+        Boolean s = Strings.isEmpty(scan) ? Boolean.FALSE : Boolean.valueOf(scan);
+        if (false == s.booleanValue()) {
+            LOG.debug("No anti-virus scanning was performed.");
+            return;
+        }
+        AntiVirusService antiVirusService = services.getOptionalService(AntiVirusService.class);
+        if (antiVirusService == null) {
+            throw AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_ABSENT.create();
+        }
+        if (false == antiVirusService.isEnabled(request.getSession())) {
+            return;
+        }
+        if (sequenceIds == null) {
+            for (MailPart mailPart : mailInterface.getAllMessageAttachments(folderPath, uid)) {
+                scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService);
+            }
+            return;
+        }
+        for (String sequenceId : sequenceIds) {
+            MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, false);
+            scan(mailPart, getUniqueId(folderPath, uid, mailPart), mailPart.getSize(), antiVirusService);
+        }
+    }
+
+    /**
+     * Performs a scan (if a scan is requested by the specified {@link MailRequest}, i.e. via the <code>scan</code>
+     * URL parameter) of the {@link InputStream} of the specified {@link IFileHolder}.
+     *
+     * @param request The {@link MailRequest}
+     * @param fileHolder The {@link IFileHolder}
+     * @param mailId The mail identifier
+     * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
+     *             or if the file is infected, or if a timeout or any other error is occurred
+     */
+    protected void scan(MailRequest request, IFileHolder fileHolder, String mailId) throws OXException {
+        String scan = request.getParameter("scan");
+        Boolean s = Strings.isEmpty(scan) ? Boolean.FALSE : Boolean.valueOf(scan);
+        if (false == s.booleanValue()) {
+            LOG.debug("No anti-virus scanning was performed.");
+            return;
+        }
+        AntiVirusService antiVirusService = services.getOptionalService(AntiVirusService.class);
+        if (antiVirusService == null) {
+            throw AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_ABSENT.create();
+        }
+        if (false == antiVirusService.isEnabled(request.getSession())) {
+            return;
+        }
+        AntiVirusResult result = antiVirusService.scan(fileHolder, mailId);
+        services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, fileHolder.getName());
+    }
+
+    /**
+     * Performs the actual scan
+     *
+     * @param mailPart The mail part to scan
+     * @param mailId The unique mail identifier
+     * @param contentSize The content size of the mail part
+     * @param antiVirusService The anti virus service
+     * @throws OXException if the mail part is too large, or if the {@link AntiVirusService} is absent,
+     *             or if the mail part is infected, or if a timeout or any other error is occurred
+     */
+    private void scan(MailPart mailPart, String mailId, long contentSize, AntiVirusService antiVirusService) throws OXException {
+        AntiVirusResult result = antiVirusService.scan(() -> mailPart.getInputStream(), mailId, contentSize);
+        String filename = mailPart.getFileName();
+        if (Strings.isEmpty(filename)) {
+            List<String> extensions = MimeType2ExtMap.getFileExtensions(mailPart.getContentType().getBaseType());
+            filename = extensions == null || extensions.isEmpty() ? "part.dat" : "part." + extensions.get(0);
+        }
+        services.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, filename);
+    }
+
+    /**
+     * Generates an identifier that uniquely identifies the specified {@link MailPart}.
+     * It checks for the sequence id and if found is returned prepended with the folder path
+     * and the mail identifier, otherwise only the folderPath and the mail identifier are
+     * returned.
+     *
+     * @param folderPath The folder path
+     * @param mailId the mail identifier
+     * @param mailPart The {@link MailPart}
+     * @return The id
+     */
+    protected String getUniqueId(String folderPath, String mailId, MailPart mailPart) {
+        String id = mailPart.getSequenceId();
+        // Dunno about this... maybe there is a better way to get a unique id for a mail attachment
+        if (Strings.isNotEmpty(id)) {
+            return folderPath + "/" + mailId + "/" + id;
+        }
+        return folderPath + "/" + mailId;
     }
 }

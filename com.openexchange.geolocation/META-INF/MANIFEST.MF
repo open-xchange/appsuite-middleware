@@ -2,8 +2,24 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The bundle providing a Geo location interfaces
 Bundle-SymbolicName: com.openexchange.geolocation
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.exception
+Import-Package: com.openexchange.annotation,
+ com.openexchange.auth.rmi,
+ com.openexchange.cli,
+ com.openexchange.config.lean,
+ com.openexchange.database,
+ com.openexchange.database.migration,
+ com.openexchange.database.migration.resource.accessor,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ liquibase.resource,
+ org.apache.commons.io,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
 Export-Package: com.openexchange.geolocation

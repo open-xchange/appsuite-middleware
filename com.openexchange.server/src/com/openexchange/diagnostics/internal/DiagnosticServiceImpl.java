@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -64,7 +64,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiConsumer;
 import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.diagnostics.DiagnosticService;
-import com.openexchange.version.Version;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.version.VersionService;
 
 /**
  * {@link DiagnosticServiceImpl}
@@ -142,7 +143,7 @@ public class DiagnosticServiceImpl implements DiagnosticService {
      */
     @Override
     public String getVersion() {
-        return Version.getInstance().getVersionString();
+        return ServerServiceRegistry.getServize(VersionService.class).getVersionString();
     }
 
     /////////////////////////////////////// HELPERS ///////////////////////////////////

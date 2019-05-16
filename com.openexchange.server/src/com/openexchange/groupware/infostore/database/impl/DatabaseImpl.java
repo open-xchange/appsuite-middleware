@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -714,16 +715,16 @@ public class DatabaseImpl extends DBService {
      * @return A sorted set of all document file store locations for the specified context
      * @throws OXException
      */
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
+    public SortedSet<String> getDocumentFileStoreLocationsPerContext(Context ctx) throws OXException {
         Connection con = getReadConnection(ctx);
         try {
-            return getDocumentFileStoreLocationsperContext(ctx, con);
+            return getDocumentFileStoreLocationsPerContext(ctx, con);
         } finally {
             releaseReadConnection(ctx, con);
         }
     }
 
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx, Connection con) throws OXException {
+    public SortedSet<String> getDocumentFileStoreLocationsPerContext(Context ctx, Connection con) throws OXException {
         int contextId = ctx.getContextId();
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -1135,14 +1136,14 @@ public class DatabaseImpl extends DBService {
 
     public void removeUser(final int id, final Context ctx, Integer destUser, final ServerSession session, final EntityLockManager locks) throws OXException {
         if (destUser == null) {
-            destUser = ctx.getMailadmin();
+            destUser = I(ctx.getMailadmin());
         }
         if (id != ctx.getMailadmin()) {
-            if (destUser <= 0) {
+            if (destUser.intValue() <= 0) {
                 removeAllForUser(id, ctx, session, true);
             } else {
                 removePrivate(id, ctx, session);
-                assignToUser(id, ctx, destUser);
+                assignToUser(id, ctx, destUser.intValue());
             }
         } else {
             removeAll(ctx, session);

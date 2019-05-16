@@ -124,7 +124,7 @@ public class ListOnboardingProvidersTool extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getName() {
-        return "listonboardingproviders";
+        return "listonboardingproviders " + BASIC_MASTER_ADMIN_USAGE;
     }
 
 }

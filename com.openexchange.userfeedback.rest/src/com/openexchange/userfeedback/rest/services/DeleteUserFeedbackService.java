@@ -157,10 +157,10 @@ public class DeleteUserFeedbackService extends AbstractUserFeedbackService {
             resp.put("successful", "true");
             resp.put("type", filter.getType());
             resp.put("contextGroup", contextGroup);
-            if (filter.start() != Long.MIN_VALUE) {
+            if (filter.start().longValue() != Long.MIN_VALUE) {
                 resp.put("start", filter.start());
             }
-            if (filter.end() != Long.MAX_VALUE) {
+            if (filter.end().longValue() != Long.MAX_VALUE) {
                 resp.put("end", filter.end());
             }
         } catch (JSONException e) {

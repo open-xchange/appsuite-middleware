@@ -50,6 +50,7 @@
 package com.openexchange.drive.impl.internal;
 
 import com.openexchange.drive.impl.management.DriveConfig;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JumpLinkGenerator}
@@ -61,17 +62,17 @@ public class JumpLinkGenerator {
 
     private static final String[] OFFICE_TEXT_MIMETYPES = { "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/rtf",
         "application/vnd.oasis.opendocument.text", "application/vnd.openxmlformats-officedocument.wordprocessingml.template", "application/msword",
-        "application/vnd.oasis.opendocument.text-master", "application/vnd.oasis.opendocument.text-template", "application/vnd.oasis.opendocument.text-web" 
+        "application/vnd.oasis.opendocument.text-master", "application/vnd.oasis.opendocument.text-template", "application/vnd.oasis.opendocument.text-web"
     };
 
     private static final String[] OFFICE_SPREADSHEET_MIMETYPES = { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
-        "application/vnd.ms-excel", "application/vnd.oasis.opendocument.spreadsheet-template" 
+        "application/vnd.ms-excel", "application/vnd.oasis.opendocument.spreadsheet-template"
     };
 
     private static final String[] OFFICE_PRESENTATION_MIMETYPES = { "application/vnd.openxmlformats-officedocument.presentationml.template",
         "application/vnd.openxmlformats-officedocument.presentationml.slideshow", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        "application/vnd.openxmlformats-officedocument.presentationml.slide", "application/vnd.ms-powerpoint", 
+        "application/vnd.openxmlformats-officedocument.presentationml.slide", "application/vnd.ms-powerpoint",
         "application/vnd.ms-powerpoint.presentation.macroEnabled.12", "application/vnd.oasis.opendocument.presentation",
         "application/vnd.oasis.opendocument.presentation-template"
     };
@@ -95,7 +96,8 @@ public class JumpLinkGenerator {
     }
 
     public String getJumpLink(String folderId, String fileId, String method, String mimeType) {
-        String redirectUrl = DriveConfig.getInstance().getJumpLink()
+        ServerSession serverSession = session.getServerSession();
+        String redirectUrl = DriveConfig.getInstance().getJumpLink(serverSession.getContextId(), serverSession.getUserId())
             .replaceAll("\\[protocol\\]", session.getHostData().isSecure() ? "https" : "http")
             .replaceAll("\\[hostname\\]", session.getHostData().getHost())
             .replaceAll("\\[uiwebpath\\]", trimSlashes(DriveConfig.getInstance().getUiWebPath()))

@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.container;
 
+import java.util.Arrays;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
-import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link ConfirmationsDiffer}

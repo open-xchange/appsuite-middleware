@@ -91,12 +91,6 @@ public class OAuthAPIRegistryImpl implements OAuthAPIRegistry {
         registry = new ConcurrentHashMap<>(apis.length, 0.9F, 1);
         for (KnownApi api : apis) {
             registry.put(Strings.asciiLowerCase(api.getServiceId()), api);
-            Collection<String> aliases = api.getAliases();
-            if (null != aliases) {
-                for (String alias : aliases) {
-                    registry.put(Strings.asciiLowerCase(alias), api);
-                }
-            }
         }
     }
 

@@ -76,22 +76,22 @@ public final class PropertyNames {
     /**
      * xmlns:x2="http://calendarserver.org/ns/"
      */
-    public final static Namespace NS_CALENDARSERVER = Namespace.getNamespace("x2", "http://calendarserver.org/ns/");;
+    public final static Namespace NS_CALENDARSERVER = Namespace.getNamespace("x2", "http://calendarserver.org/ns/");
 
     /**
      * xmlns:x3="http://apple.com/ns/ical/"
      */
-    public final static Namespace NS_APPLE_ICAL = Namespace.getNamespace("x3", "http://apple.com/ns/ical/");;
+    public final static Namespace NS_APPLE_ICAL = Namespace.getNamespace("x3", "http://apple.com/ns/ical/");
 
     /**
      * xmlns:x4="urn:ietf:params:xml:ns:carddav"
      */
-    public final static Namespace NS_CARDDAV = Namespace.getNamespace("x4", "urn:ietf:params:xml:ns:carddav");;
+    public final static Namespace NS_CARDDAV = Namespace.getNamespace("x4", "urn:ietf:params:xml:ns:carddav");
 
     /**
      * xmlns:x5="http://me.com/_namespace/"
      */
-    public final static Namespace NS_ME_COM = Namespace.getNamespace("x5", "http://me.com/_namespace/");;
+    public final static Namespace NS_ME_COM = Namespace.getNamespace("x5", "http://me.com/_namespace/");
 
     /*---------------------------------------------------------------*/
 
@@ -154,6 +154,11 @@ public final class PropertyNames {
      * supported-report-set xmlns="DAV:"
      */
     public static final DavPropertyName SUPPORTED_REPORT_SET = DavPropertyName.create("supported-report-set", NS_DAV);
+
+    /**
+     * getlastmodified xmlns="DAV:"
+     */
+    public static final DavPropertyName GETLASTMODIFIED = DavPropertyName.create("getlastmodified", NS_DAV);
 
     /**
      * resourcetype xmlns="DAV:"

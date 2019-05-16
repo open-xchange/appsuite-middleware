@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -152,7 +153,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null);
 
         assertNotNull(response.getError());
         assertEquals(response.getError(), "ICAL-PROV-4041", response.getCode());
@@ -186,7 +187,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         NewFolderBody body = new NewFolderBody();
         body.setFolder(folder);
-        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null);
 
         assertNotNull(response.getError());
         assertEquals(response.getError(), "ICAL-PROV-4041", response.getCode());
@@ -552,7 +553,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertEquals(38, allEvents.size());
 
         FolderData folderData = folderManager.getFolder(newFolderId);
-        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval(100000);
+        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval(I(100000));
         FolderDataComOpenexchangeCalendarExtendedPropertiesColor folderDataComOpenexchangeCalendarExtendedPropertiesColor = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
         folderDataComOpenexchangeCalendarExtendedPropertiesColor.setValue("blue");
         folderData.getComOpenexchangeCalendarExtendedProperties().setColor(folderDataComOpenexchangeCalendarExtendedPropertiesColor);
@@ -595,7 +596,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     @Test
     public void testParallelGet_onlyAddOnce() throws OXException, IOException, JSONException, ApiException, InterruptedException {
         String externalUri = "http://example.com/files/" + UUID.randomUUID().toString() + ".ics";
-        mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK, null, 2);
+        mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK, null);
 
         String newFolderId = createDefaultAccount(externalUri);
 
@@ -841,8 +842,8 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
+        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
 
         assertEquals(initialAllEventResponse.getError(), "ICAL-PROV-5001", initialAllEventResponse.getCode());
         assertEquals(initialAllEventResponse.getError(), secondEventResponse.getError());
@@ -861,7 +862,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
+        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
@@ -875,12 +876,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.MINUTES.toMillis(1) + 5000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, true);
+        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE);
 
         assertNull(secondEventResponse.getError());
         assertNull(secondEventResponse.getCode());
@@ -898,7 +899,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
+        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
@@ -912,12 +913,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, true);
+        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE);
 
         assertNotNull(secondEventResponse.getError());
         assertEquals("CAL-CACHE-4230", secondEventResponse.getCode());
@@ -930,7 +931,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
+        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
@@ -944,12 +945,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.MINUTES.toMillis(1) + 5000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, true);
+        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE);
 
         assertEquals(secondEventResponse.getError(), "ICAL-PROV-4043", secondEventResponse.getCode());
         assertNotNull(secondEventResponse.getError());
@@ -968,7 +969,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, false);
+        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
         clear(externalUri);
 
         assertNotNull(initialAllEventResponse.getError());
@@ -982,12 +983,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, false, true);
+        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE);
 
         assertNotNull(secondEventResponse.getError());
         assertEquals(secondEventResponse.getError(), "CAL-CACHE-4230", secondEventResponse.getCode());
@@ -1003,9 +1004,9 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         ChronosFolderBody body = new ChronosFolderBody();
         body.addFoldersItem(newFolderId);
         //load resource data
-        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false);
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.FALSE);
         // return from db
-        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false);
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.FALSE);
 
         MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
         MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
@@ -1029,7 +1030,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         ChronosFolderBody body = new ChronosFolderBody();
         body.addFoldersItem(newFolderId);
 
-        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.TRUE);
         clear(externalUri);
         MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
@@ -1043,12 +1044,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.MINUTES.toMillis(1) + 5000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.TRUE);
 
         MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
@@ -1066,7 +1067,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         ChronosFolderBody body = new ChronosFolderBody();
         body.addFoldersItem(newFolderId);
 
-        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.TRUE);
         clear(externalUri);
         MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
@@ -1082,12 +1083,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.MINUTES.toMillis(1) + 5000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
-        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.TRUE);
         MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
         assertEquals(0, secondEventResponse.getData().get(0).getEvents().size());
@@ -1113,7 +1114,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         ChronosFolderBody body = new ChronosFolderBody();
         body.addFoldersItem(newFolderId);
 
-        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.TRUE);
         clear(externalUri);
         MultipleEventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
@@ -1128,12 +1129,12 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         try {
             Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
-        } catch (InterruptedException e) {
-            //
+        } catch (@SuppressWarnings("unused") InterruptedException e) {
+            // ignore
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
-        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, true);
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, Boolean.FALSE, Boolean.TRUE);
         MultipleEventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
         assertEquals(0, secondEventResponse.getData().get(0).getEvents().size());
@@ -1190,7 +1191,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         FolderPermission perm = new FolderPermission();
         perm.setEntity(defaultUserApi.getCalUser());
         perm.setGroup(Boolean.FALSE);
-        perm.setBits(403710016);
+        perm.setBits(I(403710016));
 
         List<FolderPermission> permissions = new ArrayList<>();
         permissions.add(perm);

@@ -76,7 +76,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserizedFolderImpl implements UserizedFolder {
+public class UserizedFolderImpl implements UserizedFolder {
 
     private static final long serialVersionUID = 5090343231211791986L;
 
@@ -122,6 +122,37 @@ public final class UserizedFolderImpl implements UserizedFolder {
         this.context = context;
     }
 
+    public UserizedFolderImpl(UserizedFolder userizedFolder) {
+        super();
+        if (userizedFolder == null) {
+            throw new IllegalArgumentException("UserizedFolder is null.");
+        }
+        if (!(userizedFolder instanceof UserizedFolderImpl)) {
+            throw new IllegalArgumentException("Only objects with type UserizedFolderImpl can be copied.");
+        }
+        UserizedFolderImpl original = (UserizedFolderImpl) userizedFolder;
+        this.folder = original.folder;
+        this.session = original.session;
+        this.user = original.user;
+        this.context = original.context;
+        this.permissions = original.permissions;
+        this.ownPermission = original.ownPermission;
+        this.lastModified = original.lastModified;
+        this.lastModifiedUTC = original.lastModifiedUTC;
+        this.locale = original.locale;
+        this.creationDate = original.creationDate;
+        this.creationDateUTC = original.creationDateUTC;
+        this.deefault = original.deefault;
+        this.defaultType = original.defaultType;
+        this.type = original.type;
+        this.subfolderIds = original.subfolderIds;
+        this.parentId = original.parentId;
+        this.properties = original.properties;
+        this.totalAndUnread = original.totalAndUnread;
+        this.parameters = original.parameters;
+        this.altNames = original.altNames;
+    }
+
     /**
      * Sets the parameters reference.
      *
@@ -151,7 +182,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
     public Object clone() {
         try {
             final UserizedFolderImpl clone = (UserizedFolderImpl) super.clone();
-            clone.folder = (Folder) clone.folder.clone();
+            clone.folder = (Folder) folder.clone();
             clone.ownPermission = ownPermission == null ? null : (Permission) ownPermission.clone();
             clone.lastModifiedUTC = null == lastModifiedUTC ? null : new Date(lastModifiedUTC.getTime());
             clone.creationDateUTC = null == creationDateUTC ? null : new Date(creationDateUTC.getTime());

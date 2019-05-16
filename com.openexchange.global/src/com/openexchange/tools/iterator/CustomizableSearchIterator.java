@@ -51,16 +51,22 @@ package com.openexchange.tools.iterator;
 
 import com.openexchange.exception.OXException;
 
-
 /**
  * A {@link CustomizableSearchIterator} can be used to modify or replace all objects as they come out of {@link #next()}.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CustomizableSearchIterator<T> implements SearchIterator<T>{
+public class CustomizableSearchIterator<T> implements SearchIterator<T> {
+
     private final SearchIterator<T> searchIterator;
     private final Customizer<T> customizer;
 
+    /**
+     * Initializes a new {@link CustomizableSearchIterator}.
+     *
+     * @param searchIterator The iterator instance to wrap
+     * @param customizer The customizer to apply
+     */
     public CustomizableSearchIterator(SearchIterator<T> searchIterator, Customizer<T> customizer) {
         super();
         this.searchIterator = searchIterator;
@@ -71,30 +77,35 @@ public class CustomizableSearchIterator<T> implements SearchIterator<T>{
     public void addWarning(OXException warning) {
         searchIterator.addWarning(warning);
     }
+
     @Override
     public void close() {
         SearchIterators.close(searchIterator);
     }
+
     @Override
     public OXException[] getWarnings() {
         return searchIterator.getWarnings();
     }
+
     @Override
     public boolean hasNext() throws OXException {
         return searchIterator.hasNext();
     }
+
     @Override
     public boolean hasWarnings() {
         return searchIterator.hasWarnings();
     }
+
     @Override
     public T next() throws OXException {
-        return customizer.customize(searchIterator.next());
+        return null == customizer ? searchIterator.next() : customizer.customize(searchIterator.next());
     }
+
     @Override
     public int size() {
         return searchIterator.size();
     }
-
 
 }

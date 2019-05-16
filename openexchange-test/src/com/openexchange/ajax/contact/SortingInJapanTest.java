@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.After;
 import org.junit.Before;
@@ -63,7 +64,6 @@ import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 public class SortingInJapanTest extends AbstractManagedContactTest {
 
@@ -73,6 +73,7 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -83,6 +84,7 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
         getClient().execute(new SetRequest(Tree.Language, "ja-JP"));
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -95,7 +97,7 @@ public class SortingInJapanTest extends AbstractManagedContactTest {
     }
 
     @Test
-    public void testCustomSortingForJapan() throws Exception {
+    public void testCustomSortingForJapan() {
         /*
          * generate test contacts on server
          */

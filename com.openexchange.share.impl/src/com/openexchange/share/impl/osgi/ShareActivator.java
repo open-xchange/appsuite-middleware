@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.osgi;
 
+import java.rmi.Remote;
 import java.util.concurrent.ExecutorService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -72,11 +73,10 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMech;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.sessiond.SessiondService;
@@ -86,15 +86,14 @@ import com.openexchange.share.core.ModuleHandler;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.share.impl.DefaultShareService;
-import com.openexchange.share.impl.ShareMBeanImpl;
 import com.openexchange.share.impl.SharePasswordMech;
+import com.openexchange.share.impl.ShareRMIServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.FileStorageHandler;
 import com.openexchange.share.impl.groupware.MailModuleAdjuster;
 import com.openexchange.share.impl.groupware.ModuleExtensionRegistry;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
-import com.openexchange.share.impl.mbean.ShareMBean;
 import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.quota.ShareLinksQuotaProvider;
 import com.openexchange.templating.TemplateService;
@@ -127,7 +126,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechFactory.class, UserAliasStorage.class, SessiondService.class };
+            DispatcherPrefixService.class, CapabilityService.class, GroupService.class, PasswordMechRegistry.class, UserAliasStorage.class, SessiondService.class };
     }
 
     @Override
@@ -143,16 +142,15 @@ public class ShareActivator extends HousekeepingActivator {
         final BundleContext context = this.context;
         track(CryptoService.class, new ServiceTrackerCustomizer<CryptoService, CryptoService>() {
 
-            private volatile ServiceRegistration<ShareService> shareRegistration;
+            private ServiceRegistration<ShareService> shareRegistration;
 
             @Override
-            public CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
+            public synchronized CryptoService addingService(ServiceReference<CryptoService> serviceReference) {
                 String cryptKey = getService(ConfigurationService.class).getProperty("com.openexchange.share.cryptKey", "erE2e8OhAo71");
                 CryptoService service = context.getService(serviceReference);
 
-                PasswordMechFactory passwordMechFactory = getService(PasswordMechFactory.class);
                 SharePasswordMech sharePasswordMech = new SharePasswordMech(service, cryptKey);
-                passwordMechFactory.register(sharePasswordMech);
+                context.registerService(PasswordMech.class, sharePasswordMech, null);
                 shareRegistration = context.registerService(ShareService.class, shareService, null);
                 return service;
             }
@@ -163,7 +161,7 @@ public class ShareActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
+            public synchronized void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
                 ServiceRegistration<ShareService> shareRegistration = this.shareRegistration;
                 if (null != shareRegistration) {
                     this.shareRegistration = null;
@@ -194,9 +192,9 @@ public class ShareActivator extends HousekeepingActivator {
         registerService(ModuleSupport.class, new ModuleSupportImpl(this, folderHandlerRegistry, accessibleModulesTracker, handlerRegistry, adjusterRegistry));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
+        registerService(Remote.class, new ShareRMIServiceImpl(shareService));
 
         trackService(ModuleSupport.class);
-        track(ManagementService.class, new HousekeepingManagementTracker(context, ShareMBean.class.getName(), ShareMBean.DOMAIN, new ShareMBeanImpl(ShareMBean.class, shareService)));
         trackService(IDBasedFileAccessFactory.class);
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);

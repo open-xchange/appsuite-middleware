@@ -88,7 +88,7 @@ public class NoGlobalAddressBookUserCensorshipTest {         @Test
             if(UserField.UNPROTECTED_FIELDS.contains(field)) {
                 assertFalse("Should have remained untouched: "+field, value != null);
             } else {
-                assertTrue("Should have been hidden: "+field, value == null || -1 == (Integer)value);
+                assertTrue("Should have been hidden: "+field, value == null || -1 == ((Integer) value).intValue());
             }
         }
 

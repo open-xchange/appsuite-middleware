@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <title>U2F example </title>
+  </head>
+
+  <body>
+
+		<div class="jumbotron">
+			<h4 class="display-4">U2F example</h4>
+      <p class="lead">FIDO U2F example client for OX App Suite. <a class="btn btn-primary btn-sm" data-toggle="collapse" href="#collapsediv" role="button" aria-expanded="false" aria-controls="collapsediv">...</a></p>
+      <div class="row collapse" id="collapsediv">
+        <div class="col-2 small">
+          This demo requires 
+          <ul>
+            <li>A FIDO u2f hardware device </li> 
+            <li>A U2F enabled Web-Browser. (Firefox configuratin option: <b>security.webauth.u2f</b>)</li>
+            <li>HTTPS!</li> 
+            <li>An OX App Suite session ID obtained from a login in a different tab but same origin</li> 
+          </ul>
+        </div>
+        <div class="col-6 small">
+          Basic Usage:
+          <ol>
+            <li>Obtain an OX App Suite session ID form a login request in another tab but same orgigin and paste it into text box below</li> 
+            <li>Plugin your U2F hardware device</li>
+          </ol>
+          Registration:
+          <ol>
+            <li>Click on Start Registration</li>
+            <li>Press the button of your U2F device</li>
+          </ol>
+          Authentication:
+          <ol>
+            <li>Click on Start Authentication</li>
+            <li>Press the button of your U2F device</li>
+          </ol>
+        </div>
+      </div>
+		</div>
+			<div class="container-fluid">
+				<div class="row">
+
+				<!-- left side: control area -->
+				<div class="col-3">
+
+
+					<!-- session id setup-->
+					<div class="row">
+						<div class="col-sm">
+							<h3>Basic setup</h3>
+							<form>
+								<div class="form-group">
+									<label for="sessionid">AppSuite sessionid</label>
+									<input type="email" class="form-control" id="sessionid" aria-describedby="sessionidHelp" placeholder="Enter session id">
+									<small id="sessionidHelp" class="form-text text-muted">Enter the session ID obtained from a login request at the same origin</small>
+								</div>
+							</form>
+						</div>
+
+					</div>
+
+					<hr>
+
+					<!-- registering a device -->
+					<div class="row">
+						<div class="col-sm">
+							<h3>Device registration</h3>
+							<div id="divRegistration" class="alert alert-danger" role="alert">
+								No device registered yet.
+							</div>
+							<button type="button" class="btn btn-primary" onclick="startRegistration()">Start Registration</button>
+							<button type="button" class="btn btn-primary" onclick="removeRegistration()">Remove Registration</button>
+						</div>
+					</div>
+
+					<hr>
+
+					<!-- authenticate with a device -->
+					<div class="row">
+						<div class="col-sm">
+							<h3>Authentication</h3>
+							<div id="divAuthentication" class="alert alert-danger" role="alert">
+								Not authenticated
+							</div>
+							<button type="button" class="btn btn-primary" onclick="startAuthentication()">Start Authentication</button>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- right side: log area -->
+				<div class="col-7">
+					<h3>LOG</h3>
+					<textarea class="form-control" id="log" rows="30"></textarea>
+				</div>
+				</div>
+
+  </body>
+
+
+	<script>
+
+    //---------------------------------------------------------------------------------------------
+
+		var deviceId = null;
+
+    //---------------------------------------------------------------------------------------------
+    //u2f registration functions
+
+    //Performs the startRegistration call in order to create a new pending device on the Middelware
+    //This will return a challenge for the u2f token which is passed to doRegistration
+		function startRegistration(){
+
+			var url = location.origin + "/appsuite/api/multifactor?action=startRegistration&session=" + getSessionId();
+			var parameters = "providerName=U2F";
+			postUrlEncoded(url, parameters, function(json){
+					setLog("Data returned from SERVER (startRegistration): ");
+					appendLog(JSON.stringify(json, null, 4));
+					deviceId = json.data.device.id;
+					var alertElement = document.getElementById("divRegistration");
+					showWarning(alertElement, "Registration started for new device: " + deviceId);
+					doRegistration(json);
+			});
+		}
+
+    //This will trigger the registration mode of the U2F hardware device 
+    //It will pass the parameters obtained form the startRegistration call to the u2f device
+    //The result is passed back to the middleware by calling finishRegistration
+    function doRegistration(startRegistrationData){
+
+      var RegistrationData = {
+        "challenge": startRegistrationData.data.resultParameters.registerRequests[0].challenge,
+        "appId":		 startRegistrationData.data.resultParameters.registerRequests[0].appId,
+        "version": 	 startRegistrationData.data.resultParameters.registerRequests[0].version,
+      };
+
+      window.u2f.register(RegistrationData.appId, [RegistrationData], [],
+          function(data) {
+            if(data.errorCode) {
+							var alertElement = document.getElementById("divRegistration");
+							showError(alertElement, "UT2 failed with error code" + data.errorCode);
+              return;
+            }
+						setLog("Data returned from LOCAL U2F device:");
+						appendLog(JSON.stringify(data,null,4));
+						finishRegistration(data);	
+          }); 
+    }
+
+    //This finishs the registration process by passing the registration data created by the U2F device to the middleware
+		function finishRegistration(registrationData){
+			var url = location.origin + "/appsuite/api/multifactor?action=finishRegistration&session=" + getSessionId();
+			var parameters = "providerName=U2F" + 
+				"&registrationData=" + registrationData.registrationData + 
+			  "&clientData=" + registrationData.clientData + 
+			  "&deviceId=" + deviceId;
+			appendLog("\r\n Data sent to the SERVER (finishRegistration): ");
+			appendLog(parameters);
+			postUrlEncoded(url,parameters,function(json){
+					appendLog("\r\n Data returned from SERVER (finishRegistration): ");
+					appendLog(JSON.stringify(json,null,4));
+					var alertElement = document.getElementById("divRegistration");
+					showSuccess(alertElement,"Device registered: " + deviceId); 
+			});
+		}
+
+    //This removes the current device
+		function removeRegistration(){
+			if(deviceId === null){
+				var alertElement = document.getElementById("divRegistration");
+				showError(alertElement, "Cannot authenticate: No device registered yet.");
+				return;
+			}
+			var url = location.origin + "/appsuite/api/multifactor?action=delete&session=" + getSessionId();
+			var parameters = "deviceToDeleteProvider=U2F" + 
+			  "&deviceToDelete=" + deviceId;
+			postUrlEncoded(url,parameters,function(json){
+					setLog("Data returned from SERVER (delete): ");
+					appendLog(JSON.stringify(json, null, 4));
+					if(json.data.value == "REGISTRATION_REMOVED"){
+						var alertElement = document.getElementById("divRegistration");
+						showSuccess(alertElement,"Removed device: " + deviceId); 
+					}
+			});
+		}
+
+    //---------------------------------------------------------------------------------------------
+    //u2f authentication functions
+		
+    //This triggers a new authentication flow for a registered device 
+    //It obtaines a challenge from the Middleware which is passed to doAuthentication
+		function startAuthentication(){
+			if(deviceId === null){
+					var alertElement = document.getElementById("divAuthentication");
+					showError(alertElement, "Cannot authenticate: No device registered yet.");
+					return;
+			}
+
+			var url = location.origin + "/appsuite/api/multifactor?action=begin&session=" + getSessionId();
+			var parameters = "providerName=U2F" + 
+			  "&deviceId=" + deviceId;
+			postUrlEncoded(url,parameters,function(json){
+					setLog("Data returned from SERVER (startAuthentication): ");
+					appendLog(JSON.stringify(json, null, 4));
+					var alertElement = document.getElementById("divAuthentication");
+					showWarning(alertElement,"Authentication started for device: " + deviceId); 
+					doAuthentication(json);
+			});
+		}
+
+
+    //Performs the authentication by signing a challege obtained from the middleware
+    //Passes the result back to the middleware by callling finishAuthentication
+		function doAuthentication(startAuthenticationData){
+			
+      var SignData = {
+        "version":	 startAuthenticationData.data.challengeResponse.signRequests[0].version,
+        "keyHandle": startAuthenticationData.data.challengeResponse.signRequests[0].keyHandle
+      };
+			var appId = 		startAuthenticationData.data.challengeResponse.signRequests[0].appId;
+			var challenge = startAuthenticationData.data.challengeResponse.signRequests[0].challenge;
+
+      u2f.sign(appId,challenge,[SignData],
+          function(data){
+            if(data.errorCode){
+							var alertElement = document.getElementById("divAuthentication");
+							showError(alertElement, "UT2 failed with error code" + data.errorCode);
+              return;
+            }
+						setLog("Data returned from LOCAL U2F device:");
+						appendLog(JSON.stringify(data,null,4));
+						finishAuthentication(data);
+          });
+		}
+
+    //Sends the signed challenge back to the middleware in order to complete the authentication
+		function finishAuthentication(signData){
+			console.log(JSON.stringify(signData));
+			var url = location.origin + "/appsuite/api/multifactor?action=doAuth&session=" + getSessionId();
+			var parameters = "authProviderName=U2F" + 
+				"&authDeviceId=" + deviceId +
+			  "&clientData=" + signData.clientData + 
+				"&keyHandle=" + signData.keyHandle + 
+			  "&signatureData=" + signData.signatureData;
+
+			appendLog("\r\n Data sent to the SERVER (doAuth): ");
+			appendLog(parameters);
+			postUrlEncoded(url,parameters, function(json){
+				var resultValue = json.data.value;
+				appendLog("\r\n Data returned from SERVER (doAuth): ");
+				appendLog(JSON.stringify(json,null,4));
+				if(resultValue == "AUTHENTICATION_SUCCESSFULL"){
+					var alertElement = document.getElementById("divAuthentication");
+					showSuccess(alertElement, resultValue);
+				}
+				else{
+					showError(alertElement, resultValue);
+				}
+			});
+		}
+
+    //---------------------------------------------------------------------------------------------
+    //Helper functions for displaying  messages
+
+		function showError(element, msg){
+			element.classList.remove('alert-success');	
+			element.classList.remove('alert-warning');	
+			element.classList.add('alert-danger');	
+			element.innerHTML = msg;
+		}
+
+		function showWarning(element, msg){
+			element.classList.remove('alert-success');	
+			element.classList.remove('alert-danger');	
+			element.classList.add('alert-warning');	
+			element.innerHTML = msg;
+		}
+
+		function showSuccess(element, msg){
+			element.classList.remove('alert-warning');	
+			element.classList.remove('alert-danger');	
+			element.classList.add('alert-success');	
+			element.innerHTML = msg;
+		}
+
+
+    //---------------------------------------------------------------------------------------------
+    //Helper functions for sending POST requests
+
+    function postUrlEncoded(url, parameters, clb){
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var json = JSON.parse(xhr.responseText);
+          console.log(JSON.stringify(json));
+					clb(json);
+        }
+      };
+      xhr.send(parameters);
+    }
+
+    function postJson(url, jsonData){
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var json = JSON.parse(xhr.responseText);
+          console.log(JSON.stringify(json));
+        }
+      };
+      xhr.send(JSON.stringify(jsonData));
+    }
+
+    //---------------------------------------------------------------------------------------------
+    //utils
+		
+		function getSessionId(){
+			return document.getElementById("sessionid").value;
+		}
+
+		function appendLog(msg){
+			document.getElementById("log").value += "\r\n" + msg;
+		}
+
+		function setLog(msg){
+			document.getElementById("log").value = msg;
+		}
+
+    //---------------------------------------------------------------------------------------------
+
+	</script>
+
+</html>

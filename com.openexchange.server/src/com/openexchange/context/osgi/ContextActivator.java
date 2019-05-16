@@ -49,17 +49,15 @@
 
 package com.openexchange.context.osgi;
 
+import java.rmi.Remote;
 import java.util.Arrays;
-import com.openexchange.context.mbean.ContextMBean;
-import com.openexchange.context.mbean.ContextMBeanImpl;
+import com.openexchange.context.rmi.ContextRMIServiceImpl;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.impl.sql.ChangePrimaryKeyForContextAttribute;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -86,10 +84,11 @@ public class ContextActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, createTable);
 
         ContextAttributeTableUpdateTask updateTask = new ContextAttributeTableUpdateTask(dbase);
+
+        registerService(Remote.class, new ContextRMIServiceImpl());
         ChangePrimaryKeyForContextAttribute changePrimaryKeyForContextAttribute = new ChangePrimaryKeyForContextAttribute();
 
         registerService(UpdateTaskProviderService.class, () -> Arrays.asList(updateTask, changePrimaryKeyForContextAttribute));
-        track(ManagementService.class, new HousekeepingManagementTracker(context, ContextMBean.class.getName(), ContextMBean.DOMAIN, new ContextMBeanImpl()));
 
         openTrackers();
     }

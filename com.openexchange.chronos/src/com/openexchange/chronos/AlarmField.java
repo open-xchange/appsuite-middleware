@@ -105,7 +105,12 @@ public enum AlarmField {
     /**
      * A list of mail addresses for the mail action.
      */
-    ATTENDEES
+    ATTENDEES,
+
+    /**
+     * The timestamp of this alarm.
+     */
+    TIMESTAMP
 
     ;
 }

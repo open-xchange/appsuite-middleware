@@ -49,6 +49,8 @@
 
 package com.openexchange.modules.storage.sql.engines;
 
+import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -218,10 +220,10 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
 
             @Override
             public Boolean handle(final ResultSet rs) throws SQLException {
-                return rs.next();
+                return B(rs.next());
             }
 
-        });
+        }).booleanValue();
     }
 
     protected List<Object> primaryKey(Object id) {
@@ -231,7 +233,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
         }
         final LinkedList<Object> primaryKey = new LinkedList<Object>();
         primaryKey.add(id);
-        primaryKey.add(ctxId);
+        primaryKey.add(I(ctxId));
         return primaryKey;
     }
 
@@ -240,7 +242,7 @@ public class BasicStorage<T extends Model<T>> implements Storage<T> {
     }
 
     protected List<Object> getExtraValues() {
-        return new LinkedList<Object>(Arrays.asList(ctxId));
+        return new LinkedList<Object>(Arrays.asList(I(ctxId)));
     }
 
     protected <M> M executeQuery(final SELECT select, final List<Object> values, final ResultSetHandler<M> handler) throws SQLException, OXException {

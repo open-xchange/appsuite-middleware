@@ -61,10 +61,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class RetrievalServlet extends MultipleAdapterServletNew {
 
-    public static RetrievalActions RETRIEVAL_ACTIONS = null;
+    /**
+     * The RetrievalServlet.java.
+     */
+    private static final long serialVersionUID = 3210987223652048453L;
 
-    public RetrievalServlet() {
-        super(RETRIEVAL_ACTIONS);
+    public RetrievalServlet(RetrievalActions retrievalActions) {
+        super(retrievalActions);
     }
 
     @Override

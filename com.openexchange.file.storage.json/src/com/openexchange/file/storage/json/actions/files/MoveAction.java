@@ -143,12 +143,12 @@ public class MoveAction extends AbstractWriteAction {
         IDBasedFolderAccess folderAccess = request.getFolderAccess();
         String destFolder = request.getFolderId();
 
-        List<String> oldFiles = new LinkedList<String>();
-        LinkedList<String> deleteableFolders = new LinkedList<String>();
+        List<String> oldFiles = new LinkedList<>();
+        LinkedList<String> deleteableFolders = new LinkedList<>();
 
         boolean error = true;
         try {
-            List<String> conflicting = new ArrayList<String>(pairs.size());
+            List<String> conflicting = new ArrayList<>(pairs.size());
             for (IdVersionPair pair : pairs) {
                 String fileId = pair.getIdentifier();
                 if (fileId == null) {
@@ -165,7 +165,7 @@ public class MoveAction extends AbstractWriteAction {
                     }
 
                     String newFolderID = folderAccess.createFolder(newFolder);
-                    List<String> fileIds = new ArrayList<String>();
+                    List<String> fileIds = new ArrayList<>();
                     {
                         TimedResult<File> documents = fileAccess.getDocuments(folderId);
                         SearchIterator<File> iter = documents.results();

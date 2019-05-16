@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -62,6 +62,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
 @Suite.SuiteClasses({
     // @formatter:off
     Bug58814Test.class,
+    Bug64836Test.class,
     // @formatter:on
 
 })

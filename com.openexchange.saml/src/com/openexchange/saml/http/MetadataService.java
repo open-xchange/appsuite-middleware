@@ -93,7 +93,7 @@ public class MetadataService extends SAMLServlet {
         httpResponse.setCharacterEncoding(Charsets.UTF_8_NAME);
         try {
             String metadataXML = provider.getMetadataXML();
-            httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
             httpResponse.setContentType("application/xml");
             httpResponse.setContentLength(metadataXML.getBytes().length);
             httpResponse.getWriter().write(metadataXML);
@@ -115,11 +115,9 @@ public class MetadataService extends SAMLServlet {
                         synchronized (lock) {
                             out.write("<br>");
                         }
-                    }
-                    catch (InterruptedIOException x) {
+                    } catch (@SuppressWarnings("unused") InterruptedIOException x) {
                         Thread.currentThread().interrupt();
-                    }
-                    catch (IOException x) {
+                    } catch (@SuppressWarnings("unused") IOException x) {
                         setError();
                     }
                 }

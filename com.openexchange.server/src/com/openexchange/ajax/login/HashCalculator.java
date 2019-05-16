@@ -144,7 +144,7 @@ public class HashCalculator {
      */
     public String getHash(final HttpServletRequest req, final String userAgent, final String client, String...additionals) {
         try {
-            StringBuilder traceBuilder = LOG.isTraceEnabled() ? new StringBuilder("md5 ( ") : null;
+            StringBuilder traceBuilder = LOG.isTraceEnabled() ? new StringBuilder("md5 (") : null;
             MessageDigest md = MessageDigest.getInstance("MD5");
 
             // Update digest with User-Agent info

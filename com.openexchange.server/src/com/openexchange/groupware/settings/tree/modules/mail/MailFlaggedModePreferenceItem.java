@@ -89,23 +89,23 @@ public class MailFlaggedModePreferenceItem implements PreferencesItemService, Co
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 ConfigViewFactory factory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
                 if (factory == null){
-                    setting.setSingleValue(true);
+                    setting.setSingleValue(Boolean.TRUE);
                     return;
                 }
 
                 FlaggingMode mode = FlaggingMode.getFlaggingMode(session, factory);
                 switch (mode) {
                     case COLOR_ONLY:
-                        setting.setSingleValue(false);
+                        setting.setSingleValue(Boolean.FALSE);
                         break;
                     case FLAGGED_AND_COLOR:
-                        setting.setSingleValue(true);
+                        setting.setSingleValue(Boolean.TRUE);
                         break;
                     case FLAGGED_IMPLICIT:
-                        setting.setSingleValue(false);
+                        setting.setSingleValue(Boolean.FALSE);
                         break;
                     case FLAGGED_ONLY:
-                        setting.setSingleValue(true);
+                        setting.setSingleValue(Boolean.TRUE);
                         break;
                     default:
                         break;

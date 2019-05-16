@@ -50,12 +50,11 @@
 package com.openexchange.ajax;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.TimeZone;
 import org.junit.Before;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -92,8 +91,7 @@ public class AppointmentTest extends AbstractAJAXSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentTest.class);
 
-    private final List<Appointment> clean = new ArrayList<Appointment>();
-
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -132,8 +130,8 @@ public class AppointmentTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("location", appointmentObj1.getLocation(), appointmentObj2.getLocation());
         assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
         assertEquals("folder id", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
-        assertEquals("private flag", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
-        assertEquals("full time", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
+        assertTrue("private flag", appointmentObj1.getPrivateFlag() == appointmentObj2.getPrivateFlag());
+        assertTrue("full time", appointmentObj1.getFullTime() == appointmentObj2.getFullTime());
         assertEquals("label", appointmentObj1.getLabel(), appointmentObj2.getLabel());
         assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(), appointmentObj2.getRecurrenceType());
         assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2.getInterval());
@@ -167,12 +165,12 @@ public class AppointmentTest extends AbstractAJAXSession {
         return appointmentobject;
     }
 
-    private HashSet participants2String(final Participant[] participant) throws Exception {
+    private HashSet<String> participants2String(final Participant[] participant) {
         if (participant == null) {
             return null;
         }
 
-        final HashSet hs = new HashSet();
+        final HashSet<String> hs = new HashSet<>();
 
         for (Participant element : participant) {
             hs.add(participant2String(element));
@@ -181,7 +179,7 @@ public class AppointmentTest extends AbstractAJAXSession {
         return hs;
     }
 
-    private String participant2String(final Participant p) throws Exception {
+    private String participant2String(final Participant p) {
         final StringBuffer sb = new StringBuffer();
         sb.append("T" + p.getType());
         sb.append("ID" + p.getIdentifier());

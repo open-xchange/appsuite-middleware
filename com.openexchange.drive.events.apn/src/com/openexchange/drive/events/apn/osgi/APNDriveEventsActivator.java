@@ -49,22 +49,29 @@
 
 package com.openexchange.drive.events.apn.osgi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.drive.events.DriveEventService;
 import com.openexchange.drive.events.apn.APNAccess;
 import com.openexchange.drive.events.apn.IOSAPNCertificateProvider;
 import com.openexchange.drive.events.apn.MacOSAPNCertificateProvider;
 import com.openexchange.drive.events.apn.internal.APNDriveEventPublisher;
-import com.openexchange.drive.events.apn.internal.IOSDriveEventPublisher;
-import com.openexchange.drive.events.apn.internal.MacOSDriveEventPublisher;
-import com.openexchange.drive.events.apn.internal.Services;
+import com.openexchange.drive.events.apn.internal.DriveEventsAPNProperty;
+import com.openexchange.drive.events.apn.internal.OperationSystemType;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.exception.OXException;
+import com.openexchange.fragment.properties.loader.FragmentPropertiesLoader;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
  * {@link APNDriveEventsActivator}
@@ -84,121 +91,130 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, ConfigurationService.class, TimerService.class };
+        return new Class<?>[] { DriveEventService.class, DriveSubscriptionStore.class, LeanConfigurationService.class, TimerService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { IOSAPNCertificateProvider.class, MacOSAPNCertificateProvider.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.drive.events.apn");
-        com.openexchange.drive.events.apn.internal.Services.set(this);
-        ConfigurationService configService = getService(ConfigurationService.class);
-        DriveEventService eventService = getService(DriveEventService.class);
-        /*
-         * iOS
-         */
-        if (configService.getBoolProperty("com.openexchange.drive.events.apn.ios.enabled", false)) {
-            /*
-             * register APN certificate provider for iOS if specified via config file (with a low ranking)
-             */
-            final APNAccess access = getAccess(configService, "com.openexchange.drive.events.apn.ios.");
-            if (null != access) {
-                registerService(IOSAPNCertificateProvider.class, new IOSAPNCertificateProvider() {
+        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
+        track(FragmentPropertiesLoader.class, new SimpleRegistryListener<FragmentPropertiesLoader>() {
 
-                    @Override
-                    public APNAccess getAccess() {
-                        return access;
-                    }
-                }, 1);
-                LOG.info("Successfully registered APN certificate provider for iOS.");
-            } else {
-                LOG.info("No default APN access configured for iOS in \"Push\" section in file 'drive.properties', skipping registration for default iOS certificate provider.");
-            }
-            /*
-             * register publisher
-             */
-            APNDriveEventPublisher publisher = new IOSDriveEventPublisher();
-            eventService.registerPublisher(publisher);
-            String feedbackQueryInterval = configService.getProperty(
-                "com.openexchange.drive.events.apn.ios.feedbackQueryInterval", (String)null);
-            setupFeedbackQueries(publisher, feedbackQueryInterval);
-        } else {
-            LOG.info("Drive events for iOS clients via APN are disabled, skipping publisher registration.");
-        }
-        /*
-         * Mac OS
-         */
-        if (configService.getBoolProperty("com.openexchange.drive.events.apn.macos.enabled", false)) {
-            /*
-             * register APN certificate provider for Mac OS if specified via config file (with a low ranking)
-             */
-            final APNAccess access = getAccess(configService, "com.openexchange.drive.events.apn.macos.");
-            if (null != access) {
-                registerService(MacOSAPNCertificateProvider.class, new MacOSAPNCertificateProvider() {
+            private IOSAPNCertificateProvider iosProvider;
+            private MacOSAPNCertificateProvider macosProvider;
 
-                    @Override
-                    public APNAccess getAccess() {
-                        return access;
+            @Override
+            public synchronized void added(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                Properties properties = service.load(DriveEventsAPNProperty.FRAGMENT_FILE_NAME);
+                if (properties != null) {
+                    APNAccess access = createAccess(properties, OperationSystemType.IOS, service);
+                    if (access != null) {
+                        iosProvider = () -> access;
+                        registerService(IOSAPNCertificateProvider.class, iosProvider);
                     }
-                }, 1);
-                LOG.info("Successfully registered APN certificate provider for Mac OS.");
-            } else {
-                LOG.info("No default APN access configured for Mac OS in \"Push\" section in file 'drive.properties', skipping registration for default Mac OS certificate provider.");
+
+                    APNAccess macAccess = createAccess(properties, OperationSystemType.MACOS, service);
+                    if (macAccess != null) {
+                        macosProvider = () -> macAccess;
+                        registerService(MacOSAPNCertificateProvider.class, macosProvider);
+                    }
+                }
             }
-            /*
-             * register publisher
-             */
-            APNDriveEventPublisher publisher = new MacOSDriveEventPublisher();
-            eventService.registerPublisher(publisher);
-            String feedbackQueryInterval = configService.getProperty(
-                "com.openexchange.drive.events.apn.macos.feedbackQueryInterval", (String)null);
-            setupFeedbackQueries(publisher, feedbackQueryInterval);
-        } else {
-            LOG.info("Drive events for Mac OS clients via APN are disabled, skipping publisher registration.");
-        }
+
+            @Override
+            public synchronized void removed(ServiceReference<FragmentPropertiesLoader> ref, FragmentPropertiesLoader service) {
+                if (iosProvider != null) {
+                    unregisterService(iosProvider);
+                }
+                if (macosProvider != null) {
+                    unregisterService(macosProvider);
+                }
+            }
+        });
+        openTrackers();
+        /*
+         * register publishers
+         */
+        DriveEventService eventService = getServiceSafe(DriveEventService.class);
+        eventService.registerPublisher(new APNDriveEventPublisher(this, "apn", OperationSystemType.IOS, IOSAPNCertificateProvider.class));
+        eventService.registerPublisher(new APNDriveEventPublisher(this, "apn.macos", OperationSystemType.MACOS, MacOSAPNCertificateProvider.class));
     }
 
-    private static void setupFeedbackQueries(final APNDriveEventPublisher publisher, String feedbackQueryInterval) throws OXException {
-        if (Strings.isNotEmpty(feedbackQueryInterval)) {
-            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval);
-            if (60 * 1000 <= interval) {
-                Services.getService(TimerService.class, true).scheduleWithFixedDelay(new Runnable() {
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
 
-                    @Override
-                    public void run() {
-                        publisher.queryFeedbackService();
-                    }
-                }, interval, interval);
-            } else {
-                LOG.warn("Ignoring too small value '{} for APN feedback query interval.", feedbackQueryInterval);
-            }
-        }
+    @Override
+    public <S> void unregisterService(S service) {
+        super.unregisterService(service);
     }
 
     /**
-     * Gets an APN access from the configuration service, using the supplied configuration property prefix.
+     * Creates an {@link APNAccess} from the given {@link Properties} object
      *
-     * @param configService The config service
-     * @param prefix The prefix up to the last dot, for example <code>com.openexchange.drive.events.apn.macos.</code>
-     * @return The APN access, or <code>null</code> if not configured.
-     * @throws OXException
+     * @param properties The {@link Properties} object
+     * @param The OS identifier
+     * @param The {@link FragmentPropertiesLoader}
+     * @return The {@link APNAccess} or null
      */
-    private static APNAccess getAccess(ConfigurationService configService, String prefix) throws OXException {
-        String keystore = configService.getProperty(prefix + "keystore");
-        if (Strings.isEmpty(keystore)) {
-            return null;
+    protected APNAccess createAccess(Properties properties, OperationSystemType type, FragmentPropertiesLoader loader) {
+        try {
+            Map<String, String> optionals = Collections.singletonMap(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
+            String keystore = getProperty(properties, DriveEventsAPNProperty.keystore, optionals);
+
+            if (Strings.isNotEmpty(keystore)) {
+                String password = getProperty(properties, DriveEventsAPNProperty.password, optionals);
+                boolean production = Boolean.parseBoolean(getProperty(properties, DriveEventsAPNProperty.production, optionals));
+
+                // Check file path validity
+                if (new File(keystore).exists()) {
+                    return new APNAccess(keystore, password, production);
+                }
+
+                // Assume file is given as resource identifier
+                try {
+                    byte[] keystoreBytes = Streams.stream2bytes(loader.loadResource(keystore));
+                    if(keystoreBytes.length == 0) {
+                        return null;
+                    }
+                    return new APNAccess(keystoreBytes, password, production);
+                } catch (IOException e) {
+                    LOG.warn("Error instantiating APNS options from resource {}", keystore, e);
+                }
+            }
+        } catch (OXException e) {
+            // nothing to do
         }
-        String password = configService.getProperty(prefix + "password");
-        if (Strings.isEmpty(password)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(prefix + "password");
+        return null;
+    }
+
+    /**
+     * Get the given property from the {@link Properties} object
+     *
+     * @param properties The {@link Properties} object
+     * @param prop The {@link Property} to return
+     * @param optional The optional
+     * @return The string value of the property
+     * @throws OXException In case the property is missing
+     */
+    private String getProperty(Properties properties, Property prop, Map<String, String> optional) throws OXException {
+        String result = properties.getProperty(prop.getFQPropertyName(optional));
+        if (result == null) {
+            // This should never happen as long as the shipped fragment contains a proper properties file
+            LOG.error("Missing required property from fragment: {}", prop.getFQPropertyName());
+            throw OXException.general("Missing property: " + prop.getFQPropertyName());
         }
-        boolean production = configService.getBoolProperty(prefix + "production", true);
-        return new APNAccess(keystore, password, production);
+        return result;
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.drive.events.apn");
-        Services.set(null);
+        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }
 

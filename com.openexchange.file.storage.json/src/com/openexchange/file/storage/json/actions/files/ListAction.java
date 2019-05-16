@@ -59,6 +59,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.FilteringTimedResult;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -90,6 +91,9 @@ public class ListAction extends AbstractListingAction {
         }
 
         final List<String> ids = request.getIds();
+        if(ids.stream().anyMatch((x) -> x == null)) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
 
         // This is too complicated. We'd rather have layers below here aggressively check folders.
 

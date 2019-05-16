@@ -50,7 +50,6 @@
 package com.openexchange.report;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.management.MBeanException;
@@ -64,7 +63,6 @@ import com.openexchange.report.internal.LoginCounterMBean;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
-
 public interface LoginCounterService {
 
     /**
@@ -112,8 +110,8 @@ public interface LoginCounterService {
      * @param contextId, the context ID
      * @param startDate, the start date
      * @param endDate, the end date
-     * @return, a map with the client as key and the last login date as long value, which is number of
-     *          milliseconds since January 1, 1970, 00:00:00 GMT
+     *            @return, a map with the client as key and the last login date as long value, which is number of
+     *            milliseconds since January 1, 1970, 00:00:00 GMT
      * @throws OXException
      */
     public Map<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException;

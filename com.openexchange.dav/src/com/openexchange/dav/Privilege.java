@@ -357,9 +357,6 @@ public enum Privilege {
             }
             permission.setMaxPermissions();
         }
-        if (false == setPrivileges.contains(READ_ACL) || false == setPrivileges.contains(READ_CURRENT_USER_PRIVILEGE_SET)) {
-            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "not-supported-privilege", new WebdavPath(), HttpServletResponse.SC_FORBIDDEN);
-        }
         if (setPrivileges.contains(READ)) {
             permission.setFolderPermission(Permission.READ_FOLDER);
             permission.setReadPermission(Permission.READ_ALL_OBJECTS);

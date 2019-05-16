@@ -142,6 +142,12 @@ public class CustomRuleChecker implements Reloadable{
         ALL_STATI = Collections.unmodifiableList(tmp);
     }
 
+    /**
+     * Turns a comma separated list into a {@link List} of {@link String}
+     *
+     * @param input A string containing a comma separated list
+     * @return A {@link List} of {@link String}
+     */
     private List<String> toList(String input) {
         if (Strings.isEmpty(input)) {
             return null;

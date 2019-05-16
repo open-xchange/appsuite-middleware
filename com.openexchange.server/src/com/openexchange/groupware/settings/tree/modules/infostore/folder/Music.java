@@ -82,7 +82,9 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  */
 public class Music implements PreferencesItemService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Music.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Music.class);
+
     private static final String DEFAULT_ID = FileStorageAccount.DEFAULT_ID;
 
     /**
@@ -116,9 +118,9 @@ public class Music implements PreferencesItemService {
                  */
                 long start = System.currentTimeMillis();
                 if (InfostoreFacades.isInfoStoreAvailable()) {
-                    LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", System.currentTimeMillis() - start);
+                    LOG.debug("After InfostoreFacades.isInfoStoreAvailable(): {}ms", Long.valueOf(System.currentTimeMillis() - start));
                     int folderID = new OXFolderAccess(ctx).getDefaultFolderID(user.getId(), FolderObject.INFOSTORE, FolderObject.MUSIC);
-                    LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", System.currentTimeMillis() - start);
+                    LOG.debug("After OXFolderAccess(ctx).getDefaultFolder(): {}ms", Long.valueOf(System.currentTimeMillis() - start));
                     if (-1 != folderID) {
                         setting.setSingleValue(Integer.valueOf(folderID));
                     }

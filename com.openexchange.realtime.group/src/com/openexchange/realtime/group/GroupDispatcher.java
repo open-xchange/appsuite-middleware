@@ -254,23 +254,29 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
         MessageDispatcher dispatcher = GroupServiceRegistry.getInstance().getService(MessageDispatcher.class);
-        Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
-        // Iterate over snapshot
-        for (ID id : idsRef.get()) {
-            if (!ex.contains(id)) {
-                // Send a copy of the stanza
-                Stanza copy = copyFor(stanza, id);
-                stamp(copy);
-                if (inResponseTo != null) {
-                    if (inResponseTo.getTracer() != null) {
-                        copy.setTracer(inResponseTo.getTracer() + " response for " + id);
-                        copy.addLogMessages(inResponseTo.getLogEntries());
-                        copy.trace("---- Response ---");
+
+        if (dispatcher != null) {
+            Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
+            // Iterate over snapshot
+            for (ID id : idsRef.get()) {
+                if (!ex.contains(id)) {
+                    // Send a copy of the stanza
+                    Stanza copy = copyFor(stanza, id);
+                    stamp(copy);
+                    if (inResponseTo != null) {
+                        if (inResponseTo.getTracer() != null) {
+                            copy.setTracer(inResponseTo.getTracer() + " response for " + id);
+                            copy.addLogMessages(inResponseTo.getLogEntries());
+                            copy.trace("---- Response ---");
+                        }
+
                     }
 
+                    dispatcher.send(copy);
                 }
-                dispatcher.send(copy);
             }
+        } else {
+            LOG.error("Dispatcher reference unset. Cannot relay stanza!");
         }
     }
 
@@ -621,7 +627,10 @@ public class GroupDispatcher implements ComponentHandle {
      * 'com.openexchange.realtime.client.inactivity'.
      * @throws OXException
      */
-    public void handleInactivityNotice(Stanza stanza) throws OXException {}
+    @SuppressWarnings("unused")
+    public void handleInactivityNotice(Stanza stanza) throws OXException {
+        // must be implemented by sub-class
+    }
 
     @Override
     public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
@@ -637,7 +646,8 @@ public class GroupDispatcher implements ComponentHandle {
         return false;
     }
 
-    public Stanza getWelcomeMessage(ID onBehalfOf) {
+    @SuppressWarnings("unused")
+    public Stanza getWelcomeMessage(ID onBehalfOf, Stanza joinStanza) {
         Stanza welcome = new Message();
         welcome.setTo(onBehalfOf);
         welcome.setFrom(getId());
@@ -647,7 +657,8 @@ public class GroupDispatcher implements ComponentHandle {
         return welcome;
     }
 
-    public Stanza getSignOffMessage(ID onBehalfOf) {
+    @SuppressWarnings("unused")
+    public Stanza getSignOffMessage(ID onBehalfOf, Stanza leaveStanza) {
         Stanza goodbye = new Message();
         goodbye.setTo(onBehalfOf);
         goodbye.setFrom(getId());

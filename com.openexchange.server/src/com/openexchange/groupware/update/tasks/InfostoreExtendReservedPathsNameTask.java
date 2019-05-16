@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
 import static com.openexchange.tools.update.Tools.checkAndModifyColumns;
 import java.sql.Connection;
@@ -95,23 +94,25 @@ public final class InfostoreExtendReservedPathsNameTask extends UpdateTaskAdapte
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(InfostoreExtendReservedPathsNameTask.class);
         log.info("Performing update task {}", InfostoreExtendReservedPathsNameTask.class.getSimpleName());
 
-        Connection connnection = params.getConnection();
-        boolean rollback = false;
+        Connection connection = params.getConnection();
+        int rollback = 0;
         try {
-            connnection.setAutoCommit(false);
-            rollback = true;
-            checkAndModifyColumns(connnection, "infostoreReservedPaths", new Column("name", "varchar(767)"));
-            connnection.commit();
-            rollback = false;
+            connection.setAutoCommit(false);
+            rollback = 1;
+            checkAndModifyColumns(connection, "infostoreReservedPaths", new Column("name", "varchar(767)"));
+            connection.commit();
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (Exception e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connnection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            autocommit(connnection);
         }
         log.info("{} successfully performed.", InfostoreExtendReservedPathsNameTask.class.getSimpleName());
     }

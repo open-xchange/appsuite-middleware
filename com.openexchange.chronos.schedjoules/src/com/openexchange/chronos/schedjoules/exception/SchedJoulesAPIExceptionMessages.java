@@ -49,15 +49,17 @@
 
 package com.openexchange.chronos.schedjoules.exception;
 
+import com.openexchange.i18n.LocalizableStrings;
+
 /**
  * {@link SchedJoulesAPIExceptionMessages}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SchedJoulesAPIExceptionMessages {
+final class SchedJoulesAPIExceptionMessages implements LocalizableStrings {
 
-    // The requested page does not denote to a calendar.
-    static final String NO_CALENDAR_MSG = "The requested page does not denote to a calendar.";
+    // The requested page does not denote a calendar.
+    static final String NO_CALENDAR_MSG = "The requested page does not denote a calendar.";
     // You have no access to this calendar.
     public static final String NO_ACCESS_MSG = "You have no access to this calendar.";
     // The requested page was not found.
@@ -68,5 +70,4 @@ final class SchedJoulesAPIExceptionMessages {
     public static final String REMOTE_INTERNAL_SERVER_ERROR_MSG = "An internal server error occurred on SchedJoules side. There is nothing we can do about it.";
     // A remote server error occurred on SchedJoules side. There is nothing we can do about it.
     public static final String REMOTE_SERVER_ERROR_MSG = "A remote server error occurred on SchedJoules side. There is nothing we can do about it.";
-
 }

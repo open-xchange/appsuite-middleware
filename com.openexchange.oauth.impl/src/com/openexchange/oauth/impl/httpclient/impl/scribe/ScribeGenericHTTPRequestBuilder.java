@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.impl.httpclient.impl.scribe;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Map;
 import java.util.TreeMap;
 import org.apache.commons.httpclient.URIException;
@@ -215,8 +216,8 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
             return new Token(account.getToken(), account.getSecret());
         } catch (final RuntimeException e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ScribeGenericHTTPRequestBuilder.class);
-            logger.warn("Associated OAuth \"{} ({})\" account misses token information.", account.getDisplayName(), account.getId());
-            throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, account.getDisplayName(), account.getId());
+            logger.warn("Associated OAuth \"{} ({})\" account misses token information.", account.getDisplayName(), I(account.getId()));
+            throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, account.getDisplayName(), I(account.getId()));
         }
     }
 

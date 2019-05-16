@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.importers;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -122,7 +123,7 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
-        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes()));
+        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)));
     }
 
     /**
@@ -157,7 +158,7 @@ public abstract class ContactImporter extends AbstractImporter {
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, contact)) {
                     // try again
-                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
+                    LOG.debug("{} - trying again ({}/{})", e.getMessage(), I(retryCount), I(MAX_RETRIES), e);
                     continue;
                 }
                 // re-throw

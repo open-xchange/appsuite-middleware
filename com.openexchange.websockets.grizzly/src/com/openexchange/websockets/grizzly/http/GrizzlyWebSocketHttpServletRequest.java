@@ -665,7 +665,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
 
             // Add a new Locale to the list of Locales for this quality level
             Locale locale = new Locale(language, country, variant);
-            Double key = -quality;  // Reverse the order
+            Double key = Double.valueOf(-quality);  // Reverse the order
             List<Locale> values = localLocalesMap.get(key);
             if (values == null) {
                 values = new ArrayList<Locale>();

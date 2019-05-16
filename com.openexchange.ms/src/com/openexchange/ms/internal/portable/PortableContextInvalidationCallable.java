@@ -157,7 +157,7 @@ public class PortableContextInvalidationCallable extends AbstractCustomPortable 
                     Integer key = Integer.valueOf(contextID);
                     keys.add(key);
                     Object cached = contextCache.get(key);
-                    if (Context.class.isInstance(cached)) {
+                    if (null != cached && Context.class.isInstance(cached)) {
                         String[] loginInfos = ((Context) cached).getLoginInfo();
                         if (null != loginInfos && 0 < loginInfos.length) {
                             for (String loginInfo : loginInfos) {

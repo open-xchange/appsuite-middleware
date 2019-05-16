@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -92,30 +90,32 @@ public final class FolderClearDelTablesTasks extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             LOG.info("Clearing obsolete fields in 'del_oxfolder_tree'...");
             int cleared = clearDelOxfolderTree(connection);
-            LOG.info("Cleared {} rows in 'del_oxfolder_tree'.", cleared);
+            LOG.info("Cleared {} rows in 'del_oxfolder_tree'.", Integer.valueOf(cleared));
 
             LOG.info("Clearing obsolete fields in 'virtualBackupTree'...");
             cleared = clearVirtuelBackupTree(connection);
-            LOG.info("Cleared {} rows in 'virtualBackupTree'.", cleared);
+            LOG.info("Cleared {} rows in 'virtualBackupTree'.", Integer.valueOf(cleared));
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            autocommit(connection);
         }
     }
 

@@ -95,28 +95,30 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             if (correctType(con)) {
                 return;
             }
 
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             before(con);
             changeType(con);
             after(con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x.getMessage(), x);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
     }
 
@@ -124,10 +126,12 @@ public abstract class ChangeColumnTypeUpdateTask implements UpdateTaskV2 {
         return dbService;
     }
 
+    @SuppressWarnings("unused")
     protected void before(Connection con) throws SQLException {
         // May be overridden
     }
 
+    @SuppressWarnings("unused")
     protected void after(Connection con) throws SQLException {
         // May be overridden
     }

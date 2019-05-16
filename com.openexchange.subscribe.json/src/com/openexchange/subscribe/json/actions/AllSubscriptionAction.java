@@ -60,6 +60,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.subscribe.FallbackSubscriptionService;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -115,7 +116,7 @@ public class AllSubscriptionAction extends AbstractSubscribeAction {
             final Collection<Subscription> subscriptions = subscribeService.loadSubscriptions(session.getContext(), session.getUserId(), secret);
             allSubscriptions.addAll(subscriptions);
         }
-        return allSubscriptions;
+        return FallbackSubscriptionService.getInstance().addSubscriptionsFromMissingSource(session.getContext(), session.getUserId(), allSubscriptions);
     }
 
 }

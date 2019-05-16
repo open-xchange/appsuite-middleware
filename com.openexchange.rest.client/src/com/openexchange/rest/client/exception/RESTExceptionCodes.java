@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.exception;
 
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
@@ -116,6 +117,67 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
      * Error parsing following response body: "%1$s".
      */
     PARSE_ERROR("Error parsing following response body: \"%1$s\".", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 12),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An HTTP client protocol error occurred: %1$s</li>
+     */
+    CLIENT_PROTOCOL_ERROR("An HTTP client protocol error occurred: %1$s", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 13),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The URI path '%1$s' is not valid.</li>
+     */
+    INVALID_URI_PATH("The URI path '%1$s' is not valid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 14),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>The requested page was not found.</li>
+     * TODO introduced user friendly message
+     */
+    PAGE_NOT_FOUND("The requested page was not found.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 15),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An unexpected error occurred: %1$s</li>
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", MESSAGE, CATEGORY_ERROR, 16),
+    /**
+     * <li>The remote %2$s service is unavailable at the moment. There is nothing we can do about it. Please try again later.</li>
+     * <li>The remote service is unavailable at the moment: %1$s. Please try again later.</li>
+     */
+    REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", RESTExceptionMessages.REMOTE_SERVICE_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 17),
+    /**
+     * <li>An internal server error occurred on %2$s side. There is nothing we can do about it.</li>
+     * <li>A remote internal server error occurred: %1$s</li>
+     */
+    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", RESTExceptionMessages.REMOTE_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 18),
+    /**
+     * <li>A remote server error occurred on %2$s side. There is nothing we can do about it.</li>
+     * <li>A remote server error occurred: %1$s</li>
+     */
+    REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", RESTExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 19),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>An I/O error occurred: %1$s</li>
+     */
+    IO_ERROR("An I/O error occurred: %1$s", MESSAGE, CATEGORY_ERROR, 20),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>A JSON error occurred: %1$s</li>
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", MESSAGE, CATEGORY_ERROR, 21),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>No stream parser found for the specified content type '%1$s'</li>
+     */
+    NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", MESSAGE, CATEGORY_ERROR, 22),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>Bad request: %1$s</li>
+     */
+    BAD_REQUEST("Bad request: '%1$s'", MESSAGE, CATEGORY_ERROR, 23),
+    /**
+     * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
+     * <li>Forbidden: %1$s</li>
+     */
+    FORBIDDEN("Forbidden: '%1$s'", MESSAGE, CATEGORY_ERROR, 23),
 
     ;
 

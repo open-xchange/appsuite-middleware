@@ -49,6 +49,7 @@
 
 package com.openexchange.pgp.core;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.security.Security;
 import javax.crypto.Cipher;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -77,14 +78,14 @@ public class BouncyCastleProviderInitializer {
             Security.addProvider(new BouncyCastleProvider());
             LOG.debug("Bouncy Castle JCE Provider registered successfull.");
         } catch (Exception e) {
-            LOG.error("Error while registering Bouncy Castle JCE Provider: " + e.getMessage());
+            LOG.error("Error while registering Bouncy Castle JCE Provider", e);
             throw e;
         }
 
         //Checking allowed key length for AES
         int maxAllowedKeyLength = Cipher.getMaxAllowedKeyLength("AES");
         if (maxAllowedKeyLength < 256) {
-            LOG.warn("The JAVA security package installed only allows AES key length {}. Key lengths < 256 will often cause PGP to fail", maxAllowedKeyLength);
+            LOG.warn("The JAVA security package installed only allows AES key length {}. Key lengths < 256 will often cause PGP to fail", I(maxAllowedKeyLength));
         }
     }
 }

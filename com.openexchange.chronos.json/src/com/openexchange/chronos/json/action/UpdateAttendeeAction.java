@@ -72,6 +72,7 @@ import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  *
@@ -127,7 +128,10 @@ public class UpdateAttendeeAction extends ChronosAction {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
         if (!attendee.containsUri() && !attendee.containsEntity()) {
-            attendee.setEntity(requestData.getSession().getUserId());
+            ServerSession session = requestData.getSession();
+            if(session != null) {
+                attendee.setEntity(session.getUserId());
+            }
         }
         /*
          * perform update & return result

@@ -96,7 +96,7 @@ public class RoundRobinProcessor implements Processor {
         this.numThreads = numThreads;
 
         // Initialize fixed thread pool
-        ProcessorThreadPoolExecutor newPool = new ProcessorThreadPoolExecutor(name, numThreads);
+        ProcessorThreadPoolExecutor newPool = new ProcessorThreadPoolExecutor(name, numThreads, false);
         newPool.prestartAllCoreThreads();
         pool = newPool;
         taskManagers = new HashMap<Object, TaskManager>(256);

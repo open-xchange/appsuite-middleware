@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Events Bundle for APNS HTTP/2
 Bundle-SymbolicName: com.openexchange.drive.events.apn2
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.drive.events.apn2
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -35,12 +35,13 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.databind.ser.std,
  com.fasterxml.jackson.databind.type,
  com.fasterxml.jackson.databind.util,
- com.openexchange.config,
+ com.openexchange.config.lean,
  com.openexchange.configuration,
  com.openexchange.drive,
  com.openexchange.drive.events,
  com.openexchange.drive.events.subscribe,
  com.openexchange.exception,
+ com.openexchange.fragment.properties.loader,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.osgi.annotation,

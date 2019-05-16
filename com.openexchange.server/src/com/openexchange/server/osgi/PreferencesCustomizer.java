@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -62,7 +63,10 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
  */
 public class PreferencesCustomizer implements ServiceTrackerCustomizer<PreferencesItemService,PreferencesItemService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PreferencesCustomizer.class);
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PreferencesCustomizer.class);
+    }
 
     private final BundleContext context;
 
@@ -73,32 +77,41 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
 
     @Override
     public PreferencesItemService addingService(final ServiceReference<PreferencesItemService> reference) {
-        final PreferencesItemService item = context.getService(reference);
+        final PreferencesItemService preferencesItem = context.getService(reference);
         try {
-            ConfigTree.getInstance().addPreferencesItem(item);
-        } catch (final OXException e) {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Can't add service for preferences item. Path: ");
-            final String[] path = item.getPath();
-            for (int i = 0; i < path.length; i++) {
-                sb.append(path[i]);
-                sb.append('/');
-            }
-            sb.setLength(sb.length() - 1);
-            LOG.error(sb.toString(), e);
+            ConfigTree.getInstance().addPreferencesItem(preferencesItem);
+            return preferencesItem;
+        } catch (OXException e) {
+            Object arg = new Object() {
+                @Override
+                public String toString() {
+                    String[] path = preferencesItem.getPath();
+                    int length = path.length;
+                    if (length <= 0) {
+                        return "";
+                    }
+
+                    StringBuilder sb = new StringBuilder(length << 2);
+                    sb.append(path[0]);
+                    for (int i = 1; i < length; i++) {
+                        sb.append('/').append(path[i]);
+                    }
+                    return sb.toString();
+                }
+            };
+            LoggerHolder.LOG.error("Can't add service for preferences item. Path: {}", arg, e);
         }
-        return item;
+        return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
+    public void modifiedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService preferencesItem) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
-        final PreferencesItemService item = service;
-        ConfigTree.getInstance().removePreferencesItem(item);
+    public void removedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService preferencesItem) {
+        ConfigTree.getInstance().removePreferencesItem(preferencesItem);
         context.ungetService(reference);
     }
 }

@@ -142,11 +142,10 @@ final class SessionData {
         }
         longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
     }
-
+    
     void clear() {
         sessionList.clear();
         randoms.clear();
-
         longTermUserGuardian.clear();
         longTermList.clear();
     }
@@ -159,7 +158,6 @@ final class SessionData {
     List<SessionControl> rotateShort() {
         // This is the only location which alters 'sessionList' during runtime
         List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
-
         if (autoLogin && false == removedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
 
@@ -197,7 +195,6 @@ final class SessionData {
     List<SessionControl> rotateLongTerm() {
         // This is the only location which alters 'longTermList' during runtime
         List<SessionControl> removedSessions = new ArrayList<SessionControl>(longTermList.rotate(new SessionMap(256)).values());
-
         for (SessionControl sessionControl : removedSessions) {
             SessionImpl session = sessionControl.getSession();
             longTermUserGuardian.remove(session.getUserId(), session.getContextId());
@@ -247,7 +244,6 @@ final class SessionData {
         for (final SessionControl control : retval) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
         }
-
         if (!hasLongTermSession(userId, contextId)) {
             return retval.toArray(new SessionControl[retval.size()]);
         }
@@ -261,7 +257,7 @@ final class SessionData {
                 }
             }
         }
-
+        
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
@@ -301,19 +297,18 @@ final class SessionData {
         // Removing sessions is a write operation.
         final List<SessionControl> list = new ArrayList<SessionControl>();
         for (final SessionContainer container : sessionList) {
-            list.addAll(container.removeSessionsByContexts(contextIds));
+            List<SessionControl> removed = container.removeSessionsByContexts(contextIds);
+            list.addAll(removed);
         }
         for (final SessionControl control : list) {
             unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID(), true);
         }
-
         TIntSet contextIdsToCheck = new TIntHashSet(contextIds.size());
         for (int contextId : contextIds) {
             if (hasLongTermSession(contextId)) {
                 contextIdsToCheck.add(contextId);
             }
         }
-
         for (final SessionMap longTerm : longTermList) {
             for (SessionControl control : longTerm.values()) {
                 Session session = control.getSession();
@@ -325,6 +320,7 @@ final class SessionData {
                 }
             }
         }
+
         return list;
     }
 
@@ -539,7 +535,6 @@ final class SessionData {
         try {
             SessionControl control = sessionList.get(0).put(session, addIfAbsent);
             randoms.put(session.getRandomToken(), session.getSessionID());
-
             scheduleRandomTokenRemover(session.getRandomToken());
             return control;
         } catch (IndexOutOfBoundsException e) {
@@ -935,6 +930,32 @@ final class SessionData {
                 LOG.error("", t);
             }
         }
+    }
+
+    /**
+     * Gets the number of sessions in the short term container
+     * 
+     * @return The number of sessions in the short term container
+     */
+    public int getNumShortTerm() {
+        int result = 0;
+        for (final SessionContainer container : sessionList) {
+            result += container.size();
+        }
+        return result;
+    }
+    
+    /**
+     * Gets the number of sessions in the long term container
+     * 
+     * @return the number of sessions in the long term container
+     */
+    public int getNumLongTerm() {
+        int result = 0;
+        for (final SessionMap container : longTermList) {
+            result += container.size();
+        }
+        return result;
     }
 
 }

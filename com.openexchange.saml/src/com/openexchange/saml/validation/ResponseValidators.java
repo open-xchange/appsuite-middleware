@@ -71,7 +71,8 @@ import com.openexchange.saml.tools.SignatureHelper;
  */
 public class ResponseValidators {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ResponseValidator.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(ResponseValidator.class);
 
     /**
      * Verifies the signature of the given response object against the given validation credential.

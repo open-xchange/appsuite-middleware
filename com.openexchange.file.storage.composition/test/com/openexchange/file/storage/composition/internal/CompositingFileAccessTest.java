@@ -49,11 +49,11 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +99,7 @@ import com.openexchange.threadpool.ThreadPools;
 @PrepareForTest({ ThreadPools.class })
 public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAccess implements FileStorageService, FileStorageAccountAccess, FileStorageAccountManager {
 
-    private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
+    // private static final InputStream EMPTY_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
 
     private String serviceId;
 
@@ -125,7 +125,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
 
      @Test
      public void testExists() throws OXException {
-        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(true);
+        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(Boolean.TRUE);
 
         assertTrue(exists(fileId.toUniqueID(), "12"));
         verifyAccount();
@@ -136,11 +136,11 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
      @Test
      public void testGetDeltaWithoutSort() throws OXException {
 
-        fileAccess.expectCall("getDelta", folderId.getFolderId(), 12L, Arrays.asList(
+        fileAccess.expectCall("getDelta", folderId.getFolderId(), L(12L), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
             File.Field.FOLDER_ID,
-            File.Field.LAST_MODIFIED), true);
+            File.Field.LAST_MODIFIED), Boolean.TRUE);
 
         getDelta(folderId.toUniqueID(), 12, Arrays.asList(File.Field.TITLE), true);
 
@@ -151,11 +151,11 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
      @Test
      public void testGetDeltaWithSort() throws OXException {
 
-        fileAccess.expectCall("getDelta", folderId.getFolderId(), 12L, Arrays.asList(
+        fileAccess.expectCall("getDelta", folderId.getFolderId(), L(12L), Arrays.asList(
             File.Field.TITLE,
             File.Field.ID,
             File.Field.FOLDER_ID,
-            File.Field.LAST_MODIFIED), File.Field.TITLE, SortDirection.DESC, true);
+            File.Field.LAST_MODIFIED), File.Field.TITLE, SortDirection.DESC, Boolean.TRUE);
 
         getDelta(folderId.toUniqueID(), 12, Arrays.asList(File.Field.TITLE), File.Field.TITLE, SortDirection.DESC, true);
 
@@ -262,7 +262,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
      @Test
      public void testLock() throws OXException {
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), 1337L);
+        fileAccess.expectCall("lock", fileId.getFolderId(), fileId.getFileId(), L(1337L));
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -298,7 +298,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
      @Test
      public void testRemoveDocument() throws OXException {
         fileAccess.expectCall("startTransaction");
-        fileAccess.expectCall("removeDocument", folderId.getFolderId(), 12L);
+        fileAccess.expectCall("removeDocument", folderId.getFolderId(), L(12L));
         fileAccess.expectCall("commit");
         fileAccess.expectCall("finish");
 
@@ -327,7 +327,7 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
             File.Field.TITLE,
             File.Field.ID,
             File.Field.FOLDER_ID,
-            File.Field.LAST_MODIFIED), folderId.getFolderId(), false, File.Field.TITLE, SortDirection.DESC, 10, 20);
+            File.Field.LAST_MODIFIED), folderId.getFolderId(), Boolean.FALSE, File.Field.TITLE, SortDirection.DESC, I(10), I(20));
 
         search("query", Arrays.asList(File.Field.TITLE), folderId.toUniqueID(), false, File.Field.TITLE, SortDirection.DESC, 10, 20);
 

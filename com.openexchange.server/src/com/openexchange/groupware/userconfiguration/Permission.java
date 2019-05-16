@@ -88,7 +88,6 @@ public enum Permission {
     COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
     MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
     SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
-    PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
     ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
     USM(UserConfiguration.USM, "USM"),
     /** @deprecated */

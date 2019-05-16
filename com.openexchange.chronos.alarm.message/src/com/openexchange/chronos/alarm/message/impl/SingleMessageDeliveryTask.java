@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.alarm.message.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -278,11 +279,11 @@ class SingleMessageDeliveryTask implements Runnable {
         this.administrativeCalendarAccountService = administrativeCalendarAccountService;
         this.rateLimitFactory = rateLimitFactory;
         this.recurrenceService = recurrenceService;
-
     }
 
     @Override
     public void run() {
+        LOG.trace("Started SingleMessageDeliveryTask for event {} and alarm {} in context {}", trigger.getEventId(), I(alarm.getId()), I(ctx.getContextId()));
         Connection writeCon = null;
         boolean isReadOnly = true;
         boolean processFinished = false;
@@ -316,13 +317,14 @@ class SingleMessageDeliveryTask implements Runnable {
                 writeCon.commit();
             }
         } catch (OXException | SQLException e) {
+            LOG.error("Unable to send message.", e);
             if (writeCon != null) {
                 // rollback the last transaction
                 Databases.rollback(writeCon);
                 // if the error occurred during the process retry the hole operation once
                 if (processFinished == false) {
                     try {
-                        LOG.debug("Unable to send message. Retrying operation...", e);
+                        LOG.debug("Retrying operation...");
                         writeCon.setAutoCommit(false);
                         // do the delivery and update the db entries (e.g. like setting the acknowledged field)
                         Event event = prepareEvent(writeCon);
@@ -337,12 +339,13 @@ class SingleMessageDeliveryTask implements Runnable {
                             checkEvent(writeCon, event);
                             writeCon.commit();
                         }
-                    } catch (@SuppressWarnings("unused") SQLException | OXException e1) {
+                    } catch (SQLException | OXException e1) {
                         // Nothing that can be done. Do a rollback and reset the processed value if necessary
+                        LOG.trace(e1.getMessage(), e1);
                         Databases.rollback(writeCon);
                         if (processFinished == false) {
                             try {
-                                storage.setProcessingStatus(writeCon, Collections.singletonMap(new Pair<>(ctx.getContextId(), account), Collections.singletonList(trigger)), 0l);
+                                storage.setProcessingStatus(writeCon, Collections.singletonMap(new Pair<>(I(ctx.getContextId()), I(account)), Collections.singletonList(trigger)), Long.valueOf(0l));
                                 isReadOnly = false;
                             } catch (@SuppressWarnings("unused") OXException e2) {
                                 // ignore
@@ -351,6 +354,9 @@ class SingleMessageDeliveryTask implements Runnable {
                     }
                 }
             }
+        } catch(Exception ex) {
+            LOG.error(ex.getMessage(), ex);
+            throw ex;
         } finally {
             callback.remove(new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             Databases.autocommit(writeCon);
@@ -377,8 +383,8 @@ class SingleMessageDeliveryTask implements Runnable {
     private Event prepareEvent(Connection writeCon) throws OXException {
         SimpleDBProvider provider = new SimpleDBProvider(writeCon, writeCon);
         CalendarStorage calStorage = factory.create(ctx, account, optEntityResolver(ctx.getContextId()), provider, DBTransactionPolicy.NO_TRANSACTIONS);
-        AlarmTrigger loadedTrigger = calStorage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm());
-        if (loadedTrigger == null || loadedTrigger.getProcessed() != processed) {
+        AlarmTrigger loadedTrigger = calStorage.getAlarmTriggerStorage().loadTrigger(trigger.getAlarm().intValue());
+        if (loadedTrigger == null || loadedTrigger.getProcessed().longValue() != processed) {
             // Abort since the triggers is either gone or picked up by another node (e.g. because of an update)
             LOG.trace("Skipped message alarm task for {}. Its trigger is not up to date!", new Key(ctx.getContextId(), account, trigger.getEventId(), alarm.getId()));
             return null;
@@ -387,7 +393,7 @@ class SingleMessageDeliveryTask implements Runnable {
         CalendarAccount calendarAccount = null;
         AdministrativeCalendarProvider adminCalProvider = null;
         try {
-            calendarAccount = administrativeCalendarAccountService.getAccount(ctx.getContextId(), trigger.getUserId(), account);
+            calendarAccount = administrativeCalendarAccountService.getAccount(ctx.getContextId(), trigger.getUserId().intValue(), account);
             if (calendarAccount == null) {
                 LOG.trace("Unable to load calendar account.");
                 return null;
@@ -412,16 +418,15 @@ class SingleMessageDeliveryTask implements Runnable {
         for (Alarm tmpAlarm : alarms) {
             if (tmpAlarm.getId() == alarm.getId()) {
                 tmpAlarm.setAcknowledged(new Date());
+                tmpAlarm.setTimestamp(System.currentTimeMillis());
                 break;
             }
         }
-        calStorage.getAlarmStorage().updateAlarms(event, trigger.getUserId(), alarms);
+        calStorage.getAlarmStorage().updateAlarms(event, trigger.getUserId().intValue(), alarms);
         Map<Integer, List<Alarm>> loadAlarms = calStorage.getAlarmStorage().loadAlarms(event);
         calStorage.getAlarmTriggerStorage().deleteTriggers(event.getId());
         calStorage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
-        if (adminCalProvider != null && calendarAccount != null) {
-            adminCalProvider.touchEvent(ctx, calendarAccount, trigger.getEventId());
-        }
+        adminCalProvider.touchEvent(ctx, calendarAccount, trigger.getEventId());
         return event;
     }
 
@@ -433,11 +438,11 @@ class SingleMessageDeliveryTask implements Runnable {
     private void sendMessage(Event event) {
         Key key = new Key(ctx.getContextId(), account, event.getId(), alarm.getId());
         try {
-            int userId = trigger.getUserId();
+            int userId = trigger.getUserId().intValue();
             int contextId = ctx.getContextId();
             if (notificationService.isEnabled(userId, contextId)) {
-                if (checkRateLimit(alarm.getAction(), notificationService.getRate(userId, contextId), trigger.getUserId(), ctx.getContextId())) {
-                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId(), trigger.getTime().longValue());
+                if (checkRateLimit(alarm.getAction(), notificationService.getRate(userId, contextId), trigger.getUserId().intValue(), ctx.getContextId())) {
+                    notificationService.send(event, alarm, ctx.getContextId(), account, trigger.getUserId().intValue(), trigger.getTime().longValue());
                     LOG.trace("Message successfully send for {}", key);
                 } else {
                     LOG.info("Due to the rate limit it is not possible to send the message for {}", key);
@@ -487,7 +492,7 @@ class SingleMessageDeliveryTask implements Runnable {
         if (triggers.isEmpty() == false) {
             CalendarStorage calStorage = factory.create(ctx, account, optEntityResolver(cid), new SimpleDBProvider(writeCon, writeCon), DBTransactionPolicy.NO_TRANSACTIONS);
             for (AlarmTrigger tmpTrigger : triggers) {
-                callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, tmpTrigger.getEventId(), tmpTrigger.getAlarm()), tmpTrigger);
+                callback.scheduleTaskForEvent(writeCon, calStorage, new Key(cid, account, tmpTrigger.getEventId(), tmpTrigger.getAlarm().intValue()), tmpTrigger);
             }
             return false;
         }

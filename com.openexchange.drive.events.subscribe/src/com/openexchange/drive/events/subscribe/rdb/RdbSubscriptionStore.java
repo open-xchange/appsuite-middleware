@@ -199,7 +199,8 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             /*
              * Delete for whole schema using connection for representative context
              */
-            Connection connection = databaseService.getWritable(contextID);
+            int cid = contextID.intValue();
+            Connection connection = databaseService.getWritable(cid);
             try {
                 removed += deleteSubscriptionsForToken(connection, serviceID, token, timestamp);
             } catch (SQLException e) {
@@ -209,7 +210,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                     throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
                 }
             } finally {
-                databaseService.backWritable(contextID, connection);
+                databaseService.backWritable(cid, connection);
             }
         }
         return removed;

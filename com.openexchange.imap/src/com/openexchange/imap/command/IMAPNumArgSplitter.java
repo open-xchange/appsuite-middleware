@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.command;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Message;
@@ -202,9 +203,10 @@ public final class IMAPNumArgSplitter {
         if (!keepOrder) {
             l.sort();
         }
-        return split ? split(
-            getNumArg(l),
-            (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed)) : new String[] { getNumArg(l) };
+        if (!split) {
+            return new String[] { getNumArg(l) };
+        }
+        return split(getNumArg(l), (-1 == consumed ? MAX_IMAP_COMMAND_LENGTH_WITH_DEFAULT_CONSUMED : MAX_IMAP_COMMAND_LENGTH - consumed));
     }
 
     /**
@@ -277,30 +279,29 @@ public final class IMAPNumArgSplitter {
      * @return The number argument or an empty string if specified numbers are empty
      */
     public static String getNumArg(final TIntList numbers) {
-        final int size = numbers.size();
+        int size = numbers.size();
         if (0 == size) {
             return "";
         }
+
         int prev = numbers.get(0);
         boolean contiguous = false;
-        final StringBuilder sb = new StringBuilder(size << 2);
+        StringBuilder sb = new StringBuilder(size << 2);
         sb.append(prev);
         for (int i = 1; i < size; i++) {
-            final int current = numbers.get(i);
+            int current = numbers.get(i);
             if (prev + 1 == current) {
-                prev++;
                 contiguous = true;
             } else if (contiguous) {
                 sb.append(':').append(prev);
                 sb.append(',');
                 sb.append(current);
-                prev = current;
                 contiguous = false;
             } else {
                 sb.append(',');
                 sb.append(current);
-                prev = current;
             }
+            prev = current;
         }
         if (contiguous) {
             sb.append(':').append(prev);
@@ -392,8 +393,7 @@ public final class IMAPNumArgSplitter {
         while (offset < len) {
             int endPos = offset + maxLen;
             if (endPos < len) {
-                char c = numArg.charAt(endPos);
-                while ((c != ',') && (endPos > -1)) {
+                for (char c = numArg.charAt(endPos); (c != ',') && (endPos >= 0);) {
                     c = numArg.charAt(--endPos);
                 }
             } else {
@@ -401,7 +401,7 @@ public final class IMAPNumArgSplitter {
             }
             if (endPos <= offset) {
                 final int p = numArg.indexOf(',', offset);
-                LOG.warn("Token does not fit into given max size of {} bytes: {}", maxLen, numArg.substring(offset, p));
+                LOG.warn("Token does not fit into given max size of {} bytes: {}", I(maxLen), numArg.substring(offset, p));
                 offset = p + 1;
             } else {
                 tmp.add(numArg.substring(offset, endPos));

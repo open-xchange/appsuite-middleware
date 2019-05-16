@@ -76,6 +76,7 @@ public class Bug19827Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -105,6 +106,7 @@ public class Bug19827Test extends AbstractAJAXSession {
         response.fillObject(contact);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

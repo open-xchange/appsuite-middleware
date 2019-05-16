@@ -57,6 +57,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link ITipHandlerTest}
@@ -75,7 +76,7 @@ public class ITipHandlerTest {
     private CalendarParameters calendarParameters;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -94,7 +95,7 @@ public class ITipHandlerTest {
     @Test
     public void testHandle_calendarParametersDoesNotContainSuppressItip_process() {
         Mockito.when(calendarEvent.getCalendarParameters()).thenReturn(calendarParameters);
-        Mockito.when(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)).thenReturn(Boolean.FALSE);
+        Mockito.when(Autoboxing.B(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP))).thenReturn(Boolean.FALSE);
 
         Assert.assertTrue(handler.shouldHandle(calendarEvent));
     }
@@ -102,7 +103,7 @@ public class ITipHandlerTest {
     @Test
     public void testHandle_calendarParametersDoesNotContainSuppressItipAndFalse_process() {
         Mockito.when(calendarEvent.getCalendarParameters()).thenReturn(calendarParameters);
-        Mockito.when(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)).thenReturn(Boolean.TRUE);
+        Mockito.when(Autoboxing.B(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP))).thenReturn(Boolean.TRUE);
         Mockito.when(calendarParameters.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class)).thenReturn(Boolean.FALSE);
 
         Assert.assertTrue(handler.shouldHandle(calendarEvent));
@@ -111,7 +112,7 @@ public class ITipHandlerTest {
     @Test
     public void testHandle_calendarParametersDoesNotContainSuppressItipAndTrue_return() {
         Mockito.when(calendarEvent.getCalendarParameters()).thenReturn(calendarParameters);
-        Mockito.when(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)).thenReturn(Boolean.TRUE);
+        Mockito.when(Autoboxing.B(calendarParameters.contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP))).thenReturn(Boolean.TRUE);
         Mockito.when(calendarParameters.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class)).thenReturn(Boolean.TRUE);
 
         Assert.assertFalse(handler.shouldHandle(calendarEvent));

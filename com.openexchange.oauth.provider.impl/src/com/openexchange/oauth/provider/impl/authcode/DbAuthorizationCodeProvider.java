@@ -128,24 +128,26 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         AuthCodeInfo authCodeInfo = null;
         UserizedToken parsedCode = UserizedToken.parse(authCode);
         Connection con = dbService.getWritable(parsedCode.getContextId());
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             authCodeInfo = redeemAuthCode(parsedCode.getContextId(), parsedCode.getUserId(), authCode, con);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
 
             return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             if (null == authCodeInfo) {
                 dbService.backWritableAfterReading(parsedCode.getContextId(), con);
             } else {

@@ -178,6 +178,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 600 --> com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor
      *   &bull; 700 --> com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch
      *   &bull; 701 --> com.openexchange.oauth.impl.internal.hazelcast.PortableMultipleCallbackRegistryFetch
+     *   &bull; 800 --> com.openexchange.multifactor.storage.hazelcast.PortableMultifactorToken
      * </pre>
      *
      * @return The class ID

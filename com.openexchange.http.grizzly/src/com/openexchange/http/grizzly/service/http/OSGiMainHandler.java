@@ -91,6 +91,7 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -208,7 +209,7 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
             // first lookup needs to be done for full match.
             boolean cutOff = false;
             while (true) {
-                LOG.debug("CutOff: {}, alias: {}", cutOff, alias);
+                LOG.debug("CutOff: {}, alias: {}", B(cutOff), alias);
                 alias = OSGiCleanMapper.map(alias, cutOff);
                 if (alias == null) {
                     if (cutOff) {

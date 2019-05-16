@@ -101,15 +101,14 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         check(session.getContextId(), folderId);
         Contact contact = null;
         if (LdapContactCache.isCached(fields)) {
-            contact = cache.get(Integer.valueOf(parse(id)));
+            contact = cache.get(parse(id));
         }
         if (null == contact) {
             return doGet(session, folderId, id, fields);
-        } else {
-            Contact fullContact = doGet(session, folderId, id, LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE));
-            super.mapper.mergeDifferences(fullContact, contact);
-            return fullContact;
         }
+        Contact fullContact = doGet(session, folderId, id, LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE));
+        super.mapper.mergeDifferences(fullContact, contact);
+        return fullContact;
     }
 
     @Override
@@ -118,11 +117,10 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         if (LdapContactCache.isCached(fields)) {
             Collection<Contact> contacts = cache.values();
             return sort(contacts, sortOptions);
-        } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
-            SearchIterator<Contact> searchIterator = doAll(session, folderId, unknownFields, sortOptions);
-            return mergeCacheData(session, searchIterator, fields);
         }
+        ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
+        SearchIterator<Contact> searchIterator = doAll(session, folderId, unknownFields, sortOptions);
+        return mergeCacheData(session, searchIterator, fields);
     }
 
     @Override
@@ -130,11 +128,10 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         check(session.getContextId(), folderId);
         if (LdapContactCache.isCached(fields)) {
             return sort(cache.list(parse(ids)), sortOptions);
-        } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
-            SearchIterator<Contact> searchIterator = doList(session, folderId, ids, unknownFields, sortOptions);
-            return mergeCacheData(session, searchIterator, fields);
         }
+        ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
+        SearchIterator<Contact> searchIterator = doList(session, folderId, ids, unknownFields, sortOptions);
+        return mergeCacheData(session, searchIterator, fields);
     }
 
     @Override
@@ -142,9 +139,8 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         check(session.getContextId(), folderId);
         if (cache.isCacheReady()) {
             return cache.values().size();
-        } else {
-            return super.count(session, folderId, canReadAll);
         }
+        return super.count(session, folderId, canReadAll);
     }
 
     @Override
@@ -158,11 +154,10 @@ public class CachingLdapContactStorage extends LdapContactStorage {
                 }
             }
             return sort(contacts, sortOptions);
-        } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
-            SearchIterator<Contact> searchIterator = doModified(session, folderID, since, unknownFields, sortOptions);
-            return mergeCacheData(session, searchIterator, fields);
         }
+        ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
+        SearchIterator<Contact> searchIterator = doModified(session, folderID, since, unknownFields, sortOptions);
+        return mergeCacheData(session, searchIterator, fields);
     }
 
     @Override
@@ -170,11 +165,10 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         checkContext(session.getContextId());
         if (LdapContactCache.isCached(fields) && LdapContactCache.isCached(term)) {
             return sort(filter(cache.values(), term, Tools.getLocale(sortOptions)), sortOptions);
-        } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
-            SearchIterator<Contact> searchIterator = doSearch(session, term, unknownFields, sortOptions);
-            return mergeCacheData(session, searchIterator, fields);
         }
+        ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
+        SearchIterator<Contact> searchIterator = doSearch(session, term, unknownFields, sortOptions);
+        return mergeCacheData(session, searchIterator, fields);
     }
 
     private SearchIterator<Contact> mergeCacheData(Session session, SearchIterator<Contact> searchIterator, ContactField[] originalRequestedFields) throws OXException {
@@ -210,11 +204,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
     }
 
     private static <O> Collection<Contact> filter(Collection<Contact> contacts,  SearchTerm<O> term, Locale locale) throws OXException {
-        if (null != contacts && null != term) {
-            return new SearchFilter(term, locale).filter(contacts);
-        } else {
-            return contacts;
-        }
+        return null != contacts && null != term ? new SearchFilter(term, locale).filter(contacts) : contacts;
     }
 
     private static SearchIterator<Contact> sort(List<Contact> contacts, SortOptions sortOptions) {

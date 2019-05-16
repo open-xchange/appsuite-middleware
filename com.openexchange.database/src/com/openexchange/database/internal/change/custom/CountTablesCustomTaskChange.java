@@ -132,15 +132,15 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CountTablesCustomTaskChange.class);
         Connection configDbCon = ((JdbcConnection) databaseConnection).getUnderlyingConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(configDbCon);
-            rollback = true;
+            rollback = 1;
 
             execute(configDbCon, logger);
 
             configDbCon.commit();
-            rollback = false;
+            rollback = 2;
 
             logger.info("Count tables for ConfigDB successfully initialized");
         } catch (SQLException e) {
@@ -153,10 +153,12 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             logger.error("Failed to initialize count tables for ConfigDB", e);
             throw new CustomChangeException("Runtime error", e);
         } finally {
-            if (rollback) {
-                Databases.rollback(configDbCon);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(configDbCon);
+                }
+                Databases.autocommit(configDbCon);
             }
-            Databases.autocommit(configDbCon);
         }
     }
 

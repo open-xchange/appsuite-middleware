@@ -12,10 +12,6 @@ import com.openexchange.test.FolderTestManager;
 
 public class MoveTest extends AppointmentTest {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MoveTest.class);
-    private String login;
-    private String password;
-    private String context;
     private int objectId;
 
     public MoveTest() {
@@ -26,9 +22,6 @@ public class MoveTest extends AppointmentTest {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        login = testUser.getLogin();
-        context = testUser.getContext();
-        password = testUser.getPassword();
     }
 
     @Test

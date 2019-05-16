@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.actions;
 
+import static com.openexchange.java.Autoboxing.B;
 import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -98,7 +99,7 @@ public class GetLinkAction extends AbstractShareAction {
                 jsonResult.put("expiry_date", getParser().addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData, session)));
             }
             jsonResult.putOpt("password", shareLink.getGuest().getPassword());
-            jsonResult.putOpt("includeSubfolders", shareLink.isIncludeSubfolders());
+            jsonResult.putOpt("includeSubfolders", B(shareLink.isIncludeSubfolders()));
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

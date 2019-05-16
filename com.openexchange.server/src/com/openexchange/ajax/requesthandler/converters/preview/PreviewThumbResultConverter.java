@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 import static com.google.common.net.HttpHeaders.CACHE_CONTROL;
 import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.PRAGMA;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.InputStream;
@@ -193,8 +194,8 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
                             cachedPreview.getFileName(),
                             cachedPreview.getFileType(),
                             result.getHeader(ETAG),
-                            session.getUserId(),
-                            session.getContextId());
+                            I(session.getUserId()),
+                            I(session.getContextId()));
                     } else {
                         /*
                          * Generate preview asynchronously and put to cache. Make sure to create copies of result and requestdata to use for
@@ -320,7 +321,7 @@ public class PreviewThumbResultConverter extends AbstractPreviewResultConverter 
      * @param result The current {@link AJAXRequestResult}
      */
     private void preventCaching(AJAXRequestData requestData, AJAXRequestResult result) {
-        requestData.putParameter("keepCachingHeaders", Boolean.toString(Boolean.TRUE));
+        requestData.putParameter("keepCachingHeaders", "true");
         result.removeHeader(ETAG);
         result.setExpires(LENIENT_EXPIRY);
         result.setHeader(CACHE_CONTROL, CACHE_VALUE);

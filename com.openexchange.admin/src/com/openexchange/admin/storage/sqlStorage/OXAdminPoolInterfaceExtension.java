@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
@@ -59,14 +58,22 @@ import com.openexchange.database.SchemaInfo;
  */
 public interface OXAdminPoolInterfaceExtension extends OXAdminPoolInterface {
 
-    // SPECIAL METHODS FOR CONTEXT MOVING
-    public int getDBPoolIdForContextId(int context_id) throws PoolException;
-    public Connection getWRITEConnectionForPoolId(int db_pool_id,String db_schema) throws PoolException;
-    public void pushWRITEConnectionForPoolId(int db_pool_id,Connection con) throws PoolException;
-    public void resetPoolMappingForContext(int context_id) throws PoolException;
-    public String getSchemeForContextId(int context_id) throws PoolException;
-    public SchemaInfo getSchemaInfoForContextId(int context_id) throws PoolException;
+    /*
+     * SPECIAL METHODS FOR CONTEXT MOVING
+     */
+    int getDBPoolIdForContextId(int context_id) throws PoolException;
 
-    public Connection getWRITENoTimeoutConnectionForPoolId(int db_pool_id, String schema_name) throws PoolException;
-    public void pushWRITENoTimeoutConnectionForPoolId(int db_pool_id, Connection conny) throws PoolException;
+    Connection getWRITEConnectionForPoolId(int db_pool_id, String db_schema) throws PoolException;
+
+    void pushWRITEConnectionForPoolId(int db_pool_id, Connection con) throws PoolException;
+
+    void resetPoolMappingForContext(int context_id) throws PoolException;
+
+    String getSchemeForContextId(int context_id) throws PoolException;
+
+    SchemaInfo getSchemaInfoForContextId(int context_id) throws PoolException;
+
+    Connection getWRITENoTimeoutConnectionForPoolId(int db_pool_id, String schema_name) throws PoolException;
+
+    void pushWRITENoTimeoutConnectionForPoolId(int db_pool_id, Connection conny) throws PoolException;
 }

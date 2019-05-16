@@ -51,6 +51,7 @@ package com.openexchange.admin.console;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -65,8 +66,9 @@ public class StringPrintStream extends PrintStream {
      *
      * @param capacity The capacity
      * @return The new {@link StringPrintStream} instance
+     * @throws UnsupportedEncodingException If the output stream can't be initialized with <code>UTF-8</code> encoding
      */
-    public static StringPrintStream newInstance(final int capacity) {
+    public static StringPrintStream newInstance(final int capacity) throws UnsupportedEncodingException {
         return new StringPrintStream(new StringOutputStream(capacity));
     }
 
@@ -74,8 +76,8 @@ public class StringPrintStream extends PrintStream {
 
     final StringOutputStream sos;
 
-    private StringPrintStream(final StringOutputStream sos) {
-        super(sos);
+    private StringPrintStream(final StringOutputStream sos) throws UnsupportedEncodingException {
+        super(sos, false, com.openexchange.java.Charsets.UTF_8_NAME);
         this.sos = sos;
     }
 

@@ -128,7 +128,7 @@ public class ListFileSharesTest extends ShareTest {
         /*
          * discover & check guest
          */
-        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getId(), matchingPermission.getEntity());
         checkGuestPermission(permission, guest);
     }
 
@@ -139,7 +139,7 @@ public class ListFileSharesTest extends ShareTest {
          */
         String filename = randomUID();
         FileStorageGuestObjectPermission guestPermission = randomGuestObjectPermission();
-        FolderObject folder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
+        FolderObject folder = insertPublicFolder(FolderObject.INFOSTORE);
         File file = insertSharedFile(folder.getObjectID(), filename, guestPermission);
         /*
          * check permissions
@@ -174,7 +174,7 @@ public class ListFileSharesTest extends ShareTest {
          */
         String filename = randomUID();
         FileStorageGuestObjectPermission guestPermission = randomGuestObjectPermission();
-        FolderObject folder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
+        FolderObject folder = insertPublicFolder(FolderObject.INFOSTORE);
         FolderObject subfolder = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, folder.getObjectID());
         File file = insertSharedFile(subfolder.getObjectID(), filename, guestPermission);
         /*

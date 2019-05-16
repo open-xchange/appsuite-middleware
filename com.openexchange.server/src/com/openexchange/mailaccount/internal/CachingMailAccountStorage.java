@@ -596,22 +596,24 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         dropSessionParameter(userId, contextId);
 
         Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             updateMailAccount(mailAccount, attributes, userId, contextId, session, con, false);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }

@@ -50,14 +50,12 @@
 package com.openexchange.group.json.actions;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link GetAction}
@@ -68,6 +66,7 @@ public final class GetAction extends AbstractGroupAction {
 
     /**
      * Initializes a new {@link GetAction}.
+     * 
      * @param services
      */
     public GetAction(final ServiceLookup services) {
@@ -75,9 +74,8 @@ public final class GetAction extends AbstractGroupAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        Group group = GroupStorage.getInstance().getGroup(req.checkInt(PARAMETER_ID), req.getSession().getContext());
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException {
+        Group group = services.getServiceSafe(GroupService.class).getGroup(req.getSession().getContext(), req.checkInt(PARAMETER_ID));
         return new AJAXRequestResult(group, group.getLastModified(), "group");
     }
-
 }

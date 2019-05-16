@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.sql.SQLException;
 import java.util.Locale;
@@ -666,7 +667,7 @@ public final class FolderWriter extends DataWriter {
                 default:
 
                     if (!this.fields.knows(field)) {
-                        LOG.warn("Unknown folder field: {}", field);
+                        LOG.warn("Unknown folder field: {}", I(field));
                     }
 
                     final AdditionalFolderField folderField = this.fields.get(field);

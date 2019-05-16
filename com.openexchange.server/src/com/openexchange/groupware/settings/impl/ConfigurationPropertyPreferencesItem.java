@@ -68,9 +68,7 @@ import com.openexchange.session.Session;
 public class ConfigurationPropertyPreferencesItem implements PreferencesItemService {
 
     private final ConfigurationService config;
-
     private final String[] path;
-
     private final String key;
 
     public ConfigurationPropertyPreferencesItem(String key, ConfigurationService config, String... path) {
@@ -87,21 +85,20 @@ public class ConfigurationPropertyPreferencesItem implements PreferencesItemServ
 
     @Override
     public IValueHandler getSharedValue() {
-        return new Property();
-    }
+        final ConfigurationService config = this.config;
+        final String key = this.key;
+        return new ReadOnlyValue() {
 
-    protected final class Property extends ReadOnlyValue {
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(convert(config.getProperty(key)));
+            }
 
-        @Override
-        public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-            setting.setSingleValue(convert(config.getProperty(key)));
-        }
-
-        @Override
-        public boolean isAvailable(UserConfiguration userConfig) {
-            return config.getProperty(key) != null;
-        }
-
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                return config.getProperty(key) != null;
+            }
+        };
     }
 
     public Object convert(String property) {

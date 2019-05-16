@@ -93,6 +93,8 @@ public class DistributionListEntryObject implements Serializable {
 
     private int folderid;
 
+    private String sortName;
+
     private boolean b_entry_id;
 
     private boolean b_emailaddress;
@@ -106,6 +108,8 @@ public class DistributionListEntryObject implements Serializable {
     private boolean b_emailfield;
 
     private boolean b_folderid;
+
+    private boolean b_sortName;
 
     /**
      * Initializes a new {@link DistributionListEntryObject}
@@ -158,6 +162,15 @@ public class DistributionListEntryObject implements Serializable {
         return firstname;
     }
 
+    /**
+     * Gets the sortName
+     *
+     * @return The sortName
+     */
+    public String getSortName() {
+        return sortName;
+    }
+
     // SET METHODS
     public void setEntryID(final int entry_id) {
         this.entry_id = entry_id;
@@ -182,6 +195,16 @@ public class DistributionListEntryObject implements Serializable {
     public void setFirstname(final String firstname) {
         this.firstname = firstname;
         b_firstname = true;
+    }
+
+    /**
+     * Sets the sortName
+     *
+     * @param sortName The sortName to set
+     */
+    public void setSortName(String sortName) {
+        this.sortName = sortName;
+        this.b_sortName = true;
     }
 
     /**
@@ -257,6 +280,14 @@ public class DistributionListEntryObject implements Serializable {
         b_folderid = false;
     }
 
+    /**
+     * Removes the sort name
+     */
+    public void removeSortName() {
+        sortName = null;
+        b_sortName = false;
+    }
+
     // CONTAINS METHODS
     public boolean containsEntryID() {
         return b_entry_id;
@@ -286,6 +317,15 @@ public class DistributionListEntryObject implements Serializable {
         return b_folderid;
     }
 
+    /**
+     * Whether the {@link DistributionListEntryObject} contains a sort name or not
+     * 
+     * @return true if it contains a sort name, false otherwise
+     */
+    public boolean containsSortName() {
+        return b_sortName;
+    }
+
     @Override
     public int hashCode() {
         int result = 17;
@@ -295,15 +335,21 @@ public class DistributionListEntryObject implements Serializable {
 
     @Override
     public boolean equals(final Object o) {
-        if (o instanceof DistributionListEntryObject) {
-            final DistributionListEntryObject distributionlistentry = (DistributionListEntryObject) o;
-
-            if (emailaddress.equals(distributionlistentry.getEmailaddress())) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof DistributionListEntryObject)) {
+            return false;
+        }
+        DistributionListEntryObject distributionlistentry = (DistributionListEntryObject) o;
+        if (emailaddress == null) {
+            if (distributionlistentry.emailaddress == null) {
                 return true;
             }
+        } else if (emailaddress.equals(distributionlistentry.emailaddress)) {
+            return true;
         }
         return false;
-
     }
 
     public boolean searchDlistObject(final DistributionListEntryObject dleo) {
@@ -346,6 +392,13 @@ public class DistributionListEntryObject implements Serializable {
         } else if ((getLastname() == null && dleo.getLastname() != null) || (getLastname() != null && dleo.getLastname() == null)) {
             eq = false;
         }
+        if (getSortName() != null && dleo.getSortName() != null) {
+            if (!getSortName().equals(dleo.getSortName())) {
+                eq = false;
+            }
+        } else if ((getSortName() == null && dleo.getSortName() != null) || (getSortName() != null && dleo.getSortName() == null)) {
+            eq = false;
+        }
 
         return eq;
     }
@@ -358,6 +411,7 @@ public class DistributionListEntryObject implements Serializable {
         emailaddress = null;
         emailfield = 0;
         folderid = 0;
+        sortName = null;
 
         b_entry_id = false;
         b_displayname = false;
@@ -366,6 +420,7 @@ public class DistributionListEntryObject implements Serializable {
         b_emailaddress = false;
         b_emailfield = false;
         b_folderid = false;
+        b_sortName = false;
     }
 
     @Override

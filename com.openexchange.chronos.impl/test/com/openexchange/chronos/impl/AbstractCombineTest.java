@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public abstract class AbstractCombineTest {
 
         // Mock the session
         session = mock(CalendarSession.class);
-        when(session.getUserId()).thenReturn(1);
+        when(I(session.getUserId())).thenReturn(I(1));
         when(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class)).thenReturn(TimeZone.getTimeZone("Europe/Berlin"));
 
         // Mock the storage

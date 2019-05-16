@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -87,32 +88,34 @@ public final class ContactClearDelTablesTasks extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             LOG.info("Clearing obsolete fields in 'del_dlist'...");
             int cleared = clearDeletedDistributionLists(connection);
-            LOG.info("Cleared {} rows in 'del_dlist'.", cleared);
+            LOG.info("Cleared {} rows in 'del_dlist'.", I(cleared));
             LOG.info("Clearing obsolete fields in 'del_contacts_image'...");
             cleared = clearDeletedContactImages(connection);
-            LOG.info("Cleared {} rows in 'del_contacts_image'.", cleared);
+            LOG.info("Cleared {} rows in 'del_contacts_image'.", I(cleared));
             LOG.info("Clearing obsolete fields in 'del_contacts'...");
             cleared = clearDeletedContacts(connection);
-            LOG.info("Cleared {} rows in 'del_contacts'.", cleared);
+            LOG.info("Cleared {} rows in 'del_contacts'.", I(cleared));
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
     }
 

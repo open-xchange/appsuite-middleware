@@ -50,6 +50,8 @@
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.QUOTA_AWARE;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
@@ -270,13 +272,13 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 // Duplicate key conflict; just leave
                 long transactionDuration = System.currentTimeMillis() - start;
                 LOG.warn("Caching a resource failed due to a duplicate key conflict, this should happen very rarely otherwise this may indicate a performance problem."
-                    + " The transaction lasted {}ms. Original message: {}.", transactionDuration, e.getMessage());
+                    + " The transaction lasted {}ms. Original message: {}.", L(transactionDuration), e.getMessage());
             } catch (SQLException e) {
                 // duplicate key conflict
                 if (e.getErrorCode() == 1022) {
                     long transactionDuration = System.currentTimeMillis() - start;
                     LOG.warn("Caching a resource failed due to a duplicate key conflict, this should happen very rarely otherwise this may indicate a performance problem."
-                        + " The transaction lasted {}ms. Original message: {}.", transactionDuration, e.getMessage());
+                        + " The transaction lasted {}ms. Original message: {}.", L(transactionDuration), e.getMessage());
                 } else {
                     throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
                 }
@@ -296,10 +298,10 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     }
 
                     // Storing the resource exceeded the quota. We schedule an alignment task if this wasn't already done.
-                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(globalQuota, userId, contextId)) {
-                        LOG.debug("Scheduling alignment task for context {}.", contextId);
+                    if (triggerAlignment && alignmentRequests.putIfAbsent(I(contextId), SCHEDULED) == null && scheduleAlignmentTask(globalQuota, userId, contextId)) {
+                        LOG.debug("Scheduling alignment task for context {}.", I(contextId));
                     } else {
-                        LOG.debug("Skipping scheduling of alignment task for context {}.", contextId);
+                        LOG.debug("Skipping scheduling of alignment task for context {}.", I(contextId));
                     }
                 } else {
                     // No commit performed
@@ -371,8 +373,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     Connection con = dbService.getWritable(contextId);
                     refIds.clear();
                     condition.resetTransactionRollbackException();
-                    boolean transactionStarted = false;
-                    boolean rollback = false;
+                    int rollback = 0;
                     try {
                         long usedContextQuota = metadataStore.getUsedSize(con, contextId);
                         if (globalQuota > 0 && usedContextQuota > globalQuota) {
@@ -380,8 +381,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                             long collected = 0L;
 
                             Databases.startTransaction(con);
-                            transactionStarted = true;
-                            rollback = true;
+                            rollback = 1;
 
                             List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
                             Iterator<ResourceCacheMetadata> it = entries.iterator();
@@ -399,7 +399,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                             }
 
                             con.commit();
-                            rollback = false;
+                            rollback = 2;
                         }
                     } catch (SQLException s) {
                         if (condition.isFailedTransactionRollback(s)) {
@@ -408,10 +408,10 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                             LOG.error("Could not align preview cache for context {} to quota.", iContextId, s);
                         }
                     } finally {
-                        if (rollback) {
-                            Databases.rollback(con);
-                        }
-                        if (transactionStarted) {
+                        if (rollback > 0) {
+                            if (rollback == 1) {
+                                Databases.rollback(con);
+                            }
                             Databases.autocommit(con);
                         }
                         if (refIds.isEmpty()) {
@@ -460,7 +460,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         }
         FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         batchDeleteFiles(refIds, fileStorage);
-        LOG.info("Cleared resource cache for user {} in context {} in {}ms.", userId, contextId, System.currentTimeMillis() - start);
+        LOG.info("Cleared resource cache for user {} in context {} in {}ms.", I(userId), I(contextId), L(System.currentTimeMillis() - start));
     }
 
     @Override

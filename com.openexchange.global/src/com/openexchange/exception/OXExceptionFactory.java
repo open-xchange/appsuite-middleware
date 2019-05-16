@@ -89,8 +89,15 @@ public class OXExceptionFactory {
      * @param code The code to check against
      * @param e The exception to check
      * @return <code>true</code> if specified {@link OXException}'s attributes matches given code's ones; otherwise <code>false</code>
+     * @throws IllegalArgumentException If given code is <code>null</code>
      */
     public boolean equals(final OXExceptionCode code, final OXException e) {
+        if (null == code) {
+            throw new IllegalArgumentException("Code must not be null");
+        }
+        if (null == e) {
+            return false;
+        }
         return recEquals(code.getPrefix(), code.getNumber(), e);
     }
 

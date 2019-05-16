@@ -69,7 +69,7 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
 
     /**
      * This method must be overwritten if some more detailed response class should be used instead of the common updates response class.
-     * 
+     *
      * @param response the general response object containing methods and data for handling the general JSON response object.
      * @return a detailed response object corresponding to the request and NEVER <code>null</code>.
      */
@@ -126,19 +126,19 @@ public class CommonUpdatesParser<T extends CommonUpdatesResponse> extends Abstra
         updatesResponse.setDeletedIds(deletedIds);
     }
 
-    private int getIdFromObject(Object object) {
-        int id = -1;
+    private Integer getIdFromObject(Object object) {
+        Integer id = null;
         if (object instanceof String) {
             String s = (String) object;
             if (s.startsWith(FolderObject.SHARED_PREFIX)) {
-                id = Integer.parseInt(s.substring(FolderObject.SHARED_PREFIX.length()));
+                id = Integer.valueOf(s.substring(FolderObject.SHARED_PREFIX.length()));
             } else {
-                id = Integer.parseInt((String) object);
+                id = Integer.valueOf((String) object);
             }
         } else {
-            id = ((Integer) object).intValue();
+            id = ((Integer) object);
         }
-        return id;
+        return id == null ? new Integer(-1) : id;
     }
 
 }

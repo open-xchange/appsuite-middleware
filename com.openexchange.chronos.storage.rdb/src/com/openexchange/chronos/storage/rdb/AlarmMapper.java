@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -134,6 +135,28 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             @Override
             public void remove(Alarm alarm) {
                 alarm.removeId();
+            }
+        });
+        mappings.put(AlarmField.TIMESTAMP, new BigIntMapping<Alarm>("timestamp", "Timestamp") {
+
+            @Override
+            public void set(Alarm alarm, Long value) {
+                alarm.setTimestamp(null == value ? 0L : l(value));
+            }
+
+            @Override
+            public boolean isSet(Alarm alarm) {
+                return alarm.containsTimestamp();
+            }
+
+            @Override
+            public Long get(Alarm alarm) {
+                return L(alarm.getTimestamp());
+            }
+
+            @Override
+            public void remove(Alarm alarm) {
+                alarm.removeTimestamp();
             }
         });
         mappings.put(AlarmField.UID, new VarCharMapping<Alarm>("uid", "UID") {
@@ -347,6 +370,23 @@ public class AlarmMapper extends DefaultDbMapper<Alarm, AlarmField> {
             @Override
             public void remove(Alarm object) {
                 object.removeExtendedProperties();
+            }
+
+            @Override
+            public boolean replaceAll(Alarm object, String regex, String replacement) throws OXException {
+                if (super.replaceAll(object, regex, replacement)) {
+                    /*
+                     * also replace in properties that get encoded as extended properties
+                     */
+                    if (object.containsDescription() && null != object.getDescription()) {
+                        object.setDescription(object.getDescription().replaceAll(regex, replacement));
+                    }
+                    if (object.containsSummary() && null != object.getSummary()) {
+                        object.setSummary(object.getSummary().replaceAll(regex, replacement));
+                    }
+                    return true;
+                }
+                return false;
             }
         });
 

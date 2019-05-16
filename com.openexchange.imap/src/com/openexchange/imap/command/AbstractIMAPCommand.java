@@ -75,6 +75,8 @@ public abstract class AbstractIMAPCommand<T> {
 
     protected static final String[] ARGS_ALL = { "1:*" };
 
+    protected static final String[] ARGS_FIRST = { "1" };
+
     /**
      * The IMAP folder associated with the command to execute
      */
@@ -206,6 +208,7 @@ public abstract class AbstractIMAPCommand<T> {
      * @param The argument index
      * @return The debug info
      */
+    @SuppressWarnings("unused")
     protected String getDebugInfo(final int argsIndex) {
         return null;
     }

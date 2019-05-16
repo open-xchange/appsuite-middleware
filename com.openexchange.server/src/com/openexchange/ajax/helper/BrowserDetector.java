@@ -310,7 +310,7 @@ public final class BrowserDetector {
                 Float.parseFloat(versionEndIndex < 0 ? userAgent.substring(versionStartIndex + 1) : userAgent.substring(
                     versionStartIndex + 1,
                     versionEndIndex));
-        } catch (final NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             /*
              * Just use the default value.
              */
@@ -331,7 +331,7 @@ public final class BrowserDetector {
             browserName = MSIE;
             try {
                 browserVersion = Float.parseFloat(userAgent.substring(versionStartIndex, versionEndIndex));
-            } catch (final NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 /*
                  * Just use the default value.
                  */
@@ -358,7 +358,7 @@ public final class BrowserDetector {
             browserName = OPERA;
             try {
                 browserVersion = Float.parseFloat(userAgent.substring(versionStartIndex, versionEndIndex));
-            } catch (final NumberFormatException e) {
+            } catch (@SuppressWarnings("unused") NumberFormatException e) {
                 /*
                  * Just use the default value.
                  */

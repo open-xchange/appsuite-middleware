@@ -83,6 +83,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,7 +111,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
     /**
      * Creates a shared folder for the given module (see modules section in {@link FolderObject}).
-     * 
+     *
      * @param client will be the folder owner and can read all objects.
      * @param module the module under test
      * @param userId2 will be the user the folder is shared to. He can only see all objects.
@@ -130,7 +131,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
     /**
      * Creates a shared folder for the given module (see modules section in {@link FolderObject}).
-     * 
+     *
      * @param client will be the folder owner and can read all objects.
      * @param module the module under test
      * @param permission the permissions
@@ -149,7 +150,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
     /**
      * Creates a public folder for the given module (see modules section in {@link FolderObject}).
-     * 
+     *
      * @param client will be the folder owner and can read all objects.
      * @param module the module under test
      * @param userId2 will be the user the folder can be read by. He can only see his own objects.

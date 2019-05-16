@@ -87,32 +87,34 @@ public class ChronosCreateTableTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             connection.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             for (Map.Entry<String, String> entry : ChronosCreateTableService.getTablesByName().entrySet()) {
                 createTable(connection, entry.getKey(), entry.getValue());
             }
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
     }
 
-    private static void createTable(Connection connection, String tableName, String createStatement) throws OXException, SQLException {
+    private static void createTable(Connection connection, String tableName, String createStatement) throws SQLException {
+        if (tableExists(connection, tableName)) {
+            LoggerFactory.getLogger(ChronosCreateTableTask.class).debug("Table {} already exists, skipping.", tableName);
+            return;
+        }
         PreparedStatement stmt = null;
         try {
-            if (tableExists(connection, tableName)) {
-                LoggerFactory.getLogger(ChronosCreateTableTask.class).debug("Table {} already exists, skipping.", tableName);
-                return;
-            }
             stmt = connection.prepareStatement(createStatement);
             stmt.executeUpdate();
         } finally {

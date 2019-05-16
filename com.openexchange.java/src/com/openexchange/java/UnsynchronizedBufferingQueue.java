@@ -496,20 +496,29 @@ public class UnsynchronizedBufferingQueue<E> extends AbstractQueue<E> {
     }
 
     /**
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     * @throws IllegalArgumentException      {@inheritDoc}
+     * Copies all elements from this queue to the given collection.
+     * 
+     * @param c The {@link Collection}
+     * @return The number of
+     * @throws UnsupportedOperationException
+     * @throws ClassCastException
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
      */
     public int drainTo(Collection<? super E> c) {
         return drainTo(c, Integer.MAX_VALUE);
     }
 
     /**
-     * @throws UnsupportedOperationException {@inheritDoc}
-     * @throws ClassCastException            {@inheritDoc}
-     * @throws NullPointerException          {@inheritDoc}
-     * @throws IllegalArgumentException      {@inheritDoc}
+     * Copies the given number of elements from this queue to the given collection.
+     * 
+     * @param c The {@link Collection}
+     * @param maxElements The number of maximum elements to copy
+     * @return The number of
+     * @throws UnsupportedOperationException
+     * @throws ClassCastException
+     * @throws NullPointerException
+     * @throws IllegalArgumentException
      */
     public int drainTo(Collection<? super E> c, int maxElements) {
         if (c == null) {
@@ -748,6 +757,7 @@ public class UnsynchronizedBufferingQueue<E> extends AbstractQueue<E> {
             hash = source.hash;
         }
 
+        @SuppressWarnings("rawtypes") // Type safety is ensured by invoking object
         @Override
         public int compareTo(Delayed o) {
             long thisStamp = this.stamp;

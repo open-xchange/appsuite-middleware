@@ -49,6 +49,7 @@
 
 package com.openexchange.xing;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,6 +106,9 @@ import com.openexchange.xing.session.Session;
  */
 public class RESTUtility {
 
+    private static final List<Integer> EXPECTED_200_OK_OR_206_PARTIAL_CONTENT = Arrays.asList(I(XingServerException._200_OK), I(XingServerException._206_PARTIAL_CONTENT));
+    private static final List<Integer> EXPECTED_200_OK = Arrays.asList(I(XingServerException._200_OK));
+
     /**
      * No initialization.
      */
@@ -141,7 +145,7 @@ public class RESTUtility {
         case PUT: {
             final HttpPut put = new HttpPut(url);
             if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
             }
             req = put;
         }
@@ -149,7 +153,7 @@ public class RESTUtility {
         case POST: {
             final HttpPost post = new HttpPost(url);
             if (null != requestInformation) {
-                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"),requestInformation.toString().getBytes().length, ContentType.APPLICATION_JSON));
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME),requestInformation.toString().getBytes(com.openexchange.java.Charsets.UTF_8).length, ContentType.APPLICATION_JSON));
             }
             req = post;
         }
@@ -187,7 +191,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, null, session).response;
-        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
+        return parseAsJSON(resp, EXPECTED_200_OK);
     }
 
     /**
@@ -212,7 +216,7 @@ public class RESTUtility {
      */
     public static JSONValue request(final Method method, final String host, final String path, final int apiVersion, final String[] params, final Session session) throws XingException {
         final HttpResponse resp = streamRequest(method, host, path, apiVersion, params, session).response;
-        return parseAsJSON(resp, Arrays.asList(XingServerException._200_OK));
+        return parseAsJSON(resp, EXPECTED_200_OK);
     }
 
     /**
@@ -269,7 +273,7 @@ public class RESTUtility {
             params,
             null,
             session,
-            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
+            EXPECTED_200_OK_OR_206_PARTIAL_CONTENT);
     }
 
     /**
@@ -328,7 +332,7 @@ public class RESTUtility {
             params,
             requestInformation,
             session,
-            Arrays.asList(XingServerException._200_OK, XingServerException._206_PARTIAL_CONTENT));
+            EXPECTED_200_OK_OR_206_PARTIAL_CONTENT);
     }
 
     /**
@@ -361,7 +365,7 @@ public class RESTUtility {
         {
             final HttpPut put = new HttpPut(buildURL(host, apiVersion, path, params));
             if (null != requestInformation) {
-                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
+                put.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME), -1L, ContentType.APPLICATION_JSON));
             }
             req = put;
         }
@@ -370,7 +374,7 @@ public class RESTUtility {
         {
             final HttpPost post = new HttpPost(buildURL(host, apiVersion, path, params));
             if (null != requestInformation) {
-                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, "UTF-8"), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
+                post.setEntity(new InputStreamEntity(new JSONInputStream(requestInformation, com.openexchange.java.Charsets.UTF_8_NAME), requestInformation.toString().length(), ContentType.APPLICATION_JSON));
             }
             req = post;
         }
@@ -412,7 +416,7 @@ public class RESTUtility {
         try {
             final HttpEntity ent = response.getEntity();
             if (ent != null) {
-                final InputStreamReader in = new InputStreamReader(ent.getContent());
+                final InputStreamReader in = new InputStreamReader(ent.getContent(), com.openexchange.java.Charsets.UTF_8);
                 // Wrap this with a Buffer, so we can re-parse it if it's
                 // not JSON
                 // Has to be at least 16384, because this is defined as the buffer size in
@@ -443,7 +447,7 @@ public class RESTUtility {
         }
 
         final int statusCode = response.getStatusLine().getStatusCode();
-        if (false == expectedStatusCode.contains(statusCode)) {
+        if (false == expectedStatusCode.contains(I(statusCode))) {
             if (statusCode == XingServerException._401_UNAUTHORIZED) {
                 throw new XingUnlinkedException();
             }
@@ -486,7 +490,7 @@ public class RESTUtility {
         InputStream contentStream = null;
         try {
             contentStream = entity.getContent();
-            scanner = new Scanner(contentStream);
+            scanner = new Scanner(contentStream, com.openexchange.java.Charsets.UTF_8_NAME);
             scanner.useDelimiter("&");
 
             Map<String, String> result = new HashMap<String, String>();
@@ -578,7 +582,7 @@ public class RESTUtility {
 
             final int statusCode = response.getStatusLine().getStatusCode();
 
-            if (false == expectedStatusCode.contains(statusCode)) {
+            if (false == expectedStatusCode.contains(I(statusCode))) {
                 // This will throw the right thing: either a XingServerException or a XingProxyException
                 parseAsJSON(response, expectedStatusCode);
             }
@@ -626,9 +630,9 @@ public class RESTUtility {
             // We have to encode the whole line, then remove + and / encoding
             // to get a good OAuth URL.
             if (apiVersion > 0) {
-                trgt = URLEncoder.encode(new StringBuilder(16).append("/v").append(apiVersion).append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(new StringBuilder(16).append("/v").append(apiVersion).append(trgt).toString(), com.openexchange.java.Charsets.UTF_8_NAME);
             } else {
-                trgt = URLEncoder.encode(new StringBuilder(16).append(trgt).toString(), "UTF-8");
+                trgt = URLEncoder.encode(new StringBuilder(16).append(trgt).toString(), com.openexchange.java.Charsets.UTF_8_NAME);
             }
             trgt = trgt.replace("%2F", "/");
 

@@ -65,6 +65,26 @@ import org.opensaml.xml.security.credential.Credential;
 public interface CredentialProvider {
 
     /**
+     * Checks if this provider contains a credential to validate the signatures of digitally signed SAML objects that have been
+     * received from the IDP.
+     *
+     * @return <code>true</code> if {@link #getValidationCredential()} returns a valid credential
+     * @deprecated Use {@link CredentialProvider#hasValidationCredentials} instead
+     */
+    @Deprecated
+    boolean hasValidationCredential();
+
+    /**
+     * Gets the credential that can be used to validate the signatures of digitally signed SAML objects that have been
+     * received from the IDP.
+     *
+     * @return The credential or <code>null</code> if none is available
+     * @deprecated Use {@link CredentialProvider#getValidationCredentials} instead
+     */
+    @Deprecated
+    Credential getValidationCredential();
+    
+    /**
      * Checks if this provider contains a credential list to validate the signatures of digitally signed SAML objects that have been
      * received from the IDP.
      *

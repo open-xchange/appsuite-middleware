@@ -52,11 +52,11 @@ package com.openexchange.chronos.provider.composition.impl;
 import static com.openexchange.chronos.provider.CalendarAccount.DEFAULT_ACCOUNT;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.chronos.provider.composition.IDMangling.getRelativeFolderId;
+import static com.openexchange.chronos.provider.composition.IDMangling.getRelativeId;
+import static com.openexchange.chronos.provider.composition.IDMangling.getUniqueFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getAccountId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeIdsPerAccountId;
-import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withRelativeID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueEventIDs;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
@@ -85,6 +85,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
@@ -115,8 +116,10 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingC
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingEventsResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingImportResult;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDManglingUpdatesResult;
+import com.openexchange.chronos.provider.extensions.BasicCTagAware;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
+import com.openexchange.chronos.provider.extensions.CTagAware;
 import com.openexchange.chronos.provider.extensions.FolderSearchAware;
 import com.openexchange.chronos.provider.extensions.FolderSyncAware;
 import com.openexchange.chronos.provider.extensions.PersonalAlarmAware;
@@ -222,8 +225,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
          */
         List<Event> events = new ArrayList<Event>(eventIDs.size());
         for (EventID requestedID : eventIDs) {
-            Integer accountId = I(getAccountId(requestedID.getFolderID()));
-            Event event = find(eventsPerAccountId.get(accountId), getRelativeId(requestedID));
+            int accountId = getAccountId(requestedID.getFolderID());
+            Event event = find(eventsPerAccountId.get(I(accountId)), getRelativeId(requestedID));
             events.add(null != event ? withUniqueID(event, accountId) : null);
         }
         return events;
@@ -567,6 +570,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             throw withUniqueIDs(e, account.getAccountId());
         }
     }
+    
+    @Override
+    public CalendarResult changeOrganizer(EventID eventID, Organizer organizer, long clientTimestamp) throws OXException {
+        int accountId = getAccountId(eventID.getFolderID());
+        try {
+            GroupwareCalendarAccess calendarAccess = getGroupwareAccess(accountId);
+            CalendarResult result = calendarAccess.changeOrganizer(getRelativeId(eventID), organizer, clientTimestamp);
+            return new IDManglingCalendarResult(result, accountId);
+        } catch (OXException e) {
+            throw withUniqueIDs(e, accountId);
+        }
+    }
 
     @Override
     public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
@@ -756,6 +771,21 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
     }
 
+    @Override
+    public String getCTag(String folderID) throws OXException {
+        CalendarAccount account = getAccount(getAccountId(folderID), true);
+        try {
+            CalendarAccess access = getAccess(account.getAccountId(), CTagAware.class);
+            if (BasicCTagAware.class.isInstance(access)) {
+                return ((BasicCTagAware) access).getCTag();
+            } else {
+                throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+            }
+        } catch (OXException e) {
+            throw withUniqueIDs(e, account.getAccountId());
+        }
+    }
+
     /**
      * Gets all visible folders of a certain type in a specific calendar account.
      * <p/>
@@ -781,6 +811,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             access = getAccess(account);
         } catch (OXException e) {
             return Collections.singletonList(getBasicCalendarFolder(account, e));
+        } catch (Exception e) {
+            return Collections.singletonList(getBasicCalendarFolder(account, CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage())));
         }
         /*
          * check if provider is enabled by capability, falling back to a placeholder folder if not

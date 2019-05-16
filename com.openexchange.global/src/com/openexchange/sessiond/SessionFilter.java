@@ -74,10 +74,10 @@ import com.openexchange.session.Session;
  * </pre>
  *
  * <code>&lt;attr&gt;</code> is a string representing a field of a session object or a key in the properties
- * of a session. Attribute names are case sensitive. {@code &lt;value&gt;} is a string representing the
+ * of a session. Attribute names are case sensitive. <code>&lt;value&gt;</code> is a string representing the
  * value of a field or property. The constants of this class define the attribute names that are matched
  * against their according fields in the session objetcs. Be careful with white spaces, especially within
- * values. All characters between &lt;filtertype&gt; and ')' are matched as is.
+ * values. All characters between <code>&lt;filtertype&gt;</code> and ')' are matched as is.
  *
  * Examples:
  * <pre>
@@ -408,7 +408,7 @@ public class SessionFilter {
 
         private final Matcher matcher;
 
-        private Not(Matcher matcher) {
+        Not(Matcher matcher) {
             super();
             this.matcher = matcher;
         }
@@ -426,7 +426,7 @@ public class SessionFilter {
 
         private final boolean and;
 
-        private Junction(boolean and, List<Matcher> matchers) {
+        Junction(boolean and, List<Matcher> matchers) {
             super();
             this.and = and;
             this.matchers = matchers;
@@ -440,17 +440,15 @@ public class SessionFilter {
                         return false;
                     }
                 }
-
                 return true;
-            } else {
-                for (Matcher matcher : matchers) {
-                    if (matcher.matches(matchee)) {
-                        return true;
-                    }
-                }
-
-                return false;
             }
+
+            for (Matcher matcher : matchers) {
+                if (matcher.matches(matchee)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
     }
@@ -458,27 +456,25 @@ public class SessionFilter {
     static final class Simple implements Matcher {
 
         private final String attr;
-
         private final String value;
-
         private final FilterType type;
 
-        private Simple(String attr, String value, FilterType type) {
+        Simple(String attr, String value, FilterType type) {
             super();
             this.attr = attr;
             this.value = value;
             this.type = type;
         }
 
-        public String getAttr() {
+        String getAttr() {
             return attr;
         }
 
-        public String getValue() {
+        String getValue() {
             return value;
         }
 
-        public FilterType getType() {
+        FilterType getType() {
             return type;
         }
 

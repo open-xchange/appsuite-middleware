@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.folder;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
@@ -84,21 +86,23 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
     private static final String FILE_NAME = "quotaCheck";
     private static final String FILE_ENDING = ".txt";
 
-    private Credentials credentials = null;
-    private OXUserInterface iface = null;
+    protected Credentials credentials = null;
+    protected OXUserInterface iface = null;
 
     protected int testUserId = 0;
     protected String quotaTestFolderId;
 
     protected TestUser quotaTestuser;
     private FoldersApi foldersApi;
+    protected Context context;
+    protected User user;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         this.iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         this.credentials = new Credentials(admin.getUser(), admin.getPassword());
-        User user = createUserObj();
+        this.user = createUserObj();
         this.quotaTestuser = new TestUser(user.getName(), Integer.toString(getClient().getValues().getContextId()), "secret");
         this.testUserId = createNewUserWithQuota(user);
         quotaApiClient = generateApiClient(quotaTestuser);
@@ -124,13 +128,16 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
 
     protected int createNewUserWithQuota(User user) throws Exception {
         UserModuleAccess userModuleAccess = new UserModuleAccess();
-        return iface.create(new Context(getClient().getValues().getContextId()), user, userModuleAccess, credentials).getId();
+        context = new Context(I(getClient().getValues().getContextId()));
+        Integer userId = iface.create(context, user, userModuleAccess, credentials).getId();
+        user.setId(userId);
+        return userId.intValue();
     }
 
     protected void deleteUser() throws Exception {
         if (testUserId > 0) {
             User user = new User(testUserId);
-            iface.delete(new Context(getClient().getValues().getContextId()), user, null, credentials);
+            iface.delete(new Context(I(getClient().getValues().getContextId())), user, null, credentials);
         }
     }
 
@@ -202,7 +209,7 @@ public class AbstractFolderCheckLimitTest extends AbstractEnhancedApiClientSessi
         oxuser.setPassword("secret");
         oxuser.setImapServer("dovecot.devel.open-xchange.com");
         oxuser.setImapLogin(random + "@" + random);
-        oxuser.setMaxQuota(100L);
+        oxuser.setMaxQuota(L(100));
         return oxuser;
     }
 

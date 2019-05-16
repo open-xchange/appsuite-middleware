@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.daemons;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -71,7 +72,6 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
-import com.openexchange.admin.rmi.impl.OXPublication;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
@@ -169,8 +169,6 @@ public class AdminDaemon implements AdminDaemonService {
         set.add(regexHelper.literalPattern("com.openexchange.monitoring"));
         set.add(regexHelper.literalPattern("com.openexchange.oauth"));
         set.add(regexHelper.literalPattern("com.openexchange.proxy"));
-        set.add(regexHelper.literalPattern("com.openexchange.publish.basic"));
-        set.add(regexHelper.literalPattern("com.openexchange.publish"));
         set.add(regexHelper.literalPattern("com.openexchange.push"));
         set.add(regexHelper.literalPattern("com.openexchange.secret.recovery"));
         set.add(regexHelper.literalPattern("com.openexchange.secret"));
@@ -294,7 +292,7 @@ public class AdminDaemon implements AdminDaemonService {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), event.getType());
+                LOG.debug("{} changed to {}", event.getBundle().getSymbolicName(), I(event.getType()));
             }
         };
         context.addBundleListener(bl);
@@ -348,7 +346,6 @@ public class AdminDaemon implements AdminDaemonService {
             final com.openexchange.admin.rmi.impl.OXUtil oxutil_v2 = new com.openexchange.admin.rmi.impl.OXUtil();
             final OXAdminCoreImpl oxadmincore = new OXAdminCoreImpl();
             final OXTaskMgmtImpl oxtaskmgmt = new OXTaskMgmtImpl();
-            final OXPublication oxpublication = new OXPublication();
 
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXUserInterface.RMI_NAME);
@@ -373,10 +370,6 @@ public class AdminDaemon implements AdminDaemonService {
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXTaskMgmtInterface.RMI_NAME);
             services.add(context.registerService(Remote.class, oxtaskmgmt, properties));
-
-            properties = new Hashtable<String, Object>(2);
-            properties.put("RMIName", com.openexchange.admin.rmi.OXPublicationInterface.RMI_NAME);
-            services.add(context.registerService(Remote.class, oxpublication, properties));
 
             properties = new Hashtable<String, Object>(2);
             properties.put("RMIName", com.openexchange.admin.rmi.OXUtilInterface.RMI_NAME);
@@ -422,14 +415,14 @@ public class AdminDaemon implements AdminDaemonService {
      */
     @Deprecated
     public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName, final BundleContext context, final Class<? extends S> clazz) {
-        for (final Bundle bundle : bundlelist) {
+        for (Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                ServiceReference<?>[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
+                    for (ServiceReference<?> servicereference : servicereferences) {
+                        Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
-                            final Object obj = context.getService(servicereference);
+                            Object obj = context.getService(servicereference);
                             if (null == obj) {
                                 LOG.error("Missing service {} in bundle {}", serviceName, bundleSymbolicName);
                             }
@@ -457,12 +450,12 @@ public class AdminDaemon implements AdminDaemonService {
      */
     @Deprecated
     public static final void ungetService(final String bundleSymbolicName, final String serviceName, final BundleContext context) {
-        for (final Bundle bundle : bundlelist) {
+        for (Bundle bundle : bundlelist) {
             if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
-                final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+                ServiceReference<?>[] servicereferences = bundle.getRegisteredServices();
                 if (null != servicereferences) {
-                    for (final ServiceReference servicereference : servicereferences) {
-                        final Object property = servicereference.getProperty("name");
+                    for (ServiceReference<?> servicereference : servicereferences) {
+                        Object property = servicereference.getProperty("name");
                         if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
                             context.ungetService(servicereference);
                         }
@@ -471,4 +464,5 @@ public class AdminDaemon implements AdminDaemonService {
             }
         }
     }
+
 }

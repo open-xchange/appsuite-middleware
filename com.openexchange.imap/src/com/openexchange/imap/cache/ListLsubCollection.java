@@ -50,6 +50,7 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -84,7 +85,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -603,7 +603,7 @@ final class ListLsubCollection implements Serializable {
 
         if (debug) {
             long dur = System.currentTimeMillis() - st;
-            LOG.debug("LIST/LSUB cache built in {}msec", dur);
+            LOG.debug("LIST/LSUB cache built in {}msec", L(dur));
         }
         /*
          * Set time stamp
@@ -929,7 +929,7 @@ final class ListLsubCollection implements Serializable {
         String command = lsub ? "LSUB" : "LIST";
         String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
 
-        if(protocol == null && responses == null) {
+        if (protocol == null && responses == null) {
             throw new IllegalArgumentException("Unable to perform ListLsubCommand wihtout protocol and responses!");
         }
         Response[] r = null == responses ? performCommand(protocol, sCmd) : responses;
@@ -1034,7 +1034,7 @@ final class ListLsubCollection implements Serializable {
         } else {
             // Dispatch remaining untagged responses
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
-            if(protocol != null) {
+            if (protocol != null) {
                 protocol.notifyResponseHandlers(r);
                 protocol.handleResult(response);
             }
@@ -1192,7 +1192,13 @@ final class ListLsubCollection implements Serializable {
         Response[] r = null == responses ? performCommand(protocol, command) : responses;
 
         if (r.length == 1) {
-            // No LIST response for root folder. Do dummy LSUB and retry...
+            // No LIST response for root folder.
+            if (r[0].isBYE()) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
+                protocol.handleResult(r[0]);
+            }
+
+            // Do dummy LSUB and retry...
             doDummyLsub(protocol);
             r = performCommand(protocol, command);
         }
@@ -2160,11 +2166,6 @@ final class ListLsubCollection implements Serializable {
             return false;
         }
 
-        @Override
-        public Rights getMyRights() {
-            return null;
-        }
-
     }
 
     /**
@@ -2205,8 +2206,6 @@ final class ListLsubCollection implements Serializable {
         private transient List<ACL> acls;
 
         private Boolean hasChildren;
-
-        private Rights myRights;
 
         private Boolean subscribed;
 
@@ -2481,20 +2480,6 @@ final class ListLsubCollection implements Serializable {
             return null == subscribed ? (null == lsubMap ? true : lsubMap.containsKey(fullName)) : subscribed.booleanValue();
         }
 
-        /**
-         * Sets the status.
-         *
-         * @param status The status
-         */
-        protected void setStatus(final int[] status) {
-            if (null == status) {
-                this.status = null;
-                return;
-            }
-            this.status = new int[status.length];
-            System.arraycopy(status, 0, this.status, 0, status.length);
-        }
-
         @Override
         public int getMessageCount() {
             return null == status ? -1 : status[0];
@@ -2508,29 +2493,6 @@ final class ListLsubCollection implements Serializable {
         @Override
         public int getUnreadMessageCount() {
             return null == status ? -1 : status[2];
-        }
-
-        protected void setMyRights(final Rights myRights) {
-            this.myRights = myRights;
-        }
-
-        /**
-         * Gets MYRIGHTS.
-         *
-         * @return MYRIGHTS or <code>null</code> if absent
-         */
-        @Override
-        public Rights getMyRights() {
-            return myRights;
-        }
-
-        /**
-         * Sets the ACLs.
-         *
-         * @param acls The ACL list
-         */
-        protected void setAcls(final List<ACL> acls) {
-            this.acls = acls;
         }
 
         @Override
@@ -2638,35 +2600,6 @@ final class ListLsubCollection implements Serializable {
 
     } // End of class ListLsubEntryImpl
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
-        if (null == trace) {
-            sb.append("<missing stack trace>\n");
-            return;
-        }
-        for (final StackTraceElement ste : trace) {
-            final String className = ste.getClassName();
-            if (null != className) {
-                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(lineSeparator);
-            }
-        }
-    }
-
     /** Checks the full name */
     protected static String checkFullName(final String fullName, final char separator) {
         if (null == fullName) {
@@ -2684,4 +2617,5 @@ final class ListLsubCollection implements Serializable {
         }
         return fullName;
     }
+
 }

@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,9 +105,7 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         try {
             doSsoLogin(req, resp);
         } catch (OXException e) {
-            String errorPage = getConf().getErrorPageTemplate().replace("ERROR_MESSAGE", filter(e.getMessage()));
-            resp.setContentType(CONTENTTYPE_HTML);
-            resp.getWriter().write(errorPage);
+            LoginTools.useErrorPageTemplateOrSendException(e, getConf().getErrorPageTemplate(), req, resp);
         }
     }
 

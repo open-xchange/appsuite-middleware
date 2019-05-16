@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 
@@ -57,15 +58,15 @@ public class StatusTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if ("NOT_STARTED".equalsIgnoreCase(value)) {
-            return Task.NOT_STARTED;
+            return I(Task.NOT_STARTED);
         } else if ("IN_PROGRESS".equalsIgnoreCase(value) || "IN PROGRESS".equalsIgnoreCase(value)) {
-            return Task.IN_PROGRESS;
+            return I(Task.IN_PROGRESS);
         } else if ("DONE".equalsIgnoreCase(value)) {
-            return Task.DONE;
+            return I(Task.DONE);
         } else if ("WAITING".equalsIgnoreCase(value)) {
-            return Task.WAITING;
+            return I(Task.WAITING);
         } else if ("DEFERRED".equalsIgnoreCase(value)) {
-            return Task.DEFERRED;
+            return I(Task.DEFERRED);
         } else {
             throw OXException.general("Unknown Status: " + value);
         }

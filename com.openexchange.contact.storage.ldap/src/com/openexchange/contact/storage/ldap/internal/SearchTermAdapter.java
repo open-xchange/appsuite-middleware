@@ -107,10 +107,11 @@ public class SearchTermAdapter {
         }
     }
 
-    private String getTerm(SingleSearchTerm term) throws OXException {
+    private String getTerm(SingleSearchTerm searchTerm) throws OXException {
         /*
          * get relevant mapping for term
          */
+        SingleSearchTerm term = searchTerm;
         LdapMapping<? extends Object> ldapMapping = mapper.getMapping(term);
         if (null == ldapMapping || null == ldapMapping.getLdapAttributeName(true)) {
             LOG.debug("No LDAP attribute mapping for term '{}' available, excluding from search filter.", term);
@@ -163,7 +164,7 @@ public class SearchTermAdapter {
 
     /**
      * Builds the LDAP filter
-     * 
+     *
      * @param term The SearchTerm
      * @param ldapMapping The LDAPMapping
      * @param formatArgs The format args
@@ -191,11 +192,10 @@ public class SearchTermAdapter {
                 stringBuilder.append(filter);
             }
         }
-        if (0 < stringBuilder.length()) {
-            return "(" + String.format(operation.getLdapRepresentation(), stringBuilder.toString()) + ")";
-        } else {
+        if (stringBuilder.length() <= 0) {
             return null;
         }
+        return "(" + String.format(operation.getLdapRepresentation(), stringBuilder.toString()) + ")";
     }
 
 }

@@ -243,12 +243,12 @@ public class AlarmUtils extends CalendarUtils {
      * Filters those alarms that have a <i>relative</i> trigger from the supplied list of alarms.
      *
      * @param alarms The alarms to filter
-     * @return The filtered alarms
+     * @return The filtered alarms, or an empty list if there are none
      * @see #hasRelativeTrigger
      */
     public static List<Alarm> filterRelativeTriggers(List<Alarm> alarms) {
         if (null == alarms) {
-            return null;
+            return Collections.emptyList();
         }
         List<Alarm> filteredAlarms = new ArrayList<Alarm>(alarms.size());
         for (Alarm alarm : alarms) {
@@ -264,11 +264,11 @@ public class AlarmUtils extends CalendarUtils {
      *
      * @param alarms The alarms to filter
      * @param actions The {@link AlarmAction}s to consider
-     * @return The filtered alarms
+     * @return The filtered alarms, or an empty list if there are none
      */
     public static List<Alarm> filter(List<Alarm> alarms, AlarmAction... actions) {
         if (null == alarms) {
-            return null;
+            return Collections.emptyList();
         }
         List<Alarm> filteredAlarms = new ArrayList<Alarm>(alarms.size());
         for (Alarm alarm : alarms) {
@@ -285,12 +285,12 @@ public class AlarmUtils extends CalendarUtils {
      * @param alarms The alarms to filter
      * @param event The event the alarms are associated with
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates, and to calculate a relative trigger in
-     * @return The filtered alarms
+     * @return The filtered alarms, or an empty list if there are none
      * @see AlarmUtils#isAcknowledged(Alarm, Event, TimeZone)
      */
     public static List<Alarm> removeAcknowledged(List<Alarm> alarms, Event event, TimeZone timeZone) {
         if (null == alarms) {
-            return null;
+            return Collections.emptyList();
         }
         List<Alarm> filteredAlarms = new ArrayList<Alarm>(alarms.size());
         for (Alarm alarm : alarms) {
@@ -721,7 +721,7 @@ public class AlarmUtils extends CalendarUtils {
         }
         List<AlarmTrigger> filteredTriggers = new ArrayList<AlarmTrigger>(triggers.size());
         for (AlarmTrigger trigger : triggers) {
-            if (null == actions || com.openexchange.tools.arrays.Arrays.contains(actions, trigger.getAction())) {
+            if (com.openexchange.tools.arrays.Arrays.contains(actions, trigger.getAction())) {
                 filteredTriggers.add(trigger);
             }
         }

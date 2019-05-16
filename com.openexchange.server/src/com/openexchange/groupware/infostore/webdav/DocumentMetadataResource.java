@@ -88,6 +88,7 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
+import com.openexchange.webdav.protocol.util.Utils;
 
 public class DocumentMetadataResource extends AbstractResource implements OXWebdavResource, OXExceptionConstants {
 
@@ -177,6 +178,35 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     @Override
     protected void internalRemoveProperty(final String namespace, final String name) {
         propertyHelper.removeProperty(namespace, name);
+    }
+
+    @Override
+    protected boolean handleSpecialPut(final WebdavProperty prop) throws WebdavProtocolException {
+        if (Protocol.DAV_NS.getURI().equals(prop.getNamespace()) && "lastmodified".equals(prop.getName())) {
+            Date value = Utils.convert(prop.getValue());
+            if (null != value) {
+                loadMetadata();
+                metadata.setLastModified(value);
+                markChanged();
+                markSet(Metadata.LAST_MODIFIED_LITERAL);
+                return true;
+            }
+        }
+        return super.handleSpecialPut(prop);
+    }
+
+    @Override
+    protected WebdavProperty handleSpecialGet(final String namespace, final String name) throws WebdavProtocolException {
+        if (exists && Protocol.DAV_NS.getURI().equals(namespace) && "lastmodified".equals(name)) {
+            loadMetadata();
+            if (null != metadata && null != metadata.getLastModified()) {
+                WebdavProperty property = new WebdavProperty(namespace, name);
+                property.setDate(true);
+                property.setValue(Utils.convert(metadata.getLastModified()));
+                return property;
+            }
+        }
+        return super.handleSpecialGet(namespace, name);
     }
 
     @Override
@@ -272,11 +302,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
              */
             return null;
         }
-		return String.format(
-				"http://www.open-xchange.com/webdav/etags/%d-%d-%d",
-				Integer.valueOf(getSession().getContext().getContextId()),
-				Integer.valueOf(metadata.getId()),
-				Integer.valueOf(metadata.getVersion()));
+        return String.format(
+                "http://www.open-xchange.com/webdav/etags/%d-%d-%d-%d",
+                Integer.valueOf(getSession().getContext().getContextId()),
+                Integer.valueOf(metadata.getId()),
+                Integer.valueOf(metadata.getVersion()),
+                Long.valueOf(metadata.getSequenceNumber()));
     }
 
     @Override
@@ -287,7 +318,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     @Override
     public Date getLastModified() throws WebdavProtocolException {
         loadMetadata();
-        return metadata.getLastModified();
+        return new Date(metadata.getSequenceNumber());
     }
 
     @Override
@@ -645,10 +676,13 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                 try {
                     database.startTransaction();
                     loadMetadata();
+                    DocumentMetadata documentMetadata = new DocumentMetadataImpl();
+                    documentMetadata.setFolderId(metadata.getFolderId());
+                    documentMetadata.setId(metadata.getId());
                     if (guessSize) {
-                        metadata.setFileSize(0);
+                        documentMetadata.setFileSize(0);
                     }
-                    database.saveDocument(metadata, body, Long.MAX_VALUE, session);
+                    database.saveDocument(documentMetadata, body, Long.MAX_VALUE, session);
                     database.commit();
                 } catch (final Exception x) {
                     try {
@@ -803,7 +837,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			    ), Long.MAX_VALUE, session);
             if (nd.size() > 0) {
                 database.rollback();
-                throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.parseInt(nd.get(0).getId()));
+                throw InfostoreExceptionCodes.DELETE_FAILED.create(Integer.valueOf(nd.get(0).getId()));
             }
             database.commit();
         } catch (final OXException x) {
@@ -851,30 +885,4 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(), sessionHolder.getContext());
     }
 
-    @Override
-    protected SpecialSetSwitch getSetSwitch(String value) {
-        return new InfostoreSetSwitch(value);
-    }
-
-    private class InfostoreSetSwitch extends AbstractResource.SpecialSetSwitch {
-
-        public InfostoreSetSwitch(String value) {
-            super(value);
-        }
-
-        @Override
-        public Object lastModified() throws WebdavProtocolException {
-            try {
-                loadMetadata();
-                long parsed = Long.parseLong(value);
-                metadata.setLastModified(new Date(parsed));
-                markChanged();
-                markSet(Metadata.LAST_MODIFIED_LITERAL);
-            } catch (NumberFormatException x) {
-                // IGNORE
-            }
-            return Boolean.TRUE;
-        }
-
-    }
 }

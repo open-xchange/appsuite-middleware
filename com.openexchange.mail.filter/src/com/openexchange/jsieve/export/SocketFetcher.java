@@ -180,12 +180,10 @@ public final class SocketFetcher {
      * Configure the SSL options for the socket (if it's an SSL socket).
      */
     private static void configureSSLSocket(final Socket socket) {
-        if (!(socket instanceof SSLSocket)) {
-            return;
+        if (socket instanceof SSLSocket) {
+            final SSLSocket sslsocket = (SSLSocket) socket;
+            sslsocket.setEnabledProtocols(new String[] { "SSLv3", "TLSv1", "TLSv1.1", "TLSv1.2" });
         }
-        final SSLSocket sslsocket = (SSLSocket) socket;
-        sslsocket.setEnabledProtocols(new String[] { "SSLv3", "TLSv1" });
-        // sslsocket.setEnabledProtocols(new String[] { "TLSv1" });
     }
 
 }

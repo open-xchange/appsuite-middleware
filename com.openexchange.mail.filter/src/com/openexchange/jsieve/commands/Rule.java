@@ -304,7 +304,7 @@ public class Rule implements Comparable<Rule> {
 
     @Override
     public int compareTo(final Rule o) {
-        return Integer.valueOf(linenumber).compareTo(Integer.valueOf(o.linenumber));
+        return Integer.compare(linenumber, o.linenumber);
     }
 
     /*

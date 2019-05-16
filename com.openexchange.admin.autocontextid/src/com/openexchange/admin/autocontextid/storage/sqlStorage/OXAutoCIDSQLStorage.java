@@ -56,5 +56,5 @@ import com.openexchange.admin.autocontextid.storage.interfaces.OXAutoCIDStorageI
  *
  */
 public abstract class OXAutoCIDSQLStorage extends OXAutoCIDStorageInterface {
-
+    // empty
 }

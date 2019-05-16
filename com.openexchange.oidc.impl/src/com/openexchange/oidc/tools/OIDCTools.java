@@ -50,6 +50,7 @@
 package com.openexchange.oidc.tools;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
@@ -126,6 +127,8 @@ public class OIDCTools {
     public static final String DEFAULT_BACKEND_PATH = "oidc";
 
     public static final String PARAM_DEEP_LINK = "hash";
+
+    public static final String PARAM_SHARD = "shard";
 
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
@@ -262,7 +265,7 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
     }
-    
+
     public static String calculateHash(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
         return HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
     }
@@ -276,7 +279,7 @@ public class OIDCTools {
      * @param entrySet The key, that should be used in the session for the value, loaded from the map
      */
     public static void addParameterToSession(Session session, Map<String, String> map, String entryLoad, String entrySet) {
-        LOG.trace("void addParameterToSession(Session session: {}, Map<String, String> map size: {}, String entryLoad: {}, String entrySet: {})", session.getSessionID(), map.size(), entryLoad, entrySet);
+        LOG.trace("void addParameterToSession(Session session: {}, Map<String, String> map size: {}, String entryLoad: {}, String entrySet: {})", session.getSessionID(), I(map.size()), entryLoad, entrySet);
         String parameter = map.get(entryLoad);
         if (!Strings.isEmpty(parameter)) {
             session.setParameter(entrySet, parameter);
@@ -367,10 +370,10 @@ public class OIDCTools {
         DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
         return prefixService.getPrefix();
     }
-    
+
     /**
      * Load a session from the given {@link Cookie}.
-     * 
+     *
      * @param oidcAtologinCookie The cookie where the session is stored.
      * @param request Used to validate the found session.
      * @return The loaded session or null, if no session could be found or the validation failed.
@@ -384,18 +387,18 @@ public class OIDCTools {
         if (!sessions.isEmpty()) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
-        
+
         if (session == null) {
             return null;
         }
-        
+
         try {
             OIDCTools.validateSession(session, request);
         } catch (OXException e) {
             LOG.debug("Session validation failed for {}", session.getSessionID());
             session = null;
         }
-        
+
         return session;
     }
 }

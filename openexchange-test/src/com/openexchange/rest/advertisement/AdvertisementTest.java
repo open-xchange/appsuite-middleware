@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.advertisement;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -149,7 +150,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
                 break;
             case "TaxonomyTypes":
                 // Add taxonomy types
-                Context ctx = new Context(getAjaxClient().getValues().getContextId());
+                Context ctx = new Context(I(getAjaxClient().getValues().getContextId()));
                 ctx.setUserAttribute("taxonomy", "types", taxonomyTypes);
                 TestUser oxAdminMaster = TestContextPool.getOxAdminMaster();
                 Credentials credentials = new Credentials(oxAdminMaster.getUser(), oxAdminMaster.getPassword());

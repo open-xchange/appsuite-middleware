@@ -120,7 +120,7 @@ public class RateLimiterByLogin implements LoginListener {
 
     @Override
     public void onFailedAuthentication(LoginRequest request, Map<String, Object> properties, OXException e) throws OXException {
-        if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
+        if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e) || LoginExceptionCodes.INVALID_GUEST_PASSWORD.equals(e)) {
             String login = request.getLogin();
             if (Strings.isNotEmpty(login)) {
                 // Consume...

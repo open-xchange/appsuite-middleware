@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.login;
 
+import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 import static com.openexchange.ajax.fields.LoginFields.APPSECRET;
 import static com.openexchange.ajax.fields.LoginFields.AUTHID_PARAM;
@@ -61,12 +62,18 @@ import static com.openexchange.ajax.fields.LoginFields.TOKEN;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
 import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
+import static com.openexchange.tools.servlet.http.Tools.filter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -347,6 +354,64 @@ public final class LoginTools {
         }
         LOG.warn("No guest could be determined for share token: {}", token);
         return result;
+    }
+
+    /**
+     * Either uses given error page template or simply logs & sends given (login) error to the client.
+     * <p>
+     * In case error page template appears to redirect to referrer's URL, the referrer's URL is checked for validity against target host.
+     *
+     * @param e The (login) error
+     * @param errorPageTemplate The error page template
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    public static void useErrorPageTemplateOrSendException(OXException e, String errorPageTemplate, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (Strings.isEmpty(errorPageTemplate)) {
+            // No valid error page template...
+            LoginServlet.logAndSendException(resp, e);
+            return;
+        }
+
+        // Check referrer's URL validity in case template appears to redirect to referrer's URL
+        if (errorPageTemplate.indexOf("document.referrer") < 0) {
+            // Template appears not to redirect to referrer's URL.
+            String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", filter(e.getMessage()));
+            resp.setContentType(CONTENTTYPE_HTML);
+            resp.getWriter().write(errorPage);
+        }
+
+        // Client is supposed to be redirected to referrer's URL
+        String sReferrer = req.getHeader("Referer");
+        if (Strings.isEmpty(sReferrer)) {
+            LoginServlet.logAndSendException(resp, e);
+            return;
+        }
+
+        try {
+            URI referrerUri = new URI(sReferrer);
+            String targetHost = req.getServerName();
+            if (false == Tools.isSubdomainOfTheOther(targetHost, referrerUri) && false == containedInAllowedRedirectPaths(referrerUri, true)) {
+                // Neither in the same domain nor contained in white-list. Deny redirecting to referrer's URL
+                LoginServlet.logAndSendException(resp, e);
+                return;
+            }
+        } catch (URISyntaxException x) {
+            // Referrer is invalid
+            LoginServlet.logAndSendException(resp, e);
+            return;
+        }
+
+        // Either in the same domain or contained in white-list. Allow redirecting to referrer's URL
+        String errorPage = errorPageTemplate.replace("ERROR_MESSAGE", filter(e.getMessage()));
+        resp.setContentType(CONTENTTYPE_HTML);
+        resp.getWriter().write(errorPage);
+    }
+
+    private static boolean containedInAllowedRedirectPaths(URI referrerUri, boolean defaultValue) {
+        AllowedRedirectUris allowedRedirectUris = AllowedRedirectUris.getInstance();
+        return allowedRedirectUris.isEmpty() ? defaultValue : allowedRedirectUris.isAllowed(referrerUri);
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.serialization;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -98,7 +99,7 @@ public class PortableContextSessionsCleaner extends AbstractCustomPortable imple
         try {
             return SessionHandler.removeContextSessions(this.contextIds);
         } catch (Exception exception) {
-            LOG.error("Unable to remove sessions for context ids: " + Strings.concat(", ", contextIds));
+            LOG.error("Unable to remove sessions for context ids: {}", Strings.concat(", ", contextIds));
             throw exception;
         }
     }
@@ -119,7 +120,7 @@ public class PortableContextSessionsCleaner extends AbstractCustomPortable imple
         int[] arr = new int[this.contextIds.size()];
         int index = 0;
         for (Integer i : this.contextIds) {
-            arr[index++] = i;
+            arr[index++] = i.intValue();
         }
 
         writer.writeIntArray(FIELD_CONTEXT_IDS, arr);
@@ -133,7 +134,7 @@ public class PortableContextSessionsCleaner extends AbstractCustomPortable imple
         Set<Integer> lContextIds = new HashSet<Integer>();
         int[] contextIdArray = reader.readIntArray(FIELD_CONTEXT_IDS);
         for (int i : contextIdArray) {
-            lContextIds.add(i);
+            lContextIds.add(I(i));
         }
         this.contextIds = lContextIds;
     }

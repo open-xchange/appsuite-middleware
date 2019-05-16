@@ -145,7 +145,7 @@ public class EventResource extends DAVObjectResource<Event> {
 
     @Override
     protected String getFileExtension() {
-        return CalDAVResource.EXTENSION_ICS;
+        return parent.getFileExtension();
     }
 
     @Override
@@ -159,8 +159,8 @@ public class EventResource extends DAVObjectResource<Event> {
     }
 
     @Override
-    protected int getId(Event object) {
-        return null != object ? Integer.parseInt(object.getId()) : null;
+    protected String getId(Event object) {
+        return object == null ? null : object.getId();
     }
 
     @Override
@@ -291,7 +291,7 @@ public class EventResource extends DAVObjectResource<Event> {
             /*
              * add any extended properties & serialize ical
              */
-            EventPatches.Outgoing.applyExport(this, calendarExport);
+            EventPatches.Outgoing.applyExport(this, calendarExport, exportedEvents);
             inputStream = calendarExport.getClosingStream();
             return Streams.stream2bytes(inputStream);
         } catch (IOException e) {
@@ -673,6 +673,10 @@ public class EventResource extends DAVObjectResource<Event> {
             case "CAL-4227":
             case "CAL-42210":
                 return new PreconditionException(e, DAVProtocol.CALENDARSERVER_NS.getURI(), "valid-access-restriction", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            case "CAL-40310":
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "same-organizer-in-all-components", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            case "CAL-4090":
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "no-uid-conflict", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             default:
                 return DAVProtocol.protocolException(getUrl(), e);
         }

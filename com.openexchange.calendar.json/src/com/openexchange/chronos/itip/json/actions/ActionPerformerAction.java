@@ -75,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * 
+ *
  * {@link ActionPerformerAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -83,11 +83,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class ActionPerformerAction extends AbstractITipAction {
 
-    private RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing;
+    private final RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing;
 
     public ActionPerformerAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing, RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing) {
         super(services, analyzerListing);
-        analyzerListing.getServiceList();
         this.factoryListing = factoryListing;
     }
 

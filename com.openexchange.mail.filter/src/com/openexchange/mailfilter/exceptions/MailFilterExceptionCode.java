@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.exceptions;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_REDIRECT_ADDRESS_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE2_MSG;
 import static com.openexchange.mailfilter.exceptions.MailFilterExceptionMessages.INVALID_SIEVE_RULE_MSG;
@@ -63,6 +64,7 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.export.SieveResponse;
+import com.openexchange.jsieve.export.SieveResponse.Code;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.mailfilter.Credentials;
 
@@ -339,9 +341,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
         }
 
         if (useSIEVEResponseCodes) {
-            final SieveResponse.Code code = e.getSieveResponseCode();
-            if (null != code) {
-                return new OXException(code.getDetailnumber(), code.getMessage(), e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
+            final SieveResponse response = e.getSieveResponse();
+            if (null != response) {
+                Code code = response.getCode();
+                return new OXException(code.getDetailnumber(), response.getMessage(), e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString()).addCategory(sieveResponse2OXCategory(code)).setPrefix("MAIL_FILTER");
             }
 
             if (e.isParseError()) {
@@ -356,7 +359,7 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
         }
 
         if (e.isAuthTimeoutError()) {
-            return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), e.getSieveHostPort(), saneMessage(e.getMessage()));
+            return MailFilterExceptionCode.AUTH_TIMEOUT.create(e, e.getSieveHost(), I(e.getSieveHostPort()), saneMessage(e.getMessage()));
         }
 
         return MailFilterExceptionCode.SIEVE_COMMUNICATION_ERROR.create(e, e.getSieveHost(), Integer.valueOf(e.getSieveHostPort()), credentials.getRightUsername(), credentials.getContextString());

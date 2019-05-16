@@ -513,6 +513,8 @@ image/png png
 image/prs.btif btif
 image/svg+xml svg svgz
 image/tiff tiff tif
+image/heic heic
+image/heif heif
 image/vnd.adobe.photoshop psd
 image/vnd.djvu djvu djv
 image/vnd.dwg dwg
@@ -637,6 +639,7 @@ video/vnd.mpegurl mxu m4u
 video/vnd.rn-realvideo rv
 video/vnd.vivo viv
 video/x-fli fli
+video/x-matroska mkv
 video/x-ms-asf asf asx
 video/x-ms-wm wm
 video/x-ms-wmv wmv

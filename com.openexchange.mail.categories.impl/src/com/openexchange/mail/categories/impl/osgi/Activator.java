@@ -78,6 +78,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class Activator extends HousekeepingActivator {
 
+    private static final String MAIL_CATEGORIES_CAPABILITY = "mail_categories";
+    private static final String PROPERTY = "com.openexchange.mail.categories";
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class, ThreadPoolService.class,
@@ -92,13 +95,12 @@ public class Activator extends HousekeepingActivator {
         track(MailCategoriesRuleEngine.class, registerer);
         openTrackers();
 
-        final String sCapability = "mail_categories";
         Dictionary<String, Object> properties = new Hashtable<>(2);
-        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MAIL_CATEGORIES_CAPABILITY);
         registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
             @Override
             public FailureAwareCapabilityChecker.Result checkEnabled(String capability, Session ses) throws OXException {
-                if (sCapability.equals(capability)) {
+                if (MAIL_CATEGORIES_CAPABILITY.equals(capability)) {
                     ServerSession session = ServerSessionAdapter.valueOf(ses);
                     if (session.isAnonymous() || session.getUser().isGuest()) {
                         return FailureAwareCapabilityChecker.Result.DISABLED;
@@ -107,7 +109,7 @@ public class Activator extends HousekeepingActivator {
                     ConfigViewFactory service = Services.getService(ConfigViewFactory.class);
                     ConfigView view = service.getView(ses.getUserId(), ses.getContextId());
 
-                    ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.categories", Boolean.class);
+                    ComposedConfigProperty<Boolean> property = view.property(PROPERTY, Boolean.class);
                     if (!property.isDefined() || !property.get().booleanValue()) {
                         // Not enabled as per configuration
                         return FailureAwareCapabilityChecker.Result.DISABLED;
@@ -127,7 +129,7 @@ public class Activator extends HousekeepingActivator {
                 return FailureAwareCapabilityChecker.Result.ENABLED;
             }
         }, properties);
-        getService(CapabilityService.class).declareCapability(sCapability);
+        getService(CapabilityService.class).declareCapability(MAIL_CATEGORIES_CAPABILITY);
 
         registerService(Reloadable.class, MailCategoriesConfigUtil.getInstance());
 

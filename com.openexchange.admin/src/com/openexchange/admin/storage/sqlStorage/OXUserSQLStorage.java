@@ -82,6 +82,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             notallowed.add("Id");
             notallowed.add("Password");
             notallowed.add("PasswordMech");
+            notallowed.add("Salt");
             notallowed.add("PrimaryEmail");
             notallowed.add("Timezone");
             notallowed.add("Mailenabled");
@@ -106,6 +107,7 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
             method2field.put("ImapLogin", "imapLogin");
             method2field.put("SmtpServer", "smtpserver");
             method2field.put("PasswordMech", "passwordMech");
+            method2field.put("Salt", "salt");
             method2field.put("MaxQuota", "quota_max");
             method2field.put("Filestore_name", "filestore_name");
             method2field.put("FilestoreOwner", "filestore_owner");

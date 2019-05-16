@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="/com.openexchange.global"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.4.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.4-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.ws.rs-api-2.0.1.jar" sourcepath="/com.openexchange.bundles/source/javax.ws.rs-api-2.0.1-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-client-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-client.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-common-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-common.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.bundles.repackaged.jersey-guava-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.bundles.repackaged.jersey-guava.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-server-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-server.source_2.17.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.api-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.api.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.utils-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.utils.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.external.javax.inject-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external.javax.inject.source-2.4.0-b10.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.hk2.locator-2.4.0-b10.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.hk2.external-hk2-locator.source-2.4.0-b10.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
+</classpath>

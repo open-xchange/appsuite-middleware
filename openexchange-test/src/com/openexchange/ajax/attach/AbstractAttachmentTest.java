@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.attach;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -105,15 +106,14 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         doGet();
         final int id = atm.getCreatedEntities().get(0).getId();
         atm.cleanUp();
-
-        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, id);
+        atm.get(folderId, attachedId, moduleId, id);
         assertTrue(atm.getLastResponse().hasError());
     }
 
     protected void doUpdates() throws Exception {
         int objectId = upload();
         Thread.sleep(2000); // Hang around a bit
-        AttachmentMetadata get = atm.get(folderId, attachedId, moduleId, objectId);
+        atm.get(folderId, attachedId, moduleId, objectId);
         assertFalse(atm.getLastResponse().hasError());
         final long timestamp = atm.getLastResponse().getTimestamp().getTime();
         upload();
@@ -296,7 +296,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setAttachedId(attachedId);
         attachment.setModuleId(moduleId);
 
-        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
+        atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
         assertTrue(atm.getLastResponse().hasError());
 
         attachment.setFolderId(folderId);
@@ -313,7 +313,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         attachment.setModuleId(moduleId);
 
         atm.setClient(getClient2());
-        int objectId = atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
+        atm.attach(attachment, testFile.getName(), FileUtils.openInputStream(testFile), null);
         assertTrue(atm.getLastResponse().hasError());
 
         atm.setClient(getClient());
@@ -335,10 +335,10 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
         quota = (JSONObject) response.getData();
         final int useAfter = quota.getInt("use");
 
-        AttachmentMetadata get = atm.get(atm.getCreatedEntities().get(0).getFolderId(), atm.getCreatedEntities().get(0).getAttachedId(), atm.getCreatedEntities().get(0).getAttachedId(), atm.getCreatedEntities().get(0).getId());
+        atm.get(atm.getCreatedEntities().get(0).getFolderId(), atm.getCreatedEntities().get(0).getAttachedId(), atm.getCreatedEntities().get(0).getAttachedId(), atm.getCreatedEntities().get(0).getId());
         assertFalse(atm.getLastResponse().hasError());
 
-        assertEquals(useAfter - use, ((JSONObject) atm.getLastResponse().getData()).get("file_size"));
+        assertEquals(I(useAfter - use), ((JSONObject) atm.getLastResponse().getData()).get("file_size"));
     }
 
     public int upload() throws Exception {

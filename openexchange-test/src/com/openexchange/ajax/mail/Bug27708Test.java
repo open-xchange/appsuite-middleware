@@ -90,6 +90,7 @@ public final class Bug27708Test extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -110,6 +111,7 @@ public final class Bug27708Test extends AbstractMailTest {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -129,8 +131,9 @@ public final class Bug27708Test extends AbstractMailTest {
             // Logout clients.
             if (null != clients) {
                 for (AJAXClient client : clients) {
-                    if (null != client)
+                    if (null != client) {
                         getClient().logout();
+                    }
                 }
                 clients = null;
             }

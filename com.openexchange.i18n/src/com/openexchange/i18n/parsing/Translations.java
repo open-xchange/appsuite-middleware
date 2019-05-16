@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.parsing;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,8 +65,8 @@ import com.openexchange.java.Strings;
  */
 public class Translations {
 
-    private Map<String, Translation> simpleTranslations; // Key -> [form1, form2, ...]
-    private Map<String, Map<String, Translation>> contextTranslations; // Context -> (Key -> [form1, form2, ...])
+    private final Map<String, Translation> simpleTranslations; // Key -> [form1, form2, ...]
+    private final Map<String, Map<String, Translation>> contextTranslations; // Context -> (Key -> [form1, form2, ...])
     private Locale locale;
 
     public Translations() {
@@ -85,7 +86,7 @@ public class Translations {
         if (!simpleTranslations.containsKey(original)) {
             return null;
         }
-        return simpleTranslations.get(original).getMessage(plural);
+        return simpleTranslations.get(original).getMessage(I(plural));
     }
 
     public String translate(String context, String original) {
@@ -99,7 +100,7 @@ public class Translations {
         if (!contextTranslations.containsKey(context)) {
             return null;
         }
-        return contextTranslations.get(context).get(original).getMessage(plural);
+        return contextTranslations.get(context).get(original).getMessage(I(plural));
     }
 
     public void setTranslation(String key, String value) {
@@ -108,7 +109,7 @@ public class Translations {
         }
 
         Translation t = new Translation(null, key, null);
-        t.setMessage(0, value);
+        t.setMessage(I(0), value);
         simpleTranslations.put(key, t);
     }
 
@@ -124,7 +125,7 @@ public class Translations {
 
         Translation t = new Translation(null, key, keyPlural);
         for (int i = 0; i < values.size(); i++) {
-            t.setMessage(i, values.get(i));
+            t.setMessage(I(i), values.get(i));
         }
         simpleTranslations.put(key, t);
         if (keyPlural != null) {
@@ -138,7 +139,7 @@ public class Translations {
         }
 
         Translation t = new Translation(context, key, null);
-        t.setMessage(0, value);
+        t.setMessage(I(0), value);
         if (contextTranslations.containsKey(context)) {
             contextTranslations.get(context).put(key, t);
         } else {
@@ -165,7 +166,7 @@ public class Translations {
 
         Translation t = new Translation(context, key, keyPlural);
         for (int i = 0; i < values.size(); i++) {
-            t.setMessage(i, values.get(i));
+            t.setMessage(I(i), values.get(i));
         }
         if (contextTranslations.containsKey(context)) {
             contextTranslations.get(context).put(key, t);
@@ -187,16 +188,16 @@ public class Translations {
     }
 
     public Set<String> getKnownStrings(boolean includeContexts) {
-        if (includeContexts) {
-            Set<String> retval = new HashSet<String>();
-            retval.addAll(getKnownStrings());
-            for (Map<String, Translation> contextMap : contextTranslations.values()) {
-                retval.addAll(contextMap.keySet());
-            }
-            return retval;
-        } else {
+        if (false == includeContexts) {
             return simpleTranslations.keySet();
         }
+
+        Set<String> retval = new HashSet<String>();
+        retval.addAll(getKnownStrings());
+        for (Map<String, Translation> contextMap : contextTranslations.values()) {
+            retval.addAll(contextMap.keySet());
+        }
+        return retval;
     }
 
     public Set<String> getKnownStrings(String context) {

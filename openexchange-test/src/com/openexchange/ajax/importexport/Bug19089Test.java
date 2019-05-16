@@ -68,6 +68,7 @@ public class Bug19089Test extends ManagedAppointmentTest {
 
     private final String tzid = "Europe/Berlin";
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

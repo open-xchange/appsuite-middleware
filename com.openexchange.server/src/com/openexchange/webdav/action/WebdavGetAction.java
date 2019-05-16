@@ -97,7 +97,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 			out = new BufferedOutputStream(res.getOutputStream());
 			in = resource.getBody();
             if (in == null) {
-                LOG.error("The body of the webdav ressource at " + resource.getUrl() + " is null!");
+                LOG.error("The body of the webdav ressource at {} is null!", resource.getUrl());
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
 			final byte[] chunk = new byte[200];
@@ -218,7 +218,7 @@ public class WebdavGetAction extends WebdavHeadAction {
         @Override
 		public int compareTo(final ByteRange arg0) {
             final ByteRange other = arg0;
-            return (Long.valueOf(startOffset)).compareTo(Long.valueOf(other.startOffset));
+            return Long.compare(startOffset, other.startOffset);
         }
 
         @Override

@@ -76,13 +76,14 @@ public class ShareFolderTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ShareFolderTest}.
-     * 
+     *
      * @param name name of the test.
      */
     public ShareFolderTest() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -98,6 +99,7 @@ public class ShareFolderTest extends AbstractAJAXSession {
         testFolder.setLastModified(getClient().execute(new GetRequest(EnumAPI.OX_OLD, testFolder.getObjectID())).getTimestamp());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

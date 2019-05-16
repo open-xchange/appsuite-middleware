@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -380,7 +381,12 @@ public abstract class CalDAVTest extends WebDAVTest {
             Assert.assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
             byte[] responseBody = get.getResponseBody();
             assertNotNull("got no response body", responseBody);
-            return new ICalResource(new String(responseBody, Charsets.UTF_8), href, get.getResponseHeader("ETag").getValue());
+            ICalResource iCalResource = new ICalResource(new String(responseBody, Charsets.UTF_8), href, get.getResponseHeader("ETag").getValue());
+            Header scheduleTag = get.getResponseHeader("Schedule-Tag");
+            if (null != scheduleTag) {
+                iCalResource.setScheduleTag(scheduleTag.getValue());
+            }
+            return iCalResource;
         } finally {
             release(get);
         }
@@ -409,7 +415,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putICalUpdate(ICalResource iCalResource) throws Exception {
+    public int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;
         try {
             put = new PutMethod(getBaseUri() + iCalResource.getHref());

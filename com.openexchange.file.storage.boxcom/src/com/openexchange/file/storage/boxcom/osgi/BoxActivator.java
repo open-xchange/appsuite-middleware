@@ -49,25 +49,19 @@
 
 package com.openexchange.file.storage.boxcom.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import org.slf4j.Logger;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
+import com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -77,7 +71,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxActivator extends HousekeepingActivator {
+public final class BoxActivator extends AbstractCloudStorageActivator {
 
     /**
      * Initializes a new {@link BoxActivator}.
@@ -88,39 +82,13 @@ public final class BoxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class,
-            TimerService.class, OAuthService.class, ClusterLockService.class, OAuthAccessRegistryService.class, ThreadPoolService.class, ConfigViewFactory.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, ClusterLockService.class, OAuthAccessRegistryService.class, ThreadPoolService.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(BoxActivator.class);
-        try {
-            Services.setServices(this);
-            /*
-             * Some initialization stuff
-             */
-            final BundleContext context = this.context;
-            /*
-             * Register tracker
-             */
-            track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context));
-            openTrackers();
-            /*
-             * Register event handler
-             */
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, KnownApi.BOX_COM), serviceProperties);
-        } catch (final Exception e) {
-            logger.error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
+        Services.setServices(this);
+        super.startBundle();
     }
 
     @Override
@@ -129,4 +97,23 @@ public final class BoxActivator extends HousekeepingActivator {
         Services.setServices(null);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getServiceRegisterer(org.osgi.framework.BundleContext)
+     */
+    @Override
+    protected ServiceTrackerCustomizer<OAuthServiceMetaData, OAuthServiceMetaData> getServiceRegisterer(BundleContext context) {
+        return new OAuthServiceMetaDataRegisterer(context, Services.getServices());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.osgi.AbstractCloudStorageActivator#getAPI()
+     */
+    @Override
+    protected KnownApi getAPI() {
+        return KnownApi.BOX_COM;
+    }
 }

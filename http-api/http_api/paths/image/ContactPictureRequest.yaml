@@ -3,10 +3,11 @@
     operationId: getContactProfileImage
     tags:
       - Image
-    summary: Requests a contact's profile image. (Deprecated)
+    summary: Requests a contact's profile image.
     description: 
       <b>Important:</b>
       This endpoint is deprecated and will be removed in the future. Use the new /contacts/picture endpoint instead.
+    deprecated: true
     produces:
       - application/octet-stream
     parameters:
@@ -23,7 +24,7 @@
       - in: query
         name: transformationNeeded
         type: boolean
-        description: Indicate if the image needs to be transformed. 
+        description: Indicate if the image needs to be transformed.
         required: false
       - in: query
         name: cropWidth
@@ -69,7 +70,7 @@
           - containforcedimension
           - cover
           - coverandcrop
-        required: false  
+        required: false
     responses:
       200:
         description: The content of the requested image is directly written into output stream.

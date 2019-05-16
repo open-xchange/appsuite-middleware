@@ -49,6 +49,7 @@
 
 package com.openexchange.report.osgi;
 
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.InvalidSyntaxException;
@@ -65,6 +66,7 @@ import com.openexchange.report.internal.InfostoreInformationImpl;
 import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.report.internal.LastLoginUpdater;
 import com.openexchange.report.internal.LoginCounterImpl;
+import com.openexchange.report.internal.LoginCounterRMIServiceImpl;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.user.UserService;
 
@@ -87,24 +89,16 @@ public final class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(new DependentServiceRegisterer<LoginHandlerService>(
-            context,
-            LoginHandlerService.class,
-            LastLoginRecorder.class,
-            null,
-            ConfigurationService.class,
-            UserService.class));
-        final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+        track(new DependentServiceRegisterer<LoginHandlerService>(context, LoginHandlerService.class, LastLoginRecorder.class, null, ConfigurationService.class, UserService.class));
+
+        Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
         dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-        track(new DependentServiceRegisterer<EventHandler>(
-            context,
-            EventHandler.class,
-            LastLoginUpdater.class,
-            dict,
-            ContextService.class,
-            UserService.class));
-        registerService(LoginCounterService.class, new LoginCounterImpl());
+        track(new DependentServiceRegisterer<EventHandler>(context, EventHandler.class, LastLoginUpdater.class, dict, ContextService.class, UserService.class));
+
+        LoginCounterService counterService = new LoginCounterImpl();
+        registerService(LoginCounterService.class, counterService);
         registerService(InfostoreInformationService.class, new InfostoreInformationImpl());
+        registerService(Remote.class, new LoginCounterRMIServiceImpl(counterService));
     }
 
     private final void track(DependentServiceRegisterer<?> registerer) throws InvalidSyntaxException {

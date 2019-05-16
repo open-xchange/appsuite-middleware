@@ -58,7 +58,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.infostore.thirdparty.actions.AbstractFileRequest;
 
 /**
- * 
+ *
  * {@link LockRequest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -100,7 +100,7 @@ public class LockRequest extends AbstractFileRequest<LockResponse> {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "lock"));
         params.add(new Parameter("id", id));
         if (timeDiff != null) {
-            params.add(new Parameter("diff", timeDiff));
+            params.add(new Parameter("diff", timeDiff.longValue()));
         }
 
         return params.toArray(new Parameter[params.size()]);

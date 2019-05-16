@@ -292,7 +292,7 @@ public class CSVContactImporter extends AbstractImporter {
         }
 
         if (exceeds) {
-            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
+            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(I(limit));
         }
         return new DefaultImportResults(results);
     }
@@ -325,10 +325,9 @@ public class CSVContactImporter extends AbstractImporter {
                     return new ImportIntention(result, contactObj);
                 }
                 return new ImportIntention(contactObj);
-            } else {
-                result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
-                result.setDate(new Date());
             }
+            result.setException(ImportExportExceptionCodes.NO_FIELD_IMPORTED.create(I(lineNumber)));
+            result.setDate(new Date());
         } catch (final OXException e) {
             if (e.getCategory() != Category.CATEGORY_TRUNCATED || (e.getCategory() == Category.CATEGORY_TRUNCATED && !canOverrideInCaseOfTruncation)) {
                 result.setException(wrapException(e, lineNumber, session));
@@ -339,7 +338,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
 
     private OXException wrapException(OXException ex, int lineNumber, ServerSession session){
-        return CsvExceptionCodes.NESTED_ERROR.create(lineNumber, ex.getDisplayMessage(session.getUser().getLocale()));
+        return CsvExceptionCodes.NESTED_ERROR.create(I(lineNumber), ex.getDisplayMessage(session.getUser().getLocale()));
     }
 
     public Contact convertCsvToContact(List<String> fields, List<String> entry, ContactSwitcher conSet, int lineNumber, ImportResult result, boolean[] atLeastOneFieldInserted) throws OXException {
@@ -545,7 +544,7 @@ public class CSVContactImporter extends AbstractImporter {
                 }
                 for (ContactFieldMapper mapper : entry.getValue()) {
                     int mappedFields = getMappedFields(mapper, parsedFirstLine.get(0));
-                    if (mappedFields > maxMappedFields || mappedFields == maxMappedFields && entry.getKey().equals(detectedCharset)) {
+                    if (mappedFields > maxMappedFields || mappedFields != 0 && mappedFields == maxMappedFields && entry.getKey().equals(detectedCharset)) {
                         maxMappedFields = mappedFields;
                         bestMapper = mapper;
                         bestParser = csvParser;

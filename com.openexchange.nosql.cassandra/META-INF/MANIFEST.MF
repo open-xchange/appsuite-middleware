@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange NoSQL Cassandra Bundle
 Bundle-SymbolicName: com.openexchange.nosql.cassandra
-Bundle-Version: 7.10.1
+Bundle-Version: 7.10.2
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
@@ -11,7 +11,7 @@ Bundle-ClassPath: .,
  lib/cassandra-driver-extras-3.6.0.jar,
  lib/cassandra-driver-mapping-3.6.0.jar,
  lib/metrics-core-3.2.0.jar,
- lib/netty-all-4.1.16.Final.jar
+ lib/netty-all-4.1.33.Final.jar
 Import-Package: com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,

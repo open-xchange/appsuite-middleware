@@ -57,6 +57,8 @@ package com.openexchange.admin.rmi.extensions;
  */
 public abstract class OXCommonExtension implements OXCommonExtensionInterface {
 
+    private static final long serialVersionUID = -4307192636151887795L;
+
     private String errortext;
 
     /**

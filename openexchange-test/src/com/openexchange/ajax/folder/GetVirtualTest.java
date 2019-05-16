@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
@@ -87,8 +88,8 @@ public class GetVirtualTest extends AbstractAJAXSession {
         assertEquals("Unexpected read permission: ", OCLPermission.NO_PERMISSIONS, p.getReadPermission());
         assertEquals("Unexpected write permission: ", OCLPermission.NO_PERMISSIONS, p.getWritePermission());
         assertEquals("Unexpected delete permission: ", OCLPermission.NO_PERMISSIONS, p.getDeletePermission());
-        assertEquals("Unexpected folder admin flag: ", false, p.isFolderAdmin());
-        assertEquals("Unexpected group flag: ", true, p.isGroupPermission());
+        assertFalse("Unexpected folder admin flag: ", p.isFolderAdmin());
+        assertTrue("Unexpected group flag: ", p.isGroupPermission());
     }
 
 }

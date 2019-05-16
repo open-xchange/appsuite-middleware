@@ -82,6 +82,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -189,10 +190,16 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public Event loadEvent(String eventId, EventField[] fields) throws OXException {
+        List<Event> events = loadEvents(Collections.singletonList(eventId), fields);
+        return 0 < events.size() ? events.get(0) : null;
+    }
+
+    @Override
+    public List<Event> loadEvents(List<String> eventIds, EventField[] fields) throws OXException {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            return selectEvent(connection, eventId, fields);
+            return selectEvents(connection, eventIds, fields);
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -414,7 +421,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM calendar_event WHERE cid=? AND account=? AND id")
-            .append(getPlaceholders(ids.size())).append(';')
+            .append(Databases.getPlaceholders(ids.size())).append(';')
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -444,6 +451,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             for (Event event : events) {
+                MAPPER.validateAll(event);
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
@@ -473,6 +481,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             for (Event event : events) {
                 stmt.setInt(parameterIndex++, context.getContextId());
                 stmt.setInt(parameterIndex++, accountId);
+                MAPPER.validateAll(event);
                 parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), mappedFields);
                 stmt.setLong(parameterIndex++, getRangeFrom(event));
                 stmt.setLong(parameterIndex++, getRangeUntil(event));
@@ -492,6 +501,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
+            MAPPER.validateAll(event);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), assignedfields);
             stmt.setInt(parameterIndex++, context.getContextId());
             stmt.setInt(parameterIndex++, accountId);
@@ -511,6 +521,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
+            MAPPER.validateAll(event);
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, entityProcessor.adjustPriorSave(event), assignedfields);
             stmt.setLong(parameterIndex++, rangeFrom);
             stmt.setLong(parameterIndex++, rangeUntil);
@@ -521,20 +532,30 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
-    private Event selectEvent(Connection connection, String id, EventField[] fields) throws SQLException, OXException {
+    private List<Event> selectEvents(Connection connection, List<String> ids, EventField[] fields) throws SQLException, OXException {
+        if (null == ids || 0 == ids.size()) {
+            return Collections.emptyList();
+        }
+        List<Event> events = new ArrayList<Event>(ids.size());
         EventField[] mappedFields = MAPPER.getMappedFields(fields);
         String sql = new StringBuilder()
             .append("SELECT ").append(MAPPER.getColumns(mappedFields)).append(" FROM calendar_event ")
-            .append("WHERE cid=? AND account=? AND id=?;")
+            .append("WHERE cid=? AND account=? AND id").append(Databases.getPlaceholders(ids.size())).append(';')
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, accountId);
-            stmt.setInt(3, asInt(id));
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, accountId);
+            for (String id : ids) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                return resultSet.next() ? readEvent(resultSet, mappedFields, null) : null;
+                while (resultSet.next()) {
+                    events.add(readEvent(resultSet, mappedFields, null));
+                }
             }
         }
+        return events;
     }
 
     private Event selectException(Connection connection, String seriesId, RecurrenceId recurrenceId, EventField[] fields) throws SQLException, OXException {
@@ -825,7 +846,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 long eventDuration = event.getEndDate().getTimestamp() - event.getStartDate().getTimestamp();
                 rangeUntil = new DateTime(rangeUntil.getTimeZone(), lastRecurrenceId.getValue().getTimestamp() + eventDuration);
             } catch (OXException e) {
-                addInvalidDataWaring(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.NORMAL, "Unable to determine effective range for series master event", e);
+                addInvalidDataWarning(event.getId(), EventField.RECURRENCE_RULE, ProblemSeverity.NORMAL, "Unable to determine effective range for series master event", e);
             }
         } else if (isSeriesException(event) && null != event.getRecurrenceId() && 0 < compare(event.getRecurrenceId().getValue(), rangeUntil, TimeZones.UTC)) {
             /*

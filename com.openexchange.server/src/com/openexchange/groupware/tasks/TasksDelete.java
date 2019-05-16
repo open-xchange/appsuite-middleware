@@ -114,7 +114,6 @@ public class TasksDelete implements DeleteListener {
         try {
             stmt = writeCon.createStatement();
 
-            stmt.addBatch("DELETE FROM del_task_eparticipant WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM del_task_participant WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM del_task_folder WHERE cid=" + ctx.getContextId());
             stmt.addBatch("DELETE FROM del_task WHERE cid=" + ctx.getContextId());

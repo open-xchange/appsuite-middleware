@@ -97,11 +97,12 @@ public class MKCALENDARAction extends DAVAction {
             for (Element element : rootElement.getChildren("set", Protocol.DAV_NS)) {
                 for (Element prop : element.getChildren("prop", Protocol.DAV_NS)) {
                     for (Element propertyElement : prop.getChildren()) {
-                        if (request.getFactory().getProtocol().isProtected(propertyElement.getNamespaceURI(), propertyElement.getName())) {
-                            throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
-                        } else {
-                            resource.putProperty(new DAVProperty(propertyElement));
-                        }
+                        //                        if (request.getFactory().getProtocol().isProtected(propertyElement.getNamespaceURI(), propertyElement.getName())) {
+                        //                            throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                        //                        } else {
+                        //                            resource.putProperty(new DAVProperty(propertyElement));
+                        //                        }
+                        resource.putProperty(new DAVProperty(propertyElement));
                     }
                 }
             }

@@ -600,6 +600,10 @@ public final class ServerConfig implements Reloadable {
          * The default value for max. concurrent AJAX requests.
          */
         DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS("com.openexchange.defaultMaxConcurrentAJAXRequests", "100"),
+        /**
+         * The shard name of this server
+         */
+        SHARD_NAME("com.openexchange.server.shardName", "default")
 
         ;
 

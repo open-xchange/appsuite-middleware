@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertFalse;
 import java.util.ArrayList;
 import java.util.Date;
@@ -80,6 +81,7 @@ public class Bug26350Test extends AbstractAJAXSession {
 
     private FolderObject folder;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,7 +103,7 @@ public class Bug26350Test extends AbstractAJAXSession {
                 app.setParentFolderID(folder.getObjectID());
                 app.setIgnoreConflicts(true);
                 Appointment insert = catm.insert(app);
-                chunkIds.add(insert.getObjectID());
+                chunkIds.add(I(insert.getObjectID()));
             }
             ids.add(chunkIds);
         }
@@ -110,7 +112,7 @@ public class Bug26350Test extends AbstractAJAXSession {
             DeleteRequest[] requests = new DeleteRequest[chunkIds.size()];
 
             for (int j = 0; j < chunkIds.size(); j++) {
-                requests[j] = new DeleteRequest(chunkIds.get(j), folder.getObjectID(), new Date(Long.MAX_VALUE));
+                requests[j] = new DeleteRequest(chunkIds.get(j).intValue(), folder.getObjectID(), new Date(Long.MAX_VALUE));
             }
 
             MultipleResponse<CommonDeleteResponse> response = getClient().execute(MultipleRequest.create(requests));

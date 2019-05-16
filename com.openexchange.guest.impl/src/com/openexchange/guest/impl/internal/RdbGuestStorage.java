@@ -49,6 +49,8 @@
 
 package com.openexchange.guest.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,7 +73,7 @@ import com.openexchange.guest.impl.storage.GuestStorage;
  */
 public class RdbGuestStorage extends GuestStorage {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbGuestStorage.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbGuestStorage.class);
 
     /**
      * SQL statement for resolving the internal unique id based on the mail address
@@ -103,14 +105,14 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement for getting password and password mechanism for a user (resolved by guest id, context and user id)
      */
-    protected static final String RESOLVE_GUEST_ASSIGNMENT_PASSWORD = "SELECT password, passwordMech FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENT_PASSWORD = "SELECT password, passwordMech, salt FROM guest2context WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement for getting assignments made for a user based on the mail address<br>
      * <br>
      * Checks if the given user has assignments.
      */
-    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid,password,passwordMech FROM guest2context WHERE guest_id=?";
+    protected static final String RESOLVE_GUEST_ASSIGNMENTS = "SELECT cid,uid,password,passwordMech,salt FROM guest2context WHERE guest_id=?";
 
     /**
      * SQL statement to count assignments that currently exist.
@@ -120,12 +122,12 @@ public class RdbGuestStorage extends GuestStorage {
     /**
      * SQL statement to update password and passwordMech for the given user
      */
-    protected static final String UPDATE_GUEST_PASSWORD = "UPDATE guest2context SET password=?, passwordMech=? WHERE cid=? AND uid=? AND guest_id=?";
+    protected static final String UPDATE_GUEST_PASSWORD = "UPDATE guest2context SET password=?, passwordMech=?, salt=? WHERE cid=? AND uid=? AND guest_id=?";
 
     /**
      * SQL statement to insert a new assignment for an existing guest
      */
-    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid, password, passwordMech) VALUES (?, ?, ?, ?, ?)";
+    protected static final String INSERT_GUEST_ASSIGNMENT = "INSERT INTO guest2context (guest_id, cid, uid, password, passwordMech, salt) VALUES (?, ?, ?, ?, ?, ?)";
 
     /**
      * SQL statement to insert a new guest for an unknown mail address
@@ -210,11 +212,13 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setInt(3, assignment.getUserId());
             statement.setString(4, assignment.getPassword());
             statement.setString(5, assignment.getPasswordMech());
+            statement.setBytes(6, assignment.getSalt());
 
             long affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for adding guest assignment but there should only be 1. Executed SQL: " + statement.toString());
+                String sqlStmt = statement.toString(); // Call PreparedStatement.toString() here to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} changes for adding guest assignment but there should only be 1. Executed SQL: {}", Long.valueOf(affectedRows), sqlStmt);
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -271,7 +275,7 @@ public class RdbGuestStorage extends GuestStorage {
 
             while (result.next()) {
                 long guestId = result.getLong(1);
-                guestIds.add(guestId);
+                guestIds.add(L(guestId));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -297,10 +301,11 @@ public class RdbGuestStorage extends GuestStorage {
             statement.setLong(1, guestId);
             statement.setInt(2, contextId);
             statement.setInt(3, userId);
-            long affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for removing a guest assignment but there should only be 1. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} changes for removing a guest assignment but there should only be 1. Executed SQL: {}", I(affectedRows), sql);
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -323,10 +328,11 @@ public class RdbGuestStorage extends GuestStorage {
         try {
             statement = connection.prepareStatement(DELETE_GUEST);
             statement.setLong(1, guestId);
-            long affectedRows = statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
 
             if (affectedRows > 1) {
-                LOG.error("There have been " + affectedRows + " guests removed but there should max be 1. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} guests removed but there should max be 1. Executed SQL: {}", I(affectedRows), sql);
                 throw GuestExceptionCodes.TOO_MANY_GUESTS_REMOVED.create(Long.toString(affectedRows), statement.toString());
             }
         } catch (final SQLException e) {
@@ -378,7 +384,7 @@ public class RdbGuestStorage extends GuestStorage {
 
             while (result.next()) {
                 long guestId = result.getLong(1);
-                guestIdsAssigmentsRemovedFor.add(guestId);
+                guestIdsAssigmentsRemovedFor.add(L(guestId));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -538,8 +544,9 @@ public class RdbGuestStorage extends GuestStorage {
                 int cid = result.getInt(1);
                 int uid = result.getInt(2);
                 String password = result.getString(3);
-                String passwordMech = result.getString(3);
-                guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech));
+                String passwordMech = result.getString(4);
+                byte[] salt = result.getBytes(5);
+                guestAssignments.add(new GuestAssignment(guestId, cid, uid, password, passwordMech, salt));
             }
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -569,7 +576,8 @@ public class RdbGuestStorage extends GuestStorage {
             while (result.next()) {
                 String password = result.getString(1);
                 String passwordMech = result.getString(2);
-                return new GuestAssignment(guestId, contextId, userId, password, passwordMech);
+                byte[] salt = result.getBytes(3);
+                return new GuestAssignment(guestId, contextId, userId, password, passwordMech, salt);
             }
 
         } catch (final SQLException e) {
@@ -594,14 +602,16 @@ public class RdbGuestStorage extends GuestStorage {
             statement = connection.prepareStatement(UPDATE_GUEST_PASSWORD);
             statement.setString(1, assignment.getPassword());
             statement.setString(2, assignment.getPasswordMech());
-            statement.setInt(3, assignment.getContextId());
-            statement.setInt(4, assignment.getUserId());
-            statement.setLong(5, assignment.getGuestId());
+            statement.setBytes(3, assignment.getSalt());
+            statement.setInt(4, assignment.getContextId());
+            statement.setInt(5, assignment.getUserId());
+            statement.setLong(6, assignment.getGuestId());
 
             final int affectedRows = statement.executeUpdate();
 
             if (affectedRows != 1) {
-                LOG.error("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
+                String sql = statement.toString(); // Invoke PreparedStatement.toString() to avoid race condition with asynchronous logging behavior
+                LOG.error("There have been {} changes for updating the guest user. Executed SQL: {}", I(affectedRows), sql);
                 throw GuestExceptionCodes.SQL_ERROR.create("There have been " + affectedRows + " changes for updating the guest user. Executed SQL: " + statement.toString());
             }
         } catch (final SQLException e) {

@@ -25,6 +25,7 @@ public class Bug17261Test extends AbstractAJAXSession {
     private FolderTestManager ftm2;
     private String folderName;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -81,6 +82,7 @@ public class Bug17261Test extends AbstractAJAXSession {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

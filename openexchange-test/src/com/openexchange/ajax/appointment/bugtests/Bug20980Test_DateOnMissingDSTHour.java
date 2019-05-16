@@ -62,7 +62,7 @@ public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
     }
 
     @Test
-    public void testBugWithDST() throws Exception {
+    public void testBugWithDST() {
         int fid = folder.getObjectID();
         Appointment series = generateDailyAppointment();
         series.setStartDate(D("30/3/2008 01:00", utc));

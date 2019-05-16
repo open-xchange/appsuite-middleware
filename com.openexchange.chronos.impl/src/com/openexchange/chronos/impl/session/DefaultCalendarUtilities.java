@@ -50,9 +50,7 @@
 package com.openexchange.chronos.impl.session;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
@@ -65,8 +63,6 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
-import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.server.ServiceLookup;
 
@@ -103,74 +99,8 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
     }
 
     @Override
-    public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) throws OXException {
+    public EventUpdate compare(Event original, Event update, boolean considerUnset, EventField... ignoredFields) {
         return new DefaultEventUpdate(original, update, considerUnset, ignoredFields);
-    }
-
-    @Override
-    public boolean handleIncorrectString(OXException e, Event event) {
-        boolean hasReplaced = false;
-        if (null != event) {
-            try {
-                hasReplaced |= MappedIncorrectString.replace(e.getProblematics(), event, "");
-            } catch (ClassCastException | OXException x1) {
-                // also try attendees
-                List<Attendee> attendees = event.getAttendees();
-                if (null != attendees) {
-                    for (Attendee attendee : attendees) {
-                        try {
-                            hasReplaced |= MappedIncorrectString.replace(e.getProblematics(), attendee, "");
-                        } catch (ClassCastException | OXException x2) {
-                            // ignore
-                        }
-                    }
-                }
-            }
-        }
-        return hasReplaced;
-    }
-
-    @Override
-    public boolean handleIncorrectString(OXException e, List<Attendee> attendees) {
-        boolean hasReplaced = false;
-        if (null != attendees) {
-            for (Attendee attendee : attendees) {
-                try {
-                    hasReplaced |= MappedIncorrectString.replace(e.getProblematics(), attendee, "");
-                } catch (ClassCastException | OXException x) {
-                    // ignore
-                }
-            }
-        }
-        return hasReplaced;
-    }
-
-    @Override
-    public boolean handleDataTruncation(OXException e, Event event) {
-        boolean hasTrimmed = false;
-        if (null != event) {
-            try {
-                hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), event);
-            } catch (ClassCastException | OXException x) {
-                // ignore
-            }
-        }
-        return hasTrimmed;
-    }
-
-    @Override
-    public boolean handleDataTruncation(OXException e, List<Attendee> attendees) {
-        boolean hasTrimmed = false;
-        if (null != attendees) {
-            for (Attendee attendee : attendees) {
-                try {
-                    hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), attendee);
-                } catch (ClassCastException | OXException x) {
-                    // ignore
-                }
-            }
-        }
-        return hasTrimmed;
     }
 
     @Override
@@ -202,17 +132,15 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
                     return 0;
                 }
                 int comparison = 0;
-                if (null != sortOrders && 0 < sortOrders.length) {
-                    for (SortOrder sortOrder : sortOrders) {
-                        Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(sortOrder.getBy());
-                        if (null == mapping) {
-                            org.slf4j.LoggerFactory.getLogger(DefaultCalendarUtilities.class).warn("Can't compare by {} due to missing mapping", sortOrder.getBy());
-                            continue;
-                        }
-                        comparison = mapping.compare(event1, event2);
-                        if (0 != comparison) {
-                            return sortOrder.isDescending() ? -1 * comparison : comparison;
-                        }
+                for (SortOrder sortOrder : sortOrders) {
+                    Mapping<? extends Object, Event> mapping = EventMapper.getInstance().opt(sortOrder.getBy());
+                    if (null == mapping) {
+                        org.slf4j.LoggerFactory.getLogger(DefaultCalendarUtilities.class).warn("Can't compare by {} due to missing mapping", sortOrder.getBy());
+                        continue;
+                    }
+                    comparison = mapping.compare(event1, event2);
+                    if (0 != comparison) {
+                        return sortOrder.isDescending() ? -1 * comparison : comparison;
                     }
                 }
                 return comparison;

@@ -413,7 +413,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
             entityMap.append("zwj=8205\n");
             entityMap.append("prod=8719\n");
             entityMap.append("le=8804");
-            htmlEntities.load(new UnsynchronizedByteArrayInputStream(String.valueOf(entityMap.toString()).getBytes()));
+            htmlEntities.load(new UnsynchronizedByteArrayInputStream(String.valueOf(entityMap.toString()).getBytes(com.openexchange.java.Charsets.UTF_8)));
         } catch (final IOException e) {
             /*
              * Cannot occur
@@ -474,7 +474,7 @@ public class HTMLServiceActivator extends HousekeepingActivator {
                 defaultConfig.append("#smart-indent=no\n");
                 defaultConfig.append("output-xhtml=yes\n");
                 defaultConfig.append("char-encoding=latin1");
-                properties.load(new ByteArrayInputStream(String.valueOf(defaultConfig.toString()).getBytes()));
+                properties.load(new ByteArrayInputStream(String.valueOf(defaultConfig.toString()).getBytes(com.openexchange.java.Charsets.UTF_8)));
             } catch (final UnsupportedEncodingException e) {
                 /*
                  * Cannot occur

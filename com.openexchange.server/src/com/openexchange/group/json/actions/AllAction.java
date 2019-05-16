@@ -52,12 +52,11 @@ package com.openexchange.group.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupService;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -78,7 +77,7 @@ public final class AllAction extends AbstractGroupAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException {
         Date timestamp = new Date(0);
 
         boolean loadMembers = false;
@@ -90,9 +89,7 @@ public final class AllAction extends AbstractGroupAction {
                 }
             }
         }
-
-        GroupStorage groupStorage = GroupStorage.getInstance();
-        Group[] groups = groupStorage.getGroups(loadMembers, req.getSession().getContext());
+        Group[] groups = services.getServiceSafe(GroupService.class).listAllGroups(req.getSession().getContext(), loadMembers);
 
         int length = groups.length;
         List<Group> groupList = new ArrayList<Group>(length);
@@ -105,8 +102,6 @@ public final class AllAction extends AbstractGroupAction {
                 timestamp = lastModified;
             }
         }
-
         return new AJAXRequestResult(groupList, timestamp, "group");
     }
-
 }

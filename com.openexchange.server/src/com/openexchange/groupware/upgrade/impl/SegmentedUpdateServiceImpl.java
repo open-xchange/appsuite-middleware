@@ -100,7 +100,7 @@ public class SegmentedUpdateServiceImpl implements SegmentedUpdateService {
     public String getSharingMigrationRedirectURL(@Nullable String host) throws OXException {
         String url = getProperty(host, ShareProperty.migrationRedirectURL);
         if (Strings.isEmpty(url)) {
-            url = getProperty(host, ServerProperty.migrationRedirectURL);
+          url = getProperty(host, ServerProperty.migrationRedirectURL);
         }
         return url;
     }

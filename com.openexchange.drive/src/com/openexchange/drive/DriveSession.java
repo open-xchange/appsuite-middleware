@@ -52,6 +52,7 @@ package com.openexchange.drive;
 import java.util.List;
 import java.util.Locale;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -64,7 +65,7 @@ public interface DriveSession {
     /**
      * The session parameter used to hold the client's push token
      */
-    static final String PARAMETER_PUSH_TOKEN = "com.openexchange.drive.pushToken";
+    static final String PARAMETER_PUSH_TOKEN = Session.PARAM_PUSH_TOKEN;
 
     /**
      * Gets the underlying server session.

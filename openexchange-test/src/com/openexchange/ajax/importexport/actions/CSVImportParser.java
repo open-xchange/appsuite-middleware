@@ -56,7 +56,7 @@ import com.openexchange.ajax.framework.AbstractUploadParser;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CSVImportParser extends AbstractUploadParser {
+public final class CSVImportParser extends AbstractUploadParser<CSVImportResponse> {
 
     /**
      * @param failOnError

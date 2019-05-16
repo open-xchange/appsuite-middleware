@@ -57,6 +57,7 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
+import com.openexchange.chronos.itip.generators.changes.generators.ChangeDescriptionProvider;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -69,6 +70,15 @@ import com.openexchange.groupware.contexts.Context;
 public class ChangeDescriber {
 
     private final ChangeDescriptionGenerator[] generators;
+
+    /**
+     * 
+     * Initializes a new {@link ChangeDescriber} with all available {@link ChangeDescriptionGenerator}.
+     *
+     */
+    public ChangeDescriber() {
+        this(ChangeDescriptionProvider.getGenerators());
+    }
 
     public ChangeDescriber(ChangeDescriptionGenerator... generators) {
         this.generators = generators;

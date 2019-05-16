@@ -54,29 +54,36 @@ import com.openexchange.tools.iterator.CustomizableSearchIterator;
 import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link CustomizableTimedResult}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CustomizableTimedResult<T> implements TimedResult<T>{
+public class CustomizableTimedResult<T> implements TimedResult<T> {
+
     private final TimedResult<T> result;
     private final Customizer<T> customizer;
 
+    /**
+     * Initializes a new {@link CustomizableTimedResult}.
+     *
+     * @param result The result to wrap
+     * @param customizer The customizer to apply
+     */
     public CustomizableTimedResult(TimedResult<T> result, Customizer<T> customizer) {
         super();
         this.result = result;
         this.customizer = customizer;
     }
+
     @Override
     public SearchIterator<T> results() throws OXException {
-        return new CustomizableSearchIterator<T>(result.results(), customizer);
+        return null == customizer ? result.results() : new CustomizableSearchIterator<T>(result.results(), customizer);
     }
+
     @Override
     public long sequenceNumber() throws OXException {
         return result.sequenceNumber();
     }
-
 
 }

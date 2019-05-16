@@ -150,35 +150,35 @@ public final class TaskTools extends ParticipantTools {
     }
 
     public static void compareAttributes(final Task task, final Task reload) {
-        assertEquals("Title differs", task.containsTitle(), reload.containsTitle());
+        assertTrue("Title differs", task.containsTitle() == reload.containsTitle());
         assertEquals("Title differs", task.getTitle(), reload.getTitle());
-        assertEquals("Private Flag differs", task.containsPrivateFlag(), reload.containsPrivateFlag());
-        assertEquals("Private Flag differs", task.getPrivateFlag(), reload.getPrivateFlag());
+        assertTrue("Private Flag differs", task.containsPrivateFlag() == reload.containsPrivateFlag());
+        assertTrue("Private Flag differs", task.getPrivateFlag() == reload.getPrivateFlag());
         /*
          * Not implemented in parser assertEquals("Creation date differs", task.containsCreationDate(), reload.containsCreationDate());
          * assertEquals("Creation date differs", task.getCreationDate(), reload.getCreationDate()); assertEquals("Last modified differs",
          * task.containsLastModified(), reload.containsLastModified()); assertEquals("Last modified differs", task.getLastModified(),
          * reload.getLastModified());
          */
-        assertEquals("Start date differs", task.containsStartDate(), reload.containsStartDate());
+        assertTrue("Start date differs", task.containsStartDate() == reload.containsStartDate());
         assertEquals("Start date differs", task.getStartDate(), reload.getStartDate());
-        assertEquals("End date differs", task.containsEndDate(), reload.containsEndDate());
+        assertTrue("End date differs", task.containsEndDate() == reload.containsEndDate());
         assertEquals("End date differs", task.getEndDate(), reload.getEndDate());
         // assertEquals("After complete differs", task.containsAfterComplete(),
         // reload.containsAfterComplete());
         // assertEquals("After complete differs", task.getAfterComplete(),
         // reload.getAfterComplete());
         // task.setNote("Description");
-        assertEquals("Status differs", task.containsStatus(), reload.containsStatus());
+        assertTrue("Status differs", task.containsStatus() == reload.containsStatus());
         assertEquals("Status differs", task.getStatus(), reload.getStatus());
-        assertEquals("Priority differs", task.containsPriority(), reload.containsPriority());
+        assertTrue("Priority differs", task.containsPriority() == reload.containsPriority());
         assertEquals("Priority differs", task.getPriority(), reload.getPriority());
-        assertEquals("PercentComplete differs", task.containsPercentComplete(), reload.containsPercentComplete());
+        assertTrue("PercentComplete differs", task.containsPercentComplete() == reload.containsPercentComplete());
         assertEquals("PercentComplete differs", task.getPercentComplete(), reload.getPercentComplete());
         // task.setCategories("Categories");
-        assertEquals("TargetDuration differs", task.containsTargetDuration(), reload.containsTargetDuration());
+        assertTrue("TargetDuration differs", task.containsTargetDuration() == reload.containsTargetDuration());
         assertEquals("TargetDuration differs", task.getTargetDuration(), reload.getTargetDuration());
-        assertEquals("ActualDuration differs", task.containsActualDuration(), reload.containsActualDuration());
+        assertTrue("ActualDuration differs", task.containsActualDuration() == reload.containsActualDuration());
         assertEquals("ActualDuration differs", task.getActualDuration(), reload.getActualDuration());
         // task.setTargetCosts(1.0f);
         // task.setActualCosts(1.0f);
@@ -215,7 +215,7 @@ public final class TaskTools extends ParticipantTools {
 
     /**
      * Compares the specified objects
-     * 
+     *
      * @param taskObj1 The expected {@link Task}
      * @param taskObj2 The actual {@link Task}
      * @throws Exception if an error is occurred
@@ -226,7 +226,7 @@ public final class TaskTools extends ParticipantTools {
         assertEqualsAndNotNull("start is not equals", taskObj1.getStartDate(), taskObj2.getStartDate());
         assertEqualsAndNotNull("end is not equals", taskObj1.getEndDate(), taskObj2.getEndDate());
         assertEquals("folder id is not equals", taskObj1.getParentFolderID(), taskObj2.getParentFolderID());
-        assertEquals("private flag is not equals", taskObj1.getPrivateFlag(), taskObj2.getPrivateFlag());
+        assertTrue("private flag is not equals", taskObj1.getPrivateFlag() == taskObj2.getPrivateFlag());
         assertEquals("alarm is not equals", taskObj1.getAlarm(), taskObj2.getAlarm());
         assertEqualsAndNotNull("note is not equals", taskObj1.getNote(), taskObj2.getNote());
         assertEqualsAndNotNull("categories is not equals", taskObj1.getCategories(), taskObj2.getCategories());
@@ -236,9 +236,9 @@ public final class TaskTools extends ParticipantTools {
         assertEqualsAndNotNull("companies", taskObj1.getCompanies(), taskObj2.getCompanies());
         assertEqualsAndNotNull("currency", taskObj1.getCurrency(), taskObj2.getCurrency());
         assertEqualsAndNotNull("date completed", taskObj1.getDateCompleted(), taskObj2.getDateCompleted());
-        assertEqualsAndNotNull("percent complete", taskObj1.getPercentComplete(), taskObj2.getPercentComplete());
+        assertEquals("percent complete", taskObj1.getPercentComplete(), taskObj2.getPercentComplete());
         assertEqualsAndNotNull("priority", taskObj1.getPriority(), taskObj2.getPriority());
-        assertEqualsAndNotNull("status", taskObj1.getStatus(), taskObj2.getStatus());
+        assertEquals("status", taskObj1.getStatus(), taskObj2.getStatus());
         assertEqualsAndNotNull("target costs", taskObj1.getTargetCosts(), taskObj2.getTargetCosts());
         assertEqualsAndNotNull("target duration", taskObj1.getTargetDuration(), taskObj2.getTargetDuration());
         assertEqualsAndNotNull("trip meter", taskObj1.getTripMeter(), taskObj2.getTripMeter());

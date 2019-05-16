@@ -33,15 +33,15 @@ package net.fortuna.ical4j.model;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.component.VTimeZone;
@@ -218,7 +218,8 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
         if (tzUrl != null) {
             InputStream inputStream = null;
             try {
-                URLConnection connection = tzUrl.getUri().toURL().openConnection();
+                HttpURLConnection connection = (HttpURLConnection) tzUrl.getUri().toURL().openConnection();
+                connection.setInstanceFollowRedirects(true);
                 connection.setConnectTimeout(5000);
                 connection.setReadTimeout(5000);
                 inputStream = connection.getInputStream();

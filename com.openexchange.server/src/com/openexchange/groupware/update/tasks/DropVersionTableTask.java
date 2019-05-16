@@ -49,55 +49,23 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateConcurrency;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.groupware.update.WorkingLevel;
-import com.openexchange.tools.update.Tools;
-
-
 /**
  * {@link DropVersionTableTask}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class DropVersionTableTask extends UpdateTaskAdapter {
+public class DropVersionTableTask extends AbstractDropTableTask {
 
     /**
      * Initializes a new {@link DropVersionTableTask}.
      */
     public DropVersionTableTask() {
-        super();
-    }
-
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        Connection con = params.getConnection();
-        try {
-            String TABLE = "version";
-            if (Tools.tableExists(con, TABLE)) {
-                Tools.dropTable(con, TABLE);
-            }
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        }
+        super("version");
     }
 
     @Override
     public String[] getDependencies() {
         return new String[] { com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask.class.getName() };
     }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
-    }
-
 }

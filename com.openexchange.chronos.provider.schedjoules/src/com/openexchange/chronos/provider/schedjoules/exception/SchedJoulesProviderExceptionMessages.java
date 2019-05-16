@@ -56,8 +56,8 @@ package com.openexchange.chronos.provider.schedjoules.exception;
  */
 final class SchedJoulesProviderExceptionMessages {
 
-    // The requested page does not denote to a calendar.
-    static final String NO_CALENDAR_MSG = "The requested page does not denote to a calendar.";
+    // The requested page does not denote a calendar.
+    static final String NO_CALENDAR_MSG = "The requested page does not denote a calendar.";
     // You have no access to this calendar.
     public static final String NO_ACCESS_MSG = "You have no access to this calendar.";
     // The requested calendar does not exist.

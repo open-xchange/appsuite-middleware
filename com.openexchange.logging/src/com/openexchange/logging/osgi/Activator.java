@@ -69,9 +69,9 @@ import com.openexchange.logging.LogLevelService;
 import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.ParamsCheckingTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.internal.LogLevelServiceImpl;
 import com.openexchange.logging.internal.LogbackConfigurationRMIServiceImpl;
-import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -100,10 +100,10 @@ public class Activator implements BundleActivator, Reloadable {
 
     // ----------------------------------------------------------------------------------- //
 
-    private volatile ServiceTracker<ManagementService, ManagementService> managementTracker;
-    private volatile ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
-    private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
-    private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
+    private ServiceTracker<ManagementService, ManagementService> managementTracker;
+    private ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
+    private RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
     private ServiceRegistration<Reloadable> reloadable;
     private ServiceRegistration<LogLevelService> logLevelService;
     private LogbackConfigurationRMIServiceImpl logbackConfigurationRMIService;
@@ -123,7 +123,7 @@ public class Activator implements BundleActivator, Reloadable {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         LOGGER.info("starting bundle com.openexchange.logging");
 
         // Obtain logger context
@@ -150,7 +150,7 @@ public class Activator implements BundleActivator, Reloadable {
 
         // Register services
         final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
-        registerLoggingConfigurationMBean(context, loggerContext, rankingAwareTurboFilterList, serviceImpl);
+        registerLogstashAppenderMBean(context);
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
         registerIncludeStackTraceService(serviceImpl, context);
         reloadable = context.registerService(Reloadable.class, this, null);
@@ -163,7 +163,7 @@ public class Activator implements BundleActivator, Reloadable {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         LOGGER.info("stopping bundle com.openexchange.logging");
 
         final ServiceTracker<ManagementService, ManagementService> managementTracker = this.managementTracker;
@@ -210,7 +210,7 @@ public class Activator implements BundleActivator, Reloadable {
     /**
      * Installs the logback LevelChangePropagator if the descriptive configuration was removed by the admin.
      */
-    protected void installJulLevelChangePropagator(final LoggerContext loggerContext) {
+    protected synchronized void installJulLevelChangePropagator(final LoggerContext loggerContext) {
         List<LoggerContextListener> loggerContextListener = loggerContext.getCopyOfListenerList();
 
         if (!hasInstanceOf(loggerContextListener, LevelChangePropagator.class)) {
@@ -245,7 +245,7 @@ public class Activator implements BundleActivator, Reloadable {
      * Overrides the log level for LoginPerformer and SessionHandler in case that the administrator removed or changed the logging level to
      * coarser settings. If the settings are finer (TRACE, DEBUG, ALL) this level will not be overridden.
      */
-    protected void overrideLoggerLevels(final LoggerContext loggerContext) {
+    protected synchronized void overrideLoggerLevels(final LoggerContext loggerContext) {
         String disableOverrideLogLevels = loggerContext.getProperty("com.openexchange.logging.disableOverrideLogLevels");
         if ("true".equalsIgnoreCase(disableOverrideLogLevels)) {
             return;
@@ -282,17 +282,17 @@ public class Activator implements BundleActivator, Reloadable {
     /**
      * Register the LoggingConfigurationMBean
      */
-    protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
+    protected synchronized void registerLogstashAppenderMBean(BundleContext context) {
         try {
-            LogbackConfigurationMBeanRegisterer logbackConfigurationMBeanRegisterer = new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl);
-            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logbackConfigurationMBeanRegisterer);
+            LogbackSocketAppenderMBeanRegisterer logstashAppenderRegistration = new LogbackSocketAppenderMBeanRegisterer(context);
+            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logstashAppenderRegistration);
             this.managementTracker = tracker;
             tracker.open();
         } catch (final Exception e) {
-            LOGGER.error("Could not register LogbackConfigurationMBean", e);
+            LOGGER.error("Could not register LogstashAppenderMBean", e);
         }
 
-        LOGGER.info("LoggingConfigurationMBean successfully registered.");
+        LOGGER.info("LogstashAppenderMBean successfully registered.");
     }
 
     /**
@@ -302,7 +302,7 @@ public class Activator implements BundleActivator, Reloadable {
      * @param turboFilterList The ranking aware turbo filter list
      * @param serviceImpl The include stack trace service
      */
-    protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
+    protected synchronized void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
         ExceptionCategoryFilterRegisterer exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
         final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, exceptionCategoryFilterRegisterer);
         configurationTracker = tracker;
@@ -315,14 +315,14 @@ public class Activator implements BundleActivator, Reloadable {
      * @param serviceImpl The implementation
      * @param context The bundle context
      */
-    protected void registerIncludeStackTraceService(final IncludeStackTraceServiceImpl serviceImpl, final BundleContext context) {
+    protected synchronized void registerIncludeStackTraceService(final IncludeStackTraceServiceImpl serviceImpl, final BundleContext context) {
         includeStackTraceServiceRegistration = context.registerService(IncludeStackTraceService.class, serviceImpl, null);
     }
 
     // ------------------------------------------------- Reloadable stuff ------------------------------------------------------------
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
+    public synchronized void reloadConfiguration(ConfigurationService configService) {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         ContextInitializer ci = new ContextInitializer(loggerContext);
         URL url = ci.findURLOfDefaultConfigurationFile(true);

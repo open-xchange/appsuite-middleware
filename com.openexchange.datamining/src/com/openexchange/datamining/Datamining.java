@@ -831,8 +831,7 @@ public class Datamining {
                 }
             }
         }
-        Float averageNumberOfObjects = new Float("0");
-        averageNumberOfObjects = numberOfObjects / allSchemata.size();
+        Float averageNumberOfObjects = numberOfObjects / allSchemata.size();
         return averageNumberOfObjects;
     }
 

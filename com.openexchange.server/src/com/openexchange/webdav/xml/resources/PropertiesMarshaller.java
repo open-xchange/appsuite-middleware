@@ -56,11 +56,15 @@ import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
+import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
@@ -73,6 +77,9 @@ import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.protocol.util.Utils;
 
 public class PropertiesMarshaller implements ResourceMarshaller {
+
+    /** Pattern to extract problematic characters from verifier error messages */
+    private static final Pattern HEX_CHARACTER_PATTERN = Pattern.compile("\\b0x([a-fA-F0-9]+)\\b");
 
 	protected static final Namespace DAV_NS = Protocol.DAV_NS;
 	protected static final Namespace DATE_NS = Namespace.getNamespace("b",  "urn:uuid:c2f41010-65b3-11d1-a29f-00aa00c14882/");
@@ -168,7 +175,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	public Element marshalProperty(WebdavProperty property, Protocol protocol) {
 		Element propertyElement = new Element(property.getName(), getNamespace(property));
-		if (null == property.getValue()) {
+        if (null == property.getValue() && null == property.getChildren()) {
 			return propertyElement;
 		}
 		if (property.isXML()) {
@@ -182,7 +189,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
                     xmlBuilder.append(" xmlns:").append(namespace.getPrefix()).append("=\"").append(namespace.getURI()).append('"');
                 }
                 xmlBuilder.append('>').append(property.getValue()).append("</FKR:fakeroot>");
-				final Document doc = new SAXBuilder().build(new StringReader(xmlBuilder.toString()));
+                final Document doc = buildDocument(xmlBuilder.toString());
 				propertyElement.setContent(doc.getRootElement().cloneContent());
                 Map<String, String> attributes = property.getAttributes();
                 if (null != attributes) {
@@ -192,7 +199,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
                 }
 			} catch (JDOMException e) {
 				// NO XML
-				LOG.error(e.toString());
+                LOG.error("", e);
 				propertyElement.setText(property.getValue());
 			} catch (IOException e) {
 				LOG.error("", e);
@@ -202,9 +209,43 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 				propertyElement.setAttribute("dt", "dateTime.rfc1123", DATE_NS);
 			}
 			propertyElement.setText(property.getValue());
+            if (null != property.getChildren()) {
+                propertyElement.addContent(property.getChildren());
+            }
 		}
 		return propertyElement;
 	}
+	
+    private static Document buildDocument(String content) throws JDOMException, IOException {
+        try {
+            return new SAXBuilder().build(new StringReader(content));
+        } catch (JDOMParseException e) {
+            String sanitizedContent = replaceUnallowedCharacters(content, "");
+            if (false == Objects.equals(content, sanitizedContent)) {
+                return buildDocument(sanitizedContent);
+            }
+            throw e;
+        }
+    }
+
+    private static String replaceUnallowedCharacters(String value, String replacement) {
+        if (null == value) {
+            return value;
+        }
+        String result = org.jdom2.Verifier.checkCharacterData(value);
+        if (null != result) {
+            Matcher matcher = HEX_CHARACTER_PATTERN.matcher(result);
+            if (matcher.find()) {
+                try {
+                    char character = (char) Integer.parseInt(matcher.group(1), 16);
+                    return value.replaceAll(String.valueOf(character), replacement);
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+        return value;
+    }
 
 	private Namespace getNamespace(final WebdavProperty property) {
 		final String namespace = property.getNamespace();

@@ -183,7 +183,6 @@ public final class ListTest extends AbstractMailTest {
             final Object[] fields = array[i];
             final Object accountName = fields[fields.length - 2];
             assertNotNull("Account name is null.", accountName);
-            final Object mimeType = fields[fields.length - 1];
             assertNotNull("MIME type is null.", accountName);
         }
         /*

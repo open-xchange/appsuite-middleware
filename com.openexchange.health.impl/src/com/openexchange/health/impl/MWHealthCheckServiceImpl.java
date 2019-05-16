@@ -221,7 +221,7 @@ public class MWHealthCheckServiceImpl implements MWHealthCheckService {
             responses.add(response);
         }
 
-        LOG.debug("Health Status: " + (overallState ? "UP" : "DOWN") + " (Checks: {})", formatChecksForDebug(responses));
+        LOG.debug("Health Status: {} (Checks: {})", (overallState ? "UP" : "DOWN"), formatChecksForDebug(responses));
 
         Collections.sort(responses, responseComparator);
         return new MWHealthCheckResultImpl(overallState ? MWHealthState.UP : MWHealthState.DOWN, responses, resultIgnorelist, resultBlacklist);

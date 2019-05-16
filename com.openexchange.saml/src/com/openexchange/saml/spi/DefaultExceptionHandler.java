@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.tools.servlet.http.Tools;
@@ -69,17 +71,19 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class DefaultExceptionHandler implements ExceptionHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultExceptionHandler.class);
+
     @Override
     public void handleAuthnResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendErrorPage(httpRequest, httpResponse, exception);
+        sendErrorPage(httpResponse, exception);
     }
 
     @Override
     public void handleLogoutResponseFailed(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
-        sendErrorPage(httpRequest, httpResponse, exception);
+        sendErrorPage(httpResponse, exception);
     }
 
-    protected static void sendErrorPage(HttpServletRequest httpRequest, HttpServletResponse httpResponse, OXException exception) {
+    protected static void sendErrorPage(HttpServletResponse httpResponse, OXException exception) {
         String message = exception.getDisplayMessage(Locale.US);
         if (message == null) {
             message = exception.getMessage();
@@ -100,7 +104,7 @@ public class DefaultExceptionHandler implements ExceptionHandler {
             "    <p>" + message + "</p>" +
             "  </body>\n" +
             "</html>";
-        byte[] responseBytes = response.getBytes();
+        byte[] responseBytes = response.getBytes(com.openexchange.java.Charsets.UTF_8);
 
         Tools.disableCaching(httpResponse);
         httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -110,15 +114,16 @@ public class DefaultExceptionHandler implements ExceptionHandler {
         try {
             httpResponse.getWriter().write(response);
         } catch (IOException e) {
+            LOGGER.trace("I/O error", e);
             try {
                 httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            } catch (IOException e1) {
+            } catch (IOException | IllegalStateException x) {
                 // nothing to do here
-            } catch (IllegalStateException e1) {
-                // nothing to do here
+                LOGGER.trace("Unable to send response", x);
             }
         } catch (IllegalStateException e) {
             // response already commited
+            LOGGER.trace("Unable to send response", e);
         }
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -67,6 +68,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import org.json.JSONException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -77,6 +80,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.database.EmptyResultSet;
 import com.openexchange.database.IllegalMixOfCollationsSQLException;
 import com.openexchange.database.StringLiteralSQLException;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderPath;
@@ -94,6 +98,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -681,66 +686,62 @@ public final class OXFolderSQL {
         return updated;
     }
 
-    private static final String SQL_UPDATE_NAME = "UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?";
+    /**
+     * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
+     *
+     * @param folderId The folder ID
+     * @param newName The new name to set
+     * @param lastModified The last modified time stamp
+     * @param modifiedBy The user who shall be inserted as modified-by
+     * @param ctx The context
+     * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
+     * @throws SQLException If a SQL error occurs
+     */
+    public static void updateName(int folderId, String newName, long lastModified, int modifiedBy, Context ctx) throws OXException, SQLException {
+        Connection writeCon = null;
+        try {
+            writeCon = DBPool.pickupWriteable(ctx);
+            updateName(folderId, newName, lastModified, modifiedBy, writeCon, ctx);
+        } finally {
+            Database.back(ctx, true, writeCon);
+        }
+    }
 
     /**
      * Updates the name of the folder whose ID matches given parameter <code>folderId</code>.
      *
      * @param folderId The folder ID
      * @param newName The new name to set
-     * @param lastModified The last modified timestamp
+     * @param lastModified The last modified time stamp
      * @param modifiedBy The user who shall be inserted as modified-by
-     * @param writeConArg A writeable connection or <code>null</code> to fetch a new one from pool
+     * @param writeCon A writeable connection or <code>null</code> to fetch a new one from pool
      * @param ctx The context
      * @throws OXException If parameter <code>writeConArg</code> is <code>null</code> and a pooling error occurs
      * @throws SQLException If a SQL error occurs
      */
-    static void updateName(final int folderId, final String newName, final long lastModified, final int modifiedBy, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
-        Connection writeCon = writeConArg;
-        boolean closeWriteCon = false;
+    public static void updateName(int folderId, String newName, long lastModified, int modifiedBy, Connection writeCon, Context ctx) throws OXException, SQLException {
+        if (null == writeCon) {
+            updateName(folderId, newName, lastModified, modifiedBy, ctx);
+            return;
+        }
+
+        // Update name
         PreparedStatement stmt = null;
-        boolean rollback = false;
-        boolean startedTransaction = false;
         try {
-            if (writeCon == null) {
-                writeCon = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            startedTransaction = writeCon.getAutoCommit();
-            if (startedTransaction) {
-                writeCon.setAutoCommit(false);
-                rollback = true;
-            }
-
-            // Acquire lock
-            lock(folderId, ctx.getContextId(), writeCon);
-
             // Do the update
-            stmt = writeCon.prepareStatement(SQL_UPDATE_NAME);
+            stmt = writeCon.prepareStatement("UPDATE oxfolder_tree SET fname = ?, changing_date = ?, changed_from = ? WHERE cid = ? AND fuid = ?");
             stmt.setString(1, newName);
             stmt.setLong(2, lastModified);
             stmt.setInt(3, modifiedBy);
             stmt.setInt(4, ctx.getContextId());
             stmt.setInt(5, folderId);
             executeUpdate(stmt);
-
-            if (startedTransaction) {
-                writeCon.commit();
-                rollback = false;
-                writeCon.setAutoCommit(true);
-            }
         } finally {
-            if (startedTransaction && rollback) {
-                if (null != writeCon) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
-                }
-            }
-            closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
-    private static final String SQL_LOOKUPFOLDER = "SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
+    private static final String SQL_LOOKUPFOLDER = "SELECT fuid, fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND module=?";
 
     /**
      * Returns an {@link TIntList} of folders whose name (ignoring case) and module matches the given parameters in the given parent
@@ -760,7 +761,6 @@ public final class OXFolderSQL {
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final TIntList folderList = new TIntLinkedList();
         try {
             if (readCon == null) {
                 readCon = DBPool.pickup(ctx);
@@ -768,22 +768,24 @@ public final class OXFolderSQL {
             }
             stmt = readCon.prepareStatement(SQL_LOOKUPFOLDER);
             stmt.setInt(1, ctx.getContextId()); // cid
-            stmt.setInt(2, parent); // parent
-            stmt.setString(3, folderName); // fname
-            stmt.setInt(4, module); // module
+            stmt.setInt(2, parent);             // parent
+            stmt.setString(3, folderName);      // fname
+            stmt.setInt(4, module);             // module
             rs = executeQuery(stmt);
-            while (rs.next()) {
-                final int fuid = rs.getInt(1);
-                final String fname = rs.getString(2);
-                if (Strings.equalsNormalizedIgnoreCase(folderName, fname)) {
-                    folderList.add(fuid);
-                }
+            if (!rs.next()) {
+                return new TIntArrayList(0);
             }
+
+            TIntList folderIds = new TIntLinkedList();
+            do {
+                if (Strings.equalsNormalizedIgnoreCase(folderName, rs.getString(2)/*fname*/)) {
+                    folderIds.add(rs.getInt(1)/*fuid*/);
+                }
+            } while (rs.next());
+            return folderIds;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-
-        return folderList;
     }
 
     /**
@@ -819,33 +821,29 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            StringBuilder stmtBuilder = new StringBuilder("SELECT fuid,fname FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=?");
-            if (module > 0) {
-                final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            StringBuilder stringBuilder = new StringBuilder()
+                .append("SELECT fuid FROM oxfolder_tree ")
+                .append("WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE ")
+                .append(Databases.getCharacterSet(readCon).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin")
+            ;
+            if (0 < module) {
+                ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                 if (null != service && service.getBoolProperty("com.openexchange.oxfolder.considerModuleOnDuplicateCheck", false)) {
-                    stmtBuilder.append(" AND module=").append(module);
+                    stringBuilder.append(" AND module=").append(module);
                 }
             }
-            if (folderId > 0) {
-                stmtBuilder.append(" AND fuid!=").append(folderId);
+            if (0 < folderId) {
+                stringBuilder.append(" AND fuid<>").append(folderId);
             }
-            stmt = readCon.prepareStatement(stmtBuilder.toString());
-            stmtBuilder = null;
+            stmt = readCon.prepareStatement(stringBuilder.append(';').toString());
             stmt.setInt(1, ctx.getContextId()); // cid
             stmt.setInt(2, parent); // parent
             stmt.setString(3, folderName); // fname
             rs = executeQuery(stmt);
-            while (rs.next()) {
-                final int fuid = rs.getInt(1);
-                final String fname = rs.getString(2);
-                if (Strings.equalsNormalizedIgnoreCase(folderName, fname)) {
-                    return fuid;
-                }
-            }
+            return rs.next() ? rs.getInt(1) : -1;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
-        return -1;
     }
 
     /**
@@ -1549,7 +1547,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_NUMSUB.replaceFirst("#IDS#", StringCollection.getSqlInString(userId, groups)));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_NUMSUB, "#IDS#", StringCollection.getSqlInString(userId, groups)));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
@@ -1595,11 +1593,17 @@ public final class OXFolderSQL {
                     // Acquire lock
                     lock(folder.getParentFolderID(), ctx.getContextId(), writeCon);
 
-                    // Do the insert
-                    stmt = writeCon.prepareStatement("INSERT INTO oxfolder_tree " +
-                        "(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag," +
-                        "default_flag,meta) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL " +
-                        "WHERE NOT EXISTS (SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND fname=? AND parent>?);");
+                    // Do the insert, guarded by an additional check to prevent equally named folders below parent (binary collation, but case insensitive)
+                    String sql = new StringBuilder()
+                        .append("INSERT INTO oxfolder_tree ")
+                        .append("(fuid,cid,parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,meta) ")
+                        .append("SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL ")
+                        .append("WHERE NOT EXISTS ")
+                        .append("(SELECT 1 FROM oxfolder_tree WHERE cid=? AND parent=? AND LOWER(fname)=LOWER(?) COLLATE ")
+                        .append(Databases.getCharacterSet(writeCon).contains("utf8mb4") ? "utf8mb4_bin " : "utf8_bin ")
+                        .append("AND parent>?);")
+                    .toString();
+                    stmt = writeCon.prepareStatement(sql);
                     stmt.setInt(1, newFolderID);
                     stmt.setInt(2, ctx.getContextId());
                     stmt.setInt(3, folder.getParentFolderID());
@@ -1611,8 +1615,7 @@ public final class OXFolderSQL {
                     stmt.setLong(9, creatingTime);
                     stmt.setInt(10, userId);
                     stmt.setInt(11, permissionFlag);
-                    stmt.setInt(12, 0); // new folder does not contain
-                    // subfolders
+                    stmt.setInt(12, 0); // new folder does not contain subfolders
                     if (setDefaultFlag) {
                         stmt.setInt(13, folder.isDefaultFolder() ? 1 : 0); // default_flag
                     } else {
@@ -1631,8 +1634,8 @@ public final class OXFolderSQL {
                     stmt.setString(17, folder.getFolderName());
                     stmt.setInt(18, FolderObject.MIN_FOLDER_ID);
                     if (0 == executeUpdate(stmt)) {
-                        // due to already existing subfolder with the same name
-                        throw new SQLException("Entry not inserted");
+                        // Due to already existing subfolder with the same name
+                        throw OXFolderExceptionCode.DUPLICATE_NAME.create(folder.getFolderName(), I(folder.getParentFolderID()));
                     }
                     stmt.close();
                     stmt = null;
@@ -1685,7 +1688,7 @@ public final class OXFolderSQL {
                     }
                 } finally {
                     if (stmt != null) {
-                        stmt.close();
+                        Databases.closeSQLStuff(stmt);
                         stmt = null;
                     }
                     Streams.close(metaStream);
@@ -1766,21 +1769,31 @@ public final class OXFolderSQL {
 
     private static final String SQL_DELETE_EXISTING_PERMISSIONS = "DELETE FROM oxfolder_permissions WHERE cid = ? AND fuid = ? AND system = 0";
 
-    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeConArg) throws SQLException, OXException {
-        Connection writeCon = writeConArg;
+    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx) throws SQLException, OXException {
+        Connection writeCon = DBPool.pickupWriteable(ctx);
+        try {
+            updateFolderSQL(userId, folder, lastModified, ctx, writeCon);
+        } finally {
+            DBPool.closeWriterSilent(ctx, writeCon);
+        }
+    }
+
+    static void updateFolderSQL(final int userId, final FolderObject folder, final long lastModified, final Context ctx, final Connection writeCon) throws SQLException, OXException {
+        if (writeCon == null) {
+            updateFolderSQL(userId, folder, lastModified, ctx);
+            return;
+        }
+
         /*
          * Update Folder
          */
         int permissionFlag = determinePermissionFlag(folder);
-        boolean closeWriteCon = false;
-        try {
-            if (writeCon == null) {
-                writeCon = DBPool.pickupWriteable(ctx);
-                closeWriteCon = true;
-            }
-            final boolean startedTransaction = writeCon.getAutoCommit();
-            if (startedTransaction) {
+        DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
+        do {
+            int rollback = 0;
+            if (writeCon.getAutoCommit()) {
                 writeCon.setAutoCommit(false);
+                rollback = 1;
             }
             PreparedStatement stmt = null;
             InputStream metaStream = null;
@@ -1904,34 +1917,46 @@ public final class OXFolderSQL {
                 executeBatch(stmt);
                 stmt.close();
                 stmt = null;
-            } catch (final SQLException e) {
-                if (startedTransaction) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
+                /*
+                 * Commit
+                 */
+                if (rollback > 0) {
+                    writeCon.commit();
+                    rollback = 2;
                 }
-                throw e;
-            } catch (final JSONException e) {
-                if (startedTransaction) {
-                    writeCon.rollback();
-                    writeCon.setAutoCommit(true);
+            } catch (SQLException e) {
+                if (rollback == 0) {
+                    // Transaction was already initialized. Cannot retry...
+                    throw e;
                 }
+
+                if (!condition.isFailedTransactionRollback(e)) {
+                    throw e;
+                }
+            } catch (JSONException e) {
                 throw OXFolderExceptionCode.JSON_ERROR.create(e, e.getMessage());
             } finally {
-                if (stmt != null) {
-                    stmt.close();
-                    stmt = null;
+                Databases.closeSQLStuff(stmt);
+                if (rollback > 0) {
+                    if (rollback == 1) {
+                        Databases.rollback(writeCon);
+                    }
+                    Databases.autocommit(writeCon);
                 }
                 Streams.close(metaStream);
             }
-            if (startedTransaction) {
-                writeCon.commit();
-                writeCon.setAutoCommit(true);
-            }
-        } finally {
-            if (closeWriteCon && writeCon != null) {
-                DBPool.closeWriterSilent(ctx, writeCon);
-            }
+        } while (retryUpdate(condition));
+    }
+
+    private static boolean retryUpdate(DBUtils.TransactionRollbackCondition condition) throws SQLException {
+        boolean retry = condition.checkRetry();
+        if (retry) {
+            // Wait with exponential backoff
+            int retryCount = condition.getCount();
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retryCount * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
         }
+        return retry;
     }
 
     private static final String SQL_MOVE_UPDATE = "UPDATE oxfolder_tree SET parent=?,changing_date=?,changed_from=?,fname=? " +
@@ -2143,13 +2168,13 @@ public final class OXFolderSQL {
                 /*
                  * Clean backup tables
                  */
-                stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERPERMS));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
-                stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+                stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERTREE));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
                 executeUpdate(stmt);
@@ -2185,7 +2210,7 @@ public final class OXFolderSQL {
             /*
              * Delete from permission table
              */
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", permTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2194,7 +2219,7 @@ public final class OXFolderSQL {
             /*
              * Delete from folder table
              */
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", folderTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2252,13 +2277,13 @@ public final class OXFolderSQL {
             lock(folderId, ctx.getContextId(), true, writeCon);
 
             // Clean backup tables
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
             stmt.close();
             stmt = null;
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERTREE));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2348,13 +2373,13 @@ public final class OXFolderSQL {
             /*
              * Clean backup tables
              */
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
             stmt.close();
             stmt = null;
-            stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_DELETE, "#TABLE#", STR_DELOXFOLDERTREE));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
             executeUpdate(stmt);
@@ -2470,7 +2495,7 @@ public final class OXFolderSQL {
                 writeCon = DBPool.pickupWriteable(ctx);
                 createReadCon = true;
             }
-            stmt = writeCon.prepareStatement(SQL_DROP_SYS_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = writeCon.prepareStatement(Strings.replaceSequenceWith(SQL_DROP_SYS_PERMS, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             executeUpdate(stmt);
@@ -2542,9 +2567,7 @@ public final class OXFolderSQL {
             } else {
                 permissionsIDs = new StringBuilder().append('(').append(entity).append(')').toString();
             }
-            stmt = readCon.prepareStatement(SQL_SEL_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable).replaceFirst(
-                TMPL_FOLDER_TABLE,
-                folderTable).replaceFirst(TMPL_IDS, permissionsIDs));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(Strings.replaceSequenceWith(Strings.replaceSequenceWith(SQL_SEL_PERMS, TMPL_PERM_TABLE, permTable), TMPL_FOLDER_TABLE, folderTable), TMPL_IDS, permissionsIDs));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = executeQuery(stmt);
@@ -2663,7 +2686,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWrite = true;
             }
-            stmt = wc.prepareStatement(SQL_DELETE_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_PERMS, TMPL_PERM_TABLE, permTable));
             for (int i = size; i-- > 0;) {
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, iter.next());
@@ -2736,7 +2759,7 @@ public final class OXFolderSQL {
                         continue Next;
                     }
                 } else {
-                    stmt = wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+                    stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_PERMS, TMPL_PERM_TABLE, permTable));
                     stmt.setInt(1, destUser);
                     stmt.setInt(2, ctx.getContextId());
                     stmt.setInt(3, fuid);
@@ -2751,7 +2774,7 @@ public final class OXFolderSQL {
                     }
                 }
             }
-            stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_TIMESTAMP.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_UPDATE_TIMESTAMP, TMPL_FOLDER_TABLE, folderTable));
             iter = reassignPerms.iterator();
             for (int i = size; i-- > 0;) {
                 stmt.setInt(1, destUser);
@@ -2780,7 +2803,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 close = true;
             }
-            stmt = wc.prepareStatement(SQL_REASSIGN_DEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_DEL_PERM, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             stmt.setInt(3, fuid);
@@ -2801,7 +2824,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 close = true;
             }
-            stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_UPDATE_PERM, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, mergedPerm.getFolderPermission());
             stmt.setInt(2, mergedPerm.getReadPermission());
             stmt.setInt(3, mergedPerm.getWritePermission());
@@ -2829,7 +2852,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeRead = true;
             }
-            innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            innerStmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_SEL_PERM, TMPL_PERM_TABLE, permTable));
             innerStmt.setInt(1, ctx.getContextId());
             innerStmt.setInt(2, destUser);
             innerStmt.setInt(3, fuid);
@@ -2840,7 +2863,7 @@ public final class OXFolderSQL {
                  */
                 innerRs.close();
                 innerStmt.close();
-                innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+                innerStmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_SEL_PERM, TMPL_PERM_TABLE, permTable));
                 innerStmt.setInt(1, ctx.getContextId());
                 innerStmt.setInt(2, entity);
                 innerStmt.setInt(3, fuid);
@@ -2863,7 +2886,7 @@ public final class OXFolderSQL {
             destUserPerm.setGroupPermission(false);
             innerRs.close();
             innerStmt.close();
-            innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+            innerStmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_SEL_PERM, TMPL_PERM_TABLE, permTable));
             innerStmt.setInt(1, ctx.getContextId());
             innerStmt.setInt(2, entity);
             innerStmt.setInt(3, fuid);
@@ -2918,7 +2941,7 @@ public final class OXFolderSQL {
                 readCon = DBPool.pickup(ctx);
                 closeReadCon = true;
             }
-            stmt = readCon.prepareStatement(SQL_SEL_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_FOLDERS, TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
@@ -2973,7 +2996,7 @@ public final class OXFolderSQL {
             /*
              * Check column "changed_from"
              */
-            stmt = readCon.prepareStatement(SQL_SEL_FOLDERS2.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = readCon.prepareStatement(Strings.replaceSequenceWith(SQL_SEL_FOLDERS2, TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
@@ -3068,7 +3091,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWrite = true;
             }
-            stmt = wc.prepareStatement(SQL_DELETE_FOLDER.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_FOLDER, TMPL_FOLDER_TABLE, folderTable));
             iter = deleteFolders.iterator();
             for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
@@ -3113,7 +3136,7 @@ public final class OXFolderSQL {
                 wc = DBPool.pickupWriteable(ctx);
                 closeWrite = true;
             }
-            stmt = wc.prepareStatement(SQL_DELETE_FOLDER_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_DELETE_FOLDER_PERMS, TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, fuid);
             executeUpdate(stmt);
@@ -3148,7 +3171,7 @@ public final class OXFolderSQL {
                             iter.remove();
                             size--;
 
-                            stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+                            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_FOLDERS_WITH_NAME, TMPL_FOLDER_TABLE, folderTable));
                             stmt.setInt(1, destUser);
                             stmt.setInt(2, destUser);
                             stmt.setLong(3, lastModified);
@@ -3168,7 +3191,7 @@ public final class OXFolderSQL {
 
             // Iterate others
             TIntIterator iter = reassignFolders.iterator();
-            stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = wc.prepareStatement(Strings.replaceSequenceWith(SQL_REASSIGN_FOLDERS, TMPL_FOLDER_TABLE, folderTable));
             for (int i = size; i-- > 0;) {
                 stmt.setInt(1, destUser);
                 stmt.setInt(2, destUser);
@@ -3189,7 +3212,7 @@ public final class OXFolderSQL {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_DEFAULT_INFOSTORE.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = con.prepareStatement(Strings.replaceSequenceWith(SQL_DEFAULT_INFOSTORE, TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, FolderObject.INFOSTORE);
             stmt.setInt(3, entity);
@@ -3389,6 +3412,35 @@ public final class OXFolderSQL {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             DBPool.push(ctx, readCon);
+        }
+    }
+
+    private static final String GET_UNIQUE_USER_FOLDERNAME_SQL = "SELECT fuid FROM oxfolder_tree WHERE cid=? AND parent=10 AND fuid<>? AND fname=?";
+
+    /**
+     * Check if the given folder name is unique under {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID}
+     *
+     * @param conection The (read) connection to use
+     * @param contextId The context to search in
+     * @param folderName The folder name to check uniqueness for
+     * @param userFolderId The id of the folder
+     * @return <code>true</code> if the given name was unique, <code>false</code> otherwise
+     * @throws OXException
+     * @throws SQLException
+     */
+    public static boolean isUniqueUserstoreFolderName(Connection conection, int contextId, String folderName, int folderId) throws OXException, SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int i = 0;
+        try {
+            stmt = conection.prepareStatement(GET_UNIQUE_USER_FOLDERNAME_SQL);
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, folderId);
+            stmt.setString(3, folderName);
+            rs = stmt.executeQuery();
+            return false == rs.next();
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -530,16 +530,15 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      */
     private static final int MAX_PERMISSION = 64;
 
-    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6) {
-        { //Unnamed Block.
-            put(Permission.MAX_PERMISSION, MAX_PERMISSION);
-            put(MAX_PERMISSION, MAX_PERMISSION);
-            put(0, 0);
-            put(2, 1);
-            put(4, 2);
-            put(8, 4);
-        }
-    };
+    private static final TIntIntHashMap MAPPING = new TIntIntHashMap(6); 
+    { //Unnamed Block.
+        MAPPING.put(Permission.MAX_PERMISSION, MAX_PERMISSION);
+        MAPPING.put(MAX_PERMISSION, MAX_PERMISSION);
+        MAPPING.put(0, 0);
+        MAPPING.put(2, 1);
+        MAPPING.put(4, 2);
+        MAPPING.put(8, 4);
+    }
 
     static int createPermissionBits(final Permission perm) {
         return createPermissionBits(

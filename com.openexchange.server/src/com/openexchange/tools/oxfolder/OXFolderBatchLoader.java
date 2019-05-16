@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -69,6 +68,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import gnu.trove.map.TIntObjectMap;
@@ -129,8 +129,6 @@ public final class OXFolderBatchLoader {
     private static final String TABLE_OT = "oxfolder_tree";
 
     private static final String TABLE_OP = "oxfolder_permissions";
-
-    private static final Pattern PAT_RPL_TABLE = Pattern.compile("#TABLE#");
 
     /**
      * Initializes a new {@link OXFolderBatchLoader}.
@@ -210,7 +208,7 @@ public final class OXFolderBatchLoader {
                     final String sql = getIN(
                         "SELECT parent,fname,module,type,creating_date,created_from,changing_date,changed_from,permission_flag,subfolder_flag,default_flag,fuid,meta,origin FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
-                    stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
+                    stmt = readCon.prepareStatement(Strings.replaceSequenceWith(sql, "#TABLE#", table));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int folderId : currentIds) {
@@ -319,7 +317,7 @@ public final class OXFolderBatchLoader {
                     final String sql = getIN(
                         "SELECT permission_id,fp,orp,owp,odp,admin_flag,group_flag,system,fuid,type,sharedParentFolder FROM #TABLE# WHERE cid=? AND fuid IN (",
                         currentIds.length);
-                    stmt = readCon.prepareStatement(PAT_RPL_TABLE.matcher(sql).replaceFirst(table));
+                    stmt = readCon.prepareStatement(Strings.replaceSequenceWith(sql, "#TABLE#", table));
                     int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
                     for (final int folderId : currentIds) {
@@ -400,7 +398,7 @@ public final class OXFolderBatchLoader {
 							"SELECT fuid,parent FROM #TABLE# WHERE cid=? AND parent IN (",
 							currentIds.length)
 							+ " ORDER BY default_flag DESC, fname";
-	                stmt = readCon.prepareStatement(sql.replaceFirst("#TABLE#", table));
+	                stmt = readCon.prepareStatement(Strings.replaceSequenceWith(sql, "#TABLE#", table));
 		            int pos = 1;
                     stmt.setInt(pos++, ctx.getContextId());
 		            for (final int folderId : currentIds) {

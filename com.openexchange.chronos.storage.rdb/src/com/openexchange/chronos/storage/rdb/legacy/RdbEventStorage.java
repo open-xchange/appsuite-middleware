@@ -86,6 +86,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -232,6 +233,29 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getReadConnection(context);
             return selectEvent(connection, context.getContextId(), asInt(objectID), fields);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public List<Event> loadEvents(List<String> eventIds, EventField[] fields) throws OXException {
+        if (null == eventIds || eventIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Event> events = new ArrayList<Event>(eventIds.size());
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            for (String id : eventIds) {
+                Event event = selectEvent(connection, context.getContextId(), asInt(id), fields);
+                if (null != event) {
+                    events.add(event);
+                }
+            }
+            return events;
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -439,7 +463,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
         StringBuilder stringBuilder = new StringBuilder()
             .append("DELETE FROM prg_dates WHERE cid=? AND intfield01")
-            .append(getPlaceholders(objectIDs.size())).append(';')
+            .append(Databases.getPlaceholders(objectIDs.size())).append(';')
         ;
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;

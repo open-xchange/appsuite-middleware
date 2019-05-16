@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.downgrade;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Dictionary;
@@ -362,7 +363,7 @@ public final class OXFolderDowngradeListener implements DowngradeListener {
 
     private static void deleteContainedAppointments(final int folderID, final DowngradeEvent event) throws OXException {
         CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(event.getSession());
-        calendarSession.set(Connection.class.getName(), event.getWriteCon());
+        calendarSession.set(PARAMETER_CONNECTION(), event.getWriteCon());
         calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderID), CalendarUtils.DISTANT_FUTURE);
     }
 

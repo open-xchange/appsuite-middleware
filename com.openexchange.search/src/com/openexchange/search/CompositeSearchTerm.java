@@ -67,7 +67,7 @@ import com.openexchange.search.internal.terms.OrTerm;
  */
 public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
 
-	private static final Integer PRETTY_BIG_NUMBER = Integer.MAX_VALUE / 2; //needed since someone used MAX_VALUE instead and then did a MAX_VALUE+1 comparison. Note: This is also wrong. Since this is going to become SQL code, it should reflect the allowed maximum length of a query...
+	static final int PRETTY_BIG_NUMBER = Integer.MAX_VALUE / 2; //needed since someone used MAX_VALUE instead and then did a MAX_VALUE+1 comparison. Note: This is also wrong. Since this is going to become SQL code, it should reflect the allowed maximum length of a query...
 
     private static interface InstanceCreator extends Serializable {
 

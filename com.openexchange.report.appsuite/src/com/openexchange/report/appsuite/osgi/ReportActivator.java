@@ -75,6 +75,7 @@ import com.openexchange.report.appsuite.internal.LocalReportService;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.management.ReportMXBeanImpl;
 import com.openexchange.user.UserService;
+import com.openexchange.version.VersionService;
 
 /**
  * The {@link ReportActivator} is the interface to the OSGi world between the report framework and the runtime system.
@@ -85,7 +86,8 @@ public class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class, InfostoreInformationService.class };
+        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, 
+                             DatabaseService.class, InfostoreInformationService.class, VersionService.class };
     }
 
     @Override

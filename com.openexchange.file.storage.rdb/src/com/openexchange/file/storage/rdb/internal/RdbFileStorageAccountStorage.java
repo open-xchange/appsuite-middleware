@@ -363,10 +363,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         final int contextId = session.getContextId();
         final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(wc); // BEGIN
-            rollback = true;
+            rollback = 1;
             /*
              * Save account configuration using generic conf
              */
@@ -416,18 +416,20 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             stmt.setString(pos, account.getDisplayName());
             stmt.executeUpdate();
             wc.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
             return accountId;
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(wc); // ROLL-BACK
-            }
             Databases.closeSQLStuff(stmt);
-            Databases.autocommit(wc);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(wc);
+                }
+                Databases.autocommit(wc);
+            }
             databaseService.backWritable(contextId, wc);
         }
     }
@@ -497,7 +499,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 connectionProvider = new DatabaseServiceConnectionProvider(contextId, databaseService);
             }
         }
-        
+
         // Acquire connection & invoke
         Connection con = connectionProvider.getConnection();
         int rollback = 0;
@@ -539,7 +541,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             deleteAccounts(serviceId, accounts, genericConfIds, session);
             return;
         }
-        
+
         try {
             int contextId = session.getContextId();
             int userId = session.getUserId();
@@ -598,10 +600,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         final int contextId = session.getContextId();
         final Connection wc = databaseService.getWritable(contextId);
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(wc); // BEGIN
-            rollback = true;
+            rollback = 1;
             final int accountId = Integer.parseInt(account.getId());
             /*
              * Update account configuration using generic conf
@@ -644,7 +646,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 stmt.executeUpdate();
             }
             wc.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final OXException e) {
             throw e;
         } catch (final SQLException e) {
@@ -652,11 +654,13 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(wc); // ROLL-BACK
-            }
             Databases.closeSQLStuff(stmt);
-            Databases.autocommit(wc);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(wc);
+                }
+                Databases.autocommit(wc);
+            }
             databaseService.backWritable(contextId, wc);
         }
     }

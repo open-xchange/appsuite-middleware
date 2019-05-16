@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.ConfigurationService;
 
 /**
@@ -75,7 +76,7 @@ public abstract class AbstractConfigWrapper {
             try {
                 return Integer.parseInt(tmp);
             } catch (final NumberFormatException ex) {
-                LOG.warn("property no parsable: {}:{}", name, value);
+                LOG.warn("property no parsable: {}:{}", name, I(value));
             }
         }
         return value;

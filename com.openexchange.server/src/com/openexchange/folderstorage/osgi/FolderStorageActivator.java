@@ -66,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
+import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -77,6 +78,7 @@ import com.openexchange.folderstorage.database.osgi.DatabaseFolderStorageActivat
 import com.openexchange.folderstorage.filestorage.osgi.FileStorageFolderStorageActivator;
 import com.openexchange.folderstorage.internal.ConfiguredDefaultPermissions;
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
+import com.openexchange.folderstorage.internal.FilteringFolderService;
 import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActivator;
@@ -87,6 +89,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.Tools;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -226,7 +229,9 @@ public final class FolderStorageActivator implements BundleActivator {
         UserService.class,
         DatabaseService.class,
         UserPermissionService.class,
-        ObjectUseCountService.class
+        ObjectUseCountService.class,
+        HideAdminService.class,
+        PrincipalUseCountService.class
     };
 
     @Override
@@ -236,7 +241,7 @@ public final class FolderStorageActivator implements BundleActivator {
             // Register services
             serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
             // Register folder service
-            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FolderServiceImpl(), null));
+            serviceRegistrations.add(context.registerService(FolderService.class.getName(), new FilteringFolderService(new FolderServiceImpl()), null));
             serviceRegistrations.add(context.registerService(
                 ContentTypeDiscoveryService.class.getName(),
                 ContentTypeRegistry.getInstance(),

@@ -207,6 +207,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                     calendarSession.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
                     calendarSession.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
                     calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+                    calendarSession.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
                     List<ImportResult> importEvents = calendarService.importEvents(calendarSession, String.valueOf(calendarFolder), events);
                     for (ImportResult importEvent : importEvents) {
                         if (null == importEvent.getError()) {

@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -67,6 +66,8 @@ import com.openexchange.admin.rmi.factory.UserFactory;
  */
 public final class Bug35430Test extends AbstractRMITest {
 
+    private final int contextId = ContextFactory.getRandomContextId();
+
     /**
      * Initialises a new {@link Bug35430Test}.
      */
@@ -74,25 +75,20 @@ public final class Bug35430Test extends AbstractRMITest {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.admin.rmi.AbstractRMITest#setUp()
-     */
-    @Before
+    @Override
     public void setUp() throws Exception {
         super.setUp();
-        createContext("bug35430context.com", 314159265);
+        createContext("bug" + contextId + "context.com", contextId);
     }
 
     @Test
     public void test() throws Throwable {
         Context[] contexts = getContextManager().search("bug35430context.com");
         assertEquals(1, contexts.length);
-        assertEquals(new Integer(314159265), contexts[0].getId());
+        assertEquals(new Integer(contextId), contexts[0].getId());
         assertEquals("bug35430context.com", contexts[0].getName());
 
-        contexts = getContextManager().search("00314159265.pi");
+        contexts = getContextManager().search("00" + contextId + ".pi");
         assertEquals(0, contexts.length);
     }
 

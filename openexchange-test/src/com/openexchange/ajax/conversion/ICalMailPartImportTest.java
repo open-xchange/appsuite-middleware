@@ -93,11 +93,9 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
 
     /**
      * Tests the <code>action=convert</code> request
-     *
-     * @throws Throwable
      */
     @Test
-    public void testICalImport() throws Throwable {
+    public void testICalImport() {
         final String[] mailFolderAndMailID;
         try {
             /*
@@ -166,17 +164,15 @@ public class ICalMailPartImportTest extends AbstractConversionTest {
                 final JSONObject jsonHandler = new JSONObject().put("identifier", "com.openexchange.ical");
                 jsonHandler.put("args", new JSONArray().put(new JSONObject().put("com.openexchange.groupware.calendar.folder", getPrivateCalendarFolder())).put(new JSONObject().put("com.openexchange.groupware.task.folder", getPrivateTaskFolder())));
                 jsonBody.put("datahandler", jsonHandler);
-                final ConvertResponse convertResponse = (ConvertResponse) Executor.execute(getSession(), new ConvertRequest(jsonBody, true));
+                final ConvertResponse convertResponse = Executor.execute(getSession(), new ConvertRequest(jsonBody, true));
                 final String[][] sa = convertResponse.getFoldersAndIDs();
 
                 assertFalse("Missing response on action=convert", sa == null);
                 assertTrue("Unexpected response length", sa.length == 1);
 
             } finally {
-                if (mailFolderAndMailID != null) {
-                    final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
-                    Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
-                }
+                final FolderAndID mailPath = new FolderAndID(mailFolderAndMailID[0], mailFolderAndMailID[1]);
+                Executor.execute(getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, true));
             }
         } catch (final Exception e) {
             e.printStackTrace();

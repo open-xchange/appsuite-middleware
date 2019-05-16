@@ -85,9 +85,8 @@ public abstract class LdapIDMapping extends LdapMapping<Integer> {
         // override to parse numerical IDs if necessary
         if (String.class.isInstance(value)) {
             return encode(Integer.valueOf(Tools.parse((String)value)), idResolver);
-        } else {
-            return super.encodeForFilter(value, idResolver);
         }
+        return super.encodeForFilter(value, idResolver);
     }
 
     @Override
@@ -100,9 +99,8 @@ public abstract class LdapIDMapping extends LdapMapping<Integer> {
                 // no valid UUID format
             }
             return ldapID;
-        } else {
-            return null;
         }
+        return null;
     }
 
     private static final char[] DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };

@@ -50,6 +50,7 @@
 package com.openexchange.session.delegate;
 
 import java.util.Set;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.SetableSession;
 
@@ -197,4 +198,10 @@ public class DelegateSession implements SetableSession {
     public Set<String> getParameterNames() {
         return session.getParameterNames();
     }
+
+    @Override
+    public Origin getOrigin() {
+        return session.getOrigin();
+    }
+
 }

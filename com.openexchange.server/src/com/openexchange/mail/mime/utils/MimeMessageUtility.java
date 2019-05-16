@@ -107,6 +107,7 @@ import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.io.LineReaderInputStream;
 import org.apache.james.mime4j.io.LineReaderInputStreamAdaptor;
 import org.apache.james.mime4j.stream.DefaultFieldBuilder;
@@ -1714,7 +1715,7 @@ public final class MimeMessageUtility {
      * <pre>
      * final String quotedPersonal = quotePersonal(&quot;Doe, Jane&quot;);
      *
-     * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
+     * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;
      * System.out.println(buildAddr);
      * // Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
      *
@@ -1841,6 +1842,43 @@ public final class MimeMessageUtility {
      */
     public static String fold(final int used, final String foldMe) {
         return MimeUtility.fold(used, foldMe);
+    }
+
+    /**
+     * Folds a string at linear whitespace so that each line is no longer than 76 characters, if that string contains a whitespace.
+     * Otherwise a forced folding is performed.
+     *
+     * @param used The characters used in line so far; typically the length of the header name plus 2 (for <code>": "</code> part)
+     * @param foldMe The string to fold
+     * @return The folded string
+     * @see #fold(int, String)
+     */
+    public static String forceFold(int used, String foldMe) {
+        int usedInLine = used < 0 ? 0 : used;
+        int length = foldMe.length();
+        if (usedInLine + length <= 76) {
+            return foldMe;
+        }
+
+        if (foldMe.indexOf(' ') > 0) {
+            // Contains a whitespace
+            return MimeUtility.fold(usedInLine, foldMe);
+        }
+
+        StringBuilder sb = new StringBuilder(length + 16);
+        int start = 0;
+        while (start < length) {
+            int end = Math.min(start + 76 - usedInLine, length);
+            if (start == 0) {
+                usedInLine = 1;
+            }
+            if (sb.length() > 0) {
+                sb.append("\r\n ");
+            }
+            sb.append(foldMe.substring(start, end));
+            start = end;
+        }
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_UNFOLD = Pattern.compile("(\\?=)(\\s*)(=\\?)");
@@ -2338,7 +2376,8 @@ public final class MimeMessageUtility {
             }
             out.flush();
             return newTempFile;
-        } catch (final Exception e) {
+        } catch (IOException | MimeException e) {
+            LOG.debug("An error occurred", e);
             return file;
         } finally {
             Streams.close(in, out);

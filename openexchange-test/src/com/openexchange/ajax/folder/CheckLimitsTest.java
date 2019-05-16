@@ -51,12 +51,13 @@ package com.openexchange.ajax.folder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.models.FolderCheckLimitsFiles;
 import com.openexchange.testing.httpclient.models.FolderCheckLimitsResponse;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link CheckLimitsTest}
@@ -66,11 +67,10 @@ import edu.emory.mathcs.backport.java.util.Collections;
  */
 public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
 
-    private static final long FILE_SIZE_SMALL = 9437184L; // 9MB
-    private static final long FILE_SIZE_MEDIUM = 31457280L; // 30MB
-    private static final long FILE_SIZE_LARGE = 115343360L;
+    private static final Long FILE_SIZE_SMALL = L(9437184); // 9MB
+    private static final Long FILE_SIZE_MEDIUM = L(31457280); // 30MB
+    private static final Long FILE_SIZE_LARGE = L(115343360);
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_noLimitExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_SMALL));
@@ -79,7 +79,6 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         assertEquals(0, checkLimits.getData().getErrors().size());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_maxUploadExceeded() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
@@ -119,10 +118,8 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
 
         infoItemQuotaCheckFiles.add(createQuotaCheckFiles(FILE_SIZE_LARGE));
         checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
-        System.out.println();
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_unknownType_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
@@ -132,7 +129,6 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
         assertNull(checkLimits.getData());
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     public void testFileQuotaCheckSingleFile_unknownFolder_returnException() throws Exception {
         List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_MEDIUM));
@@ -140,6 +136,16 @@ public class CheckLimitsTest extends AbstractFolderCheckLimitTest {
 
         assertEquals("FILE_STORAGE-0029", checkLimits.getCode());
         assertNull(checkLimits.getData());
+    }
+
+    @Test
+    public void testFileQuota_bug622059_fileQuotaSetWithoutLimit_doNotReturnError() throws Exception {
+        user.setUserAttribute("config", "com.openexchange.quota.infostore", "0");
+        iface.change(context, user, credentials);
+        List<FolderCheckLimitsFiles> infoItemQuotaCheckFiles = Collections.singletonList(createQuotaCheckFiles(FILE_SIZE_SMALL));
+        FolderCheckLimitsResponse checkLimits = checkLimits(createQuotaCheckData(infoItemQuotaCheckFiles), quotaTestFolderId, "filestorage");
+
+        assertEquals(0, checkLimits.getData().getErrors().size());
     }
 
 }

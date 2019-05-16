@@ -67,7 +67,6 @@ import com.openexchange.chronos.service.ErrorAwareCalendarResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,7 +113,7 @@ public class CalendarResultsPerEventIdConverter extends CalendarResultConverter 
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private JSONValue convertCalendarResults(Map<EventID, CalendarResult> resultsPerId, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    private JSONValue convertCalendarResults(Map<EventID, CalendarResult> resultsPerId, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == resultsPerId) {
             return null;
         }
@@ -125,7 +124,7 @@ public class CalendarResultsPerEventIdConverter extends CalendarResultConverter 
         return jsonArray;
     }
 
-    private JSONObject convertCalendarResult(EventID eventID, CalendarResult calendarResult, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    private JSONObject convertCalendarResult(EventID eventID, CalendarResult calendarResult, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == calendarResult) {
             return null;
         }

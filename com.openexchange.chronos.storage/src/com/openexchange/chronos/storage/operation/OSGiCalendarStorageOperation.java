@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.operation;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -140,7 +141,7 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
      * @return The connection, or <code>null</code> if not defined
      */
     private static Connection optConnection(CalendarParameters parameters) {
-        return null != parameters ? parameters.get(Connection.class.getName(), Connection.class, null) : null;
+        return null != parameters ? parameters.get(PARAMETER_CONNECTION(), Connection.class, null) : null;
     }
 
 }

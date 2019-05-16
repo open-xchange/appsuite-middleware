@@ -114,6 +114,6 @@ public class OXError {
 
     @Override
     public String toString() {
-        return String.format("%3s-%04d", category, number);
+        return String.format("%3s-%04d", category, Integer.valueOf(number));
     }
 }

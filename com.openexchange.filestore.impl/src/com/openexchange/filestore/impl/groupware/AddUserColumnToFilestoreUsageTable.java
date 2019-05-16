@@ -82,10 +82,10 @@ public class AddUserColumnToFilestoreUsageTable extends UpdateTaskAdapter {
         log.info("Performing update task {}", AddUserColumnToFilestoreUsageTable.class.getSimpleName());
 
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(con);
-            rollback = true;
+            rollback = 1;
 
             // Add the new column
             Column[] columns;
@@ -100,16 +100,18 @@ public class AddUserColumnToFilestoreUsageTable extends UpdateTaskAdapter {
             Tools.createPrimaryKeyIfAbsent(con, "filestore_usage", new String[] { "cid", "user" });
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback==1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
         }
 
         log.info("{} successfully performed.", AddUserColumnToFilestoreUsageTable.class.getSimpleName());

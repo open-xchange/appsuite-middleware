@@ -1,0 +1,21 @@
+/multifactor/provider?action=all:
+  get:
+    operationId: multifactorProviderActionAll
+    tags:
+      - Multifactor
+    summary: Gets all available multifactor providers
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: providers
+        type: string
+        description: |
+            A comma separated list of provider names to return. Omit to return all available providers.
+        required: false
+    responses:
+        200:
+          description: |
+            A JSON object containing the result of the operation. In case of errors the
+            responsible fields in the response are filled (see [Error handling](#error-handling)).
+          schema:
+            $ref: "#/definitions/MultifactorProvidersResponse"

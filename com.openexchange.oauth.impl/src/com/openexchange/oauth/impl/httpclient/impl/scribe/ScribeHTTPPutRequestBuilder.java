@@ -98,6 +98,7 @@ public class ScribeHTTPPutRequestBuilder extends
 			while ((ch = isr.read()) != -1) {
 				b.append((char) ch);
 			}
+            payload = b.toString();
 		} catch (IOException e) {
 			throw OxHttpClientExceptionCodes.IO_ERROR.create(e.getMessage());
 		} finally {

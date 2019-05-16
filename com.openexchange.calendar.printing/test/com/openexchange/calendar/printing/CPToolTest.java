@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
@@ -103,7 +104,7 @@ public class CPToolTest extends AbstractDateTest {
     private void checkBlockTemplate(boolean expected, String templateName) {
         CPParameters params = new CPParameters();
         params.setTemplate(templateName);
-        assertEquals("Checking template '" + templateName + "'", expected, tool.isBlockTemplate(params));
+        assertEquals("Checking template '" + templateName + "'", B(expected), B(tool.isBlockTemplate(params)));
     }
 
 }

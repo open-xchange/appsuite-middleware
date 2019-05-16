@@ -70,7 +70,6 @@ import com.openexchange.contacts.json.actions.NewAction;
 import com.openexchange.contacts.json.actions.SearchAction;
 import com.openexchange.contacts.json.actions.UpdateAction;
 import com.openexchange.contacts.json.actions.UpdatesAction;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
@@ -119,7 +118,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
+    public AJAXActionService createActionService(final String action) {
         return actions.get(action);
     }
 }

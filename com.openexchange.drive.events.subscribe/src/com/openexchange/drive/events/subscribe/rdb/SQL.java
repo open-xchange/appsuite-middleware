@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.events.subscribe.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -149,23 +151,21 @@ public class SQL {
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();
-        } else {
-            long start = System.currentTimeMillis();
-            ResultSet resultSet = stmt.executeQuery();
-            LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), (System.currentTimeMillis() - start));
-            return resultSet;
         }
+        long start = System.currentTimeMillis();
+        ResultSet resultSet = stmt.executeQuery();
+        LOG.debug("executeQuery: {} - {} ms elapsed.", stmt.toString(), L((System.currentTimeMillis() - start)));
+        return resultSet;
     }
 
     public static int logExecuteUpdate(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeUpdate();
-        } else {
-            long start = System.currentTimeMillis();
-            int rowCount = stmt.executeUpdate();
-            LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), rowCount, (System.currentTimeMillis() - start));
-            return rowCount;
         }
+        long start = System.currentTimeMillis();
+        int rowCount = stmt.executeUpdate();
+        LOG.debug("executeUpdate: {} - {} rows affected, {} ms elapsed.", stmt.toString(), I(rowCount), L((System.currentTimeMillis() - start)));
+        return rowCount;
     }
 
     public static String escape(String value) throws OXException {

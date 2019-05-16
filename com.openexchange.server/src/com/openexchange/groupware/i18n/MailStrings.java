@@ -78,7 +78,7 @@ public class MailStrings implements LocalizableStrings {
         .intern();
 
     // The internationalized name for the sent mail folder
-    public static final String SENT = "Sent objects"
+    public static final String SENT = "Sent"
         .intern();
 
     // The alternative internationalized name for the sent mail folder

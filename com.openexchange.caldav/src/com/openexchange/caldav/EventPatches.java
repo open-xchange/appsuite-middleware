@@ -51,10 +51,15 @@ package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
+import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -62,23 +67,27 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.UUID;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.caldav.clientfields.Lightning;
 import com.openexchange.caldav.resources.CalendarAccessOperation;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.Trigger;
@@ -99,6 +108,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.dav.AttachmentUtils;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Streams;
@@ -111,6 +121,8 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public class EventPatches {
+
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
 
     /**
      * Initializes a new {@link Incoming}.
@@ -130,8 +142,6 @@ public class EventPatches {
         return new Outgoing(factory);
     }
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventPatches.class);
-
     /** The external representation of the prefix used for private comments denoting a new time proposal */
     private static final String COMMENT_PROPOSAL_PREFIX_EXTERNAL = "\u200B\uD83D\uDDD3\u200B ";
 
@@ -139,13 +149,13 @@ public class EventPatches {
     private static final String COMMENT_PROPOSAL_PREFIX_INTERNAL = "\u200B\u0e4f\u200B ";
 
     /** The "empty" trigger used in Apple default alarms (<code>19760401T005545Z</code>) */
-    private static final Trigger EMPTY_ALARM_TRIGGER = new Trigger(new Date(197168145000L));  // 19760401T005545Z
+    static final Trigger EMPTY_ALARM_TRIGGER = new Trigger(new Date(197168145000L));  // 19760401T005545Z
 
     /** Extended properties that are derived from others and injected on a per-client basis */
     private static final String[] DERIVED_X_PROPERTIES = {
         "X-MICROSOFT-CDO-ALLDAYEVENT", "X-MICROSOFT-CDO-BUSYSTATUS",
         "X-CALENDARSERVER-PRIVATE-COMMENT", "X-CALENDARSERVER-ATTENDEE-COMMENT",
-        "X-MOZ-SNOOZE", "X-MOZ-SNOOZE-TIME*", "X-MOZ-LASTACK"
+        Lightning.X_MOZ_SNOOZE.getId(), Lightning.X_MOZ_SNOOZE_TIME.getId()+"*"
     };
 
     /**
@@ -182,7 +192,7 @@ public class EventPatches {
      * @param The prefix to replace
      * @param The replacement prefix
      */
-    private static void patchPrivateComments(List<Attendee> attendees, String prefix, String replacement) {
+    static void patchPrivateComments(List<Attendee> attendees, String prefix, String replacement) {
         if (null == attendees || 0 == attendees.size()) {
             return;
         }
@@ -203,7 +213,7 @@ public class EventPatches {
      * @param event The event being imported/exported
      * @return The patched event
      */
-    private static Event removeAttachmentsFromExceptions(EventResource resource, Event event) {
+    static Event removeAttachmentsFromExceptions(EventResource resource, Event event) {
         if (null != event.getAttachments() && DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) && (isSeriesException(event) || null != event.getRecurrenceId())) {
             event.removeAttachments();
         }
@@ -212,11 +222,11 @@ public class EventPatches {
 
     /**
      * Removes all extended properties from an event that are derived from others.
-     * 
+     *
      * @param event The event to strip the derived extended properties from
      * @return The passed event reference
      */
-    private static Event stripDerivedProperties(Event event) {
+    static Event stripDerivedProperties(Event event) {
         ExtendedProperties extendedProperties = event.getExtendedProperties();
         if (null != extendedProperties && 0 < extendedProperties.size()) {
             List<ExtendedProperty> propertiesToRemove = new ArrayList<ExtendedProperty>();
@@ -246,7 +256,7 @@ public class EventPatches {
          *
          * @param factory The factory
          */
-        private Incoming(GroupwareCaldavFactory factory) {
+        Incoming(GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
         }
@@ -277,24 +287,45 @@ public class EventPatches {
                  * take over the user's attendee comment if set
                  */
                 try {
+                    int calendarUserId = eventResource.getParent().getCalendarUser().getId();
                     EntityResolver entityResolver = factory.requireService(CalendarUtilities.class).getEntityResolver(factory.getContext().getContextId());
-                    entityResolver.prepare(importedEvent.getAttendees());
+                    entityResolver.prepare(importedEvent.getAttendees(), new int[] { calendarUserId });
+                    Attendee attendee = find(importedEvent.getAttendees(), calendarUserId);
+                    if (null != attendee && false == attendee.containsComment()) {
+                        attendee.setComment(String.valueOf(extendedProperty.getValue()));
+                    }
                 } catch (OXException e) {
                     LOG.warn("Error preparing attendees for imported event", e);
-                }
-                Attendee attendee = find(importedEvent.getAttendees(), eventResource.getFactory().getUser().getId());
-                if (null != attendee && false == attendee.containsComment()) {
-                    attendee.setComment(String.valueOf(extendedProperty.getValue()));
                 }
             }
         }
 
         /**
-         * Strips any extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the 
+         * Restores the original <code>X-APPLE-TRAVEL-ADVISORY-BEHAVIOR</code> property in the event, in case it is located in a
+         * non-private folder.
+         *
+         * @param resource The parent event resource
+         * @param importedEvent The event being exported
+         */
+        private void adjustAppleTravelAdvisory(EventResource resource, Event importedEvent) {
+            if (resource.exists() && false == PrivateType.getInstance().equals(resource.getParent().getFolder().getType()) &&
+                (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
+                ExtendedProperty originalProperty = optExtendedProperty(resource.getEvent(), "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR");
+                if (null != originalProperty) {
+                    importedEvent.setExtendedProperties(addExtendedProperty(importedEvent.getExtendedProperties(), originalProperty, true));
+                } else {
+                    removeExtendedProperties(importedEvent.getExtendedProperties(), "X-APPLE-TRAVEL-ADVISORY-BEHAVIOR");
+                }
+            }
+        }
+
+
+        /**
+         * Strips any extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the
          * calendar user's point of view.
          * <p/>
-         * Otherwise, all known and handled extended properties are removed to avoid ambigiouties, as they will be derived from other 
-         * properties upon the next export. 
+         * Otherwise, all known and handled extended properties are removed to avoid ambigiouties, as they will be derived from other
+         * properties upon the next export.
          *
          * @param eventResource The event resource
          * @param importedEvent The event
@@ -318,7 +349,7 @@ public class EventPatches {
             }
         }
 
-        private static void adjustAlarms(EventResource resource, Event importedEvent, Event importedSeriesMaster) {
+        private static void adjustAlarms(EventResource resource, Event importedEvent, Event importedSeriesMaster, Calendar calendar) {
             List<Alarm> alarms = importedEvent.getAlarms();
             if (null == alarms || 0 == alarms.size()) {
                 return;
@@ -335,7 +366,7 @@ public class EventPatches {
                 /*
                  * handle acknowledged alarms via X-MOZ-LASTACK
                  */
-                adjustMozillaLastAcknowledged(importedEvent, importedSeriesMaster);
+                adjustMozillaLastAcknowledged(importedEvent, importedSeriesMaster, calendar);
             }
             if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent()) || DAVUserAgent.EM_CLIENT.equals(resource.getUserAgent())) {
 
@@ -366,9 +397,12 @@ public class EventPatches {
                         return;
                     }
                     Event newChangeException = newChangeExceptions.get(0);
+                    if(newChangeException == null) {
+                        return;
+                    }
                     Alarm snoozedAlarm = null;
                     Alarm snoozeAlarm = null;
-                    if (null != newChangeException && null != newChangeException.getAlarms()) {
+                    if (null != newChangeException.getAlarms()) {
                         for (Alarm alarm : newChangeException.getAlarms()) {
                             /*
                              * XXX: If the original event did contain more than one alarm the snooze alarm of e.g. the second alarm
@@ -404,7 +438,7 @@ public class EventPatches {
                             EventUpdate eventUpdate = DefaultEventUpdate.builder()
                                 .originalEvent(originalOccurrence)
                                 .updatedEvent(newChangeException)
-                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES)
+                                .ignoredEventFields(EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.EXTENDED_PROPERTIES)
                                 .considerUnset(true)
                                 .ignoreDefaults(true)
                             .build();
@@ -453,7 +487,7 @@ public class EventPatches {
             return null;
         }
 
-        private Event exportAndImport(EventResource resource, Event event) throws OXException {
+        Event exportAndImport(EventResource resource, Event event) throws OXException {
             /*
              * prepare exported event
              */
@@ -521,7 +555,7 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          */
         private static void adjustMozillaSnooze(Event importedEvent) {
-            Date mozSnoozeDate = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-SNOOZE");
+            Date mozSnoozeDate = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_SNOOZE.getId());
             if (null == mozSnoozeDate || null == importedEvent.getAlarms()) {
                 return;
             }
@@ -569,7 +603,7 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          */
         private static void adjustMozillaSnoozeTime(Event importedEvent) {
-            Date mozSnoozeTime = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-SNOOZE-TIME*");
+            Date mozSnoozeTime = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_SNOOZE_TIME.getId()+"*");
             if (null == mozSnoozeTime || null == importedEvent.getAlarms()) {
                 return;
             }
@@ -578,7 +612,7 @@ public class EventPatches {
              */
             Alarm snoozeAlarm = new Alarm(new Trigger(mozSnoozeTime), AlarmAction.DISPLAY);
             snoozeAlarm.setDescription("Reminder");
-            snoozeAlarm.setAcknowledged(Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK"));
+            snoozeAlarm.setAcknowledged(Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId()));
             importedEvent.getAlarms().add(snoozeAlarm);
             addSnoozeRelationship(snoozeAlarm, importedEvent.getAlarms());
         }
@@ -590,19 +624,28 @@ public class EventPatches {
          * @param importedEvent The imported event as sent by the client
          * @param importedSeriesMaster The imported series master event as sent by the client
          */
-        private static void adjustMozillaLastAcknowledged(Event importedEvent, Event importedSeriesMaster) {
+        private static void adjustMozillaLastAcknowledged(Event importedEvent, Event importedSeriesMaster, Calendar calendar) {
             if (null == importedEvent.getAlarms() || 0 == importedEvent.getAlarms().size()) {
                 return;
             }
             /*
              * take over latest "X-MOZ-LASTACK" from alarms and parent event component
              */
-            Date parentAcknowledged = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), "X-MOZ-LASTACK");
+            Date parentAcknowledged = Tools.optExtendedPropertyAsDate(importedEvent.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId());
             if (null != importedSeriesMaster) {
-                parentAcknowledged = Tools.getLatestModified(parentAcknowledged, Tools.optExtendedPropertyAsDate(importedSeriesMaster.getExtendedProperties(), "X-MOZ-LASTACK"));
+                parentAcknowledged = Tools.getLatestModified(parentAcknowledged, Tools.optExtendedPropertyAsDate(importedSeriesMaster.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId()));
+            } else {
+                if (calendar != null) {
+                    for (Event event : calendar.getEvents()) {
+                        ExtendedProperty fakeMaster = Tools.optExtendedProperty(event.getExtendedProperties(), Lightning.X_MOZ_FAKED_MASTER.getId());
+                        if (fakeMaster != null) {
+                            parentAcknowledged = Tools.optExtendedPropertyAsDate(event.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId());
+                        }
+                    }
+                }
             }
             for (Alarm alarm : importedEvent.getAlarms()) {
-                Date acknowledged = Tools.getLatestModified(Tools.optExtendedPropertyAsDate(alarm.getExtendedProperties(), "X-MOZ-LASTACK"), alarm.getAcknowledged());
+                Date acknowledged = Tools.getLatestModified(Tools.optExtendedPropertyAsDate(alarm.getExtendedProperties(), Lightning.X_MOZ_LASTACK.getId()), alarm.getAcknowledged());
                 acknowledged = Tools.getLatestModified(parentAcknowledged, acknowledged);
                 alarm.setAcknowledged(acknowledged);
             }
@@ -617,8 +660,8 @@ public class EventPatches {
         private static void applyFilename(EventResource resource, Event importedEvent) {
             String name = resource.getUrl().name();
             if (Strings.isNotEmpty(name)) {
-                if (name.toLowerCase().endsWith(com.openexchange.caldav.resources.CalDAVResource.EXTENSION_ICS)) {
-                    name = name.substring(0, name.length() - com.openexchange.caldav.resources.CalDAVResource.EXTENSION_ICS.length());
+                if (name.toLowerCase().endsWith(Tools.EXTENSION_ICS)) {
+                    name = name.substring(0, name.length() - Tools.EXTENSION_ICS.length());
                 }
                 if (false == name.equals(importedEvent.getUid())) {
                     importedEvent.setFilename(name);
@@ -676,6 +719,105 @@ public class EventPatches {
         }
 
         /**
+         * Restores the participation status in the attendee property matching the event organizer for group scheduled events edited by
+         * the organizer. This is done for the mac OS client who seems to use a fixed participation status of ACCEPTED here.
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void restoreAttendeeForOrganizer(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (false == resource.exists() || null == importedEvent || false == DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()) || 
+                false == isGroupScheduled(importedEvent) || false == isOrganizer(resource.getEvent(), resource.getFactory().getUser().getId())) {
+                return; // not applicable
+            }
+            try {
+                new CalendarAccessOperation<Void>(factory) {
+
+                    @Override
+                    protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                        /*
+                         * check organizer's attendee in imported event
+                         */
+                        EventID eventID = getEventID(resource.getEvent());
+                        Attendee updatedAttendee = find(importedEvent.getAttendees(), importedEvent.getOrganizer());
+                        Event originalEvent = access.getEvent(eventID);
+                        Attendee originalAttendee = find(originalEvent.getAttendees(), originalEvent.getOrganizer());
+                        if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
+                            updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                        }
+                        if (null != importedChangeExceptions) {
+                            for (Event importedChangeException : importedChangeExceptions) {
+                                eventID = new EventID(eventID.getFolderID(), eventID.getObjectID(), importedChangeException.getRecurrenceId());
+                                updatedAttendee = find(importedChangeException.getAttendees(), importedChangeException.getOrganizer());
+                                Event originalChangeException = access.getEvent(eventID);
+                                originalAttendee = find(originalChangeException.getAttendees(), originalChangeException.getOrganizer());
+                                if (null != updatedAttendee && null != originalAttendee && matches(updatedAttendee, originalAttendee)) {
+                                    updatedAttendee.setPartStat(originalAttendee.getPartStat());
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                }.execute(factory.getSession());
+            } catch (OXException e) {
+                LOG.warn("Error restoring participation status in organizer's attendee", e);
+            }
+        }
+
+        /**
+         * Restores deleted change exception events from the past where the calendar user attendee's participation status was
+         * previously set to 'declined'. This is done for the iOS client who sometimes decides to send such updates without user
+         * interaction.
+         *
+         * @param resource The event resource
+         * @param importedEvent The imported series master event as supplied by the client
+         * @param importedChangeExceptions The imported change exceptions as supplied by the client
+         */
+        private void restoreDeclinedDeleteExceptions(EventResource resource, Event importedEvent, List<Event> importedChangeExceptions) {
+            if (false == resource.exists() || false == isSeriesMaster(resource.getEvent()) || null == importedEvent || false == DAVUserAgent.IOS.equals(resource.getUserAgent())) {
+                return; // not applicable
+            }
+            SortedSet<RecurrenceId> deleteExceptionDates = importedEvent.getDeleteExceptionDates();
+            DateTime now = new DateTime(System.currentTimeMillis());
+            if (isNullOrEmpty(deleteExceptionDates) || now.before(importedEvent.getDeleteExceptionDates().first().getValue())) {
+                return; // not applicable
+            }
+            try {
+                new CalendarAccessOperation<Void>(factory) {
+
+                    @Override
+                    protected Void perform(IDBasedCalendarAccess access) throws OXException {
+                        /*
+                         * check for new delete exception dates for previous change exceptions
+                         */
+                        Event originalSeriesMaster = access.getEvent(getEventID(resource.getEvent()));
+                        if (isNullOrEmpty(originalSeriesMaster.getChangeExceptionDates())) {
+                            return null;
+                        }
+                        for (RecurrenceId exceptionDate : originalSeriesMaster.getChangeExceptionDates()) {
+                            if (deleteExceptionDates.contains(exceptionDate) && now.after(exceptionDate.getValue())) {
+                                Event originalChangeException = access.getEvent(
+                                    new EventID(resource.getEvent().getFolderId(), resource.getEvent().getId(), exceptionDate));
+                                Attendee attendee = find(originalChangeException.getAttendees(), resource.getParent().getCalendarUser().getId());
+                                if (null != attendee && ParticipationStatus.DECLINED.matches(attendee.getPartStat())) {
+                                    /*
+                                     * restore original change exception; remove delete exception date
+                                     */
+                                    deleteExceptionDates.remove(exceptionDate);
+                                    importedChangeExceptions.add(exportAndImport(resource, originalChangeException));
+                                }
+                            }
+                        }
+                        return null;
+                    }
+                }.execute(factory.getSession());
+            } catch (OXException e) {
+                LOG.warn("Error restoring declined delete exceptions", e);
+            }
+        }
+
+        /**
          * Applies all known patches to an event after importing.
          *
          * @param resource The parent event resource
@@ -696,8 +838,11 @@ public class EventPatches {
                 applyFilename(resource, importedEvent);
                 adjustAttendeeComments(resource, importedEvent);
                 adjustProposedTimePrefixes(importedEvent);
+                restoreDeclinedDeleteExceptions(resource, importedEvent, importedChangeExceptions);
+                restoreAttendeeForOrganizer(resource, importedEvent, importedChangeExceptions);
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
-                adjustAlarms(resource, importedEvent, null);
+                adjustAlarms(resource, importedEvent, null, null);
+                adjustAppleTravelAdvisory(resource, importedEvent);
                 applyManagedAttachments(importedEvent);
                 stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedEvent);
             }
@@ -708,7 +853,8 @@ public class EventPatches {
                 for (Event importedChangeException : importedChangeExceptions) {
                     adjustAttendeeComments(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
-                    adjustAlarms(resource, importedChangeException, importedEvent);
+                    adjustAlarms(resource, importedChangeException, importedEvent, caldavImport.getCalender());
+                    adjustAppleTravelAdvisory(resource, importedEvent);
                     applyManagedAttachments(importedChangeException);
                     removeAttachmentsFromExceptions(resource, importedChangeException);
                     stripExtendedPropertiesFromAttendeeSchedulingResource(resource, importedChangeException);
@@ -747,7 +893,7 @@ public class EventPatches {
          *
          * @param factory The factory
          */
-        private Outgoing(GroupwareCaldavFactory factory) {
+        Outgoing(GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
         }
@@ -814,6 +960,26 @@ public class EventPatches {
             return alarm;
         }
 
+        /**
+         * Forcibly disables "time to leave" notifications for Apple clients in non-private folders by inserting the extended property
+         * <code>X-APPLE-TRAVEL-ADVISORY-BEHAVIOR:DISABLED</code> in the event.
+         *
+         * @param resource The parent event resource
+         * @param exportedEvent The event being exported
+         * @return The patched event
+         */
+        private Event adjustAppleTravelAdvisory(EventResource resource, Event exportedEvent) {
+            /*
+             * forcibly disable "time to leave" notifications for Apple clients in non-private folders
+             */
+            if (false == PrivateType.getInstance().equals(resource.getParent().getFolder().getType()) &&
+                (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent()))) {
+                ExtendedProperty property = new ExtendedProperty("X-APPLE-TRAVEL-ADVISORY-BEHAVIOR", "DISABLED");
+                exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), property, true));
+            }
+            return exportedEvent;
+        }
+
         private Event adjustAlarms(EventResource resource, Event exportedEvent) {
             List<Alarm> exportedAlarms = exportedEvent.getAlarms();
             try {
@@ -843,7 +1009,7 @@ public class EventPatches {
                      * also supply the acknowledged date via X-MOZ-LASTACK, both in alarm and parent event component
                      */
                     if (null != exportedAlarm.getAcknowledged()) {
-                        ExtendedProperty mozLastAckProperty = new ExtendedProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
+                        ExtendedProperty mozLastAckProperty = new ExtendedProperty(Lightning.X_MOZ_LASTACK.getId(), Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
                         alarm.setExtendedProperties(addExtendedProperty(alarm.getExtendedProperties(), mozLastAckProperty, true));
                         exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), mozLastAckProperty, true));
                     }
@@ -864,7 +1030,7 @@ public class EventPatches {
                                         exportedEvent, snoozedAlarm.getAcknowledged(), null);
                                     if (iterator.hasNext()) {
                                         DateTime relatedDate = AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), iterator.next());
-                                        String propertyName = "X-MOZ-SNOOZE-TIME-" + String.valueOf(relatedDate.getTimestamp()) + "000";
+                                        String propertyName = Lightning.X_MOZ_SNOOZE_TIME.getId() + "-" + String.valueOf(relatedDate.getTimestamp()) + "000";
                                         addExtendedProperty(exportedEvent, new ExtendedProperty(propertyName, Tools.formatAsUTC(snoozeTime)));
                                     }
                                 } catch (OXException e) {
@@ -872,7 +1038,7 @@ public class EventPatches {
                                 }
                             } else {
                                 if (null != snoozeTime) {
-                                    addExtendedProperty(exportedEvent, new ExtendedProperty("X-MOZ-SNOOZE-TIME", Tools.formatAsUTC(snoozeTime)));
+                                    addExtendedProperty(exportedEvent, new ExtendedProperty(Lightning.X_MOZ_SNOOZE_TIME.getId(), Tools.formatAsUTC(snoozeTime)));
                                 }
                             }
                         }
@@ -947,19 +1113,72 @@ public class EventPatches {
             exportedEvent = adjustProposedTimePrefixes(exportedEvent);
             exportedEvent = applyAttendeeComments(resource, exportedEvent);
             exportedEvent = adjustAlarms(resource, exportedEvent);
+            exportedEvent = adjustAppleTravelAdvisory(resource, exportedEvent);
             exportedEvent = prepareManagedAttachments(resource, exportedEvent);
             exportedEvent = removeAttachmentsFromExceptions(resource, exportedEvent);
             return exportedEvent;
         }
 
-        public static CalendarExport applyExport(EventResource eventResource, CalendarExport calendarExport) {
+        public static CalendarExport applyExport(EventResource eventResource, CalendarExport calendarExport, List<Event> exportedEvents) throws OXException {
             if (DAVUserAgent.IOS.equals(eventResource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(eventResource.getUserAgent())) {
                 Event event = eventResource.getEvent();
                 if (null != event && false == CalendarUtils.isPublicClassification(event)) {
                     calendarExport.add(new ExtendedProperty("X-CALENDARSERVER-ACCESS", String.valueOf(event.getClassification())));
                 }
             }
+            if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(eventResource.getUserAgent()) && PhantomMaster.class.isInstance(eventResource.getEvent())) {
+                // Add fake master
+                Event phantom = eventResource.getEvent();
+                Event fake = createFakeMaster(phantom, exportedEvents);
+                calendarExport.add(fake);
+            }
             return calendarExport;
+        }
+
+        /**
+         * Creates a fake master from the given phantom and exported events
+         *
+         * @param phantom The phantom event
+         * @param exportedEvents The exported events
+         * @return The fake master event
+         */
+        private static Event createFakeMaster(Event phantom, List<Event> exportedEvents) {
+            Event fake = new Event();
+            fake.setUid(phantom.getUid());
+            fake.setLastModified(phantom.getLastModified());
+            fake.setCreated(phantom.getCreated());
+            fake.setTimestamp(phantom.getTimestamp());
+            SortedSet<RecurrenceId> recurrenceIds = CalendarUtils.getRecurrenceIds(exportedEvents);
+            fake.setRecurrenceDates(recurrenceIds);
+            fake.setStartDate(recurrenceIds.first().getValue());
+
+            ExtendedProperties extendedProperties = new ExtendedProperties();
+            extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_FAKED_MASTER.getId(), "1"));
+            extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_GENERATION.getId(), Integer.valueOf(phantom.getSequence())));
+            Optional<Object> ack = findXMOZASTACK(exportedEvents);
+            if(ack.isPresent()) {
+                extendedProperties.add(new ExtendedProperty(Lightning.X_MOZ_LASTACK.getId(), ack.get()));
+            }
+            fake.setExtendedProperties(extendedProperties);
+            return fake;
+        }
+
+        /**
+         * Finds the first X-MOZ-ACK property in the alarms of the given events
+         *
+         * @param events The events to search for
+         * @return An optional which may or may not contain the X-MOZ-ACK value
+         */
+        private static Optional<Object> findXMOZASTACK(List<Event> events) {
+            for (Event eve : events) {
+                if (eve.containsAlarms()) {
+                    Optional<Alarm> findAny = eve.getAlarms().stream().filter((alarm) -> alarm.containsExtendedProperties() && alarm.getExtendedProperties().contains(Lightning.X_MOZ_LASTACK.getId())).findAny();
+                    if (findAny.isPresent()) {
+                        return Optional.ofNullable(findAny.get().getExtendedProperties().get(Lightning.X_MOZ_LASTACK.getId()).getValue());
+                    }
+                }
+            }
+            return Optional.empty();
         }
 
     }

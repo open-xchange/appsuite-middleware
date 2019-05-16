@@ -111,18 +111,19 @@ public enum MailCategoriesOrganizeExceptionCodes implements DisplayableOXExcepti
     private String displayMessage;
 
     /**
-     * Default constructor.
      *
-     * @param message message.
-     * @param category category.
-     * @param number number.
+     * Initializes a new {@link MailCategoriesOrganizeExceptionCodes}.
+     *
+     * @param message
+     * @param category
+     * @param number
      */
     private MailCategoriesOrganizeExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
     }
 
     /**
-     * Default constructor.
+     * Initializes a new {@link MailCategoriesOrganizeExceptionCodes}.
      *
      * @param message
      * @param category

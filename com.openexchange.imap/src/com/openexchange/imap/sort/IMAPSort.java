@@ -50,6 +50,7 @@
 package com.openexchange.imap.sort;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.IOException;
 import java.util.EnumMap;
@@ -172,7 +173,7 @@ public final class IMAPSort {
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
                         long duration = System.currentTimeMillis() - start;
                         mailInterfaceMonitor.addUseTime(duration);
-                        LOG.debug("IMAP sort took {}msec", duration);
+                        LOG.debug("IMAP sort took {}msec", L(duration));
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
                         return new int[0];
@@ -353,8 +354,8 @@ public final class IMAPSort {
                     case FOLDER_CLOSED:
                         {
                             // Apparently, SORT RETURN PARTIAL command failed
-                            try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
-                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                            try {    imapFolder.close(false);    } catch (@SuppressWarnings("unused") Exception x) { /*Ignore*/ }
+                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (@SuppressWarnings("unused") Exception x) { /*Ignore*/ }
                         }
                         break;
                     default:
@@ -435,8 +436,8 @@ public final class IMAPSort {
                     case FOLDER_CLOSED:
                         {
                             // Apparently, SORT RETURN PARTIAL command failed
-                            try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
-                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                            try {    imapFolder.close(false);    } catch (@SuppressWarnings("unused") Exception x) { /*Ignore*/ }
+                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (@SuppressWarnings("unused") Exception x) { /*Ignore*/ }
                         }
                         break;
                     default:
@@ -503,7 +504,7 @@ public final class IMAPSort {
                     args.writeAtom("UTF-8");    // charset specification
                     if (jmsSearchTerm != null) {
                         try {
-                            args.append(new SearchSequence().generateSequence(jmsSearchTerm, "UTF-8"));
+                            args.append(new SearchSequence(protocol).generateSequence(jmsSearchTerm, "UTF-8"));
                         } catch (final IOException ioex) {
                             // should never happen
                             throw new WrappingProtocolException("", new SearchException(ioex.toString()));

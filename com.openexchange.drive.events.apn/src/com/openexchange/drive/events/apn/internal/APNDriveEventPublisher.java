@@ -49,16 +49,29 @@
 
 package com.openexchange.drive.events.apn.internal;
 
-import java.util.ArrayList;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.osgi.Tools.requireService;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn.APNAccess;
+import com.openexchange.drive.events.apn.APNCertificateProvider;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.strings.TimeSpanParser;
 import javapns.Push;
 import javapns.communication.exceptions.CommunicationException;
 import javapns.communication.exceptions.KeystoreException;
@@ -75,49 +88,164 @@ import javapns.notification.PushedNotifications;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class APNDriveEventPublisher implements DriveEventPublisher {
+public class APNDriveEventPublisher implements DriveEventPublisher {
+
+    /** The logger constant */
+    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventPublisher.class);
 
     // https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/CommunicatingWIthAPS.html
     private final int STATUS_INVALID_TOKEN_SIZE = 5;
     private final int STATUS_INVALID_TOKEN = 8;
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(APNDriveEventPublisher.class);
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<APNAccess, Boolean> initializedFeedbackQueries;
+    private final ServiceLookup services;
+    private final String serviceId;
+    private final Class<? extends APNCertificateProvider> certifcateProviderClass;
+    private final Map<String, String> optionals;
 
     /**
      * Initializes a new {@link APNDriveEventPublisher}.
+     *
+     * @param services The service lookup reference
+     * @param serviceId The service identifier used for push subscriptions, i.e. <code>apn</code> or <code>apn.macos</code>
+     * @param type The operation system type, this publisher is responsible for.
+     * @param certifcateProviderClass The class under which the fallback APN certificate provider gets registered.
      */
-    public APNDriveEventPublisher() {
+    public APNDriveEventPublisher(ServiceLookup services, String serviceId, OperationSystemType type, Class<? extends APNCertificateProvider> certifcateProviderClass) {
         super();
+        this.services = services;
+        this.serviceId = serviceId;
+        this.certifcateProviderClass = certifcateProviderClass;
+        HashMap<String, String> map = new HashMap<>(1);
+        map.put(DriveEventsAPNProperty.OPTIONAL_FIELD, type.getName());
+        optionals = Collections.unmodifiableMap(map);
+        this.initializedFeedbackQueries = new ConcurrentHashMap<>();
     }
 
-    protected abstract String getServiceID();
-
-    protected abstract APNAccess getAccess() throws OXException;
+    private APNAccess getAccess(int contextId, int userId) {
+        LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
+        if (null == configService) {
+            LOG.warn("Unable to get configuration service to determine push options via {} for user {} in context {}.", serviceId, I(userId), I(contextId));
+            return null;
+        }
+        /*
+         * check if push via APN is enabled
+         */
+        if (false == configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.enabled, optionals)) {
+            LOG.trace("Push via {} is disabled for user {} in context {}.", serviceId, I(userId), I(contextId));
+            return null;
+        }
+        /*
+         * get APN options via config cascade if configured
+         */
+        String keystore = configService.getProperty(userId, contextId, DriveEventsAPNProperty.keystore, optionals);
+        if (Strings.isNotEmpty(keystore)) {
+            String password = configService.getProperty(userId, contextId, DriveEventsAPNProperty.password, optionals);
+            boolean production = configService.getBooleanProperty(userId, contextId, DriveEventsAPNProperty.production, optionals);
+            LOG.trace("Using configured keystore {}, {} service for push via {} for user {} in context {}.", keystore, production ? "production" : "sandbox", serviceId, I(userId), I(contextId));
+            return new APNAccess(keystore, password, production);
+        }
+        /*
+         * check for a registered APN options provider as fallback, otherwise
+         */
+        APNCertificateProvider certificateProvider = services.getOptionalService(certifcateProviderClass);
+        if (null != certificateProvider) {
+            LOG.trace("Using fallback certificate provider for push via {} for user {} in context {}.", serviceId, I(userId), I(contextId));
+            return certificateProvider.getAccess();
+        }
+        LOG.trace("No configuration for push via {} found for user {} in context {}.", serviceId, I(userId), I(contextId));
+        return null;
+    }
 
     @Override
     public void publish(DriveEvent event) {
+        /*
+         * get subscriptions from storage
+         */
         List<Subscription> subscriptions = null;
         try {
-            subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(
-                event.getContextID(), new String[] { getServiceID() }, event.getFolderIDs());
+            subscriptions = requireService(DriveSubscriptionStore.class, services).getSubscriptions(
+                event.getContextID(), new String[] { serviceId }, event.getFolderIDs());
         } catch (OXException e) {
-            LOG.error("unable to get subscriptions for service {}", getServiceID(), e);
+            LOG.error("unable to get subscriptions for service {}", serviceId, e);
         }
-        if (null != subscriptions && 0 < subscriptions.size()) {
-            List<PayloadPerDevice> payloads = getSilentNotificationPayloads(subscriptions);
-            if (0 < payloads.size()) {
-                PushedNotifications notifications = null;
+        if (null == subscriptions || subscriptions.isEmpty()) {
+            return;
+        }
+        /*
+         * build payloads per APN access
+         */
+        Map<APNAccess, List<PayloadPerDevice>> payloadsPerAccess = new HashMap<APNAccess, List<PayloadPerDevice>>();
+        for (Subscription subscription : subscriptions) {
+            PayloadPerDevice payload = getSilentNotificationPayload(subscription);
+            if (null == payload) {
+                LOG.debug("No payload constructed for subscription {}, skipping", subscription);
+                continue;
+            }
+            APNAccess access = getAccess(subscription.getContextID(), subscription.getUserID());
+            if (null == access) {
+                LOG.debug("No APN configuration for subscription {}, skipping", subscription);
+                continue;
+            }
+            com.openexchange.tools.arrays.Collections.put(payloadsPerAccess, access, payload);
+        }
+        /*
+         * send payloads per access & setup feedback query task unless already done
+         */
+        PushedNotifications notifications = new PushedNotifications(subscriptions.size());
+        for (Map.Entry<APNAccess, List<PayloadPerDevice>> entry : payloadsPerAccess.entrySet()) {
+            APNAccess access = entry.getKey();
+            try {
+                notifications.addAll(Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), entry.getValue()));
+                setupFeedbackQueriesIfNeeded(access);
+            } catch (CommunicationException e) {
+                LOG.warn("error submitting push notifications", e);
+            } catch (KeystoreException e) {
+                LOG.warn("error submitting push notifications", e);
+            }
+        }
+        /*
+         * process notification results afterwards
+         */
+        processNotificationResults(notifications);
+    }
+
+    private void setupFeedbackQueriesIfNeeded(final APNAccess access) {
+        Boolean marker = initializedFeedbackQueries.get(access);
+        if (null == marker) {
+            marker = initializedFeedbackQueries.putIfAbsent(access, Boolean.TRUE);
+            if (null == marker) {
+                // This thread set the marker and thus is supposed to setup feedback queries
+                boolean error = true; // pessimistic
                 try {
-                    APNAccess access = getAccess();
-                    notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
-                } catch (CommunicationException e) {
-                    LOG.warn("error submitting push notifications", e);
-                } catch (KeystoreException e) {
-                    LOG.warn("error submitting push notifications", e);
+                    setupFeedbackQueries(access);
+                    error = false;
                 } catch (OXException e) {
-                    LOG.warn("error submitting push notifications", e);
+                    LOG.warn("Error setting up feedback queries for {}.", serviceId, e);
+                } finally {
+                    if (error) {
+                        initializedFeedbackQueries.remove(access);
+                    }
                 }
-                processNotificationResults(notifications);
+            }
+        }
+    }
+
+    private void setupFeedbackQueries(APNAccess access) throws OXException {
+        LeanConfigurationService configService = requireService(LeanConfigurationService.class, services);
+        String feedbackQueryInterval = configService.getProperty(DriveEventsAPNProperty.feedbackQueryInterval, optionals);
+        if (Strings.isNotEmpty(feedbackQueryInterval)) {
+            long interval = TimeSpanParser.parseTimespanToPrimitive(feedbackQueryInterval);
+            if (60 * 1000 <= interval) {
+                requireService(TimerService.class, services).scheduleWithFixedDelay(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        queryFeedbackService(access);
+                    }
+                }, interval, interval);
             }
         }
     }
@@ -134,7 +262,7 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
                         if (STATUS_INVALID_TOKEN == status || STATUS_INVALID_TOKEN_SIZE == status) {
                             Device device = notification.getDevice();
                             int removed = removeSubscriptions(device);
-                            LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                            LOG.info("Removed {} subscriptions for device with token: {}.", I(removed), device.getToken());
                         }
                     }
                 }
@@ -144,108 +272,81 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
 
     /**
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.
+     *
+     * @param access The underlying APN access to use
      */
-    public void queryFeedbackService() {
-        LOG.info("Querying APN feedback service for '{}'...", getServiceID());
+    public void queryFeedbackService(APNAccess access) {
+        LOG.info("Querying APN feedback service for '{}'...", serviceId);
         long start = System.currentTimeMillis();
         List<Device> devices = null;
         try {
-            APNAccess access = getAccess();
-            devices = Push.feedback(access.getKeystore(), access.getPassword(), access.isProduction());
+            if (null != access) {
+                devices = Push.feedback(access.getKeystore(), access.getPassword(), access.isProduction());
+            }
         } catch (CommunicationException e) {
             LOG.warn("error querying feedback service", e);
         } catch (KeystoreException e) {
-            LOG.warn("error querying feedback service", e);
-        } catch (OXException e) {
             LOG.warn("error querying feedback service", e);
         }
         if (null != devices && 0 < devices.size()) {
             for (Device device : devices) {
                 LOG.debug("Got feedback for device with token: {}, last registered: {}", device.getToken(), device.getLastRegister());
                 int removed = removeSubscriptions(device);
-                LOG.info("Removed {} subscriptions for device with token: {}.", removed, device.getToken());
+                LOG.info("Removed {} subscriptions for device with token: {}.", I(removed), device.getToken());
             }
         } else {
             LOG.debug("No devices to unregister received from feedback service.");
         }
-        LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", getServiceID(), (System.currentTimeMillis() - start));
+        LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", serviceId, L((System.currentTimeMillis() - start)));
     }
 
-    public void notifySilently() {
-        LOG.info("Sending silent push notifications for '{}'...", getServiceID());
-        long start = System.currentTimeMillis();
+    private PayloadPerDevice getSilentNotificationPayload(Subscription subscription) {
         try {
-            List<Subscription> subscriptions = Services.getService(DriveSubscriptionStore.class, true).getSubscriptions(getServiceID());
-            if (null != subscriptions && 0 < subscriptions.size()) {
-                List<PayloadPerDevice> payloads = getSilentNotificationPayloads(subscriptions);
-                if (0 < payloads.size()) {
-                    APNAccess access = getAccess();
-                    PushedNotifications notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
-                    processNotificationResults(notifications);
-                }
+            PushNotificationPayload payload = new PushNotificationBigPayload();
+            payload.addCustomDictionary("root", subscription.getRootFolderID());
+            payload.addCustomDictionary("action", "sync");
+            JSONObject apsObject = payload.getPayload().getJSONObject("aps");
+            if (null == apsObject) {
+                apsObject = new JSONObject();
+                payload.getPayload().put("aps", apsObject);
             }
-        } catch (CommunicationException e) {
-            LOG.warn("error sending silent push notifications", e);
-        } catch (KeystoreException e) {
-            LOG.warn("error sending silent push notifications", e);
-        } catch (OXException e) {
-            LOG.warn("error sending silent push notifications", e);
+            apsObject.put("content-available", 1);
+            return new PayloadPerDevice(payload, subscription.getToken());
+        } catch (JSONException e) {
+            LOG.warn("error constructing payload", e);
+        } catch (InvalidDeviceTokenFormatException e) {
+            LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
+            removeSubscription(subscription);
         }
-        LOG.info("Finished sending silent push notifications for ''{}'' after {} ms.", getServiceID(), (System.currentTimeMillis() - start));
+        return null;
     }
 
-    private List<PayloadPerDevice> getSilentNotificationPayloads(List<Subscription> subscriptions) {
-        List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
-        for (Subscription subscription : subscriptions) {
-            try {
-                PushNotificationPayload payload = new PushNotificationBigPayload();
-                payload.addCustomDictionary("root", subscription.getRootFolderID());
-                payload.addCustomDictionary("action", "sync");
-                JSONObject apsObject = payload.getPayload().getJSONObject("aps");
-                if (null == apsObject) {
-                    apsObject = new JSONObject();
-                    payload.getPayload().put("aps", apsObject);
-                }
-                apsObject.put("content-available", 1);
-                payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
-            } catch (JSONException e) {
-                LOG.warn("error constructing payload", e);
-            } catch (InvalidDeviceTokenFormatException e) {
-                LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
-                removeSubscription(subscription);
-            }
-        }
-        return payloads;
-    }
-
-    private List<PayloadPerDevice> getPayloads(DriveEvent event, List<Subscription> subscriptions) {
+    private PayloadPerDevice getPayload(DriveEvent event, Subscription subscription) {
         String pushTokenReference = event.getPushTokenReference();
-        List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
-        for (Subscription subscription : subscriptions) {
-            if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
-                LOG.trace("Skipping push notification for subscription: {}", subscription);
-                continue;
-            }
-            try {
-                PushNotificationPayload payload = new PushNotificationBigPayload();
-                payload.addCustomAlertLocKey("TRIGGER_SYNC");
-                payload.addCustomAlertActionLocKey("OK");
-                payload.addCustomDictionary("root", subscription.getRootFolderID());
-                payload.addCustomDictionary("action", "sync");
-                payloads.add(new PayloadPerDevice(payload, subscription.getToken()));
-            } catch (JSONException e) {
-                LOG.warn("error constructing payload", e);
-            } catch (InvalidDeviceTokenFormatException e) {
-                LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
-                removeSubscription(subscription);
-            }
+        if (null != pushTokenReference && subscription.matches(pushTokenReference)) {
+            LOG.trace("Skipping push notification for subscription: {}", subscription);
+            return null;
         }
-        return payloads;
+        try {
+            PushNotificationPayload payload = new PushNotificationBigPayload();
+            payload.addCustomAlertLocKey("TRIGGER_SYNC");
+            payload.addCustomAlertActionLocKey("OK");
+            payload.addCustomDictionary("root", subscription.getRootFolderID());
+            payload.addCustomDictionary("action", "sync");
+            return new PayloadPerDevice(payload, subscription.getToken());
+        } catch (JSONException e) {
+            LOG.warn("error constructing payload", e);
+            return null;
+        } catch (InvalidDeviceTokenFormatException e) {
+            LOG.warn("Invalid device token: '{}', removing from subscription store.", subscription.getToken(), e);
+            removeSubscription(subscription);
+            return null;
+        }
     }
 
     private boolean removeSubscription(Subscription subscription) {
         try {
-            return Services.getService(DriveSubscriptionStore.class, true).removeSubscription(subscription);
+            return requireService(DriveSubscriptionStore.class, services).removeSubscription(subscription);
         } catch (OXException e) {
             LOG.error("Error removing subscription", e);
         }
@@ -255,8 +356,8 @@ public abstract class APNDriveEventPublisher implements DriveEventPublisher {
     private int removeSubscriptions(Device device) {
         if (null != device && null != device.getToken() && null != device.getLastRegister()) {
             try {
-                return Services.getService(DriveSubscriptionStore.class, true).removeSubscriptions(
-                    getServiceID(), device.getToken(), device.getLastRegister().getTime());
+                return requireService(DriveSubscriptionStore.class, services).removeSubscriptions(
+                    serviceId, device.getToken(), device.getLastRegister().getTime());
             } catch (OXException e) {
                 LOG.error("Error removing subscription", e);
             }

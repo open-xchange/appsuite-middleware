@@ -184,9 +184,8 @@ public class QueryFields {
 				}
 			}
     		return updateFields.toArray(new ContactField[updateFields.size()]);
-    	} else {
-    		return this.imageDataFields;
     	}
+        return this.imageDataFields;
     }
 
     public ContactField[] getContactDataFields(boolean forUpdate) {
@@ -198,9 +197,8 @@ public class QueryFields {
 				}
 			}
     		return updateFields.toArray(new ContactField[updateFields.size()]);
-    	} else {
-    		return this.imageDataFields;
     	}
+        return this.imageDataFields;
     }
 
     /**

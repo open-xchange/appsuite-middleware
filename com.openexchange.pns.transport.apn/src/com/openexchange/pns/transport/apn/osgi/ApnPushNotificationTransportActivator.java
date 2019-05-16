@@ -75,8 +75,8 @@ import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.apn.ApnOptions;
 import com.openexchange.pns.transport.apn.ApnOptionsProvider;
+import com.openexchange.pns.transport.apn.DefaultApnOptionsProvider;
 import com.openexchange.pns.transport.apn.internal.ApnPushNotificationTransport;
-import com.openexchange.pns.transport.apn.internal.DefaultApnOptionsProvider;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.strings.TimeSpanParser;
@@ -280,7 +280,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
 
     private void setupFeedbackQueries(ApnPushNotificationTransport apnTransport, String feedbackQueryInterval) {
         if (Strings.isNotEmpty(feedbackQueryInterval)) {
-            long interval = TimeSpanParser.parseTimespan(feedbackQueryInterval.trim()).longValue();
+            long interval = TimeSpanParser.parseTimespanToPrimitive(feedbackQueryInterval.trim());
             if (60 * 1000 > interval) {
                 LOG.warn("Ignoring too small value '{}' for APNS feedback query interval.", feedbackQueryInterval);
                 return;

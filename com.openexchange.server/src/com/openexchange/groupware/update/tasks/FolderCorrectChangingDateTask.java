@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -93,31 +92,33 @@ public final class FolderCorrectChangingDateTask extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderCorrectChangingDateTask.class);
         log.info("Performing update task {}", FolderCorrectChangingDateTask.class.getSimpleName());
-        Connection connnection = params.getConnection();
-        boolean rollback = false;
+        Connection connection = params.getConnection();
+        int rollback = 0;
         PreparedStatement stmt = null;
         try {
-            connnection.setAutoCommit(false);
-            rollback = true;
+            connection.setAutoCommit(false);
+            rollback = 1;
 
-            stmt = connnection.prepareStatement("UPDATE oxfolder_tree SET changing_date=? WHERE changing_date=?;");
+            stmt = connection.prepareStatement("UPDATE oxfolder_tree SET changing_date=? WHERE changing_date=?;");
             stmt.setLong(1, System.currentTimeMillis());
             stmt.setLong(2, Long.MAX_VALUE);
             int corrected = stmt.executeUpdate();
-            log.info("Corrected {} rows in 'oxfolder_tree'.", corrected);
+            log.info("Corrected {} rows in 'oxfolder_tree'.", Integer.valueOf(corrected));
 
-            connnection.commit();
-            rollback = false;
+            connection.commit();
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (rollback) {
-                Databases.rollback(connnection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            autocommit(connnection);
         }
         log.info("{} successfully performed.", FolderCorrectChangingDateTask.class.getSimpleName());
     }

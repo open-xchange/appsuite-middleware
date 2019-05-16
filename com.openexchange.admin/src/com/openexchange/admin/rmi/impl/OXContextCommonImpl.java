@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.impl;
 
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -71,21 +70,15 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
     private final static org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OXContextCommonImpl.class);
 
-    /** The bundle context */
-    protected final BundleContext context;
-
     /**
      * Initializes a new {@link OXContextCommonImpl}.
      *
-     * @param context The bundle context
      */
-    protected OXContextCommonImpl(final BundleContext context) {
+    protected OXContextCommonImpl() {
         super();
-        this.context = context;
     }
 
-    protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
-
+    protected void createchecks(final Context ctx, final User admin_user, @SuppressWarnings("unused") final OXToolStorageInterface tool) throws StorageException, InvalidDataException {
         try {
             Boolean ret = null;
 
@@ -99,7 +92,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 }
             }
 
-            if (ret == null || (ret != null && ret.booleanValue())) {
+            if (ret == null || ret.booleanValue()) {
                 if (!ctx.mandatoryCreateMembersSet()) {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
                 }
@@ -193,10 +186,11 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     }
 
     /**
-     * @return
-     * @throws StorageException
+     * Check if plugins are loaded
+     *
+     * @return <code>true</code> if a plugin is loaded
      */
-    protected boolean isAnyPluginLoaded() throws StorageException {
+    protected boolean isAnyPluginLoaded() {
         final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
         return null != pluginInterfaces && false == pluginInterfaces.getContextPlugins().getServiceList().isEmpty();
     }

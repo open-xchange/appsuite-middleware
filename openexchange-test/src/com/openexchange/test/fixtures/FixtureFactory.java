@@ -56,5 +56,11 @@ import java.util.Map;
  */
 public interface FixtureFactory<T> {
 
-    Fixtures<T> createFixture(String fixtureName, Map<String, Map<String, String>> entries);
+    /**
+     * Creates a {@link Fixture}
+     * 
+     * @param entries
+     * @return
+     */
+    Fixtures<T> createFixture(Map<String, Map<String, String>> entries);
 }

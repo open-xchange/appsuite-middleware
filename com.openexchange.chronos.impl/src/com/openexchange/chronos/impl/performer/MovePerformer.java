@@ -76,9 +76,11 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -183,6 +185,11 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         updateCommonFolderId(originalEvent, targetFolder.getId());
         updateCalendarUser(originalEvent, null);
+        
+        /*
+         * Remove attendee privileges
+         */
+        removeAttendeePrivileges(originalEvent);
     }
 
     private void moveFromPublicToPersonalFolder(Event originalEvent, CalendarFolder targetFolder) throws OXException {
@@ -243,7 +250,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
              */
             Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
             if (null == originalAttendee) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUserId), originalEvent.getId());
             }
             updateAttendeeFolderId(originalEvent, originalAttendee, targetFolder.getId());
             touch(originalEvent.getId());
@@ -274,7 +281,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
              */
             Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
             if (null == originalAttendee) {
-                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(I(calendarUserId), originalEvent.getId());
             }
             storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
@@ -326,7 +333,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
         if (false == matches(getCalendarUser(session, targetFolder), originalEvent.getOrganizer())) {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
-            Organizer organizer = prepareOrganizer(session, targetFolder, null);
+            Organizer organizer = prepareOrganizer(session, targetFolder, null, null);
             eventUpdate.setOrganizer(organizer);
             Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
             storage.getEventStorage().updateEvent(eventUpdate);
@@ -347,7 +354,18 @@ public class MovePerformer extends AbstractUpdatePerformer {
                     return true;
                 }
             };
+            originalAlarms.stream().forEach(a -> a.setTimestamp(System.currentTimeMillis()));
             storage.getAlarmStorage().updateAlarms(userizedEvent, userId, originalAlarms);
+        }
+    }
+    
+    private void removeAttendeePrivileges(Event originalEvent) throws OXException {
+        if (null != originalEvent.getAttendeePrivileges() && false == CalendarUtils.hasAttendeePrivileges(originalEvent, DefaultAttendeePrivileges.DEFAULT)) {
+            Event eventUpdate = new Event();
+            eventUpdate.setId(originalEvent.getId());
+            Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+            eventUpdate.setAttendeePrivileges(DefaultAttendeePrivileges.DEFAULT);
+            storage.getEventStorage().updateEvent(eventUpdate);
         }
     }
 

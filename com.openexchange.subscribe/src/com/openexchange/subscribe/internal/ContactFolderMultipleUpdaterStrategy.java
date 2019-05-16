@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,6 +63,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
+import com.openexchange.session.Session;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -87,7 +89,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     private static final ContactField[] COMPARISON_FIELDS = ContactField.values();
 
     @Override
-    public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) throws OXException {
+    public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) {
         int score = 0;
         final int threshhold = getThreshold(session);
 
@@ -130,14 +132,17 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     protected boolean eq(final Object o1, final Object o2) {
         if (o1 == null || o2 == null) {
             return false;
-        } else {
-            return o1.equals(o2);
         }
+        return o1.equals(o2);
     }
 
     @Override
-    public void closeSession(final Object session) throws OXException {
-
+    public void closeSession(final Object session) {
+        if(session instanceof Map<?,?>) {
+            @SuppressWarnings("unchecked") Map<Integer, Object> userInfo = (Map<Integer, Object>) session;
+            Session ses = (Session) userInfo.get(I(SESSION));
+            ses.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, null);
+        }
     }
 
     @Override
@@ -162,7 +167,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     }
 
     @Override
-    public int getThreshold(final Object session) throws OXException {
+    public int getThreshold(final Object session) {
         return 9;
     }
 
@@ -173,8 +178,8 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
 
     @Override
     public void save(final Contact newElement, final Object session, Collection<OXException> errors) throws OXException {
-        ContactService contactService = (ContactService)getFromSession(SQL_INTERFACE, session);
-        TargetFolderSession targetFolderSession = (TargetFolderSession)getFromSession(SESSION, session);
+        ContactService contactService = (ContactService) getFromSession(SQL_INTERFACE, session);
+        TargetFolderSession targetFolderSession = (TargetFolderSession) getFromSession(SESSION, session);
         TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
 
@@ -197,18 +202,20 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Object getFromSession(final int key, final Object session) {
-        return ((Map<Integer, Object>) session).get(key);
+        return ((Map<Integer, Object>) session).get(I(key));
     }
 
     @Override
-    public Object startSession(final TargetFolderDefinition target) throws OXException {
+    public Object startSession(final TargetFolderDefinition target) {
         final Map<Integer, Object> userInfo = new HashMap<Integer, Object>();
         final TargetFolderSession session = new TargetFolderSession(target);
         ContactService contactService = SubscriptionServiceRegistry.getInstance().getService(ContactService.class);
-        userInfo.put(SQL_INTERFACE, contactService);
-        userInfo.put(TARGET, target);
-        userInfo.put(SESSION, session);
+        userInfo.put(I(SQL_INTERFACE), contactService);
+        userInfo.put(I(TARGET), target);
+        session.setParameter(Session.PARAM_SUBSCRIPTION_ADMIN, Boolean.TRUE);
+        userInfo.put(I(SESSION), session);
         return userInfo;
     }
 

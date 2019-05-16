@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.googledrive;
 
+import java.util.EnumSet;
 import com.openexchange.file.storage.FileStorageConstants;
 
 /**
@@ -65,11 +66,40 @@ public final class GoogleDriveConstants implements FileStorageConstants {
         super();
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Status code (400) indicating the request sent by the client was syntactically incorrect.
+     */
+    public static final int SC_BAD_REQUEST = 400;
+
+    /**
+     * Status code (401) indicating that the request requires HTTP authentication.
+     */
+    public static final int SC_UNAUTHORIZED = 401;
+
+    /**
+     * Status code (403) indicating the server understood the request but refused to fulfill it.
+     */
+    public static final int SC_FORBIDDEN = 403;
+
+    /**
+     * Status code (404) indicating that the requested resource is not available.
+     */
+    public static final int SC_NOT_FOUND = 404;
+
+    /**
+     * Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource.
+     */
+    public static final int SC_CONFLICT = 409;
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
     /**
      * The identifier for Google Drive file storage service.
      */
     public static final String ID = "googledrive";
-    
+
     /**
      * The display name for Google Drive file storage service.
      */
@@ -81,6 +111,11 @@ public final class GoogleDriveConstants implements FileStorageConstants {
      * A folder is a file with the MIME type <code>application/vnd.google-apps.folder</code> and with no extension.
      */
     public static final String MIME_TYPE_DIRECTORY = "application/vnd.google-apps.folder";
+
+    /**
+     * The root folder identifier
+     */
+    public static final String ROOT_ID = "root";
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
@@ -109,6 +144,61 @@ public final class GoogleDriveConstants implements FileStorageConstants {
     /**
      * The default fields to query.
      */
-    public static final String FIELDS_DEFAULT = "id,parents/id,modifiedDate,mimeType,explicitlyTrashed,labels/trashed";
+    public static final String FIELDS_DEFAULT = getFields(GoogleFileFields.defaults());
 
+    /**
+     * The minimal set of fields to query a file with.
+     */
+    public static final String FIELDS_MINIMAL = getFields(GoogleFileFields.ID, GoogleFileFields.NAME, GoogleFileFields.MIME_TYPE, GoogleFileFields.EXPLICITLY_TRASHED);
+
+    // ------------------------------------------------------------------------------------------------------------------------------- //
+
+    public enum GoogleFileFields {
+        ID("id"),
+        NAME("name"),
+        PARENTS("parents"),
+        MODIFIED("modifiedTime"),
+        MIME_TYPE("mimeType"),
+        TRASHED("trashed"),
+        EXPLICITLY_TRASHED("explicitlyTrashed"),
+        THUMBNAIL("thumbnailLink"),
+        ;
+
+        private final String fieldName;
+
+        /**
+         * Initializes a new {@link GoogleDriveConstants.GoogleFileFields}.
+         * 
+         */
+        private GoogleFileFields(String fieldName) {
+            this.fieldName = fieldName;
+        }
+
+        /**
+         * Gets the fieldName
+         *
+         * @return The fieldName
+         */
+        public String getField() {
+            return fieldName;
+        }
+
+        // ------------------------------------------------------------------------------------- //
+
+        public static EnumSet<GoogleFileFields> defaults() {
+            return EnumSet.of(ID, NAME, PARENTS, MODIFIED, MIME_TYPE, TRASHED, EXPLICITLY_TRASHED);
+        }
+    }
+
+    public static String getFields(EnumSet<GoogleFileFields> fields) {
+        return getFields(fields.toArray(new GoogleFileFields[0]));
+    }
+
+    public static String getFields(GoogleFileFields... fields) {
+        StringBuilder builder = new StringBuilder();
+        for (GoogleFileFields field : fields) {
+            builder.append(field.getField()).append(",");
+        }
+        return builder.substring(0, builder.length() - 1);
+    }
 }

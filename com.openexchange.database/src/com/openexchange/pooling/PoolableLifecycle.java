@@ -91,16 +91,18 @@ public interface PoolableLifecycle<T> {
      * verified. This method is only called if the pool implementation checks
      * objects before they are lent out to the client.
      * @param data data of the pooled object and the pooled object.
+     * @param forceValidityCheck Whether connection's validity is explicitly checked
      * @return <code>true</code> if the object didn't perish.
      */
-    boolean activate(PooledData<T> data);
+    boolean activate(PooledData<T> data, boolean forceValidityCheck);
 
     /**
      * This method checks if the pooled object is still useable.
      * @param data data of the pooled object and the pooled object.
+     * @param onActivate Whether this methods is called on activate or on deactivate
      * @return <code>true</code> if the pooled object is still valid.
      */
-    boolean validate(PooledData<T> data);
+    boolean validate(PooledData<T> data, boolean onActivate);
 
     /**
      * @return a name for the pooled objects that can be used to generate more understandable messages for administrators. E.g.

@@ -101,7 +101,7 @@ public class SearchTest extends AbstractContactTest {
     public void testLastModifiedUTC() throws Exception {
         final int cols[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
 
-        final Contact contactObj = createContactObject("testLastModifiedUTC");
+        final Contact contactObj = createContactObject();
         final int objectId = insertContact(contactObj);
         try {
 

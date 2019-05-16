@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -172,7 +173,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
 
     @Override
     protected int getMaxActions() {
-        return DriveConfig.getInstance().getMaxFileActions();
+        ServerSession serverSession = session.getServerSession();
+        return DriveConfig.getInstance().getMaxFileActions(serverSession.getContextId(), serverSession.getUserId());
     }
 
     @Override
@@ -287,7 +289,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * not allowed, let client re-download the file, indicate as error without quarantine flag
                  */
                 OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
-                LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
+                LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
                 result.addActionForClient(createDownloadAction(comparison.getClientVersion(), serverFileVersion, comparison));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), serverFileVersion, comparison, path, e, false));
                 return 2;

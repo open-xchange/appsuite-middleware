@@ -114,7 +114,7 @@ public class PacketProcessor {
     protected void handlePacket(PGPPacket packet, BCPGOutputStream out, PacketProcessorHandler handler, RememberingInputStream rememberInpuStream) throws Exception {
         if (packet != null) {
             //Handle the packet
-            logger.debug("Processing PGP Packet " + packet.getBcPacket());
+            logger.debug("Processing PGP Packet {}", packet.getBcPacket());
             PGPPacket[] newPackets = handler.handlePacket(packet);
             if (out != null && newPackets != null) {
                 for (PGPPacket newPacket : newPackets) {

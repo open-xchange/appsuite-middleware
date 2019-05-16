@@ -521,7 +521,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsGroupMember(final Context ctx, final int group_ID, final int member_ID) throws StorageException {
-        return selectwithint(ctx.getId().intValue(), "SELECT id FROM groups_member WHERE cid = ? AND id = ? AND member = ?", ctx.getId(), group_ID, member_ID);
+        return selectwithint(ctx.getId().intValue(), "SELECT id FROM groups_member WHERE cid = ? AND id = ? AND member = ?", ctx.getId().intValue(), group_ID, member_ID);
     }
 
     /**
@@ -927,9 +927,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         PreparedStatement prep = null;
         try {
-            con = cache.getConnectionForContext(ctx.getId());
+            con = cache.getConnectionForContext(ctx.getId().intValue());
             prep = con.prepareStatement("SELECT 1 FROM user WHERE cid=? AND id=? AND guestCreatedBy > 0");
-            prep.setInt(1, ctx.getId());
+            prep.setInt(1, ctx.getId().intValue());
             prep.setInt(2, userId);
             rs = prep.executeQuery();
             return rs.next();
@@ -949,7 +949,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             if (null != con) {
                 try {
-                    cache.pushConnectionForContextAfterReading(ctx.getId(), con);
+                    cache.pushConnectionForContextAfterReading(ctx.getId().intValue(), con);
                 } catch (final PoolException ecp) {
                     log.error("Error pushing ox db write connection to pool!", ecp);
                 }
@@ -1491,7 +1491,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             con = cache.getConnectionForContext(ctx.getId().intValue());
             if (isGuest(con, ctx, user_id)) {
                 prep_check = con.prepareStatement("SELECT field65 FROM prg_contacts WHERE cid = ? AND userid = ?");
-                prep_check.setInt(1, ctx.getId());
+                prep_check.setInt(1, ctx.getId().intValue());
                 prep_check.setInt(2, user_id);
                 rs = prep_check.executeQuery();
                 if (rs.next() && !rs.getString(1).isEmpty() && !"".equals(rs.getString(1))) {
@@ -1562,7 +1562,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setInt(1, ctx.getId());
+            stmt.setInt(1, ctx.getId().intValue());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
             return rs.next();
@@ -2248,6 +2248,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
+    @SuppressWarnings("unused")
     private Group[] getDomainUsedbyGroup(final Context ctx, final String domain, final Connection oxcon) throws SQLException {
         // groups are currently not used with mail addresses in the core
         return null;
@@ -2280,11 +2281,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(prep_check);
         }
 
-        if (data.size() == 0) {
-            return null;
-        } else {
-            return data.toArray(new Resource[data.size()]);
-        }
+        return data.size() == 0 ? null : data.toArray(new Resource[data.size()]);
     }
 
     private User[] getDomainUsedbyUser(final Context ctx, final String domain, final Connection oxcon) throws SQLException {
@@ -2891,7 +2888,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         if (!usr.isContextadmin()) {
             if (existsDisplayName(ctx, usr, 0)) {
-                throw new InvalidDataException("The displayname is already used");
+                try {
+                    ConfigViewFactory configViewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class, true);
+                    ConfigView view = configViewFactory.getView(-1, ctx.getId().intValue());
+                    if (null == view || view.opt("com.openexchange.user.enforceUniqueDisplayName", Boolean.class, Boolean.TRUE).booleanValue()) {
+                        // Do enforce unique display names
+                        throw new InvalidDataException("The displayname is already used");
+                    }
+                } catch (OXException e) {
+                    log.debug("Unable to get \"com.openexchange.user.enforceUniqueDisplayName\". Fallback to enforce display name uniqueness.", e);
+                    throw new InvalidDataException("The displayname is already used", e);
+                }
+
             }
         }
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
@@ -2949,7 +2957,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
             if (viewFactory != null) {
                 try {
-                    int ctxId = ctx.getId();
+                    int ctxId = ctx.getId().intValue();
                     if (user.isContextadmin() && user.getId() == null) {
                         ctxId = -1;
                     }
@@ -3072,12 +3080,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             UPDATE update = new UPDATE(table).SET(column, new BitAND(new BitOR(column, PLACEHOLDER), new INVERT(PLACEHOLDER)));
 
             List<Object> values = new ArrayList<Object>();
-            values.add(addAccess);
-            values.add(removeAccess);
+            values.add(I(addAccess));
+            values.add(I(removeAccess));
 
             if (filter != -1) {
                 update.WHERE(new EQUALS(column, PLACEHOLDER));
-                values.add(filter);
+                values.add(I(filter));
             }
             new StatementBuilder().executeStatement(con, update, values);
 
@@ -3187,11 +3195,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#fetchSlaveUsersOfMasterFilestore(com.openexchange.admin.rmi.dataobjects.Context, int)
-     */
     @Override
     public Map<Integer, List<Integer>> fetchSlaveUsersOfMasterFilestore(Context context, int userId) throws StorageException {
         int contextId = context.getId().intValue();
@@ -3209,12 +3212,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             while (result.next()) {
                 int id = result.getInt(1);
                 int cid = result.getInt(2);
-                List<Integer> userIds = users.get(cid);
+                List<Integer> userIds = users.get(I(cid));
                 if (userIds == null) {
                     userIds = new ArrayList<Integer>();
-                    users.put(cid, userIds);
+                    users.put(I(cid), userIds);
                 }
-                userIds.add(id);
+                userIds.add(I(id));
             }
 
             return users;

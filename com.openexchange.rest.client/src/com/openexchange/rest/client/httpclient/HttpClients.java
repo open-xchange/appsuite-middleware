@@ -54,12 +54,15 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpClientConnection;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
@@ -674,10 +677,12 @@ public final class HttpClients {
 
         private volatile IdleConnectionCloser idleConnectionCloser;
         private final int keepAliveMonitorInterval;
+        private final AtomicBoolean shuttingDown;
 
         ClientConnectionManager(Registry<ConnectionSocketFactory> socketFactoryRegistry, int keepAliveMonitorInterval) {
             super(socketFactoryRegistry);
             this.keepAliveMonitorInterval = keepAliveMonitorInterval;
+            shuttingDown = new AtomicBoolean(false);
         }
 
         /**
@@ -695,6 +700,25 @@ public final class HttpClients {
             if (null != idleConnectionClose) {
                 idleConnectionClose.ensureRunning(keepAliveMonitorInterval);
             }
+            if (shuttingDown.get()) {
+                /*
+                 * In case the connection pool is shutting down return a ConnectionReuest which always throws a ExecutionException for the get method.
+                 * This is required to prevent an IllegalStateException.
+                 */
+                return new ConnectionRequest() {
+
+                    @Override
+                    public boolean cancel() {
+                        return true;
+                    }
+
+                    @Override
+                    public HttpClientConnection get(final long timeout, final TimeUnit tunit) throws ExecutionException {
+                        throw new ExecutionException("Connection pool is shutting down", null);
+                    }
+
+                };
+            }
             return super.requestConnection(route, state);
         }
 
@@ -705,6 +729,7 @@ public final class HttpClients {
                 idleConnectionClose.stop();
                 this.idleConnectionCloser = null;
             }
+            shuttingDown.set(true);
             super.shutdown();
         }
     }

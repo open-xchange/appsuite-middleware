@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,13 +99,13 @@ public final class CalendarFolderFactory {
             config.setColor((String) value);
         });
         configMappers.put(CalendarFolderConfig.ENABLED, (config, value) -> {
-            config.setEnabled(Boolean.parseBoolean((String) value));
+            config.setEnabled(Boolean.valueOf((String) value));
         });
         configMappers.put(CalendarFolderConfig.ITEM_ID, (config, value) -> {
-            config.setItemId(Integer.toString((int) value));
+            config.setItemId(value.toString());
         });
         configMappers.put(CalendarFolderConfig.REFRESH_INTERVAL, (config, value) -> {
-            config.setRefreshInterval((int) value);
+            config.setRefreshInterval((Integer) value);
         });
         configMappers.put(CalendarFolderConfig.LOCALE, (config, value) -> {
             config.setLocale((String) value);
@@ -122,7 +122,7 @@ public final class CalendarFolderFactory {
      * @param extProperties The extended properties
      * @return The payload
      */
-    public static final NewFolderBody createFolderBody(String module, String providerId, String title, boolean subscribed, JSONObject config, JSONObject extProperties) {
+    public static final NewFolderBody createFolderBody(String module, String providerId, String title, Boolean subscribed, JSONObject config, JSONObject extProperties) {
         NewFolderBody folderBody = new NewFolderBody();
         folderBody.setFolder(createFolder(module, providerId, title, subscribed, config, extProperties));
         return folderBody;
@@ -138,7 +138,7 @@ public final class CalendarFolderFactory {
      * @param extProperties The extended properties
      * @return The payload
      */
-    private static final NewFolderBodyFolder createFolder(String module, String providerId, String title, boolean subscribed, JSONObject config, JSONObject extProperties) {
+    private static final NewFolderBodyFolder createFolder(String module, String providerId, String title, Boolean subscribed, JSONObject config, JSONObject extProperties) {
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
         folder.setComOpenexchangeCalendarProvider(providerId);
         folder.setModule(module);

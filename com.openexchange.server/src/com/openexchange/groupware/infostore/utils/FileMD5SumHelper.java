@@ -168,10 +168,10 @@ public class FileMD5SumHelper {
         List<DocumentMetadata> updatedDocuments;
         Connection connection = dbSerivce.getWritable(contextId);
         int updated = 0;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(connection);
-            rollback = true;
+            rollback = 1;
             List<DocumentMetadata> documents = listItemsWithoutChecksum(connection, contextId);
             if (0 < documents.size()) {
                 /*
@@ -190,14 +190,16 @@ public class FileMD5SumHelper {
                 updatedDocuments = documents;
             }
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw new OXException(e);
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
             if (0 < updated) {
                 dbSerivce.backWritable(contextId, connection);
             } else {

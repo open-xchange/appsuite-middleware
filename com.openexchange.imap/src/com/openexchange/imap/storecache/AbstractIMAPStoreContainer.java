@@ -51,7 +51,9 @@ package com.openexchange.imap.storecache;
 
 import static com.openexchange.imap.IMAPAccess.doIMAPConnect;
 import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPClientParameters;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
@@ -97,15 +99,27 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
          * Get new store...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(name);
-        if (propagateClientIp) {
-            imapStore.setPropagateClientIpAddress(session.getLocalIp());
+        boolean error = true;
+        try {
+            if (propagateClientIp) {
+                imapStore.setPropagateClientIpAddress(session.getLocalIp());
+            }
+            try {
+                IMAPClientParameters.setDefaultClientParameters(imapStore, session);
+            } catch (OXException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
+            /*
+             * ... and connect it
+             */
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
+            error = false;
+            return imapStore;
+        } finally {
+            if (error) {
+                Streams.close(imapStore);
+            }
         }
-        IMAPClientParameters.setDefaultClientParameters(imapStore, session);
-        /*
-         * ... and connect it
-         */
-        doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
-        return imapStore;
     }
 
     /**
@@ -113,11 +127,11 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
      *
      * @param imapStore The IMAP store
      */
-    protected static void closeSafe(final IMAPStore imapStore) {
+    protected static void closeSafe(IMAPStore imapStore) {
         if (null != imapStore) {
             try {
                 imapStore.close();
-            } catch (final Exception e) {
+            } catch (@SuppressWarnings("unused") Exception e) {
                 // Ignore
             }
         }
@@ -132,20 +146,20 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         protected final long lastAccessed;
         private final int hash;
 
-        protected IMAPStoreWrapper(final IMAPStore imapStore) {
+        protected IMAPStoreWrapper(IMAPStore imapStore) {
             super();
             this.imapStore = imapStore;
             lastAccessed = System.currentTimeMillis();
-            final int prime = 31;
+            int prime = 31;
             int result = 1;
             result = prime * result + ((imapStore == null) ? 0 : imapStore.hashCode());
             hash = result;
         }
 
         @Override
-        public int compareTo(final IMAPStoreWrapper other) {
-            final long thisVal = this.lastAccessed;
-            final long anotherVal = other.lastAccessed;
+        public int compareTo(IMAPStoreWrapper other) {
+            long thisVal = this.lastAccessed;
+            long anotherVal = other.lastAccessed;
             return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
         }
 
@@ -162,7 +176,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
             if (!(obj instanceof IMAPStoreWrapper)) {
                 return false;
             }
-            final IMAPStoreWrapper other = (IMAPStoreWrapper) obj;
+            IMAPStoreWrapper other = (IMAPStoreWrapper) obj;
             if (imapStore == null) {
                 if (other.imapStore != null) {
                     return false;

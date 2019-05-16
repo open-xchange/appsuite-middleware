@@ -92,6 +92,7 @@ public class AbstractClientSession {
         admin = testContext.getAdmin();
     }
 
+    @SuppressWarnings("unused")
     @After
     public void tearDown() throws Exception {
         try {
@@ -122,7 +123,7 @@ public class AbstractClientSession {
      * client = logoutClient(client);
      * </code>
      * </p>
-     * 
+     *
      * @param client to logout
      * @return <code>null</code> to prepare client for garbage collection
      */
@@ -138,7 +139,7 @@ public class AbstractClientSession {
      * client = logoutClient(client, true);
      * </code>
      * </p>
-     * 
+     *
      * @param client to logout
      * @param loggin Whether to log an error or not
      * @return <code>null</code> to prepare client for garbage collection
@@ -159,7 +160,7 @@ public class AbstractClientSession {
     /**
      * Generates a new {@link AJAXClient}. Uses standard client identifier.
      * Generated client needs a <b>logout in tearDown()</b>
-     * 
+     *
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
      */
@@ -170,7 +171,7 @@ public class AbstractClientSession {
     /**
      * Generates a new {@link AJAXClient}.
      * Generated client needs a <b>logout in tearDown()</b>
-     * 
+     *
      * @param client The client identifier to use when performing a login
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
@@ -182,7 +183,7 @@ public class AbstractClientSession {
     /**
      * Generates a new {@link AJAXClient} for the {@link TestUser}.
      * Generated client needs a <b>logout in tearDown()</b>
-     * 
+     *
      * @param user The {@link TestUser} to create a client for
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
@@ -203,7 +204,7 @@ public class AbstractClientSession {
     /**
      * Generates a new {@link AJAXClient} for the {@link TestUser}.
      * Generated client needs a <b>logout in tearDown()</b>
-     * 
+     *
      * @param client The client identifier to use when performing a login
      * @param user The {@link TestUser} to create a client for
      * @return The new {@link AJAXClient}

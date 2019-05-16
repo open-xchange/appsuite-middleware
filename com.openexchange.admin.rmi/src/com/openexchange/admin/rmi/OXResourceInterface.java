@@ -208,5 +208,5 @@ public interface OXResourceInterface extends Remote {
      * @throws RemoteException General RMI Exception
      * @throws DatabaseUpdateException
      */
-    public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;;
+    public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException;
 }

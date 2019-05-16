@@ -100,10 +100,12 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
+     * @param previewSupported Whether target IMAP server supports <code>"PREVIEW=FUZZY"</code> capability
      * @param imapFolder The IMAP folder providing connected protocol
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, IMAPFolder imapFolder) throws MessagingException {
+    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, boolean previewSupported, IMAPFolder imapFolder) throws MessagingException {
         super(imapFolder);
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
@@ -126,11 +128,11 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         this.messages = tm;
         this.uids = tuids.toArray();
         if (length == messageCount) {
-            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
-            args = (1 == length ? new String[] { "1" } : ARGS_ALL);
+            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo, previewSupported);
+            args = (1 == length ? ARGS_FIRST : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
+            command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo, previewSupported);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }

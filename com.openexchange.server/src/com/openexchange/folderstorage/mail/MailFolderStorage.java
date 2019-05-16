@@ -116,6 +116,7 @@ import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
@@ -124,6 +125,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -1379,10 +1381,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     }
                 }
 
-                int size = accounts.size();
-                List<SortableId> list = new ArrayList<>(size);
-                for (int j = 0; j < size; j++) {
-                    list.add(new MailId(prepareFullname(accounts.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), j).setName(MailFolder.DEFAULT_FOLDER_NAME));
+                List<SortableId> list = new ArrayList<>(accounts.size());
+                int j = 0;
+                for (MailAccount account : accounts) {
+                    list.add(new MailId(prepareFullname(account.getId(), MailFolder.DEFAULT_FOLDER_ID), j++).setName(MailFolder.DEFAULT_FOLDER_NAME));
                 }
                 return list.toArray(new SortableId[list.size()]);
             }
@@ -1480,11 +1482,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
                     /*
                      * Generate sorted IDs preserving order
                      */
-                    final int size = folderInfos.size();
-                    final List<SortableId> list = new ArrayList<>(size);
-                    for (int j = 0; j < size; j++) {
-                        final MailFolderInfo tmp = folderInfos.get(j);
-                        list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(translate ? tmp.getDisplayName() : tmp.getName()));
+                    final List<SortableId> list = new ArrayList<>(folderInfos.size());
+                    int j = 0;
+                    for (MailFolderInfo tmp : folderInfos) {
+                        list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j++).setName(translate ? tmp.getDisplayName() : tmp.getName()));
                     }
                     return list.toArray(new SortableId[list.size()]);
                 }
@@ -1608,11 +1609,10 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
             /*
              * Generate sorted IDs preserving order
              */
-            final int size = children.size();
-            final List<SortableId> list = new ArrayList<>(size);
-            for (int j = 0; j < size; j++) {
-                final MailFolder tmp = children.get(j);
-                list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j).setName(tmp.getName()));
+            List<SortableId> list = new ArrayList<>(children.size());
+            int j = 0;
+            for (MailFolder tmp : children) {
+                list.add(new MailId(prepareFullname(accountId, tmp.getFullname()), j++).setName(tmp.getName()));
             }
             return list.toArray(new SortableId[list.size()]);
         } finally {
@@ -2302,31 +2302,30 @@ public final class MailFolderStorage implements FolderStorageFolderModifier<Mail
     }
 
     private boolean cannotConnect(Session session, int accountId) throws OXException {
-        if (accountId != MailAccount.DEFAULT_ID) {
-            return false;
-        }
-
-        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
-        if (passwordSource != PasswordSource.SESSION || session.getPassword() != null || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
-            return false;
-        }
-
-        // Missing password in non-guest user
-        MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-        MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-        if (mailAccount.isMailOAuthAble() && mailAccount.getMailOAuthId() >= 0) {
-            // OAuth is supposed to be used
-            Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
-            if (obj != null) {
-                return false;
-            }
-
-            // Missing OAuth token and OAuth is supposed to be used. Unable to connect.
+        return !canConnect(session, accountId);
+    }
+    
+    private boolean canConnect(Session session, int accountId) throws OXException {
+        if (accountId != MailAccount.DEFAULT_ID || Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
             return true;
         }
+        
+        // Check presence of OAuth token in case OAuth-wise mail access is configured
+        if (AuthType.isOAuthType(MailConfig.getConfiguredAuthType(true, session))) {
+            // OAuth is supposed to be used
+            Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
+            return obj == null ? false : true;
+        }
 
-        // Missing password and no OAuth is supposed to be used. Unable to connect.
-        return true;
+        // Check master password in case master access is configured
+        PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource(session.getUserId(), session.getContextId());
+        if (PasswordSource.GLOBAL.equals(passwordSource)) {
+            String masterPw = MailProperties.getInstance().getMasterPassword(session.getUserId(), session.getContextId());
+            return masterPw == null ? false : true;
+        }
+
+        // Check presence of session password as common user/password login is assumed
+        return session.getPassword() == null ? false : true;
     }
 
     private static void postEvent(int accountId, String fullname, boolean contentRelated, StorageParameters params) {

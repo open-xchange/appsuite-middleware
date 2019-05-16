@@ -57,7 +57,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -73,18 +72,13 @@ public class DistributedFileServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final ServiceLookup services;
-
     private final ManagedFileManagement fileManagement;
-
-    private final int port;
 
     public static final String PATH = "distributedFiles";
 
     public DistributedFileServlet(ServiceLookup services) {
-        this.services = services;
         fileManagement = services.getService(ManagedFileManagement.class);
-        port = services.getService(ConfigurationService.class).getIntProperty("com.openexchange.filemanagement.distributed.port", 2003);
+//        port = services.getService(ConfigurationService.class).getIntProperty("com.openexchange.filemanagement.distributed.port", 2003);
     }
 
     @Override

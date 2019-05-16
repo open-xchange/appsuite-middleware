@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.mailaccount;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -105,7 +106,7 @@ public class ChangePrimaryMailAccountNameTest extends AbstractAPIClientSession {
         @SuppressWarnings("unchecked") ArrayList<ArrayList<Object>> data = (ArrayList<ArrayList<Object>>) response.getData();
 
         for (final ArrayList<Object> account : data) {
-            if (account.size()>0 && account.get(0).equals(0)) {
+            if (account.size() > 0 && account.get(0).equals(I(0))) {
                 MailAccountData result = new MailAccountData();
                 result.setId((Integer) account.get(0));
                 result.setName((String) account.get(1));

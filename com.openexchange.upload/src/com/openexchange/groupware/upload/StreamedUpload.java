@@ -92,6 +92,13 @@ public interface StreamedUpload {
     String getFormField(String fieldName);
 
     /**
+     * Gets the first form field.
+     *
+     * @return The value of first form field or <code>null</code>.
+     */
+    String getFirstFormField();
+
+    /**
      * Gets an iterator for form fields.
      *
      * @return An iterator for form fields.

@@ -82,45 +82,41 @@ public class FileHolder implements IFileHolder {
         try {
             f = ByteArrayInputStream.class.getDeclaredField("buf");
             f.setAccessible(true);
-        } catch (final SecurityException e) {
-            f = null;
-        } catch (final NoSuchFieldException e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             f = null;
         }
         bufField = f;
         try {
             f = ByteArrayInputStream.class.getDeclaredField("mark");
             f.setAccessible(true);
-        } catch (final SecurityException e) {
-            f = null;
-        } catch (final NoSuchFieldException e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             f = null;
         }
         markField = f;
     }
 
-    private static byte[] bytesFrom(final ByteArrayInputStream bais) {
+    private static byte[] bytesFrom(ByteArrayInputStream bais) {
         if (null == bais) {
             return null;
         }
         try {
-            final Field bufField = FileHolder.bufField;
-            final Field markfield = FileHolder.markField;
+            Field bufField = FileHolder.bufField;
+            Field markfield = FileHolder.markField;
             if (null != bufField && null != markfield) {
-                final byte[] buf = (byte[]) bufField.get(bais);
-                final int mark = markfield.getInt(bais);
+                byte[] buf = (byte[]) bufField.get(bais);
+                int mark = markfield.getInt(bais);
                 if (mark <= 0) {
                     return buf;
                 }
-                final int len = buf.length - mark;
+                int len = buf.length - mark;
                 if (len <= 0) {
                     return null;
                 }
-                final byte [] ret = new byte[len];
+                byte [] ret = new byte[len];
                 System.arraycopy(buf, mark, ret, 0, len);
                 return ret;
             }
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") Exception e) {
             // Ignore
         }
         return null;
@@ -130,7 +126,7 @@ public class FileHolder implements IFileHolder {
 
         final File file;
 
-        FileInputStreamClosure(final File file) {
+        FileInputStreamClosure(File file) {
             super();
             this.file = file;
         }

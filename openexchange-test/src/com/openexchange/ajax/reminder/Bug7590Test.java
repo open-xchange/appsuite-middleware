@@ -57,7 +57,6 @@ import org.json.JSONException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
@@ -121,7 +120,7 @@ public class Bug7590Test extends AbstractAJAXSession {
         assertNotNull("No reminder found for created appointment.", actual);
 
         final ReminderObject expected = new ReminderObject();
-        @SuppressWarnings("null") int reminderId = actual.getObjectId();
+        int reminderId = actual.getObjectId();
         expected.setObjectId(reminderId);
         expected.setFolder(folderId);
         expected.setTargetId(appointment.getObjectID());
@@ -131,7 +130,7 @@ public class Bug7590Test extends AbstractAJAXSession {
         ReminderTest.compareReminder(expected, actual);
     }
 
-    private Appointment createAppointment() throws OXException, IOException, SAXException, JSONException {
+    private Appointment createAppointment() throws OXException, IOException, JSONException {
         final Appointment appointmentObj = new Appointment();
         appointmentObj.setTitle("testBug7590");
 

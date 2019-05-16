@@ -121,6 +121,16 @@ public abstract class DefaultDbMultiMapping<T, O> extends DefaultMapping<T, O> i
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p/>
+     * Neutral default implementation, override if applicable.
+     */
+    @Override
+    public void validate(O object) throws OXException {
+        // empty
+    }
+
     @Override
     public String[] getColumnLabels() {
         return columnLabels;

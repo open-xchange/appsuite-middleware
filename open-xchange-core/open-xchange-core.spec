@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -26,11 +26,15 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The essential core of an Open-Xchange backend
 Autoreqprov:   no
+Requires(post): patch
 Requires:      open-xchange-osgi >= @OXVERSION@
 Requires:      open-xchange-xerces >= @OXVERSION@
 Requires:      open-xchange-hazelcast
 Requires(pre): open-xchange-system >= @OXVERSION@
+Requires:      open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
+Conflicts:     open-xchange-publish < 7.10.2
+Obsoletes:     open-xchange-publish < 7.10.2
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -88,9 +92,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2464
     ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
 
-    # SoftwareChange_Request-2470
-    ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-
     # SoftwareChange_Request-2541
     VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
     if [ "5000" = "$VALUE" ]; then
@@ -146,16 +147,6 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2772
     ox_add_property com.openexchange.ajax.response.includeArguments false /opt/open-xchange/etc/server.properties
 
-    # SoftwareChange_Request-2811
-    PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-    if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
-        cat >> $PFILE <<EOF
-
-# Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
-!com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
-EOF
-    fi
-
     # SoftwareChange_Request-2815
     ox_add_property html.tag.s '""' /opt/open-xchange/etc/whitelist.properties
 
@@ -174,16 +165,6 @@ EOF
     PFILE=/opt/open-xchange/etc/permissions.properties
     if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
         ox_set_property com.openexchange.capability.archive_emails true $PFILE
-    fi
-
-    # SoftwareChange_Request-2914
-    PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-    if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
-        cat >> $PFILE <<EOF
-
-# Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
-!com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
-EOF
     fi
 
     # SoftwareChange_Request-2990
@@ -549,6 +530,39 @@ EOF
         ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"open-xchange-mobile-api-facade*\"" /opt/open-xchange/etc/mail-push.properties
     fi
 
+    SCR=SCR-208
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/configdb.properties
+
+      declare -A dmap
+      dmap[3]="useUnicode=true"
+      dmap[4]="characterEncoding=UTF-8"
+      dmap[5]="autoReconnect=false"
+      dmap[6]="useServerPrepStmts=false"
+      dmap[7]="useTimezone=true"
+      dmap[8]="serverTimezone=UTC"
+      dmap[9]="connectTimeout=15000"
+      dmap[10]="socketTimeout=15000"
+
+      for x in {3..10}
+      do
+        default_val=${dmap[$x]}
+        for prop_type in readProperty writeProperty
+        do
+          prop=${prop_type}.${x}
+          curr_val=$(ox_read_property ${prop} ${pfile})
+          if [ -n "${curr_val}" ]
+          then
+            if [ "${default_val}" == "${curr_val}" ]
+            then
+              ox_remove_property ${prop} ${pfile}
+            fi
+          fi
+        done
+      done
+      ox_scr_done ${SCR}
+    }
+
     # SoftwareChange_Request-236
     PFILE=/opt/open-xchange/etc/cache.ccf
     NAMES=( jcs.region.CalendarCache jcs.region.CalendarCache.cacheattributes jcs.region.CalendarCache.cacheattributes.MaxObjects jcs.region.CalendarCache.cacheattributes.MemoryCacheName jcs.region.CalendarCache.cacheattributes.UseMemoryShrinker jcs.region.CalendarCache.cacheattributes.MaxMemoryIdleTimeSeconds jcs.region.CalendarCache.cacheattributes.ShrinkerIntervalSeconds jcs.region.CalendarCache.cacheattributes.MaxSpoolPerRun jcs.region.CalendarCache.elementattributes jcs.region.CalendarCache.elementattributes.IsEternal jcs.region.CalendarCache.elementattributes.MaxLifeSeconds jcs.region.CalendarCache.elementattributes.IdleTime jcs.region.CalendarCache.elementattributes.IsSpool jcs.region.CalendarCache.elementattributes.IsRemote jcs.region.CalendarCache.elementattributes.IsLateral )
@@ -585,39 +599,6 @@ EOF
       fi
     fi
 
-    SCR=SCR-208
-    ox_scr_todo ${SCR} && {
-      pfile=/opt/open-xchange/etc/configdb.properties
-
-      declare -A dmap
-      dmap[3]="useUnicode=true"
-      dmap[4]="characterEncoding=UTF-8"
-      dmap[5]="autoReconnect=false"
-      dmap[6]="useServerPrepStmts=false"
-      dmap[7]="useTimezone=true"
-      dmap[8]="serverTimezone=UTC"
-      dmap[9]="connectTimeout=15000"
-      dmap[10]="socketTimeout=15000"
-
-      for x in {3..10}
-      do
-        default_val=${dmap[$x]}
-        for prop_type in readProperty writeProperty
-        do
-          prop=${prop_type}.${x}
-          curr_val=$(ox_read_property ${prop} ${pfile})
-          if [ -n "${curr_val}" ]
-          then
-            if [ "${default_val}" == "${curr_val}" ]
-            then
-              ox_remove_property ${prop} ${pfile}
-            fi
-          fi
-        done
-      done
-      ox_scr_done ${SCR}
-    }
-
     SCR=SCR-299
     ox_scr_todo ${SCR} && {
       pfile=/opt/open-xchange/etc/cache.ccf
@@ -631,6 +612,88 @@ EOF
       done
       ox_scr_done ${SCR}
     }
+
+    SCR=SCR-322.core
+    ox_scr_todo ${SCR} && {
+      prop_file=/opt/open-xchange/etc/server.properties
+      prop_key=PUBLISH_REVOKE
+      if ox_exists_property ${prop_key} ${prop_file}
+      then
+        prop_val=$(ox_read_property ${prop_key} ${prop_file})
+        if [ -z "${prop_val}" ]
+        then
+          ox_remove_property ${prop_key} ${prop_file} 
+        fi
+      fi
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-391
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="video/x-matroska mkv"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
+    SCR=SCR-422
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/mime.types
+      type="image/heic heic"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      type="image/heif heif"
+      if ! contains "${type}" ${pfile}
+      then
+        echo "${type}" >> ${pfile}
+        LC_COLLATE=C sort -o ${pfile} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
+    # SCR-426
+    if ! contains "Allow users to configure the showContactImage setting" /opt/open-xchange/etc/settings/ui.properties; then
+        cat <<EOF | (cd /opt/open-xchange/etc && patch -p3 -N -r -)
+diff --git a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
+index 3ce3af8146f..61ee86367b8 100644
+--- a/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
++++ b/com.openexchange.groupware.settings.extensions/conf/settings/ui.properties
+@@ -2,7 +2,7 @@
+ # Possible values: embedded and popups
+ ui/global/windows/mode/value=embedded
+
+-# All user to configure the latter
++# Allow users to configure the windows mode
+ # Possible values: true|false
+ ui/global/windows/mode/configurable=true
+
+@@ -10,7 +10,7 @@ ui/global/windows/mode/configurable=true
+ # Possible values: tabbased|simple
+ ui/global/toolbar/mode/value=tabbased
+
+-# All user to configure the latter
++# Allow users to configure the toolbar mode
+ # Possible values: true|false
+ ui/global/toolbar/mode/configurable=true
+
+@@ -18,7 +18,7 @@ ui/global/toolbar/mode/configurable=true
+ # Possible values: true|false
+ ui/mail/showContactImage/value = true
+
+-# All user to configure the latter
++# Allow users to configure the showContactImage setting
+ # Possible values: true|false
+ # Please configure the ui.yml accordingly.
+ ui/mail/showContactImage/configurable = true
+EOF
+    fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -671,6 +734,7 @@ exit 0
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
 %dir /opt/open-xchange/etc/hazelcast
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir /var/spool/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
@@ -679,28 +743,16 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
-* Mon May 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-05-13 (5235)
-* Wed Apr 24 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-04-29 (5211)
-* Tue Mar 26 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-04-01 (5180)
-* Tue Mar 12 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-03-11 (5149)
-* Thu Feb 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-02-25 (5133)
-* Thu Feb 07 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-02-11 (5108)
-* Tue Jan 29 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-31 (5103)
-* Mon Jan 21 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-28 (5076)
-* Tue Jan 08 2019 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2019-01-14 (5023)
-* Fri Nov 23 2018 Marcus Klein <marcus.klein@open-xchange.com>
-RC 1 for 7.10.1 release
-* Fri Nov 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Second preview for 7.10.1 release
+* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.10.2 release
+* Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.10.2 release
+* Tue Apr 30 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.2 release
+* Thu Mar 28 2019 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.2 release
+* Thu Oct 18 2018 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.2 release
 * Thu Oct 11 2018 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <marcus.klein@open-xchange.com>

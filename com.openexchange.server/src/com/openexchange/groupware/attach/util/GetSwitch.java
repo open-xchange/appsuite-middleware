@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.attach.util;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 
@@ -62,27 +64,27 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
 
 	@Override
     public Object createdBy() {
-		return attachment.getCreatedBy();
+		return I(attachment.getCreatedBy());
 	}
 
 	@Override
     public Object id() {
-		return attachment.getId();
+		return I(attachment.getId());
 	}
 
 	@Override
     public Object moduleId() {
-		return attachment.getModuleId();
+		return I(attachment.getModuleId());
 	}
 
 	@Override
     public Object attachedId() {
-		return attachment.getAttachedId();
+		return I(attachment.getAttachedId());
 	}
 
 	@Override
     public Object fileSize() {
-		return attachment.getFilesize();
+		return L(attachment.getFilesize());
 	}
 
 	@Override
@@ -97,7 +99,7 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
 
 	@Override
     public Object folderId() {
-		return attachment.getFolderId();
+		return I(attachment.getFolderId());
 	}
 
 	@Override
@@ -107,7 +109,7 @@ public class GetSwitch implements AttachmentField.AttachmentSwitch {
 
 	@Override
     public Object rtfFlag(){
-		return attachment.getRtfFlag();
+		return attachment.getRtfFlag() ? Boolean.TRUE : Boolean.FALSE;
 	}
 
 	@Override

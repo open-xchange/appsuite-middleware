@@ -64,3 +64,19 @@ properties:
       file: user.properties
       packageName: open-xchange-core
       tags: ["User", "Limit"]
+    - key: com.openexchange.user.enforceUniqueDisplayName
+      description: |
+        Specify whether the display name of a user must be unique within a context or
+        if one display name can be used by multiple users within a context.
+        If set to false , the property `com.openexchange.folderstorage.database.preferDisplayName`
+        should be set to false too. Otherwise it can't be guaranteed that shared folder names 
+        are unique.
+        The property is `ConfigCasscade` aware down to context level. 
+      defaultValue: true
+      version: 7.10.2
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.folderstorage.database.preferDisplayName
+      file:
+      packageName: open-xchange-core
+      tags: ["User", "Folder"]

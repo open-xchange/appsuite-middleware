@@ -82,6 +82,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
         new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
+        new com.openexchange.groupware.infostore.media.osgi.MediaMetadataActivator(),
         new com.openexchange.groupware.importexport.osgi.ImportExportActivator(),
         new com.openexchange.consistency.osgi.ConsistencyActivator(),
         new com.openexchange.authorization.osgi.AuthorizationActivator(),
@@ -93,10 +94,13 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.mail.json.compose.share.osgi.ShareComposeActivator(),
         new com.openexchange.mail.osgi.UserSettingMailActivator(),
         new com.openexchange.filemanagement.json.osgi.ManagedFileJSONActivator(),
+        new com.openexchange.group.internal.osgi.GroupActivator(),
         new com.openexchange.group.json.osgi.GroupJSONActivator(),
+        new com.openexchange.resource.internal.osgi.ResourceActivator(),
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),
         new com.openexchange.quota.json.osgi.QuotaJSONActivator(),
         new com.openexchange.config.json.osgi.ConfigJSONActivator(),
+        new com.openexchange.config.admin.osgi.ConfigAdminActivator(),
         new com.openexchange.mailaccount.json.osgi.MailAccountJSONActivator(),
         new com.openexchange.contact.storage.osgi.ContactStorageActivator(),
         new com.openexchange.contact.osgi.ContactServiceActivator(),
@@ -118,7 +122,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.tools.oxfolder.property.osgi.FolderUserPropertyActivator(),
         new com.openexchange.groupware.datahandler.osgi.DataHandlerActivator(),
         new com.openexchange.diagnostics.osgi.DiagnosticsActivator(),
-        new com.openexchange.groupware.upgrade.osgi.SegmentedUpgradeActivator()
+        new com.openexchange.groupware.upgrade.osgi.SegmentedUpgradeActivator(),
+        new com.openexchange.groupware.update.tasks.objectusagecount.UseCountTableActivator()
     };
 
     public ServerCompositeActivator() {

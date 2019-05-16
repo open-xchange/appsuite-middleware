@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Charsets.toAsciiBytes;
 import static com.openexchange.java.Charsets.toAsciiString;
 import static com.openexchange.java.Strings.isEmpty;
@@ -581,7 +582,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         try {
             return isResourceCacheEnabled(contextId, userId) ? ResourceCaches.getResourceCache() : null;
         } catch (OXException e) {
-            LOGGER.warn("Failed to check if ResourceCache is enabled for context {} and user {}", contextId, userId, e);
+            LOGGER.warn("Failed to check if ResourceCache is enabled for context {} and user {}", I(contextId), I(userId), e);
         }
         return null;
     }

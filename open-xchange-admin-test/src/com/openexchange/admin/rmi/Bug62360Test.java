@@ -50,7 +50,6 @@
 package com.openexchange.admin.rmi;
 
 import static org.junit.Assert.assertFalse;
-import java.util.Random;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -66,18 +65,12 @@ import com.openexchange.admin.rmi.factory.UserFactory;
  */
 public final class Bug62360Test extends AbstractRMITest {
 
-    private int contextId = getRandomNumberInRange(11, 10000);
     private Context context;
-
-    private static int getRandomNumberInRange(int min, int max) {
-        Random r = new Random();
-        return r.ints(min, (max + 1)).findFirst().getAsInt();
-    }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        context = createContext("bug62360context.com", contextId);
+        context = createContext("bug62360context.com", ContextFactory.getRandomContextId());
     }
 
     @Test

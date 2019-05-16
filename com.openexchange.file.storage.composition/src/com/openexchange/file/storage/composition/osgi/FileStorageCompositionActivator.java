@@ -65,6 +65,7 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.marker.OXThreadMarkers;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
@@ -116,6 +117,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         trackService(ShareService.class);
         trackService(ShareNotificationService.class);
         trackService(ObjectUseCountService.class);
+        trackService(PrincipalUseCountService.class);
         openTrackers();
 
         // Register file access factory

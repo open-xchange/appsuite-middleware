@@ -56,6 +56,7 @@ import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
+import static com.openexchange.java.Autoboxing.l;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -91,6 +92,7 @@ import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -395,7 +397,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         int updated = 0;
         try {
             for (String eventId : eventIds) {
-                updated += deleteReminderTriggers(con, context.getContextId(), Integer.valueOf(eventId), new int[] { userId });
+                updated += deleteReminderTriggers(con, context.getContextId(), asInt(eventId), new int[] { userId });
             }
         } catch (SQLException e) {
             throw asOXException(e);
@@ -483,7 +485,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
                     if(resultSet.getInt("recurrence")>0) {
                         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-                        calendar.setTime(new Date(trigger.getTime()));
+                        calendar.setTime(new Date(l(trigger.getTime())));
                         calendar.add(Calendar.MINUTE, -1);
 
                         RecurrenceData data = eventStorage.selectRecurrenceData(connection, targetId, false);
@@ -554,7 +556,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     private static int deleteReminderTriggers(Connection connection, int contextID, List<String> eventIds) throws SQLException {
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id").append(getPlaceholders(eventIds.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND module=? AND target_id").append(Databases.getPlaceholders(eventIds.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -573,8 +575,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, REMINDER_MODULE);
             stmt.setInt(parameterIndex++, eventID);
-            for (Integer userID : userIDs) {
-                stmt.setInt(parameterIndex++, i(userID));
+            for (int userID : userIDs) {
+                stmt.setInt(parameterIndex++, userID);
             }
             return logExecuteUpdate(stmt);
         }
@@ -587,8 +589,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             stmt.setNull(parameterIndex++, java.sql.Types.INTEGER);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, eventID);
-            for (Integer userID : userIDs) {
-                stmt.setInt(parameterIndex++, i(userID));
+            for (int userID : userIDs) {
+                stmt.setInt(parameterIndex++, userID);
             }
             return logExecuteUpdate(stmt);
         }
@@ -692,7 +694,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == alarmIds || 0 == alarmIds.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(getPlaceholders(alarmIds.size())).append(';');
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM reminder WHERE cid=? AND object_id").append(Databases.getPlaceholders(alarmIds.size())).append(';');
         try (PreparedStatement stmt = con.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextId);

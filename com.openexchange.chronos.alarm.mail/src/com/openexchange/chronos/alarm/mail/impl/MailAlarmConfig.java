@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.alarm.mail.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.Property;
 
@@ -67,21 +69,21 @@ public class MailAlarmConfig {
      * With this property the admin can configure the average time needed by the mail system to send out the mail.
      * This way the mail should usually be send out on time and not a few seconds late.
      */
-    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", 0);
+    public static final Property MAIL_SHIFT = DefaultProperty.valueOf(PREFIX + "time.shift", I(0));
 
     /**
      * Enabled or disables mail alarms.
      */
-    public static final Property MAIL_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", true);
+    public static final Property MAIL_ENABLED = DefaultProperty.valueOf(PREFIX + "enabled", Boolean.TRUE);
 
     /**
      * The amount of mails allowed to be sent in a given time-frame (see {@link #MAIL_LIMIT_TIME_FRAME})
      */
-    public static final Property MAIL_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", -1);
+    public static final Property MAIL_LIMIT_AMOUNT = DefaultProperty.valueOf(PREFIX + "limit.amount", I(-1));
 
     /**
      * The timeframe in milliseconds used for the amount limit (see {@link #MAIL_LIMIT_AMOUNT}
      */
-    public static final Property MAIL_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", 60000l);
+    public static final Property MAIL_LIMIT_TIME_FRAME = DefaultProperty.valueOf(PREFIX + "limit.timeframe", L(60000l));
 
 }

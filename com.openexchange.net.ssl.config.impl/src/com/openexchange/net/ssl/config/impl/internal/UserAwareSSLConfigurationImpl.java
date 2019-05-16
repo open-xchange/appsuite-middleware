@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
@@ -102,7 +103,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
             String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, userId, this.contextService.getContext(contextId));
             return userTrustsAll == null ? false : userTrustsAll.equalsIgnoreCase("true");
         } catch (OXException e) {
-            LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
+            LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, I(userId), I(contextId));
         }
         return false;
     }
@@ -118,7 +119,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
             Boolean isUserAllowedToDefineTrustlevel = view.property(USER_CONFIG_ENABLED_PROPERTY, Boolean.class).get();
             return isUserAllowedToDefineTrustlevel == null ? false : isUserAllowedToDefineTrustlevel.booleanValue();
         } catch (OXException e) {
-            LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
+            LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, I(userId), I(contextId));
         }
         return false;
     }
@@ -137,13 +138,13 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
         try {
             userService.setUserAttribute(USER_ATTRIBUTE_NAME, Boolean.toString(trustAll), userId, context);
         } catch (OXException e) {
-            LOG.error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, context);
+            LOG.error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, I(userId), I(context.getContextId()));
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.net.ssl.config.UserAwareSSLConfigurationService#canManageCertificates(int, int)
      */
     @Override

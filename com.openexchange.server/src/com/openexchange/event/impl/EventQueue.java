@@ -49,6 +49,7 @@
 
 package com.openexchange.event.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -308,7 +309,7 @@ public final class EventQueue {
         final int module = eventObj.getModule();
         switch (module) {
         case Types.APPOINTMENT:
-            LOG.error("invalid module: {}", module);
+            LOG.error("invalid module: {}", I(module));
             break;
         case Types.CONTACT:
             contact(eventObj, noDelay ? noDelayContactEventList : contactEventList);
@@ -323,7 +324,7 @@ public final class EventQueue {
 //            infostore(eventObj, noDelay ? noDelayInfostoreEventList : infostoreEventList);
 //            break;
         default:
-            LOG.error("invalid module: {}", module);
+            LOG.error("invalid module: {}", I(module));
         }
     }
 
@@ -363,7 +364,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for contact: {}", action);
+            LOG.error("invalid action for contact: {}", I(action));
         }
     }
 
@@ -430,7 +431,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for task: {}", action);
+            LOG.error("invalid action for task: {}", I(action));
         }
     }
 
@@ -470,7 +471,7 @@ public final class EventQueue {
             }
             break;
         default:
-            LOG.error("invalid action for folder: {}", action);
+            LOG.error("invalid action for folder: {}", I(action));
         }
     }
 

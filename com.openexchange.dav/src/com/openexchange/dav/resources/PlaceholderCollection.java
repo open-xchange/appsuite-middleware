@@ -59,6 +59,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
@@ -70,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.BasicPermission;
+import com.openexchange.folderstorage.CalendarFolderConverter;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.ParameterizedFolder;
@@ -120,7 +122,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    public Date getLastModified() throws WebdavProtocolException {
+    public Date getLastModified() {
         return null;
     }
 
@@ -165,6 +167,9 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
                 contentType = ContactContentType.getInstance();
             } else if (null != element.getChild("calendar", DAVProtocol.CAL_NS)) {
                 contentType = CalendarContentType.getInstance();
+                if (null != element.getChild("subscribed", DAVProtocol.CALENDARSERVER_NS)) {
+                    getFolderToUpdate().setProperty(CalendarFolderConverter.CALENDAR_PROVIDER_FIELD, CalendarProviders.ID_ICAL);
+                }
             } else {
                 throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-resourcetype", getUrl(), HttpServletResponse.SC_CONFLICT);
             }
@@ -216,17 +221,17 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    public boolean exists() throws WebdavProtocolException {
+    public boolean exists() {
         return false;
     }
 
     @Override
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
     @Override
-    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since) {
         SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
         if (since == null) {
             since = new Date(0l);
@@ -236,7 +241,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    protected Collection<T> getObjects() throws OXException {
+    protected Collection<T> getObjects() {
         return Collections.emptyList();
     }
 
@@ -246,7 +251,7 @@ public class PlaceholderCollection<T> extends FolderCollection<T> {
     }
 
     @Override
-    protected T getObject(String resourceName) throws OXException {
+    protected T getObject(String resourceName) {
         return null;
     }
 

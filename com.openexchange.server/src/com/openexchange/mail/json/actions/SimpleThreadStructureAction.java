@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.log.LogProperties;
@@ -280,8 +281,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     fromToIndices = new int[] { start, end };
                 }
             }
-
-            long lookAhead = req.getMax();
+            Integer end = fromToIndices == null ? null : Autoboxing.I(fromToIndices[1]);
+            long max = end == null ? -1 : Autoboxing.i(end);
             boolean includeSent = req.optBool("includeSent", false);
             boolean ignoreSeen = req.optBool("unseen", false);
             boolean ignoreDeleted = getIgnoreDeleted(req, false);
@@ -390,7 +391,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             long start = System.currentTimeMillis();
             int sortCol = req.getSortFieldFor(sort);
             if (!filterApplied) {
-                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
+                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, max, null);
                 AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
                 if (!mailInterface.getWarnings().isEmpty()) {
                     result.addWarnings(mailInterface.getWarnings());
@@ -398,14 +399,10 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 return result;
             }
 
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm);
-            boolean cached = false;
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, max, searchTerm);
             int more = -1;
             if (mails instanceof PropertizedList) {
                 PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
-                Boolean b = (Boolean) propertizedList.getProperty("cached");
-                cached = null != b && b.booleanValue();
-
                 Integer i = (Integer) propertizedList.getProperty("more");
                 more = null == i ? -1 : i.intValue();
             }

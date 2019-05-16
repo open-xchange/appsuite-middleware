@@ -78,27 +78,39 @@ public class AddMetaForOXFolderTable extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
+            boolean oxfolderTreeHasMeta = Tools.columnExists(con, "oxfolder_tree", "meta");
+            boolean delOxfolderTreeHasMeta = Tools.columnExists(con, "del_oxfolder_tree", "meta");
+            if (oxfolderTreeHasMeta && delOxfolderTreeHasMeta) {
+                // Nothing to do
+                return;
+            }
+
+            // Add "meta" column...
             startTransaction(con);
-            rollback = true;
-            if (!Tools.columnExists(con, "oxfolder_tree", "meta")) {
+            rollback = 1;
+
+            if (!oxfolderTreeHasMeta) {
                 Tools.addColumns(con, "oxfolder_tree", new Column("meta", "BLOB DEFAULT NULL"));
             }
-            if (!Tools.columnExists(con, "del_oxfolder_tree", "meta")) {
+            if (!delOxfolderTreeHasMeta) {
                 Tools.addColumns(con, "del_oxfolder_tree", new Column("meta", "BLOB DEFAULT NULL"));
             }
+
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (1 == rollback) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 

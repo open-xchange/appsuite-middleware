@@ -100,6 +100,9 @@ public class SyncCollection extends PROPFINDAction {
          */
         FolderCollection<?> folderCollection = requireResource(request, FolderCollection.class);
         SyncStatus<WebdavResource> syncStatus = folderCollection.getSyncStatus(syncToken);
+        if (null == syncStatus) {
+            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "supported-report", request.getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
         /*
          * marshal multistatus response
          */

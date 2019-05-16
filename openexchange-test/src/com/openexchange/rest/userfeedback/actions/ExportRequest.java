@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.userfeedback.actions;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.ws.rs.client.Client;
@@ -65,12 +66,12 @@ import org.glassfish.jersey.client.ClientConfig;
  */
 public class ExportRequest extends AbstractRestRequest {
 
-    private String contextGroup;
-    private String type;
-    private long start;
-    private long end;
+    private final String contextGroup;
+    private final String type;
+    private final long start;
+    private final long end;
 
-    private String exportPath = "/userfeedback/v1/export";
+    private final String exportPath = "/userfeedback/v1/export";
 
     public ExportRequest(String pContextGroup, String pType) {
         this(pContextGroup, pType, 0, 0);
@@ -103,10 +104,10 @@ public class ExportRequest extends AbstractRestRequest {
             target.request(MediaType.APPLICATION_JSON_TYPE);
 
             if (start >= 0) {
-                target = target.queryParam("start", start);
+                target = target.queryParam("start", L(start));
             }
             if (end >= 0) {
-                target = target.queryParam("end", end);
+                target = target.queryParam("end", L(end));
             }
             return target;
         } catch (URISyntaxException e) {

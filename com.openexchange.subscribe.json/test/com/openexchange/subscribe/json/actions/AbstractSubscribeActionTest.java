@@ -49,6 +49,7 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import static com.openexchange.java.Autoboxing.B;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -91,7 +92,7 @@ public class AbstractSubscribeActionTest {
 
      @Test
      public void testCheckCreateModifyEnabled_enabledViaConfig_doNotThrowException() throws OXException {
-        Mockito.when(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false)).thenReturn(Boolean.TRUE);
+        Mockito.when(B(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))).thenReturn(Boolean.TRUE);
 
         NewSubscriptionAction abstractSubscribeAction = new NewSubscriptionAction(services);
         abstractSubscribeAction.checkAllowed(subscription);
@@ -100,7 +101,7 @@ public class AbstractSubscribeActionTest {
 
     @Test(expected = OXException.class)
      public void testCheckCreateModifyEnabled_disabledViaConfig_doThrowException() throws Exception {
-        Mockito.when(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false)).thenReturn(Boolean.FALSE);
+        Mockito.when(B(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))).thenReturn(Boolean.FALSE);
 
         NewSubscriptionAction abstractSubscribeAction = new NewSubscriptionAction(services);
         abstractSubscribeAction.checkAllowed(subscription);
@@ -108,7 +109,7 @@ public class AbstractSubscribeActionTest {
 
      @Test
      public void testCheckCreateModifyEnabled_noOXMFSubscription_doNotThrowException() throws OXException {
-        Mockito.when(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false)).thenReturn(Boolean.TRUE);
+        Mockito.when(B(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))).thenReturn(Boolean.TRUE);
         Mockito.when(source.getId()).thenReturn("not_the_OXMF_type");
 
         NewSubscriptionAction abstractSubscribeAction = new NewSubscriptionAction(services);
@@ -117,7 +118,7 @@ public class AbstractSubscribeActionTest {
 
      @Test
      public void testCheckCreateModifyEnabled_noOXMFSubscriptionButDisabled_doNotThrowException() throws OXException {
-        Mockito.when(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false)).thenReturn(Boolean.FALSE);
+        Mockito.when(B(configurationService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false))).thenReturn(Boolean.FALSE);
         Mockito.when(source.getId()).thenReturn("not_the_OXMF_type");
 
         NewSubscriptionAction abstractSubscribeAction = new NewSubscriptionAction(services);

@@ -82,7 +82,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
  */
 public abstract class DAVPerformer implements SessionHolder {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVPerformer.class);
 
     private final ThreadLocal<ServerSession> sessionHolder;
 

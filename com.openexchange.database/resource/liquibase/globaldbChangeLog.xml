@@ -176,7 +176,7 @@
     <changeSet id="7.8.4:feedback_star_rating_v1:create" author="kevin.ruthmann@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="star_rating_v1" />
+                <tableExists tableName="feedback_star_rating_v1" />
             </not>
         </preConditions>
         <comment>
@@ -250,4 +250,124 @@
         <customChange class="com.openexchange.database.internal.change.utf8mb4.globaldb.GuestToUtf8mb4ChangeV2" />
     </changeSet>
 
+    <!-- ******************************************************** -->
+    <!-- ************** Release 7.10.2 starts here ************** -->
+    <!-- ******************************************************** -->
+
+    <!-- has been released with 7.10.2 but was already executed with wrong version id -->
+    <changeSet id="7.10.1:guest2context:addSalt" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="guest2context" columnName="salt" />
+            </not>
+        </preConditions>
+        <comment>
+            Add column 'salt' to table guest2context.
+        </comment>
+        <sql>
+            ALTER TABLE guest2context ADD salt VARBINARY(128) DEFAULT NULL;
+        </sql>
+        <rollback>
+            <dropColumn tableName="guest2context" columnName="salt" />
+        </rollback>
+    </changeSet>
+    
+    <!-- ******************************************************** -->
+    <!-- ****************** IP2Location table * ***************** -->
+    <!-- ******************************************************** -->
+	<changeSet id="7.10.2:ip2location:create" author="ioannis.chouklis@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="ip2location" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'ip2location' to persist the ip2Location geolocation ip database
+        </comment>
+        <sql>
+            CREATE TABLE `ip2location`(
+    			`ip_from` INT(10) UNSIGNED,
+    			`ip_to` INT(10) UNSIGNED,
+    			`country_code` CHAR(2),
+    			`country_name` VARCHAR(64),
+    			`region_name` VARCHAR(128),
+    			`city_name` VARCHAR(128),
+    			`latitude` DOUBLE,
+    			`longitude` DOUBLE,
+    			`zip_code` VARCHAR(30),
+    			INDEX `idx_ip_from` (`ip_from`),
+    			INDEX `idx_ip_to` (`ip_to`),
+    			INDEX `idx_ip_from_to` (`ip_from`, `ip_to`)
+			)  ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="ip2location"/>
+        </rollback>
+    </changeSet>
+    
+    <!-- ******************************************************** -->
+    <!-- ******************** MaxMind tables  ******************* -->
+    <!-- ******************************************************** -->
+	<changeSet id="7.10.2:ip_blocks:create" author="ioannis.chouklis@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="ip_blocks" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'ip_blocks' to persist the MaxMind geolocation ip database
+        </comment>
+        <sql>
+            CREATE TABLE `ip_blocks` (
+  				`ip_from` INT UNSIGNED NOT NULL,
+  				`ip_to` INT UNSIGNED NOT NULL,
+  				`network` VARCHAR(32) NOT NULL,
+  				`geoname_id` INT UNSIGNED NOT NULL,
+  				`registered_country_geoname_id` INT UNSIGNED NOT NULL,
+  				`represented_country_geoname_id` INT UNSIGNED NOT NULL,
+  				`is_anonymous_proxy` TINYINT(1) NOT NULL,
+  				`is_satellite_provider` TINYINT(1) NOT NULL,
+  				`postal_code` VARCHAR(32) NOT NULL,
+  				`latitude` FLOAT(8,4) NOT NULL,
+  				`longitude` FLOAT(8,4) NOT NULL,
+  				`accuracy_radius` SMALLINT UNSIGNED NOT NULL,
+  				PRIMARY KEY `ip_to` (`ip_to`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="ip_blocks"/>
+        </rollback>
+    </changeSet>
+    
+    <changeSet id="7.10.2:ip_locations:create" author="ioannis.chouklis@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="ip_locations" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'ip_locations' to persist the MaxMind geolocation ip database
+        </comment>
+        <sql>
+            CREATE TABLE `ip_locations` (
+  				`geoname_id` int unsigned NOT NULL,
+  				`locale_code` varchar(32) NOT NULL,
+  				`continent_code` char(2) NOT NULL,
+  				`continent_name` varchar(32) NOT NULL,
+  				`country_iso_code` char(2) NOT NULL,
+  				`country_name` varchar(64) NOT NULL,
+  				`subdivision_1_iso_code` varchar(3) NOT NULL,
+  				`subdivision_1_name` varchar(128) COLLATE 'utf8_unicode_ci' NOT NULL,
+  				`subdivision_2_iso_code` varchar(3) NOT NULL,
+  				`subdivision_2_name` varchar(128) COLLATE 'utf8_unicode_ci' NOT NULL,
+  				`city_name` varchar(128) COLLATE 'utf8_unicode_ci' NOT NULL,
+  				`metro_code` smallint unsigned NOT NULL,
+  				`time_zone` varchar(64) NOT NULL,
+  				PRIMARY KEY `geoname_id` (`geoname_id`)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="ip_locations"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

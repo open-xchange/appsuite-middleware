@@ -137,7 +137,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
     public Set<OAuthScope> getAvailableScopes(API api) throws OXException {
         ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
         if (scopes == null) {
-            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getName());
+            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getDisplayName());
         }
         return Collections.unmodifiableSet(scopes.keySet());
     }
@@ -152,7 +152,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
             }
         }
         if (legacyScopes.isEmpty()) {
-            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getName());
+            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getDisplayName());
         }
         return legacyScopes;
     }
@@ -170,7 +170,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
     public OAuthScope getScope(API api, OXScope module) throws OXException {
         ConcurrentMap<OAuthScope, OAuthScope> scopes = registry.get(api.getServiceId());
         if (scopes == null) {
-            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getName());
+            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getDisplayName());
         }
 
         Set<OAuthScope> availableScopes = scopes.keySet();
@@ -179,6 +179,6 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
                 return scope;
             }
         }
-        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getName());
+        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getDisplayName());
     }
 }

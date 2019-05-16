@@ -1,0 +1,9 @@
+requests:
+  - Compose.yaml
+  - ComposeById.yaml
+  - Save.yaml
+  - Send.yaml
+  - Attachments.yaml
+  - AttachmentsById.yaml
+  - AttachmentsOriginal.yaml
+  - AttachmentsVcard.yaml

@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attachment;
@@ -74,7 +75,6 @@ import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -95,7 +95,6 @@ import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 
@@ -143,16 +142,16 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
     protected CalendarUtilities calendarUtilities;
 
     public static final EventField[] DEFAULT_SKIP = new EventField[] { EventField.ID, EventField.FOLDER_ID, EventField.CREATED_BY, EventField.MODIFIED_BY, EventField.CREATED, EventField.LAST_MODIFIED, EventField.ALARMS, EventField.SEQUENCE,
-        EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS };
+        EventField.TRANSP, EventField.TIMESTAMP, EventField.FLAGS, EventField.ATTENDEE_PRIVILEGES };
 
     public ITipNotificationMailGenerator(final ServiceLookup services, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Event original, final Event updated, User user,
-        final User onBehalfOf, final Context ctx, final Session session, CalendarUser principal, String comment) throws OXException {
+        final User onBehalfOf, final Context ctx, final CalendarSession session, CalendarUser principal, String comment) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
         this.calendarUtilities = Services.getService(CalendarUtilities.class);
 
-        this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session, principal);
+        this.recipients = resolver.resolveAllRecipients(original, updated, user, onBehalfOf, ctx, session.getSession(), principal);
         this.participants = resolver.getAllParticipants(this.recipients, updated);
         this.resources = resolver.getResources(updated);
         this.comment = comment;
@@ -182,16 +181,15 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             organizer = actor; // Is that so? As a fallback this could be good enough
         }
 
-        CalendarService calendarService = Services.getService(CalendarService.class);
-        this.session = calendarService.init(session);
         this.original = original;
         this.updated = updated;
+        this.session = session;
 
         if (original != null) {
             this.diff = new ITipEventUpdate(original, updated, true, DEFAULT_SKIP);
         }
 
-        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL) || util.isActingOnBehalfOf(updated, session)) {
+        if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL) || util.isActingOnBehalfOf(updated, session.getSession())) {
             state = new OrganizerState();
         } else {
             if (organizer.isExternal()) {
@@ -352,7 +350,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
      */
     private NotificationParticipant determinateSender(boolean external) {
         NotificationParticipant n;
-        if (external) {
+        if (external && organizer.isExternal() == false) {
             n = organizer.clone();
             try {
                 String fromAddr;
@@ -542,7 +540,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             return;
         }
         try {
-            ITipEventUpdate update = new ITipEventUpdate(mail.getOriginal(), mail.getEvent(), false, (EventField[]) null);
+            ITipEventUpdate update = new ITipEventUpdate(mail.getOriginal(), mail.getEvent(), true, (EventField[]) null);
             if (update.getAttachmentUpdates() != null && !update.getAttachmentUpdates().isEmpty()) {
 
                 mail.setAttachmentUpdate(true);
@@ -612,7 +610,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
     private void recalculateOccurrence(final NotificationMail mail) throws OXException {
         final Event originalOcurrence = mail.getOriginal();
         final Event newEvent = mail.getEvent();
-        if (!CalendarUtils.isSeriesException(newEvent)) {
+        if (!CalendarUtils.isSeriesEvent(newEvent) || !CalendarUtils.isSeriesException(newEvent)) {
             return;
         }
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
@@ -706,7 +704,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, services).getChanges());
+            env.put("changes", new ChangeHelper(ctx, originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper).getChanges());
         } else {
             env.put("changes", new ArrayList<String>());
         }
@@ -719,7 +717,7 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         wrapper = new HTMLWrapper();
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, services).getChanges());
+            env.put("changes", new ChangeHelper(ctx, originalForRendering, updateForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper).getChanges());
         }
         writer = new AllocatingStringWriter();
         htmlTemplate.process(env, writer);
@@ -858,17 +856,16 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         }
 
         protected boolean existsInUpdate(NotificationParticipant participant) {
-            for (Attendee attendee : updated.getAttendees()) {
-                if (participant.getIdentifier() == attendee.getEntity()) {
-                    return true;
-                }
-            }
-            return false;
+            return exists(updated.getAttendees(), participant);
         }
 
         protected boolean existsInOriginal(NotificationParticipant participant) {
-            for (Attendee attendee : original.getAttendees()) {
-                if (participant.getIdentifier() == attendee.getEntity()) {
+            return exists(original.getAttendees(), participant);
+        }
+
+        protected boolean exists(List<Attendee> attendees, NotificationParticipant participant) {
+            for (Attendee attendee : attendees) {
+                if (participant.matches(attendee)) {
                     return true;
                 }
             }
@@ -876,30 +873,14 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
         }
 
         protected boolean hasBeenRemoved(final NotificationParticipant participant) {
-            if (diff == null) {
-                return false;
-            }
-            if (diff.containsAnyChangeOf(new EventField[] { EventField.ATTENDEES })) {
-                CollectionUpdate<Attendee, AttendeeField> update = diff.getAttendeeUpdates();
-                if (update == null || update.isEmpty()) {
-                    return false;
-                }
-
-                List<Attendee> removed = update.getRemovedItems();
-                if (removed == null || removed.isEmpty()) {
-                    return false;
-                }
-
-                for (Attendee attendee : removed) {
-                    if (participant.matches(attendee)) {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return hasBeenModified(participant, () -> diff.getAttendeeUpdates().getRemovedItems());
         }
 
         protected boolean hasBeenAdded(final NotificationParticipant participant) {
+            return hasBeenModified(participant, () -> diff.getAttendeeUpdates().getAddedItems());
+        }
+
+        private boolean hasBeenModified(NotificationParticipant participant, Supplier<List<Attendee>> attendeeSupplier) {
             if (diff == null) {
                 return false;
             }
@@ -909,15 +890,13 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                     return false;
                 }
 
-                List<Attendee> added = update.getAddedItems();
-                if (added == null || added.isEmpty()) {
+                List<Attendee> attendees = attendeeSupplier.get();
+                if (attendees == null || attendees.isEmpty()) {
                     return false;
                 }
 
-                for (Attendee attendee : added) {
-                    if (participant.matches(attendee)) {
-                        return true;
-                    }
+                if (exists(attendees, participant)) {
+                    return true;
                 }
             }
             return false;
@@ -1111,9 +1090,16 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
             event.setAttendees(purged);
         }
 
+        private final EventField[] ORGANIZER_CHANGE = new EventField[] { EventField.ORGANIZER };
+
         @Override
         public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
+                if (false == participant.isExternal()) {
+                    // Changes done on behalf of an internal organizer
+                    return update(request(participant, null, getStateTypeForStatus(confirmStatus)));
+                }
+                
                 if (onlyMyStateChanged()) {
                     if (confirmStatus == null) {
                         return null;
@@ -1127,6 +1113,8 @@ public class ITipNotificationMailGenerator implements ITipMailGenerator {
                     return update(counter(participant));
                 } else if (ignorableChangedOnly()) {
                     return null;
+                } else if (diff.containsAnyChangeOf(ORGANIZER_CHANGE)) {
+                    return ORGANIZER.generateUpdateMailFor(participant);
                 } else {
                     return update(noITIP(participant, Type.MODIFIED));
                 }

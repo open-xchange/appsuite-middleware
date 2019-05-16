@@ -103,11 +103,6 @@ public final class Delete {
     private final Date lastRead;
 
     /**
-     * Storage API for groups.
-     */
-    private static final GroupStorage storage = GroupStorage.getInstance();
-
-    /**
      * cache field for the group.
      */
     private transient Group orig;
@@ -129,7 +124,7 @@ public final class Delete {
 
     Group getOrig() throws OXException {
         if (null == orig) {
-            orig = storage.getGroup(groupId, ctx);
+            orig = ServerServiceRegistry.getServize(GroupStorage.class, true).getGroup(groupId, ctx);
         }
         return orig;
     }
@@ -216,6 +211,7 @@ public final class Delete {
 
     private void delete(final Connection con) throws OXException {
         // Delete the group.
+        GroupStorage storage = ServerServiceRegistry.getServize(GroupStorage.class, true);
         storage.deleteMember(ctx, con, getOrig(), getOrig().getMember());
         storage.deleteGroup(ctx, con, groupId, lastRead);
         // Remember as deleted group.

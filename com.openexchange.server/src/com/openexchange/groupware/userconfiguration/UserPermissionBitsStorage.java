@@ -159,10 +159,12 @@ public abstract class UserPermissionBitsStorage {
     public abstract void saveUserPermissionBits(Connection con, int permissionBits, int userId, Context ctx) throws OXException;
 
 
+    @SuppressWarnings("unused")
     protected void startInternal() throws OXException {
         // Nope
     }
 
+    @SuppressWarnings("unused")
     protected void stopInternal() throws OXException {
         // Nope
     }

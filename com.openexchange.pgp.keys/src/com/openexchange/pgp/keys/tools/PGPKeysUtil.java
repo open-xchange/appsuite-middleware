@@ -49,6 +49,7 @@
 
 package com.openexchange.pgp.keys.tools;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Objects;
@@ -415,10 +416,45 @@ public final class PGPKeysUtil {
         PGPSignatureGenerator generator = new PGPSignatureGenerator(
             new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, org.bouncycastle.openpgp.PGPUtil.SHA1));
         generator.init(PGPSignature.POSITIVE_CERTIFICATION, privateKey);
-        PGPSignatureSubpacketGenerator signhashgen = createSignatureGeneratorFromPrior (publicKey, privateKey.getKeyID());
+        PGPSignatureSubpacketGenerator signhashgen = createSignatureGeneratorFromPrior (publicKey, L(privateKey.getKeyID()));
         generator.setHashedSubpackets(signhashgen.generate());
         PGPSignature certification = generator.generateCertification(userId, publicKey);
         return PGPPublicKey.addCertification(publicKey, userId, certification);
+    }
+
+
+    /**
+     * Checks if a public key contains the specified user ID
+     *
+     * @param publicKey The key
+     * @param userId The user ID
+     * @return true, if the key contains the given ID, false otherwise
+     */
+    public static boolean containsUID(PGPPublicKey publicKey, String userId) {
+        userId = userId.toUpperCase();
+        for(Iterator<String> ids = publicKey.getUserIDs(); ids.hasNext();) {
+            String keyUserId = ids.next().toUpperCase();
+            if(keyUserId.contains(userId) || userId.contains(keyUserId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a public key ring contains the specified user ID
+     *
+     * @param publicKey The key ring
+     * @param userId The user ID
+     * @return true, if the and of the ring's keys contain the ID, false otherwise
+     */
+    public static boolean containsUID(PGPPublicKeyRing publicKeyring, String userId) {
+       for(Iterator<PGPPublicKey> keys = publicKeyring.getPublicKeys(); keys.hasNext();) {
+          if(containsUID(keys.next(), userId)){
+             return true;
+          }
+       }
+       return false;
     }
 
     /**
@@ -440,7 +476,7 @@ public final class PGPKeysUtil {
             }
             while (sigs.hasNext()) {
                 PGPSignature sig = sigs.next();
-                if (sig.isCertification() && sig.getKeyID() == keyId) {
+                if (sig.isCertification() && sig.getKeyID() == keyId.longValue()) {
                     PGPSignatureSubpacketVector vectors = sig.getHashedSubPackets();
                     if (vectors != null) {
                         if (vectors.isPrimaryUserID()) {

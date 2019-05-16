@@ -49,6 +49,7 @@
 
 package com.openexchange.event.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -108,10 +109,10 @@ public class EventConfigImpl extends AbstractConfigWrapper implements EventConfi
         }
 
         isEventQueueEnabled = parseProperty(prop, "com.openexchange.event.isEventQueueEnabled", false);
-        LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled={}", isEventQueueEnabled);
+        LOG.debug("Event property: com.openexchange.event.isEventQueueEnabled={}", isEventQueueEnabled ? Boolean.TRUE : Boolean.FALSE);
 
         eventQueueDelay = parseProperty(prop, "com.openexchange.event.eventQueueDelay", eventQueueDelay);
-        LOG.debug("Event property: com.openexchange.event.eventQueueDelay={}", eventQueueDelay);
+        LOG.debug("Event property: com.openexchange.event.eventQueueDelay={}", I(eventQueueDelay));
 
         /*-
          * Field "isInit" is never used

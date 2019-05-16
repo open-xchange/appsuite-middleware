@@ -50,6 +50,7 @@
 package com.openexchange.snippet.rdb;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
 import java.io.Closeable;
@@ -498,7 +499,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
             if (amountQuota.isExceeded() || amountQuota.willExceed(1)) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(L(amountQuota.getUsage()), L(amountQuota.getLimit()));
             }
         }
 
@@ -508,10 +509,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
         List<Closeable> closeables = new LinkedList<Closeable>();
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN;
-            rollback = true;
+            rollback = 1;
             /*-
              * Obtain identifier
              *
@@ -587,18 +588,19 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Commit & return identifier
              */
             con.commit(); // COMMIT
-            Databases.autocommit(con);
-            rollback = false;
+            rollback = 2;
             return Integer.toString(id);
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(closeables);
-            if (rollback) {
-                Databases.rollback(con);
+            Databases.closeSQLStuff(stmt);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
-            Databases.closeSQLStuff(stmt);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -615,10 +617,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
         List<Closeable> closeables = new LinkedList<Closeable>();
         PreparedStatement stmt = null;
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN;
-            rollback = true;
+            rollback = 1;
             /*
              * Update snippet if necessary
              */
@@ -737,18 +739,19 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Commit & return
              */
             con.commit(); // COMMIT
-            Databases.autocommit(con);
-            rollback = false;
+            rollback = 2;
             return identifier;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(closeables);
-            if (rollback) {
-                Databases.rollback(con);
+            closeSQLStuff(stmt);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
                 Databases.autocommit(con);
             }
-            closeSQLStuff(stmt);
             databaseService.backReadOnly(contextId, con);
         }
     }
@@ -894,20 +897,22 @@ public final class RdbSnippetManagement implements SnippetManagement {
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false); // BEGIN;
-            rollback = true;
+            rollback = 1;
             deleteSnippet(id, userId, contextId, con);
             con.commit(); // COMMIT
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            Databases.autocommit(con);
             databaseService.backReadOnly(contextId, con);
         }
     }

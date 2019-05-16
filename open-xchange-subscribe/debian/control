@@ -10,4 +10,4 @@ Package: open-xchange-subscribe
 Architecture: all
 Depends: ${misc:Depends}, open-xchange-oauth (>= @OXVERSION@)
 Description: The Open Xchange backend subscribe extension
- Adds the feature to subscribe to third party services or publications to the backend installation.
+ Adds the feature to subscribe to third party services to the backend installation.

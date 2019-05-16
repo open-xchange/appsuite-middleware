@@ -49,6 +49,7 @@
 
 package com.openexchange.share.notification.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -89,7 +90,7 @@ public class TextSnippets {
         int count = targetProxies.size();
         Set<TargetProxyType> targetProxyTypes = determineTypes(targetProxies);
         if (count > 1 && targetProxyTypes.size() > 1) {
-            return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), somebody, count);
+            return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), somebody, I(count));
         } else {
             TargetProxy targetProxy = targetProxies.iterator().next();
             TargetProxyType targetProxyType = targetProxy.getProxyType();
@@ -98,25 +99,25 @@ public class TextSnippets {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE), somebody, itemName);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), somebody, count);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), somebody, I(count));
                 }
             } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILE), somebody, itemName);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES), somebody, count);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES), somebody, I(count));
                 }
             } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDAR), somebody, itemName);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDARS), somebody, count);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDARS), somebody, I(count));
                 }
             } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER), somebody, itemName);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS), somebody, count);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS), somebody, I(count));
                 }
             } else {
                 //fall back to item for other types
@@ -145,7 +146,7 @@ public class TextSnippets {
         int count = targetProxies.size();
         Set<TargetProxyType> targetProxyTypes = determineTypes(targetProxies);
         if (count > 1 && targetProxyTypes.size() > 1) {
-            return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS_GROUP), somebody, count, group);
+            return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS_GROUP), somebody, I(count), group);
         } else {
             TargetProxy targetProxy = targetProxies.iterator().next();
             TargetProxyType targetProxyType = targetProxy.getProxyType();
@@ -154,25 +155,25 @@ public class TextSnippets {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE_GROUP), somebody, itemName, group);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES_GROUP), somebody, count, group);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES_GROUP), somebody, I(count), group);
                 }
             } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILE_GROUP), somebody, itemName, group);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES_GROUP), somebody, count, group);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FILES_GROUP), somebody, I(count), group);
                 }
             } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDAR_GROUP), somebody, itemName, group);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDARS_GROUP), somebody, count, group);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_CALENDARS_GROUP), somebody, I(count), group);
                 }
             } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                 if (count == 1) {
                     return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER_GROUP), somebody, itemName, group);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS_GROUP), somebody, count, group);
+                    return String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS_GROUP), somebody, I(count), group);
                 }
             } else {
                 //fall back to item for other types
@@ -204,43 +205,43 @@ public class TextSnippets {
         if (count > 1) {
             if (targetProxyTypes.size() > 1) {//multiple shares of different types
                 if (hasMessage) {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, I(count));
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE), fullName, email, count);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE), fullName, email, I(count));
                 }
             } else {//multiple shares of single type
                 TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
                 if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName, email, I(count));
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES), fullName, email, I(count));
                     }
 
                 } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName, email, I(count));
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE), fullName, email, I(count));
                     }
                 } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_AND_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_AND_MESSAGE), fullName, email, I(count));
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_NO_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_NO_MESSAGE), fullName, email, I(count));
                     }
                 } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName, email, I(count));
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_NO_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_NO_MESSAGE), fullName, email, I(count));
                     }
                 } else {
                     //fall back to item for other types
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, I(count));
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE), fullName, email, count);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE), fullName, email, I(count));
                     }
                 }
             }
@@ -303,43 +304,43 @@ public class TextSnippets {
         if (count > 1) {
             if (targetProxyTypes.size() > 1) {//multiple shares of different types
                 if (hasMessage) {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE_GROUP), fullName, email, I(count), group);
                 } else {
-                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                    return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE_GROUP), fullName, email, I(count), group);
                 }
             } else {//multiple shares of single type
                 TargetProxyType targetProxyType = targetProxyTypes.iterator().next();
                 if (KnownTargetProxyType.IMAGE.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE_GROUP), fullName, email, I(count), group);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_NO_IMAGES_GROUP), fullName, email, I(count), group);
                     }
 
                 } else if (KnownTargetProxyType.FILE.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE_GROUP), fullName, email, I(count), group);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_NO_MESSAGE_GROUP), fullName, email, I(count), group);
                     }
                 } else if (KnownTargetProxyType.CALENDAR.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_AND_MESSAGE_GROUP), fullName, email, I(count), group);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_CALENDARS_NO_MESSAGE_GROUP), fullName, email, I(count), group);
                     }
                 } else if (KnownTargetProxyType.FOLDER.equals(targetProxyType)) {
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE_GROUP), fullName, email, I(count), group);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_NO_MESSAGE_GROUP), fullName, email, I(count), group);
                     }
                 } else {
                     //fall back to item for other types
                     if (hasMessage) {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE_GROUP), fullName, email, I(count), group);
                     } else {
-                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE_GROUP), fullName, email, count, group);
+                        return String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_NO_MESSAGE_GROUP), fullName, email, I(count), group);
                     }
                 }
             }

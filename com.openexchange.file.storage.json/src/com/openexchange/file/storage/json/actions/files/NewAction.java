@@ -121,7 +121,7 @@ public class NewAction extends AbstractWriteAction {
         }
 
         result.addWarnings(warnings);
-        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
+        if (null == newId && false == warnings.isEmpty() && false == ignoreWarnings) {
             String name = getFilenameSave(file, null, fileAccess);
             result.setException(FileStorageExceptionCodes.FILE_SAVE_ABORTED.create(name, name));
         }

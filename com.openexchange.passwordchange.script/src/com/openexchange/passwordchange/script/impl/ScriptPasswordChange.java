@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -195,7 +196,7 @@ public final class ScriptPasswordChange extends PasswordChangeService {
         final Runtime rt = Runtime.getRuntime();
         final Process proc = rt.exec(cmd);
         final InputStream stderr = proc.getInputStream();
-        final InputStreamReader isr = new InputStreamReader(stderr);
+        final InputStreamReader isr = new InputStreamReader(stderr, StandardCharsets.UTF_8);
         final BufferedReader br = new BufferedReader(isr);
         String line = null;
 

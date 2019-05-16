@@ -80,10 +80,6 @@ public enum Table {
      */
     DELETED_DISTLIST("del_dlist"),
     /**
-     * The 'prg_contacts_linkage' table
-     */
-    LINKS("prg_contacts_linkage"),
-    /**
      * The 'del_contacts_linkage' table
      */
     DELETED_LINKS("del_contacts_linkage"),

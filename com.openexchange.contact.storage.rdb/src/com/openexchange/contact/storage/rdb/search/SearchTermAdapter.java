@@ -391,7 +391,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
         }
     }
 
-    private void appendColumnOperand(DbMapping<? extends Object, Contact> dbMapping) throws OXException {
+    private void appendColumnOperand(DbMapping<? extends Object, Contact> dbMapping) {
         if (null != this.charset && Types.VARCHAR == dbMapping.getSqlType()) {
             stringBuilder.append("CONVERT(").append(dbMapping.getColumnLabel()).append(" USING ").append(this.charset).append(')');
         } else {
@@ -416,7 +416,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
         return mapping;
     }
 
-    private static ContactField getField(Object value) throws OXException {
+    private static ContactField getField(Object value) {
         ContactField field = null;
         if (ContactField.class.isInstance(value)) {
             field = (ContactField) value;

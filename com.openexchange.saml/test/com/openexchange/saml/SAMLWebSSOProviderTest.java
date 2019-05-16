@@ -7,6 +7,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,9 +31,11 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.joda.time.DateTime;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.opensaml.DefaultBootstrap;
 import org.opensaml.common.SAMLObject;
 import org.opensaml.common.SAMLVersion;
@@ -95,6 +98,8 @@ import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.SessionEnhancement;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.SimConfigurationService;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
@@ -115,6 +120,8 @@ import com.openexchange.saml.state.SimStateManagement;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.saml.tools.SignatureHelper;
 import com.openexchange.server.SimpleServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.session.reservation.SimSessionReservationService;
@@ -180,7 +187,7 @@ import com.openexchange.user.UserService;
  * @since v7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(OAuthAccessTokenService.class)
+@PrepareForTest({OAuthAccessTokenService.class, ServerServiceRegistry.class, ConfigurationService.class})
 @PowerMockIgnore({"javax.net.*","javax.security.*","javax.crypto.*"})
 public class SAMLWebSSOProviderTest {
 
@@ -194,6 +201,8 @@ public class SAMLWebSSOProviderTest {
     private static SimSessiondService sessiondService;
     private static SimpleServiceLookup services;
     private static SimUserService userService;
+    @Mock
+    private ServerServiceRegistry serverServiceRegistry;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -228,6 +237,14 @@ public class SAMLWebSSOProviderTest {
         userService.addUser(new SimUser(1), 1);
         stateManagement = new SimStateManagement();
         provider = new WebSSOProviderImpl(config, openSAML, stateManagement, services, samlBackend);
+    }
+
+    @Before
+    public void setUp() {
+        PowerMockito.mockStatic(ServerServiceRegistry.class);
+        PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
+        final SimConfigurationService simConfigurationService = new SimConfigurationService();
+        PowerMockito.when(serverServiceRegistry.getService(ConfigurationService.class)).thenReturn(simConfigurationService);
     }
 
      @Test
@@ -350,7 +367,7 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(reservationToken);
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
-     
+
      @Test
      public void testAutoLogin() throws Exception {
         /*
@@ -380,7 +397,7 @@ public class SAMLWebSSOProviderTest {
             autoLoginHTTPRequest,
             LoginTools.parseUserAgent(autoLoginHTTPRequest),
             LoginTools.parseClient(autoLoginHTTPRequest, false, loginConfigurationLookup.getLoginConfiguration().getDefaultClient()));
-        List<Cookie> cookies = new ArrayList<Cookie>();
+        List<Cookie> cookies = new ArrayList<>();
         cookies.add(new Cookie(SAMLLoginTools.AUTO_LOGIN_COOKIE_PREFIX + cookieHash, samlCookieValue));
         cookies.add(new Cookie(LoginServlet.SECRET_PREFIX + cookieHash, session.getSecret()));
         autoLoginHTTPRequest.setCookies(cookies);
@@ -572,7 +589,7 @@ public class SAMLWebSSOProviderTest {
          */
         String relayState = UUIDs.getUnformattedString(UUID.randomUUID());
         LogoutRequest logoutRequest = buildIdPLogoutRequest(sessionIndex, nameID);
-        BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject>();
+        BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<>();
         context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
         context.setOutboundSAMLMessage(logoutRequest);
         SimHttpServletResponse logoutHTTPRedirect = new SimHttpServletResponse();
@@ -735,6 +752,42 @@ public class SAMLWebSSOProviderTest {
         Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
     }
 
+    @Test
+    public void testShardNameRedirectParam() throws Exception {
+        AuthnRequest authnRequest = prepareAuthnRequest();
+
+        String requestHost = "webmail2.example.com";
+        String split = ":";
+
+        StringBuilder relayStateBuilder = new StringBuilder();
+        relayStateBuilder.append("domain=").append(requestHost).append(split);
+        String encodedRelayState = Base64.encodeBytes(relayStateBuilder.toString().getBytes());
+
+        /*
+         * Build response and process it
+         */
+        Response response = buildResponseWithoutInResponseTo();
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("RelayState", encodedRelayState)
+            .build());
+
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final login redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals(requestHost, locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals("default", redirectParams.get(SAMLLoginTools.PARAM_SHARD));
+    }
+
      @Test
      public void testCachingHeadersOnInit() throws Exception {
         InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), new TestLoginConfigurationLookup(), services);
@@ -817,7 +870,7 @@ public class SAMLWebSSOProviderTest {
 
     private LogoutResponse parseLogoutResponse(SimHttpServletRequest logoutResponseHTTPRequest) throws Exception {
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(logoutResponseHTTPRequest);
-        BasicSAMLMessageContext<LogoutResponse, LogoutResponse, SAMLObject> context = new BasicSAMLMessageContext<LogoutResponse, LogoutResponse, SAMLObject>();
+        BasicSAMLMessageContext<LogoutResponse, LogoutResponse, SAMLObject> context = new BasicSAMLMessageContext<>();
         context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
         context.setInboundMessageTransport(inTransport);
         context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
@@ -935,8 +988,8 @@ public class SAMLWebSSOProviderTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
-                return enhancement;
+            public List<SessionEnhancement> getEnhancements() {
+                return Arrays.asList(enhancement);
             }
 
             @Override
@@ -968,12 +1021,17 @@ public class SAMLWebSSOProviderTest {
             public String getUserAgent() {
                 return "User-Agent";
             }
+
+            @Override
+            public Origin getOrigin() {
+                return Origin.HTTP_JSON;
+            }
         };
     }
 
     private AuthnRequest parseAuthnRequest(HttpServletRequest httpRequest) throws Exception {
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(httpRequest);
-        BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject>();
+        BasicSAMLMessageContext<SAMLObject, AuthnRequest, SAMLObject> context = new BasicSAMLMessageContext<>();
         context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
         context.setInboundMessageTransport(inTransport);
         context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
@@ -1013,7 +1071,7 @@ public class SAMLWebSSOProviderTest {
 
     private LogoutRequest parseLogoutRequest(HttpServletRequest httpRequest) throws Exception {
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(httpRequest);
-        BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject>();
+        BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<>();
         context.setCommunicationProfileId("urn:oasis:names:tc:SAML:2.0:profiles:SSO:browser");
         context.setInboundMessageTransport(inTransport);
         context.setInboundSAMLProtocol(SAMLConstants.SAML20P_NS);
@@ -1047,7 +1105,7 @@ public class SAMLWebSSOProviderTest {
     }
 
     private static Map<String, String> parseURIQuery(URI uri) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         List<NameValuePair> pairs = URLEncodedUtils.parse(uri, "UTF-8");
         for (NameValuePair pair : pairs) {
             map.put(pair.getName(), pair.getValue());

@@ -68,7 +68,7 @@ import com.openexchange.groupware.ldap.RdbUserStorage.ValuePair;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.lock.LockService;
 import com.openexchange.log.LogProperties;
-import com.openexchange.passwordmechs.IPasswordMech;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.map.TIntObjectMap;
@@ -522,11 +522,11 @@ public class CachingUserStorage extends UserStorage {
         Integer tmp;
         try {
             tmp = (Integer) cache.get(key);
-        } catch (final ClassCastException e) {
+        } catch (@SuppressWarnings("unused") final ClassCastException e) {
             tmp = null;
         }
         if (null == tmp) {
-            LOG.trace("Cache MISS. Context: {} User: {}", context.getContextId(), uid);
+            LOG.trace("Cache MISS. Context: {} User: {}", I(context.getContextId()), uid);
             identifier = delegate.getUserId(uid, context);
             try {
                 cache.put(key, Integer.valueOf(identifier), false);
@@ -534,7 +534,7 @@ public class CachingUserStorage extends UserStorage {
                 throw LdapExceptionCode.CACHE_PROBLEM.create(e, new Object[0]).setPrefix("USR");
             }
         } else {
-            LOG.trace("Cache HIT. Context: {} User: {}", context.getContextId(), uid);
+            LOG.trace("Cache HIT. Context: {} User: {}", I(context.getContextId()), uid);
             identifier = tmp.intValue();
         }
         LogProperties.put(LogProperties.Name.LOGIN_RESOLVED_LOGIN, uid);
@@ -587,7 +587,7 @@ public class CachingUserStorage extends UserStorage {
             int[] tmp;
             try {
                 tmp = (int[]) cache.get(key);
-            } catch (final ClassCastException e) {
+            } catch (@SuppressWarnings("unused") final ClassCastException e) {
                 tmp = null;
             }
             if (null == tmp) {
@@ -614,7 +614,7 @@ public class CachingUserStorage extends UserStorage {
         invalidateUserCache(ctx, userId);
         try {
             UserConfigurationStorage.getInstance().invalidateCache(userId, ctx);
-        } catch (final Exception e) {
+        } catch (@SuppressWarnings("unused") final Exception e) {
             // Ignore
         }
     }
@@ -652,7 +652,7 @@ public class CachingUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    protected void updatePasswordInternal(Connection connection, Context context, int userId, IPasswordMech mech, String password) throws OXException {
-        delegate.updatePasswordInternal(connection, context, userId, mech, password);
+    protected void updatePasswordInternal(Connection connection, Context context, int userId, PasswordMech mech, String password, byte[] salt) throws OXException {
+        delegate.updatePasswordInternal(connection, context, userId, mech, password, salt);
     }
 }

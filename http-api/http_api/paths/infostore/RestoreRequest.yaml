@@ -8,6 +8,11 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push token to restrict the generated drive event
+        required: false
       - in: body
         name: body
         description: A JSON array of objects with the fields `id` and `folder` representing infoitems that shall be restored.

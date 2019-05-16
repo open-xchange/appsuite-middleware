@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -199,7 +201,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                     throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(account.getAccountId()));
                 }
                 if (storedAccount.getLastModified().getTime() > clientTimestamp) {
-                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
                 }
             }
             txPolicy.commit(connection);
@@ -256,7 +258,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                     throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
                 }
                 if (storedAccount.getLastModified().getTime() > clientTimestamp) {
-                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), L(clientTimestamp), L(storedAccount.getLastModified().getTime()));
                 }
             }
         } catch (SQLException e) {
@@ -433,7 +435,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     private static List<CalendarAccount> selectAccounts(Connection connection, int cid, String provider, int[] userIds) throws SQLException {
         String sql = new StringBuilder()
             .append("SELECT id,user,provider,modified,internalConfig,userConfig FROM calendar_account WHERE cid=? AND provider=? AND user")
-            .append(getPlaceholders(userIds.length)).append(';')
+            .append(Databases.getPlaceholders(userIds.length)).append(';')
         .toString();
         List<CalendarAccount> accounts = new ArrayList<CalendarAccount>();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

@@ -77,6 +77,7 @@ public class MailSearchTest extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -84,6 +85,7 @@ public class MailSearchTest extends AbstractMailTest {
         clearFolder(folder);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

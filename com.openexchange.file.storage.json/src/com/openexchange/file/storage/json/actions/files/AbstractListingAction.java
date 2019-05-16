@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -61,9 +62,9 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -73,6 +74,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.log.LogProperties;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.RemoteInternalPreviewService;
@@ -97,13 +99,27 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     /** The logger */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AbstractListingAction.class);
 
-    private static final String PARAMETER_PREGENERATE_PREVIEWS = "pregenerate_previews";
-
     /**
      * Initializes a new {@link AbstractListingAction}.
      */
     protected AbstractListingAction() {
         super();
+    }
+
+    @Override
+    protected void before(AJAXInfostoreRequest req) throws OXException {
+        super.before(req);
+        if (req.isPregeneratePreviews()) {
+            LogProperties.putProperty(LogProperties.Name.FILE_STORAGE_PREGENERATE_PREVIEWS, Boolean.TRUE);
+        }
+    }
+
+    @Override
+    protected void after(AJAXInfostoreRequest req) {
+        if (req.isPregeneratePreviews()) {
+            LogProperties.remove(LogProperties.Name.FILE_STORAGE_PREGENERATE_PREVIEWS);
+        }
+        super.after(req);
     }
 
     /**
@@ -117,7 +133,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult result(TimedResult<File> documents, InfostoreRequest request) throws OXException {
         TimedResult<File> timedResult = documents;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
+        if (request.isPregeneratePreviews()) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -154,7 +170,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult results(final SearchIterator<File> searchIterator, final long timestamp, final InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
 
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
+        if (request.isPregeneratePreviews()) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -187,7 +203,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
     protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
         SearchIterator<File> results = searchIterator;
         Long timestamp = null;
-        if (AJAXRequestDataTools.parseBoolParameter(PARAMETER_PREGENERATE_PREVIEWS, request.getRequestData())) {
+        if (request.isPregeneratePreviews()) {
             PreviewService previewService = Services.getPreviewService();
             ThreadPoolService threadPool = Services.getThreadPoolService();
             if (null != previewService && null != threadPool) {
@@ -196,8 +212,8 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                     while (results.hasNext()) {
                         // Call preview service for next file
                         File fileMetadata = results.next();
-                        if(timestamp == null || timestamp<fileMetadata.getSequenceNumber()) {
-                            timestamp = fileMetadata.getSequenceNumber();
+                        if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                            timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                         }
                         files.add(fileMetadata);
                     }
@@ -210,21 +226,21 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             }
         }
 
-        // Calculate eventually missing timestamp
+        // Calculate eventually missing time stamp
         if(timestamp == null && results.hasNext()) {
             List<File> files = new LinkedList<File>();
             while (results.hasNext()) {
                 // Call preview service for next file
                 File fileMetadata = results.next();
-                if(timestamp == null || timestamp < fileMetadata.getSequenceNumber()) {
-                    timestamp = fileMetadata.getSequenceNumber();
+                if(timestamp == null || timestamp.longValue() < fileMetadata.getSequenceNumber()) {
+                    timestamp = Long.valueOf(fileMetadata.getSequenceNumber());
                 }
                 files.add(fileMetadata);
             }
-            return new AJAXRequestResult(files, new Date(timestamp), "infostore");
+            return new AJAXRequestResult(files, timestamp == null ? null : new Date(timestamp.longValue()), "infostore");
         }
 
-        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp), "infostore");
+        return new AJAXRequestResult(results, timestamp == null ? null : new Date(timestamp.longValue()), "infostore");
     }
 
     /**
@@ -259,10 +275,10 @@ public abstract class AbstractListingAction extends AbstractFileAction {
             this.threadControl = null == threadControl ? ThreadControlService.DUMMY_CONTROL : threadControl;
 
             AJAXRequestData requestData = request.getRequestData().copyOf();
-            requestData.putParameter("width", "160");
-            requestData.putParameter("height", "160");
-            requestData.putParameter("delivery", "view");
-            requestData.putParameter("scaleType", "cover");
+            requestData.putParameter("width", Integer.toString(FileResponseRenderer.THUMBNAIL_WIDTH));
+            requestData.putParameter("height", Integer.toString(FileResponseRenderer.THUMBNAIL_HEIGHT));
+            requestData.putParameter("delivery", FileResponseRenderer.THUMBNAIL_DELIVERY);
+            requestData.putParameter("scaleType", FileResponseRenderer.THUMBNAIL_SCALE_TYPE);
             this.requestData = requestData;
 
             List<Field> columns = request.getFieldsToLoad();
@@ -285,7 +301,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
 
         @Override
         public void setThreadName(ThreadRenamer threadRenamer) {
-            threadRenamer.renamePrefix("Async-DC-Trigger");
+            threadRenamer.renamePrefix("Async-Drive-DC-Trigger");
         }
 
         @Override
@@ -304,7 +320,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                                 fileMetadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
                                 triggerFor(id, fileMetadata);
                             } catch (Exception e) {
-                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), I(session.getUserId()), I(session.getContextId()), e);
                             }
                         }
                     } finally {
@@ -319,7 +335,7 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                             try {
                                 triggerFor(id, fileMetadata);
                             } catch (Exception e) {
-                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), session.getUserId(), session.getContextId(), e);
+                                LOGGER.warn("Failed to pre-generate preview image from file {} for user {} in context {}", fileMetadata.getId(), I(session.getUserId()), I(session.getContextId()), e);
                             }
                         }
                     }
@@ -351,10 +367,10 @@ public abstract class AbstractListingAction extends AbstractFileAction {
                 FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
                 AbstractPreviewResultConverter.triggerPreviewService(session, fileHolder, requestData, candidate, PreviewOutput.IMAGE);
-                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, session.getUserId(), session.getContextId());
+                LOGGER.debug("Triggered to create preview from file {} for user {} in context {}", id, I(session.getUserId()), I(session.getContextId()));
                 numberOfPregeneratedPreviews--;
             } else {
-                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, session.getUserId(), session.getContextId());
+                LOGGER.debug("Found no suitable {} service to trigger preview creation from file {} for user {} in context {}", RemoteInternalPreviewService.class.getSimpleName(), id, I(session.getUserId()), I(session.getContextId()));
             }
         }
     }

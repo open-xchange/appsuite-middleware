@@ -69,39 +69,6 @@ import com.openexchange.realtime.packet.Stanza;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.1
  */
-/*
- * @startuml doc-files/SelectorChoice_object
- * object selectorChoice1 {
- * client = "client1@context1/resourceIdentifier1"
- * group="groupDispatcher1@synthetic/reourceIdentifier2"
- * selector="s1"
- * }
- * @enduml
- * 
- * @startuml doc-files/SelectorChoice_interaction.png
- * actor Client1
- * actor Client2
- * actor Client3
- * entity GroupDispatcher1
- * Client1 -> GroupDispatcher1: Join
- * note right: Join with selector <b>s1</b>
- * Client2 -> GroupDispatcher1: Join
- * note right: Join with selector <b>s2</b>
- * Client3 -> GroupDispatcher1: Join
- * note right: Join with selector <b>s3</b>
- * Client1 -> GroupDispatcher1: "Hello all"
- * GroupDispatcher1 -> Client2: "Hello all"
- * note right
- * client receives Stanza
- * <i> {from: "client1", selector: "<b>s2</b>", payload: "Hello all"}</i>
- * end note
- * GroupDispatcher1 -> Client3: "Hello all"
- * note right
- * client receives Stanza
- * <i> {from: "client1", selector: "<b>s3</b>", payload: "Hello all"}</i>
- * end note
- * @enduml
- */
 public class SelectorChoice {
 
     protected ID client;

@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.oauth;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -165,6 +166,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
      */
     @Override
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
+        // Nothing
     }
 
     public Map<Integer, Integer> exchangeOAuthIds(final Connection con, final List<OAuthAccount> accounts, final Context ctx) throws OXException {
@@ -175,7 +177,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 final int newId = idService.getId("com.openexchange.oauth.account", ctx.getContextId());
                 account.setId(newId);
 
-                mapping.put(oldId, newId);
+                mapping.put(I(oldId), I(newId));
             } catch (final OXException e) {
                 throw UserCopyExceptionCodes.ID_PROBLEM.create(e, "com.openexchange.oauth.account");
             }

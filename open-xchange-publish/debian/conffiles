@@ -1,9 +1,0 @@
-opt/open-xchange/etc/microformatWhitelist.properties
-opt/open-xchange/templates/contacts_hcard_censored.tmpl
-opt/open-xchange/templates/contacts_hcard_uncensored.tmpl
-opt/open-xchange/templates/contacts_oxmf_censored.tmpl
-opt/open-xchange/templates/contacts_oxmf_uncensored.tmpl
-opt/open-xchange/templates/contacts.tmpl
-opt/open-xchange/templates/infostore.tmpl
-opt/open-xchange/templates/infostore_gallery.tmpl
-opt/open-xchange/templates/publish.microformats.properties

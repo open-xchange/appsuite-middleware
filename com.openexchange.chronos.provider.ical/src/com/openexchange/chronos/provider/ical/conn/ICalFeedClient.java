@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.ical.conn;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -92,6 +93,7 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.session.Session;
+import com.openexchange.version.VersionService;
 
 /**
  *
@@ -222,7 +224,7 @@ public class ICalFeedClient {
 
         long allowedFeedSize = ICalCalendarProviderProperties.allowedFeedSize();
         if (contentLength > allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > allowedFeedSize)) {
-            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), allowedFeedSize, contentLength2 != null ? contentLength2 : contentLength);
+            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), L(allowedFeedSize), contentLength2 != null ? contentLength2 : L(contentLength));
         }
         response.setCalendar(importCalendar(entity));
         return response;
@@ -292,8 +294,8 @@ public class ICalFeedClient {
                     tmp = httpClient;
                     if (tmp == null) {
                         ClientConfig config = ClientConfig.newInstance();
-                        config.setUserAgent("Open-Xchange Calendar Feed Client");
-                        init(config);
+                        config.setUserAgent(initUserAgent());
+                        initConfig(config);
                         tmp = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
                         httpClient = tmp;
                     }
@@ -302,7 +304,18 @@ public class ICalFeedClient {
             return tmp;
         }
 
-        static void init(ClientConfig config) {
+        static String initUserAgent() {
+            VersionService versionService = Services.getService(VersionService.class);
+            String versionString = null;
+            if (null == versionService) {
+                versionString = "<unknown version>";
+            } else {
+                versionString = versionService.getVersionString();
+            }
+            return VersionService.NAME + "/" + versionString;
+        }
+
+        static void initConfig(ClientConfig config) {
             LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
             int maxConnections = leanConfigurationService.getIntProperty(ICalCalendarProviderProperties.maxConnections);
             config.setMaxTotalConnections(maxConnections);
@@ -335,7 +348,7 @@ public class ICalFeedClient {
     private OXException unauthorizedException(HttpResponse response) {
         String feedUrl = iCalFeedConfig.getFeedUrl();
         AuthInfo authInfo = iCalFeedConfig.getAuthInfo();
-        
+
         boolean hadCredentials = null != authInfo && (Strings.isNotEmpty(authInfo.getPassword()) || Strings.isNotEmpty(authInfo.getToken()));
         String realm = getFirstHeaderElement(response, HttpHeaders.WWW_AUTHENTICATE, "Basic realm");
         if (null != realm && realm.contains("Share/Anonymous/")) {

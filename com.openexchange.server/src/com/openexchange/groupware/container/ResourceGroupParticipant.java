@@ -172,9 +172,9 @@ public class ResourceGroupParticipant implements Participant, Comparable<Partici
     public int compareTo(final Participant part) {
         final int retval;
         if (RESOURCEGROUP == part.getType()) {
-            retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
+            retval = Integer.compare(id, part.getIdentifier());
         } else {
-            retval = Integer.valueOf(RESOURCEGROUP).compareTo(Integer.valueOf(part.getType()));
+            retval = Integer.compare(RESOURCEGROUP, part.getType());
         }
         return retval;
     }

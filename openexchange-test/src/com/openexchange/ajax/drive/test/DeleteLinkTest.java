@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.drive.test;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
@@ -81,6 +82,7 @@ import com.openexchange.test.TestInit;
  */
 public class DeleteLinkTest extends AbstractDriveShareTest {
 
+    @SuppressWarnings("hiding")
     private InfostoreTestManager itm;
     private FolderObject rootFolder;
     private FolderObject folder;
@@ -90,6 +92,7 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -115,7 +118,7 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         target.setDrivePath("/" + folder.getFolderName());
         target.setName(file.getFileName());
         target.setChecksum(file.getFileMD5Sum());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), target);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(I(rootFolder.getObjectID()), target);
         GetLinkResponse getLinkResponse = getClient().execute(getLinkRequest);
         String url = getLinkResponse.getUrl();
 
@@ -125,18 +128,19 @@ public class DeleteLinkTest extends AbstractDriveShareTest {
         guestClient.checkShareAccessible(expectedPermission);
         int guestID = guestClient.getValues().getUserId();
 
-        getClient().execute(new DeleteLinkRequest(rootFolder.getObjectID(), target));
+        getClient().execute(new DeleteLinkRequest(I(rootFolder.getObjectID()), target));
         ExtendedPermissionEntity guestEntity;
         if (target.isFolder()) {
             guestEntity = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, folder.getObjectID(), guestID);
         } else {
-            guestEntity = discoverGuestEntity(file.getFolderId(), file.getId(), guestID);
+            guestEntity = discoverGuestEntity(file.getId(), guestID);
         }
         assertNull("Share was not deleted", guestEntity);
         List<FileStorageObjectPermission> objectPermissions = getClient().execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertTrue("Permission was not deleted", objectPermissions.isEmpty());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

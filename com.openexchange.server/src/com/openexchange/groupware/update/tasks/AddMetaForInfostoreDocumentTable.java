@@ -78,10 +78,10 @@ public class AddMetaForInfostoreDocumentTable extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             startTransaction(con);
-            rollback = true;
+            rollback = 1;
             if (!Tools.columnExists(con, "infostore_document", "meta")) {
                 Tools.addColumns(con, "infostore_document", new Column("meta", "BLOB DEFAULT NULL"));
             }
@@ -89,16 +89,18 @@ public class AddMetaForInfostoreDocumentTable extends UpdateTaskAdapter {
                 Tools.addColumns(con, "del_infostore_document", new Column("meta", "BLOB DEFAULT NULL"));
             }
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(con);
+                }
+                autocommit(con);
             }
-            autocommit(con);
         }
     }
 

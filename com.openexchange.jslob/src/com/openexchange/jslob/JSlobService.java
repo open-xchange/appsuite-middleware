@@ -78,9 +78,11 @@ public interface JSlobService {
 
     /**
      * Gets the JSlob associated with given user in given context.
+     * <p>
+     * Calling this method is the same as {@link #get(String, boolean, Session)} with <code>allowInjectingConfigTreeSettings</code> set to <code>true</code>
      *
      * @param id The identifier of the JSlob
-     * @param userId session An active session
+     * @param session The session providing user data
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
      */
@@ -89,12 +91,36 @@ public interface JSlobService {
     /**
      * Gets the JSlob associated with given user in given context.
      *
+     * @param id The identifier of the JSlob
+     * @param allowInjectingConfigTreeSettings <code>true</code> to allow injecting settings from config-tree; otherwise <code>false</code>
+     * @param session The session providing user data
+     * @return The JSlob
+     * @throws OXException If JSlob cannot be returned
+     */
+    JSlob get(String id, boolean allowInjectingConfigTreeSettings, Session session) throws OXException;
+
+    /**
+     * Gets the JSlob associated with given user in given context.
+     * <p>
+     * Calling this method is the same as {@link #get(List, boolean, Session)} with <code>allowInjectingConfigTreeSettings</code> set to <code>true</code>
+     *
      * @param ids The identifiers of the JSlobs
      * @param userId session An active session
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
     List<JSlob> get(List<String> ids, Session session) throws OXException;
+
+    /**
+     * Gets the JSlob associated with given user in given context.
+     *
+     * @param ids The identifiers of the JSlobs
+     * @param allowInjectingConfigTreeSettings <code>true</code> to allow injecting settings from config-tree; otherwise <code>false</code>
+     * @param session The session providing user data
+     * @return The JSlobs
+     * @throws OXException If JSlobs cannot be returned
+     */
+    List<JSlob> get(List<String> ids, boolean allowInjectingConfigTreeSettings, Session session) throws OXException;
 
     /**
      * Gets the shared JSlob.
@@ -108,12 +134,24 @@ public interface JSlobService {
 
     /**
      * Gets the JSlobs associated with given user in given context.
+     * <p>
+     * Calling this method is the same as {@link #get(boolean, Session)} with <code>allowInjectingConfigTreeSettings</code> set to <code>true</code>
      *
      * @param session an active session
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
     Collection<JSlob> get(Session session) throws OXException;
+
+    /**
+     * Gets the JSlobs associated with given user in given context.
+     *
+     * @param allowInjectingConfigTreeSettings <code>true</code> to allow injecting settings from config-tree; otherwise <code>false</code>
+     * @param session an active session
+     * @return The JSlobs
+     * @throws OXException If JSlobs cannot be returned
+     */
+    Collection<JSlob> get(boolean allowInjectingConfigTreeSettings, Session session) throws OXException;
 
     /**
      * Gets the shared JSlobs.

@@ -49,17 +49,10 @@
 
 package com.openexchange.file.storage.boxcom.oauth;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.boxcom.BoxFileStorageService;
+import com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociationProvider;
 import com.openexchange.oauth.association.OAuthAccountAssociation;
-import com.openexchange.oauth.association.spi.OAuthAccountAssociationProvider;
-import com.openexchange.session.Session;
 
 /**
  * {@link BoxOAuthAccountAssociationProvider}
@@ -67,59 +60,22 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.4
  */
-public class BoxOAuthAccountAssociationProvider implements OAuthAccountAssociationProvider {
-
-    private final BoxFileStorageService storageService;
+public class BoxOAuthAccountAssociationProvider extends AbstractFileStorageOAuthAccountAssociationProvider {
 
     /**
      * Initializes a new {@link BoxOAuthAccountAssociationProvider}.
      */
     public BoxOAuthAccountAssociationProvider(BoxFileStorageService storageService) {
-        super();
-        this.storageService = storageService;
+        super(storageService);
     }
 
-    @Override
-    public Collection<OAuthAccountAssociation> getAssociationsFor(int accountId, Session session) throws OXException {
-        Collection<OAuthAccountAssociation> associations = null;
-        List<FileStorageAccount> accounts = storageService.getAccounts(session);
-        for (FileStorageAccount fileStorageAccount : accounts) {
-            Map<String, Object> configuration = fileStorageAccount.getConfiguration();
-            if (getAccountId(configuration) == accountId) {
-                if (null == associations) {
-                    associations = new LinkedList<>();
-                }
-                associations.add(new BoxOAuthAccountAssociation(accountId, fileStorageAccount, session.getUserId(), session.getContextId()));
-            }
-        }
-
-        return null == associations ? Collections.<OAuthAccountAssociation> emptyList() : associations;
-    }
-
-    /**
-     * Returns the OAuth account identifier from associated account's configuration
-     *
-     * @param configuration The configuration
-     * @return The account identifier or <code>-1</code> if account identifier cannot be determined
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.oauth.AbstractFileStorageOAuthAccountAssociationProvider#createAssociation(int, com.openexchange.file.storage.FileStorageAccount, int, int)
      */
-    private int getAccountId(Map<String, Object> configuration) {
-        if (null == configuration) {
-            return -1;
-        }
-
-        Object accountId = configuration.get("account");
-        if (null == accountId) {return -1;
-        }
-
-        if (accountId instanceof Integer) {
-            return ((Integer) accountId).intValue();
-        }
-
-        try {
-            return Integer.parseInt(accountId.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
-        }
+    @Override
+    public OAuthAccountAssociation createAssociation(int accountId, FileStorageAccount account, int userId, int contextId) {
+        return new BoxOAuthAccountAssociation(accountId, account, userId, contextId);
     }
-
 }

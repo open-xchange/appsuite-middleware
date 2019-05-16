@@ -97,17 +97,17 @@ public class UserConfiguration implements Serializable, Cloneable {
     /**
      * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    private static final int PROJECTS = UserPermissionBits.PROJECTS;
+    // private static final int PROJECTS = UserPermissionBits.PROJECTS;
 
     /**
      * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    private static final int FORUM = UserPermissionBits.FORUM;
+    // private static final int FORUM = UserPermissionBits.FORUM;
 
     /**
      * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    private static final int PINBOARD_WRITE_ACCESS = UserPermissionBits.PINBOARD_WRITE_ACCESS;
+    // private static final int PINBOARD_WRITE_ACCESS = UserPermissionBits.PINBOARD_WRITE_ACCESS;
 
     /**
      * The permission bit for WebDAV/XML access.
@@ -134,12 +134,12 @@ public class UserConfiguration implements Serializable, Cloneable {
     /**
      * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    private static final int RSS_BOOKMARKS = UserPermissionBits.RSS_BOOKMARKS;
+    // private static final int RSS_BOOKMARKS = UserPermissionBits.RSS_BOOKMARKS;
 
     /**
      * @Obsolete Unused permission was removed. Leaving it here to prevent confusion.
      */
-    private static final int RSS_PORTAL = UserPermissionBits.RSS_PORTAL;
+    // private static final int RSS_PORTAL = UserPermissionBits.RSS_PORTAL;
 
     /**
      * The permission bit for mobility access.
@@ -193,7 +193,10 @@ public class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * The permission bit for publication access.
+     *
+     * @deprecated Since v7.10.2
      */
+    @Deprecated
     public static final int PUBLICATION = UserPermissionBits.PUBLICATION;
 
     /**
@@ -639,15 +642,6 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean isSubscription() {
         return capabilities.contains(Permission.SUBSCRIPTION.getCapabilityName());
-    }
-
-    /**
-     * Checks if this user configuration indicates to enable publication.
-     *
-     * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
-     */
-    public boolean isPublication() {
-        return capabilities.contains(Permission.PUBLICATION.getCapabilityName());
     }
 
     /**

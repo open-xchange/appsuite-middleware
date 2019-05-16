@@ -1,0 +1,20 @@
+type: object
+title: Shared Attachments
+description: The shared attachments object
+properties:
+  language:
+    type: string
+    description: The locale string
+  enabled:
+    type: boolean
+    description: The enabled flag
+  autodelete:
+   type: boolean
+   description: The auto delete flag
+  expiryDate:
+    type: integer
+    format: int64
+    description: The expiry date. Milliseconds since January 1, 1970, 00:00:00 GMT
+  password:
+    type: string
+    description: The password

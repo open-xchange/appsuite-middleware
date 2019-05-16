@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.caching;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -83,12 +85,30 @@ public class CachingCalendarUtils {
             try {
                 JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccessConstants.CACHING);
                 if (caching != null) {
-                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, newLastUpdateTimestamp);
+                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, L(newLastUpdateTimestamp));
                 }
             } catch (JSONException e) {
-                LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
+                LOG.error("Unable to retrieve caching information for calendar account '{}' with provider '{}': {}", I(calendarAccount.getAccountId()), calendarAccount.getProviderId(), e.getMessage(), e);
             }
         }
+    }
+
+    /**
+     * Gets a value indicating whether synchronization is enabled or not for accounts of a specific calendar provider.
+     *
+     * @param providerId The identifier of the provider to check
+     * @param session The current user's session
+     * @param def The default value
+     * @return <code>true</code> if accounts from this provider can be used for synchronization, <code>false</code> otherwise
+     */
+    public static boolean canBeUsedForSync(String providerId, Session session, boolean def) {
+        DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.valueOf(def));
+        LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
+        if (null == leanConfigurationService) {
+            LOG.warn("Unable to access configuration service, assuming '{}' for '{}'.", property.getDefaultValue(), property.getFQPropertyName());
+            return property.getDefaultValue(Boolean.class).booleanValue();
+        }
+        return leanConfigurationService.getBooleanProperty(session.getUserId(), session.getContextId(), property);
     }
 
     /**
@@ -99,13 +119,7 @@ public class CachingCalendarUtils {
      * @return <code>true</code> if accounts from this provider can be used for synchronization, <code>false</code> otherwise
      */
     public static boolean canBeUsedForSync(String providerId, Session session) {
-        DefaultProperty property = DefaultProperty.valueOf(CalendarProviders.getUsedForSyncPropertyName(providerId), Boolean.FALSE);
-        LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-        if (null == leanConfigurationService) {
-            LOG.warn("Unable to access configuration service, assuming {} for {}.", property.getDefaultValue(), property.getFQPropertyName());
-            return property.getDefaultValue(Boolean.class).booleanValue();
-        }
-        return leanConfigurationService.getBooleanProperty(session.getUserId(), session.getContextId(), property);
+        return canBeUsedForSync(providerId, session, true);
     }
 
 }

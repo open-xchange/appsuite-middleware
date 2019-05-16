@@ -58,7 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.logging.filter.ExceptionCategoryFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
-import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
+import com.openexchange.logging.internal.IncludeStackTraceServiceImpl;
 
 
 /**

@@ -254,6 +254,7 @@ public class Strings {
     /**
      * High speed test for whitespace! Faster than the java one (from some testing).
      *
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isWhitespace(final char c) {
@@ -278,8 +279,42 @@ public class Strings {
     }
 
     /**
+     * Gets the character for given digit (between 0 inclusive and 10 exclusive).
+     *
+     * @param digit The digit
+     * @return The digit's character representation
+     */
+    public static char charForDigit(int digit) {
+        switch (digit) {
+            case 0:
+                return '0';
+            case 1:
+                return '1';
+            case 2:
+                return '2';
+            case 3:
+                return '3';
+            case 4:
+                return '4';
+            case 5:
+                return '5';
+            case 6:
+                return '6';
+            case 7:
+                return '7';
+            case 8:
+                return '8';
+            case 9:
+                return '9';
+            default:
+                throw new IllegalArgumentException("Digit needs to be between 0 (inclusive) and 10 (exclusive)");
+        }
+    }
+
+    /**
      * High speed test for ASCII numbers!
      *
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
      */
     public static boolean isDigit(final char c) {
@@ -303,10 +338,11 @@ public class Strings {
     /**
      * High speed test for punctuation character!
      *
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is a punctuation; otherwise <code>false</code>
      */
-    public static boolean isPunctuation(char ch) {
-        switch (ch) {
+    public static boolean isPunctuation(char c) {
+        switch (c) {
             case '!':
             case '"':
             case '#':
@@ -349,6 +385,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter!
      *
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is an ASCII letter; otherwise <code>false</code>
      */
     public static boolean isAsciiLetter(final char c) {
@@ -358,6 +395,7 @@ public class Strings {
     /**
      * High speed test for ASCII letter or digit!
      *
+     * @param c The character to check
      * @return <code>true</code> if the indicated character is an ASCII letter or digit; otherwise <code>false</code>
      */
     public static boolean isAsciiLetterOrDigit(final char c) {
@@ -367,7 +405,7 @@ public class Strings {
     /**
      * Gets specified string's ASCII bytes
      *
-     * @param str The string
+     * @param cs The string
      * @return The ASCII bytes
      */
     public static byte[] toAsciiBytes(final CharSequence cs) {
@@ -510,7 +548,7 @@ public class Strings {
         return splitBy(s, ',', true);
     }
 
-   // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+    // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
 
     /**
      * Splits given string by colon separator.
@@ -606,7 +644,7 @@ public class Strings {
         return P_SPLIT_CRLF.split(s, 0);
     }
 
-    private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
+    // private static final Pattern P_SPLIT_TAB = Pattern.compile("\t");
 
     /**
      * Splits given string by tabs.
@@ -615,10 +653,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByTab(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_TAB.split(s, 0);
+        return splitBy(s, '\t', false);
     }
 
     private static final Pattern P_SPLIT_WHITESPACE = Pattern.compile("\\s+");
@@ -644,6 +679,7 @@ public class Strings {
      * @param replacement The replacement character
      * @return The string with all occurrences replaced
      */
+    @SuppressWarnings("null")
     public static String replaceSequenceWith(String s, String sequence, char replacement) {
         if ((null == s) || (null == sequence)) {
             return s;
@@ -667,11 +703,10 @@ public class Strings {
         }
 
         if (prev > 0) {
-            sb.append(s.substring(prev, s.length()));
+            sb.append(s.substring(prev));
         }
         return null == sb ? s : sb.toString();
     }
-
 
     /**
      * Replaces all occurrences of the specified sequence in string with given replacement.
@@ -681,6 +716,7 @@ public class Strings {
      * @param replacement The replacement
      * @return The string with all occurrences replaced
      */
+    @SuppressWarnings("null")
     public static String replaceSequenceWith(String s, String sequence, String replacement) {
         if ((null == s) || (null == sequence) || (null == replacement)) {
             return s;
@@ -704,7 +740,7 @@ public class Strings {
         }
 
         if (prev > 0) {
-            sb.append(s.substring(prev, s.length()));
+            sb.append(s.substring(prev));
         }
         return null == sb ? s : sb.toString();
     }
@@ -854,6 +890,7 @@ public class Strings {
 
     /* In a holder class to defer initialization until needed. */
     private static class Holder {
+
         static final CharsetDecoder UTF8_CHARSET_DECODER;
         static {
             final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
@@ -909,12 +946,12 @@ public class Strings {
     }
 
     /**
-     * Joins a collection of objects by connecting the results of their #toString() method with a connector
+     * Joins a collection of objects by connecting the results of their #toString() method with a connector.
+     * Can be <code>null</code> if collection == null or empty string if collection is empty
      *
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @param builder The string builder to use
-     * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final Collection<? extends Object> coll, final String connector, final StringBuilder builder) {
         if (coll == null) {
@@ -938,12 +975,12 @@ public class Strings {
     }
 
     /**
-     * Joins an array of integers by connecting their String representations with a connector
+     * Joins an array of integers by connecting their String representations with a connector.
+     * Can be <code>null</code> if collection == null or empty string if collection is empty
      *
      * @param arr Integers to be connected
      * @param connector Connector place between two objects
      * @param builder The string builder to use
-     * @return connected strings or null if collection == null or empty string if collection is empty
      */
     public static void join(final int[] arr, final String connector, final StringBuilder builder) {
         final List<Integer> list = new LinkedList<Integer>();
@@ -951,6 +988,38 @@ public class Strings {
             list.add(Autoboxing.I(i));
         }
         join(list, connector, builder);
+    }
+
+    /**
+     * Joins the specified array of {@link T} objects with the specified <code>connector</code>
+     * starting from <code>beginIndex</code> and going until the <code>endIndex</code> inclusively.
+     * If the <code>endIndex</code> lies outside the <code>array</code> length, then the array's length
+     * will be used as an <code>endIndex</code>.
+     *
+     * @param array The elements of the array to join
+     * @param connector The connector string
+     * @param beginIndex The begin index
+     * @param endIndex The end index
+     * @return The joined String or <code>null</code> if an empty or <code>null</code> array is provided.
+     * @throws IllegalArgumentException if the begin index lies after the end index.
+     */
+    public static <T> String join(T[] array, String connector, int beginIndex, int endIndex) {
+        if (array == null || array.length == 0) {
+            return null;
+        }
+        if (endIndex - beginIndex < 0) {
+            throw new IllegalArgumentException("The begin index cannot lie after the end index (" + beginIndex + ">" + endIndex + ")");
+        }
+        if (endIndex > array.length) {
+            endIndex = array.length;
+        }
+        StringBuilder builder = new StringBuilder(array.length << 4);
+        int index = beginIndex;
+        builder.append(array[index++]);
+        while (index < endIndex) {
+            builder.append(connector).append(array[index++]);
+        }
+        return builder.toString();
     }
 
     public static <T> String join(final T[] arr, final String connector) {
@@ -967,25 +1036,22 @@ public class Strings {
 
     public static String join(final byte[] arr, final String connector) {
         final List<Byte> list = new LinkedList<Byte>();
-        for (final Byte i : arr) {
-            list.add(i);
+        for (byte i : arr) {
+            list.add(Byte.valueOf(i));
         }
         return join(list, connector);
     }
 
+    private static final byte[][] BYTE_ORDER_MARKS = new byte[][] { new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF }, new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
     /**
      * Removes byte order marks from UTF8 strings.
      *
+     * @param str The string to remove byte marks on
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
-        final byte[][] byteOrderMarks = new byte[][] {
-            new byte[] { (byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF },
-            new byte[] { (byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x0 }, new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF },
-            new byte[] { (byte) 0xFE, (byte) 0xFF }, new byte[] { (byte) 0xFE, (byte) 0xFF } };
-
         final byte[] bytes = str.getBytes();
-        for (final byte[] bom : byteOrderMarks) {
+        for (final byte[] bom : BYTE_ORDER_MARKS) {
             if (bom.length > bytes.length) {
                 continue;
             }
@@ -1106,7 +1172,7 @@ public class Strings {
      * @return The quoted string.
      */
     public static String quote(final String s) {
-        return concat('"', s, '"');
+        return concat(Character.valueOf('"'), s, Character.valueOf('"'));
     }
 
     /**
@@ -1139,6 +1205,7 @@ public class Strings {
      * Removes surrounding characters from a string in case it is actually surrounded.
      *
      * @param s The value to be un-char'd
+     * @param c The character to remove
      * @return The un-char'd value or <code>null</code>
      */
     public static String unchar(final String s, final char c) {
@@ -1179,11 +1246,11 @@ public class Strings {
     }
 
     /**
-     * Generates a string of code points for given string
+     * Generates a string of code points for given string and print it
+     * either to the given stream or to {@link System#out}
      *
      * @param str The string
      * @param out The print stream to print to
-     * @return The code points
      */
     public static void outCodePoints(final String str, final PrintStream out) {
         if (null == out) {
@@ -1193,7 +1260,12 @@ public class Strings {
         }
     }
 
-    /** ASCII-wise to upper-case */
+    /**
+     * ASCII-wise to upper-case
+     *
+     * @param chars The {@link CharSequence} to transform
+     * @return A new String with upper case characters
+     */
     public static String toUpperCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -1218,7 +1290,12 @@ public class Strings {
         return null == builder ? chars.toString() : builder.toString();
     }
 
-    /** ASCII-wise to lower-case */
+    /**
+     * ASCII-wise to lower-case
+     *
+     * @param chars The {@link CharSequence} to transform
+     * @return A new String with lower case characters
+     */
     public static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -1243,15 +1320,7 @@ public class Strings {
         return null == builder ? chars.toString() : builder.toString();
     }
 
-    private static char[] lowercases = {
-        '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017',
-        '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037',
-        '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057',
-        '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077',
-        '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137',
-        '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157',
-        '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
+    private static char[] lowercases = { '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010', '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021', '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032', '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043', '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054', '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065', '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076', '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142', '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175', '\176', '\177' };
 
     /**
      * Fast lower-case conversion.
@@ -1259,6 +1328,7 @@ public class Strings {
      * @param s The string
      * @return The lower-case string
      */
+    @SuppressWarnings("null")
     public static String asciiLowerCase(String s) {
         if (null == s) {
             return null;
@@ -1627,7 +1697,6 @@ public class Strings {
             sb.delete(0, st);
         }
 
-
         return sb;
     }
 
@@ -1783,14 +1852,40 @@ public class Strings {
      * @param hash Array of bytes to convert to hex-string
      * @return Generated hex string
      */
-    public static String asHex(final byte[] hash) {
+    public static char[] asHexChars(final byte[] hash) {
         final int length = hash.length;
         final char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];
         }
-        return new String(buf);
+        return buf;
     }
 
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    public static String asHex(final byte[] hash) {
+        return new String(asHexChars(hash));
+    }
+
+    /**
+     * Converts the specified byte count to its counterpart human readable format.
+     *
+     * @param bytes The amount of bytes to convert
+     * @param si Whether the SI notation will be used.
+     * @return The human readable format
+     */
+    public static String humanReadableByteCount(long bytes, boolean si) {
+        int unit = si ? 1000 : 1024;
+        if (bytes < unit) {
+            return bytes + " B";
+        }
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+        return String.format("%.1f %sB", Double.valueOf(bytes / Math.pow(unit, exp)), pre);
+    }
 }

@@ -14,7 +14,7 @@ BuildRequires: java-1.8.0-openjdk-devel
 %endif
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define        ox_release 12
+%define        ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -57,28 +57,16 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Mon May 06 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-05-13 (5235)
-* Wed Apr 24 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-04-29 (5211)
-* Tue Mar 26 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-04-01 (5180)
-* Tue Mar 12 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-03-11 (5149)
-* Thu Feb 21 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-02-25 (5133)
-* Thu Feb 07 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-02-11 (5108)
-* Tue Jan 29 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-01-31 (5103)
-* Mon Jan 21 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-01-28 (5076)
-* Tue Jan 08 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Build for patch 2019-01-14 (5023)
-* Fri Nov 23 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-RC 1 for 7.10.1 release
-* Fri Nov 02 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-Second preview for 7.10.1 release
+* Fri May 10 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second candidate for 7.10.2 release
+* Fri May 10 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First candidate for 7.10.2 release
+* Tue Apr 30 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second preview for 7.10.2 release
+* Thu Mar 28 2019 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First preview for 7.10.2 release
+* Thu Oct 18 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.10.2 release
 * Thu Oct 11 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First candidate for 7.10.1 release
 * Thu Sep 06 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>

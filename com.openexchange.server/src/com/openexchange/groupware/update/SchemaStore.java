@@ -49,12 +49,11 @@
 
 package com.openexchange.groupware.update;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import com.openexchange.caching.CacheService;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -146,22 +145,24 @@ public abstract class SchemaStore {
 
     public final void addExecutedTask(String taskName, boolean success, int poolId, String schema) throws OXException {
         Connection con = Database.get(poolId, schema);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             addExecutedTask(con, taskName, success, poolId, schema);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(poolId, con);
         }
     }
@@ -173,22 +174,24 @@ public abstract class SchemaStore {
 
     public final void addExecutedTasks(int contextId, Collection<String> taskNames, boolean success, int poolId, String schema) throws OXException {
         final Connection con = Database.get(contextId, true);
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             addExecutedTasks(con, taskNames, success, poolId, schema);
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
             Database.back(contextId, true, con);
         }
     }

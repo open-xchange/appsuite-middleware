@@ -314,3 +314,14 @@ properties:
     file: login.properties
     packageName: open-xchange-core
     tags: ["Login"]
+  - key: com.openexchange.ajax.login.allowedRedirectURIsOnLoginError
+    description: |
+      Specifies a comma-separated list of those host names, to which it is allowed to redirect to in case a login fails. If nothing is set
+      (default) every redirect is allowed. Accepts wild-card notation.
+    defaultValue: 
+    version: 7.10.2
+    reloadable: false
+    configcascadeAware: false
+    file: login.properties
+    packageName: open-xchange-core
+    tags: ["Login"]

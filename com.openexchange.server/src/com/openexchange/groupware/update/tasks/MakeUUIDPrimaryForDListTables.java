@@ -80,10 +80,10 @@ public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         ProgressState progress = params.getProgressState();
         Connection connection = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             Databases.startTransaction(connection);
-            rollback = true;
+            rollback = 1;
 
             progress.setTotal(getTotalRows(connection));
             if (!Tools.columnExists(connection, TABLE, COLUMN)) {
@@ -102,14 +102,16 @@ public class MakeUUIDPrimaryForDListTables extends UpdateTaskAdapter {
             Tools.createPrimaryKeyIfAbsent(connection, DEL_TABLE, new String[] { COLUMN, "cid", "intfield01" });
 
             connection.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                Databases.rollback(connection);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(connection);
+                }
+                Databases.autocommit(connection);
             }
-            Databases.autocommit(connection);
         }
     }
 

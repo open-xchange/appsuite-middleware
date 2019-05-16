@@ -49,6 +49,7 @@
 
 package com.openexchange.test.fixtures.transformators;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 
@@ -61,11 +62,11 @@ public class PriorityTransformator implements Transformator {
     @Override
     public Object transform(final String value) throws OXException {
         if ("low".equalsIgnoreCase(value)) {
-            return Task.LOW;
+            return I(Task.LOW);
         } else if ("normal".equalsIgnoreCase(value)) {
-            return Task.NORMAL;
+            return I(Task.NORMAL);
         } else if ("high".equalsIgnoreCase(value)) {
-            return Task.HIGH;
+            return I(Task.HIGH);
         } else {
             throw OXException.general("Unknown Priority: " + value);
         }

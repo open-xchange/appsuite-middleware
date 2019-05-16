@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.action;
 
+import static com.openexchange.chronos.json.fields.ChronosJsonFields.COMMENT;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
@@ -100,8 +101,8 @@ public class UpdateAction extends ChronosAction {
 
         Map<String, Object> bodyParameters = new HashMap<>();
         Event event = parseEvent(requestData, bodyParameters);
-        if (bodyParameters.containsKey(BODY_PARAM_COMMENT)) {
-            calendarAccess.set(CalendarParameters.PARAMETER_COMMENT, bodyParameters.get(BODY_PARAM_COMMENT));
+        if (bodyParameters.containsKey(COMMENT)) {
+            calendarAccess.set(CalendarParameters.PARAMETER_COMMENT, bodyParameters.get(COMMENT));
         }
 
         if (false == calendarAccess.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {

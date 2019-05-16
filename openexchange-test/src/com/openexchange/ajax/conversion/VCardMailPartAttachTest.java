@@ -87,11 +87,9 @@ public final class VCardMailPartAttachTest extends AbstractConversionTest {
 
     /**
      * Tests the <code>action=convert</code> request
-     *
-     * @throws Throwable
      */
     @Test
-    public void testVCardAttach() throws Throwable {
+    public void testVCardAttach() {
         try {
             /*
              * Find a valid contact

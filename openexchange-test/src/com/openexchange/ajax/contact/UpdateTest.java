@@ -15,7 +15,7 @@ public class UpdateTest extends AbstractContactTest {
 
     @Test
     public void testUpdate() throws Exception {
-        final Contact contactObj = createContactObject("testUpdate");
+        final Contact contactObj = createContactObject();
         final int objectId = insertContact(contactObj);
 
         contactObj.setObjectID(objectId);
@@ -29,7 +29,7 @@ public class UpdateTest extends AbstractContactTest {
 
     @Test
     public void testUpdateWithDistributionList() throws Exception {
-        final Contact contactEntry = createContactObject("internal contact");
+        final Contact contactEntry = createContactObject();
         contactEntry.setEmail1("internalcontact@x.de");
         final int contactId = insertContact(contactEntry);
         contactEntry.setObjectID(contactId);
@@ -58,7 +58,7 @@ public class UpdateTest extends AbstractContactTest {
 
     @Test
     public void testContactWithImage() throws Exception {
-        final Contact contactObj = createContactObject("testContactWithImage");
+        final Contact contactObj = createContactObject();
         contactObj.setImage1(image);
         contactObj.setImageContentType("image/png");
         final int objectId = insertContact(contactObj);
@@ -77,7 +77,7 @@ public class UpdateTest extends AbstractContactTest {
 
     @Test
     public void testUpdateContactWithImage() throws Exception {
-        final Contact contactObj = createContactObject("testUpdateContactWithImageUpdate");
+        final Contact contactObj = createContactObject();
         final int objectId = insertContact(contactObj);
 
         contactObj.setImage1(image);

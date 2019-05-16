@@ -96,7 +96,7 @@ public abstract class OXContextRestoreStorageInterface {
                             throw new StorageException(e);
                         }
                     } else {
-                        final StorageException storageException = new StorageException("Property for user_storage not defined");
+                        final StorageException storageException = new StorageException("Property for CONTEXT_RESTORE_STORAGE not defined");
                         log.error("", storageException);
                         throw storageException;
                     }

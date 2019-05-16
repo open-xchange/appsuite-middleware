@@ -53,8 +53,30 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 public interface HTTPPutRequestBuilder extends HTTPGenericRequestBuilder<HTTPPutRequestBuilder> {
+
+    /**
+     * Sets the body
+     *
+     * @param body The body as a string
+     * @return This {@link HTTPRequestBuilder}
+     * @throws OXException
+     */
 	public HTTPPutRequestBuilder body(String body) throws OXException;
+
+    /**
+     * Sets the body
+     *
+     * @param body The body as a {@link InputStream}
+     * @return This {@link HTTPRequestBuilder}
+     * @throws OXException
+     */
 	public HTTPPutRequestBuilder body(InputStream body) throws OXException;
 
+    /**
+     * Sets the content type
+     *
+     * @param ctype Ther content type
+     * @return This {@link HTTPRequestBuilder}
+     */
 	public HTTPPutRequestBuilder contentType(String ctype);
 }

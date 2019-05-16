@@ -61,8 +61,20 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  */
 public interface FolderUpdaterService<T> {
+
+    /**
+     * Whether this {@link FolderUpdaterService} handles the given folder or not
+     *
+     * @param folder The {@link FolderObject} to check
+     * @return true if it handles it, false otherwise
+     */
     public boolean handles(FolderObject folder);
 
+    /**
+     * Whether this {@link FolderUpdaterService} uses the multiple strategy or not
+     *
+     * @return true if it uses the multiple strategy, false otherwise
+     */
     public boolean usesMultipleStrategy();
 
     /**

@@ -103,7 +103,7 @@ public enum NodeType {
                     final TestCommand command = (TestCommand) jjtAccept;
                     ifCommand.setTestcommand(command);
                 } else if (jjtAccept instanceof ArrayList) {
-                    final ArrayList command = (ArrayList) jjtAccept;
+                    final ArrayList<ActionCommand> command = (ArrayList<ActionCommand>) jjtAccept;
                     for (Object o : command) {
                         if (o instanceof Rule) {
                             throw new SieveException("Nested 'if' commands are not supported by this implementation");
@@ -203,7 +203,7 @@ public enum NodeType {
      * @param data The data
      * @param commented whether to comment the rule
      */
-    private static void parseUnsupported(ASTcommand node, Object data, boolean commented) {
+    static void parseUnsupported(ASTcommand node, Object data, boolean commented) {
         ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), node.getName() + " is not support by this implementation."));
     }
 

@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -149,7 +149,7 @@ public class DefaultGuestInfo implements GuestInfo {
             String cryptedPassword = guestUser.getUserPassword();
             if (Strings.isNotEmpty(cryptedPassword)) {
                 try {
-                    return services.getService(PasswordMechFactory.class).get(guestUser.getPasswordMech()).decode(cryptedPassword);
+                    return services.getService(PasswordMechRegistry.class).get(guestUser.getPasswordMech()).decode(cryptedPassword, guestUser.getSalt());
                 } catch (OXException e) {
                     getLogger(DefaultGuestInfo.class).error("Error decrypting password '{}' for guest user {} in context {}",
                         cryptedPassword, Integer.valueOf(getGuestID()), Integer.valueOf(contextID), e);

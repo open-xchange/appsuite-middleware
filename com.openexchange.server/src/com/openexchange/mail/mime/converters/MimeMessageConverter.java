@@ -2084,29 +2084,33 @@ public final class MimeMessageConverter {
         try {
             final Folder f = msg.getFolder();
             if (f != null) {
-                final String[] ret = new String[2];
+                String[] ret = new String[2];
                 ret[0] = f.getFullName();
-                final boolean openFolder = !f.isOpen();
-                if (openFolder) {
+                if (!f.isOpen()) {
                     f.open(Folder.READ_ONLY);
-                }
-                try {
-                    if (f instanceof UIDFolder) {
-                        ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
-                    } else if (f instanceof POP3Folder) {
-                        ret[1] = ((POP3Folder) f).getUID(msg);
-                    }
-                } finally {
-                    if (openFolder) {
+                    try {
+                        setId(msg, f, ret);
+                    } finally {
                         f.close(false);
                     }
+                } else {
+                    setId(msg, f, ret);
                 }
+                return ret;
             }
         } catch (final Exception e) {
             // Ignore
             LOG.debug("{}", e.getMessage(), e);
         }
         return null;
+    }
+
+    private static void setId(final MimeMessage msg, final Folder f, String[] ret) throws MessagingException {
+        if (f instanceof UIDFolder) {
+            ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
+        } else if (f instanceof POP3Folder) {
+            ret[1] = ((POP3Folder) f).getUID(msg);
+        }
     }
 
     /**

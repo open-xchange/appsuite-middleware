@@ -148,7 +148,9 @@ public class ReplyITipAnalyzerTest {
         // Mock used service classes
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(UserService.class)).thenReturn(this.userService);
+        PowerMockito.when(Services.getService(UserService.class, true)).thenReturn(this.userService);
         PowerMockito.when(Services.getService(ContextService.class)).thenReturn(this.contextService);
+        PowerMockito.when(Services.getService(ContextService.class, true)).thenReturn(this.contextService);
 
         // Mock settings
         PowerMockito.when(contextService.getContext(ArgumentMatchers.anyInt())).thenReturn(context);

@@ -85,8 +85,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
 public class CopyAction extends ContactAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyAction.class);
-
     /**
      * Initializes a new {@link CopyAction}.
      * @param serviceLookup

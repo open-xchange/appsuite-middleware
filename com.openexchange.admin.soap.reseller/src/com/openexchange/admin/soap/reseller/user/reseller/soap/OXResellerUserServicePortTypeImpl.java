@@ -6,6 +6,7 @@
 
 package com.openexchange.admin.soap.reseller.user.reseller.soap;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -449,7 +450,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             excludeUsers = Boolean.FALSE;
         }
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), includeGuests, excludeUsers);
+            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth), includeGuests.booleanValue(), excludeUsers.booleanValue());
             if (null == list) {
                 return null;
             }
@@ -717,7 +718,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             excludeUsers = Boolean.FALSE;
         }
         try {
-            final User[] listAll = iface.listAll(soap2Context(ctx), soap2Credentials(auth), includeGuests, excludeUsers);
+            final User[] listAll = iface.listAll(soap2Context(ctx), soap2Credentials(auth), includeGuests.booleanValue(), excludeUsers.booleanValue());
             if (null == listAll) {
                 return null;
             }
@@ -1540,7 +1541,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (bool_tmp != null) {
             user.setConvertDriveUserFolders(bool_tmp.booleanValue());
         }
-        
+
         bool_tmp = soapUser.isLoadRemoteMailContentByDefault();
         if (bool_tmp != null) {
             user.setLoadRemoteMailContentByDefault(bool_tmp);
@@ -2213,7 +2214,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setId(user.getId());
         soapUser.setImapLogin(user.getImapLogin());
         soapUser.setImapServer(user.getImapServer());
-        soapUser.setImapPort(user.getImapPort());
+        soapUser.setImapPort(I(user.getImapPort()));
         soapUser.setImapServerString(user.getImapServerString());
         soapUser.setImapSchema(user.getImapSchema());
         soapUser.setInfo(user.getInfo());
@@ -2248,7 +2249,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setRoomNumber(user.getRoom_number());
         soapUser.setSalesVolume(user.getSales_volume());
         soapUser.setSmtpServer(user.getSmtpServer());
-        soapUser.setSmtpPort(user.getSmtpPort());
+        soapUser.setSmtpPort(I(user.getSmtpPort()));
         soapUser.setSmtpServerString(user.getSmtpServerString());
         soapUser.setSmtpSchema(user.getSmtpSchema());
         soapUser.setSpouseName(user.getSpouse_name());
@@ -2437,11 +2438,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
             moduleAccess.setOLOX20(booleanValue(tmp));
         }
 
-        tmp = soapModuleAccess.isPublication();
-        if (tmp != null) {
-            moduleAccess.setPublication(booleanValue(tmp));
-        }
-
         tmp = soapModuleAccess.isPublicFolderEditable();
         if (tmp != null) {
             moduleAccess.setPublicFolderEditable(booleanValue(tmp));
@@ -2518,7 +2514,6 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapModuleAccess.setInfostore(Boolean.valueOf(moduleAccess.getInfostore()));
         soapModuleAccess.setMultipleMailAccounts(Boolean.valueOf(moduleAccess.isMultipleMailAccounts()));
         soapModuleAccess.setOLOX20(Boolean.valueOf(moduleAccess.isOLOX20()));
-        soapModuleAccess.setPublication(Boolean.valueOf(moduleAccess.isPublication()));
         soapModuleAccess.setPublicFolderEditable(Boolean.valueOf(moduleAccess.isPublicFolderEditable()));
         soapModuleAccess.setReadCreateSharedFolders(Boolean.valueOf(moduleAccess.getReadCreateSharedFolders()));
         soapModuleAccess.setSubscription(Boolean.valueOf(moduleAccess.isSubscription()));

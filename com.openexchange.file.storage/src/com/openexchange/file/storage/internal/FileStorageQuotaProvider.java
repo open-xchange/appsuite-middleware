@@ -94,12 +94,15 @@ public class FileStorageQuotaProvider implements QuotaProvider {
     }
 
     @Override
-    public AccountQuota getFor(Session session, String accountID) throws OXException {
-        List<String> unmangled = IDMangler.unmangle(accountID);
+    public AccountQuota getFor(Session session, String compositeAccountID) throws OXException {
+        String accountID = compositeAccountID;
         String serviceID = null;
-        if (unmangled.size() == 2) {
-            serviceID = unmangled.get(0);
-            accountID = unmangled.get(1);
+        {
+            List<String> unmangled = IDMangler.unmangle(compositeAccountID);
+            if (unmangled.size() == 2) {
+                serviceID = unmangled.get(0);
+                accountID = unmangled.get(1);
+            }
         }
 
         if (serviceID == null) {
@@ -164,10 +167,7 @@ public class FileStorageQuotaProvider implements QuotaProvider {
                             if (limit == Quota.UNLIMITED) {
                                 accountQuota.addQuota(com.openexchange.quota.Quota.UNLIMITED_AMOUNT);
                             } else {
-                                accountQuota.addQuota(
-                                    QuotaType.AMOUNT,
-                                    limit,
-                                    quota.getUsage());
+                                accountQuota.addQuota(QuotaType.AMOUNT, limit, quota.getUsage());
                             }
                             break;
 
@@ -175,10 +175,7 @@ public class FileStorageQuotaProvider implements QuotaProvider {
                             if (limit == Quota.UNLIMITED) {
                                 accountQuota.addQuota(com.openexchange.quota.Quota.UNLIMITED_SIZE);
                             } else {
-                                accountQuota.addQuota(
-                                    QuotaType.SIZE,
-                                    limit,
-                                    quota.getUsage());
+                                accountQuota.addQuota(QuotaType.SIZE, limit, quota.getUsage());
                             }
                             break;
                     }

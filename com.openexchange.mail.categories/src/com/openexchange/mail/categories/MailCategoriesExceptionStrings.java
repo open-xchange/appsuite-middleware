@@ -58,7 +58,12 @@ import com.openexchange.i18n.LocalizableStrings;
  * @since v7.8.2
  */
 public class MailCategoriesExceptionStrings implements LocalizableStrings {
-    
+
+    /**
+     * Prevents instantiation
+     */
+    private MailCategoriesExceptionStrings() {}
+
     // The user category %1$s does not exist.
     public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
 

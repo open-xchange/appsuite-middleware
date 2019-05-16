@@ -49,8 +49,10 @@
 
 package com.openexchange.sessiond;
 
+import java.util.ArrayList;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Origin;
 
 /**
  * {@link DefaultAddSessionParameter} - The default implementation of {@code AddSessionParameter}.
@@ -70,14 +72,16 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private String client;
     private String clientToken;
     private boolean tranzient;
-    private SessionEnhancement enhancement;
+    private ArrayList<SessionEnhancement> enhancements;
     private String userAgent;
+    private Origin origin;
 
     /**
      * Initializes a new {@link DefaultAddSessionParameter}.
      */
     public DefaultAddSessionParameter() {
         super();
+        enhancements = null;
     }
 
     @Override
@@ -257,12 +261,24 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     }
 
     @Override
-    public SessionEnhancement getEnhancement() {
-        return enhancement;
+    public ArrayList<SessionEnhancement> getEnhancements() {
+        return enhancements;
     }
 
-    public void setEnhancement(SessionEnhancement enhancement) {
-        this.enhancement = enhancement;
+    /**
+     * Adds given <code>SessionEnhancement</code> instance to these parameters.
+     *
+     * @param enhancement The enhancement to add
+     */
+    public void addEnhancement(SessionEnhancement enhancement) {
+        if (null != enhancement) {
+            ArrayList<SessionEnhancement> enhancements = this.enhancements;
+            if (null == enhancements) {
+                enhancements = new ArrayList<>(4);
+                this.enhancements = enhancements;
+            }
+            enhancements.add(enhancement);
+        }
     }
 
     @Override
@@ -270,7 +286,27 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
         return userAgent;
     }
 
+    /**
+     * Sets the User-Agent string.
+     *
+     * @param userAgent The User-Agent string to set
+     */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
+
+    @Override
+    public Origin getOrigin() {
+        return origin;
+    }
+
+    /**
+     * Sets the origin
+     *
+     * @param origin The origin to set
+     */
+    public void setOrigin(Origin origin) {
+        this.origin = origin;
+    }
+
 }

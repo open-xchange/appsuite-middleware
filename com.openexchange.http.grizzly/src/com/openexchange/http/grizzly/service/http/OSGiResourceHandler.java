@@ -91,6 +91,7 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -166,9 +167,8 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             LOG.debug("OSGiResourceHandler \'{}\' Haven't found '{}'.", alias, path);
             response.setStatus(404);
             return;
-        } else {
-            response.setStatus(200);
         }
+        response.setStatus(200);
 
         // MIME handling
         String mime = httpContext.getMimeType(path);
@@ -195,7 +195,7 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
             os.flush();
             response.finish();
             if (total != length) {
-                LOG.warn("Was supposed to send {}, but sent {}", length, total);
+                LOG.warn("Was supposed to send {}, but sent {}", I(length), I(total));
             }
         } catch (IOException e) {
             LOG.warn("", e);

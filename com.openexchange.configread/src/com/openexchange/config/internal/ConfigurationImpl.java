@@ -574,10 +574,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     @Override
     public boolean getBoolProperty(final String name, final boolean defaultValue) {
         final String prop = properties.get(name);
-        if (null != prop) {
-            return Boolean.parseBoolean(prop.trim());
-        }
-        return defaultValue;
+        return null == prop ? defaultValue : Boolean.parseBoolean(prop.trim());
     }
 
     @Override

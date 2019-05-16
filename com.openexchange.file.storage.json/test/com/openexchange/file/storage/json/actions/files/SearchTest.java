@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.Arrays;
@@ -85,7 +86,7 @@ public class SearchTest extends FileActionTest {
             .param("sort", "700").param("order", "desc").param("start", "10").param("end", "12").param("timezone", "Europe/Berlin");
 
         List<Field> columns = Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME);
-        fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, 10, 12).andReturn(SearchIteratorAdapter.emptyIterator());
+        fileAccess().expectCall("search", "someSearch", columns, "12", File.Field.TITLE, SortDirection.DESC, I(10), I(12)).andReturn(SearchIteratorAdapter.emptyIterator());
 
         perform();
 

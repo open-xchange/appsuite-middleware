@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.json.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -91,7 +90,7 @@ public final class UpdatesAction extends AbstractResourceAction {
         Resource[] updatedResources = null;
         Resource[] deletedResources = null;
         try {
-            ResourceService resService = ResourceServiceImpl.getInstance();
+            ResourceService resService = services.getServiceSafe(ResourceService.class);
             updatedResources = resService .listModified(lastModified, session.getContext());
             deletedResources = resService.listDeleted(lastModified, session.getContext());
         } catch (final OXException exc) {

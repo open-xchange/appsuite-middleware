@@ -55,10 +55,6 @@ package com.openexchange.reseller.data;
  */
 public interface PasswordMechObject {
 
-    public static final String CRYPT_MECH = "{CRYPT}".intern();
-    public static final String SHA_MECH = "{SHA}".intern();
-    public static final String BCRYPT_MECH = "{BCRYPT}".intern();
-
     /**
      * @return the passwordMech
      */
@@ -70,4 +66,11 @@ public interface PasswordMechObject {
      * @return A {@link String} containing the password
      */
     String getPassword();
+
+    /**
+     * Return the salt of this user object.
+     *
+     * @return A {@link String} containing the salt
+     */
+    String getSalt();
 }

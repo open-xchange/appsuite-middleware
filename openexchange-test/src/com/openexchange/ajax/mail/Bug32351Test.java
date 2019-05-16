@@ -88,12 +88,14 @@ public class Bug32351Test extends AbstractMailTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         values = getClient().getValues();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -145,23 +147,21 @@ public class Bug32351Test extends AbstractMailTest {
             }
         }
 
-        String mailID = json.getJSONObject(0).getString("id");
-        String folderID = json.getJSONObject(0).getString("folder_id");
 
         // Concurrent delete attempts
         final String[][] fmid = this.fmid;
-        final AJAXClient client = getClient();
         final CountDownLatch startLatch = new CountDownLatch(1);
         final CountDownLatch endLatch = new CountDownLatch(2);
 
         final AtomicReference<Exception> exc1 = new AtomicReference<Exception>();
+        final AJAXClient client = getClient();
         final Runnable deleteTask1 = new Runnable() {
 
             @Override
             public void run() {
                 try {
                     startLatch.await();
-                    getClient().execute(new DeleteRequest(fmid, false));
+                    client.execute(new DeleteRequest(fmid, false));
 
                     System.out.println("Thread #1 performed deletion");
 
@@ -181,7 +181,7 @@ public class Bug32351Test extends AbstractMailTest {
             public void run() {
                 try {
                     startLatch.await();
-                    getClient().execute(new DeleteRequest(fmid, false));
+                    client.execute(new DeleteRequest(fmid, false));
 
                     System.out.println("Thread #2 performed deletion");
 

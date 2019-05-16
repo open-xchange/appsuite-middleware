@@ -89,6 +89,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Fixtures<T> getFixtures(final String fixtureName, final Class<T> aClass) throws OXException {
         if (fixturesCache.containsKey(fixtureName) && fixturesClasses.get(fixtureName).equals(aClass)) {
@@ -97,7 +98,7 @@ public class YAMLFixtureLoader implements FixtureLoader {
         if (null == fixtureDefinitions.get(fixtureName)) {
             load(fixtureName);
         }
-        final Fixtures<T> fixtures = getFixtureFactory(aClass).createFixture(fixtureName, fixtureDefinitions.get(fixtureName));
+        final Fixtures<T> fixtures = getFixtureFactory(aClass).createFixture(fixtureDefinitions.get(fixtureName));
         fixturesCache.put(fixtureName, fixtures);
         fixturesClasses.put(fixtureName, aClass);
         return fixtures;

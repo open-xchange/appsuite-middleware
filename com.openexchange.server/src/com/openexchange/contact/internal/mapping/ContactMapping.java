@@ -67,8 +67,9 @@ public abstract class ContactMapping<T> extends com.openexchange.groupware.tools
 	 * @param contact the contact to validate the property for
 	 * @throws OXException
 	 */
-	public void validate(final Contact contact) throws OXException {
-
+    @SuppressWarnings("unused")
+    public void validate(final Contact contact) throws OXException {
+        // empty
 	}
 
 	@Override
@@ -76,7 +77,8 @@ public abstract class ContactMapping<T> extends com.openexchange.groupware.tools
 		return this.compare(object1, object2, (Comparator<Object>) null);
 	}
 
-	public int compare(final Contact object1, final Contact object2, final Comparator<Object> collator) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public int compare(final Contact object1, final Contact object2, final Comparator<Object> collator) {
 		final T value1 = this.get(object1);
 		final T value2 = this.get(object2);
 		if (value1 == value2) {

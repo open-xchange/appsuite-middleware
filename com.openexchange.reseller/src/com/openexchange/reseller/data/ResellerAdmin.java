@@ -85,6 +85,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         private String name;
         private String password;
         private String passwordMech;
+        private String salt;
         private String displayname;
         private Restriction[] restrictions;
 
@@ -124,6 +125,11 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
             return this;
         }
 
+        public ResellerAdminBuilder salt(String salt) {
+            this.salt = salt;
+            return this;
+        }
+
         public ResellerAdminBuilder displayname(String displayname) {
             this.displayname = displayname;
             return this;
@@ -140,7 +146,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
          * @return The {@code ResellerAdmin} instance
          */
         public ResellerAdmin build(){
-            return new ResellerAdmin(id, parentId, name, password, passwordMech, displayname, restrictions);
+            return new ResellerAdmin(id, parentId, name, password, passwordMech, salt, displayname, restrictions);
         }
     }
 
@@ -161,6 +167,9 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     private final String passwordMech;
     private final boolean passwordMechset;
 
+    private final String salt;
+    private final boolean saltSet;
+
     private final String displayname;
     private final boolean displaynameset;
 
@@ -172,7 +181,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
     /**
      * Initializes a new {@link ResellerAdmin}.
      */
-    ResellerAdmin(Integer id, Integer parentId, String name, String password, String passwordMech, String displayname, Restriction[] restrictions) {
+    ResellerAdmin(Integer id, Integer parentId, String name, String password, String passwordMech, String salt, String displayname, Restriction[] restrictions) {
         super();
 
         if (id != null) {
@@ -213,6 +222,14 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         } else {
             this.passwordMech = null;
             passwordMechset = false;
+        }
+
+        if (salt != null) {
+            this.salt = salt;
+            saltSet = true;
+        } else {
+            this.salt = null;
+            saltSet = false;
         }
 
         if (displayname != null) {
@@ -264,6 +281,11 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
         return passwordMech;
     }
 
+    @Override
+    public String getSalt() {
+        return salt;
+    }
+
     /**
      * @return the pid
      */
@@ -304,6 +326,13 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
      */
     public boolean isPasswordset() {
         return passwordset;
+    }
+
+    /**
+     * @return the saltSet
+     */
+    public boolean isSaltSet() {
+        return saltSet;
     }
 
     /**
@@ -372,6 +401,7 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
             result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
             result = prime * result + (passwordMechset ? 1231 : 1237);
             result = prime * result + (passwordset ? 1231 : 1237);
+            result = prime * result + (saltSet ? 1231 : 1237);
             result = prime * result + ((restrictions == null) ? 0 : restrictions.hashCode());
             result = prime * result + (restrictionsset ? 1231 : 1237);
             tmp = Integer.valueOf(result);
@@ -404,6 +434,9 @@ public class ResellerAdmin implements PasswordMechObject, Cloneable {
             return false;
         }
         if (passwordMechset != other.passwordMechset) {
+            return false;
+        }
+        if (saltSet != other.saltSet) {
             return false;
         }
         if (passwordset != other.passwordset) {

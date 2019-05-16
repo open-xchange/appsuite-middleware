@@ -49,7 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import static com.google.common.net.HttpHeaders.*;
+import static com.google.common.net.HttpHeaders.ETAG;
+import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
 import static com.openexchange.java.Streams.bufferedInputStreamFor;
 import static com.openexchange.tools.images.ImageTransformationUtility.seemsLikeThumbnailRequest;
 import java.io.IOException;
@@ -110,13 +111,17 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         /*
          * handle request for thumbnails directly if supported by storage
          */
-        if (seemsLikeThumbnailRequest(request.getRequestData()) &&
-            fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.THUMBNAIL_IMAGES)) {
+        if (seemsLikeThumbnailRequest(request.getRequestData()) && fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.THUMBNAIL_IMAGES)) {
             File metadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
             InputStreamClosure isClosure = getThumbnailStream(request.getSession(), request.getId(), request.getVersion());
             IFileHolder fileHolder = new FileHolder(isClosure, -1, null, metadata.getFileName());
+            boolean scanned = scan(request, fileHolder, metadata);
+            if (scanned && false == fileHolder.repetitive()) {
+                isClosure = getThumbnailStream(request.getSession(), request.getId(), request.getVersion());
+                fileHolder = new FileHolder(isClosure, -1, null, metadata.getFileName());
+            }
             AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            createAndSetETag(metadata, request, result);
+            createAndSetETag(metadata, result);
             setLastModified(metadata, result);
             return result;
         }
@@ -134,6 +139,10 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                     try {
                         fileHolder.write(document.getData());
+                        boolean scanned = scan(request, fileHolder, document.getFile());
+                        if (scanned && false == document.isRepetitive()) {
+                            fileHolder.write(document.getData());
+                        }
                         result = new AJAXRequestResult(fileHolder, "file");
                         fileHolder = null;
                     } finally {
@@ -145,9 +154,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                         size = -1;
                     }
 
-                    FileHolder fileHolder = document.isRepetitive() ?
-                        new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) :
-                        new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
+                    FileHolder fileHolder = document.isRepetitive() ? new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) : new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
+                    boolean scanned = scan(request, fileHolder, document.getFile());
+                    if (scanned && false == document.isRepetitive()) {
+                        fileHolder = new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
+                    }
                     try {
                         if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
                             fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
@@ -177,6 +188,10 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             try {
                 fileHolder.write(fileAccess.getDocument(request.getId(), request.getVersion()));
+                boolean scanned = scan(request, fileHolder, metadata);
+                if (scanned && false == fileHolder.repetitive()) {
+                    fileHolder.write(fileAccess.getDocument(request.getId(), request.getVersion()));
+                }
                 result = new AJAXRequestResult(fileHolder, "file");
                 fileHolder = null;
             } finally {
@@ -193,18 +208,19 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
                     fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
                 }
+                scan(request, fileHolder, metadata);
                 result = new AJAXRequestResult(fileHolder, "file");
                 fileHolder = null;
             } finally {
                 Streams.close(fileHolder);
             }
         }
-        createAndSetETag(metadata, request, result);
+        createAndSetETag(metadata, result);
         setLastModified(metadata, result);
         return result;
     }
 
-    private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
+    private void createAndSetETag(File fileMetadata, AJAXRequestResult result) throws OXException {
         setETag(FileStorageUtility.getETagFor(fileMetadata), 0, result);
     }
 
@@ -276,7 +292,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
      * @param version The file version to retrieve the thumbnail for
      * @return A file holder providing access to the thumbnail data
      */
-    private static IFileHolder.InputStreamClosure getThumbnailStream(final ServerSession session, final String id, final String version) {
+    private IFileHolder.InputStreamClosure getThumbnailStream(final ServerSession session, final String id, final String version) {
         return new IFileHolder.InputStreamClosure() {
 
             @Override
@@ -305,7 +321,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
      * @param version The file version to retrieve the input stream for
      * @return A file holder providing access to the document data
      */
-    private static IFileHolder.InputStreamClosure getDocumentStream(final ServerSession session, final String id, final String version) {
+    private IFileHolder.InputStreamClosure getDocumentStream(final ServerSession session, final String id, final String version) {
         return new IFileHolder.InputStreamClosure() {
 
             @Override
@@ -322,7 +338,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
      * @param document The document
      * @return A file holder providing access to the document data
      */
-    private static IFileHolder.InputStreamClosure getDocumentStream(final Document document) {
+    private IFileHolder.InputStreamClosure getDocumentStream(final Document document) {
         return new IFileHolder.InputStreamClosure() {
 
             @Override

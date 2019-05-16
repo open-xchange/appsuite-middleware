@@ -52,6 +52,7 @@ package com.openexchange.dav;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -114,6 +115,11 @@ public class DAVProperty extends WebdavProperty {
     }
 
     @Override
+    public List<Element> getChildren() {
+        return element.getChildren();
+    }
+
+    @Override
     public Map<String, String> getAttributes() {
         HashMap<String, String> attributes = new HashMap<String, String>();
         for (Attribute attribute : element.getAttributes()) {
@@ -159,6 +165,11 @@ public class DAVProperty extends WebdavProperty {
 
     @Override
     public void setXML(boolean xml) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setChildren(List<Element> children) {
         throw new UnsupportedOperationException();
     }
 

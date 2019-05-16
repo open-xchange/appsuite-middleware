@@ -49,6 +49,8 @@
 
 package com.openexchange.pop3.connect;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.net.InetAddress;
 import java.util.concurrent.Callable;
@@ -145,7 +147,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
              */
             final int min = parseLoginDelaySeconds(capabilities);
             if (min >= 0 && (min * 1000l) > refreshRate) {
-                LOG.warn("Refresh rate of {}sec is lower than minimum allowed seconds between logins ({}sec)", refreshRate / 1000, min);
+                LOG.warn("Refresh rate of {}sec is lower than minimum allowed seconds between logins ({}sec)", L(refreshRate / 1000), I(min));
             }
         }
         LOG.debug("\n\tSynchronizing messages with POP3 account: {}", server, new Throwable());
@@ -201,7 +203,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         try {
             minutes = Integer.parseInt(frequencyStr);
         } catch (final NumberFormatException e) {
-            LOG.warn("POP3 property \"{}\" is not a number: ``{}''. Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, frequencyStr, FALLBACK_MINUTES,
+            LOG.warn("POP3 property \"{}\" is not a number: ``{}''. Using fallback of {} minutes.", POP3StoragePropertyNames.PROPERTY_REFRESH_RATE, frequencyStr, I(FALLBACK_MINUTES),
                 e);
             minutes = FALLBACK_MINUTES;
         }

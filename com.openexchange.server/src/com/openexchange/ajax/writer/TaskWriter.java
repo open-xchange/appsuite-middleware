@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -175,7 +176,7 @@ public class TaskWriter extends CalendarWriter {
             }
             break;
         default:
-            LOG.warn("Column {} is unknown for tasks.", column);
+            LOG.warn("Column {} is unknown for tasks.", I(column));
         }
     }
 

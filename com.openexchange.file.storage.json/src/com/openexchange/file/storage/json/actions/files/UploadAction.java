@@ -88,6 +88,7 @@ public class UploadAction extends AbstractWriteAction {
         if (Strings.isEmpty(request.getParameter(File.Field.FILENAME.getName()))) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FILENAME.getName());
         }
+
         IDBasedFileAccess fileAccess = request.getFileAccess();
         File file = request.getFile();
         String originalFileName = file.getFileName();
@@ -107,7 +108,7 @@ public class UploadAction extends AbstractWriteAction {
         if (offset == null) {
             newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
         } else {
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), offset);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), timestamp, request.getSentColumns(), offset.longValue());
         }
 
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());

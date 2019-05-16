@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.tools.console;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
+import com.openexchange.groupware.update.TaskStatus;
 import com.openexchange.groupware.update.UpdateTaskService;
 
 /**
@@ -76,7 +77,7 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      * Initializes a new {@link UpdateTaskRunAllUpdateCLT}.
      */
     private UpdateTaskRunAllUpdateCLT() {
-        super("runallupdate", "Runs the update on all schemas.");
+        super("runallupdate [-e] " + BASIC_MASTER_ADMIN_USAGE, "Runs the update on all schemas.");
     }
 
     /*
@@ -86,7 +87,7 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("e", "error", false, "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.");
+        options.addOption(createSwitch("e", "error", "The flag indicating whether process is supposed to be stopped if an error occurs when trying to update a schema.", false));
     }
 
     /*
@@ -97,7 +98,8 @@ public final class UpdateTaskRunAllUpdateCLT extends AbstractUpdateTasksCLT<Void
     @Override
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         UpdateTaskService updateTaskService = getRmiStub(UpdateTaskService.RMI_NAME);
-        updateTaskService.runAllUpdates(failOnError);
+        TaskStatus taskStatus = updateTaskService.runAllUpdates(failOnError);
+        System.out.println("Scheduled an asynchronous job with id: " + taskStatus.getJobId() + "\n" + taskStatus.getStatusText());
         return null;
     }
 

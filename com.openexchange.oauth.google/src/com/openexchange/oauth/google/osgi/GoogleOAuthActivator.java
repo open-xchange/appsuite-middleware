@@ -49,76 +49,41 @@
 
 package com.openexchange.oauth.google.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.common.osgi.AbstractOAuthActivator;
 import com.openexchange.oauth.google.GoogleOAuthScope;
 import com.openexchange.oauth.google.GoogleOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
  * {@link GoogleOAuthActivator} - The activator for Google OAuth service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GoogleOAuthActivator extends HousekeepingActivator {
+public final class GoogleOAuthActivator extends AbstractOAuthActivator {
 
     public GoogleOAuthActivator() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getOAuthServiceMetaData()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class };
+    protected OAuthServiceMetaData getOAuthServiceMetaData() {
+        return new GoogleOAuthServiceMetaData(this);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.common.osgi.AbstractOAuthActivator#getScopes()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            final GoogleOAuthServiceMetaData googleService = new GoogleOAuthServiceMetaData(this);
-            registerService(OAuthServiceMetaData.class, googleService);
-            registerService(Reloadable.class, googleService);
-
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "google");
-            registerService(CapabilityChecker.class, new CapabilityChecker() {
-
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if ("google".equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous() || session.getUser().isGuest()) {
-                            return false;
-                        }
-
-                        return googleService.isEnabled(session.getUserId(), session.getContextId());
-                    }
-
-                    return true;
-                }
-            }, properties);
-
-            getService(CapabilityService.class).declareCapability("google");
-
-            // Register the scope
-            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-            scopeRegistry.registerScopes(googleService.getAPI(), GoogleOAuthScope.values());
-        } catch (final Exception e) {
-            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GoogleOAuthActivator.class);
-            log.warn("Could not start-up Google OAuth service", e);
-            throw e;
-        }
+    protected OAuthScope[] getScopes() {
+        return GoogleOAuthScope.values();
     }
 
 }

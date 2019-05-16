@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ************************************************************************************* 
+	Hints: - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG 
+	table - use failOnError param to define if a successful execution of the 
+	ChangeSet is required ************************************************************************************* -->
+
+<databaseChangeLog xmlns="urn:liquibase"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
+	logicalFilePath="resellerConfigdbChangeLog">
+
+	<changeSet id="7.10.2:subadmin:create" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="subadmin" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'subadmin' table</comment>
+		<sql>
+			CREATE TABLE subadmin ( 
+				sid INT4 UNSIGNED NOT NULL,
+				pid INT4 UNSIGNED NOT NULL, 
+				name VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+				displayName VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+				password VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+				passwordMech VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+				salt VARBINARY(128) DEFAULT NULL,
+				CONSTRAINT name_unique UNIQUE (name),
+				PRIMARY KEY (sid)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="subadmin" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.2:restrictions:create" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="restrictions" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'restrictions' table</comment>
+		<sql>
+			CREATE TABLE restrictions (
+				rid INT4 UNSIGNED NOT NULL,
+				name VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+				CONSTRAINT name_unique UNIQUE (name),
+				PRIMARY KEY (rid)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="restrictions" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.2:subadmin_restrictions:create" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="subadmin_restrictions" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'subadmin_restrictions' table</comment>
+		<sql>
+			CREATE TABLE subadmin_restrictions (
+				sid INT4 UNSIGNED NOT NULL,
+				rid INT4 UNSIGNED NOT NULL,
+				value VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+				CONSTRAINT sid_rid_unique UNIQUE (sid,rid),
+				FOREIGN KEY(sid) REFERENCES subadmin(sid),
+				FOREIGN KEY(rid) REFERENCES restrictions(rid)
+			) ENGINE=InnoDB DEFAULT
+			CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="subadmin_restrictions" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.2:context_restrictions:create" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="context_restrictions" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'context_restrictions' table</comment>
+		<sql>
+			CREATE TABLE
+				context_restrictions (
+				cid INT4 UNSIGNED NOT NULL,
+				rid INT4 UNSIGNED NOT NULL,
+				value VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
+				CONSTRAINT cid_rid_unique UNIQUE (cid,rid),
+				FOREIGN KEY(cid) REFERENCES context(cid),
+				FOREIGN KEY(rid) REFERENCES restrictions(rid)
+			) ENGINE=InnoDB DEFAULT
+			CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="context_restrictions" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.2:context2subadmin:create" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="context2subadmin" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'context2subadmin' table</comment>
+		<sql>
+			CREATE TABLE context2subadmin (
+				cid INT4 UNSIGNED NOT NULL,
+				sid INT4 UNSIGNED NOT NULL,
+				PRIMARY KEY (cid,sid),
+				INDEX (sid),
+				UNIQUE (cid),
+				FOREIGN KEY(sid) REFERENCES subadmin(sid),
+				FOREIGN KEY(cid) REFERENCES context(cid)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="context2subadmin" />
+		</rollback>
+	</changeSet>
+	
+	<changeSet id="7.10.2:context_customfields:create" author="kevin.ruthmann@open-xchange.com">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="context_customfields" />
+			</not>
+		</preConditions>
+		<comment>Creates the 'context_customfields' table</comment>
+		<sql>
+			CREATE TABLE context_customfields (
+				cid INT4 UNSIGNED NOT NULL,
+				customid VARCHAR(128) COLLATE utf8mb4_unicode_ci,
+				createTimestamp INT8 NOT NULL,
+				modifyTimestamp INT8 NOT NULL,
+				CONSTRAINT cid_unique UNIQUE (cid),
+				FOREIGN KEY(cid) REFERENCES context(cid)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+			COLLATE=utf8mb4_unicode_ci;
+		</sql>
+		<rollback>
+			<dropTable tableName="context_customfields" />
+		</rollback>
+	</changeSet>	
+
+	<!-- This changeset is in fact older than above ones because it previously exists within the core configdbChangeLog.xml.
+		It has was moved to the reseller bundle after introducing liquibase for reseller.
+		This means: this changeset has to be executed after the above ones. Leave it at the current position! 
+		In addition we have to add the logicalFilePath for this changeSet to be able to identify its already happened execution -->
+	<changeSet id="7.10.0:reseller:toUtf8Mb4" author="martin.schneider@open-xchange.com" failOnError="false" logicalFilePath="configdbChangeLog"> 
+		<validCheckSum>7:829cdcafd6bd14edec97b1fd4b123ebc</validCheckSum> <!-- required because package of customChange changed -->
+		<comment>Converts the table/column definition to support utf8mb4</comment>
+		<customChange class="com.openexchange.admin.reseller.update.ResellerToUtf8mb4Change" />
+	</changeSet>
+
+    <changeSet id="7.10.2:subadmin:addSalt" author="martin.schneider@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="subadmin" />
+                <not>
+                    <columnExists tableName="subadmin" columnName="salt" />
+                </not>
+            </and>
+        </preConditions>
+        <comment>
+            Add column 'salt' to table subadmin.
+        </comment>
+        <sql>
+            ALTER TABLE subadmin ADD salt VARBINARY(128) DEFAULT NULL;
+        </sql>
+        <rollback>
+            <dropColumn tableName="subadmin" columnName="salt" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

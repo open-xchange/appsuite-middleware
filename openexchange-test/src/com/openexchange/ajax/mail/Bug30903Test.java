@@ -91,6 +91,7 @@ public class Bug30903Test extends AbstractMailTest {
         super();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

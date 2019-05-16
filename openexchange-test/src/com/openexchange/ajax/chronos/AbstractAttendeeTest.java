@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.chronos;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +97,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     }
 
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {
-        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, timestamp, body, recurrenceId, false, null);
+        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, L(timestamp), body, recurrenceId, Boolean.FALSE, null);
         List<EventData> updates = calendarResult.getData().getUpdated();
         assertTrue(updates.size() == 1);
         return updates.get(0);
@@ -104,7 +106,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     public List<Attendee> addAdditionalAttendee(EventData expectedEventData) {
         ArrayList<Attendee> atts = new ArrayList<>(2);
         atts.addAll(expectedEventData.getAttendees());
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
+        Attendee attendee2 = AttendeeFactory.createIndividual(I(user2.getCalUser().intValue()));
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         return atts;
@@ -113,7 +115,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     protected AttendeeAndAlarm createAttendeeAndAlarm(EventData updatedEvent, int attendeeId) {
         AttendeeAndAlarm body = new AttendeeAndAlarm();
         for (Attendee attendee : updatedEvent.getAttendees()) {
-            if (attendee.getEntity() == attendeeId) {
+            if (attendee.getEntity() != null && attendee.getEntity().intValue() == attendeeId) {
                 attendee.setPartStat("TENTATIVE");
                 attendee.setMember(null);
                 body.attendee(attendee);

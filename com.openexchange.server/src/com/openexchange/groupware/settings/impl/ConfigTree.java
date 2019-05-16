@@ -288,7 +288,7 @@ public final class ConfigTree {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "deprecation" })
     private static Class< ? extends PreferencesItemService>[] getClasses() {
         return new Class[] {
             com.openexchange.groupware.settings.tree.AvailableModules.class,
@@ -357,6 +357,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Templates.class,
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Music.class,
             com.openexchange.groupware.settings.tree.modules.infostore.folder.Videos.class,
+            com.openexchange.groupware.settings.tree.modules.infostore.autodelete.AutodeleteEditable.class,
             com.openexchange.groupware.settings.tree.modules.infostore.autodelete.MaxVersionCount.class,
             com.openexchange.groupware.settings.tree.modules.infostore.autodelete.RetentionDays.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,

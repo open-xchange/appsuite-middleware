@@ -81,7 +81,7 @@ public final class TikaImageExtractingParser implements Parser {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(TikaImageExtractingParser.class);
 
-    private static final Set<MediaType> TYPES_IMAGE = ImmutableSet.of(MediaType.image("bmp"), MediaType.image("gif"), MediaType.image("jpg"), MediaType.image("jpeg"), MediaType.image("png"), MediaType.image("tiff"));
+    private static final Set<MediaType> TYPES_IMAGE = ImmutableSet.of(MediaType.image("bmp"), MediaType.image("gif"), MediaType.image("jpg"), MediaType.image("jpeg"), MediaType.image("png"), MediaType.image("tiff"), MediaType.image("heic"), MediaType.image("heif"));
 
     private static final Set<MediaType> TYPES_EXCEL = ImmutableSet.of(MediaType.image("vnd.ms-excel"));
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.diff"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.plugin.hosting"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.advertisement.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.apps.manifests.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.audit"/>
@@ -65,19 +65,14 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oidc.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.password.mechanism"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pgp.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pgp.keys"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.basic"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.hazelcast"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.realtime.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.appsuite.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.report.client"/>
@@ -90,7 +85,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.spamhandler.cloudmark"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.test"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.textxtraction"/>

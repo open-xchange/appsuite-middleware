@@ -53,6 +53,7 @@ import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
 import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import static com.openexchange.drive.impl.DriveUtils.combine;
 import static com.openexchange.drive.impl.DriveUtils.split;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.Closeable;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -103,6 +104,7 @@ import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -639,7 +641,7 @@ public class DriveStorage {
         FileStorageFolder folder = getFolderAccess().getFolder(folderID);
         if (null == folder) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
-                session.getServerSession().getUserId(), session.getServerSession().getContextId());
+                I(session.getServerSession().getUserId()), I(session.getServerSession().getContextId()));
         }
         List<File> files = new ArrayList<File>();
         /*
@@ -651,6 +653,7 @@ public class DriveStorage {
         } else {
             final String path = getPath(folderID);
             final Set<String> existingNames = DriveUtils.getNormalizedFolderNames(session.getStorage().getSubfolders(path).values());
+            SyncSession session = this.session;
             filter = new FileNameFilter() {
 
                 @Override
@@ -977,8 +980,9 @@ public class DriveStorage {
     }
 
     public String getVersionComment() {
+        Session serverSession = session.getServerSession();
         String device = Strings.isEmpty(session.getDeviceName()) ? session.getServerSession().getClient() : session.getDeviceName();
-        String product = DriveConfig.getInstance().getShortProductName();
+        String product = DriveConfig.getInstance().getShortProductName(serverSession.getContextId(), serverSession.getUserId());
         String format = StringHelper.valueOf(session.getDriveSession().getLocale()).getString(DriveStrings.VERSION_COMMENT);
         return String.format(format, product, device);
     }
@@ -1039,11 +1043,11 @@ public class DriveStorage {
                 try {
                     existingFolder = createFolder(currentFolder, name);
                 } catch (OXException e) {
-                    if ("FLD-0012".equals(e.getErrorCode())) {
+                    if ("FLD-0012".equals(e.getErrorCode()) || "FLD-0095".equals(e.getErrorCode())) {
                         session.trace("Name conflict during folder creation (" + e.getMessage() + "), trying again...");
                         existingFolder = resolveToLeaf(path, false, false);
                         if (null == existingFolder) {
-                            throw e;
+                            throw DriveExceptionCodes.DIRECTORY_ALREADY_EXISTS.create(e, name, currentPath);
                         }
                     } else {
                         throw e;

@@ -180,6 +180,7 @@ public class SortableConcurrentList<E extends Comparable<E>> extends ConcurrentL
      * @throws UnsupportedOperationException if the specified list's list-iterator does not support the <tt>set</tt> operation.
      * @see Comparator
      */
+    @Override
     public void sort(Comparator<? super E> c) {
         List<E> expected;
         List<E> list;

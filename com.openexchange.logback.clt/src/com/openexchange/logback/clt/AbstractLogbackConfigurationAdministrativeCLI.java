@@ -51,7 +51,6 @@ package com.openexchange.logback.clt;
 
 import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
@@ -61,6 +60,7 @@ import com.openexchange.cli.AbstractRmiCLI;
  * 
  * @param <R> - The return type
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.1
  */
 abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends AbstractRmiCLI<R> {
 
@@ -91,7 +91,6 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
      * 
      * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
-    @SuppressWarnings("unused")
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
         try {
@@ -139,7 +138,6 @@ abstract class AbstractLogbackConfigurationAdministrativeCLI<R> extends Abstract
      */
     @Override
     protected void printHelp(Options options) {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(120, getName(), getHeader(), options, getFooter(), false);
+        printHelp(options, 120, false);
     }
 }

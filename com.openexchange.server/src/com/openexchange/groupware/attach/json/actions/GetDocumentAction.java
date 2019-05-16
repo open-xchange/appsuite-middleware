@@ -52,17 +52,22 @@ package com.openexchange.groupware.attach.json.actions;
 import java.io.InputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.antivirus.AntiVirusResult;
+import com.openexchange.antivirus.AntiVirusResultEvaluatorService;
+import com.openexchange.antivirus.AntiVirusService;
+import com.openexchange.antivirus.exceptions.AntiVirusServiceExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -83,12 +88,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        require(
-            requestData,
-            AJAXServlet.PARAMETER_FOLDERID,
-            AJAXServlet.PARAMETER_ATTACHEDID,
-            AJAXServlet.PARAMETER_MODULE,
-            AJAXServlet.PARAMETER_ID);
+        require(requestData, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ID);
 
         int folderId, attachedId, moduleId, id;
         final String contentType = requestData.getParameter(AJAXServlet.PARAMETER_CONTENT_TYPE);
@@ -97,25 +97,15 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
         id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
-        if(!"preview_image".equals(requestData.getFormat())) {
+        if (!"preview_image".equals(requestData.getFormat())) {
             requestData.setFormat("file");
         }
-        return document(
-            session, folderId,
-            attachedId,
-            moduleId,
-            id,
-            contentType,
-            requestData.getParameter(AJAXServlet.PARAMETER_DELIVERY),
-            session.getContext(),
-            session.getUser(),
-            session.getUserConfiguration(),
-            requestData);
+        return document(session, folderId, attachedId, moduleId, id, contentType, requestData.getParameter(AJAXServlet.PARAMETER_DELIVERY), session.getContext(), session.getUser(), session.getUserConfiguration(), requestData);
     }
 
     private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
 
-    private AJAXRequestResult document(final Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final String delivery, final Context ctx, final User user, final UserConfiguration userConfig, final AJAXRequestData requestData) throws OXException {
+    private AJAXRequestResult document(ServerSession session, int folderId, int attachedId, int moduleId, int id, String contentType, String delivery, Context ctx, User user, UserConfiguration userConfig, AJAXRequestData requestData) throws OXException {
         ThresholdFileHolder fileHolder = null;
         boolean rollback = true;
         try {
@@ -160,6 +150,11 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             try {
                 fileHolder.write(documentData);
+                boolean scanned = scanAttachment(requestData, session, folderId, attachedId, moduleId, id, userConfig, fileHolder, attachment);
+                if (scanned && false == fileHolder.repetitive()) {
+                    documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
+                    fileHolder.write(documentData);
+                }
             } finally {
                 Streams.close(documentData);
             }
@@ -195,4 +190,37 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
+    /**
+     * Checks whether the {@link InputStream} in the specified closure should be scanned
+     * 
+     * @param request The {@link AJAXRequestData}
+     * @param session The {@link ServerSession}
+     * @param folderId the folder identifier
+     * @param attachedId The attached identifier
+     * @param moduleId The module identifier
+     * @param id The identifier
+     * @param userConfig The user configuration
+     * @param attachment The attachment metadata
+     * @return <code>true</code> if the stream was scanned; <code>false</code> otherwise.
+     * @throws OXException if the file is too large, or if the {@link AntiVirusService} is absent,
+     *             or if the file is infected, or if a timeout or any other error is occurred
+     */
+    private boolean scanAttachment(AJAXRequestData request, ServerSession session, int folderId, int attachedId, int moduleId, int id, UserConfiguration userConfig, IFileHolder fileHolder, AttachmentMetadata attachment) throws OXException {
+        String scan = request.getParameter("scan");
+        Boolean s = Strings.isEmpty(scan) ? Boolean.FALSE : Boolean.valueOf(scan);
+        if (false == s.booleanValue()) {
+            LOG.debug("No anti-virus scanning was performed.");
+            return false;
+        }
+        AntiVirusService antiVirusService = serviceLookup.getOptionalService(AntiVirusService.class);
+        if (antiVirusService == null) {
+            throw AntiVirusServiceExceptionCodes.ANTI_VIRUS_SERVICE_ABSENT.create();
+        }
+        if (false == antiVirusService.isEnabled(request.getSession())) {
+            return false;
+        }
+        AntiVirusResult result = antiVirusService.scan(fileHolder, attachment.getFileId());
+        serviceLookup.getServiceSafe(AntiVirusResultEvaluatorService.class).evaluate(result, attachment.getFilename());
+        return result.isStreamScanned();
+    }
 }

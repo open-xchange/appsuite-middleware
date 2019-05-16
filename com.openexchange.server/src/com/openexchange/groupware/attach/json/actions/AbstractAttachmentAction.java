@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.parser.AttachmentParser;
@@ -60,7 +62,9 @@ import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link AbstractAttachmentAction}
@@ -74,6 +78,8 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
     protected static final AttachmentParser PARSER = new AttachmentParser();
 
     protected static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
 
     private final AtomicLong maxUploadSize;
 
@@ -89,16 +95,16 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
     }
 
     protected int requireNumber(final AJAXRequestData req, final String parameter) throws OXException {
-        final String value = req.getParameter(parameter);
+        String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
-        } catch (final NumberFormatException nfe) {
-            throw AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(parameter, value);
+        } catch (NumberFormatException nfe) {
+            throw AttachmentExceptionCodes.INVALID_REQUEST_PARAMETER.create(nfe, parameter, value);
         }
     }
 
     protected static void require(final AJAXRequestData req, final String... parameters) throws OXException {
-        for (final String param : parameters) {
+        for (String param : parameters) {
             if (req.getParameter(param) == null) {
                 throw UploadException.UploadCode.MISSING_PARAM.create(param);
             }
@@ -122,10 +128,12 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
                 cur = maxUploadSize.get();
             } while (!maxUploadSize.compareAndSet(cur, configuredSize));
         }
-        final long maxUploadSize = this.maxUploadSize.get();
+
+        long maxUploadSize = this.maxUploadSize.get();
         if (maxUploadSize == 0) {
             return;
         }
+
         if (size > maxUploadSize) {
             if (!requestData.containsParameter(CALLBACK)) {
                 requestData.putParameter(CALLBACK, "error");
@@ -140,5 +148,30 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
         } catch (final Exception e) {
             LOG.debug("Rollback failed.", e);
         }
+    }
+
+    /**
+     * Returns the value of the specified parameter as an integer array
+     *
+     * @param requestData The request data
+     * @param name The name of the parameter
+     * @return An integer list or <code>null</code> if the parameter is absent
+     * @throws OXException if an invalid value is specified
+     */
+    protected List<Integer> optIntegerList(AJAXRequestData requestData, String name) throws OXException {
+        String value = requestData.getParameter(name);
+        if (value == null) {
+            return null;
+        }
+        String[] array = Strings.splitByComma(value);
+        List<Integer> retList = new LinkedList<>();
+        for (int i = 0; i < array.length; i++) {
+            try {
+                retList.add(Integer.valueOf(array[i]));
+            } catch (NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, name);
+            }
+        }
+        return retList;
     }
 }

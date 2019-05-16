@@ -269,7 +269,7 @@ public class Utility {
             return "jpeg";
         }
         // Sanitize given image format
-        String val = value;
+        String val = value.trim();
         if (val.toLowerCase().startsWith("image/")) {
             val = val.substring(6);
         }

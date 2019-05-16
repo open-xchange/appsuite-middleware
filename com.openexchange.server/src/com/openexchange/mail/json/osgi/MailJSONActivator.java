@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.antivirus.AntiVirusService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
@@ -106,7 +107,7 @@ import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
 import com.openexchange.mail.authenticity.GenericCustomPropertyJsonHandler;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
-import com.openexchange.mail.compose.CompositionSpace;
+import com.openexchange.mail.compose.old.OldCompositionSpace;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.config.MaliciousFolders;
@@ -193,7 +194,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         MailFetchListenerRegistry.initInstance(listing);
         rememberTracker(listing);
         track(CustomPropertyJsonHandler.class);
-
+        trackService(AntiVirusService.class);
         openTrackers();
 
         registerService(CustomPropertyJsonHandler.class, new GenericCustomPropertyJsonHandler());
@@ -229,7 +230,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                 }
 
                 private void handleSession(Session session) {
-                    CompositionSpace.dropCompositionSpaces(session);
+                    OldCompositionSpace.dropCompositionSpaces(session);
                 }
             };
 

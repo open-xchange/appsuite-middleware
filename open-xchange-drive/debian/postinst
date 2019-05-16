@@ -20,32 +20,38 @@ set -e
 . /opt/open-xchange/lib/oxfunctions.sh
 
 postFix() {
-    local version=${1%-*}
-    version=${version//[-.]/}
+  local version=${1%-*}
+  version=${version//[-.]/}
 
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
+  # prevent bash from expanding, see bug 13316
+  GLOBIGNORE='*'
 
-    PFILE=/opt/open-xchange/etc/drive.properties
-
-    # SoftwareChange_Request-2850
-    ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
-    ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
-    ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
-    ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
-
-    # SoftwareChange_Request-3244
-    ox_add_property com.openexchange.drive.checksum.cleaner.interval 1D $PFILE
-    ox_add_property com.openexchange.drive.checksum.cleaner.maxAge 4W $PFILE
-
-    ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
+  # SCR-392
+  # don't wrap in ox_scr_todo as it might have to reexecute after downgrade or
+  # configs will be lost
+  orig_pfile=/opt/open-xchange/etc/drive.properties
+  save_pfile=${orig_pfile}.dpkg-backup
+  rm_pfile=${orig_pfile}.dpkg-remove
+  if [ -e ${save_pfile} ] && [ ! -e ${orig_pfile} ]
+  then
+    # preinst upgrade detected modifications that we want to keep
+    # but as lean config now, like as if the user created the file
+    echo "Keeping ${save_pfile} as ${orig_pfile} due to modifications"
+    mv ${save_pfile} ${orig_pfile}
+  fi
+  if [ -e ${rm_pfile} ] && [ ! -e ${orig_pfile} ]
+  then
+    # preinst upgrade detected no modifications remove old file
+    echo "Removing ${rm_pfile} as ${orig_pfile} had no modifications"
+    rm -f ${rm_pfile}
+  fi
 }
 
 case "$1" in
     configure)
         test -n "$2" && {
             # we are in update mode, run postFix to apply fixes
-            postFix "$2"
+            postFix "$@"
         }
     ;;
 

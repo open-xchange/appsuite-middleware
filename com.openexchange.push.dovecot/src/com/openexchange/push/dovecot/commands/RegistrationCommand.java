@@ -119,7 +119,7 @@ public class RegistrationCommand implements ProtocolCommand {
             */
 
             // Closing parenthesis
-            cmdBuilder.append(")");
+            cmdBuilder.append(')');
             command = cmdBuilder.toString();
         }
 

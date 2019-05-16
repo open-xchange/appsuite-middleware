@@ -73,7 +73,7 @@ public class SearchTest extends AbstractAJAXSession {
 
     @Test
     public void testLimit() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, 1);
+        itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, 1);
         assertFalse(itm.getLastResponse().hasError());
 
         final JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -83,7 +83,7 @@ public class SearchTest extends AbstractAJAXSession {
 
     @Test
     public void testSort() throws Exception {
-        List<com.openexchange.file.storage.File> files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, -1);
+        itm.search("5", folderId, Metadata.DESCRIPTION, Order.ASCENDING, -1);
         assertFalse(itm.getLastResponse().hasError());
 
         JSONArray arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -92,7 +92,7 @@ public class SearchTest extends AbstractAJAXSession {
         assertTitle(1, arrayOfarrays, "Test 15");
         assertTitle(2, arrayOfarrays, "Test 25");
 
-        files = itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1);
+        itm.search("5", folderId, Metadata.DESCRIPTION, Order.DESCENDING, -1);
         assertFalse(itm.getLastResponse().hasError());
 
         arrayOfarrays = (JSONArray) itm.getLastResponse().getData();
@@ -164,7 +164,9 @@ public class SearchTest extends AbstractAJAXSession {
             final JSONArray row = results.optJSONArray(i);
             assertNotNull(row);
             assertTrue(row.length() > 0);
-            assertNotNull(row.optLong(0));
+            Object opt = row.opt(0);
+            assertNotNull(opt);
+            assertEquals(all[i], opt.toString());
         }
     }
 
@@ -172,7 +174,7 @@ public class SearchTest extends AbstractAJAXSession {
     @Test
     public void testBackslashFound() throws Exception {
         String title = "Test\\WithBackslash";
-        com.openexchange.file.storage.File tempFile = itm.createFileOnServer(folderId, title, "text/javascript");
+        itm.createFileOnServer(folderId, title, "text/javascript");
         assertTrue(itm.getLastResponse().hasError());
     }
 
@@ -181,7 +183,7 @@ public class SearchTest extends AbstractAJAXSession {
         assertEquals(title, entry.getString(0));
     }
 
-    public static void assertTitles(final List<com.openexchange.file.storage.File> files, final String... titles) throws JSONException {
+    public static void assertTitles(final List<com.openexchange.file.storage.File> files, final String... titles) {
         final Set<String> titlesSet = new HashSet<String>(Arrays.asList(titles));
 
         final String error = "Expected: " + titlesSet + " but got " + files;

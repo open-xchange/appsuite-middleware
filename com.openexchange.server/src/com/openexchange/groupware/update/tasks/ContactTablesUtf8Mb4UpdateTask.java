@@ -75,16 +75,11 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
      */
     public ContactTablesUtf8Mb4UpdateTask() {
         //@formatter:off
-        super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_linkage", "prg_contacts_image", "del_contacts_image"),
+        super(Arrays.asList("prg_dlist", "del_dlist", "prg_contacts_image", "del_contacts_image"),
             "com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask");
         //@formatter:on
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask#before(com.openexchange.groupware.update.PerformParameters, java.sql.Connection)
-     */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
         recreateKey(connection, "prg_contacts", new String[] { "cid", "field01" }, new int[] { -1, 191 });
@@ -111,7 +106,7 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
 
     /**
      * Resets the value of the column with the specified name to <code>NULL</code> if the timestamp is '0000-00-00'
-     * 
+     *
      * @param connection The {@link Connection}
      * @param columnName The column name
      * @throws SQLException if an SQL error is occurred
@@ -120,7 +115,8 @@ public class ContactTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUtf8mb4Up
         PreparedStatement ps = null;
         try {
             ps = connection.prepareStatement("UPDATE IGNORE prg_contacts SET " + columnName + "=NULL WHERE " + columnName + "='0000-00-00'");
-            LOG.info("Reset {} rows for column '{}' that contained invalid timestamps", ps.executeUpdate(), columnName);
+            int rows = ps.executeUpdate();
+            LOG.info("Reset {} rows for column '{}' that contained invalid timestamps", Integer.valueOf(rows), columnName);
         } finally {
             Databases.closeSQLStuff(ps);
         }

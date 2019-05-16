@@ -155,14 +155,12 @@ public interface CalendarConfig {
      * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
      */
     boolean isRestrictAllowedAttendeeChanges();
-
+    
     /**
-     * Gets a value indicating whether attendee changes to events located in <i>public</i> folders should be restricted according to
-     * <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.1">RFC 6638, section 3.2.2.1</a> or not, which effectively restricts
-     * any changes to the calendar scheduling resource to be performed by the organizer only.
-     *
-     * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
+     * Gets a value indicating whether it is allowed to change the organizer of an event or not.
+     * 
+     * @return <code>true</code> if organizer changes are allowed, <code>false</code> otherwise
      */
-    boolean isRestrictAllowedAttendeeChangesPublic();
+    boolean isOrganizerChangeAllowed();
 
 }

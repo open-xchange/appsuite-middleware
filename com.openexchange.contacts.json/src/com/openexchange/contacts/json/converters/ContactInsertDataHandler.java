@@ -168,7 +168,7 @@ public final class ContactInsertDataHandler implements DataHandler {
                         org.slf4j.LoggerFactory.getLogger(ContactInsertDataHandler.class).debug("error storing contact", e);
                         throw handleDataTruncation(e);
                     } finally {
-                        if (false == saved && null != vCardID) {
+                        if (false == saved && null != vCardID && null != vCardStorageService) {
                             vCardStorageService.deleteVCard(vCardID, session.getContextId());
                         }
                     }

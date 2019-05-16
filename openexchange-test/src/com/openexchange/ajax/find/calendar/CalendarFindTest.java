@@ -70,6 +70,7 @@ import com.openexchange.test.CalendarTestManager;
 public class CalendarFindTest extends AbstractFindTest {
 
     protected CalendarTestManager manager;
+    @SuppressWarnings("hiding")
     protected Random random;
     protected CalendarTestManager manager2;
 
@@ -82,6 +83,7 @@ public class CalendarFindTest extends AbstractFindTest {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -90,6 +92,7 @@ public class CalendarFindTest extends AbstractFindTest {
         manager2 = new CalendarTestManager(client2);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -125,7 +128,7 @@ public class CalendarFindTest extends AbstractFindTest {
      * @param parentFolder The parent folder id
      * @return The appointment
      */
-    protected Appointment randomAppointment(int parentFolder) throws Exception {
+    protected Appointment randomAppointment(int parentFolder) {
         Appointment app = new Appointment();
         app.setTitle(randomUID());
         app.setLocation(randomUID());

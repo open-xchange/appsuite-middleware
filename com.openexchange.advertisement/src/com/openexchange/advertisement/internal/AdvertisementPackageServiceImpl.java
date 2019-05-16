@@ -174,7 +174,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
         try {
             reseller2Scheme.set(computeReseller2SchemeMapping(configService));
         } catch (OXException e) {
-            LOG.error("Error while reloading configuration: " + e.getMessage());
+            LOG.error("Error while reloading configuration", e);
         }
     }
 

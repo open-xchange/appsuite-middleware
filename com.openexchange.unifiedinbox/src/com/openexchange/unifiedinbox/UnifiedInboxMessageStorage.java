@@ -49,6 +49,8 @@
 
 package com.openexchange.unifiedinbox;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -444,7 +446,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     GetMessagesResult result = completionService.take().get();
                     insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullName, undelegatedAccountId);
                 }
-                LOG.debug("Retrieval of {} messages from folder \"{}\" took {}msec.", mailIds.length, fullName, completionService.getDuration());
+                LOG.debug("Retrieval of {} messages from folder \"{}\" took {}msec.", I(mailIds.length), fullName, L(completionService.getDuration()));
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -919,7 +921,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+                LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
 
                 // Sort them
                 final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
@@ -1273,7 +1275,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+                LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
 
                 // Sort them
                 final MailMessageComparator comparator = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
@@ -1576,7 +1578,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+                LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
 
                 // Sort them
                 MailMessageComparator c = MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), this.session, true);
@@ -1691,20 +1693,20 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, folder);
                             // Check if denoted account has such a default folder
                             if (fn == null) {
-                                return 0;
+                                return I(0);
                             }
                             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                            return messageStorage.getUnreadCount(folder, searchTerm);
+                            return I(messageStorage.getUnreadCount(folder, searchTerm));
                         } catch (OXException e) {
                             if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
                                 getLogger().debug("Couldn't get unread count from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
                             } else {
                                 getLogger().warn("Couldn't get unread count from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
                             }
-                            return 0;
+                            return I(0);
                         } catch (RuntimeException e) {
                             getLogger().warn("Couldn't get unread count from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
-                            return 0;
+                            return I(0);
                         } finally {
                             closeSafe(mailAccess);
                         }
@@ -1715,7 +1717,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             try {
                 int result = 0;
                 for (int i = 0; i < length; i++) {
-                    result += completionService.take().get();
+                    result += completionService.take().get().intValue();
                 }
 
                 return result;
@@ -2056,7 +2058,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+                LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
                 // Sort them
                 MailMessageComparator c = MailMessageComparatorFactory.createComparator(effectiveSortField, order, locale, session, true);
 
@@ -2255,7 +2257,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
-                LOG.debug("Retrieving unread messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
+                LOG.debug("Retrieving unread messages from folder \"{}\" took {}msec.", fullName, L(completionService.getDuration()));
 
                 // Sort them
                 Collections.sort(messages, MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), session, true));

@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.search;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -87,7 +88,7 @@ public class CreatedByTerm extends AbstractNumberSearchTerm {
 
     @Override
     protected Number getNumber(File file) {
-        return file.getCreatedBy();
+        return I(file.getCreatedBy());
     }
 
     @Override

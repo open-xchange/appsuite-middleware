@@ -277,9 +277,9 @@ public class ConstraintsConfig implements LiquibaseSerializable {
             return null;
         } else {
             if (value.equalsIgnoreCase("true") || value.equals("1")) {
-                return true;
+                return Boolean.TRUE;
             } else if (value.equalsIgnoreCase("false") || value.equals("0")) {
-                return false;
+                return Boolean.FALSE;
             } else {
                 throw new UnexpectedLiquibaseException("Unparsable boolean value: "+value);
             }

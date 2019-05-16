@@ -76,23 +76,25 @@ public class ContactFieldsForJapaneseKanaSearch extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
 
             Tools.checkAndAddColumns(con, "prg_contacts", getColumns());
             Tools.checkAndAddColumns(con, "del_contacts", getColumns());
 
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
+            if (rollback > 0) {
+            if (rollback == 1) {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
+            }
         }
     }
 

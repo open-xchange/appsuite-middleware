@@ -49,6 +49,7 @@
 
 package com.openexchange.tokenlogin.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import java.util.concurrent.ConcurrentHashMap;
@@ -147,7 +148,7 @@ public class Bug32698Test {
         PowerMockito.mockStatic(Services.class);
 
         // BEHAVIOUR
-        PowerMockito.when(session.getContextId()).thenReturn(424242669);
+        PowerMockito.when(I(session.getContextId())).thenReturn(I(424242669));
         PowerMockito.when(session.getSessionID()).thenReturn("8a07c5a2e4974a75ae70bd9a36198f03");
 
         PowerMockito.when(tokenIMap, method(IMap.class, "put", String.class, String.class)).withArguments(anyString(), anyString()).thenAnswer(new Answer<String>() {

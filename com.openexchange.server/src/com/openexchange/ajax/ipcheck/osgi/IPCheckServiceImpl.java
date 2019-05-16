@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.ipcheck.osgi;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -236,7 +237,7 @@ public class IPCheckServiceImpl extends ServiceTracker<IPChecker, IPChecker> imp
         BuiltInChecker builtInChecker = BuiltInChecker.builtInCheckerFor(checkerId);
         if (null == builtInChecker) {
             // No such checker
-            LOG.warn("Specified IP check mode \"{}\" for user {} in context {} does not match any known IP check mechanism", checkerId, session.getUserId(), session.getContextId());
+            LOG.warn("Specified IP check mode \"{}\" for user {} in context {} does not match any known IP check mechanism", checkerId, I(session.getUserId()), I(session.getContextId()));
             return NoneIPChecker.getInstance();
         }
 
@@ -250,7 +251,7 @@ public class IPCheckServiceImpl extends ServiceTracker<IPChecker, IPChecker> imp
         }
 
         // Cannot occur
-        LOG.warn("Specified IP check mode \"{}\" for user {} in context {} does not match any known IP check mechanism", checkerId, session.getUserId(), session.getContextId());
+        LOG.warn("Specified IP check mode \"{}\" for user {} in context {} does not match any known IP check mechanism", checkerId, I(session.getUserId()), I(session.getContextId()));
         return NoneIPChecker.getInstance();
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl;
 
+import static com.openexchange.java.Autoboxing.B;
 import static org.junit.Assert.assertEquals;
 import javax.net.ssl.SSLSocketFactory;
 import org.junit.Before;
@@ -112,7 +113,7 @@ public class SSLSocketFactoryProviderTest {
      @Test
      public void testGetDefault_trustLevelRestrictedAndNoUserInLogProperties_returnTrustedFactory() {
         Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
-        Mockito.when(this.userAwareSSLConfigurationService.isTrustAll(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(Boolean.FALSE.booleanValue());
+        Mockito.when(B(this.userAwareSSLConfigurationService.isTrustAll(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt()))).thenReturn(Boolean.FALSE);
 
         SSLSocketFactory socketFactory = new DefaultSSLSocketFactoryProvider(sslConfigurationService).getDefault();
 
@@ -142,7 +143,7 @@ public class SSLSocketFactoryProviderTest {
      @Test
      public void testGetDefault_trustLevelRestrictedButUserWithTrustAllConfig_returnTrustAllFactory() {
         Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
-        Mockito.when(this.userAwareSSLConfigurationService.isTrustAll(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt())).thenReturn(Boolean.FALSE.booleanValue());
+        Mockito.when(B(this.userAwareSSLConfigurationService.isTrustAll(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt()))).thenReturn(Boolean.FALSE);
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_USER_ID)).thenReturn("307");
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID)).thenReturn("1");
 

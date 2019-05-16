@@ -64,7 +64,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 
-
 /**
  * {@link SimSessiondService}
  *
@@ -90,9 +89,11 @@ public class SimSessiondService implements SessiondService {
             existing = sessionsById.putIfAbsent(session.getSessionID(), session);
         } while (existing != null);
 
-        SessionEnhancement enhancement = param.getEnhancement();
-        if (null != enhancement) {
-            enhancement.enhanceSession(session);
+        List<SessionEnhancement> enhancements = param.getEnhancements();
+        if (null != enhancements) {
+            for (SessionEnhancement enhancement: enhancements) {
+                enhancement.enhanceSession(session);
+            }
         }
         return session;
     }
@@ -126,13 +127,18 @@ public class SimSessiondService implements SessiondService {
     @Override
     public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
         for (Integer contextId : contextIds) {
-            removeContextSessions(contextId);
+            removeContextSessions(contextId.intValue());
         }
     }
 
     @Override
     public void removeUserSessionsGlobally(int userId, int contextId) throws OXException {
         removeUserSessions(userId, contextId);
+    }
+
+    @Override
+    public Collection<String> removeSessions(SessionFilter filter) throws OXException {
+        return filterSessionIds(filter, true);
     }
 
     @Override

@@ -64,8 +64,8 @@ import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.FileMetadata;
 import com.openexchange.groupware.dataRetrieval.config.Configuration;
 import com.openexchange.groupware.dataRetrieval.registry.DataProviderRegistry;
-import com.openexchange.groupware.dataRetrieval.services.Services;
 import com.openexchange.groupware.dataRetrieval.servlets.Paths;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -82,10 +82,16 @@ public class RetrievalActions implements AJAXActionServiceFactory {
     protected DataProviderRegistry registry;
 
     protected RandomTokenContainer<Map<String, Object>> paramMap;
+    
+    protected final Configuration configuration;
+    
+    protected final ServiceLookup serviceLookup;
 
-    public RetrievalActions(final DataProviderRegistry registry, final RandomTokenContainer<Map<String, Object>> paramMap) {
+    public RetrievalActions(final DataProviderRegistry registry, final RandomTokenContainer<Map<String, Object>> paramMap, Configuration configuration, final ServiceLookup serviceLookup) {
         this.registry = registry;
         this.paramMap = paramMap;
+        this.configuration = configuration;
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
@@ -100,12 +106,11 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
         @Override
         public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-            final Configuration configuration = Services.getConfiguration();
             if (configuration.isEnabled() == false) {
                 throw AjaxExceptionCodes.DISABLED_ACTION.create(REGISTER);
             }
             final String id = requestData.getParameter("datasource");
-            DataProvider provider = null;
+            DataProvider<Object> provider = null;
             Object state = null;
             try {
                 provider = registry.getProvider(id);
@@ -115,7 +120,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
                 FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
                 parameters.put(Constants.SESSION_KEY, session);
-                parameters.put(Constants.CREATED, System.currentTimeMillis());
+                parameters.put(Constants.CREATED, Long.valueOf(System.currentTimeMillis()));
                 String token = paramMap.rememberForSession(session, parameters);
 
                 return new AJAXRequestResult(toJSON(metadata, getURI(token, requestData)));
@@ -126,9 +131,8 @@ public class RetrievalActions implements AJAXActionServiceFactory {
             }
         }
 
-        private String getURI(final String token, final AJAXRequestData request) {
-            final Configuration configuration = Services.getConfiguration();
-            return request.constructURL(configuration.getForcedProtocol() , Services.SERVICE_LOOKUP.getService(DispatcherPrefixService.class).getPrefix()+Paths.FILE_DELIVERY_PATH_APPENDIX, true, "token=" + token).toString();
+        private String getURI(final String token, final AJAXRequestData request) throws OXException {
+            return request.constructURL(configuration.getForcedProtocol() , serviceLookup.getServiceSafe(DispatcherPrefixService.class).getPrefix()+Paths.FILE_DELIVERY_PATH_APPENDIX, true, "token=" + token).toString();
         }
 
         private JSONObject toJSON(final FileMetadata metadata, final String uri) throws OXException {

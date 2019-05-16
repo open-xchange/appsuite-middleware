@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -320,7 +319,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             // set last modified
             changeLastModifiedOnGroup(ctxId, groupId, con);
             con.commit();
-            log.info("Group {} changed!", groupId);
+            log.info("Group {} changed!", I(groupId));
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             Databases.rollback(con);
@@ -392,7 +391,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 changeLastModifiedOfGroupMembers(ctx, con, group.getMembers());
             }
             con.commit();
-            log.info("Group {} created!", groupId);
+            log.info("Group {} created!", I(groupId));
         } catch (DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             Databases.rollback(con);
@@ -464,29 +463,23 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 stmt2.close();
 
                 // JCS
-                final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
-                final String NAME_OXCACHE = "oxcache";
-                final BundleContext context = AdminCache.getBundleContext();
-                if (null != context) {
-                    final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                    ;
-                    if (null != cacheService) {
-                        try {
-                            final int contextId = ctx.getId().intValue();
-                            for (final Integer userId : members) {
-                                final CacheKey key = cacheService.newCacheKey(contextId, userId.intValue());
-                                Cache cache = cacheService.getCache("User");
-                                cache.remove(key);
-                                cache = cacheService.getCache("UserPermissionBits");
-                                cache.remove(key);
-                                cache = cacheService.getCache("UserConfiguration");
-                                cache.remove(key);
-                                cache = cacheService.getCache("UserSettingMail");
-                                cache.remove(key);
-                            }
-                        } catch (final OXException e) {
-                            log.error("", e);
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final int contextId = ctx.getId().intValue();
+                        for (final Integer userId : members) {
+                            final CacheKey key = cacheService.newCacheKey(contextId, userId.intValue());
+                            Cache cache = cacheService.getCache("User");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserPermissionBits");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserConfiguration");
+                            cache.remove(key);
+                            cache = cacheService.getCache("UserSettingMail");
+                            cache.remove(key);
                         }
+                    } catch (final OXException e) {
+                        log.error("", e);
                     }
                 }
                 // End of JCS

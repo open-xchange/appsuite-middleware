@@ -80,13 +80,14 @@ public class Bug44622Test extends AbstractInfostoreTest {
 
     /**
      * Initializes a new {@link Bug44622Test}.
-     * 
+     *
      * @param name
      */
     public Bug44622Test() {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -99,6 +100,7 @@ public class Bug44622Test extends AbstractInfostoreTest {
         fileID = resp.getID();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

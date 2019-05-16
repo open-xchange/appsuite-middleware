@@ -49,13 +49,12 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
-import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.dropIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -85,23 +84,25 @@ public final class UserAddMailIndexTask extends UpdateTaskAdapter {
     @Override
     public void perform(final PerformParameters params) throws OXException {
         Connection con = params.getConnection();
-        boolean rollback = false;
+        int rollback = 0;
         try {
             con.setAutoCommit(false);
-            rollback = true;
+            rollback = 1;
             final String[] tables = new String[] { "user" };
             createMailIndex(con, tables);
             con.commit();
-            rollback = false;
+            rollback = 2;
         } catch (final SQLException e) {
             throw createSQLError(e);
         } catch (final RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(con);
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
             }
-            autocommit(con);
         }
     }
 

@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange ICAP Client Bundle
+Bundle-SymbolicName: com.openexchange.icap
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.icap
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.cache,
+ com.google.common.collect,
+ com.google.common.io,
+ com.google.common.primitives,
+ com.google.common.util.concurrent,
+ com.openexchange.ajax.container,
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.timer,
+ com.openexchange.tools.stream,
+ org.apache.commons.codec.digest,
+ org.apache.commons.io,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.icap,
+ com.openexchange.icap.header
+Bundle-Activator: com.openexchange.icap.osgi.ICAPClientActivator

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.Date;
+import java.util.Map;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 
@@ -108,7 +109,13 @@ public class IDManglingGroupwareFolder extends IDManglingFolder implements Group
     }
 
     @Override
+    public Map<String, Object> getMeta() {
+        return delegate.getMeta();
+    }
+
+    @Override
     public String toString() {
         return "IDManglingGroupwareFolder [newId=" + newId + ", newParentId=" + newParentId + ", delegate=" + delegate + "]";
     }
+
 }

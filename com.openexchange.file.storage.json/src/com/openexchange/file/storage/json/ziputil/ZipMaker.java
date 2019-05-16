@@ -50,10 +50,12 @@
 package com.openexchange.file.storage.json.ziputil;
 
 import static com.openexchange.file.storage.json.actions.files.AbstractFileAction.getZipDocumentsCompressionLevel;
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.servlet.http.HttpServletResponse;
@@ -209,7 +211,7 @@ public class ZipMaker {
                  */
                 throw AjaxExceptionCodes.CONNECTION_RESET.create(e, e.getMessage());
             }
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, I(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), "Internal Server Error");
         }
     }
 
@@ -235,7 +237,13 @@ public class ZipMaker {
                         }
                     }
                     entry = new ZipArchiveEntry(pathPrefix + entryName);
-                    entry.setTime(file.getLastModified().getTime());
+                    {
+                        Date date = file.getCaptureDate();
+                        if (null == date) {
+                            date = file.getLastModified();
+                        }
+                        entry.setTime(date.getTime());
+                    }
                     zipOutput.putArchiveEntry(entry);
                     break;
                 } catch (final java.util.zip.ZipException e) {
@@ -258,7 +266,7 @@ public class ZipMaker {
             // Complete the entry
             zipOutput.closeArchiveEntry();
         } catch (IOException e) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, I(HttpServletResponse.SC_INTERNAL_SERVER_ERROR), "Internal Server Error");
         } finally {
             Streams.close(in);
         }

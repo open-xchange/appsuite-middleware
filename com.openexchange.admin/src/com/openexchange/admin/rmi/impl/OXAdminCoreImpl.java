@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
 import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.exception.OXException;
 import com.openexchange.pluginsloaded.PluginsLoadedService;
 
 /**
@@ -70,7 +69,7 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
     }
 
     @Override
-    public boolean allPluginsLoaded() throws RemoteException, OXException {
+    public boolean allPluginsLoaded() throws RemoteException {
         PluginsLoadedService service = AdminServiceRegistry.getInstance().getService(PluginsLoadedService.class);
         if (null == service) {
             LOGGER.error("The PluginsLoadedService was not started");

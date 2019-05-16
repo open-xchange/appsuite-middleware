@@ -65,9 +65,14 @@ import com.openexchange.osgi.HousekeepingActivator;
 public class MobilityProvisioningActivator extends HousekeepingActivator {
 
     private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningActivator.class);
-    private final static String SERVLET_PATH_APPENDIX = "mobilityprovisioning";
-    private volatile String alias;
 
+    private static final String SERVLET_PATH_APPENDIX = "mobilityprovisioning";
+
+    private String alias;
+
+	/**
+	 * Initializes a new {@link MobilityProvisioningActivator}.
+	 */
 	public MobilityProvisioningActivator() {
 		super();
 	}
@@ -87,56 +92,45 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	protected void handleUnavailability(final Class<?> clazz) {
 	    LOG.warn("Absent service: {}", clazz.getName());
 		getInstance().removeService(clazz);
-
 	}
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            final MobilityProvisioningServiceRegistry registry = getInstance();
-            registry.clearRegistry();
-            registry.clearActionServices();
-            final Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
-                if (null != service) {
-                    registry.addService(classes[i], service);
-                }
+    protected synchronized void startBundle() throws Exception {
+        final MobilityProvisioningServiceRegistry registry = getInstance();
+        registry.clearRegistry();
+        registry.clearActionServices();
+        final Class<?>[] classes = getNeededServices();
+        for (int i = 0; i < classes.length; i++) {
+            final Object service = getService(classes[i]);
+            if (null != service) {
+                registry.addService(classes[i], service);
             }
-
-            String alias = getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX;
-            getService(HttpService.class).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
-            this.alias = alias;
-
-            track(ActionService.class, new ActionServiceListener(context));
-            openTrackers();
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
 
+        String alias = getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX;
+        getService(HttpService.class).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
+        this.alias = alias;
+
+        track(ActionService.class, new ActionServiceListener(context));
+        openTrackers();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        try {
-            final HttpService service = getService(HttpService.class);
-            if (null != service) {
-                String alias = this.alias;
-                if (null != alias) {
-                    service.unregister(alias);
-                    this.alias = null;
-                }
+    protected synchronized void stopBundle() throws Exception {
+        final HttpService service = getService(HttpService.class);
+        if (null != service) {
+            String alias = this.alias;
+            if (null != alias) {
+                service.unregister(alias);
+                this.alias = null;
             }
-            /*
-             * Close service trackers
-             */
-            getInstance().clearRegistry();
-            getInstance().clearActionServices();
-            super.stopBundle();
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
+        /*
+         * Close service trackers
+         */
+        getInstance().clearRegistry();
+        getInstance().clearActionServices();
+        super.stopBundle();
     }
+
 }

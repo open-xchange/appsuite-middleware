@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -101,7 +101,7 @@ public class CalendarFolderManager extends AbstractManager {
      */
     public void cleanUp() {
         try {
-            foldersApi.deleteFolders(userApi.getSession(), folderIds, TREE_ID, null, CALENDAR_MODULE, true, false, false);
+            foldersApi.deleteFolders(userApi.getSession(), folderIds, TREE_ID, null, CALENDAR_MODULE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         } catch (ApiException e) {
             System.err.println("Could not clean up the calendar folders for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
@@ -135,8 +135,8 @@ public class CalendarFolderManager extends AbstractManager {
      * @throws ChronosApiException
      */
     public String createFolder(String module, String providerId, String title, JSONObject config, JSONObject extendedProperties, boolean expectedException) throws ApiException, ChronosApiException {
-        NewFolderBody body = CalendarFolderFactory.createFolderBody(module, providerId, title, true, config, extendedProperties);
-        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, TREE_ID, module);
+        NewFolderBody body = CalendarFolderFactory.createFolderBody(module, providerId, title, Boolean.TRUE, config, extendedProperties);
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, TREE_ID, module, null);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
@@ -145,7 +145,7 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     public String createFolder(NewFolderBody body) throws ApiException {
-        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, null);
         return handleCreation(response).getData();
     }
 
@@ -202,7 +202,7 @@ public class CalendarFolderManager extends AbstractManager {
         FolderBody body = new FolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), body, Boolean.FALSE, folderData.getLastModifiedUtc(), TREE_ID, CALENDAR_MODULE, Boolean.TRUE);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), body, Boolean.FALSE, folderData.getLastModifiedUtc(), TREE_ID, CALENDAR_MODULE, Boolean.TRUE, null);
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
@@ -227,7 +227,7 @@ public class CalendarFolderManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public void deleteFolders(List<String> folders) throws ApiException {
-        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, null, CALENDAR_MODULE, true, false, false);
+        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, null, CALENDAR_MODULE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         for (String folder : folders) {
             folderIds.remove(folder);
         }

@@ -49,6 +49,7 @@
 
 package com.openexchange.user.copy.internal.folder;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,6 +67,7 @@ import java.util.TreeMap;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -175,7 +177,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             try {
                 final int id = folder.getObjectID();
                 if (!ignoreFolder(id)) {
-                    originFolders.put(id, folder.clone());
+                    originFolders.put(I(id), folder.clone());
                 }
             } catch (final CloneNotSupportedException e) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
@@ -183,7 +185,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         }
 
         final Map<Integer, Integer> idMapping = new HashMap<Integer, Integer>();
-        exchangeIds(folderTree, folderTree.getRoot(), i(dstCtxId), i(dstUsrId), dstCon, -1, idMapping);
+        exchangeIds(folderTree, folderTree.getRoot(), tools.getDestinationContext(), i(dstUsrId), -1, idMapping);
 
         /*
          * Write folders and permissions.
@@ -238,7 +240,7 @@ public class FolderCopyTask implements CopyUserTaskService {
 
             while (rs.next()) {
                 final FolderObject folder = buildFolderFromResultSet(rs);
-                folderMap.put(folder.getObjectID(), new FolderEqualsWrapper(folder, "orig"));
+                folderMap.put(I(folder.getObjectID()), new FolderEqualsWrapper(folder, "orig"));
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -280,10 +282,10 @@ public class FolderCopyTask implements CopyUserTaskService {
 
         final SortedMap<Integer, FolderEqualsWrapper> extendedMap = new TreeMap<Integer, FolderEqualsWrapper>();
         extendedMap.putAll(folderMap);
-        extendedMap.put(privateFolder.getObjectID(), privateFolder);
-        extendedMap.put(systemInfostoreFolder.getObjectID(), systemInfostoreFolder);
-        extendedMap.put(userInfostoreFolder.getObjectID(), userInfostoreFolder);
-        extendedMap.put(publicInfostoreFolder.getObjectID(), publicInfostoreFolder);
+        extendedMap.put(I(privateFolder.getObjectID()), privateFolder);
+        extendedMap.put(I(systemInfostoreFolder.getObjectID()), systemInfostoreFolder);
+        extendedMap.put(I(userInfostoreFolder.getObjectID()), userInfostoreFolder);
+        extendedMap.put(I(publicInfostoreFolder.getObjectID()), publicInfostoreFolder);
 
         /*
          * A recursion is used here to be sure that the folder tree always contains a folders parent before the folder is added.
@@ -301,9 +303,9 @@ public class FolderCopyTask implements CopyUserTaskService {
     private void addFoldersRecursive(final SortedMap<Integer, FolderEqualsWrapper> folderMap, final Tree<FolderEqualsWrapper> folderTree, final FolderEqualsWrapper folder) throws OXException {
         final int folderId = folder.getObjectID();
         final int parentFolderId = folder.getParentFolderID();
-        final FolderEqualsWrapper parent = folderMap.get(parentFolderId);
+        final FolderEqualsWrapper parent = folderMap.get(I(parentFolderId));
         if (parentFolderId != 0 && parent == null) {
-            LOG.warn(String.format("A private folder (%1$s) without existing parent (%2$s) was found. The folder will be ignored!", folderId, folder.getParentFolderID()));
+            LOG.warn(String.format("A private folder (%1$s) without existing parent (%2$s) was found. The folder will be ignored!", I(folderId), I(folder.getParentFolderID())));
             return;
         }
 
@@ -372,13 +374,13 @@ public class FolderCopyTask implements CopyUserTaskService {
         }
     }
 
-    private void exchangeIds(final Tree<FolderEqualsWrapper> folderTree, final FolderEqualsWrapper root, final int cid, final int uid, final Connection con, final int newParent, final Map<Integer, Integer> idMapping) throws OXException {
+    private void exchangeIds(final Tree<FolderEqualsWrapper> folderTree, final FolderEqualsWrapper root, final Context context, final int uid, final int newParent, final Map<Integer, Integer> idMapping) throws OXException {
         try {
             final int origId = root.getObjectID();
             int newId = origId;
             if (!ignoreFolder(origId)) {
-                newId = IDGenerator.getId(cid, com.openexchange.groupware.Types.FOLDER, con);
-                idMapping.put(origId, newId);
+                newId = IDGenerator.getId(context, com.openexchange.groupware.Types.FOLDER);
+                idMapping.put(I(origId), I(newId));
             }
 
             final FolderEqualsWrapper rootClone = root.clone();
@@ -390,7 +392,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             if (folderTree.exchangeNodes(root, rootClone) && !folderTree.isLeaf(rootClone)) {
                 final Set<FolderEqualsWrapper> children = folderTree.getChildren(rootClone);
                 for (final FolderEqualsWrapper folder : children) {
-                    exchangeIds(folderTree, folder, cid, uid, con, newId, idMapping);
+                    exchangeIds(folderTree, folder, context, uid, newId, idMapping);
                 }
             }
         } catch (final SQLException e) {
@@ -496,13 +498,13 @@ public class FolderCopyTask implements CopyUserTaskService {
                 Integer folderId = null;
                 Integer parentId = null;
                 try {
-                    Integer tmp = Integer.parseInt(folderIdStr);
+                    Integer tmp = Integer.valueOf(folderIdStr);
                     final Integer newFolderId = idMapping.get(tmp);
                     if (newFolderId != null) {
                         folderId = newFolderId;
                     }
 
-                    tmp = Integer.parseInt(parentIdStr);
+                    tmp = Integer.valueOf(parentIdStr);
                     final Integer newParentId = idMapping.get(tmp);
                     if (newParentId != null) {
                         parentId = newParentId;

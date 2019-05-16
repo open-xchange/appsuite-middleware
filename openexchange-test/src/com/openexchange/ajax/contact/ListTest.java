@@ -23,7 +23,7 @@ public class ListTest extends AbstractContactTest {
 
     @Test
     public void testList() throws Exception {
-        final Contact contactObj = createContactObject("testList");
+        final Contact contactObj = createContactObject();
         final int id1 = insertContact(contactObj);
         final int id2 = insertContact(contactObj);
         final int id3 = insertContact(contactObj);
@@ -47,13 +47,13 @@ public class ListTest extends AbstractContactTest {
     }
 
     @Test
-    public void testSortDuration() throws Exception {
+    public void testSortDuration() {
         final int size = 10000;
         final List<Contact> contacts = new ArrayList<Contact>();
         final int[][] objectIdsAndFolderIds = new int[size][2];
         for (int i = 0; i < size; i++) {
             final int objectId = (size - 1) - i;
-            final Contact contact = createContactObject("testList");
+            final Contact contact = createContactObject();
             contact.setObjectID(objectId);
             contacts.add(contact);
 
@@ -61,7 +61,6 @@ public class ListTest extends AbstractContactTest {
         }
 
         // Sort loaded contacts in the order they were requested
-        final long start = System.currentTimeMillis();
         final List<Contact> sortedContacts = new ArrayList<Contact>(contacts.size());
         for (int i = 0; i < objectIdsAndFolderIds.length; i++) {
             final int[] objectIdsAndFolderId = objectIdsAndFolderIds[i];
@@ -75,10 +74,6 @@ public class ListTest extends AbstractContactTest {
                 }
             }
         }
-        final long end = System.currentTimeMillis();
-        final long diff = end - start;
-
-        // System.out.println("Duration: " + diff);
     }
 
     @Test
@@ -130,7 +125,7 @@ public class ListTest extends AbstractContactTest {
     public void testLastModifiedUTC() throws Exception {
         final int cols[] = new int[] { Contact.OBJECT_ID, Contact.FOLDER_ID, Contact.LAST_MODIFIED_UTC };
 
-        final Contact contactObj = createContactObject("testLastModifiedUTC");
+        final Contact contactObj = createContactObject();
         final int objectId = insertContact(contactObj);
         try {
             final ListRequest listRequest = new ListRequest(ListIDs.l(new int[] { contactFolderId, objectId }), cols, true);
@@ -170,7 +165,7 @@ public class ListTest extends AbstractContactTest {
     @Test
     public void testBug42726_emptyList_markedAsDistList() throws Exception {
         // SETUP
-        Contact contactEntry = createContactObject("internal contact");
+        Contact contactEntry = createContactObject();
         contactEntry.setEmail1("internalcontact@x.de");
         final int contactId = insertContact(contactEntry);
         int distListObjectId = 0;
@@ -184,9 +179,9 @@ public class ListTest extends AbstractContactTest {
             GetResponse getResponse = getClient().execute(getRequest);
 
             Boolean markAsDistList = new Boolean(((JSONObject) getResponse.getData()).getBoolean("mark_as_distributionlist"));
-            assertTrue(markAsDistList);
+            assertTrue(markAsDistList.booleanValue());
 
-            Long numberOfDistListMembers = ((JSONObject) getResponse.getData()).getLong("number_of_distribution_list");
+            long numberOfDistListMembers = ((JSONObject) getResponse.getData()).getLong("number_of_distribution_list");
             assertTrue(numberOfDistListMembers == 1);
             JSONArray distListArray = ((JSONObject) getResponse.getData()).getJSONArray("distribution_list");
             assertTrue(distListArray.length() == numberOfDistListMembers);
@@ -198,10 +193,10 @@ public class ListTest extends AbstractContactTest {
             // ASSERT
             GetRequest emptyGetRequest = new GetRequest(contactFolderId, distListObjectId, tz, false);
             GetResponse emptyGetResponse = getClient().execute(emptyGetRequest);
-            Boolean emptyMarkAsDistList = new Boolean(((JSONObject) emptyGetResponse.getData()).getBoolean("mark_as_distributionlist"));
+            boolean emptyMarkAsDistList = ((JSONObject) emptyGetResponse.getData()).getBoolean("mark_as_distributionlist");
             assertTrue("Contact not marked as list", emptyMarkAsDistList);
 
-            Long emptyNumberOfDistListMembers = ((JSONObject) emptyGetResponse.getData()).getLong("number_of_distribution_list");
+            long emptyNumberOfDistListMembers = ((JSONObject) emptyGetResponse.getData()).getLong("number_of_distribution_list");
             assertTrue("Empty list has wrong number of members", emptyNumberOfDistListMembers == 0);
         } finally {
             deleteContact(contactId, contactFolderId, true);

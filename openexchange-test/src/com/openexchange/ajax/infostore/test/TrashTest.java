@@ -90,6 +90,7 @@ public class TrashTest extends AbstractInfostoreTest {
     private FolderObject testFolder;
     private int trashFolderID;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -322,7 +323,7 @@ public class TrashTest extends AbstractInfostoreTest {
         fail("File " + objectID + " not found in folder: " + folderID);
     }
 
-    private void assertFolderExistsInFolder(int folderID, int objectID) throws Exception {
+    private void assertFolderExistsInFolder(int folderID, int objectID) {
         FolderObject[] folders = ftm.listFoldersOnServer(folderID);
         for (FolderObject folder : folders) {
             if (folder.getObjectID() == objectID) {
@@ -341,7 +342,7 @@ public class TrashTest extends AbstractInfostoreTest {
         }
     }
 
-    private void assertFolderNotExistsInFolder(int folderID, int objectID) throws Exception {
+    private void assertFolderNotExistsInFolder(int folderID, int objectID) {
         FolderObject[] folders = ftm.listFoldersOnServer(folderID);
         for (FolderObject folder : folders) {
             assertFalse("Folder " + objectID + " found in folder: " + folderID, objectID == folder.getObjectID());

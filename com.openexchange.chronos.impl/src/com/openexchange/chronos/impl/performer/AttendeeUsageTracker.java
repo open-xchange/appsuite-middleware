@@ -70,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.objectusecount.BatchIncrementArguments;
 import com.openexchange.objectusecount.BatchIncrementArguments.Builder;
+import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.session.Session;
@@ -124,6 +125,22 @@ public class AttendeeUsageTracker {
                     LOG.warn("Error incrementing object use count", e);
                 }
             }
+        }
+
+        PrincipalUseCountService useCountService = Services.getService(PrincipalUseCountService.class);
+        if (useCountService != null) {
+            // Check for used resources, Groups are checked on json layer
+            for (Attendee att : attendees) {
+                if (CalendarUserType.GROUP.equals(att.getCuType()) || CalendarUserType.RESOURCE.equals(att.getCuType())) {
+                    try {
+                        useCountService.increment(session, att.getEntity());
+                    } catch (OXException e) {
+                        LOG.warn("Error incrementing principal use count", e);
+                    }
+                }
+            }
+        } else {
+            LOG.debug("{} not available, skipping principal use count incrementation.", PrincipalUseCountService.class);
         }
         if (collectEmailAddresses) {
             /*

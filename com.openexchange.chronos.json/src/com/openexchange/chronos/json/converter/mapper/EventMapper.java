@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.converter.mapper;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultAttendeePrivileges;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
@@ -297,12 +299,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setCreated(new Date(value));
+                object.setCreated(new Date(value.longValue()));
             }
 
             @Override
             public Long get(Event object) {
-                return object.getCreated() != null ? object.getCreated().getTime() : 0l;
+                return L(object.getCreated() != null ? object.getCreated().getTime() : 0l);
             }
 
             @Override
@@ -319,12 +321,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setTimestamp(value);
+                object.setTimestamp(value.longValue());
             }
 
             @Override
             public Long get(Event object) {
-                return object.getTimestamp();
+                return L(object.getTimestamp());
             }
 
             @Override
@@ -368,12 +370,12 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public void set(Event object, Long value) throws OXException {
-                object.setLastModified(new Date(value));
+                object.setLastModified(new Date(value.longValue()));
             }
 
             @Override
             public Long get(Event object) {
-                return object.getLastModified() != null ? object.getLastModified().getTime() : 0l;
+                return L(object.getLastModified() != null ? object.getLastModified().getTime() : 0l);
             }
 
             @Override
@@ -948,6 +950,28 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
                 geoLocationJson.put(ChronosJsonFields.Geo.LATITUDE, from.getGeo()[0]);
                 geoLocationJson.put(ChronosJsonFields.Geo.LONGITUDE, from.getGeo()[1]);
                 return geoLocationJson;
+            }
+        });
+        mappings.put(EventField.ATTENDEE_PRIVILEGES, new StringMapping<Event>(ChronosJsonFields.ATTENDEE_PRIVILEGES, null) {
+
+            @Override
+            public boolean isSet(Event object) {
+                return object.containsAttendeePrivileges();
+            }
+
+            @Override
+            public void set(Event object, String value) throws OXException {
+                object.setAttendeePrivileges(DefaultAttendeePrivileges.MODIFY.getValue().equalsIgnoreCase(value) ? DefaultAttendeePrivileges.MODIFY : DefaultAttendeePrivileges.DEFAULT);
+            }
+
+            @Override
+            public String get(Event object) {
+                return object.getAttendeePrivileges().getValue();
+            }
+
+            @Override
+            public void remove(Event object) {
+                object.removeAttendeePrivileges();
             }
         });
         mappings.put(EventField.ATTENDEES, new AttendeesMapping<Event>(ChronosJsonFields.ATTENDEES, null) {

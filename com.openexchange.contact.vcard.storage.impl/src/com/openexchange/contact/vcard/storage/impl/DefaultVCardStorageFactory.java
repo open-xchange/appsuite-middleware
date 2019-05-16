@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard.storage.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
@@ -80,7 +81,7 @@ public class DefaultVCardStorageFactory implements VCardStorageFactory {
             for (String capability : this.vCardStorageService.neededCapabilities()) {
                 ConfigProperty<Boolean> filestoreCapability = configViewFactory.getView(-1, contextId).property(capability, boolean.class);
                 if (!filestoreCapability.get().booleanValue()) {
-                    LOG.info("Needed capability '{}' not available for context id {}. Unable to handle VCard for storage.", capability, contextId);
+                    LOG.info("Needed capability '{}' not available for context id {}. Unable to handle VCard for storage.", capability, I(contextId));
                     return null;
                 }
             }

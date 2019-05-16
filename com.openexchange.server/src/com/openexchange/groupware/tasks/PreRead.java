@@ -136,7 +136,7 @@ final class PreRead<T> {
         final List<T> retval;
         lock.lock();
         try {
-            LOG.debug("Taking. {}", minimum);
+            LOG.debug("Taking. {}", minimum ? Boolean.TRUE : Boolean.FALSE);
             if (minimum && elements.size() < MINIMUM_PREREAD
                 && !preReaderFinished) {
                 LOG.debug("Waiting for enough.");

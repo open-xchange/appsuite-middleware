@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,7 +74,6 @@ public class TrustedMailIconURLFetcher extends AbstractTrustedMailIconFetcher im
      */
     public TrustedMailIconURLFetcher() {
         super();
-        HttpURLConnection.setFollowRedirects(false);
     }
 
     /*
@@ -132,6 +131,7 @@ public class TrustedMailIconURLFetcher extends AbstractTrustedMailIconFetcher im
         connection.setConnectTimeout(CONNECTION_TIMEOUT);
         connection.setReadTimeout(READ_TIMEOUT);
         connection.setRequestMethod(httpMethod);
+        connection.setInstanceFollowRedirects(false);
         return connection;
     }
 }

@@ -63,8 +63,6 @@ import java.util.Map;
  */
 public class Threader {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Threader.class);
-
     private ThreadContainer rootNode; // has kids, and no next
     private Map<String, ThreadContainer> idMap; // maps message IDs to ThreadContainers
     private int bogusIdCount; // tick of how many dup IDs we've seen

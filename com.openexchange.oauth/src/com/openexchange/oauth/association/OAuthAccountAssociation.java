@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.association;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
 /**
@@ -107,11 +109,19 @@ public interface OAuthAccountAssociation {
     String getDisplayName();
 
     /**
-     * Gets the association's type.
+     * Returns the module which the OAuth account is associated with
      *
-     * @return The type
+     * @return the module which the OAuth account is associated with
      */
-    Type getType();
+    String getModule();
+
+    /**
+     * Returns the optional folder of the association
+     *
+     * @return the optional folder or <code>null</code> if no
+     *         folder is associated with this {@link OAuthAccountAssociation}
+     */
+    String getFolder();
 
     // ---------------------------------------------------------------------------------------------------------------------
 
@@ -123,5 +133,12 @@ public interface OAuthAccountAssociation {
      * @throws OXException If status cannot be retrieved
      */
     Status getStatus(Session session) throws OXException;
+
+    /**
+     * Returns an unmodifiable {@link List} with all enabled scopes of the association
+     *
+     * @return an unmodifiable {@link List} with all enabled scopes of the association
+     */
+    List<OAuthScope> getScopes();
 
 }

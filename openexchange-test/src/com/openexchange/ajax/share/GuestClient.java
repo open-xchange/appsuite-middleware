@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.share;
 
+import static org.junit.Assert.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -125,6 +127,10 @@ import com.openexchange.share.recipient.ShareRecipient;
  */
 public class GuestClient extends AJAXClient {
 
+    /**
+     * The GuestClient.java.
+     */
+    private static final String TIMESTAMP_META = "timestamp";
     private final ResolveShareResponse shareResponse;
     private final LoginResponse loginResponse;
     private final String module;
@@ -289,19 +295,19 @@ public class GuestClient extends AJAXClient {
 
     public static final class ClientConfig {
 
-        private final String url;
+        final String url;
 
-        private String username;
+        String username;
 
-        private String password;
+        String password;
 
-        private boolean failOnNonRedirect;
+        boolean failOnNonRedirect;
 
-        private boolean mustLogout;
+        boolean mustLogout;
 
-        private String client;
+        String client;
 
-        private AJAXSession ajaxSession;
+        AJAXSession ajaxSession;
 
         public ClientConfig(String url) {
             super();
@@ -499,6 +505,7 @@ public class GuestClient extends AJAXClient {
         GetInfostoreResponse getInfostoreResponse = execute(getInfostoreRequest);
         checkResponse(getInfostoreResponse, false == permissions.canRead());
         DefaultFile file = new DefaultFile(getInfostoreResponse.getDocumentMetadata());
+        file.setMeta(Collections.singletonMap(TIMESTAMP_META, getInfostoreResponse.getTimestamp()));
         if (null != file.getFileName() && 0 < file.getFileSize()) {
             GetDocumentRequest getDocumentRequest = new GetDocumentRequest(folderID, fileID);
             getInfostoreRequest.setFailOnError(permissions.canRead());
@@ -521,19 +528,12 @@ public class GuestClient extends AJAXClient {
              * check item update
              */
             file.setFileName(file.getFileName() + "_edit");
-            UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, new Field[] { Field.FILENAME }, file.getLastModified());
+            Date timestamp = file.getMeta() == null ? file.getLastModified() : (Date) file.getMeta().getOrDefault(TIMESTAMP_META, file.getLastModified());
+            UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, new Field[] { Field.FILENAME }, timestamp);
             updateInfostoreRequest.setFailOnError(permissions.canWrite());
             UpdateInfostoreResponse updateInfostoreResponse = execute(updateInfostoreRequest);
             checkResponse(updateInfostoreResponse, false == permissions.canWrite());
             file.setLastModified(updateInfostoreResponse.getTimestamp());
-            /*
-             * check item delete
-             */
-            //TODO: throws "not exist" in folder 10
-            //            DeleteInfostoreRequest deleteInfostoreRequest = new DeleteInfostoreRequest(fileID, new FileID(fileID).getFolderId(), file.getLastModified());
-            //            deleteInfostoreRequest.setFailOnError(permissions.canDelete());
-            //            DeleteInfostoreResponse deleteInfostoreResponse = execute(deleteInfostoreRequest);
-            //            checkResponse(deleteInfostoreResponse, false == permissions.canDelete());
         }
     }
 
@@ -557,7 +557,7 @@ public class GuestClient extends AJAXClient {
      * This method checks only for object permissions. If you shared the parent folder you need
      * to check the files accessibility otherwise.
      *
-     * @param fileID The identifier of the file to check
+     * @param id The identifier of the file to check
      * @param permissions The guest permissions for that file
      * @throws Exception
      */
@@ -577,6 +577,7 @@ public class GuestClient extends AJAXClient {
         }
 
         FileStorageObjectPermission permissionForEntity = null;
+        assertNotNull(objectPermissions);
         for (FileStorageObjectPermission p : objectPermissions) {
             if (p.getEntity() == permissions.getEntity() && p.isGroup() == permissions.isGroupPermission()) {
                 permissionForEntity = p;
@@ -585,10 +586,7 @@ public class GuestClient extends AJAXClient {
         }
 
         int expected = getObjectPermissionBits(permissions.getPermissionBits());
-        if (permissionForEntity == null) {
-            Assert.fail("File contains no object permission for entity " + permissions.getEntity());
-        }
-
+        assertNotNull("File contains no object permission for entity " + permissions.getEntity(), permissionForEntity);
         Assert.assertEquals("Wrong permission found", expected, permissionForEntity.getPermissions());
     }
 
@@ -622,7 +620,7 @@ public class GuestClient extends AJAXClient {
      * @throws Exception
      */
     public void checkFolderNotAccessible(String folderID) throws Exception {
-        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, Integer.valueOf(folderID), false));
+        GetResponse getResponse = execute(new GetRequest(EnumAPI.OX_NEW, Integer.valueOf(folderID).intValue(), false));
         Assert.assertTrue("No errors in response", getResponse.hasError());
         Assert.assertNull("Folder in response", getResponse.getFolder());
     }

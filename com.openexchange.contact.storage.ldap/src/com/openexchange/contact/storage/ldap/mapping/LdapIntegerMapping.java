@@ -66,7 +66,7 @@ public abstract class LdapIntegerMapping extends LdapMapping<Integer> {
         String value = (String)super.getValue(result);
         if (null != value) {
             try {
-                return Integer.parseInt(value);
+                return Integer.valueOf(value);
             } catch (NumberFormatException e) {
                 throw LdapExceptionCodes.ERROR_GETTING_ATTRIBUTE.create(e, e.getMessage());
             }

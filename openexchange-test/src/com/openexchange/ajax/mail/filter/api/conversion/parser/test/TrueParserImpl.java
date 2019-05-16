@@ -72,11 +72,6 @@ public class TrueParserImpl implements TestParser {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ajax.mail.filter.api.conversion.parser.JSONParser#parse(org.json.JSONObject)
-     */
     @Override
     public Test<? extends TestArgument> parse(JSONObject jsonObject) throws JSONException {
         if (jsonObject.has("test")) {
@@ -84,14 +79,13 @@ public class TrueParserImpl implements TestParser {
             final String testname = jsonTestObject.getString("test");
             TestCommand testCommand = TestCommand.valueOf(testname.toLowerCase());
             final TestParser testParser = TestParserFactory.getParser(testCommand);
-            final Test<? extends TestArgument> test = testParser.parse(jsonTestObject);
+            testParser.parse(jsonTestObject);
 
             Test<TrueTestArgument> trueTest = new TrueTest();
             // TODO: check if 'true' test command can have a nested test
-            //notTest.setTestArgument(TrueTestArgument.test, test); 
+            //notTest.setTestArgument(TrueTestArgument.test, test);
             return trueTest;
-        } else {
-            return new TrueTest();
         }
+        return new TrueTest();
     }
 }

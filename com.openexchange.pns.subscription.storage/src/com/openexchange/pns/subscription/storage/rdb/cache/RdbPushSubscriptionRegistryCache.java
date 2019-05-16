@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.subscription.storage.rdb.cache;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -134,7 +135,7 @@ public class RdbPushSubscriptionRegistryCache {
      */
     public CachedPushSubscriptionCollection getCollectionFor(int userId, int contextId) throws OXException {
         try {
-            LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.get(contextId);
+            LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.get(I(contextId));
             return userCache.get(UserAndContext.newInstance(userId, contextId));
         } catch (ExecutionException e) {
             throw ThreadPools.launderThrowable(e, OXException.class);
@@ -149,7 +150,7 @@ public class RdbPushSubscriptionRegistryCache {
      */
     public void addAndInvalidateIfPresent(PushSubscription subscription) throws OXException {
         int contextId = subscription.getContextId();
-        LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(contextId);
+        LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(I(contextId));
         if (null == userCache) {
             return;
         }
@@ -172,7 +173,7 @@ public class RdbPushSubscriptionRegistryCache {
      */
     public void removeAndInvalidateIfPresent(PushSubscription subscription) throws OXException {
         int contextId = subscription.getContextId();
-        LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(contextId);
+        LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(I(contextId));
         if (null == userCache) {
             return;
         }
@@ -211,9 +212,9 @@ public class RdbPushSubscriptionRegistryCache {
         } else {
             if (userId <= 0) {
                 // Drop for whole context
-                cache.invalidate(contextId);
+                cache.invalidate(I(contextId));
             } else {
-                LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(contextId);
+                LoadingCache<UserAndContext, CachedPushSubscriptionCollection> userCache = cache.getIfPresent(I(contextId));
                 if (null != userCache) {
                     userCache.invalidate(UserAndContext.newInstance(userId, contextId));
                 }

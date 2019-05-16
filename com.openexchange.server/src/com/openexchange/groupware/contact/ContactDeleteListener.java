@@ -81,7 +81,7 @@ import gnu.trove.list.array.TIntArrayList;
  */
 public final class ContactDeleteListener implements DeleteListener {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDeleteListener.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDeleteListener.class);
 
     /**
      * Initializes a new {@link ContactDeleteListener}
@@ -97,7 +97,7 @@ public final class ContactDeleteListener implements DeleteListener {
 
             Integer destUser = deleteEvent.getDestinationUserID();
             if(destUser == null){
-                destUser = deleteEvent.getContext().getMailadmin();
+                destUser = I(deleteEvent.getContext().getMailadmin());
             }
             /*
              * Drop affected distribution list entries
@@ -107,7 +107,7 @@ public final class ContactDeleteListener implements DeleteListener {
             /*
              * Proceed
              */
-            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), destUser, readCon, writeCon);
+            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), destUser.intValue(), readCon, writeCon);
         } else if (type == DeleteEvent.TYPE_CONTEXT) {
             handleContextDeletion(writeCon, deleteEvent.getContext());
         }
@@ -262,7 +262,7 @@ public final class ContactDeleteListener implements DeleteListener {
             EventClient eventClient = new EventClient(session);
             for (Contact contact : toDelete) {
                 try {
-                    FolderObject parentFolder = parentFolders.get(contact.getParentFolderID());
+                    FolderObject parentFolder = parentFolders.get(I(contact.getParentFolderID()));
                     if (null != parentFolder) {
                         eventClient.delete(contact, parentFolder);
                     } else {
@@ -307,8 +307,7 @@ public final class ContactDeleteListener implements DeleteListener {
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toDelete.add(contact);
             } else if (null == folder) {
-                LOG.warn("Contact with no valid parent folder will be moved to user's address book. " +
-                    "[Context={} Folder={} User={} Contact={}]",
+                LOG.warn("Contact with no valid parent folder will be moved to user's address book. [Context={} Folder={} User={} Contact={}]",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toUsersFolder.add(contact);
             } else if (FolderObject.CONTACT != folder.getModule()) {
@@ -319,8 +318,7 @@ public final class ContactDeleteListener implements DeleteListener {
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toDelete.add(contact);
             } else {
-                LOG.debug("Contact in non-'private' folder will be transferred to user " +
-                    "[Context={} Folder={} User={} Contact={}].",
+                LOG.debug("Contact in non-'private' folder will be transferred to user [Context={} Folder={} User={} Contact={}].",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toUser.add(contact);
             }
@@ -522,13 +520,12 @@ public final class ContactDeleteListener implements DeleteListener {
     }
 
     /**
-     * Deletes the supplied contacts. This includes all affected entries in tables 'prg_dlist', 'prg_contacts_linkage',
+     * Deletes the supplied contacts. This includes all affected entries in tables 'prg_dlist',
      * 'prg_contacts_image' and 'prg_contacts'.
      *
      * @param writeConnection The connection to use
      * @param contextID The context ID
      * @param contacts The contacts to delete
-     * @param newCreatedBy The new created by ID
      * @return The number of updated rows
      * @throws OXException
      */
@@ -554,21 +551,6 @@ public final class ContactDeleteListener implements DeleteListener {
                 stmt.setInt(1, contextID);
                 for (int i = 0; i < contacts.size(); i++) {
                     stmt.setInt(i + 2, contacts.get(i).getObjectID());
-                }
-                stmt.executeUpdate();
-            } finally {
-                Databases.closeSQLStuff(stmt);
-            }
-            /*
-             * prg_contacts_linkage (obsoloete?)
-             */
-            try {
-                stmt = writeConnection.prepareStatement(
-                    "DELETE FROM prg_contacts_linkage WHERE cid=? AND (intfield01" + inClause + " OR intfield02" + inClause + ");");
-                stmt.setInt(1, contextID);
-                for (int i = 0; i < contacts.size(); i++) {
-                    stmt.setInt(i + 2, contacts.get(i).getObjectID());
-                    stmt.setInt(i + 2 + contacts.size(), contacts.get(i).getObjectID());
                 }
                 stmt.executeUpdate();
             } finally {

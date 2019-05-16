@@ -50,6 +50,7 @@
 package com.openexchange.chronos.json.converter.mapper;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Date;
 import java.util.EnumMap;
@@ -223,13 +224,13 @@ public class AlarmMapper extends DefaultJsonMapper<Alarm, AlarmField> {
 
             @Override
             public void set(Alarm object, Long value) throws OXException {
-                object.setAcknowledged(new Date(value));
+                object.setAcknowledged(new Date(value.longValue()));
             }
 
             @Override
             public Long get(Alarm object) {
                 Date acknowledged = object.getAcknowledged();
-                return acknowledged != null ? acknowledged.getTime() : null;
+                return acknowledged != null ? L(acknowledged.getTime()) : null;
             }
 
             @Override

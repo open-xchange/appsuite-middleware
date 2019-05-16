@@ -68,10 +68,9 @@ public class PermissionAvailabilityService {
 
     /**
      * These permissions (better: the associated JSON bundles or services) are currently controlled by the service<br>
-     * - Permission.PUBLICATION: bundle 'com.openexchange.publish.json'<br>
      * - Permission.SUBSCRIPTION: bundle 'com.openexchange.subscribe.json'
      */
-    public static final Collection<Permission> CONTROLLED_PERMISSIONS = Collections.unmodifiableList(Arrays.asList(Permission.PUBLICATION, Permission.SUBSCRIPTION));
+    public static final Collection<Permission> CONTROLLED_PERMISSIONS = Collections.unmodifiableList(Arrays.asList(Permission.SUBSCRIPTION));
 
     /**
      * The {@link Permission} the service is registered for.

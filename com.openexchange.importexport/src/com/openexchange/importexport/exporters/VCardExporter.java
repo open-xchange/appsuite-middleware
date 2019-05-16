@@ -256,25 +256,8 @@ public class VCardExporter extends AbstractExporter {
 
     @Override
     public SizedInputStream exportFolderData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
-        return export(session, format, folder, fieldsToBeExported, optionalParams, null);
-    }
-
-    @Override
-    public SizedInputStream exportBatchData(final ServerSession session, final Format format, final Map<String, List<String>> batchIds, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
-        return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
-    }
-
-    private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
-        if (null != batchIds) {
-            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
-                if (!canExportBatch(session, format, batchEntry, optionalParams)) {
-                    throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
-                }
-            }
-        } else {
-            if (!canExport(session, format, folder, optionalParams)) {
-                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
-            }
+        if (!canExport(session, format, folder, optionalParams)) {
+            throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
         }
 
         boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
@@ -285,17 +268,9 @@ public class VCardExporter extends AbstractExporter {
             if (null != response) {
                 Writer writer = null;
                 try {
-                    response.setHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
-                    if (null != folder) {
-                        response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.VCARD.getExtension())));
-                    } else if (null != batchIds) {
-                        response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.VCARD.getExtension())));
-                    } else {
-                        response.setHeader("Content-Disposition", "attachment; filename=Export." + Format.VCARD.getExtension());
-                    }
-                    Tools.removeCachingHeader(response);
-                    writer = new OutputStreamWriter(new DelayInitServletOutputStream(response), DEFAULT_CHARSET);
-                    export(session, folder, exportDistributionLists, fieldsToBeExported, writer, batchIds);
+                    String fileName = getFolderExportFileName(session, folder, Format.VCARD.getExtension());
+                    writer = setResponseHeadersAndInitWriter(response, fileName, optionalParams, requestData);
+                    exportByFolder(session, folder, exportDistributionLists, fieldsToBeExported, writer);
                     return null;
                 } finally {
                     Streams.close(writer);
@@ -307,7 +282,7 @@ public class VCardExporter extends AbstractExporter {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean error = true;
         try {
-            export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET), batchIds);
+            exportByFolder(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET));
             SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
             error = false;
             return sizedIn;
@@ -318,9 +293,64 @@ public class VCardExporter extends AbstractExporter {
         }
     }
 
-    private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
+    @Override
+    public SizedInputStream exportBatchData(final ServerSession session, final Format format, final Map<String, List<String>> batchIds, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            if (!canExportBatch(session, format, batchEntry, optionalParams)) {
+                throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+            }
+        }
 
-    private void export(final ServerSession session, final String folderId, boolean exportDistributionLists, int[] fieldsToBeExported, Writer writer, Map<String, List<String>> batchIds) throws OXException {
+        boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            // Try to stream
+            HttpServletResponse response = requestData.optHttpServletResponse();
+            if (null != response) {
+                Writer writer = null;
+                try {
+                    String fileName = getBatchExportFileName(session, batchIds, Format.VCARD.getExtension());
+                    writer = setResponseHeadersAndInitWriter(response, fileName, optionalParams, requestData);
+                    exportByBatchIds(session, exportDistributionLists, fieldsToBeExported, writer, batchIds);
+                    return null;
+                } finally {
+                    Streams.close(writer);
+                }
+            }
+        }
+
+        // No streaming support possible
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            exportByBatchIds(session, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET), batchIds);
+            SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
+            error = false;
+            return sizedIn;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
+    }
+
+    /**
+     * Sets the "Content-Type" as well as "Content-Disposition" response headers and returns initialized <code>Writer</code> instance.
+     *
+     * @param response The HTTP response to write headers to
+     * @param fileName The file name to use
+     * @param optionalParams The optional parameters
+     * @param requestData The AJAX request data
+     * @return The <code>Writer</code> instance
+     */
+    private Writer setResponseHeadersAndInitWriter(HttpServletResponse response, String fileName, Map<String, Object> optionalParams, AJAXRequestData requestData) {
+        response.setHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
+        response.setHeader("Content-Disposition", "attachment" + appendFileNameParameter(requestData, fileName));
+        Tools.removeCachingHeader(response);
+        return new OutputStreamWriter(new DelayInitServletOutputStream(response), DEFAULT_CHARSET);
+    }
+
+    private void exportByBatchIds(ServerSession session, boolean exportDistributionLists, int[] fieldsToBeExported, Writer writer, Map<String, List<String>> batchIds) throws OXException {
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = ContactMapper.getInstance().getFields(_contactFields);
@@ -340,48 +370,66 @@ public class VCardExporter extends AbstractExporter {
         VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
         VCardService vCardService = ImportExportServices.getVCardService();
 
-        // export a single contact or a batch of contacts...
-        if (batchIds != null){
-            for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
-                String folder = batchEntry.getKey();
-                List<String> contacts = batchEntry.getValue();
-                String[] contactsId = new String[contacts.size()];
-                contactsId = contacts.toArray(contactsId);
-                SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
-                try {
-                    while (contactBatchIterator.hasNext()) {
-                        Contact contact = contactBatchIterator.next();
-                        try {
-                            Contact fullContact = contactService.getContact(session, folder, Integer.toString(contact.getObjectID()), fields);
-                            if (false == exportDistributionLists && (fullContact.containsDistributionLists() || fullContact.getMarkAsDistribtuionlist())) {
-                                continue;
-                            }
+        // Export a single contact or a batch of contacts...
+        for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+            String folder = batchEntry.getKey();
+            List<String> contacts = batchEntry.getValue();
+            String[] contactsId = new String[contacts.size()];
+            contactsId = contacts.toArray(contactsId);
+            SearchIterator<Contact> contactBatchIterator = contactService.getContacts(session, folder, contacts.toArray(contactsId));
+            try {
+                while (contactBatchIterator.hasNext()) {
+                    Contact contact = contactBatchIterator.next();
+                    try {
+                        Contact fullContact = contactService.getContact(session, folder, Integer.toString(contact.getObjectID()), fields);
+                        if (exportDistributionLists || (!fullContact.containsDistributionLists() && !fullContact.getMarkAsDistribtuionlist())) {
                             exportContact(session, fullContact, vCardService, vCardStorage, writer);
-                        } catch (OXException e) {
-                            if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
-                                throw e;
-                            }
+                        }
+                    } catch (OXException e) {
+                        if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                            throw e;
                         }
                     }
-                } finally {
-                    SearchIterators.close(contactBatchIterator);
                 }
+            } finally {
+                SearchIterators.close(contactBatchIterator);
             }
-            doFlush(writer);
-            return;
+        }
+        doFlush(writer);
+    }
+
+    private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
+
+    private void exportByFolder(ServerSession session, String folderId, boolean exportDistributionLists, int[] fieldsToBeExported, Writer writer) throws OXException {
+        ContactField[] fields;
+        if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
+            fields = ContactMapper.getInstance().getFields(_contactFields);
+            List<ContactField> tmp = new ArrayList<>();
+            tmp.addAll(Arrays.asList(fields));
+            tmp.add(ContactField.VCARD_ID);
+            fields = tmp.toArray(new ContactField[tmp.size()]);
+        } else {
+            // In this case the original vCard must not be merged. Since the ContactMapper does not even map the VCARD_ID column it will not be considered when exporting.
+            fields = ContactMapper.getInstance().getFields(fieldsToBeExported);
+            fields = ensureContained(fields, ContactField.MARK_AS_DISTRIBUTIONLIST);
         }
 
-        // ... or export a folder of contacts
+        // Get required contact service
+        ContactService contactService = ImportExportServices.getContactService();
+
+        VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
+        VCardService vCardService = ImportExportServices.getVCardService();
+
+        // Export all contacts residing in given folder
         SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
         try {
             while (searchIterator.hasNext()) {
                 Contact contact = searchIterator.next();
                 try {
                     Contact fullContact = contactService.getContact(session, folderId, Integer.toString(contact.getObjectID()), fields);
-                    if (false == exportDistributionLists && (fullContact.containsDistributionLists() || fullContact.getMarkAsDistribtuionlist())) {
-                        continue;
+                    if (exportDistributionLists || (!fullContact.containsDistributionLists() && !fullContact.getMarkAsDistribtuionlist())) {
+                        exportContact(session, fullContact, vCardService, vCardStorage, writer);
                     }
-                    exportContact(session, fullContact, vCardService, vCardStorage, writer);
                 } catch (OXException e) {
                     if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
                         throw e;

@@ -58,6 +58,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.ConfigTools;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
@@ -120,14 +122,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.factory = factory;
         this.folder = folder;
         if (null != folder) {
-            includeProperties(
-                new CTag(this),
-                new SyncToken(this),
-                new ACL(folder.getPermissions()),
-                new ACLRestrictions(),
-                new SupportedPrivilegeSet(),
-                new Principal(getOwner())
-            );
+            includeProperties(new CTag(this), new SyncToken(this), new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet(), new Principal(getOwner()));
             if (supportsPermissions(folder)) {
                 includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this));
             }
@@ -198,7 +193,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
             for (T object : this.getObjects()) {
                 children.add(createResource(object, constructPathForChildResource(object)));
             }
-            LOG.debug("{}: added {} child resources.", this.getUrl(), children.size());
+            LOG.debug("{}: added {} child resources.", this.getUrl(), Integer.valueOf(children.size()));
             return children;
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
@@ -257,9 +252,12 @@ public abstract class FolderCollection<T> extends DAVCollection {
             try {
                 since = new Date(Long.parseLong(token));
             } catch (NumberFormatException e) {
-                OXException cause = OXException.general("Invalid sync token \"" + token + "\"");
+                OXException cause = OXException.general("Invalid sync token \"" + token + "\"", e);
                 throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
+        }
+        if (null != since && 0L < since.getTime()) {
+            checkDataAvailability(since, token);
         }
         try {
             /*
@@ -271,8 +269,33 @@ public abstract class FolderCollection<T> extends DAVCollection {
         }
     }
 
+    private void checkDataAvailability(Date since, String token) throws PreconditionException {
+        try {
+            ConfigViewFactory configViewFactory = factory.getService(ConfigViewFactory.class);
+            Boolean enabled = configViewFactory.getView().opt("com.openexchange.database.tombstone.cleanup.enabled", Boolean.class, Boolean.TRUE);
+            if (enabled == null || enabled.booleanValue() == false) {
+                return;
+            }
+            String timespanStr = configViewFactory.getView().opt("com.openexchange.database.tombstone.cleanup.timespan", String.class, "12w");
+            long timespan = ConfigTools.parseTimespan(timespanStr);
+            if (timespan < 1) {
+                LOG.warn("Cleanup enabled but no meaningful value defined. Will use the default of 3 months.");
+                timespan = ConfigTools.parseTimespan("12w");
+            }
+            if (since != null && since.after(new Date(System.currentTimeMillis() - timespan))) {
+                return;
+            }
+        } catch (OXException e) {
+            LOG.warn("Unable to retrieve configuration view.", e);
+            return;
+        }
+        // Set since to null in case already clean-up data is requested to perform a slow sync
+        OXException cause = OXException.general("Token \"" + token + "\" out of range.");
+        throw new PreconditionException(cause, DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    }
+
     @Override
-    public Date getCreationDate() throws WebdavProtocolException {
+    public Date getCreationDate() {
         return null != folder ? folder.getCreationDateUTC() : null;
     }
 
@@ -283,9 +306,8 @@ public abstract class FolderCollection<T> extends DAVCollection {
         String ownerName = SharedType.getInstance().equals(this.folder.getType()) ? getOwnerName() : null;
         if (null != ownerName && 0 < ownerName.length()) {
             return String.format("%s (%s)", name, ownerName);
-        } else {
-            return name;
         }
+        return name;
     }
 
     @Override
@@ -342,7 +364,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
         if (null != folder.getOwnPermission() && false == folder.getOwnPermission().isAdmin() && DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
             // Client will continue to show an exclamation mark if responding with 403 on an "unsubscribe" request,
             // so pretend a successful deletion here
-            LOG.info("{}: Ignoring delete/unsubscribe request for folder {} due to missing admin permissions of user {}.", getUrl(), folder, factory.getUser().getId());
+            LOG.info("{}: Ignoring delete/unsubscribe request for folder {} due to missing admin permissions of user {}.", getUrl(), folder, Integer.valueOf(factory.getUser().getId()));
             return;
         }
         if (folder.isDefault()) {

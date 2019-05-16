@@ -217,7 +217,7 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
 
     @Override
     public void touch(String folderId, String id) throws OXException {
-        getInfostore(folderId).touch(ID(id), context);;
+        getInfostore(folderId).touch(ID(id), context);
     }
 
 }

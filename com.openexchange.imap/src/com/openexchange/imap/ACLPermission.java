@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -168,7 +169,7 @@ public final class ACLPermission extends MailPermission {
     public int canRename() {
         return canRename;
     }
-    
+
     /**
      * Sets the rename flag.
      *
@@ -182,7 +183,7 @@ public final class ACLPermission extends MailPermission {
     public int canStoreSeenFlag() {
         return canStoreSeenFlag;
     }
-    
+
     /**
      * Sets the canStoreSeenFlag
      *
@@ -218,7 +219,7 @@ public final class ACLPermission extends MailPermission {
             // Group not supported
             GroupService groups = Services.getService(GroupService.class);
             Group group = groups.getGroup(ctx, getEntity());
-            throw Entity2ACLExceptionCode.UNKNOWN_GROUP.create(getEntity(), ctx.getContextId(), imapConfig.getServer(), group.getDisplayName());
+            throw Entity2ACLExceptionCode.UNKNOWN_GROUP.create(I(getEntity()), I(ctx.getContextId()), imapConfig.getServer(), group.getDisplayName());
         }
         return (acl = new ACL(Entity2ACL.getInstance(imapStore, imapConfig).getACLName(getEntity(), ctx, args), rights));
     }
@@ -246,9 +247,8 @@ public final class ACLPermission extends MailPermission {
      *
      * @param rights -The rights to parse
      * @param imapConfig The IMAP configuration
-     * @throws IMAPException If an IMAP error occurs
      */
-    public void parseRights(final Rights rights, final IMAPConfig imapConfig) throws IMAPException {
+    public void parseRights(final Rights rights, final IMAPConfig imapConfig) {
         rights2Permission(rights, this, imapConfig);
         canRename = imapConfig.getACLExtension().canCreate(rights) ? 1 : 0;
         canStoreSeenFlag = imapConfig.getACLExtension().canKeepSeen(rights) ? 1 : 0;

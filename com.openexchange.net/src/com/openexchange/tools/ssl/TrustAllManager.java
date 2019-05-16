@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.ssl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.net.Socket;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -98,7 +99,7 @@ public final class TrustAllManager extends X509ExtendedTrustManager implements T
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509ExtendedTrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
      */
     @Override
@@ -109,7 +110,7 @@ public final class TrustAllManager extends X509ExtendedTrustManager implements T
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, java.net.Socket)
      */
     @Override
@@ -120,7 +121,7 @@ public final class TrustAllManager extends X509ExtendedTrustManager implements T
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509ExtendedTrustManager#checkClientTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
      */
     @Override
@@ -131,7 +132,7 @@ public final class TrustAllManager extends X509ExtendedTrustManager implements T
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see javax.net.ssl.X509ExtendedTrustManager#checkServerTrusted(java.security.cert.X509Certificate[], java.lang.String, javax.net.ssl.SSLEngine)
      */
     @Override
@@ -142,11 +143,11 @@ public final class TrustAllManager extends X509ExtendedTrustManager implements T
 
     /**
      * Log in debug level
-     * 
+     *
      * @param host The host
      */
     private void log(String host) {
-        LOG.debug("No SSL certificate check for host {}. User {} in context {} trusts all.", host, getUserId(), getContextId());
+        LOG.debug("No SSL certificate check for host {}. User {} in context {} trusts all.", host, I(getUserId()), I(getContextId()));
     }
 
     /**

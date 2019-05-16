@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -281,16 +282,28 @@ public class SessionHandlerTest {
         Assert.assertTrue(sessions.contains(s1.getSessionID()) && sessions.contains(s2.getSessionID()));
     }
 
+    @Test
+    public void testRemoteParameterRoundtrip() throws Exception {
+        String v1 = UUID.randomUUID().toString();
+        SessionImpl s1 = addSession(v1);
+        Assert.assertEquals(1, SessionHandler.getSessions().size());
+        SessionHandler.setLocalIp(s1, "172.16.33.66");
+        List<String> sessions = SessionHandler.findRemoteSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
+        Assert.assertEquals(1, sessions.size());
+        Assert.assertEquals(s1.getSessionID(), sessions.get(0));
+    }
+
     private static SessionImpl addSession() throws OXException {
         return addSession((String[]) null);
     }
 
     private static SessionImpl addSession(final String... props) throws OXException {
         if (props == null) {
-            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, "default-user-agent");
+            return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, null, "default-user-agent");
         }
 
-        return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, new SessionEnhancement() {
+        return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, Arrays.asList(new SessionEnhancement() {
+
 
             @Override
             public void enhanceSession(Session session) {
@@ -298,7 +311,7 @@ public class SessionHandlerTest {
                     session.setParameter(PROP_NAMES[i], props[i]);
                 }
             }
-        }, "default-user-agent");
+        }), "default-user-agent");
     }
 
 }
