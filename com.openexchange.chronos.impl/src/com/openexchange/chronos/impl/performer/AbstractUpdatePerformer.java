@@ -293,11 +293,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         tombstone.setAttendees(storage.getUtilities().getTombstones(originalEvent.getAttendees()));
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, tombstone.getAttendees());
-        storage.getAlarmStorage().deleteAlarms(id);
         storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), id, originalEvent.getAttachments());
-        storage.getEventStorage().deleteEvent(id);
-        storage.getAttendeeStorage().deleteAttendees(id);
         storage.getAlarmTriggerStorage().deleteTriggers(id);
+        storage.getAlarmStorage().deleteAlarms(id);
+        storage.getAttendeeStorage().deleteAttendees(id);
+        storage.getEventStorage().deleteEvent(id);
         /*
          * track deletion in result
          */
