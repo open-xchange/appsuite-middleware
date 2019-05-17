@@ -94,7 +94,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
-import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -159,7 +158,6 @@ public class AdminActivator extends HousekeepingActivator {
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
         track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, AdminServiceRegistry.getInstance(), UserService.class));
-        track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
         track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
         track(PluginsLoadedService.class, new RegistryServiceTrackerCustomizer<PluginsLoadedService>(context, AdminServiceRegistry.getInstance(), PluginsLoadedService.class));
         track(QuotaAwareSnippetService.class, new RankingAwareRegistryServiceTrackerCustomizer<QuotaAwareSnippetService>(context, AdminServiceRegistry.getInstance(), QuotaAwareSnippetService.class));
