@@ -113,6 +113,9 @@ case "${BNAME}" in
     "listcontextsbyfilestore")
     ACTION="context.ListContextByFilestore"
     ;;
+    "listquota")
+    ACTION="util.context.ListQuota"
+    ;;
     "changefilestore")
     ACTION="util.filestore.ChangeFilestore"
     ;;

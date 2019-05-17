@@ -93,7 +93,7 @@ public class ListUserFilestores extends BasicCommandlineOptions {
     }
 
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("list user filestores");
+        final AdminParser parser = new AdminParser("listuserfilestores");
         try {
             setOptions(parser);
             parser.ownparse(args);

@@ -76,7 +76,7 @@ import com.openexchange.auth.rmi.RemoteAuthenticator;
 public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String, RemoteAuthenticator> {
 
     protected final static String BASIC_USAGE = "[--responsetimeout <responseTimeout>] | [-h]";
-    protected final static String BASIC_MASTER_ADMIN_USAGE = "-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
+    protected final static String BASIC_MASTER_ADMIN_USAGE = "-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server>] " + BASIC_USAGE;
     protected final static String BASIC_CONTEXT_ADMIN_USAGE = "-A <masterAdmin | contextAdmin> -P <masterAdminPassword | contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
     protected final static String BASIC_CONTEXT_ONLY_ADMIN_USAGE = "-A <contextAdmin> -P <contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
 

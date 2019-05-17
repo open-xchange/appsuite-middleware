@@ -76,7 +76,7 @@ public enum SHACrypt {
     SHA256("{SHA-256}", "SHA-256"),
     /**
      * SHA-512 algorithm.
-     * Note: Might not run will all JVMs.
+     * Note: Might not run on all JVMs.
      *
      * @see <a href="https://docs.oracle.com/javase/8/docs/api/java/security/MessageDigest.html">MessageDigest</a>
      *
