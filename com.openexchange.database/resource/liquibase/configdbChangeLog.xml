@@ -159,7 +159,8 @@
     		cid INT4 UNSIGNED NOT NULL,
     		user INT4 UNSIGNED NOT NULL,
     		filestore_id INT4 UNSIGNED,
-    		PRIMARY KEY (cid, user, filestore_id)
+    		PRIMARY KEY (cid, user, filestore_id),
+            KEY `filestore_id_index` (`filestore_id`)
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         </sql>
         <rollback>
