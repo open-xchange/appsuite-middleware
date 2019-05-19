@@ -284,4 +284,9 @@
 		<customChange class="com.openexchange.database.internal.change.custom.RemoveParametersFromPoolConnectionUrlCustomTaskChange" />
 	</changeSet>
 
+	<changeSet id="7.10.3:filestore2user:addFilestoreIdIndex" author="thorben.betten@open-xchange.com">
+		<comment>This changeset executes a custom task which adds an INDEX to filestore2user table.</comment>
+		<customChange class="com.openexchange.database.internal.change.custom.AddIndexForFilestore2UserCustomTaskChange" />
+	</changeSet>
+
 </databaseChangeLog>
