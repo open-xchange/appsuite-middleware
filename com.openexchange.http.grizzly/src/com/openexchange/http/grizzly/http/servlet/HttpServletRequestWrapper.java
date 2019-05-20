@@ -247,7 +247,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
             return ABSENT == value ? null /*Explicitly removed*/ : value;
         }
 
-        return delegate.getParameter(name);
+        return delegate.getHeader(name);
     }
 
     @Override
