@@ -22,4 +22,7 @@ Import-Package: com.openexchange.annotation,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.geolocation
+Export-Package: com.openexchange.geolocation,
+ com.openexchange.geolocation.exceptions
+Bundle-ClassPath: lib/ipaddress-5.0.2.jar,
+ .

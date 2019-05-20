@@ -53,7 +53,11 @@ import static com.openexchange.java.Autoboxing.L;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.openexchange.exception.OXException;
+import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
+import com.openexchange.geolocation.exceptions.NotConvertibleException;
 import com.openexchange.java.Strings;
+import inet.ipaddr.IPAddressString;
+import inet.ipaddr.ipv6.IPv6Address;
 
 /**
  * {@link GeoLocationIPUtils}
@@ -82,9 +86,11 @@ public final class GeoLocationIPUtils {
      * @param ipAddress The IPv4 address to convert
      * @return The number representation of the IPv4 address
      * @throws OXException if the specified IPv4 address is invalid
+     * @throws NotConvertibleException if the address is IPv6 and cannot be converted to IPv4.
      */
-    public static long convertIp(String ipAddress) throws OXException {
+    public static long convertIp(String ipAddress) throws OXException, NotConvertibleException {
         validate(ipAddress);
+        ipAddress = convertToIPv4(ipAddress);
         String[] split = ipAddress.split("\\.");
         return Long.parseLong(split[0]) * O1 + Long.parseLong(split[1]) * O2 + Long.parseLong(split[2]) * O3 + Long.parseLong(split[3]);
     }
@@ -118,5 +124,25 @@ public final class GeoLocationIPUtils {
         } catch (UnknownHostException e) {
             throw GeoLocationExceptionCodes.UNABLE_TO_RESOLVE_HOST.create(e, ipAddress);
         }
+    }
+
+    /**
+     * Checks if the specified IP address is an IPv6 address and if possible converts it
+     * to an IPv4. Otherwise, it throws an exception
+     * 
+     * @param ipAddress The address to check and possibly convert
+     * @return The IPv4 version of the specified address.
+     * @throws NotConvertibleException if the address is IPv6 and cannot be converted to IPv4.
+     */
+    private static String convertToIPv4(String ipAddress) throws OXException, NotConvertibleException {
+        IPAddressString stringAddress = new IPAddressString(ipAddress);
+        if (stringAddress.isIPv4()) {
+            return ipAddress;
+        }
+        IPv6Address ipv6 = stringAddress.getAddress().toIPv6();
+        if (false == ipv6.isIPv4Convertible()) {
+            throw new NotConvertibleException(ipAddress);
+        }
+        return ipv6.toIPv4().toNormalizedString();
     }
 }
