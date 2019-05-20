@@ -88,6 +88,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.tree.modules.mail.AllMessagesFolder;
 import com.openexchange.groupware.settings.tree.modules.mail.DeleteDraftOnTransport;
 import com.openexchange.groupware.settings.tree.modules.mail.ForwardUnquoted;
+import com.openexchange.groupware.settings.tree.modules.mail.IgnoreSubscription;
 import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
@@ -292,6 +293,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         ForwardUnquoted forwardUnquoted = new ForwardUnquoted(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, forwardUnquoted);
+
+        IgnoreSubscription ignoreSubscription = new IgnoreSubscription(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, ignoreSubscription);
 
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
