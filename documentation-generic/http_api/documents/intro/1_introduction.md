@@ -106,6 +106,8 @@ Dates with time are transmitted as the number of milliseconds since 1970-01-01 0
 Then dates with time are transmitted as the number of milliseconds since 1970-01-01 00:00 UTC (again, ignoring leap seconds) plus the offset between the _specified_ timezone and 
 UTC at the time in question.
 
+To prevent the timezone offset getting applied implicitly on the server for dates with time, e.g. because the client handles timezones on his own, requests should be decorated with the URL parameter `timezone` set to `UTC` statically.  
+
 For some date and time values, especially timestamps, monotonicity is more important than the actual value. Such values are transmitted as the number of 
 milliseconds since 1970-01-01 00:00 UTC, ignoring leap seconds and without timezone correction. If possible, a unique strictly monotonic increasing value should be used instead, as it avoids 
 some race conditions described below.
