@@ -1,6 +1,6 @@
 ---
 title: Session Management
-icon: fa-clock-o
+icon: far fa-clock
 tags: Session, Installation, Configuration, Geolocation
 ---
 

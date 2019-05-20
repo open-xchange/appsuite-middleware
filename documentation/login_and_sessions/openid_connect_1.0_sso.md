@@ -1,6 +1,6 @@
 ---
 title: OpenID Connect 1.0 SSO
-icon: fa-openid
+icon: fab fa-openid
 tags: OpenId, SSO, Configuration
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: MySQL Fulltext Index
-icon: fa-file-text
+icon: fas fa-file-alt
 tags: Administration, Database, Contacts
 ---
 

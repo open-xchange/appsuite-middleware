@@ -1,6 +1,6 @@
 ---
 title: Upgrading Without Downtimes
-icon: fa-level-up
+icon: fas fa-level-up-alt
 tags: Administration, Upgrade, Database
 ---
 

@@ -1,4 +1,4 @@
 ---
 title: APIs
-icon: fa-exchange
+icon: fas fa-exchange-alt
 ---

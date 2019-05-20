@@ -1,6 +1,6 @@
 ---
 title: E-Mail Authentication with OAuth 2.0
-icon: fa-envelope-o
+icon: far fa-envelope
 tags: SAML, OAuth, Authentication, Mail, Configuration
 ---
 

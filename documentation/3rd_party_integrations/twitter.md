@@ -1,6 +1,6 @@
 ---
 title: Twitter
-icon: fa-twitter
+icon: fab fa-twitter
 tags: 3rd Party, Twitter, Installation, Configuration
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Box
-icon: fa-archive
+icon: fas fa-box
 tags: 3rd Party, Box, Installation, Configuration, Filestore
 ---
 

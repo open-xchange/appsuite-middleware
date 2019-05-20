@@ -1,5 +1,5 @@
 ---
 title: Mail
-icon: fa-envelope-o
+icon: fa-envelope
 ---
 

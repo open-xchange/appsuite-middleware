@@ -1,6 +1,6 @@
 ---
 title: XING
-icon: fa-xing
+icon: fab fa-xing
 tags: 3rd Party, XING, Installation, Configuration, Contacts
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: Microsoft
-icon: fa-windows
+icon: fab fa-windows
 tags: 3rd Party, Microsoft, Installation, Configuration, Filestore, Contacts
 ---
 

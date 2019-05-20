@@ -1,4 +1,4 @@
 ---
 title: Dovecot
-icon: fa-envelope
+icon: far fa-envelope
 ---

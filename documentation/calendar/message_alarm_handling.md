@@ -1,6 +1,6 @@
 ---
 title: Message Alarm Handling
-icon: fa-bell-o
+icon: fas fa-bell
 tags: API, Calendar, Configuration, Limits
 ---
 

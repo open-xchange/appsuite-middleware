@@ -1,6 +1,6 @@
 ---
 title: Dropbox
-icon: fa-dropbox
+icon: fab fa-dropbox
 tags: 3rd Party, Dropbox, Installation, Configuration, Filestore
 ---
 
