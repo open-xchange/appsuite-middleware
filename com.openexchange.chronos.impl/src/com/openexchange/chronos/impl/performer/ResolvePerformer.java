@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.filterByUid;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
@@ -64,8 +65,6 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -161,7 +160,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         /*
          * search for an event matching the UID & verify equality via String#equals
          */
-        List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
+        List<Event> events = filterByUid(storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID, EventField.UID }), uid);
         if (1 < events.size()) {
             String conflictingIds = events.stream().map(Event::getId).collect(Collectors.joining(", "));
             Exception cause = new IllegalStateException("UID \"" + uid + "\" resolves to multiple events [" + conflictingIds + ']');
@@ -190,7 +189,7 @@ public class ResolvePerformer extends AbstractQueryPerformer {
             )
         ;
         EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.UID, EventField.CALENDAR_USER };
-        List<Event> events = findEventsByUid(storage.getEventStorage().searchEvents(searchTerm, null, fields), uid);
+        List<Event> events = filterByUid(storage.getEventStorage().searchEvents(searchTerm, null, fields), uid);
         /*
          * load calendar user's attendee data for found events and resolve to first matching event for this folder's calendar user
          */
@@ -353,18 +352,6 @@ public class ResolvePerformer extends AbstractQueryPerformer {
         } catch (OXException e) {
             return new DefaultEventsResult(e);
         }
-    }
-
-    private static List<Event> findEventsByUid(Collection<Event> events, String uid) {
-        List<Event> matchingEvents = new ArrayList<Event>();
-        if (null != events) {
-            for (Event event : events) {
-                if (uid.equals(event.getUid())) {
-                    matchingEvents.add(event);
-                }
-            }
-        }
-        return matchingEvents;
     }
 
 }
