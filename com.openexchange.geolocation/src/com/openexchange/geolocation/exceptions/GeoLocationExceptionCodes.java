@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.geolocation;
+package com.openexchange.geolocation.exceptions;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -84,6 +84,10 @@ public enum GeoLocationExceptionCodes implements DisplayableOXExceptionCode {
      * The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'
      */
     STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED("The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'", CATEGORY_CONFIGURATION, 6),
+    /**
+     * The IPv6 address '%1$s' is not convertible to IPv4.
+     */
+    UNABLE_TO_CONVERT_TO_IPV4("The IPv6 address '%1$s' is not convertible to IPv4", CATEGORY_ERROR, 7);
     ;
 
     private final int number;

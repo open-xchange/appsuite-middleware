@@ -56,11 +56,12 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationIPUtils;
 import com.openexchange.geolocation.GeoLocationProperty;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
+import com.openexchange.geolocation.exceptions.NotConvertibleException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -93,7 +94,13 @@ public class GeoLocationServiceImpl implements GeoLocationService {
      */
     @Override
     public GeoInformation getGeoInformation(int contextId, String ipAddress) throws OXException {
-        return getStorage(contextId).getGeoInformation(contextId, GeoLocationIPUtils.convertIp(ipAddress));
+        try {
+            return getStorage(contextId).getGeoInformation(contextId, GeoLocationIPUtils.convertIp(ipAddress));
+        } catch (NotConvertibleException e) {
+            // Work-around for Bug 65336 until the GeoLocationService supports IPv6 locations
+            LOGGER.debug("{}", e);
+            return null;
+        }
     }
 
     /*

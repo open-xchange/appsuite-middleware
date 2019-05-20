@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.geolocation;
+package com.openexchange.geolocation.exceptions;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

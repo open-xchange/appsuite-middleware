@@ -61,6 +61,7 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.geolocation.exceptions.GeoLocationStorageExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
 /**
