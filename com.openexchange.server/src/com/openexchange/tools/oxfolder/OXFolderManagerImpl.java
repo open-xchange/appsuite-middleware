@@ -1311,7 +1311,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          */
         try {
             storageSrc.setFolderName(newName);
-            OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, readCon, writeCon);
+            OXFolderSQL.moveFolderSQL(user.getId(), storageSrc, storageDest, lastModified, ctx, writeCon);
         } catch (DataTruncation e) {
             throw parseTruncated(e, storageSrc, TABLE_OXFOLDER_TREE);
         } catch (final IncorrectStringSQLException e) {
