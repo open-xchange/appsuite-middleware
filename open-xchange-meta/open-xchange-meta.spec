@@ -3,7 +3,7 @@
 Name:           open-xchange-meta
 BuildArch:      noarch
 Version:        @OXVERSION@
-%define         ox_release 12
+%define         ox_release 13
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -366,6 +366,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Mon May 13 2019 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2019-05-14 (5247)
 * Mon May 06 2019 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2019-05-13 (5235)
 * Wed Apr 24 2019 Carsten Hoeger <choeger@open-xchange.com>

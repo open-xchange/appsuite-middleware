@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 13
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -57,6 +57,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Mon May 13 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-05-14 (5247)
 * Mon May 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-05-13 (5235)
 * Wed Apr 24 2019 Marcus Klein <marcus.klein@open-xchange.com>
