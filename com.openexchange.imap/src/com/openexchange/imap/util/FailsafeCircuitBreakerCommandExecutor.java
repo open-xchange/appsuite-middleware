@@ -68,6 +68,7 @@ import net.jodah.failsafe.CircuitBreaker;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
+import net.jodah.failsafe.function.CheckedRunnable;
 
 /**
  * {@link FailsafeCircuitBreakerCommandExecutor}
@@ -115,7 +116,28 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
         CircuitBreaker circuitBreaker = new CircuitBreaker()
             .withFailureThreshold(failureThreshold)
             .withSuccessThreshold(successThreshold)
-            .withDelay(delayMillis, TimeUnit.MILLISECONDS);
+            .withDelay(delayMillis, TimeUnit.MILLISECONDS)
+            .onOpen(new CheckedRunnable() {
+
+                @Override
+                public void run() throws Exception {
+                    LOG.info("Circuit breaker opened for: {}", hostList.getHostString());
+                }
+            })
+            .onHalfOpen(new CheckedRunnable() {
+
+                @Override
+                public void run() throws Exception {
+                    LOG.info("Circuit breaker half-opened for: {}", hostList.getHostString());
+                }
+            })
+            .onClose(new CheckedRunnable() {
+
+                @Override
+                public void run() throws Exception {
+                    LOG.info("Circuit breaker closed for: {}", hostList.getHostString());
+                }
+            });
         this.circuitBreaker = circuitBreaker;
     }
 
@@ -229,7 +251,7 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
                 if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
                     // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
                     // System.err.println("Failed command: " + command + " (" + statusResponse + ")");
-                    throw new CircuitBreakerCommandFailedException(responses);
+                    throw new CircuitBreakerCommandFailedException(responses, byeException);
                 }
             }
 
@@ -249,9 +271,10 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
          * Initializes a new {@link CircuitBreakerCommandFailedException}.
          *
          * @param responses The responses advertised from IMAP server
+         * @param byeException The BYE exception
          */
-        public CircuitBreakerCommandFailedException(Response[] responses) {
-            super();
+        public CircuitBreakerCommandFailedException(Response[] responses, Exception byeException) {
+            super(byeException);
             this.responses = responses;
         }
 

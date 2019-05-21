@@ -142,7 +142,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
     private static class ConcurrentCommandExecutorCollection extends CommandExecutorCollection {
 
         private final List<CommandExecutor> commandExecutors;
-        private final Cache<CommandKey, ImmutableReference<CommandExecutor>> matchingCommandExecutors;
+        private final Cache<HostAndPortAndUser, ImmutableReference<CommandExecutor>> matchingCommandExecutors;
 
         /**
          * Initializes a new {@link CommandExecutorCollection}.
@@ -157,12 +157,18 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
 
         @Override
         public void add(CommandExecutor commandExecutor) {
-            commandExecutors.add(commandExecutor);
+            boolean added = commandExecutors.add(commandExecutor);
+            if (added) {
+                matchingCommandExecutors.invalidateAll();
+            }
         }
 
         @Override
         public boolean remove(CommandExecutor commandExecutor) {
             boolean removed = commandExecutors.remove(commandExecutor);
+            if (removed) {
+                matchingCommandExecutors.invalidateAll();
+            }
             return removed && commandExecutors.isEmpty();
         }
 
@@ -173,6 +179,10 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
 
         @Override
         public Iterator<CommandExecutor> commandExecutors() {
+            /*-
+             * Element-changing operations on CopyOnWriteArrayList iterators (remove, set, and add) are not supported.
+             * These methods throw UnsupportedOperationException.
+             */
             return commandExecutors.iterator();
         }
 
@@ -183,8 +193,8 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
 
         @Override
         public CommandExecutor getMatchingCommandExecutorFor(Protocol protocol) {
-            CommandKey key = new CommandKey(protocol);
-            ImmutableReference<CommandExecutor> executorRef = matchingCommandExecutors.getIfPresent(key);
+            HostAndPortAndUser hostAndPortAndUser = new HostAndPortAndUser(protocol);
+            ImmutableReference<CommandExecutor> executorRef = matchingCommandExecutors.getIfPresent(hostAndPortAndUser);
             if (executorRef != null) {
                 return executorRef.getValue();
             }
@@ -196,7 +206,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
                     matching = commandExecutor;
                 }
             }
-            matchingCommandExecutors.put(key, new ImmutableReference<CommandExecutor>(matching));
+            matchingCommandExecutors.put(hostAndPortAndUser, new ImmutableReference<CommandExecutor>(matching));
             return matching;
         }
     }
@@ -250,18 +260,18 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
         }
     }
 
-    private static class CommandKey {
+    private static class HostAndPortAndUser {
 
         private final String host;
         private final int port;
         private final String user;
         private final int hash;
 
-        CommandKey(Protocol protocol) {
+        HostAndPortAndUser(Protocol protocol) {
             this(protocol.getHost(), protocol.getPort(), protocol.getUser());
         }
 
-        CommandKey(String host, int port, String user) {
+        HostAndPortAndUser(String host, int port, String user) {
             super();
             this.host = host;
             this.port = port;
@@ -291,7 +301,7 @@ public abstract class CommandExecutorCollection implements Iterable<CommandExecu
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            CommandKey other = (CommandKey) obj;
+            HostAndPortAndUser other = (HostAndPortAndUser) obj;
             if (port != other.port) {
                 return false;
             }
