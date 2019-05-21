@@ -65,6 +65,7 @@ import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import net.jodah.failsafe.CircuitBreaker;
+import net.jodah.failsafe.CircuitBreaker.State;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
@@ -188,6 +189,32 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
             }
             throw new IOException(failure);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("hosts=").append(hostList.getHostString());
+        if (ports != null) {
+            sb.append(", ports=").append(ports);
+        }
+        State state = circuitBreaker.getState();
+        sb.append(", state=").append(state);
+        switch (state) {
+            case CLOSED:
+                sb.append(" (The circuit is closed and fully functional, allowing executions to occur)");
+                break;
+            case HALF_OPEN:
+                sb.append(" (The circuit is temporarily allowing executions to occur)");
+                break;
+            case OPEN:
+                sb.append(" (The circuit is opened and not allowing executions to occur.)");
+                break;
+            default:
+                break;
+
+        }
+        return super.toString();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------
