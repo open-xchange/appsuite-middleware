@@ -81,7 +81,6 @@ import com.openexchange.halo.AbstractContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.java.util.TimeZones;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
