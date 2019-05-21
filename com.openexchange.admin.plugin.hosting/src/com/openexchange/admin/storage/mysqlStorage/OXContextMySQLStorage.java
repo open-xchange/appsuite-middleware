@@ -112,6 +112,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -212,6 +213,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // Delete filestores of the context
         LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
         Utils.removeFileStorages(ctx, true);
+        Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
         LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
 
         // Delete context
@@ -277,7 +279,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         } finally {
                             Databases.closeSQLStuff(rs, stmt);
                         }
-                        
+
                         // Loop through tables and execute delete statements on each table (using transaction)
                         deleteContextData(ctx, conForContext, sorted_tables, userIds);
                     } catch (SQLException e) {
@@ -387,7 +389,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             con.commit();
             rollback = false;
-            
+
             try {
                 DeleteEvent event = DeleteEvent.createDeleteEventForContextDeletion(this, ctx.getId().intValue(), userIds);
                 DeleteFinishedListenerRegistry.getInstance().fireDeleteEvent(event);
