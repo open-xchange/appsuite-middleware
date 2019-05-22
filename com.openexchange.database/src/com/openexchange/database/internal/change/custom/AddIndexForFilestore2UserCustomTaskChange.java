@@ -49,8 +49,6 @@
 
 package com.openexchange.database.internal.change.custom;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -59,15 +57,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.database.Databases;
-import com.openexchange.java.Strings;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.change.custom.CustomTaskRollback;
 import liquibase.database.Database;
@@ -240,78 +234,6 @@ public class AddIndexForFilestore2UserCustomTaskChange implements CustomTaskChan
             }
         }
         return foundIndex;
-    }
-
-    private static final void createPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
-        final int[] lengths = new int[columns.length];
-        Arrays.fill(lengths, -1);
-        createPrimaryKey(con, table, columns, lengths);
-    }
-
-    private static final void createPrimaryKey(final Connection con, final String table, final String[] columns, final int[] lengths) throws SQLException {
-        createKey(con, table, columns, lengths, true, null);
-    }
-
-    private static final void createKey(final Connection con, final String table, final String[] columns, final int[] lengths, boolean primary, String name) throws SQLException {
-        final StringBuilder sql = new StringBuilder("ALTER TABLE `");
-        sql.append(table);
-        sql.append("` ADD ");
-        if (primary) {
-            sql.append("PRIMARY ");
-        }
-        sql.append("KEY ");
-        if (!primary && Strings.isNotEmpty(name)) {
-            sql.append('`').append(name).append('`');
-        }
-        sql.append(" (");
-        {
-            final String column = columns[0];
-            sql.append('`').append(column).append('`');
-            final int len = lengths[0];
-            if (len > 0) {
-                sql.append('(').append(len).append(')');
-            }
-        }
-        for (int i = 1; i < columns.length; i++) {
-            final String column = columns[i];
-            sql.append(',');
-            sql.append('`').append(column).append('`');
-            final int len = lengths[i];
-            if (len > 0) {
-                sql.append('(').append(len).append(')');
-            }
-        }
-        sql.append(')');
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.execute(sql.toString());
-        } finally {
-            closeSQLStuff(null, stmt);
-        }
-    }
-
-    private static List<int[]> partition(int[] original, int partitionSize) {
-        checkNotNull(original, "Array must not be null");
-        checkArgument(partitionSize > 0);
-        int total = original.length;
-        if (partitionSize >= total) {
-            return Collections.singletonList(original);
-        }
-
-        // Create a list of sets to return.
-        List<int[]> result = new ArrayList<>((total + partitionSize - 1) / partitionSize);
-
-        // Create each new array.
-        int stopIndex = 0;
-        for (int startIndex = 0; startIndex + partitionSize <= total; startIndex += partitionSize) {
-            stopIndex += partitionSize;
-            result.add(java.util.Arrays.copyOfRange(original, startIndex, stopIndex));
-        }
-        if (stopIndex < total) {
-            result.add(java.util.Arrays.copyOfRange(original, stopIndex, total));
-        }
-        return result;
     }
 
 }
