@@ -50,6 +50,7 @@
 package com.openexchange.secret.recovery.json.action;
 
 import static com.openexchange.java.Autoboxing.I;
+import org.json.ImmutableJSONObject;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -69,6 +70,8 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CheckAction.class);
 
+    private final JSONObject jSecretWorks;
+
     /**
      * Initializes a new {@link CheckAction}.
      *
@@ -76,6 +79,7 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
      */
     public CheckAction(final ServiceLookup services) {
         super(services);
+        this.jSecretWorks = ImmutableJSONObject.immutableFor(new JSONObject(2).putSafe("secretWorks", Boolean.TRUE));
     }
 
     @Override
@@ -90,18 +94,16 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
         String diagnosis = secretInconsistencyDetector.isSecretWorking(session);
 
         // Compose JSON response
-        JSONObject object;
         if (diagnosis == null) {
             // Works...
-            object = new JSONObject(2);
-            object.put("secretWorks", true);
-        } else {
-            LOG.info("Secrets in session {} (user={}, context={}) seem to need migration: {}", session.getSessionID(), I(session.getUserId()), I(session.getContextId()), diagnosis);
-            object = new JSONObject(4);
-            object.put("secretWorks", false);
-            object.put("diagnosis", diagnosis);
+            return new AJAXRequestResult(jSecretWorks, "json");
         }
-        return new AJAXRequestResult(object, "json");
+
+        LOG.info("Secrets in session {} (user={}, context={}) seem to need migration: {}", session.getSessionID(), I(session.getUserId()), I(session.getContextId()), diagnosis);
+        JSONObject jResult = new JSONObject(4);
+        jResult.put("secretWorks", false);
+        jResult.put("diagnosis", diagnosis);
+        return new AJAXRequestResult(jResult, "json");
     }
 
 }

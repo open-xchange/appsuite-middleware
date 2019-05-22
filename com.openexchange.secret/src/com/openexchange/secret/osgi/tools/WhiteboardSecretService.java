@@ -107,14 +107,14 @@ public class WhiteboardSecretService implements RankingAwareSecretService {
     }
 
     /**
-     * Open this {@link WhiteboardSecretService} and begin tracking {@link SecretService}.
+     * Opens this {@link WhiteboardSecretService} and starts tracking {@link SecretService}.
      */
     public void open() {
         tracker.open();
     }
 
     /**
-     * Close this {@link WhiteboardSecretService}.
+     * Closes this {@link WhiteboardSecretService}.
      */
     public void close() {
         tracker.close();

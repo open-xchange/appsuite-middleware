@@ -58,6 +58,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -104,6 +105,13 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             {
                 int id = optionalIntParameter(AJAXServlet.PARAMETER_ID, -1, requestData);
                 if (id >= 0) {
+                    if (MailAccount.DEFAULT_ID == id) {
+                        // Primary is always allowed
+                        return getStatusFor(id, session, storageService, warnings);
+                    }
+                    if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
+                        throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    }
                     return getStatusFor(id, session, storageService, warnings);
                 }
             }
@@ -119,7 +127,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
             for (MailAccount account : accounts) {
                 int id = account.getId();
-                Status status = determineAccountStatus(id, false, storageService, warnings, session);
+                Status status = determineAccountStatus(account, false, warnings, session);
                 if (null != status) {
                     String message = status.getMessage(session.getUser().getLocale());
 
@@ -156,11 +164,14 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
     private Status determineAccountStatus(int id, boolean singleRequested, MailAccountStorageService storageService, List<OXException> warnings, ServerSession session) throws OXException {
         MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+        return determineAccountStatus(mailAccount, singleRequested, warnings, session);
+    }
 
+    private Status determineAccountStatus(MailAccount mailAccount, boolean singleRequested, List<OXException> warnings, ServerSession session) throws OXException {
         if (isUnifiedINBOXAccount(mailAccount)) {
             // Treat as no hit
             if (singleRequested) {
-                throw MailAccountExceptionCodes.NOT_FOUND.create(Integer.valueOf(id), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                throw MailAccountExceptionCodes.NOT_FOUND.create(Integer.valueOf(mailAccount.getId()), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             }
             return null;
         }
@@ -200,10 +211,15 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
         accountDescription.setMailStartTls(account.isMailStartTls());
         accountDescription.setLogin(account.getLogin());
         accountDescription.setPrimaryAddress(account.getPrimaryAddress());
-        {
+        try {
             AuthInfo authInfo = determinePasswordAndAuthType(account.getLogin(), session, account, true);
             accountDescription.setPassword(authInfo.getPassword());
             accountDescription.setAuthType(authInfo.getAuthType());
+        } catch (OXException e) {
+            if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                throw e;
+            }
+            return KnownStatus.INVALID_CREDENTIALS;
         }
 
         if (!isEmpty(account.getTransportServer())) {
@@ -226,9 +242,16 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             } else {
                 String transportLogin = account.getTransportLogin();
                 accountDescription.setTransportLogin(transportLogin);
-                AuthInfo authInfo = determinePasswordAndAuthType(transportLogin, session, account, false);
-                accountDescription.setTransportPassword(authInfo.getPassword());
-                accountDescription.setTransportAuthType(authInfo.getAuthType());
+                try {
+                    AuthInfo authInfo = determinePasswordAndAuthType(transportLogin, session, account, false);
+                    accountDescription.setTransportPassword(authInfo.getPassword());
+                    accountDescription.setTransportAuthType(authInfo.getAuthType());
+                } catch (OXException e) {
+                    if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                        throw e;
+                    }
+                    return KnownStatus.INVALID_CREDENTIALS;
+                }
             }
         }
 
