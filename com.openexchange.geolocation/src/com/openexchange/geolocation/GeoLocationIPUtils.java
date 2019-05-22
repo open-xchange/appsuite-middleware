@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.exceptions.NotConvertibleException;
 import com.openexchange.java.Strings;
+import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import inet.ipaddr.ipv6.IPv6Address;
 
@@ -129,17 +130,21 @@ public final class GeoLocationIPUtils {
     /**
      * Checks if the specified IP address is an IPv6 address and if possible converts it
      * to an IPv4. Otherwise, it throws an exception
-     * 
+     *
      * @param ipAddress The address to check and possibly convert
      * @return The IPv4 version of the specified address.
      * @throws NotConvertibleException if the address is IPv6 and cannot be converted to IPv4.
      */
-    private static String convertToIPv4(String ipAddress) throws OXException, NotConvertibleException {
+    private static String convertToIPv4(String ipAddress) throws NotConvertibleException {
         IPAddressString stringAddress = new IPAddressString(ipAddress);
         if (stringAddress.isIPv4()) {
             return ipAddress;
         }
-        IPv6Address ipv6 = stringAddress.getAddress().toIPv6();
+        IPAddress address = stringAddress.getAddress();
+        if (address == null) {
+            throw new NotConvertibleException(ipAddress);
+        }
+        IPv6Address ipv6 = address.toIPv6();
         if (false == ipv6.isIPv4Convertible()) {
             throw new NotConvertibleException(ipAddress);
         }
