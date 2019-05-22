@@ -59,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -75,6 +76,14 @@ import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SortOrder.Order;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.halo.AbstractContactHalo;
@@ -93,14 +102,17 @@ import com.openexchange.tools.session.ServerSession;
 public class EventsContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
     private final IDBasedCalendarAccessFactory calendarAccessFactory;
+    private FolderService folderService;
 
     /**
      * Initializes a new {@link EventsContactHalo}.
      *
      * @param calendarAccessFactory The calendar access factory
+     * @param folderService
      */
-    public EventsContactHalo(IDBasedCalendarAccessFactory calendarAccessFactory) {
+    public EventsContactHalo(IDBasedCalendarAccessFactory calendarAccessFactory, FolderService folderService) {
         this.calendarAccessFactory = calendarAccessFactory;
+        this.folderService = folderService;
     }
 
     @Override
@@ -128,9 +140,13 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         Map<String, EventsResult> resultsPerFolder = null;
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(request);
         boolean committed = false;
+        List<String> folders = visiblePrivateAndPublicFolders(session);
+        if (folders == null || folders.isEmpty()) {
+            return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        }
         try {
             calendarAccess.startTransaction();
-            resultsPerFolder = calendarAccess.searchEvents(null, filters, null);
+            resultsPerFolder = calendarAccess.searchEvents(folders, filters, null);
             calendarAccess.commit();
             committed = true;
         } finally {
@@ -154,6 +170,29 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
             result.addWarnings(warnings);
         }
         return result;
+    }
+
+    private List<String> visiblePrivateAndPublicFolders(ServerSession session) throws OXException {
+        List<String> folderIDs = new LinkedList<String>();
+        FolderResponse<UserizedFolder[]> visibleFolders = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), PrivateType.getInstance(), false, session, null);
+        UserizedFolder[] folders = visibleFolders.getResponse();
+        if (folders != null) {
+            for (UserizedFolder folder : folders) {
+                if (folder.getOwnPermission().getReadPermission() >= Permission.READ_OWN_OBJECTS) {
+                    folderIDs.add(folder.getID());
+                }
+            }
+        }
+        visibleFolders = folderService.getVisibleFolders(FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), PublicType.getInstance(), false, session, null);
+        folders = visibleFolders.getResponse();
+        if (folders != null) {
+            for (UserizedFolder folder : folders) {
+                if (folder.getOwnPermission().getReadPermission() >= Permission.READ_OWN_OBJECTS) {
+                    folderIDs.add(folder.getID());
+                }
+            }
+        }
+        return folderIDs;
     }
 
     private IDBasedCalendarAccess initCalendarAccess(AJAXRequestData request) throws OXException {
