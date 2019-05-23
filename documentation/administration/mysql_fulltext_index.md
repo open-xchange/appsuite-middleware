@@ -4,7 +4,7 @@ icon: fas fa-file-alt
 tags: Administration, Database, Contacts
 ---
 
-## Introduction
+# Introduction
 
 With Open-Xchange Server v7.8.1 the MySQL ``FULLTEXT`` index is supported for retrieving auto-complete results. In order to use that capability, an appropriate MySQL version needs to be in place. ``FULLTEXT`` indexes are supported starting with MySQL v5.6.4 (see http://dev.mysql.com/doc/refman/5.6/en/fulltext-restrictions.html for details). Once enabled, an appropriate index is created on the ``prg_contacts`` table automatically and is used afterwards to serve the "find as you type" auto-completion requests in a more efficient way. 
 
@@ -18,7 +18,7 @@ yields the tokens: "jane", "doe", "somewhere", and "com"
 Thus a user is able to start typing e.g. *somewhere* or *doe* to hit that search result. Without ``FULLTEXT`` index support, the user is supposed to enter *jane* to get that hit.
 
 
-## Enabling usage of MySQL ``FULLTEXT`` index
+# Enabling usage of MySQL ``FULLTEXT`` index
 
 For enabling the usage for a MySQL ``FULLTEXT`` index the property ``com.openexchange.contact.fulltextAutocomplete`` needs to be set to ``true`` and a restart is supposed to be performed. Once set to ``true``, an appropriate update task (``com.openexchange.contact.storage.rdb.groupware.AddFulltextIndexTask``) gets executed on next login attempts for associated database schemas.
 
@@ -33,7 +33,7 @@ An administrator can even influence what fields are supposed to be considered fo
 Otherwise, the ``FULLTEXT`` index will stop working.
 
 
-## MySQL configuration options
+# MySQL configuration options
 
 An administrator may want to change how the MySQL ``FULLTEXT`` index works. MySQL only supports to change [[http://dev.mysql.com/doc/refman/5.7/en/fulltext-fine-tuning.html|minimum/maximum word length]] and [[http://dev.mysql.com/doc/refman/5.7/en/fulltext-stopwords.html|stop-words list]] for the InnoDB storage engine.
 
