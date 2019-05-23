@@ -164,6 +164,8 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
 
         // Add static remote parameters
         remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN);
+        remoteParameterNames.add(PARAM_OAUTH_REFRESH_TOKEN);
+        remoteParameterNames.add(PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE);
 
         // Add configured remote parameters
         remoteParameterNames.addAll(configuredRemoteParameterNames);

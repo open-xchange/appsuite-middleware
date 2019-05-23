@@ -31,6 +31,11 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
 
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        if (session.getParameter(OIDCTools.IDTOKEN) == null) {
+            // session not managed by us
+            return Reply.NEUTRAL;
+        }
+
         OIDCBackend backend = this.loadBackendForSession(session);
         if (null == backend) {
             return Reply.NEUTRAL;
