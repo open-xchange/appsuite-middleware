@@ -77,6 +77,9 @@ public class CheckAndDropDateExternalForeignKeysUpdateTask extends UpdateTaskAda
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "del_dates", "dateExternal", "delDateExternal")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

@@ -13,7 +13,6 @@ Import-Package: com.openexchange.database,
  com.openexchange.modules.model,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,
- com.openexchange.sql.schema,
  com.openexchange.sql.tools
 Export-Package: com.openexchange.modules.storage.memory,
  com.openexchange.modules.storage.sql,

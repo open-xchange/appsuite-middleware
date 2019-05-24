@@ -133,11 +133,17 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
         // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
         dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
 
-        // Check "uid" column in prg_dates
-        enlargeVarcharColumn("uid", 1024, "prg_dates", con);
+        try {
+            if (Databases.tablesExist(con, "prg_dates", "del_dates")) {
+                // Check "uid" column in prg_dates
+                enlargeVarcharColumn("uid", 1024, "prg_dates", con);
 
-        // Check "uid" column in del_dates
-        enlargeVarcharColumn("uid", 1024, "del_dates", con);
+                // Check "uid" column in del_dates
+                enlargeVarcharColumn("uid", 1024, "del_dates", con);
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        }
     }
 
     private boolean enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {

@@ -240,7 +240,7 @@ public class CalendarDataMigration {
         return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, 0, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
-    private CalendarStorage initSourceStorage(Connection connection) throws OXException {
+    private CalendarStorage initSourceStorage(Connection connection) {
         DBProvider dbProvider = new SimpleDBProvider(connection, connection);
         return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }

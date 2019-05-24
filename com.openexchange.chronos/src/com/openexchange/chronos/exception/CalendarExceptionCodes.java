@@ -86,6 +86,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.OUT_OF_SEQUENCE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.PROVIDER_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.QUERY_TOO_SHORT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.STORAGE_NOT_AVAILABLE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ALARMS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_ATTENDEES_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.TOO_MANY_EVENTS_MSG;
@@ -372,6 +373,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Calendar account disabled [provider: %1$s, account %2$d]</li>
      */
     ACCOUNT_DISABLED("Calendar account disabled [provider: %1$s, account %2$d]", ACCOUNT_DISABLED_MSG, Category.CATEGORY_SERVICE_DOWN, 5031),
+    /**
+     * <li>The calendar storage is temporarily not available. Please try again later.</li>
+     * <li>Calendar storage not available [%1$s]</li>
+     */
+    STORAGE_NOT_AVAILABLE("Calendar storage not available [%1$s]", STORAGE_NOT_AVAILABLE_MSG, Category.CATEGORY_SERVICE_DOWN, 5032),
     /**
      * <li>Some data entered exceeded the field limit. Please shorten the value for \"%1$s\" (limit: %2$d, current: %3$d) and try again.</li>
      * <li>Data truncation [field %1$s, limit %2$d, current %3$d]</li>

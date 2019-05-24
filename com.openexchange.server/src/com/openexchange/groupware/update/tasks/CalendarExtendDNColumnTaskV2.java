@@ -98,6 +98,9 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_date_rights", "del_date_rights")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

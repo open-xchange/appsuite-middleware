@@ -54,6 +54,7 @@ import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,6 +85,9 @@ public class CalendarAddNewPrimaryKeyForConfirmPerOccurrence extends UpdateTaskA
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "del_dates", "dateExternal", "delDateExternal", "prg_dates_members", "del_dates_members")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

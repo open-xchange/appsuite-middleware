@@ -52,7 +52,7 @@ package com.openexchange.subscribe.sql;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sql.grammar.Constant.ASTERISK;
-import static com.openexchange.sql.schema.Tables.subscriptions;
+import static com.openexchange.subscribe.sql.SubscriptionSQLStorage.subscriptions;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.sql.SQLException;

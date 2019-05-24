@@ -62,7 +62,6 @@ import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.mysql.CreateAttachmentTables;
-import com.openexchange.admin.mysql.CreateCalendarTables;
 import com.openexchange.admin.mysql.CreateContactsTables;
 import com.openexchange.admin.mysql.CreateInfostoreTables;
 import com.openexchange.admin.mysql.CreateLdap2SqlTables;
@@ -271,7 +270,6 @@ public class AdminActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateOXFolderTables());
         registerService(CreateTableService.class, new CreateVirtualFolderTables());
         registerService(CreateTableService.class, new CreateSettingsTables());
-        registerService(CreateTableService.class, new CreateCalendarTables());
         registerService(CreateTableService.class, new CreateContactsTables());
         registerService(CreateTableService.class, new CreateInfostoreTables());
         registerService(CreateTableService.class, new CreateAttachmentTables());

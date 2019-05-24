@@ -81,6 +81,9 @@ public class PrgDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tableExists(con, "prg_dates_members")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
             final String table = "prg_dates_members";

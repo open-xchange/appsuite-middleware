@@ -69,6 +69,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String PROVIDER_NOT_AVAILABLE_MSG = "The calendar provider \"%1$s\" is not available.";
 
+    public static final String STORAGE_NOT_AVAILABLE_MSG = "The calendar storage is temporarily not available. Please try again later.";
+
     public static final String ACCOUNT_DISABLED_MSG = "The requested calendar account is currently disabled. Please enable the account and try again.";
 
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";

@@ -85,6 +85,9 @@ public final class EnlargeCalendarUid extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "del_dates")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

@@ -95,6 +95,9 @@ public final class CalendarAddUIDValueTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tableExists(con, "prg_dates")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 
