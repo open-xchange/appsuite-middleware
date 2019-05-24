@@ -443,9 +443,6 @@ public abstract class MailConfig {
                 login = userLoginInfo;
                 break;
         }
-        if (null == login) {
-            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
-        }
         return login;
     }
 
@@ -821,6 +818,7 @@ public abstract class MailConfig {
      * @throws OXException If a configuration error occurs
      */
     protected static final void fillLoginAndPassword(MailConfig mailConfig, Session session, String userLoginInfo, Account account, boolean forMailAccess) throws OXException {
+        final boolean isGuest = Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
         // Assign login
         {
             String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
@@ -829,6 +827,9 @@ public abstract class MailConfig {
                 mailConfig.login = saneLogin(slogin);
             } else {
                 mailConfig.login = getMailLogin(account, userLoginInfo, session.getUserId(), session.getContextId());
+                if (mailConfig.login == null && !isGuest) {  // Guest users won't have login
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
+                }
             }
         }
 
@@ -840,7 +841,7 @@ public abstract class MailConfig {
                 // Apparently, OAuth is supposed to be used
                 Object obj = session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN);
                 if (obj == null) {
-                    if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+                    if (isGuest) {
                         obj = "";
                     } else {
                         throw MailExceptionCode.MISSING_CONNECT_PARAM.create("The session contains no OAuth token.");
