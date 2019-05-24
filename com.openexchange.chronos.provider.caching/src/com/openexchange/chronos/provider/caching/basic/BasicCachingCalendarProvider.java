@@ -215,8 +215,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     @Override
     public final void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        delete(session.getContextId(), account, parameters);
-
+        deleteAllData(session.getContextId(), account.getAccountId());
         onAccountDeletedOpt(session, account, parameters);
     }
 
@@ -231,8 +230,7 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
 
     @Override
     public final void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        delete(context.getContextId(), account, parameters);
-
+        deleteAllData(context.getContextId(), account.getAccountId());
         onAccountDeletedOpt(context, account, parameters);
     }
 
@@ -245,9 +243,8 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
      */
     protected abstract void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
-    private void delete(int contextId, CalendarAccount account, CalendarParameters parameters) throws OXException {
-
-        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), contextId, account.getAccountId()) {
+    private static void deleteAllData(int contextId, int accountId) throws OXException {
+        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), contextId, accountId) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {

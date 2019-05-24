@@ -70,7 +70,7 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
     private boolean configSaved = false;
 
     public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters, null);
+        super(session, account, parameters);
     }
 
     boolean cacheUpdated = false;

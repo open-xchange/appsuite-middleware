@@ -117,7 +117,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
      * @throws OXException
      */
     public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
-        super(session, account, parameters, null);
+        super(session, account, parameters);
         refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
         requestTimeout = GoogleCalendarConfig.getRetryOnErrorInterval(session);
         try {
