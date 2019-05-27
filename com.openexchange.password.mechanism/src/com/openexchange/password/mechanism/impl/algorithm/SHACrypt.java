@@ -66,7 +66,7 @@ public enum SHACrypt {
     /**
      * SHA-1 algorithm.
      *
-     * @deprecated Use SHA256 to generate new password instead
+     * @deprecated Use SHA-256 to generate new password instead
      */
     @Deprecated
     SHA1("{SHA}", "SHA"),

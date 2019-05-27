@@ -90,8 +90,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.JdbcProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
+import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -656,7 +656,7 @@ public class AdminCache {
     public PasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
         String passwordMechIdentifier = user.getPasswordMech();
         if (Strings.isEmpty(passwordMechIdentifier) || "null".equals(Strings.toLowerCase(passwordMechIdentifier))) {
-            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "{SHA-256}");
         }
 
         try {

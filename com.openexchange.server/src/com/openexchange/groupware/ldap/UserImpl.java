@@ -163,7 +163,7 @@ public class UserImpl implements User, Cloneable {
     /**
      * Password encryption mechanism.
      */
-    private String passwordMech = "{SHA}";
+    private String passwordMech = "{SHA-256}";
 
     /**
      * The salt used for password encryption.
