@@ -401,7 +401,7 @@ properties:
         Be careful: if you think about doing a rollback to a previous release do not use SHA256 and SHA512!
         Users that were created with SHA256 or SHA512 won't be able to login then as the middleware won't be 
         able to process the defined hash mechanism.
-      defaultValue: SHA
+      defaultValue: SHA256
       version:
       reloadable: false
       configcascadeAware: false
