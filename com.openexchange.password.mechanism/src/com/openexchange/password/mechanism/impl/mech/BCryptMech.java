@@ -50,6 +50,7 @@
 package com.openexchange.password.mechanism.impl.mech;
 
 import com.damienmiller.BCrypt;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
 
 /**
@@ -58,7 +59,7 @@ import com.openexchange.password.mechanism.PasswordDetails;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.2
  */
-public class BCryptMech extends ConfigAwarePasswordMech {
+public class BCryptMech extends AbstractPasswordMech {
 
     /**
      * Initializes a new {@link BCryptMech}.

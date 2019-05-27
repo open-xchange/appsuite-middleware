@@ -51,6 +51,7 @@ package com.openexchange.password.mechanism.impl.mech;
 
 import java.security.NoSuchAlgorithmException;
 import com.openexchange.exception.OXException;
+import com.openexchange.password.mechanism.AbstractPasswordMech;
 import com.openexchange.password.mechanism.PasswordDetails;
 import com.openexchange.password.mechanism.exceptions.PasswordMechExceptionCodes;
 import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
@@ -61,7 +62,7 @@ import com.openexchange.password.mechanism.impl.algorithm.SHACrypt;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> moved
  * @since v7.10.2
  */
-public class SHAMech extends ConfigAwarePasswordMech {
+public class SHAMech extends AbstractPasswordMech {
 
     private final SHACrypt crypt;
 
@@ -78,11 +79,8 @@ public class SHAMech extends ConfigAwarePasswordMech {
     @Override
     public PasswordDetails encodePassword(String str) throws OXException {
         try {
-            if (doSalt()) {
-                byte[] salt = getSalt();
-                return new PasswordDetails(str, crypt.makeSHAPasswd(str, salt), getIdentifier(), salt);
-            }
-            return new PasswordDetails(str, crypt.makeSHAPasswd(str), getIdentifier(), null);
+            byte[] salt = getSalt();
+            return new PasswordDetails(str, crypt.makeSHAPasswd(str, salt), getIdentifier(), salt);
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Error encrypting password according to SHA mechanism", e);
             throw PasswordMechExceptionCodes.UNSUPPORTED_ENCODING.create(e, e.getMessage());
@@ -102,6 +100,7 @@ public class SHAMech extends ConfigAwarePasswordMech {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static int getHashLength(SHACrypt crypt) {
         switch (crypt) {
             case SHA1:
