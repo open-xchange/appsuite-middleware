@@ -3808,6 +3808,24 @@ msgstr ""
 msgid "Kerberos ticket in session is missing. Pleasy try again."
 msgstr ""
 
+#. *
+#. * No recipient(s) has been defined for new message
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:71
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
+msgid "There are no recipient(s) for the new message."
+msgstr ""
+
+#. *
+#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
+#.
+#: com.openexchange.gmail.send/src/com/openexchange/gmail/send/GmailSendExceptionMessage.java:76
+#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
+msgid ""
+"The following recipient is not allowed: %1$s. Please remove associated "
+"address and try again."
+msgstr ""
+
 #. A Guard error occurred: %1$s
 #: com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:62
 msgid "An error occurred: %1$s"
@@ -10522,22 +10540,6 @@ msgstr ""
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:70
 msgid ""
 "Message is too long (%1$s characters). Maximum length is %2$s characters."
-msgstr ""
-
-#. *
-#. * No recipient(s) has been defined for new message
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:71
-msgid "There are no recipient(s) for the new message."
-msgstr ""
-
-#. *
-#. * The following recipient is not allowed: %1$s. Please remove associated address and try again.
-#.
-#: com.openexchange.smtp/src/com/openexchange/smtp/SMTPExceptionMessage.java:76
-msgid ""
-"The following recipient is not allowed: %1$s. Please remove associated "
-"address and try again."
 msgstr ""
 
 #. Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
