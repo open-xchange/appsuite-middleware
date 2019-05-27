@@ -115,7 +115,7 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
         if (null == map) {
             return new String[0];
         }
-        
+
         String[] array = new String[map.size()];
         int counter = 0;
         for (Map.Entry<String, String> clientInformation : map.entrySet()) {
@@ -140,8 +140,8 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
         if (null == readUTFArray) {
             return new HashMap<>(1);
         }
-        
-        Map<String, String> result = new HashMap<>();
+
+        Map<String, String> result = new HashMap<>(readUTFArray.length);
         for (String uiInformation : readUTFArray) {
             int pos = uiInformation.indexOf(EQUAL_SIGN);
             if (pos > 0) {
