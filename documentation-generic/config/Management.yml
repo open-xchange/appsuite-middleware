@@ -79,7 +79,7 @@ properties:
       tags: ["Management", "Authentication", "Credential"]
     - key: JMXPasswordHashAlgorithm
       description: |
-        Define the hash mechanism used to hash the password. Possible hash mechanisms are: CRYPT / SHA / SHA256 / SHA512 / BCRYPT
+        Define the hash mechanism used to hash the password. Possible hash mechanisms are: CRYPT / SHA / BCRYPT
         This property only has effect if property [[JMXLogin]] is set.
       defaultValue: SHA
       version: 7.10.1
