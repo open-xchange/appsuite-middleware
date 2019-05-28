@@ -283,7 +283,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         GeoLocationService geoLocationService = services.getOptionalService(GeoLocationService.class);
         if (geoLocationService != null) {
             try {
-                GeoInformation geoInformation = geoLocationService.getGeoInformation(s.getContextId(), ipAddress);
+                GeoInformation geoInformation = geoLocationService.getGeoInformation(s.getContextId(), InetAddress.getByName(ipAddress));
                 if (null == geoInformation) {
                     return getDefaultLocation(s);
                 }
@@ -306,6 +306,8 @@ public class SessionManagementServiceImpl implements SessionManagementService {
                 }
             } catch (OXException e) {
                 LOG.debug("Failed to determine location for session with IP address {}", ipAddress, e);
+            } catch (UnknownHostException e) {
+                LOG.debug("Invalid address was specified: {}", ipAddress, e);
             }
         }
 

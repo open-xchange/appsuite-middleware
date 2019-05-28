@@ -83,7 +83,11 @@ public enum GeoLocationExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'
      */
-    STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED("The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'", CATEGORY_CONFIGURATION, 6),
+    STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED_FOR_CONTEXT("The property '%1$s' is empty! No geo location storage service provider is registered therefore none was selected for context with id '%2$s'", CATEGORY_CONFIGURATION, 6),
+    /**
+     * The property '%1$s' is empty! No geo location storage service provider is registered.
+     */
+    STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED("The property '%1$s' is empty! No geo location storage service provider is registered.", CATEGORY_CONFIGURATION, 6),
     /**
      * The IPv6 address '%1$s' is not convertible to IPv4.
      */
