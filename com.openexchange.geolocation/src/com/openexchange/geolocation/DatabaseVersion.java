@@ -49,34 +49,35 @@
 
 package com.openexchange.geolocation;
 
-import java.net.InetAddress;
-import com.openexchange.annotation.Nullable;
-import com.openexchange.exception.OXException;
+import java.io.Serializable;
 
 /**
- * {@link GeoLocationStorageService}
+ * {@link DatabaseVersion} - Helper interface to define the different supported
+ * database versions by the different GeoLocation service providers.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.2
  */
-public interface GeoLocationStorageService {
+public interface DatabaseVersion extends Serializable {
 
     /**
-     * Retrieves the {@link GeoInformation} of the specified IP address from the storage
-     * 
-     * @param contextId The context identifier
-     * @param address The IP address to lookup
-     * @return The Geographical information for the specified IP address or <code>null</code> if no location could be determined
-     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
-     *             or any other error is occurred
+     * Gets the numberOfFields
+     *
+     * @return The numberOfFields
      */
-    @Nullable
-    GeoInformation getGeoInformation(int contextId, InetAddress address) throws OXException;
+    int getNumberOfFields();
 
     /**
-     * Returns the service provider identifier
-     * 
-     * @return the service provider identifier
+     * Returns the name of the lite version
+     *
+     * @return the name of the lite version
      */
-    String getProviderId();
+    String getLiteName();
+
+    /**
+     * Returns the name of the full version
+     *
+     * @return the name of the full version
+     */
+    String getName();
 }

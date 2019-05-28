@@ -49,13 +49,11 @@
 
 package com.openexchange.geolocation;
 
-import static com.openexchange.java.Autoboxing.L;
+import java.math.BigInteger;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
-import com.openexchange.geolocation.exceptions.NotConvertibleException;
-import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import inet.ipaddr.IPAddress;
 import inet.ipaddr.IPAddressString;
 import inet.ipaddr.ipv6.IPv6Address;
 
@@ -68,81 +66,45 @@ import inet.ipaddr.ipv6.IPv6Address;
 public final class GeoLocationIPUtils {
 
     /**
-     * The first octet multiplier/divisor for the IP address, i.e. <code>16777216</code>
-     */
-    private static final long O1 = (long) Math.pow(2, 24);
-    /**
-     * The second octet multiplier/divisor for the IP address, i.e. <code>65536</code>
-     */
-    private static final long O2 = (long) Math.pow(2, 16);
-    /**
-     * The second octet multiplier/divisor for the IP address, i.e. <code>256</code>
-     */
-    private static final long O3 = (long) Math.pow(2, 8);
-
-    /**
-     * Converts the specified IPv4 address to its integer representation
+     * Converts the specified IP address to its numerical representation
      *
-     * @param ipAddress The IPv4 address to convert
-     * @return The number representation of the IPv4 address
-     * @throws OXException if the specified IPv4 address is invalid
-     * @throws NotConvertibleException if the address is IPv6 and cannot be converted to IPv4.
+     * @param ipAddress The IP address to convert
+     * @return The number representation of the IP address
+     * @throws OXException if the specified IP address is invalid
      */
-    public static long convertIp(String ipAddress) throws OXException, NotConvertibleException {
-        validate(ipAddress);
-        ipAddress = convertToIPv4(ipAddress);
-        String[] split = ipAddress.split("\\.");
-        return Long.parseLong(split[0]) * O1 + Long.parseLong(split[1]) * O2 + Long.parseLong(split[2]) * O3 + Long.parseLong(split[3]);
-    }
-
-    /**
-     * Converts the specified integer to an IP address
-     *
-     * @param ipAddress The integer version of the IP address
-     * @return The IP address as a string
-     * @throws OXException if the specified integer did not yield a valid IPv4 address
-     */
-    public static String convertIp(long ipAddress) throws OXException {
-        long p1 = (ipAddress / O1) % O3;
-        long p2 = (ipAddress / O2) % O3;
-        long p3 = (ipAddress / O3) % O3;
-        long p4 = ipAddress % O3;
-        String ipStr = Strings.concat(".", L(p1), L(p2), L(p3), L(p4));
-        validate(ipStr);
-        return ipStr;
-    }
-
-    /**
-     * Determines whether the specified IP address is valid
-     *
-     * @param ipAddress The IP address to validate
-     * @throws OXException If the specified IP address is invalid
-     */
-    private static void validate(String ipAddress) throws OXException {
-        try {
-            InetAddress.getByName(ipAddress);
-        } catch (UnknownHostException e) {
-            throw GeoLocationExceptionCodes.UNABLE_TO_RESOLVE_HOST.create(e, ipAddress);
+    public static BigInteger convertIp(InetAddress ipAddress) throws OXException {
+        IPAddressString addressString = new IPAddressString(ipAddress.getHostAddress());
+        if (addressString.isIPv4() || addressString.getAddress().isIPv4Convertible()) {
+            return new BigInteger(Long.toString(addressString.getAddress().toIPv4().longValue()));
         }
+        return addressString.getAddress().toIPv6().getValue();
     }
 
     /**
-     * Checks if the specified IP address is an IPv6 address and if possible converts it
-     * to an IPv4. Otherwise, it throws an exception
+     * Converts the specified IP address from its numerical representation
+     * to a string.
+     *
+     * @param ipAddress The numerical representation of the IP address
+     * @return The string version of the IP.
+     */
+    public static String convertIp(BigInteger ipAddress) {
+        IPAddress address = new IPv6Address(ipAddress);
+        if (address.isIPv4Convertible()) {
+            return address.toIPv4().toNormalizedString();
+        }
+        return address.toAddressString().toNormalizedString();
+    }
+
+    /**
+     * Retrieves the lower and upper numerical representations of the
+     * IP range from the specified CIDR
      * 
-     * @param ipAddress The address to check and possibly convert
-     * @return The IPv4 version of the specified address.
-     * @throws NotConvertibleException if the address is IPv6 and cannot be converted to IPv4.
+     * @param cidr The CIDR
+     * @return A {@link Pair} with the lower and upper values of the IP range denoted by the specified CIDR
      */
-    private static String convertToIPv4(String ipAddress) throws OXException, NotConvertibleException {
-        IPAddressString stringAddress = new IPAddressString(ipAddress);
-        if (stringAddress.isIPv4()) {
-            return ipAddress;
-        }
-        IPv6Address ipv6 = stringAddress.getAddress().toIPv6();
-        if (false == ipv6.isIPv4Convertible()) {
-            throw new NotConvertibleException(ipAddress);
-        }
-        return ipv6.toIPv4().toNormalizedString();
+    public static Pair<BigInteger, BigInteger> getIPv6Range(String cidr) {
+        IPAddressString ipv6Str = new IPAddressString(cidr);
+        IPAddress address = ipv6Str.getAddress();
+        return new Pair<BigInteger, BigInteger>(address.getLower().getValue(), address.getUpper().getValue());
     }
 }

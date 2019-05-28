@@ -1,14 +1,14 @@
 feature_name: Geolocation
-feature_description: Described properties related to the geolocation service.
+feature_description: Describes properties related to the geolocation service.
 properties:
     - key: com.openexchange.geolocation.maxmind.databasePath
       description: |
-        The path to the maxmind database
-      defaultValue: resource://geodb/GeoLite2-City.mmdb
+        The path to the maxmind city database, e.g. <code>/var/lib/maxmind/GeoLite2-City.mmdb</code>
+      defaultValue: 
       version: 7.10.1
       reloadable: true
       configcascadeAware: false
       related:
       file: geolocation.properties
-      packageName: open-xchange-geoip
+      packageName: open-xchange-geoip-maxmind
       tags: ["Geolocation", "Maxmind"]

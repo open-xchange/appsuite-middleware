@@ -50,18 +50,17 @@
 package com.openexchange.geolocation.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.net.InetAddress;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationIPUtils;
 import com.openexchange.geolocation.GeoLocationProperty;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
 import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
-import com.openexchange.geolocation.exceptions.NotConvertibleException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -93,24 +92,8 @@ public class GeoLocationServiceImpl implements GeoLocationService {
      * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, java.lang.String)
      */
     @Override
-    public GeoInformation getGeoInformation(int contextId, String ipAddress) throws OXException {
-        try {
-            return getStorage(contextId).getGeoInformation(contextId, GeoLocationIPUtils.convertIp(ipAddress));
-        } catch (NotConvertibleException e) {
-            // Work-around for Bug 65336 until the GeoLocationService supports IPv6 locations
-            LOGGER.debug("{}", e);
-            return null;
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.geolocation.GeoLocationService#getGeoInformation(com.openexchange.session.Session, double, double, int)
-     */
-    @Override
-    public GeoInformation getGeoInformation(int contextId, double latitude, double longitude, int radius) throws OXException {
-        return getStorage(contextId).getGeoInformation(contextId, latitude, longitude, radius);
+    public GeoInformation getGeoInformation(int contextId, InetAddress ipAddress) throws OXException {
+        return getStorage(contextId).getGeoInformation(contextId, ipAddress);
     }
 
     /**
@@ -123,21 +106,18 @@ public class GeoLocationServiceImpl implements GeoLocationService {
     private GeoLocationStorageService getStorage(int contextId) throws OXException {
         LeanConfigurationService leanConfig = services.getServiceSafe(LeanConfigurationService.class);
         String property = leanConfig.getProperty(-1, contextId, GeoLocationProperty.PROVIDER);
-        if (Strings.isEmpty(property)) {
-            List<GeoLocationStorageService> availableServices = GeoLocationStorageServiceRegistry.getInstance().getAvailableServiceProviders();
-            if (availableServices.isEmpty()) {
-                OXException e = GeoLocationExceptionCodes.STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED.create(GeoLocationProperty.PROVIDER.getFQPropertyName(), I(contextId));
-                LOGGER.warn("{}", e.getMessage());
-                throw e;
-            }
-            GeoLocationStorageService service = availableServices.get(0);
-            LOGGER.debug("The property '{}' is empty! The geo location storage service provider '{}' was selected for context with id '{}'", GeoLocationProperty.PROVIDER.getFQPropertyName(), service.getProviderId(), I(contextId));
-            return service;
-        }
-        try {
+        if (Strings.isNotEmpty(property)) {
             return GeoLocationStorageServiceRegistry.getInstance().getStorageServiceProvider(property);
-        } catch (IllegalArgumentException e) {
-            throw GeoLocationExceptionCodes.UNKNOWN_STORAGE_SERVICE_PROVIDER.create(property);
         }
+
+        List<GeoLocationStorageService> availableServices = GeoLocationStorageServiceRegistry.getInstance().getAvailableServiceProviders();
+        if (availableServices.isEmpty()) {
+            OXException e = GeoLocationExceptionCodes.STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED_FOR_CONTEXT.create(GeoLocationProperty.PROVIDER.getFQPropertyName(), I(contextId));
+            LOGGER.warn("{}", e.getMessage());
+            throw e;
+        }
+        GeoLocationStorageService service = availableServices.get(0);
+        LOGGER.debug("The property '{}' is empty! The geo location storage service provider '{}' was selected for context with id '{}'", GeoLocationProperty.PROVIDER.getFQPropertyName(), service.getProviderId(), I(contextId));
+        return service;
     }
 }

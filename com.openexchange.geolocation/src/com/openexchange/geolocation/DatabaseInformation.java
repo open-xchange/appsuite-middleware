@@ -49,34 +49,56 @@
 
 package com.openexchange.geolocation;
 
-import java.net.InetAddress;
-import com.openexchange.annotation.Nullable;
-import com.openexchange.exception.OXException;
+import java.io.Serializable;
 
 /**
- * {@link GeoLocationStorageService}
+ * {@link DatabaseInformation}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.10.2
+ * @since v7.10.3
  */
-public interface GeoLocationStorageService {
+public class DatabaseInformation implements Serializable {
+
+    private static final long serialVersionUID = -5559499264276864511L;
+
+    private final String name;
+    private final String login;
+    private final String password;
 
     /**
-     * Retrieves the {@link GeoInformation} of the specified IP address from the storage
-     * 
-     * @param contextId The context identifier
-     * @param address The IP address to lookup
-     * @return The Geographical information for the specified IP address or <code>null</code> if no location could be determined
-     * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
-     *             or any other error is occurred
+     * Initialises a new {@link DatabaseInformation}.
      */
-    @Nullable
-    GeoInformation getGeoInformation(int contextId, InetAddress address) throws OXException;
+    public DatabaseInformation(String name, String login, String password) {
+        super();
+        this.name = name;
+        this.login = login;
+        this.password = password;
+    }
 
     /**
-     * Returns the service provider identifier
-     * 
-     * @return the service provider identifier
+     * Gets the name
+     *
+     * @return The name
      */
-    String getProviderId();
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the login
+     *
+     * @return The login
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
 }

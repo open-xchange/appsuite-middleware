@@ -49,19 +49,14 @@
 
 package com.openexchange.geolocation.osgi;
 
-import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.geolocation.GeoLocationRMIService;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
-import com.openexchange.geolocation.impl.GeoLocationRMIServiceImpl;
 import com.openexchange.geolocation.impl.GeoLocationServiceImpl;
 import com.openexchange.geolocation.impl.GeoLocationStorageServiceRegistry;
 import com.openexchange.server.ServiceLookup;
@@ -79,7 +74,6 @@ public class GeoLocationStorageServiceRegistrationTracker implements ServiceTrac
     private final BundleContext context;
     private final ServiceLookup services;
     private ServiceRegistration<GeoLocationService> serviceRegistration;
-    private ServiceRegistration<Remote> rmiServiceRegistration;
 
     /**
      * Initialises a new {@link GeoLocationStorageServiceRegistrationTracker}.
@@ -125,10 +119,6 @@ public class GeoLocationStorageServiceRegistrationTracker implements ServiceTrac
         context.ungetService(reference);
         LOGGER.info("Unregistered the GeoLocationStorageService provider {}.", service.getProviderId());
         if (false == GeoLocationStorageServiceRegistry.getInstance().hasStorages() && serviceRegistration != null) {
-            rmiServiceRegistration.unregister();
-            rmiServiceRegistration = null;
-            LOGGER.info("Unregistered the GeoLocationRMIService.");
-
             serviceRegistration.unregister();
             serviceRegistration = null;
             LOGGER.info("Unregistered the GeoLocationService.");
@@ -142,11 +132,7 @@ public class GeoLocationStorageServiceRegistrationTracker implements ServiceTrac
         if (serviceRegistration != null) {
             return;
         }
-        Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put("RMIName", GeoLocationRMIService.RMI_NAME);
         serviceRegistration = context.registerService(GeoLocationService.class, new GeoLocationServiceImpl(services), null);
         LOGGER.info("Registered the GeoLocationService.");
-        rmiServiceRegistration = context.registerService(Remote.class, new GeoLocationRMIServiceImpl(services), props);
-        LOGGER.info("Registered the GeoLocationRMIService.");
     }
 }

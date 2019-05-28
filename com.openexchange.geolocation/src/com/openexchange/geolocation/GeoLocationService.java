@@ -49,6 +49,7 @@
 
 package com.openexchange.geolocation;
 
+import java.net.InetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -72,17 +73,5 @@ public interface GeoLocationService {
      * @return The Geographical information for the specified IP address
      * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
      */
-    GeoInformation getGeoInformation(int contextId, String ipAddress) throws OXException;
-
-    /**
-     * Retrieves the {@link GeoInformation} of the specified geographical point within the specified radius
-     * 
-     * @param contextId The context identifier
-     * @param latitude The latitude
-     * @param longitude The longitude
-     * @param radius The radius
-     * @return The Geographical information of the closest point within the specified radius
-     * @throws OXException if Geographical information cannot be returned or any other error is occurred
-     */
-    GeoInformation getGeoInformation(int contextId, double latitude, double longitude, int radius) throws OXException;
+    GeoInformation getGeoInformation(int contextId, InetAddress ipAddress) throws OXException;
 }

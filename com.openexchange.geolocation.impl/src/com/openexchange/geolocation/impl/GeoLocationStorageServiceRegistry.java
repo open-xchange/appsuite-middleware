@@ -69,7 +69,7 @@ import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
  */
 public class GeoLocationStorageServiceRegistry {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationRMIServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationStorageServiceRegistry.class);
 
     public static final GeoLocationStorageServiceRegistry INSTANCE = new GeoLocationStorageServiceRegistry();
 
