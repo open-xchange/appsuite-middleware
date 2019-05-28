@@ -219,7 +219,9 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 try {
                     final Decrypter decrypter = (Decrypter) customizationNote;
                     decrypted = decrypter.getDecrypted(session, toDecrypt);
-                    LOG.debug("Decrypted password with former crypt mechanism");
+                    if (decrypted != null) {
+                        LOG.debug("Decrypted password with former crypt mechanism");
+                    }
                 } catch (final OXException x) {
                     // Ignore and try other
                     LOG.debug("Failed to decrypt with former crypt mechanism (user={}, context={})", iUserId, iContextId, x);
