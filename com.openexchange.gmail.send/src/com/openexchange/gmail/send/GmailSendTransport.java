@@ -49,6 +49,7 @@
 
 package com.openexchange.gmail.send;
 
+import static com.openexchange.gmail.send.GmailAccess.accessFor;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
@@ -73,15 +74,11 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.codec.binary.BaseNCodecInputStream;
 import org.slf4j.Logger;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.AbstractInputStreamContent;
-import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
-import com.google.api.client.http.HttpUnsuccessfulResponseHandler;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.Gmail.Users.Messages.Send;
 import com.google.api.services.gmail.model.Message;
@@ -265,10 +262,9 @@ public class GmailSendTransport extends MailTransport {
      * @param message The returned message model
      * @param gmailSendMessage The transported MIME message
      * @param gmailSendConfig The associated configuration
-     * @throws OXException If logging fails
      * @throws MessagingException If a messaging error occurs
      */
-    private void logMessageTransport(Message message, final MimeMessage gmailSendMessage, final GmailSendConfig gmailSendConfig) throws OXException, MessagingException {
+    private void logMessageTransport(Message message, final MimeMessage gmailSendMessage, final GmailSendConfig gmailSendConfig) throws MessagingException {
         if (gmailSendConfig.getGmailSendProperties().isLogTransport()) {
             LOG.info("Sent \"{}\" for login \"{}\" using Gmail Send API.", message == null ? gmailSendMessage.getMessageID() : message.getId(), gmailSendConfig.getLogin());
         }
@@ -281,7 +277,7 @@ public class GmailSendTransport extends MailTransport {
      * @return The connected Gmail instance
      * @throws OXException If connect attempt fails
      */
-    protected Gmail connectTransport(GmailSendConfig gmailSendConfig) throws OXException {
+    protected GmailAccess connectTransport(GmailSendConfig gmailSendConfig) throws OXException {
         return connectTransport(gmailSendConfig, false);
     }
 
@@ -293,7 +289,7 @@ public class GmailSendTransport extends MailTransport {
      * @return The connected Gmail instance
      * @throws OXException If connect attempt fails
      */
-    protected Gmail connectTransport(GmailSendConfig gmailSendConfig, boolean forPing) throws OXException {
+    protected GmailAccess connectTransport(GmailSendConfig gmailSendConfig, boolean forPing) throws OXException {
         Account account = getAccount(gmailSendConfig);
         if (false == forPing) {
             if (account.isTransportDisabled()) {
@@ -349,7 +345,8 @@ public class GmailSendTransport extends MailTransport {
 
         // Establish Gmail instance
         HttpRequestInitializer httpRequestInitializer = new RetryingHttpRequestInitializer(credentials, gmailSendConfig);
-        return new Gmail.Builder(credentials.getTransport(), credentials.getJsonFactory(), httpRequestInitializer).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
+        Gmail gmail = new Gmail.Builder(credentials.getTransport(), credentials.getJsonFactory(), httpRequestInitializer).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
+        return accessFor(gmail, oauthAccount);
     }
 
     /**
@@ -410,14 +407,16 @@ public class GmailSendTransport extends MailTransport {
 
     @Override
     public void ping() throws OXException {
+        GmailAccess gmailAccess = connectTransport(getTransportConfig(), true);
         try {
-            Gmail gmail = connectTransport(getTransportConfig(), true);
+            Gmail gmail = gmailAccess.gmail;
             gmail.users().getProfile("me").execute();
         } catch (final HttpResponseException e) {
             if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
-                throw MailExceptionCode.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
+                // Not authorized...
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(gmailAccess.oauthAccount.getDisplayName(), I(gmailAccess.oauthAccount.getId()));
             }
-            throw MailExceptionCode.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
+            throw MailExceptionCode.PROTOCOL_ERROR.create(e, "HTTP", e.getStatusCode() + " " + e.getStatusMessage());
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -767,6 +766,7 @@ public class GmailSendTransport extends MailTransport {
 
         // Try to send the message
         MimeMessage messageToSend = mimeMessage;
+        GmailAccess gmailAccess = null;
         Exception exception = null;
         try {
             // Check listener chain
@@ -811,7 +811,8 @@ public class GmailSendTransport extends MailTransport {
             */
 
             // Transport
-            Gmail gmail = connectTransport(gmailSendConfig);
+            gmailAccess = connectTransport(gmailSendConfig);
+            Gmail gmail = gmailAccess.gmail;
             Send send = gmail.users().messages().send("me", null, new MimeMessageInputStreamContent(messageToSend));
             com.google.api.services.gmail.model.Message message = send.execute();
             if (gmailSendConfig.getGmailSendProperties().isLogTransport()) {
@@ -823,6 +824,13 @@ public class GmailSendTransport extends MailTransport {
         } catch (OXException e) {
             exception = e;
             throw e;
+        } catch (final HttpResponseException e) {
+            exception = e;
+            if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                // Not authorized...
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(gmailAccess.oauthAccount.getDisplayName(), I(gmailAccess.oauthAccount.getId()));
+            }
+            throw MailExceptionCode.PROTOCOL_ERROR.create(e, "HTTP", e.getStatusCode() + " " + e.getStatusMessage());
         } catch (IOException e) {
             exception = e;
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -1173,18 +1181,6 @@ public class GmailSendTransport extends MailTransport {
         }
     }
 
-    private static final class UrlSafeBase64EncodingInputStream extends BaseNCodecInputStream {
-
-        /**
-         * Creates a Base64InputStream such that all data read is Base64-encoded from the original provided InputStream.
-         *
-         * @param in InputStream to wrap.
-         */
-        public UrlSafeBase64EncodingInputStream(InputStream in) {
-            super(in, new org.apache.commons.codec.binary.Base64(true), true);
-        }
-    }
-
     private static final class MailCleanerTask implements Runnable {
 
         private final ComposedMailMessage composedMail;
@@ -1200,31 +1196,6 @@ public class GmailSendTransport extends MailTransport {
         }
 
     } // End of class MailCleanerTask
-
-    private static final class ChainedHttpUnsuccessfulResponseHandler implements HttpUnsuccessfulResponseHandler {
-
-        private final HttpUnsuccessfulResponseHandler[] handlers;
-
-        /**
-         * Initializes a new {@link ChainedHttpUnsuccessfulResponseHandler}.
-         */
-        ChainedHttpUnsuccessfulResponseHandler(HttpUnsuccessfulResponseHandler... handlers) {
-            super();
-            this.handlers = handlers;
-        }
-
-        @Override
-        public boolean handleResponse(HttpRequest request, HttpResponse response, boolean supportsRetry) throws IOException {
-            boolean retry = false;
-            for (int i = 0; !retry && i < handlers.length; i++) {
-                HttpUnsuccessfulResponseHandler handler = handlers[i];
-                if (handler != null) {
-                    retry = handlers[i].handleResponse(request, response, supportsRetry);
-                }
-            }
-            return retry;
-        }
-    }
 
     private static String quoteReplacement(final String str) {
         return com.openexchange.java.Strings.isEmpty(str) ? "" : quoteReplacement0(str);
