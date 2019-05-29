@@ -476,7 +476,17 @@ public final class IMAPFolderConverter {
         }
     }
 
-    private static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
+    /**
+     * Checks if given IMAP full name starts with any of given personal/user namespaces.
+     *
+     * @param imapFullName The IMAP full name
+     * @param sep The separator character
+     * @param personalNamespaces The personal namespaces
+     * @param userNamespaces The user namespaces
+     * @param tmp Helper instance of <code>StringBuilder</code>
+     * @return <code>true</code> if given IMAP full name starts with any of given personal/user namespaces; otherwise <code>false</code>
+     */
+    public static boolean startsWithOneOf(final String imapFullName, final char sep, final String[] personalNamespaces, final String[] userNamespaces, final StringBuilder tmp) {
         for (final String string : userNamespaces) {
             if (imapFullName.equals(string)) {
                 return true;

@@ -726,10 +726,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
     }
 
     private InputStream retrieveFile(String fileId, Context ctx) throws OXException {
+        FileStorage fs = getFileStorage(ctx);
         try {
-            final FileStorage fs = getFileStorage(ctx);
             return fs.getFile(fileId);
-
         } catch (OXException e) {
             throw AttachmentExceptionCodes.READ_FAILED.create(e, fileId);
         }

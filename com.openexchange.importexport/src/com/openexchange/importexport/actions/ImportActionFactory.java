@@ -51,10 +51,10 @@ package com.openexchange.importexport.actions;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.actions.importer.CSVImportAction;
 import com.openexchange.importexport.actions.importer.ICalImportAction;
 import com.openexchange.importexport.actions.importer.VCardImportAction;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.server.ServiceLookup;
 
 public class ImportActionFactory extends AbstractIEActionFactory{

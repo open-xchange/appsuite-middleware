@@ -229,6 +229,16 @@ public class QuotaFileStorageTest {
         }
 
         @Override
+        public void backWritableForGlobalAfterReading(int contextId, Connection connection) {
+            // Nothing to do.
+        }
+
+        @Override
+        public void backWritableForGlobalAfterReading(String group, Connection connection) {
+            // Nothing to do.
+        }
+
+        @Override
         public Connection get(final int poolId, final String schema) {
             return null;
         }

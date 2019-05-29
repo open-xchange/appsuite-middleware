@@ -193,7 +193,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 } else if (value instanceof Map) {
                     myArrayList.add(new JSONObject((Map<String, Object>) value));
                 } else {
-                    myArrayList.add(value);
+                    myArrayList.add(value == null ? JSONObject.NULL : value);
                 }
             }
         }
@@ -267,7 +267,7 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                     retval.add(jsonValue.toObject().asMap());
                 }
             } else {
-                retval.add(value);
+                retval.add(JSONObject.NULL.equals(value) ? null : value);
             }
         }
         return retval;

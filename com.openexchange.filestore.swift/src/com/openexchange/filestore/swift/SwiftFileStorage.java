@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -93,16 +94,19 @@ public class SwiftFileStorage implements FileStorage {
     private final SwiftClient client;
     private final ChunkStorage chunkStorage;
     private final AtomicReference<Future<Void>> containerCreatedTask;
+    private final URI uri;
 
     /**
      * Initializes a new {@link SwiftFileStorage}.
      *
+     * @param uri The URI that fully qualifies this file storage
      * @param services A service lookup reference
      * @param client The spoxyd client to use
      * @param chunkStorage The underlying chunk storage
      */
-    public SwiftFileStorage(SwiftClient client, ChunkStorage chunkStorage) {
+    public SwiftFileStorage(URI uri, SwiftClient client, ChunkStorage chunkStorage) {
         super();
+        this.uri = uri;
         this.client = client;
         this.chunkStorage = chunkStorage;
         containerCreatedTask = new AtomicReference<Future<Void>>(null);
@@ -146,6 +150,11 @@ public class SwiftFileStorage implements FileStorage {
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
+    }
+
+    @Override
+    public URI getUri() {
+        return uri;
     }
 
     @Override

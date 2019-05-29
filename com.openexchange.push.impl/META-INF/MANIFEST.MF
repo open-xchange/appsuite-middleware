@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.collect,
  com.hazelcast.config,
  com.hazelcast.core,
+ com.hazelcast.instance;version="3.12.0",
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.openexchange.auth,

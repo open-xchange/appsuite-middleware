@@ -187,6 +187,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 700 --> com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch
      *   &bull; 701 --> com.openexchange.oauth.impl.internal.hazelcast.PortableMultipleCallbackRegistryFetch
      *   &bull; 800 --> com.openexchange.multifactor.storage.hazelcast.PortableMultifactorToken
+     *   &bull; 900 --> com.openexchange.hazelcast.serialization.PortableCheckForBooleanConfigOptionCallable
      * </pre>
      *
      * @return The class ID

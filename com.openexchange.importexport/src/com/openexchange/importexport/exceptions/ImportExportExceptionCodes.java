@@ -186,6 +186,12 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
 
     /** %1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s */
     WARNINGS_AND_TRUNCATED_RESULTS("%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation of %2$s", CATEGORY_WARNING, 1322, ImportExportExceptionMessages.WARNINGS_AND_TRUNCATED_RESULTS_MSG),
+
+    /** Cannot find an importer for format %s */
+    NO_SUCH_IMPORTER("Cannot find an importer for format %s", CATEGORY_SERVICE_DOWN, 1100, null),
+
+    /** Cannot find an exporter for format %s */
+    NO_SUCH_EXPORTER("Cannot find an exporter for format %s", CATEGORY_SERVICE_DOWN, 1101, null),
     ;
 
     private final String message;

@@ -1,0 +1,81 @@
+'/gdpr/dataexport':
+  get:
+    operationId: getDataExportTask
+    tags:
+      - DataExport
+    summary: Loads the available data export task for session-associated user
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: A JSON object containing the requested data export task.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataExportTaskResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+  delete:
+    operationId: cancelDataExportTask
+    tags:
+      - DataExport
+    summary: Cancels the data export for session-associated user
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: A JSON object containing the success status.
+        content:
+          application/json:
+            schema:
+              type: object
+              title: cancelDataExportTaskReponse
+              properties:
+                success:
+                  type: boolean
+                  description: >-
+                    True if such a data export task has been successfully
+                    canceled; false otherwise
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+  post:
+    operationId: submitDataExportTask
+    tags:
+      - DataExport
+    summary: Submits a data export task for execution
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: deleteOldDataExport
+        description: A flag indicating whether previously completed data export is supposed to be deleted prior to submitting a new one.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: A JSON object containing the success status.
+        content:
+          application/json:
+            schema:
+              type: object
+              title: submitDataExportTaskReponse
+              properties:
+                success:
+                  type: boolean
+                  description: >-
+                    True if such a data export task has been successfully
+                    canceled; false otherwise
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      description: A JSON object containing the modules and associated parameters.
+      content:
+        application/json:
+          schema:
+            type: string

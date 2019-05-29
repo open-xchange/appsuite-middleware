@@ -306,6 +306,16 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
         back(connection, false);
     }
 
+    @Override
+    public void backWritableForGlobalAfterReading(String group, Connection connection) {
+        back(connection, true);
+    }
+
+    @Override
+    public void backWritableForGlobalAfterReading(int contextId, Connection connection) {
+        back(connection, true);
+    }
+
     private AssignmentImpl getAssignment(String group) throws OXException {
         String name = Strings.isEmpty(group) ? GlobalDbConfig.DEFAULT_GROUP : group;
         GlobalDbConfig dbConfig = globalDbConfigs.get(name);

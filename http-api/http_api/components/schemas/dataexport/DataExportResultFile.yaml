@@ -1,0 +1,14 @@
+type: object
+properties:
+  fileInfo:
+    type: string
+    description: The work item identifier
+  number:
+    type: int
+    description: The package number
+  contentType:
+    type: string
+    description: The Content-Type identifier
+  taskId:
+    type: string
+    description: The task identifier

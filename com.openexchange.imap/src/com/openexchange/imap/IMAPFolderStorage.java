@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.imap.converters.IMAPFolderConverter.startsWithOneOf;
 import static com.openexchange.imap.util.FolderUtility.canBeOpened;
 import static com.openexchange.java.Strings.quoteReplacement;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
@@ -614,10 +615,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return considerStandardFolders;
     }
 
-    private MailFolderInfo toFolderInfo(final ListLsubEntry entry) {
+    private MailFolderInfo toFolderInfo(final ListLsubEntry entry) throws MessagingException {
         final MailFolderInfo mfi = new MailFolderInfo();
         mfi.setAccountId(accountId);
-        mfi.setSeparator(entry.getSeparator());
+        char sep = entry.getSeparator();
+        mfi.setSeparator(sep);
         final String fullName = entry.getFullName();
 
         mfi.setName(entry.getName());
@@ -642,8 +644,60 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } else {
             mfi.setDefaultFolder(false);
             mfi.setDefaultFolderType(DefaultFolderType.NONE);
-            mfi.setParentFullname(entry.getParent() == null ? null : entry.getParent().getFullName());
+            if (entry.getParent() == null) {
+                mfi.setParentFullname(null);
+            } else {
+                String pf = entry.getParent().getFullName();
+                mfi.setParentFullname(0 == pf.length() ? DEFAULT_FOLDER_ID : pf);
+            }
             mfi.setFullname(fullName);
+        }
+
+        if (imapConfig.getImapCapabilities().hasNamespace()) {
+            String[] users = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId);
+            StringBuilder tmp = new StringBuilder(32);
+            boolean shared = false;
+            for (int i = 0; !shared && i < users.length; i++) {
+                final String userNamespace = users[i];
+                if (!com.openexchange.java.Strings.isEmpty(userNamespace)) {
+                    if (fullName.equals(userNamespace)) {
+                        shared = true;
+                    } else {
+                        tmp.setLength(0);
+                        final String prefix = tmp.append(userNamespace).append(sep).toString();
+                        if (fullName.startsWith(prefix)) {
+                            shared = true;
+                        }
+                    }
+                }
+            }
+            mfi.setShared(shared);
+
+            boolean isPublic = false;
+            if (!shared) {
+                String[] shares = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId);
+                String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
+                for (int i = 0; !isPublic && i < shares.length; i++) {
+                    final String sharedNamespace = shares[i];
+                    if (!com.openexchange.java.Strings.isEmpty(sharedNamespace)) {
+                        if (fullName.equals(sharedNamespace)) {
+                            isPublic = true;
+                        } else {
+                            tmp.setLength(0);
+                            final String prefix = tmp.append(sharedNamespace).append(sep).toString();
+                            if (fullName.startsWith(prefix)) {
+                                isPublic = true;
+                            }
+                        }
+                    } else if (!startsWithOneOf(fullName, sep, personals, users, tmp)) {
+                        isPublic = true;
+                    }
+                }
+            }
+            mfi.setPublic(isPublic);
+        } else {
+            mfi.setShared(false);
+            mfi.setPublic(false);
         }
 
         return mfi;

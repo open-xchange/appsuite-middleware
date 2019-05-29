@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -84,18 +85,26 @@ public class SproxydFileStorage implements FileStorage {
 
     private final SproxydClient client;
     private final ChunkStorage chunkStorage;
+    private final URI uri;
 
     /**
      * Initializes a new {@link SproxydFileStorage}.
      *
+     * @param uri The URI that fully qualifies this file storage
      * @param services A service lookup reference
      * @param client The spoxyd client to use
      * @param chunkStorage The underlying chunk storage
      */
-    public SproxydFileStorage(SproxydClient client, ChunkStorage chunkStorage) {
+    public SproxydFileStorage(URI uri, SproxydClient client, ChunkStorage chunkStorage) {
         super();
+        this.uri = uri;
         this.client = client;
         this.chunkStorage = chunkStorage;
+    }
+
+    @Override
+    public URI getUri() {
+        return uri;
     }
 
     @Override

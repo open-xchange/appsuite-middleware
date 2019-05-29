@@ -65,8 +65,10 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
+import com.openexchange.importexport.ImportExportService;
 import com.openexchange.importexport.actions.ExportActionFactory;
 import com.openexchange.importexport.actions.ImportActionFactory;
+import com.openexchange.importexport.impl.ImportExportServiceImpl;
 
 /**
  * {@link ImportExportActivator}
@@ -105,6 +107,7 @@ public class ImportExportActivator extends AJAXModuleActivator{
 	@Override
 	protected void startBundle() throws Exception {
 		ImportExportServices.LOOKUP.set(this);
+		registerService(ImportExportService.class, new ImportExportServiceImpl(this));
 		registerModule(new ImportActionFactory(this), "import");
 		registerModule(new ExportActionFactory(this), "export");
 

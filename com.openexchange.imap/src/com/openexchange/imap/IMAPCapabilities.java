@@ -185,6 +185,8 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasAttachmentSearch;
     private boolean hasTextPreview;
     private boolean hasMailFilterApplication;
+    private boolean hasPublicFolders;
+    private boolean hasSharedFolders;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -367,6 +369,34 @@ public class IMAPCapabilities extends MailCapabilities {
 
     public void setAttachmentSearchEnabled(boolean enabled) {
         this.hasAttachmentSearch = enabled;
+    }
+
+    /**
+     * Sets if mail system supports public folders
+     *
+     * @param supported <code>true</code> if public folders are supported; otherwise <code>false</code>
+     */
+    public void setPublicFolders(boolean supported) {
+        this.hasPublicFolders = supported;
+    }
+
+    @Override
+    public boolean hasPublicFolders() {
+        return hasPublicFolders;
+    }
+
+    /**
+     * Sets if mail system supports shared folders
+     *
+     * @param supported <code>true</code> if shared folders are supported; otherwise <code>false</code>
+     */
+    public void setSharedFolders(boolean supported) {
+        this.hasSharedFolders = supported;
+    }
+
+    @Override
+    public boolean hasSharedFolders() {
+        return hasSharedFolders;
     }
 
     @Override

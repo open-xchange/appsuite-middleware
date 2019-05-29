@@ -59,11 +59,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.lang.reflect.Field;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItemHeaders;
@@ -174,6 +176,21 @@ public final class UploadUtility {
      * @return The number of bytes in a human readable format
      */
     public static String getSize(long size, int precision, boolean longName, boolean realSize) {
+        return getSize(size, precision, longName, realSize, Locale.US);
+    }
+
+    /**
+     * Converts given number of bytes to a human readable format.
+     *
+     * @param size The number of bytes
+     * @param precision The number of digits allowed after dot
+     * @param longName <code>true</code> to use unit's long name (e.g. <code>Megabytes</code>) or short name (e.g. <code>MB</code>)
+     * @param realSize <code>true</code> to bytes' real size of <code>1024</code> used for detecting proper unit; otherwise
+     *            <code>false</code> to narrow unit with <code>1000</code>.
+     * @param locale The locale to use to format number
+     * @return The number of bytes in a human readable format
+     */
+    public static String getSize(long size, int precision, boolean longName, boolean realSize, Locale locale) {
         int pos = 0;
         double decSize = size;
         final int base = realSize ? 1024 : 1000;
@@ -188,7 +205,8 @@ public final class UploadUtility {
         if (precision <= 0) {
             sb.append((int) value);
         } else {
-            sb.append(value);
+            NumberFormat numberFormat = NumberFormat.getInstance(locale);
+            sb.append(numberFormat.format(value));
         }
         sb.append(' ');
 

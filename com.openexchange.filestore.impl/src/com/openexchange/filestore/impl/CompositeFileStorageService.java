@@ -171,7 +171,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         }
         try {
             LocalFileStorage standardFS = new LocalFileStorage(uri);
-            HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
+            HashingFileStorage hashedFS = new HashingFileStorage(uri, new File(new File(uri), "hashed"));
             return new CompositingFileStorage(standardFS, "hashed", Collections.<String, FileStorage> singletonMap("hashed", hashedFS));
         } catch (IllegalArgumentException e) {
             throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". That URI does not hold the preconditions to be absolute, hierarchical with a scheme equal to \"file\", a non-empty path component, and undefined authority, query, and fragment components.", e);

@@ -592,6 +592,20 @@ public final class Databases {
     }
 
     /**
+     * Checks if given SQL exception represents a duplicate key conflict in MySQL.
+     *
+     * @param e The SQL exception to check
+     * @return <code>true</code> for duplicate key conflict; otherwise <code>false</code>
+     */
+    public static boolean isDuplicateKeyConflictInMySQL(SQLException e) {
+        if ("23000".equals(e.getSQLState())) {
+            int errorCode = e.getErrorCode();
+            return (1062 == errorCode || 1586 == errorCode);
+        }
+        return false;
+    }
+
+    /**
      * Checks if given {@link SQLException} instance is caused by a (recoverable) socket read timeout.
      *
      * @param e The <code>SQLException</code> instance to check

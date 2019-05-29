@@ -1,0 +1,155 @@
+feature_name: Data Export
+feature_description: |
+  Configuration options for the data export feature allowing users to export their personal data as ZIP archives.
+properties:
+    - key: com.openexchange.gdpr.dataexport.active
+      description: |
+        Whether processing of data export tasks is enabled in this node.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.enabled
+      description: |
+        Whether the feature is available for a user.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.fileStorageId
+      description: |
+        The identifier of the dedicated file storage to use for data export artefacts
+      defaultValue: 
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.schedule
+      description: |
+        The pattern specifying when processing of data export tasks is allowed. The default time zone of the Java virtual machine is assumed,
+        which is typically the system's default time zone; unless the <code>user.timezone</code> property is set otherwise.
+        A semicolon-separated listing of tokens, while a token consists of a weekday and an optional time range
+        A weekday is one of: Mon, Tue, Wed, Thu, Fri, Sat and Sun. It also accepts ranges e.g. "Mon-Fri"
+        A time range is a hour of day range of the 24h clock. E.g. "0-6" for 0 to 6 in the morning or "22:30-24" for 22:30h until 24h in the evening. Also accepts comma-separated pairs; e.g. "0-6,22:30-24"
+        A more complex example: "Mon 0:12-6:45; Tue-Thu 0-7:15; Fri 0-6,22:30-24; Sat,Sun 0-8"
+      defaultValue: 
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.numberOfConcurrentTasks
+      description: |
+        Specifies how many task are allowed being processed concurrently on this node.
+      defaultValue: 1
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.checkForTasksFrequency
+      description: |
+        The frequency to check for new task that can be worked on. Accepts units of measurement.
+      defaultValue: 5m
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.checkForAbortedTasksFrequency
+      description: |
+        The frequency to check for aborted task.
+      defaultValue: 2m
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.maxProcessingTimeMillis
+      description: |
+        Specifies the time in milliseconds which is allowed to work on an individual task.
+        If that time elapsed, task gets paused and the next available task is considered.
+        A value of equal or less than 0 (zero) means infinte.
+      defaultValue: -1
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.maxTimeToLive
+      description: |
+        Specifies the time a completed task's results are kept alive prior to being deleted.
+      defaultValue: 2W
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.expirationTime
+      description: |
+        The time a task is considered as idle; meaning no processing took place for longer than given time.
+      defaultValue: 10m
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.defaultMaxFileSize
+      description: |
+        The default value (in bytes) to assume for the value specifying max. size for a result file package.
+        Resulting data is split into chunks of given size. Minimum accepted size is 536870912 (512 MB).
+      defaultValue: 1073741824
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.maxFailCountForWorkItem
+      description: |
+        The max. fail count for attempts to export items from a certain provider.
+      defaultValue: 4
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]
+    - key: com.openexchange.gdpr.dataexport.addDiagnosticsReport
+      description: |
+        Whether to add a diagnostics report to generated archive file.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: dataexport.properties
+      packageName: open-xchange-gdpr-dataexport
+      tags: ["Data Export"]

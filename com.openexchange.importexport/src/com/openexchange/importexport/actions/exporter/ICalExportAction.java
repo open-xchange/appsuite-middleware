@@ -49,9 +49,9 @@
 package com.openexchange.importexport.actions.exporter;
 
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
-import com.openexchange.importexport.exporters.Exporter;
+import com.openexchange.importexport.Exporter;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.exporters.ICalExporter;
-import com.openexchange.importexport.formats.Format;
 
 @DispatcherNotes(defaultFormat="file")
 public class ICalExportAction extends AbstractExportAction {

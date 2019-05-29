@@ -67,7 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest {
 

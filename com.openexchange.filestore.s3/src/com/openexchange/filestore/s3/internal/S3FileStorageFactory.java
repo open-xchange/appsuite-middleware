@@ -176,7 +176,7 @@ public class S3FileStorageFactory implements FileStorageProvider, InterestsAware
             AmazonS3Client client = clientInfo.client;
             String bucketName = initBucket(client, filestoreID, configService, s3EncryptionConfig);
             LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            return new S3FileStorage(client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
+            return new S3FileStorage(uri, client, clientInfo.encrypted, s3EncryptionConfig.getServerSideEncryption() != null, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
         } catch (OXException ex) {
             Throwable cause = ex.getCause();
             if (cause instanceof AmazonS3Exception) {

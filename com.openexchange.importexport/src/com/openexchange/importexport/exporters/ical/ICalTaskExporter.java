@@ -140,6 +140,7 @@ public class ICalTaskExporter extends AbstractICalExporter {
         ICalSession iCalSession = emitter.createSession();
         TasksSQLInterface tasksSql = new TasksSQLImpl(session);
         int[] fields = null != fieldsToBeExported ? fieldsToBeExported : _taskFields;
+
         SearchIterator<Task> searchIterator = tasksSql.getModifiedTasksInFolder(Integer.parseInt(getFolderId()), fields, DATE_ZERO);
         try {
             while (searchIterator.hasNext()) {
@@ -152,10 +153,12 @@ public class ICalTaskExporter extends AbstractICalExporter {
             SearchIterators.close(searchIterator);
         }
         log(errors, warnings);
+
         if (null != out) {
             emitter.writeSession(iCalSession, out);
             return null;
         }
+
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean error = true;
         try {
@@ -176,24 +179,22 @@ public class ICalTaskExporter extends AbstractICalExporter {
         List<ConversionWarning> warnings = new LinkedList<>();
         ICalSession iCalSession = emitter.createSession();
         TasksSQLInterface tasksSql = new TasksSQLImpl(session);
-        if (null != out) {
 
+        if (null != out) {
             try {
                 for (Map.Entry<String, List<String>> batchEntry : getBatchIds().entrySet()) {
                     for (String object : batchEntry.getValue()) {
                         emitter.writeTask(iCalSession, tasksSql.getTaskById(Integer.parseInt(object), Integer.parseInt(batchEntry.getKey())), session.getContext(), errors, warnings);
                     }
                 }
-                emitter.writeSession(iCalSession, out);
             } catch (OXException e) {
                 throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
             }
             log(errors, warnings);
-        }
-        if (null != out) {
             emitter.writeSession(iCalSession, out);
             return null;
         }
+
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean error = true;
         try {

@@ -69,7 +69,7 @@ public class AbstractHashingFileStorageTest {
     public void setUp() throws Exception {
         tmpFile = new File("/tmp/" + this.getClass().getCanonicalName() + "_" + System.currentTimeMillis());
         tmpFile.mkdirs();
-        fs = new HashingFileStorage(tmpFile);
+        fs = new HashingFileStorage(tmpFile.toURI(), tmpFile);
     }
 
     @After

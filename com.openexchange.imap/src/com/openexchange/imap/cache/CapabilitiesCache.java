@@ -227,6 +227,21 @@ public final class CapabilitiesCache {
                 imapCaps.setSortDisplay(true);
             }
             imapCaps.setAttachmentSearchEnabled(imapConfig.getIMAPProperties().isAttachmentMarkerEnabled());
+            if (imapCaps.hasNamespace()) {
+                String[] namespaces = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accontId);
+                boolean found = false;
+                for (int i = 0; !found && i < namespaces.length; i++) {
+                    found = !com.openexchange.java.Strings.isEmpty(namespaces[i]);
+                }
+                imapCaps.setSharedFolders(found);
+
+                namespaces = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accontId);
+                found = false;
+                for (int i = 0; !found && i < namespaces.length; i++) {
+                    found = !com.openexchange.java.Strings.isEmpty(namespaces[i]);
+                }
+                imapCaps.setPublicFolders(found);
+            }
             /*
              * ACL extension
              */

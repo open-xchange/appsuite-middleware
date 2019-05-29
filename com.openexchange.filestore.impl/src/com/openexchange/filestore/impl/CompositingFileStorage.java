@@ -50,6 +50,7 @@
 package com.openexchange.filestore.impl;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,6 +86,11 @@ public class CompositingFileStorage implements FileStorage {
         this.standardFS = standardFS;
         this.savePrefix = savePrefix;
         this.prefixedStores = null == prefixedStores ? Collections.<String, FileStorage> emptyMap() : ImmutableMap.<String, FileStorage> copyOf(prefixedStores);
+    }
+
+    @Override
+    public URI getUri() {
+        return standardFS.getUri();
     }
 
     @Override

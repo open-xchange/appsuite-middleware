@@ -32,7 +32,6 @@ import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.jdbcjobstore.JobStoreSupport;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.impl.triggers.SimpleTriggerImpl;
-import org.quartz.jobs.NoOpJob;
 import org.quartz.simpl.CascadingClassLoadHelper;
 import org.quartz.spi.ClassLoadHelper;
 import org.quartz.spi.JobStore;
@@ -404,5 +403,8 @@ public abstract class AbstractJobStoreTest {
 
         @Override
         public void notifySchedulerListenersJobDeleted(JobKey jobKey) {}
+
+        @Override
+        public void notifySchedulerListenersError(String string, SchedulerException jpe) {}
     }
 }

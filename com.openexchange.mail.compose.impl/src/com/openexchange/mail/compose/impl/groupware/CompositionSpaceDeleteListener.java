@@ -123,7 +123,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                     try {
                         fileStorage.remove();
                     } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete the filestore {}", uri);
+                        LoggerHolder.LOG.warn("Failed to delete the filestore {}", uri, e);
                     }
                 }
             }

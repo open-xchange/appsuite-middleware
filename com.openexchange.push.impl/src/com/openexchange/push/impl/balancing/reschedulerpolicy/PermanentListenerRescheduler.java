@@ -80,6 +80,7 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.hazelcast.instance.EndpointQualifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.PoolAndSchema;
@@ -599,7 +600,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     }
 
                     private String toString(Member m) {
-                        InetSocketAddress addr = m.getSocketAddress();
+                        InetSocketAddress addr = m.getSocketAddress(EndpointQualifier.MEMBER);
                         return new StringBuilder(24).append(addr.getAddress().getHostAddress()).append(':').append(addr.getPort()).toString();
                     }
                 });

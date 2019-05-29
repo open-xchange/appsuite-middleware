@@ -263,6 +263,24 @@ public abstract class MailCapabilities {
     }
 
     /**
+     * Indicates if mail system supports shared folders
+     *
+     * @return <code>true</code> if shared folders are supported; otherwise <code>false</code>
+     */
+    public boolean hasSharedFolders() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports public folders
+     *
+     * @return <code>true</code> if public folders are supported; otherwise <code>false</code>
+     */
+    public boolean hasPublicFolders() {
+        return false;
+    }
+
+    /**
      * Returns the capabilities as a bit mask.
      * <p>
      * Override to support additional capabilities:

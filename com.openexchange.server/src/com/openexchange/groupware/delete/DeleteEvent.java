@@ -49,11 +49,16 @@
 
 package com.openexchange.groupware.delete;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.EventObject;
 import java.util.List;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Reference;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -227,6 +232,7 @@ public class DeleteEvent extends EventObject {
     protected Integer destUserID;
     private transient Session session;
     private final List<Integer> userIds;
+    private Reference<Connection> globalDbConnection;
 
     /**
      * Initializes a new {@link DeleteEvent}.
@@ -249,6 +255,48 @@ public class DeleteEvent extends EventObject {
         this.ctx = ctx;
         this.destUserID = destUserID;
         this.userIds = userIds;
+        globalDbConnection = null;
+    }
+
+    /**
+     * Optionally gets the connection to global database.
+     *
+     * @return The connection or <code>null</code>
+     */
+    synchronized Connection optGlobalDbConnection() {
+        return globalDbConnection == null ? null : globalDbConnection.getValue();
+    }
+
+    /**
+     * Gets the connection to global database.
+     *
+     * @return The connection or <code>null</code> if no global database available for event-associated context
+     * @throws OXException If connection to global database cannot be returned
+     */
+    public synchronized Connection getGlobalDbConnection() throws OXException {
+        if (globalDbConnection == null) {
+            DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+            if (databaseService == null) {
+                return null;
+            }
+
+            int contextId = ctx.getContextId();
+            if (databaseService.isGlobalDatabaseAvailable(contextId)) {
+                Connection globalDbConnection = databaseService.getWritableForGlobal(contextId);
+                try {
+                    globalDbConnection.setAutoCommit(false);
+                    this.globalDbConnection = new Reference<Connection>(globalDbConnection);
+                    globalDbConnection = null; // Nullify to avoid premature release
+                } catch (SQLException e) {
+                    throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    databaseService.backWritableForGlobal(contextId, globalDbConnection);
+                }
+            } else {
+                globalDbConnection = new Reference<Connection>(null);
+            }
+        }
+        return globalDbConnection.getValue();
     }
 
     /**

@@ -154,7 +154,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Interests
          */
         SproxydClient client = initClient(filestoreID, extractionResult.getPrefix());
         ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
-        return new SproxydFileStorage(client, chunkStorage);
+        return new SproxydFileStorage(uri, client, chunkStorage);
     }
 
     static DatabaseAccess lookUpDatabaseAccess(URI uri, String prefix) throws OXException {

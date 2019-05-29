@@ -50,7 +50,6 @@
 package com.openexchange.filestore;
 
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 
@@ -58,13 +57,6 @@ import com.openexchange.exception.OXException;
  * {@link QuotaFileStorage} - A {@link FileStorage file storage} that is quota aware.
  */
 public interface QuotaFileStorage extends FileStorage, QuotaMode {
-
-    /**
-     * Gets the URI that fully qualifies this file storage.
-     *
-     * @return The URI
-     */
-    URI getUri();
 
     /**
      * Gets the total available quota

@@ -55,6 +55,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -71,8 +72,14 @@ import com.openexchange.java.util.UUIDs;
  */
 public class HashingFileStorage extends DefaultFileStorage {
 
-    public HashingFileStorage(File storage) {
-        super(storage);
+    /**
+     * Initializes a new {@link HashingFileStorage}.
+     *
+     * @param uri The URI that fully qualifies this file storage
+     * @param storage The parent directory; e.g. <code>"file:/Mount/disk/1_ctx_store/hashed"</code>
+     */
+    public HashingFileStorage(URI uri, File storage) {
+        super(uri, storage);
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URI;
@@ -122,6 +123,33 @@ public class Attach<T extends CalendarComponent, U extends CalendarObject> exten
                 attach.getParameters().add(new XParameter("SIZE", String.valueOf(metadata.getFilesize())));
                 attach.getParameters().add(new XParameter("MANAGED-ID", String.valueOf(metadata.getId())));
                 calendarComponent.getProperties().add(attach);
+            }
+        }
+        List<IFileHolder> binaryAttachments = calendarObject.getProperty(PROPERTY_BINARY_ATTACHMENTS);
+        if (null != binaryAttachments && !binaryAttachments.isEmpty()) {
+            for (IFileHolder attachment : binaryAttachments) {
+                try {
+                    net.fortuna.ical4j.model.property.Attach attach = new net.fortuna.ical4j.model.property.Attach(Streams.stream2bytes(attachment.getStream()));
+                    String fileName = attachment.getName();
+                    if (Strings.isNotEmpty(fileName)) {
+                        attach.getParameters().add(new XParameter("FILENAME", fileName));
+                        attach.getParameters().add(new XParameter("X-ORACLE-FILENAME", fileName));
+                        attach.getParameters().add(new XParameter("X-APPLE-FILENAME", fileName));
+                    }
+                    String contentType = attachment.getContentType();
+                    if (Strings.isNotEmpty(contentType)) {
+                        attach.getParameters().add(new XParameter("FMTTYPE", contentType));
+                    }
+                    long length = attachment.getLength();
+                    if (length >= 0) {
+                        attach.getParameters().add(new XParameter("SIZE", String.valueOf(length)));
+                    }
+                    calendarComponent.getProperties().add(attach);
+                } catch (IOException e) {
+                    warnings.add(new ConversionWarning(index, Code.PARSE_EXCEPTION, e, e.getMessage()));
+                } catch (OXException e) {
+                    warnings.add(new ConversionWarning(index, Code.PARSE_EXCEPTION, e, e.getMessage()));
+                }
             }
         }
         /*

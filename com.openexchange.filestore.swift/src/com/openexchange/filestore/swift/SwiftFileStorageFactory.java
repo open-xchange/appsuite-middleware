@@ -170,7 +170,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider, InterestsAw
         // Initialize file storage using dedicated client & chunk storage
         SwiftClient client = initClient(filestoreID, extractionResult.getPrefix());
         ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
-        return new SwiftFileStorage(client, chunkStorage);
+        return new SwiftFileStorage(uri, client, chunkStorage);
     }
 
     static DatabaseAccess lookUpDatabaseAccess(URI uri, String prefix) throws OXException {

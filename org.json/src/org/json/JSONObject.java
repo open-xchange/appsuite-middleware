@@ -329,7 +329,7 @@ public class JSONObject extends AbstractJSONValue {
                 } else if (value instanceof Map) {
                     myHashMap.put(entry.getKey(), new JSONObject((Map<String, Object>) value));
                 } else {
-                    myHashMap.put(entry.getKey(), value);
+                    myHashMap.put(entry.getKey(), value == null ? JSONObject.NULL : value);
                 }
             }
         }
@@ -476,7 +476,7 @@ public class JSONObject extends AbstractJSONValue {
                     retval.put(entry.getKey(), jsonValue.toObject().asMap());
                 }
             } else {
-                retval.put(entry.getKey(), value);
+                retval.put(entry.getKey(), JSONObject.NULL.equals(value) ? null : value);
             }
         }
         return retval;

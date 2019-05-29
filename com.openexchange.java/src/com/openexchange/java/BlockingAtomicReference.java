@@ -107,6 +107,24 @@ public class BlockingAtomicReference<V> {
     }
 
     /**
+     * Gets this reference's value, waiting if necessary for a non-null value to become available.
+     *
+     * @return The value
+     */
+    public V getUninterruptibly() {
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            while (reference == null) {
+                notNull.awaitUninterruptibly();
+            }
+            return reference;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * Gets this reference's value, waiting up to the specified wait time if necessary for a non-null value to become available.
      *
      * @param timeout How long to wait before giving up, in units of {@code unit}
@@ -149,18 +167,16 @@ public class BlockingAtomicReference<V> {
     /**
      * (Atomically) Sets the given value for this reference.
      *
-     * @param value The value to set; must not be <code>null</code>
+     * @param value The value to set; may be <code>null</code>
      */
     public void set(V value) {
-        if (value == null) {
-            throw new NullPointerException();
-        }
-
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
             reference = value;
-            notNull.signal();
+            if (value != null) {
+                notNull.signal();
+            }
         } finally {
             lock.unlock();
         }
@@ -174,16 +190,14 @@ public class BlockingAtomicReference<V> {
      * @return <code>true</code> if successful. <code>false</code> indicates that the actual value was not equal to the expected value.
      */
     public final boolean compareAndSet(V expect, V update) {
-        if (update == null) {
-            throw new NullPointerException();
-        }
-
         final ReentrantLock lock = this.lock;
         lock.lock();
         try {
             if (expect == reference) {
                 reference = update;
-                notNull.signal();
+                if (update != null) {
+                    notNull.signal();
+                }
                 return true;
             }
             return false;

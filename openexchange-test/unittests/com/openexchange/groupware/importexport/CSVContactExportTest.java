@@ -66,9 +66,9 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.importers.TestCSVContactImporter;
+import com.openexchange.importexport.Exporter;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.exporters.CSVContactExporter;
-import com.openexchange.importexport.exporters.Exporter;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.test.OXTestToolkit;
 

@@ -527,6 +527,15 @@ MailComposeSaveResponse:
   $ref: ./mailcompose/SaveResponse.yaml
 PostAttachmentsData:
   $ref: ./mailcompose/PostAttachmentsData.yaml
+# Module: dataexport
+DataExportTask:
+  $ref: ./dataexport/DataExportTask.yaml
+DataExportTaskResponse:
+  $ref: ./dataexport/DataExportTaskResponse.yaml
+DataExportWorkItem:
+  $ref: ./dataexport/DataExportWorkItem.yaml
+DataExportResultFile:
+  $ref: ./dataexport/DataExportResultFile.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml

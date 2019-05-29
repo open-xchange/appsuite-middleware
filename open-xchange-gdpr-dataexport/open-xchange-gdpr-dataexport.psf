@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<psf version="2.0">
+<provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.clt"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.provider.general"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.provider.calendar"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.provider.contacts"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.provider.infostore"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.provider.mail"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.gdpr.dataexport.provider.tasks"/>
+</provider>
+</psf>

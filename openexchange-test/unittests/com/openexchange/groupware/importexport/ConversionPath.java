@@ -1,7 +1,7 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 
 public class ConversionPath {
 

@@ -63,8 +63,8 @@ import com.openexchange.groupware.userconfiguration.MutableUserConfiguration;
 import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.importexport.formats.Format;
 import com.openexchange.setuptools.TestConfig;
 
 public class Bug8681forCSV extends AbstractContactTest {

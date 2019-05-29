@@ -390,4 +390,128 @@
          <dropTable tableName="ip2location"/>
         <comment>Drops the Ip2Location's ip2location table</comment>
     </changeSet>
+
+    <changeSet id="7.10.3:dataExportTask:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportTask" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportTask' to manage requested data export tasks.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportTask (
+                uuid binary(16) NOT NULL,
+                cid INT4 UNSIGNED NOT NULL,
+                user INT4 UNSIGNED NOT NULL,
+                timestamp BIGINT(20) DEFAULT NULL,
+                creationTime BIGINT(20) NOT NULL,
+                startTime BIGINT(20) DEFAULT NULL,
+                duration BIGINT(20) DEFAULT NULL,
+                notificationSent TINYINT(1) NOT NULL DEFAULT 0,
+                status VARCHAR(32) NOT NULL,
+                filestore INT(10) unsigned NOT NULL,
+                arguments TEXT DEFAULT NULL,
+                PRIMARY KEY (uuid),
+                UNIQUE KEY `user_key` (cid,user)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportTask" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportTaskWorklist:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportTaskWorklist" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportTaskWorklist' to manage task-associated work items.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportTaskWorklist (
+                cid INT4 UNSIGNED NOT NULL,
+                uuid binary(16) NOT NULL,
+                taskId binary(16) NOT NULL,
+            	id VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+            	status VARCHAR(32) NOT NULL,
+            	info TEXT DEFAULT NULL,
+            	savepoint TEXT DEFAULT NULL,
+            	filestoreLocation VARCHAR(255) DEFAULT NULL,
+            	failCount INT4 UNSIGNED NOT NULL DEFAULT 0,
+            	PRIMARY KEY (uuid),
+            	UNIQUE KEY `task_key` (taskId, id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportTaskWorklist" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportFilestoreLocation:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportFilestoreLocation" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportFilestoreLocation' to store result files of completed data export tasks.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportFilestoreLocation (
+                cid INT4 UNSIGNED NOT NULL,
+                taskId binary(16) NOT NULL,
+                num INT(10) unsigned NOT NULL,
+                filestoreLocation VARCHAR(255) NOT NULL,
+                size BIGINT(20) NOT NULL,
+                PRIMARY KEY (taskId, num)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportFilestoreLocation" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportReport:create" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataExportReport" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'dataExportReport' to store report of running/paused data export tasks.
+        </comment>
+        <sql>
+            CREATE TABLE dataExportReport (
+                cid INT4 UNSIGNED NOT NULL,
+                messageId binary(16) NOT NULL,
+                taskId binary(16) NOT NULL,
+                message TEXT NOT NULL,
+                timeStamp BIGINT(20) NOT NULL,
+                moduleId VARCHAR(32) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+                PRIMARY KEY (messageId),
+                KEY `task_key` (taskId)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="dataExportReport" />
+        </rollback>
+    </changeSet>
+    <changeSet id="7.10.3:dataExportTaskWorklist:addFailCount" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="dataExportTaskWorklist" columnName="failCount" />
+            </not>
+        </preConditions>
+        <comment>
+            Add column 'failCount' to table dataExportTaskWorklist.
+        </comment>
+        <sql>
+            ALTER TABLE dataExportTaskWorklist ADD failCount INT4 UNSIGNED NOT NULL DEFAULT 0;
+        </sql>
+        <rollback>
+            <dropColumn tableName="dataExportTaskWorklist" columnName="failCount" />
+        </rollback>
+    </changeSet>
+    
 </databaseChangeLog>

@@ -59,7 +59,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.function.Function;
 
 /**
  * Methods for easy handling of collections.
@@ -159,6 +162,30 @@ public final class Collections {
             multiMap.put(key, list);
         }
         return list.addAll(values);
+    }
+
+    /**
+     * Puts all elements of a given {@link Collection} into a given {@link Map}.
+     *
+     * @param collection The Collection with the values to add
+     * @param map The "multi map" to put the values into
+     * @param keyFunction The function to derive a key from each value
+     * @retrurn The given map
+     */
+    public static <K, V, M extends Map<K, List<V>>> M toMultiMap(Collection<V> collection, M map, Function<V, K> keyFunction) {
+        if (collection == null || collection.isEmpty()) {
+            return map;
+        }
+        for (V value : collection) {
+            K key = keyFunction.apply(value);
+            List<V> valueList = map.get(key);
+            if (valueList == null) {
+                valueList = new ArrayList<>();
+                map.put(key, valueList);
+            }
+            valueList.add(value);
+        }
+        return map;
     }
 
     /**
@@ -354,5 +381,4 @@ public final class Collections {
 
         public boolean accept(T object);
     }
-
 }

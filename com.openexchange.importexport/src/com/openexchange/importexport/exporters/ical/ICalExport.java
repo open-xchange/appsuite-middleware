@@ -68,13 +68,14 @@ public interface ICalExport {
      * Handles the export request
      *
      * @param session The session object
-     * @param requestData The AJAX request data
+     * @param requestData The optional AJAX request data (in preference over output stream)
+     * @param out The optional output stream
      * @param isSaveToDisk The value of the optional parameter isSaveToDisk
      * @param filename The file name
      * @return InputStream in requested format.
      * @throws OXException if export fails
      */
-    SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException;
+    SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, OutputStream out, boolean isSaveToDisk, String filename) throws OXException;
 
      /**
      * Checks if the export is folder or batch based

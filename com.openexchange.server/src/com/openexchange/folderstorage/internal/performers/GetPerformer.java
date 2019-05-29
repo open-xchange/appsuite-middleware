@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.CalculatePermission;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -58,7 +59,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;

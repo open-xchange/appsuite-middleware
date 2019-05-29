@@ -194,6 +194,7 @@ public final class ThresholdFileHolder implements IFileHolder {
      * Deletes associated file (if set) and resets internal buffer.
      */
     public void reset() {
+        count = 0;
         final File tempFile = this.tempFile;
         if (null != tempFile) {
             tempFile.delete();

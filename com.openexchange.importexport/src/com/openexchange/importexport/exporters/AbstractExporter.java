@@ -52,6 +52,7 @@ package com.openexchange.importexport.exporters;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.importexport.Exporter;
 import com.openexchange.importexport.helpers.ExportFileNameCreator;
 import com.openexchange.tools.session.ServerSession;
 

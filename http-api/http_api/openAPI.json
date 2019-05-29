@@ -1296,6 +1296,34 @@
         }
       }
     },
+    "/gdpr/dataexport/availableModules" : {
+      "get" : {
+        "operationId" : "getDataExportAvailableModules",
+        "tags" : [ "DataExport" ],
+        "summary" : "Loads the available data export modules for session-associated user",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the available modules.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      }
+    },
     "/attachment?action=list" : {
       "put" : {
         "operationId" : "getAttachmentList",
@@ -2272,6 +2300,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/gdpr/dataexport/delete" : {
+      "delete" : {
+        "operationId" : "deleteDataExportTask",
+        "tags" : [ "DataExport" ],
+        "summary" : "Deletes the result files and all resourcess of data export task for session-associated user",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the success status.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "title" : "deleteDataExportTaskReponse",
+                  "properties" : {
+                    "success" : {
+                      "type" : "boolean",
+                      "description" : "True if such resources for data export task has been successfully deleted; false otherwise"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
           }
         }
       }
@@ -5509,6 +5572,51 @@
         }
       }
     },
+    "/gdpr/dataexport/{id}" : {
+      "get" : {
+        "operationId" : "getDataExport",
+        "tags" : [ "DataExport" ],
+        "summary" : "Downloads the available result file package from user-associated data export task",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "path",
+          "name" : "id",
+          "description" : "The ID of the composition space",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "number",
+          "description" : "The number of the package",
+          "required" : true,
+          "schema" : {
+            "type" : "int"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A ZIP archive.",
+            "content" : {
+              "application/zip" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      }
+    },
     "/snippet?action=delete" : {
       "put" : {
         "operationId" : "deleteSnippet",
@@ -8583,6 +8691,118 @@
           },
           "401" : {
             "description" : "Not authorized"
+          }
+        }
+      }
+    },
+    "/gdpr/dataexport" : {
+      "get" : {
+        "operationId" : "getDataExportTask",
+        "tags" : [ "DataExport" ],
+        "summary" : "Loads the available data export task for session-associated user",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the requested data export task.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/DataExportTaskResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      },
+      "delete" : {
+        "operationId" : "cancelDataExportTask",
+        "tags" : [ "DataExport" ],
+        "summary" : "Cancels the data export for session-associated user",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the success status.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "title" : "cancelDataExportTaskReponse",
+                  "properties" : {
+                    "success" : {
+                      "type" : "boolean",
+                      "description" : "True if such a data export task has been successfully canceled; false otherwise"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        }
+      },
+      "post" : {
+        "operationId" : "submitDataExportTask",
+        "tags" : [ "DataExport" ],
+        "summary" : "Submits a data export task for execution",
+        "parameters" : [ {
+          "$ref" : "#/components/parameters/gblQueryParamSession"
+        }, {
+          "in" : "query",
+          "name" : "deleteOldDataExport",
+          "description" : "A flag indicating whether previously completed data export is supposed to be deleted prior to submitting a new one.",
+          "required" : false,
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "A JSON object containing the success status.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "object",
+                  "title" : "submitDataExportTaskReponse",
+                  "properties" : {
+                    "success" : {
+                      "type" : "boolean",
+                      "description" : "True if such a data export task has been successfully canceled; false otherwise"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request, response contains error message."
+          },
+          "401" : {
+            "description" : "Not authorized"
+          }
+        },
+        "requestBody" : {
+          "description" : "A JSON object containing the modules and associated parameters.",
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
           }
         }
       }
@@ -31637,6 +31857,186 @@
           }
         },
         "required" : [ "file" ]
+      },
+      "DataExportTask" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The task identifier"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The task's status"
+          },
+          "creationTime" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The time when task was created/submitted."
+          },
+          "startTime" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The time when processing of the task started. Not present in case task has not yet been started."
+          },
+          "duration" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The duration of the processing for the task. Not present in case task is not yet terminated."
+          },
+          "availableUntil" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The number of milliseconds how long task's result files will stay accessible until automatically deleted. Not present in case task is not yet terminated."
+          },
+          "results" : {
+            "type" : "array",
+            "description" : "The result files. Not present in case task is not yet terminated.",
+            "items" : {
+              "$ref" : "#/components/schemas/DataExportResultFile"
+            }
+          },
+          "workItems" : {
+            "type" : "array",
+            "description" : "The result files. Not present in case task is not yet terminated.",
+            "items" : {
+              "$ref" : "#/components/schemas/DataExportWorkItem"
+            }
+          }
+        }
+      },
+      "DataExportTaskResponse" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/DataExportTask"
+          },
+          "error" : {
+            "type" : "string",
+            "description" : "The translated error message. Present in case of errors."
+          },
+          "error_params" : {
+            "type" : "array",
+            "description" : "Empty JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "error_id" : {
+            "type" : "string",
+            "description" : "Unique error identifier to help finding this error instance in the server logs."
+          },
+          "error_desc" : {
+            "type" : "string",
+            "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+          },
+          "error_stack" : {
+            "type" : "array",
+            "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "code" : {
+            "type" : "string",
+            "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+          },
+          "categories" : {
+            "type" : "string",
+            "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+          },
+          "category" : {
+            "type" : "integer",
+            "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+          },
+          "timestamp" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "The latest timestamp of the returned data (see [Updates](#updates))."
+          }
+        }
+      },
+      "DataExportWorkItem" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The work item identifier"
+          },
+          "module" : {
+            "type" : "string",
+            "description" : "The module identifier"
+          },
+          "status" : {
+            "type" : "string",
+            "description" : "The status of the work item"
+          },
+          "info" : {
+            "type" : "object",
+            "description" : "The optional status information",
+            "properties" : {
+              "error" : {
+                "type" : "string",
+                "description" : "The translated error message. Present in case of errors."
+              },
+              "error_params" : {
+                "type" : "array",
+                "description" : "An array of error params.",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "error_id" : {
+                "type" : "string",
+                "description" : "Unique error identifier to help finding this error instance in the server logs."
+              },
+              "error_desc" : {
+                "type" : "string",
+                "description" : "The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available."
+              },
+              "error_stack" : {
+                "type" : "array",
+                "description" : "If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides \nthe stack trace of associated Java exception represented as a JSON array.\n",
+                "items" : {
+                  "type" : "string"
+                }
+              },
+              "code" : {
+                "type" : "string",
+                "description" : "Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. \"MSG-0012\""
+              },
+              "categories" : {
+                "type" : "string",
+                "description" : "Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs."
+              },
+              "category" : {
+                "type" : "integer",
+                "description" : "Maintained for legacy reasons: The numeric representation of the first category."
+              }
+            }
+          }
+        }
+      },
+      "DataExportResultFile" : {
+        "type" : "object",
+        "properties" : {
+          "fileInfo" : {
+            "type" : "string",
+            "description" : "The work item identifier"
+          },
+          "number" : {
+            "type" : "int",
+            "description" : "The package number"
+          },
+          "contentType" : {
+            "type" : "string",
+            "description" : "The Content-Type identifier"
+          },
+          "taskId" : {
+            "type" : "string",
+            "description" : "The task identifier"
+          }
+        }
       },
       "AutoConfigResponse" : {
         "type" : "object",

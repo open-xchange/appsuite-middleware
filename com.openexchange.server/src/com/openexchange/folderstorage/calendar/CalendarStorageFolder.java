@@ -51,12 +51,15 @@ package com.openexchange.folderstorage.calendar;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link CalendarStorageFolder}
@@ -69,6 +72,7 @@ public class CalendarStorageFolder extends AbstractFolder implements Parameteriz
     private static final long serialVersionUID = 4412370864213762652L;
 
     private final Map<FolderField, FolderProperty> properties;
+    private final boolean localizable;
 
     /**
      * Initializes a new calendar folder as used by the internal folder storage.
@@ -77,7 +81,19 @@ public class CalendarStorageFolder extends AbstractFolder implements Parameteriz
      * @param contentType The content type to take over
      */
     public CalendarStorageFolder(String treeId, ContentType contentType) {
+        this(treeId, contentType, false);
+    }
+
+    /**
+     * Initializes a new calendar folder as used by the internal folder storage.
+     *
+     * @param treeId The identifier of the folder tree to take over
+     * @param contentType The content type to take over
+     * @param localizable <code>true</code> to be localizable; otherwise <code>false</code>
+     */
+    public CalendarStorageFolder(String treeId, ContentType contentType, boolean localizable) {
         super();
+        this.localizable = localizable;
         this.properties = new HashMap<FolderField, FolderProperty>();
         setTreeID(treeId);
         setSubscribed(true);
@@ -108,6 +124,22 @@ public class CalendarStorageFolder extends AbstractFolder implements Parameteriz
     @Override
     public Map<FolderField, FolderProperty> getProperties() {
         return Collections.unmodifiableMap(properties);
+    }
+
+    @Override
+    public String getLocalizedName(final Locale locale) {
+        return localizable ? translationFor(getName(), locale) : super.getLocalizedName(locale);
+    }
+
+    /**
+     * Gets the translation for specified name.
+     *
+     * @param toTranslate The name to translate
+     * @param locale The locale
+     * @return The translation or specified name
+     */
+    protected String translationFor(final String toTranslate, final Locale locale) {
+        return StringHelper.valueOf(null == locale ? LocaleTools.DEFAULT_LOCALE : locale).getString(toTranslate);
     }
 
     @Override

@@ -11,7 +11,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.java.Charsets;
 

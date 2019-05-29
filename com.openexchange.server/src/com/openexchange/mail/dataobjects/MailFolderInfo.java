@@ -119,6 +119,12 @@ public class MailFolderInfo implements Serializable, Cloneable {
     private int numSubfolders;
     private boolean b_numSubfolders;
 
+    private boolean shared;
+    private boolean b_shared;
+
+    private boolean isPublic;
+    private boolean b_public;
+
     /**
      * Initializes a new {@link MailFolderInfo}
      */
@@ -722,6 +728,78 @@ public class MailFolderInfo implements Serializable, Cloneable {
         this.numSubfolders = numSubfolders;
         b_numSubfolders = true;
         return this;
+    }
+
+    /**
+     * Checks if this folder is shared.
+     *
+     * @return <code>true</code> if this folder is shared; otherwise <code>false</code>
+     */
+    public boolean isShared() {
+        return shared;
+    }
+
+    /**
+     * Checks if the shared flag was set.
+     *
+     * @return <code>true</code> if shared flag is set; otherwise <code>false</code>
+     */
+    public boolean containsShared() {
+        return b_shared;
+    }
+
+    /**
+     * Removes the shared flag.
+     */
+    public void removeShared() {
+        shared = false;
+        b_shared = false;
+    }
+
+    /**
+     * Sets the shared flag.
+     *
+     * @param shared The shared flag to set
+     */
+    public void setShared(final boolean shared) {
+        this.shared = shared;
+        b_shared = true;
+    }
+
+    /**
+     * Checks if this folder is public.
+     *
+     * @return <code>true</code> if this folder is public; otherwise <code>false</code>
+     */
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Checks if the public flag was set.
+     *
+     * @return <code>true</code> if public flag is set; otherwise <code>false</code>
+     */
+    public boolean containsPublic() {
+        return b_public;
+    }
+
+    /**
+     * Removes the public flag.
+     */
+    public void removePublic() {
+        isPublic = false;
+        b_public = false;
+    }
+
+    /**
+     * Sets the public flag.
+     *
+     * @param isPublic The public flag to set
+     */
+    public void setPublic(final boolean isPublic) {
+        this.isPublic = isPublic;
+        b_public = true;
     }
 
     @Override

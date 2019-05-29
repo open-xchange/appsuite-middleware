@@ -68,7 +68,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.i18n.I18nServiceRegistry;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 import com.openexchange.importexport.helpers.DelayInitServletOutputStream;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
@@ -123,7 +123,7 @@ public abstract class AbstractICalExporter implements ICalExport {
     abstract protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException;
 
     @Override
-    public SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, boolean isSaveToDisk, String filename) throws OXException {
+    public SizedInputStream exportData(ServerSession session, AJAXRequestData requestData, OutputStream optOut, boolean isSaveToDisk, String filename) throws OXException {
         if (null != requestData) {
             // Try to stream
             HttpServletResponse response = requestData.optHttpServletResponse();
@@ -139,6 +139,15 @@ public abstract class AbstractICalExporter implements ICalExport {
                 } finally {
                     Streams.close(out);
                 }
+            }
+        }
+
+        if (null != optOut) {
+            try {
+                getExportDataSource(session, optOut);
+                return null;
+            } finally {
+                Streams.close(optOut);
             }
         }
 

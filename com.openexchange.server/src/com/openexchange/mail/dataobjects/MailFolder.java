@@ -210,6 +210,8 @@ public class MailFolder implements Serializable, Cloneable {
         mfi.setSubfolders(hasSubfolders);
         mfi.setSubscribed(subscribed);
         mfi.setSubscribedSubfolders(hasSubscribedSubfolders);
+        mfi.setShared(shared);
+        mfi.setPublic(isPublic);
         return mfi;
     }
 

@@ -343,6 +343,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
         globalDatabaseService.backWritableForGlobal(contextId, connection);
     }
 
+    @Override
+    public void backWritableForGlobalAfterReading(int contextId, Connection connection) {
+        globalDatabaseService.backWritableForGlobalAfterReading(contextId, connection);
+    }
+
+    @Override
+    public void backWritableForGlobalAfterReading(String group, Connection connection) {
+        globalDatabaseService.backWritableForGlobalAfterReading(group, connection);
+    }
+
     // Implemented database service methods.
 
     @Override

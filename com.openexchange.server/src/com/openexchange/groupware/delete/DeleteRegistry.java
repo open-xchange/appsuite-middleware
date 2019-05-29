@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.outlook.OutlookFolderDeleteListener;
 import com.openexchange.group.internal.GroupDeleteListener;
@@ -72,6 +74,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.file.UserQuotaUsageDelete;
@@ -250,28 +253,51 @@ public final class DeleteRegistry {
      * @throws OXException If delete event could not be performed
      */
     public void fireDeleteEvent(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
-        /*
-         * At first trigger dynamically added listeners
-         */
-        for (DeleteListener listener : listeners) {
-            listener.deletePerformed(deleteEvent, readCon, writeCon);
-        }
-        /*
-         * Now trigger static listeners
-         */
-        for (DeleteListener listener : staticListeners) {
-            try {
+        boolean error = true;
+        try {
+            /*
+             * At first trigger dynamically added listeners
+             */
+            for (DeleteListener listener : listeners) {
                 listener.deletePerformed(deleteEvent, readCon, writeCon);
-            } catch (OXException e) {
-                OXException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
-                if (null != opt) {
-                    throw opt;
+            }
+            /*
+             * Now trigger static listeners
+             */
+            for (DeleteListener listener : staticListeners) {
+                try {
+                    listener.deletePerformed(deleteEvent, readCon, writeCon);
+                } catch (OXException e) {
+                    OXException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
+                    if (null != opt) {
+                        throw opt;
+                    }
+                } catch (RuntimeException e) {
+                    RuntimeException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
+                    if (null != opt) {
+                        throw opt;
+                    }
                 }
-            } catch (RuntimeException e) {
-                RuntimeException opt = logFKFailureElseReturnException(e, listener, deleteEvent);
-                if (null != opt) {
-                    throw opt;
+            }
+            /*
+             * Commit Global DB connection (if any)
+             */
+            Connection globalDbConnection = deleteEvent.optGlobalDbConnection();
+            if (globalDbConnection != null) {
+                globalDbConnection.commit();
+            }
+            error = false;
+        } catch (SQLException e) {
+            throw DeleteFailedExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Connection globalDbConnection = deleteEvent.optGlobalDbConnection();
+            if (globalDbConnection != null) {
+                if (error) {
+                    Databases.rollback(globalDbConnection);
                 }
+                Databases.autocommit(globalDbConnection);
+                DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+                databaseService.backWritableForGlobal(deleteEvent.getContext().getContextId(), globalDbConnection);
             }
         }
     }

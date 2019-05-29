@@ -52,6 +52,7 @@ package com.openexchange.importexport.importers;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.importexport.Importer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 

@@ -51,7 +51,7 @@ package com.openexchange.importexport.helpers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.importexport.formats.Format;
+import com.openexchange.importexport.Format;
 
 /**
  * Defines a wrapper for an <code>InputStream</code> that also knows the size of the provided data.

@@ -847,7 +847,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     private AuthenticationFailureHandlerResult handleConnectFailure(OXException e, MailConfig mailConfig) {
-        if (MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) || OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e) || (e.getCause() instanceof javax.mail.AuthenticationFailedException)) {
+        if (isAuthFailed(e)) {
             // Authentication failed...
             if (mailConfig.getAccountId() == MailAccount.DEFAULT_ID) {
                 AuthenticationFailedHandlerService handlerService = ServerServiceRegistry.getInstance().getService(AuthenticationFailedHandlerService.class);
@@ -890,6 +890,16 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
         // Otherwise signal regular error result
         return AuthenticationFailureHandlerResult.createErrorResult(e);
+    }
+
+    /**
+     * Checks if given exception indicates a failed authentication
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> for failed authentication; otherwise <code>false</code>
+     */
+    public static boolean isAuthFailed(OXException e) {
+        return MimeMailExceptionCode.LOGIN_FAILED.equals(e) || MimeMailExceptionCode.INVALID_CREDENTIALS.equals(e) || OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.equals(e) || (e.getCause() instanceof javax.mail.AuthenticationFailedException);
     }
 
     private void checkDefaultFolderOnConnect() throws OXException {
