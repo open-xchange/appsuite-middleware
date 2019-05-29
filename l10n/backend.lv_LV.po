@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.lv_LV.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-29 13:23+0300\n"
+"PO-Revision-Date: 2019-05-15 12:14+0200\n"
 "Last-Translator: Aivars Oliņš <aivars@adsl.lv>\n"
 "Language-Team: Latvian <LL@li.org>\n"
 "Language: lv\n"
@@ -1236,9 +1236,9 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Iekšējs kalendārs"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "Pieprasītā lapa nenorāda uz kalendāru."
 
 #. You have no access to this calendar.
@@ -7073,11 +7073,9 @@ msgid "Drafts"
 msgstr "Melnraksti"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
-msgstr "Nosūtītie objekti"
+msgid "Sent"
+msgstr "Nosūtīts"
 
 #. The alternative internationalized name for the sent mail folder
 #. The name for the sent folder
@@ -7218,6 +7216,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Cienījamie Kungi un Dāmas"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Nosūtītie objekti"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10653,6 +10656,10 @@ msgid ""
 "its subfolders"
 msgstr ""
 "Jums nav tiesību mainīt atkritnes mapes un tās apakšmapju piekļuves tiesības"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Mape ar vārdu \"%1$s\" jau eksistē. Lūdzu izvēlieties citu vārdu."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -14269,6 +14276,10 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#, fuzzy
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "Pieprasītā lapa nenorāda uz kalendāru."
+
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr ""
@@ -17715,9 +17726,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Melnrakstu mape"
-
-#~ msgid "Sent"
-#~ msgstr "Nosūtīts"
 
 #~ msgid "Sent folder"
 #~ msgstr "Nosūtīto mape"
