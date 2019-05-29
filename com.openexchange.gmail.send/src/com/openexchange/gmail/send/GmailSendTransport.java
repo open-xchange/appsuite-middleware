@@ -143,6 +143,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -226,7 +227,7 @@ public class GmailSendTransport extends MailTransport {
         }
     }
 
-    private Account getAccount(GmailSendConfig gmailSendConfig) throws OXException {
+    private Account requireAccount(GmailSendConfig gmailSendConfig) throws OXException {
         Account account = gmailSendConfig.getAccount();
         if (null != account) {
             return account;
@@ -234,12 +235,12 @@ public class GmailSendTransport extends MailTransport {
 
         Session session = this.session;
         if (null == session) {
-            return null;
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("Session not set");
         }
 
         MailAccountStorageService service = Services.optService(MailAccountStorageService.class);
         if (null == service) {
-            return null;
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
         }
 
         return service.getTransportAccount(accountId, session.getUserId(), session.getContextId());
@@ -290,7 +291,7 @@ public class GmailSendTransport extends MailTransport {
      * @throws OXException If connect attempt fails
      */
     protected GmailAccess connectTransport(GmailSendConfig gmailSendConfig, boolean forPing) throws OXException {
-        Account account = getAccount(gmailSendConfig);
+        Account account = requireAccount(gmailSendConfig);
         if (false == forPing) {
             if (account.isTransportDisabled()) {
                 if (account.isTransportOAuthAble() && account.getTransportOAuthId() >= 0) {
