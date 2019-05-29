@@ -77,7 +77,7 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @param account The {@link CalendarAccount}
      * @param calendarParameters The {@link CalendarParameters}
      */
-    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) {
         super(session, account, parameters);
     }
 

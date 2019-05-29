@@ -49,7 +49,7 @@ onlostpointercapture
 onmessage
 onmousedown
 onmouseenter
-onmounseleave
+onmouseleave
 onmousemove
 onmouseout
 onmouseover
@@ -74,6 +74,7 @@ onpointerup
 onpopstate
 onprogress
 onratechange
+onrejectionhandled
 onreset
 onresize
 onscroll
@@ -93,6 +94,7 @@ ontouchend
 ontouchmove
 ontouchstart
 ontransitioned
+onunhandledrejection
 onunload
 onvolumechange
 onwaiting

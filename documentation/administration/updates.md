@@ -1,5 +1,5 @@
 ---
 title: Updates
-icon: fa-refresh
+icon: fas fa-sync-alt
 ---
 

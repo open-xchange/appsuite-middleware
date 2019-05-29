@@ -115,7 +115,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
-import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -2883,18 +2882,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, context);
             contextcheck(context);
-            UserAliasStorage uas = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
-
-            List<Integer> ids = uas.getUserIdsByAliasDomain(context.getId().intValue(), aliasDomain);
-
-            ArrayList<User> users = new ArrayList<User>(ids.size());
-            for (int id : ids) {
-                users.add(new User(id));
-            }
-            return users.toArray(new User[ids.size()]);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            throw new StorageException(e);
+            return oxu.listUsersByAliasDomain(context, aliasDomain);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;

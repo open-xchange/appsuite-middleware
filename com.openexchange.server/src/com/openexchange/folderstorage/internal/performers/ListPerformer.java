@@ -61,6 +61,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.Category;
@@ -260,18 +262,29 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Need to get user-visible subfolders from appropriate storage
                  */
-                return getSubfoldersFromStorages(treeId, parentId, all, checkOnly);
+                return logAndReturn(treeId, parentId, getSubfoldersFromStorages(treeId, parentId, all, checkOnly));
             }
 
             subfolderIds = filterPOP3SubfolderIds(parentId, subfolderIds);
             if (0 == subfolderIds.length) {
-                return new UserizedFolder[0];
+                return logAndReturn(treeId, parentId, new UserizedFolder[0]);
             }
 
-            return loadFolders(treeId, subfolderIds, all, checkOnly);
+            return logAndReturn(treeId, parentId, loadFolders(treeId, subfolderIds, all, checkOnly));
         } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static Logger LOG2 = LoggerFactory.getLogger(ListPerformer.class.getCanonicalName() + "2");
+
+    private UserizedFolder[] logAndReturn(final String treeId, final String parentId, UserizedFolder[] result) {
+        if (LOG2.isDebugEnabled()) {
+            if (treeId.equals("0") && parentId.equals("default0") && (result == null || result.length == 0)) {
+                LOG2.info("List request is empty!!!!!!", new Throwable("Public mail folder is missing"));
+            }
+        }
+        return result;
     }
 
     private List<SortableId> filterPOP3SubfolderIds(FolderStorage neededStorage, String treeId, String parentId, SortableId[] subfolderIds, StorageParameters newParameters) throws OXException {

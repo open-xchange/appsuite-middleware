@@ -88,7 +88,7 @@ abstract class AbstractExtensionHandler {
      * @param parameters The {@link CalendarParameters}
      * @throws OXException
      */
-    public AbstractExtensionHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public AbstractExtensionHandler(Session session, CalendarAccount account, CalendarParameters parameters) {
         super();
         this.session = session;
         this.account = account;

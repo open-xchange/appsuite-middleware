@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mailcompose;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -82,6 +81,7 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
     public void testSendMail() throws Exception {
         MailComposeMessageModel model = createNewCompositionSpace();
         MailComposeResponse loaded = api.getMailComposeById(getSessionId(), model.getId());
+        check(loaded);
         assertNotNull(loaded);
         assertEquals("Wrong Composition Space loaded.", model.getId(), loaded.getData().getId());
         model.setFrom(getSender());
@@ -89,6 +89,7 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         model.setSubject(UUID.randomUUID().toString());
         model.setContent(UUID.randomUUID().toString());
         MailComposeSendResponse postMailComposeSend = api.postMailComposeSend(getSessionId(), model.getId(), model.toJson());
+        check(postMailComposeSend);
         assertTrue(postMailComposeSend.getErrorDesc(), Strings.isEmpty(postMailComposeSend.getError()));
         System.out.println("\n\n\t" + postMailComposeSend);
         loaded = api.getMailComposeById(getSessionId(), model.getId());
@@ -100,11 +101,12 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
     public void testSaveCompositionSpace() throws Exception {
         MailComposeMessageModel model = createNewCompositionSpace();
         MailComposeResponse loaded = api.getMailComposeById(getSessionId(), model.getId());
+        check(loaded);
         assertEquals("Wrong Composition Space loaded.", model.getId(), loaded.getData().getId());
         assertNotNull(loaded);
         String id = model.getId();
         MailComposeSendResponse mailPath = api.getSave(getSessionId(), id);
-        assertTrue(mailPath.getErrorDesc(), Strings.isEmpty(mailPath.getError()));
+        check(mailPath);
         loaded = api.getMailComposeById(getSessionId(), model.getId());
         assertEquals("Error expected.", "MSGCS-0007", loaded.getCode());
         assertNull("No data expected", loaded.getData());
@@ -122,9 +124,10 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         update.setSubject(subject);
         update.setFrom(sender);
         update.setTo(recipient);
-        api.patchMailComposeById(getSessionId(), update.getId(), update);
+        check(api.patchMailComposeById(getSessionId(), update.getId(), update));
 
         MailComposeResponse loaded = api.getMailComposeById(getSessionId(), model.getId());
+        check(loaded);
         MailComposeMessageModel loadedData = loaded.getData();
         assertEquals("Wrong id.", model.getId(), loadedData.getId());
         assertEquals("Wrong subject.", subject, loadedData.getSubject());
@@ -144,6 +147,7 @@ public class CompositionSpaceTest extends AbstractMailComposeTest {
         }
 
         MailComposeGetResponse response = api.getMailCompose(getSessionId(), null);
+        check(response);
         assertEquals("Wrong amount of open composition spaces.", ids.size(), response.getData().size());
         response.getData().stream().map(MailComposeMessageModel::getId).forEach(id -> assertTrue("Wrong id.", ids.contains(id)));
     }

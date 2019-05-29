@@ -1,6 +1,6 @@
 ---
 title: Metrics Overview
-icon: fa-bar-chart
+icon: fas fa-chart-bar
 tags: Monitoring, Administration
 ---
 

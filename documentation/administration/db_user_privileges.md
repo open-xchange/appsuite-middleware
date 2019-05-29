@@ -6,13 +6,13 @@ tags: Administration, Database, Security
 
 This article describes how to reduce the database user privileges in existing Open-Xchange installations to the least required ones. Changing the existing ``ALL PRIVILEGES`` to the provided minimum set will have no implications for running the server. OX versions prior v7.8.0 may have used stored procedures; therefore they need to be removed beforehand, too.
 
-## Remove obsolete Stored Procedures
+# Remove obsolete Stored Procedures
 
-### Why to manually remove the existing Stored Procedures?
+## Why to manually remove the existing Stored Procedures?
 
 The Stored Procedures mentioned within the next paragraph aren't needed any more by the Open-Xchange groupware. Because of the reduced privileges Open Xchange recommends, the  'openexchange' database user isn't able to detect the existing stored procedures.
 
-### Which Stored Procedures are affected?
+## Which Stored Procedures are affected?
 
 The following Stored Procedures have to be removed from your configured config database:
 
@@ -26,7 +26,7 @@ The following Stored Procedures have to be removed from the context schematas:
 get_attachment_id, get_calendar_id, get_contact_id, get_folder_id, get_forum_id, get_gid_number_id, get_gui_setting_id, get_ical_id, get_infostore_id, get_mail_service_id, get_pinboard_id, get_principal_id, get_project_id, get_resource_group_id, get_resource_id, get_task_id, get_uid_number_id, get_unique_id, get_webdav_id
 ```
 
-### How to remove affected Stored Procedures?
+## How to remove affected Stored Procedures?
 
 Connect to mysql as a privileged user and run the following commands:
 
@@ -70,8 +70,7 @@ Connect to mysql as a privileged user and run the following commands:
    ```
 
 
-
-## Restrict Privileges 
+# Restrict Privileges 
 
 The following privileges are required for the Open-Xchange user: ``CREATE``, ``LOCK TABLES``, ``REFERENCES``, ``INDEX``, ``DROP``, ``DELETE``, ``ALTER``, ``SELECT``, ``UPDATE``, ``INSERT``, ``CREATE TEMPORARY TABLES``, ``SHOW VIEW`` and ``SHOW DATABASES``. The following steps can be used to change the existing database privileges:
 

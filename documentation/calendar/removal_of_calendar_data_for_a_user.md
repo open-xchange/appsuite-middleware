@@ -1,6 +1,6 @@
 ---
 title: Removal of Calendar Data for a User
-icon: fa-calendar-minus-o
+icon: far fa-calendar-minus
 tags: API, Calendar, Administration
 ---
 

@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -74,12 +75,13 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
         try {
             ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
             ServiceSet<EncryptedItemCleanUpService> cleanUpServices = new ServiceSet<EncryptedItemCleanUpService>();
-            
+
             track(SecretMigrator.class, secretMigrators);
             track(EncryptedItemCleanUpService.class, cleanUpServices);
-            
+            trackService(SecretUsesPasswordChecker.class);
+
             openTrackers();
-            
+
             registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this), secretMigrators, cleanUpServices), "recovery/secret");
             registerService(PreferencesItemService.class, new Enabled());
         } catch (final Exception x) {

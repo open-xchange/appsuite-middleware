@@ -65,9 +65,11 @@ import com.sun.mail.imap.CommandExecutor;
 import com.sun.mail.imap.ResponseEvent.Status;
 import com.sun.mail.imap.ResponseEvent.StatusResponse;
 import net.jodah.failsafe.CircuitBreaker;
+import net.jodah.failsafe.CircuitBreaker.State;
 import net.jodah.failsafe.CircuitBreakerOpenException;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.FailsafeException;
+import net.jodah.failsafe.function.CheckedRunnable;
 
 /**
  * {@link FailsafeCircuitBreakerCommandExecutor}
@@ -115,7 +117,28 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
         CircuitBreaker circuitBreaker = new CircuitBreaker()
             .withFailureThreshold(failureThreshold)
             .withSuccessThreshold(successThreshold)
-            .withDelay(delayMillis, TimeUnit.MILLISECONDS);
+            .withDelay(delayMillis, TimeUnit.MILLISECONDS)
+            .onOpen(new CheckedRunnable() {
+
+                @Override
+                public void run() throws Exception {
+                    LOG.info("Circuit breaker opened for: {}", hostList.getHostString());
+                }
+            })
+            .onHalfOpen(new CheckedRunnable() {
+
+                @Override
+                public void run() throws Exception {
+                    LOG.info("Circuit breaker half-opened for: {}", hostList.getHostString());
+                }
+            })
+            .onClose(new CheckedRunnable() {
+
+                @Override
+                public void run() throws Exception {
+                    LOG.info("Circuit breaker closed for: {}", hostList.getHostString());
+                }
+            });
         this.circuitBreaker = circuitBreaker;
     }
 
@@ -166,6 +189,32 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
             }
             throw new IOException(failure);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("hosts=").append(hostList.getHostString());
+        if (ports != null) {
+            sb.append(", ports=").append(ports);
+        }
+        State state = circuitBreaker.getState();
+        sb.append(", state=").append(state);
+        switch (state) {
+            case CLOSED:
+                sb.append(" (The circuit is closed and fully functional, allowing executions to occur)");
+                break;
+            case HALF_OPEN:
+                sb.append(" (The circuit is temporarily allowing executions to occur)");
+                break;
+            case OPEN:
+                sb.append(" (The circuit is opened and not allowing executions to occur.)");
+                break;
+            default:
+                break;
+
+        }
+        return super.toString();
     }
 
     // ------------------------------------------------------------------------------------------------------------------------
@@ -229,7 +278,7 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
                 if (isEitherOf(byeException, NETWORK_COMMUNICATION_ERRORS)) {
                     // Command failed due to a network communication error. Signal I/O error as failure to circuit breaker
                     // System.err.println("Failed command: " + command + " (" + statusResponse + ")");
-                    throw new CircuitBreakerCommandFailedException(responses);
+                    throw new CircuitBreakerCommandFailedException(responses, byeException);
                 }
             }
 
@@ -249,9 +298,10 @@ public class FailsafeCircuitBreakerCommandExecutor implements CommandExecutor {
          * Initializes a new {@link CircuitBreakerCommandFailedException}.
          *
          * @param responses The responses advertised from IMAP server
+         * @param byeException The BYE exception
          */
-        public CircuitBreakerCommandFailedException(Response[] responses) {
-            super();
+        public CircuitBreakerCommandFailedException(Response[] responses, Exception byeException) {
+            super(byeException);
             this.responses = responses;
         }
 

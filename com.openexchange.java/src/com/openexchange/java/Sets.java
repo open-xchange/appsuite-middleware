@@ -74,7 +74,7 @@ public class Sets {
     }
 
     /**
-     * Generates consecutive subsets of a set, each of the same size (the final list may be smaller).
+     * Generates consecutive subsets of a set, each of the same size (the final set may be smaller).
      *
      * @param original The set to return consecutive subsets of
      * @param partitionSize The desired size for each subset

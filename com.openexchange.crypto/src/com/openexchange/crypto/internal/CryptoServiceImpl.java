@@ -251,6 +251,9 @@ public class CryptoServiceImpl implements CryptoService {
             cipher.init(Cipher.DECRYPT_MODE, key, IV);
         } catch (final GeneralSecurityException e) {
             throw SecurityException.create(e);
+        } catch (final IllegalArgumentException e) {
+            // No valid base64 scheme
+            throw SecurityException.create(e);
         }
 
         try {

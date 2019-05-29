@@ -51,9 +51,12 @@ package com.openexchange.secret.recovery.json.action;
 
 import java.util.Set;
 import org.json.JSONException;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.crypto.CryptoErrorMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
@@ -68,6 +71,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MigrateAction extends AbstractSecretRecoveryAction {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MigrateAction.class);
+    }
 
     private final Set<SecretMigrator> secretMigrators;
 
@@ -91,17 +99,34 @@ public final class MigrateAction extends AbstractSecretRecoveryAction {
 
         final String password = req.getParameter("password");
         final ServerSession session = req.getSession();
-        final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor(session);
 
         // Old secret
-        setableSession.setPassword(password);
-        final String oldSecret = secretService.getSecret(setableSession);
+        String oldSecret;
+        SecretUsesPasswordChecker usesPasswordChecker = services.getOptionalService(SecretUsesPasswordChecker.class);
+        if (usesPasswordChecker != null && usesPasswordChecker.usesPassword()) {
+            SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor(session);
+            setableSession.setPassword(password);
+            oldSecret = secretService.getSecret(setableSession);
+        } else {
+            oldSecret = password;
+        }
 
         // New secret
         final String secret = secretService.getSecret(session);
+        if (oldSecret.equals(secret)) {
+            // Nothing to do...
+            return new AJAXRequestResult(Integer.valueOf(1), "int");
+        }
 
         for (SecretMigrator migrator : secretMigrators) {
-            migrator.migrate(oldSecret, secret, session);
+            try {
+                migrator.migrate(oldSecret, secret, session);
+            } catch (OXException e) {
+                if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                    throw e;
+                }
+                LoggerHolder.LOG.warn("{} is unable to re-crypt.", migrator.getClass().getName(), e);
+            }
         }
 
         return new AJAXRequestResult(Integer.valueOf(1), "int");

@@ -83,6 +83,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -1018,6 +1019,62 @@ public final class MimeMessageUtility {
             return unfold(headerValue);
         }
         return decodeMultiEncodedHeader0(checkNonAscii(headerValue), true);
+    }
+
+    private static final class WritePartToPipeOutRunnable implements Runnable {
+
+        private final PipedOutputStream pos;
+        private final ExceptionAwarePipedInputStream pin;
+        private final Part part;
+
+        /**
+         * Initializes a new {@link WritePartToPipeOutRunnable}.
+         */
+        WritePartToPipeOutRunnable(Part part, PipedOutputStream pos, ExceptionAwarePipedInputStream pin) {
+            super();
+            this.pos = pos;
+            this.pin = pin;
+            this.part = part;
+        }
+
+        @Override
+        public void run() {
+            try {
+                part.writeTo(pos);
+            } catch (final Exception e) {
+                pin.setException(e);
+            } finally {
+                Streams.close(pos);
+            }
+        }
+    }
+
+    private static final class WriteMailPartToPipeOutRunnable implements Runnable {
+
+        private final PipedOutputStream pos;
+        private final ExceptionAwarePipedInputStream pin;
+        private final MailPart part;
+
+        /**
+         * Initializes a new {@link WritePartToPipeOutRunnable}.
+         */
+        WriteMailPartToPipeOutRunnable(MailPart part, PipedOutputStream pos, ExceptionAwarePipedInputStream pin) {
+            super();
+            this.pos = pos;
+            this.pin = pin;
+            this.part = part;
+        }
+
+        @Override
+        public void run() {
+            try {
+                part.writeTo(pos);
+            } catch (final Exception e) {
+                pin.setException(e);
+            } finally {
+                Streams.close(pos);
+            }
+        }
     }
 
     private static final class Base64EncodedValue {
@@ -2720,29 +2777,25 @@ public final class MimeMessageUtility {
         if (null == part) {
             return null;
         }
-        final PipedOutputStream pos = new PipedOutputStream();
-        final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
-        final Runnable r = new Runnable() {
+        // Initialize pipes
+        PipedOutputStream pos = new PipedOutputStream();
+        ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
-            @Override
-            public void run() {
-                try {
-                    part.writeTo(pos);
-                } catch (final Exception e) {
-                    pin.setException(e);
-                } finally {
-                    Streams.close(pos);
-                }
-            }
-        };
-        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        // Write part to piped output stream using a separate thread
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
-            new Thread(r, "getStreamFromPart").start();
+            new Thread(new WritePartToPipeOutRunnable(part, pos, pin), "getStreamFromPart").start();
         } else {
-            threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+            Runnable r = new WritePartToPipeOutRunnable(part, pos, pin);
+            try {
+                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+            } catch (RejectedExecutionException e) {
+                new Thread(r, "getStreamFromPart").start();
+            }
         }
 
+        // Return piped input stream getting filled with bytes from separate thread
         return pin;
     }
 
@@ -2758,29 +2811,24 @@ public final class MimeMessageUtility {
             return null;
         }
         try {
-            final PipedOutputStream pos = new PipedOutputStream();
-            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+            // Initialize pipes
+            PipedOutputStream pos = new PipedOutputStream();
+            ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
-            final Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        part.writeTo(pos);
-                    } catch (final Exception e) {
-                        pin.setException(e);
-                    } finally {
-                        Streams.close(pos);
-                    }
-                }
-            };
-            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            // Write part to piped output stream using a separate thread
+            ThreadPoolService threadPool = ThreadPools.getThreadPool();
             if (null == threadPool) {
-                new Thread(r, "getStreamFromMailPart").start();
+                new Thread(new WriteMailPartToPipeOutRunnable(part, pos, pin), "getStreamFromMailPart").start();
             } else {
-                threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+                WriteMailPartToPipeOutRunnable r = new WriteMailPartToPipeOutRunnable(part, pos, pin);
+                try {
+                    threadPool.submit(ThreadPools.task(r), AbortBehavior.getInstance());
+                } catch (RejectedExecutionException e) {
+                    new Thread(r, "getStreamFromMailPart").start();
+                }
             }
 
+            // Return piped input stream getting filled with bytes from separate thread
             return pin;
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {

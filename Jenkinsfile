@@ -1,5 +1,7 @@
 @Library('pipeline-library') _
 
+import com.openexchange.jenkins.Trigger
+
 String workspace // pwd()
 String coverityIntermediateDir = 'analyze-idir'
 String coverityBuildDir = 'build'
@@ -42,7 +44,7 @@ spec:
             when {
                 allOf {
                     // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { com.openexchange.jenkins.Trigger.isStartedByTrigger(currentBuild.buildCauses, com.openexchange.jenkins.Trigger.Triggers.TIMER) }
+                    expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
                     expression { null != version4ConfigDocProcessor(env.BRANCH_NAME) }
                 }
             }
@@ -61,8 +63,9 @@ spec:
                         }
                     }
                     dir('config-doc-processor') {
-                        sshPublisher(publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/config/${targetVersion}", remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'properties.json')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+                        sshPublisher failOnError: true, publishers: [sshPublisherDesc(configName: 'documentation.open-xchange.com/var/www/documentation', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: "components/middleware/config/${targetVersion}", remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'properties.json')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)]
                     }
+                    build job: 'middleware/propertyDocumentationUI/master', parameters: [string(name: 'targetVersion', value: targetVersion)]
                 }
             }
             post {
@@ -158,7 +161,5 @@ String version4ConfigDocProcessor(String branchName) {
         return branchName.substring(7)
     if (branchName.startsWith('release-'))
         return branchName.substring(8)
-    if ('master' == branchName)
-        return '7.10.1'
     error "Processing configuration documentation is not intended for branch ${branchName}"
 }

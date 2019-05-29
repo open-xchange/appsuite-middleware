@@ -65,6 +65,7 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.impl.CryptoSecretEncryptionFactoryService;
+import com.openexchange.secret.impl.DefaultSecretUsesPasswordChecker;
 import com.openexchange.secret.impl.LiteralToken;
 import com.openexchange.secret.impl.ReservedToken;
 import com.openexchange.secret.impl.Token;
@@ -106,8 +107,8 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
         TokenBasedSecretService.RANDOM.set("unknown");
         final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService;
         if (null != whiteboardSecretService) {
-            whiteboardSecretService.close();
             this.whiteboardSecretService = null;
+            whiteboardSecretService.close();
         }
         super.stopBundle();
     }
@@ -179,18 +180,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
             }
             // Checks if SecretService is configured to use a password
             final boolean usesPassword = tokenList.isUsesPassword();
-            registerService(SecretUsesPasswordChecker.class, new SecretUsesPasswordChecker() {
-
-                @Override
-                public boolean usesPassword() {
-                    return usesPassword;
-                }
-
-                @Override
-                public SecretService passwordUsingSecretService() {
-                    return usesPassword ? tokenBasedSecretService : null;
-                }
-            });
+            registerService(SecretUsesPasswordChecker.class, new DefaultSecretUsesPasswordChecker(tokenBasedSecretService, usesPassword));
 
             Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(tokenBasedSecretService.getRanking()));

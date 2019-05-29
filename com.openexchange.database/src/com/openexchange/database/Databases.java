@@ -71,6 +71,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.Strings;
 
 /**
  * Utilities for database resource handling.
@@ -276,6 +277,65 @@ public final class Databases {
             con.rollback();
         } catch (SQLException e) {
             LOG.error("Failed to perform a roll-back.", e);
+        }
+    }
+
+    /**
+     * Rolls a transaction of a connection back to specified save-point,
+     * which undoes all changes made after the the save-point was set.
+     *
+     * @param savepoint The save-point
+     * @param con connection to roll back.
+     */
+    public static void rollback(Savepoint savepoint, Connection con) {
+        rollback(savepoint, false, con);
+    }
+
+    /**
+     * Rolls a transaction of a connection back to specified save-point,
+     * which undoes all changes made after the the save-point was set.
+     *
+     * @param savepoint The save-point
+     * @param releaseSavepoint Whether to release the save-point from current transaction afterwards
+     * @param con connection to roll back.
+     */
+    public static void rollback(Savepoint savepoint, boolean releaseSavepoint, Connection con) {
+        if (null == con || savepoint == null) {
+            return;
+        }
+
+        if (releaseSavepoint) {
+            try {
+                con.rollback(savepoint);
+            } catch (SQLException e) {
+                LOG.error("Failed to perform a roll-back to save-point.", e);
+            } finally {
+                releaseSavepoint(savepoint, con);
+            }
+        } else {
+            try {
+                con.rollback(savepoint);
+            } catch (SQLException e) {
+                LOG.error("Failed to perform a roll-back to save-point.", e);
+            }
+        }
+    }
+
+    /**
+     * Removes given save-point from current transaction.
+     *
+     * @param savepoint The save-point to remove
+     * @param con The connection
+     */
+    public static void releaseSavepoint(Savepoint savepoint, Connection con) {
+        if (null == con || savepoint == null) {
+            return;
+        }
+
+        try {
+            con.releaseSavepoint(savepoint);
+        } catch (SQLException e) {
+            LOG.error("Failed to remove save-point from current transaction.", e);
         }
     }
 
@@ -674,6 +734,89 @@ public final class Databases {
      */
     public static String removeParametersFromJdbcUrl(String url) {
         return JdbcProperties.removeParametersFromJdbcUrl(url);
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     *
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     *
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final SQLException sqlException) {
+        if (null == sqlException) {
+            return false;
+        }
+        if (suggestsRestartingTransaction(sqlException) || sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
+            return true;
+        }
+        if (isTransactionRollbackException(sqlException.getNextException())) {
+            return true;
+        }
+        final Throwable cause = sqlException.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if passed <tt>SQLException</tt> (or any of chained <tt>SQLException</tt>s) indicates a failed transaction roll-back.
+     *
+     * <pre>
+     * Deadlock found when trying to get lock; try restarting transaction
+     * </pre>
+     *
+     * @param exception The exception to check
+     * @return <code>true</code> if a failed transaction roll-back is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTransactionRollbackException(final Exception exception) {
+        if (null == exception) {
+            return false;
+        }
+        if (exception instanceof SQLException) {
+            return isTransactionRollbackException((SQLException) exception);
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return false;
+        }
+        return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if specified SQL exception's detail message contains a suggestion to restart the transaction;<br>
+     * e.g. <code>"Lock wait timeout exceeded; try restarting transaction"</code>
+     *
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if SQL exception suggests restarting transaction; otherwise <code>false</code>
+     */
+    public static boolean suggestsRestartingTransaction(SQLException sqlException) {
+        String message = null == sqlException ? null : sqlException.getMessage();
+        return null != message && Strings.asciiLowerCase(message).indexOf("try restarting transaction") >= 0;
+    }
+
+    /**
+     * Extracts possibly nested <tt>SQLException</tt> reference.
+     *
+     * @param exception The parental exception to extract from
+     * @return The <tt>SQLException</tt> reference or <code>null</code>
+     */
+    public static SQLException extractSqlException(final Exception exception) {
+        if (null == exception) {
+            return null;
+        }
+        if (exception instanceof SQLException) {
+            return (SQLException) exception;
+        }
+        final Throwable cause = exception.getCause();
+        if (null == cause || !(cause instanceof Exception)) {
+            return null;
+        }
+        return extractSqlException((Exception) cause);
     }
 
 }

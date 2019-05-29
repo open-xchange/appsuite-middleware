@@ -1,6 +1,6 @@
 ---
 title: OAuth 2.0 with Postfix and Dovecot
-icon: fa-drivers-license-o
+icon: fas fa-id-badge
 tags: Mail, Configuration, OAuth
 ---
 

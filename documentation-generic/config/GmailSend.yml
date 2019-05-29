@@ -1,0 +1,49 @@
+feature_name: Gmail Send
+feature_description: |
+  To differentiate between settings that apply all Gmail Send accounts or settings that only apply to the primary account
+  each property containing the ".primary" suffix allows to specify a value only applicable to the primary account
+  by appending the "primary." suffix to properties' common "com.openexchange.gmail.send." prefix.  
+  E.g.
+  <pre>
+  com.openexchange.gmail.send.timeout=5000 
+  # specifies 5sec read timeout for every Gmail Send account  
+
+  com.openexchange.gmail.send.primary.timeout=2000
+  # specifies 2sec read timeout for primary-only Gmail Send account  
+  </pre>
+properties:
+    - key: com.openexchange.gmail.send.timeout
+      description: |
+        Define the socket read timeout value in milliseconds. A value less than
+        or equal to zero is infinite timeout.
+      defaultValue: 5000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: gmailsend.properties
+      packageName: open-xchange-oauth
+      tags: ["Mail", "OAuth", "Google", "Timeout"]
+    - key: com.openexchange.gmail.send.connectionTimeout
+      description: |
+        Define the socket connect timeout value in milliseconds. A value less
+        or equal to zero is infinite timeout.
+      defaultValue: 3000
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: gmailsend.properties
+      packageName: open-xchange-oauth
+      tags: ["Mail", "OAuth", "Google", "Timeout"]
+    - key: com.openexchange.gmail.send.logTransport
+      description: |
+        Specifies whether a transported message shall be logged providing Google Message ID and login information.
+      defaultValue: false
+      version: 
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: gmailsend.properties
+      packageName: open-xchange-oauth
+      tags: ["Mail", "OAuth", "Google"]

@@ -392,7 +392,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             }
             return (AccessTokenResponse) response;
         } catch (com.nimbusds.oauth2.sdk.ParseException | IOException e) {
-            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e);
+            throw OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create(e, e.getMessage());
         }
     }
 

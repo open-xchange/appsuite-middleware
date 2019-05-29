@@ -214,12 +214,14 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
         // Try to decrypt "the old way"
         if (decrypted == null) {
-            LOG.debug("Failed to decrypt password with 'secrets' token list. Retrying with former crypt mechanism (user={}, context={})", iUserId, iContextId);
+            LOG.debug("Failed to decrypt. Retrying with former crypt mechanism (user={}, context={})", iUserId, iContextId);
             if (customizationNote instanceof Decrypter) {
                 try {
                     final Decrypter decrypter = (Decrypter) customizationNote;
                     decrypted = decrypter.getDecrypted(session, toDecrypt);
-                    LOG.debug("Decrypted password with former crypt mechanism");
+                    if (decrypted != null) {
+                        LOG.debug("Decrypted password with former crypt mechanism");
+                    }
                 } catch (final OXException x) {
                     // Ignore and try other
                     LOG.debug("Failed to decrypt with former crypt mechanism (user={}, context={})", iUserId, iContextId, x);

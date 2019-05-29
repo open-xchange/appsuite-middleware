@@ -1,6 +1,6 @@
 ---
 title: Google
-icon: fa-google
+icon: fab fa-google
 tags: 3rd Party, Google, Installation, Configuration, Filestore, Calendar, Contacts
 ---
 

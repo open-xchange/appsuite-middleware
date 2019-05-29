@@ -282,7 +282,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                      * include if attendee does attend
                      */
                     Attendee eventAttendee = find(eventInPeriod.getAttendees(), attendee);
-                    if (null == eventAttendee || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
+                    if (null == eventAttendee || eventAttendee.isHidden() || ParticipationStatus.DECLINED.equals(eventAttendee.getPartStat())) {
                         continue;
                     }
                     folderID = CalendarUserType.INDIVIDUAL.equals(eventAttendee.getCuType()) ? chooseFolderID(eventInPeriod) : null;
@@ -290,7 +290,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     /*
                      * include if attendee matches event owner
                      */
-                    if (matches(eventInPeriod.getCreatedBy(), attendee.getEntity())) {
+                    if (false == matches(eventInPeriod.getCalendarUser(), attendee.getEntity())) {
                         continue;
                     }
                     folderID = eventInPeriod.getFolderId();

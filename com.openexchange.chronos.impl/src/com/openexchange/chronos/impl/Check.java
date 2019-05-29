@@ -58,7 +58,9 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -426,6 +428,28 @@ public class Check extends com.openexchange.chronos.common.Check {
                 if (false == Objects.equals(uid, e.getUid())) {
                     throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
                 }
+            }
+        }
+        return uid;
+    }
+
+    /**
+     * Checks that the unique identifier (UID) matches in all events within the supplied collection, i.e. it is either undefined, or
+     * equal in all events.
+     *
+     * @param events The events to check the UID for equality
+     * @return The event's common unique identifier, after it was checked to be equal in all events, or <code>null</code> if not assigned
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_DATA}
+     */
+    public static String uidMatches(Collection<Event> events) throws OXException {
+        if (null == events || events.isEmpty()) {
+            return null;
+        }
+        Iterator<Event> iterator = events.iterator();
+        String uid = iterator.next().getUid();
+        while (iterator.hasNext()) {
+            if (false == Objects.equals(uid, iterator.next().getUid())) {
+                throw CalendarExceptionCodes.INVALID_DATA.create(EventField.UID, "UID mismatch");
             }
         }
         return uid;

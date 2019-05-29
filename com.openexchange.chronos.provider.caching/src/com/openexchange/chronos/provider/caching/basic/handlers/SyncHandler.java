@@ -93,7 +93,7 @@ public class SyncHandler extends AbstractExtensionHandler {
     /**
      * Initialises a new {@link SyncHandler}.
      */
-    public SyncHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public SyncHandler(Session session, CalendarAccount account, CalendarParameters parameters) {
         super(session, account, parameters);
     }
 

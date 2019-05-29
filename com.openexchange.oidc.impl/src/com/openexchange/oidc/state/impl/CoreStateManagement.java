@@ -85,7 +85,7 @@ public class CoreStateManagement implements StateManagement {
     public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit) throws OXException {
         LOG.trace("addAuthenticationRequest(AuthenticationRequestInfo: {})", authenticationRequestInfo.getState());
         try {
-            hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo), ttl , timeUnit);
+            hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).set(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo), ttl , timeUnit);
         } catch (RuntimeException e) {
             throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_AUTHREQUEST_INFO_MAP, e);
         }
@@ -100,7 +100,7 @@ public class CoreStateManagement implements StateManagement {
         } catch (RuntimeException e) {
             throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_AUTHREQUEST_INFO_MAP, e);
         }
-        
+
         if (null == portable) {
             return null;
         }

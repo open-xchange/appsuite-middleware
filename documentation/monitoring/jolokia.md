@@ -1,6 +1,6 @@
 ---
 title: Jolokia
-icon: fa-leaf
+icon: fas fa-pepper-hot
 tags: Monitoring, Configuration, Administration
 ---
 

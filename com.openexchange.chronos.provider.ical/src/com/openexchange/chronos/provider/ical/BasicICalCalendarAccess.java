@@ -77,7 +77,6 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -104,10 +103,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
      * @param parameters The calendar parameters
      */
     public BasicICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(  session,
-                account,
-                parameters,
-                Tools.requireService(CalendarUtilities.class, Services.getServiceLookup()));
+        super(session, account, parameters);
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
@@ -241,7 +237,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess implemen
 
     @Override
     public CalendarResult updateAlarms(EventID eventID, List<Alarm> alarms, long clientTimestamp) throws OXException {
-        return updateAlarmsInternal(eventID, alarms, clientTimestamp);
+        return updateAlarmsInternal(eventID, alarms, clientTimestamp, Services.getService(CalendarUtilities.class));
     }
 
     @Override

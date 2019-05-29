@@ -56,7 +56,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -96,96 +95,76 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
          */
         final WhiteboardSecretService whiteboardSecretService = this.whiteboardSecretService = new WhiteboardSecretService(context);
         whiteboardSecretService.open();
+        final SecretUsesPasswordChecker usesPasswordChecker = getService(SecretUsesPasswordChecker.class);
 
-        final SecretUsesPasswordChecker checker = getService(SecretUsesPasswordChecker.class);
-        if ((whiteboardSecretService.getRanking() < 0) && (null != checker) && checker.usesPassword()) {
-            /*-
-             * Token list in use and main entry uses password for secret retrieval.
-             *
-             * Initialize whiteboard services
-             */
-            final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
-            this.whiteboardEncryptedItemDetector = whiteboardEncryptedItemDetector;
+        /*
+         * Initialize whiteboard services
+         */
+        final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
+        this.whiteboardEncryptedItemDetector = whiteboardEncryptedItemDetector;
 
-            /*
-             * Register SecretInconsistencyDetector
-             */
-            FastSecretInconsistencyDetector detector;
-            {
-                CryptoService cryptoService = getService(CryptoService.class);
-                UserService userService = getService(UserService.class);
-                // final SecretService secretService = checker.passwordUsingSecretService();
-                SecretEncryptionFactoryService secretEncryptionFactory = getService(SecretEncryptionFactoryService.class);
-                ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
-                detector = new FastSecretInconsistencyDetector(secretEncryptionFactory, cryptoService, userService, whiteboardEncryptedItemDetector, configViewFactory);
-            }
+        /*
+         * Register SecretInconsistencyDetector
+         */
+        FastSecretInconsistencyDetector detector;
+        {
+            CryptoService cryptoService = getService(CryptoService.class);
+            UserService userService = getService(UserService.class);
+            // final SecretService secretService = checker.passwordUsingSecretService();
+            SecretEncryptionFactoryService secretEncryptionFactory = getService(SecretEncryptionFactoryService.class);
+            ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+            detector = new FastSecretInconsistencyDetector(secretEncryptionFactory, cryptoService, userService, whiteboardEncryptedItemDetector, configViewFactory);
+        }
+        registerService(SecretInconsistencyDetector.class, detector);
+        registerService(EncryptedItemCleanUpService.class, detector);
+        registerService(SecretMigrator.class, detector); // Needs Migration as well
 
-            registerService(SecretInconsistencyDetector.class, detector);
-            registerService(EncryptedItemCleanUpService.class, detector);
+        whiteboardEncryptedItemDetector.open();
 
-            /*
-             * Register SecretMigrator
-             */
-            registerService(SecretMigrator.class, detector); // Needs Migration as well
+        final ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
+        track(SecretMigrator.class, secretMigrators);
+        openTrackers();
 
-            whiteboardEncryptedItemDetector.open();
+        /*
+         * Register appropriate event handler
+         */
+        {
+            final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecretRecoveryActivator.class);
+            final EventHandler eventHandler = new EventHandler() {
 
-            final ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
-            track(SecretMigrator.class, secretMigrators);
+                @Override
+                public void handleEvent(final Event event) {
+                    final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
+                    final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
+                    final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor((Session) event.getProperty("com.openexchange.passwordchange.session"));
 
-            openTrackers();
-
-            /*
-             * Register appropriate event handler
-             */
-            {
-                final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SecretRecoveryActivator.class);
-                final EventHandler eventHandler = new EventHandler() {
-
-                    @Override
-                    public void handleEvent(final Event event) {
-                        final String oldPassword = (String) event.getProperty("com.openexchange.passwordchange.oldPassword");
-                        final String newPassword = (String) event.getProperty("com.openexchange.passwordchange.newPassword");
-                        final SetableSession setableSession = SetableSessionFactory.getFactory().setableSessionFor((Session) event.getProperty("com.openexchange.passwordchange.session"));
-
-                        // Old secret
+                    // Old secret
+                    String oldSecret;
+                    if (usesPasswordChecker != null && usesPasswordChecker.usesPassword()) {
                         setableSession.setPassword(oldPassword);
-                        final String oldSecret = whiteboardSecretService.getSecret(setableSession);
-
-                        // New secret
-                        setableSession.setPassword(newPassword);
-                        final String newSecret = whiteboardSecretService.getSecret(setableSession);
-
-                        // Try to migrate with new password applied to session
-                        try {
-                            final ServerSession serverSession = ServerSessionAdapter.valueOf(setableSession);
-                            for (final SecretMigrator migrator : secretMigrators) {
-                                migrator.migrate(oldSecret, newSecret, serverSession);
-                            }
-                        } catch (final Exception e) {
-                            log.warn("Password change event could not be handled.", e);
-                        }
+                        oldSecret = whiteboardSecretService.getSecret(setableSession);
+                    } else {
+                        oldSecret = oldPassword;
                     }
-                };
-                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-                dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
-                registerService(EventHandler.class, eventHandler, dict);
-            }
-        } else {
-            registerService(SecretInconsistencyDetector.class, new SecretInconsistencyDetector() {
 
-                @Override
-                public String isSecretWorking(final ServerSession session) throws OXException {
-                    return null;
-                }
-            });
-            registerService(SecretMigrator.class, new SecretMigrator() {
+                    // New secret
+                    setableSession.setPassword(newPassword);
+                    final String newSecret = whiteboardSecretService.getSecret(setableSession);
 
-                @Override
-                public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-                    // No nothing
+                    // Try to migrate with new password applied to session
+                    try {
+                        final ServerSession serverSession = ServerSessionAdapter.valueOf(setableSession);
+                        for (final SecretMigrator migrator : secretMigrators) {
+                            migrator.migrate(oldSecret, newSecret, serverSession);
+                        }
+                    } catch (final Exception e) {
+                        log.warn("Password change event could not be handled.", e);
+                    }
                 }
-            });
+            };
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+            dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/passwordchange");
+            registerService(EventHandler.class, eventHandler, dict);
         }
     }
 

@@ -50,8 +50,10 @@
 package com.openexchange.ajax.mailcompose;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.rmi.server.UID;
@@ -66,9 +68,13 @@ import com.openexchange.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.InlineResponse2002;
+import com.openexchange.testing.httpclient.models.MailComposeAttachmentPostResponse;
+import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeGetResponse;
 import com.openexchange.testing.httpclient.models.MailComposeMessageModel;
 import com.openexchange.testing.httpclient.models.MailComposeResponse;
+import com.openexchange.testing.httpclient.models.MailComposeSendResponse;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
 import com.openexchange.testing.httpclient.models.MailImportResponse;
 import com.openexchange.testing.httpclient.models.MailListElement;
@@ -119,8 +125,9 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
+        folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null, null);
+        FolderUpdateResponse createFolder = foldersApi.createFolder(FOLDER, getApiClient().getSession(), body, "0", null, null);
         folderId = createFolder.getData();
 
         MailImportResponse response = mailApi.importMail(getApiClient().getSession(), folderId, mailWithAttachmentFile, null, Boolean.TRUE);
@@ -158,8 +165,7 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
             body.add(mailListElement);
         }
         mailApi.deleteMails(getApiClient().getSession(), body, timestamp);
-        foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
-
+        foldersApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "0", timestamp, null, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null);
         super.tearDown();
     }
 
@@ -195,6 +201,35 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
 
     protected List<List<String>> getRecipient() throws Exception {
         return Collections.singletonList(Arrays.asList(new String[] { testUser2.getUser(), getOtherMailAddress() }));
+    }
+
+    protected void check(MailComposeSendResponse response) {
+        check(response.getErrorDesc(), response.getError(), response);
+    }
+
+    protected void check(MailComposeResponse response) {
+        check(response.getErrorDesc(), response.getError(), response);
+    }
+
+    protected void check(MailComposeGetResponse response) {
+        check(response.getErrorDesc(), response.getError(), response);
+    }
+
+    protected void check(MailComposeAttachmentResponse response) {
+        check(response.getErrorDesc(), response.getError(), response);
+    }
+
+    protected void check(MailComposeAttachmentPostResponse response) {
+        check(response.getErrorDesc(), response.getError(), response);
+    }
+
+    protected void check(InlineResponse2002 response) {
+        assertTrue(b(response.getSuccess()));
+    }
+
+    protected void check(String errorDesc, String error, Object notNull) {
+        assertNotNull(notNull);
+        assertNull(errorDesc, error);
     }
 
 }

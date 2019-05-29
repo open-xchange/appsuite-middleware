@@ -1248,6 +1248,26 @@ public class CalendarUtils {
     }
 
     /**
+     * Collects all events with a specific unique identifier (UID) from the given event collection.
+     *
+     * @param events The events to filter
+     * @param uid The UID to match
+     * @return The matching events, or an empty list if none were found
+     */
+    public static List<Event> filterByUid(Collection<Event> events, String uid) {
+        if (null != events && 0 < events.size()) {
+            List<Event> matchingEvents = new ArrayList<Event>();
+            for (Event event : events) {
+                if (uid.equals(event.getUid())) {
+                    matchingEvents.add(event);
+                }
+            }
+            return matchingEvents;
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * Gets the entity identifiers of all attendees representing internal users.
      *
      * @param attendees The attendees to extract the user identifiers for
