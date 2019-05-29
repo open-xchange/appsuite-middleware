@@ -61,6 +61,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -493,6 +494,27 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The create result
      */
     CalendarResult createEvent(String folderId, Event event) throws OXException;
+
+    /**
+     * Puts a new or updated <i>calendar object resource</i>, i.e. an event and/or its change exceptions, to the calendar. In case the
+     * calendar resource already exists under the perspective of the parent folder, it is updated implicitly: No longer indicated events
+     * are removed, new ones are added, and existing ones are updated.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SCHEDULING}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_IGNORE_FORBIDDEN_ATTENDEE_CHANGES}</li>
+     * </ul>
+     *
+     * @param folderId The identifier of the folder to add/update the calendar object resource in
+     * @param recource The calendar object resource to store
+     * @return The calendar result
+     * @see <a href="https://tools.ietf.org/html/rfc4791#section-4.1">RFC 4791, section 4.1</a><br/>
+     *      <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException;
 
     /**
      * Updates an existing event.

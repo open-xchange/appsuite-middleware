@@ -56,9 +56,11 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.clientfields.Lightning;
 import com.openexchange.caldav.resources.EventResource;
 import com.openexchange.chronos.Calendar;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -69,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link CalDAVImport}
@@ -132,6 +135,14 @@ public class CalDAVImport {
                 LOG.debug("Skipping event marked with \"{}\": {}", Lightning.X_MOZ_FAKED_MASTER.getId(), importedEvent);
                 continue;
             }
+            /*
+             * take over first or check consecutive event UID
+             */
+            if (null == uid) {
+                uid = importedEvent.getUid();
+            } else if (false == uid.equals(importedEvent.getUid())) {
+                throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+            }
             if (looksLikeException(importedEvent)) {
                 /*
                  * take over change exception event
@@ -141,7 +152,7 @@ public class CalDAVImport {
                 /*
                  * check against min-/max-date-time, if configured
                  */
-                if (Boolean.valueOf(resource.getFactory().getConfigValue("com.openexchange.caldav.interval.strict", "false"))) {
+                if (Boolean.parseBoolean(resource.getFactory().getConfigValue("com.openexchange.caldav.interval.strict", "false"))) {
                     if (false == CalendarUtils.isInRange(importedEvent, resource.getParent().getMinDateTime(), null, TimeZones.UTC) && (
                         null == importedEvent.getRecurrenceRule() || false == resource.getFactory().requireService(RecurrenceService.class).iterateEventOccurrences(
                             importedEvent, resource.getParent().getMinDateTime(), null).hasNext())) {
@@ -150,11 +161,6 @@ public class CalDAVImport {
                     if (false == CalendarUtils.isInRange(importedEvent, null, resource.getParent().getMaxDateTime(), TimeZones.UTC)) {
                         throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "max-date-time", url, HttpServletResponse.SC_FORBIDDEN);
                     }
-                }
-                if (null == uid) {
-                    uid = importedEvent.getUid();
-                } else if (false == uid.equals(importedEvent.getUid())) {
-                    throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
                 }
                 /*
                  * take over series master or non-recurring event
@@ -229,6 +235,34 @@ public class CalDAVImport {
      */
     public List<Event> getChangeExceptions() {
         return changeExceptions;
+    }
+
+    /**
+     * Initializes a new calendar object resource bundling the imported event data.
+     * 
+     * @return The calendar object resource
+     * @throws WebdavProtocolException <code>CALDAV:valid-calendar-object-resource</code> precondition exception if no valid calendar object resource can be created
+     */
+    public CalendarObjectResource asCalendarObjectResource() throws WebdavProtocolException {
+        try {
+            return new DefaultCalendarObjectResource(event, changeExceptions);
+        } catch (IllegalArgumentException e) {
+            throw new PreconditionException(OXException.general("", e), DAVProtocol.CAL_NS.getURI(), "valid-calendar-object-resource", url, HttpServletResponse.SC_FORBIDDEN);
+        }
+    }
+
+    /**
+     * Gets all imported events.
+     *
+     * @return The events, or an empty list if there are none.
+     */
+    public List<Event> getEvents() {
+        List<Event> events = new ArrayList<Event>(changeExceptions.size() + 1);
+        if (null != event) {
+            events.add(event);
+        }
+        events.addAll(changeExceptions);
+        return events;
     }
 
     private static boolean looksLikeException(Event event) {

@@ -912,12 +912,33 @@ public class Utils {
      * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
      * calendar object resource or not, depending on the modified attendee fields.
      *
+     * @param attendeeUpdates The attendee updates to check
+     * @param calendarUser The calendar user to check the reply for
      * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
      */
     public static boolean isReply(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates, CalendarUser calendarUser) {
         for (ItemUpdate<Attendee, AttendeeField> itemUpdate : attendeeUpdates.getUpdatedItems()) {
             if (matches(itemUpdate.getOriginal(), calendarUser)) {
                 return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether one of the applied changes represent an attendee reply of a specific calendar user for the associated
+     * calendar object resource or not, depending on the modified attendee fields.
+     * 
+     * @param eventUpdates The event updates to check
+     * @param calendarUser The calendar user to check the reply for
+     * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
+     */
+    public static boolean isReply(List<? extends EventUpdate> eventUpdates, CalendarUser calendarUser) {
+        if (null != eventUpdates && 0 < eventUpdates.size()) {
+            for (EventUpdate eventUpdate : eventUpdates) {
+                if (isReply(eventUpdate.getAttendeeUpdates(), calendarUser)) {
+                    return true;
+                }
             }
         }
         return false;
@@ -942,6 +963,28 @@ public class Utils {
         }
         if (0 < eventUpdate.getAttendeeUpdates().getAddedItems().size() || 0 < eventUpdate.getAttendeeUpdates().getRemovedItems().size()) {
             return true; // attendee lineup changed
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether at least one of the supplied event updates represents a <i>re-scheduling</i> of the calendar object
+     * resource or not, depending on the modified event fields.
+     * <p/>
+     * Besides changes to an event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     *
+     * @param eventUpdates The event updates to check
+     * @return <code>true</code> if one of the updated events is considered as re-scheduled, <code>false</code>, otherwise
+     * @see #RESCHEDULE_FIELDS
+     */
+    public static boolean isReschedule(List<? extends EventUpdate> eventUpdates) {
+        if (null != eventUpdates && 0 < eventUpdates.size()) {
+            for (EventUpdate eventUpdate : eventUpdates) {
+                if (isReschedule(eventUpdate)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -1638,7 +1681,7 @@ public class Utils {
         Organizer organizer;
         if (null != organizerData) {
             organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL, resolvableEntities);
-            if (0 < organizer.getEntity()) {
+            if (isInternal(organizer, CalendarUserType.INDIVIDUAL)) {
                 /*
                  * internal organizer must match the actual calendar user if specified
                  */

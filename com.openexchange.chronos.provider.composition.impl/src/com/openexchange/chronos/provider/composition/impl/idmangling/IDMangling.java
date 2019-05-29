@@ -59,9 +59,11 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -294,6 +296,23 @@ public class IDMangling extends com.openexchange.chronos.provider.composition.ID
     public static Event withRelativeID(Event event) throws OXException {
         String newFolderId = getRelativeFolderId(event.getFolderId());
         return new IDManglingEvent(event, newFolderId);
+    }
+
+    /**
+     * Gets the account-relative representation for the supplied calendar object resource with unique composite identifiers.
+     *
+     * @param resource The calendar object resource
+     * @return The resource representation with relative identifiers
+     */
+    public static CalendarObjectResource withRelativeID(CalendarObjectResource resource) throws OXException {
+        if (null == resource) {
+            return resource;
+        }
+        List<Event> eventsWithRelativeIDs = new ArrayList<Event>(resource.getEvents().size());
+        for (Event event : resource.getEvents()) {
+            eventsWithRelativeIDs.add(withRelativeID(event));
+        }
+        return new DefaultCalendarObjectResource(eventsWithRelativeIDs);
     }
 
     /**

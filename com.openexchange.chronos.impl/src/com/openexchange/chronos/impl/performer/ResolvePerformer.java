@@ -210,6 +210,60 @@ public class ResolvePerformer extends AbstractQueryPerformer {
     public EventID resolveByUid(String uid, int calendarUserId) throws OXException {
         return resolveByUid(uid, null, calendarUserId);
     }
+    
+    /**
+     * Resolves an unique identifier within the scope of a specific calendar user, i.e. the unique identifier is resolved to events 
+     * residing in the user's <i>personal</i>, as well as <i>public</i> calendar folders.
+     *
+     * @param uid The unique identifier to resolve
+     * @param calendarUserId The identifier of the calendar user the unique identifier should be resolved for
+     * @param fields The event fields to load for the resolved events, or <code>null</code> to load all properties
+     * @return The resolved events, or an empty list if none were found
+     */
+    List<Event> lookupByUid(String uid, int calendarUserId, EventField[] fields) throws OXException {
+        if (Strings.isEmpty(uid)) {
+            return Collections.emptyList();
+        }        
+        /*
+         * construct search term & lookup matching events in storage
+         */
+        SearchTerm<?> searchTerm = getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid);
+        EventField[] fieldsToQuery = getFields(fields, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, EventField.FOLDER_ID, EventField.UID, EventField.CALENDAR_USER);
+        List<Event> matchingEvents = filterByUid(storage.getEventStorage().searchEvents(searchTerm, null, fieldsToQuery), uid);
+        if (matchingEvents.isEmpty()) {
+            return Collections.emptyList();
+        }
+        matchingEvents = storage.getUtilities().loadAdditionalEventData(-1, matchingEvents, fieldsToQuery);
+        /*
+         * load calendar user's attendee data for found events and resolve to first matching event for this folder's calendar user
+         */
+        Map<String, Attendee> attendeePerEvent = storage.getAttendeeStorage().loadAttendee(
+            getObjectIDs(matchingEvents), session.getEntityResolver().prepareUserAttendee(calendarUserId), (AttendeeField[]) null);
+        List<Event> resolvedEvents = new ArrayList<Event>(matchingEvents.size());
+        for (Event matchingEvent : matchingEvents) {
+            if (null != matchingEvent.getFolderId()) {
+                /*
+                 * common folder identifier is assigned, consider 'resolved' in public or calendar user's private folder
+                 */
+                CalendarFolder folder = getFolder(session, matchingEvent.getFolderId(), false);
+                if (PublicType.getInstance().equals(folder.getType()) || folder.getCreatedBy() == calendarUserId) {
+                    resolvedEvents.add(matchingEvent);
+                }
+            } else {
+                /*
+                 * group scheduled event with no common folder identifier assigned, consider 'resolved' if calendar user attends
+                 */
+                Attendee attendee = attendeePerEvent.get(matchingEvent.getId());
+                if (null != attendee && Strings.isNotEmpty(attendee.getFolderId())) {
+                    CalendarFolder folder = getFolder(session, attendee.getFolderId(), false);
+                    if (false == PublicType.getInstance().equals(folder.getType()) && folder.getCreatedBy() == calendarUserId) {
+                        resolvedEvents.add(matchingEvent);
+                    }
+                }
+            }
+        }
+        return storage.getUtilities().loadAdditionalEventData(-1, resolvedEvents, fieldsToQuery);
+    }
 
     /**
      * Resolves an unique identifier and optional recurrence identifier pair within the scope of a specific calendar user, i.e. the unique

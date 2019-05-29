@@ -69,6 +69,7 @@ import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
+import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
@@ -333,6 +334,7 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected int move(ICalResource iCalResource, String targetFolderID) throws Exception {
+        DeleteMethod ds;
         MoveMethod move = null;
         try {
             String targetHref = Config.getPathPrefix() + "/caldav/" + encodeFolderID(targetFolderID) + "/" + iCalResource.getHref().substring(1 + iCalResource.getHref().lastIndexOf('/'));
@@ -374,9 +376,13 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
+        return get(getWebDAVClient(), encodeFolderID(folderID), resourceName, ifNoneMatchEtag, ifMatchEtag);
+    }
+
+    protected static ICalResource get(WebDAVClient client, String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
         GetMethod get = null;
         try {
-            String href = Config.getPathPrefix() + "/caldav/" + encodeFolderID(folderID) + "/" + urlEncode(resourceName) + ".ics";
+            String href = Config.getPathPrefix() + "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
             get = new GetMethod(getBaseUri() + href);
             if (null != ifNoneMatchEtag) {
                 get.addRequestHeader(Headers.IF_NONE_MATCH, ifNoneMatchEtag);
@@ -384,7 +390,7 @@ public abstract class CalDAVTest extends WebDAVTest {
             if (null != ifMatchEtag) {
                 get.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
             }
-            Assert.assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
+            Assert.assertEquals("response code wrong", StatusCodes.SC_OK, client.executeMethod(get));
             byte[] responseBody = get.getResponseBody();
             assertNotNull("got no response body", responseBody);
             ICalResource iCalResource = new ICalResource(new String(responseBody, Charsets.UTF_8), href, get.getResponseHeader("ETag").getValue());
@@ -428,6 +434,27 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
+    protected int delete(String folderID, String resourceName, String ifMatchEtag, String ifMatchScheduleTag) throws Exception {
+        return delete(getWebDAVClient(), encodeFolderID(folderID), resourceName, ifMatchEtag, ifMatchScheduleTag);
+    }
+
+    protected static int delete(WebDAVClient client, String collectioName, String resourceName, String ifMatchEtag, String ifMatchScheduleTag) throws Exception {
+        DeleteMethod delete = null;
+        try {
+            String href = Config.getPathPrefix() + "/caldav/" + collectioName + "/" + urlEncode(resourceName) + ".ics";
+            delete = new DeleteMethod(getBaseUri() + href);
+            if (null != ifMatchEtag) {
+                delete.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
+            if (null != ifMatchScheduleTag) {
+                delete.addRequestHeader("If-Schedule-Tag-Match", ifMatchScheduleTag);
+            }
+            return client.executeMethod(delete);
+        } finally {
+            release(delete);
+        }
+    }
+
     public int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;
         try {
@@ -452,6 +479,17 @@ public abstract class CalDAVTest extends WebDAVTest {
             }
         }
         return null;
+    }
+
+    protected List<Appointment> getAppointments(String folderID, String uid) {
+        List<Appointment> matchingAppointments = new ArrayList<Appointment>();
+        Appointment[] appointments = catm.all(parse(folderID), new Date(0), new Date(100000000000000L), Appointment.ALL_COLUMNS);
+        for (Appointment appointment : appointments) {
+            if (uid.equals(appointment.getUid())) {
+                matchingAppointments.add(appointment);
+            }
+        }
+        return matchingAppointments;
     }
 
     protected List<Appointment> getChangeExcpetions(Appointment appointment) throws OXException {

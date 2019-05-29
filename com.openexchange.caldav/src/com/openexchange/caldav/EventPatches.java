@@ -49,9 +49,10 @@
 
 package com.openexchange.caldav;
 
-import static com.openexchange.chronos.common.CalendarUtils.*;
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getEventID;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -1099,6 +1100,7 @@ public class EventPatches {
                  * patch the change exceptions
                  */
                 for (Event importedChangeException : importedChangeExceptions) {
+                    applyFilename(resource, importedChangeException);
                     adjustAttendeeComments(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent, caldavImport.getCalender());

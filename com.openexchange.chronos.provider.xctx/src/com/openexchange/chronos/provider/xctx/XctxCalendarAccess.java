@@ -76,6 +76,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
@@ -83,6 +84,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -324,6 +326,17 @@ public class XctxCalendarAccess implements SubscribeAware, GroupwareCalendarAcce
         Check.containsNoSuchAttendees(event, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM, CalendarUserType.GROUP);
         Event unmangledEvent = entityHelper.unmangleLocalEvent(event);
         CalendarResult calendarResult = getCalendarService().createEvent(guestSession, folderId, unmangledEvent);
+        return entityHelper.mangleRemoteCalendarResult(calendarResult);
+    }
+
+    @Override
+    public CalendarResult putResource(String folderId, CalendarObjectResource resource) throws OXException {
+        List<Event> unmangledEventData = new ArrayList<Event>();
+        for (Event event : resource.getEvents()) {
+            Check.containsNoSuchAttendees(event, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM, CalendarUserType.GROUP);
+            unmangledEventData.add(entityHelper.unmangleLocalEvent(event));
+        }
+        CalendarResult calendarResult = getCalendarService().putResource(guestSession, folderId, new DefaultCalendarObjectResource(unmangledEventData));
         return entityHelper.mangleRemoteCalendarResult(calendarResult);
     }
 

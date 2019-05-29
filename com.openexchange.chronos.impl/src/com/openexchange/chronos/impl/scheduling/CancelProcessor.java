@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.scheduling;
 
 import static com.openexchange.java.Autoboxing.I;
 import static java.util.Collections.singletonList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
@@ -143,7 +144,7 @@ public class CancelProcessor extends AbstractUpdatePerformer {
         if (false == CalendarUtils.matches(originator, deletee.getOrganizer()) && (null == deletee.getOrganizer().getSentBy() || false == CalendarUtils.matches(originator, deletee.getOrganizer().getSentBy()))) {
             throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), originalEvent.getId(), originator.getUri(), originator.getCn());
         }
-        Check.organizerMatches(originalEvent, deletee);
+        Check.organizerMatches(originalEvent, Collections.singletonList(deletee));
 
         /*
          * Check internal constrains

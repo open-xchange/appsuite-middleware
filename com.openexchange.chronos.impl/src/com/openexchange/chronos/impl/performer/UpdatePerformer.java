@@ -260,7 +260,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Updates data of an existing event recurrence and tracks the update in the underlying calendar result.
+     * Updates data of an existing event recurrence and tracks the update in the underlying calendar result. A new change exception event
+     * will be created automatically unless it already exists for this event series.
      *
      * @param originalSeriesMaster The original series master event
      * @param recurrenceId The recurrence identifier targeting the event occurrence to update
@@ -351,7 +352,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Updates data of an existing event.
+     * Updates data of an existing event based on the client supplied event data and tracks the update results accordingly. Permission-
+     * and consistency-related checks are performed implicitly, however, no scheduling- or notification messages are tracked.
      *
      * @param originalEvent The original, plain event data
      * @param eventData The updated event data
@@ -851,54 +853,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             }
         }
         return new UnmodifiableEvent(adjustedClientUpdate);
-    }
-
-    private static class InternalUpdateResult {
-
-        private final AbstractUpdatePerformer performer;
-        private final InternalEventUpdate eventUpdate;
-        private final List<Event> updatedChangeExceptions;
-        private final Event updatedEvent;
-
-        private CalendarObjectResource updatedResource;
-
-        InternalUpdateResult(AbstractUpdatePerformer perfomer, InternalEventUpdate eventUpdate, Event updatedEvent, List<Event> updatedChangeExceptions) {
-            super();
-            this.performer = perfomer;
-            this.eventUpdate = eventUpdate;
-            this.updatedChangeExceptions = updatedChangeExceptions;
-            this.updatedEvent = updatedEvent;
-        }
-
-        Event getSeriesMaster() throws OXException {
-            return getUpdatedResource().getSeriesMaster();
-        }
-
-        CalendarObjectResource getOriginalResource() {
-            return eventUpdate.getOriginalResource();
-        }
-
-        CalendarObjectResource getUpdatedResource() throws OXException {
-            if (null == updatedResource) {
-                updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
-                if (isSeriesException(updatedResource.getFirstEvent())) {
-                    Event seriesMaster = performer.optEventData(updatedResource.getFirstEvent().getSeriesId());
-                    if (null != seriesMaster) {
-                        List<Event> changeExceptions = performer.loadExceptionData(seriesMaster);
-                        updatedResource = new DefaultCalendarObjectResource(seriesMaster, changeExceptions);
-                    }
-                }
-            }
-            return updatedResource;
-        }
-
-        InternalEventUpdate getEventUpdate() {
-            return eventUpdate;
-        }
-
-        Event getUpdatedEvent() {
-            return updatedEvent;
-        }
     }
 
 }
