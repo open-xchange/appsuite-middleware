@@ -219,12 +219,7 @@ public class GmailSendTransport extends MailTransport {
 
     @Override
     protected boolean supports(AuthType authType) {
-        switch (authType) {
-            case OAUTH:
-                return true;
-            default:
-                return false;
-        }
+        return AuthType.OAUTH == authType;
     }
 
     private Account requireAccount(GmailSendConfig gmailSendConfig) throws OXException {
