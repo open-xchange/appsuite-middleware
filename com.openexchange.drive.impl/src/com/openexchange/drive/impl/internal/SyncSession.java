@@ -324,28 +324,47 @@ public class SyncSession {
 
             @Override
             public List<ServerDirectoryVersion> call() throws OXException {
-                return getServerDirectoryVersions(limit);
+                Map<String, FileStorageFolder> folders;
+                if (-1 != limit) {
+                    folders = getStorage().getFolders(limit + 1);
+                    if (folders.size() > limit) {
+                        throw DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(limit));
+                    }
+                } else {
+                    folders = getStorage().getFolders();
+                }
+                return getServerDirectoryVersions(folders);
+            }
+        });
+    }
+    
+    /**
+     * Gets a single directory version from the server. Only synchronized folders are taken into account, i.e. invalid and ignored
+     * directories are excluded. Missing directory checksums will be calculated on demand, and the folder is created implicitly in case
+     * it not already exists.
+     *
+     * @param limit The maximum number of directories to add before throwing an exception, or <code>-1</code> for no limitations
+     * @return The server directory versions
+     */
+    public ServerDirectoryVersion getServerDirectory(String path) throws OXException {
+        return getStorage().wrapInTransaction(new StorageOperation<ServerDirectoryVersion>() {
+
+            @Override
+            public ServerDirectoryVersion call() throws OXException {
+                FileStorageFolder folder = getStorage().getFolder(path, true);
+                List<ServerDirectoryVersion> directoryVersions = getServerDirectoryVersions(Collections.singletonMap(path, folder));
+                return 0 < directoryVersions.size() ? directoryVersions.get(0) : null;
             }
         });
     }
 
     /**
-     * Gets a list of all directory versions available at the server. Only synchronized folders are taken into account, i.e. invalid and
-     * ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
+     * Gets a list of directory versions for the supplied mapping of paths to folders. Only synchronized folders are taken into account, 
+     * i.e. invalid and ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
      *
-     * @param limit The maximum number of directories to add before throwing an exception, or <code>-1</code> for no limitations
      * @return The server directory versions
      */
-    List<ServerDirectoryVersion> getServerDirectoryVersions(int limit) throws OXException {
-        Map<String, FileStorageFolder> folders;
-        if (-1 != limit) {
-            folders = getStorage().getFolders(limit + 1);
-            if (folders.size() > limit) {
-                throw DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(I(limit));
-            }
-        } else {
-            folders = getStorage().getFolders();
-        }
+    List<ServerDirectoryVersion> getServerDirectoryVersions(Map<String, FileStorageFolder> folders) throws OXException {
         List<String> folderIDs = new ArrayList<String>(folders.size());
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String path = entry.getKey();

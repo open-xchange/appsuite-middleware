@@ -71,6 +71,16 @@ public interface DriveService {
     static final Capability CAPABILITY_DRIVE = new Capability("drive");
 
     /**
+     * Synchronizes a single folder.
+     *
+     * @param session The session
+     * @param originalVersion The directory version previously known by the client
+     * @param clientVersions The current client directory version
+     * @return A list of resulting actions to execute on the client afterwards
+     */
+    SyncResult<DirectoryVersion> syncFolder(DriveSession session, DirectoryVersion originalVersion, DirectoryVersion clientVersion) throws OXException;
+        
+    /**
      * Synchronizes the folder hierarchy.
      *
      * @param session The session
