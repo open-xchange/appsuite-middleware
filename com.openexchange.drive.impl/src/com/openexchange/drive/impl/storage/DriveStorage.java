@@ -215,21 +215,26 @@ public class DriveStorage {
      * @throws OXException
      */
     public File copyFile(File sourceFile, String targetFileName, String targetPath) throws OXException {
-        File copiedFile = new DefaultFile();
-        copiedFile.setFileName(targetFileName);
-        copiedFile.setTitle(targetFileName);
-        copiedFile.setFolderId(getFolderID(targetPath, true));
-        copiedFile.setLastModified(new Date());
-        copiedFile.setVersion("1");
-        copiedFile.setFileMIMEType(sourceFile.getFileMIMEType());
+        File fileCopy = new DefaultFile();
+        fileCopy.setFileName(targetFileName);
+        fileCopy.setTitle(targetFileName);
+        fileCopy.setFolderId(getFolderID(targetPath, true));
+        fileCopy.setLastModified(new Date());
+        fileCopy.setVersion("1");
+        fileCopy.setFileMIMEType(sourceFile.getFileMIMEType());
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.VERSION });
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
                 combine(targetPath, targetFileName));
         }
         String sourceVersion = sourceFile.isCurrentVersion() ? FileStorageFileAccess.CURRENT_VERSION : sourceFile.getVersion();
-        String targetId = getFileAccess().copy(sourceFile.getId(), sourceVersion, copiedFile.getFolderId(), copiedFile, null, fileFields);
-        copiedFile.setId(targetId);
+        String targetId = getFileAccess().copy(sourceFile.getId(), sourceVersion, fileCopy.getFolderId(), fileCopy, null, fileFields);
+        File copiedFile = getFile(targetId);
+        if (false == targetFileName.equals(copiedFile.getFileName())) {
+            Exception cause = new Exception("File copied to " + copiedFile.getFileName());
+            deleteFile(copiedFile, true);
+            throw DriveExceptionCodes.FILE_NOT_FOUND.create(cause, targetFileName, targetPath);
+        }
         return copiedFile;
     }
 
