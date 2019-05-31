@@ -425,7 +425,20 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     protected JSONObject getCachingConfiguration() {
-        JSONObject internalConfig = this.getAccount().getInternalConfiguration();
+        JSONObject internalConfig = account.getInternalConfiguration();
+        if (null == internalConfig) {
+            /*
+             * inconsistent configuration, try and restore in account
+             */
+            internalConfig = new JSONObject().putSafe(CachingCalendarAccessConstants.CACHING, new JSONObject());
+            try {
+                AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+                account = accountService.updateAccount(
+                    session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+            } catch (Exception e) {
+                LOG.warn("Error initializing configuration in account {}", account, e);
+            }
+        }
         JSONObject caching = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
         if (caching == null) {
             caching = new JSONObject();
