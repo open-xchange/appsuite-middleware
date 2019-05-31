@@ -86,27 +86,27 @@ public class ThrottlingDriveService implements DriveService {
      * @param delegate The drive service delegate
      * @throws OXException
      */
-    public ThrottlingDriveService(DriveService delegate) throws OXException {
+    public ThrottlingDriveService(DriveService delegate) {
         super();
         this.delegate = delegate;
         currentSyncOperations = new AtomicInteger();
     }
 
     @Override
-    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException {
+    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions) throws OXException {
         try {
             enterSyncOperation(session);
-            return delegate.syncFolders(session, originalVersions, clientVersions, includeQuota);
+            return delegate.syncFolders(session, originalVersions, clientVersions);
         } finally {
             leaveSyncOperation();
         }
     }
 
     @Override
-    public SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException {
+    public SyncResult<FileVersion> syncFiles(DriveSession session, String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
         try {
             enterSyncOperation(session);
-            return delegate.syncFiles(session, path, originalVersions, clientVersions, includeQuota);
+            return delegate.syncFiles(session, path, originalVersions, clientVersions);
         } finally {
             leaveSyncOperation();
         }

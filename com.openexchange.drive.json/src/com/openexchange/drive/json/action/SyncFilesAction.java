@@ -50,7 +50,6 @@
 package com.openexchange.drive.json.action;
 
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -118,16 +117,14 @@ public class SyncFilesAction extends AbstractDriveAction {
          */
         try {
             DriveService driveService = Services.getService(DriveService.class, true);
-            boolean includeQuota = requestData.containsParameter("quota") ? requestData.getParameter("quota", Boolean.class).booleanValue() : false;
-            SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles, includeQuota);
-            if (null != session.isDiagnostics() || includeQuota) {
+            SyncResult<FileVersion> syncResult = driveService.syncFiles(session, path, originalFiles, clientFiles);
+            if (null != session.isDiagnostics() || session.isIncludeQuota()) {
                 JSONObject jsonObject = new JSONObject();
                 if (null != session.isDiagnostics()) {
                     jsonObject.put("diagnostics", syncResult.getDiagnostics());
                 }
-                if (includeQuota) {
-                    JSONArray quotaAsJSON = DriveJSONUtils.serializeQuota(syncResult.getQuota());
-                    jsonObject.put("quota", quotaAsJSON);
+                if (session.isIncludeQuota()) {
+                    jsonObject.put("quota", DriveJSONUtils.serializeQuota(syncResult.getQuota()));
                 }
                 jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));
                 return new AJAXRequestResult(jsonObject, "json");

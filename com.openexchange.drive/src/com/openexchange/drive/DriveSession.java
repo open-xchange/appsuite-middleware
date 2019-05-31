@@ -160,6 +160,13 @@ public interface DriveSession {
     boolean useDriveMeta();
 
     /**
+     * Gets a value indicating whether the current quota and usage should be included in the response or not, when applicable.
+     *
+     * @return <code>true</code> if quota information should be included, <code>false</code>, otherwise
+     */
+    boolean isIncludeQuota();
+
+    /**
      * Gets the desired mode to use for metadata synchronization.
      *
      * @return The <code>.drive-meta</code>-mode

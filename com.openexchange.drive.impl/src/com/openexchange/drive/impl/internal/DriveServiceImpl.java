@@ -142,7 +142,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException {
+    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions) throws OXException {
         ServerSession serverSession = session.getServerSession();
         /*
          * check (hard) version restrictions
@@ -261,10 +261,7 @@ public class DriveServiceImpl implements DriveService {
                     actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, false));
                 }
             }
-            DriveQuota quota = null;
-            if (includeQuota) {
-                quota = getQuota(session);
-            }
+            DriveQuota quota = session.isIncludeQuota() ? getQuota(session) : null;
             /*
              * return actions for client
              */
@@ -277,7 +274,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException {
+    public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateFileVersions(originalVersions);
         DriveVersionValidator.validateFileVersions(clientVersions);
@@ -340,10 +337,7 @@ public class DriveServiceImpl implements DriveService {
                 }
                 throw e;
             }
-            DriveQuota quota = null;
-            if (includeQuota) {
-                quota = getQuota(session);
-            }
+            DriveQuota quota = session.isIncludeQuota() ? getQuota(session) : null;
             /*
              * return actions for client
              */
