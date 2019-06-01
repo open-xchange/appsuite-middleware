@@ -125,7 +125,13 @@ public final class HtmlServices {
                 StringBuffer sb = new StringBuffer(s.length());
                 do {
                     char c = (char) Integer.parseInt(m.group(1));
-                    m.appendReplacement(sb, String.valueOf(c));
+                    String replacement;
+                    if (c == '\\' || c == '$') {
+                        replacement = new StringBuilder(2).append('\\').append(c).toString();
+                    } else {
+                        replacement = String.valueOf(c);
+                    }
+                    m.appendReplacement(sb, replacement);
                 } while (m.find());
                 m.appendTail(sb);
                 s = sb.toString();
