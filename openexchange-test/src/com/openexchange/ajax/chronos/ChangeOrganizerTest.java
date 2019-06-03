@@ -97,6 +97,8 @@ public class ChangeOrganizerTest extends AbstractOrganizerTest {
         if (null != event) {
             EventId id = new EventId();
             id.setId(event.getId());
+            
+            // Make sure event is deleted, whoever the organizer is
             try {
                 id.setFolder(null != event.getFolder() ? event.getFolder() : defaultFolderId);
                 eventManager.deleteEvent(id, System.currentTimeMillis(), false);
@@ -105,7 +107,7 @@ public class ChangeOrganizerTest extends AbstractOrganizerTest {
             }
             try {
                 id.setFolder(null != event.getFolder() ? event.getFolder() : folderId2);
-                eventManager2.deleteEvent(id);
+                eventManager2.deleteEvent(id, System.currentTimeMillis(), false);
             } catch (Exception e) {
                 // Ignore
             }
