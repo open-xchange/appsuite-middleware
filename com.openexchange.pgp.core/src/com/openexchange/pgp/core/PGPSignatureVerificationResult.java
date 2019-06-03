@@ -49,6 +49,8 @@
 
 package com.openexchange.pgp.core;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPUserAttributeSubpacketVector;
@@ -62,13 +64,15 @@ import org.bouncycastle.openpgp.PGPUserAttributeSubpacketVector;
 public class PGPSignatureVerificationResult {
 
     private final PGPSignature              signature;
-    private final boolean                   verified;
+    private boolean                         verified;
     private final boolean                   missing;
     private String                          userId;
+    private String                          error;
     private PGPPublicKey                    publicKey;
     private PGPUserAttributeSubpacketVector userAttributes;
     private PGPPublicKey                    issuerKey;
     private MDCVerificationResult           mdcVerificationResult;
+    private final List<String>              issuerUserIds = new ArrayList<String>();
 
     /**
      * Initializes a new {@link PGPSignatureVerificationResult}.
@@ -112,6 +116,26 @@ public class PGPSignatureVerificationResult {
     }
 
     /**
+     * Gets error if any
+     *
+     * @return  Error message if any
+     */
+    public String getError() {
+        return error;
+    }
+
+    /**
+     * Sets the error message
+     *
+     * @param error The message
+     * @return this
+     */
+    public PGPSignatureVerificationResult setError(String error) {
+        this.error = error;
+        return this;
+    }
+
+    /**
      * Gets the verification result
      *
      * @return Whether the signature has been verified or not
@@ -120,12 +144,23 @@ public class PGPSignatureVerificationResult {
         return verified;
     }
 
+    /**
+     * Sets the verification result
+     *
+     * @param verified The result to set
+     * @return this
+     */
+    public PGPSignatureVerificationResult setVerified(boolean verified) {
+        this.verified = verified;
+        return this;
+    }
+
     public boolean isMissing() {
         return missing;
     }
 
     /**
-     * Sets the PGP user id related to the signature verification, or null if not user id is related
+     * Sets the PGP user id related to the signature verification, or null if this signature is not related to a user-id
      *
      * @param userId The user ID related to the signature verification
      * @return this, for a fluent like style.
@@ -138,7 +173,7 @@ public class PGPSignatureVerificationResult {
     /**
      * Get the PGP user id related to the signature verification
      *
-     * @return The PGP user id related to the signature verification, or null if not user id is related
+     * @return The PGP user id related to the signature verification, or null if this signature is not related to a user-id
      */
     public String getUserId() {
         return this.userId;
@@ -195,10 +230,30 @@ public class PGPSignatureVerificationResult {
      * Sets the public key of the issuer, or null if the issuer's key is not known
      *
      * @param issuerKey The public key of the issuer, or null if the public key is unknown.
-     * @return
+     * @return this
      */
     public PGPSignatureVerificationResult setIssuerKey(PGPPublicKey issuerKey) {
         this.issuerKey = issuerKey;
+        return this;
+    }
+
+    /**
+     * Returns the user IDs of the issuer if known, an empty list otherwise
+     *
+     * @return The user IDs of the signature's issuer, or an empty list if unknown
+     */
+    public List<String> getIssuerUserIds() {
+        return this.issuerUserIds;
+    }
+
+    /**
+     * Adds a user ID of the issuer
+     *
+     * @param  issuerUserId The ID of the issuer to add
+     * @return this
+     */
+    public PGPSignatureVerificationResult addIssuerUserId(String issuerUserId) {
+        this.issuerUserIds.add(issuerUserId);
         return this;
     }
 
@@ -206,5 +261,3 @@ public class PGPSignatureVerificationResult {
         return this.mdcVerificationResult;
     }
 }
-
-

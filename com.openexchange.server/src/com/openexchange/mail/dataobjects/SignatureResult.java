@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.dataobjects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Result of a signature verification
  * {@link SignatureResult}
@@ -61,6 +64,10 @@ public class SignatureResult {
     private boolean verified;  // Signature is verified
     private boolean missing;   // Missing key/info to verify
     private long date;         // Tick representation date
+    private String error;      // Error in verifying signature
+    private long issuerKeyId;  // The ID of the issuer key
+    private String issuerKeyFingerprint; // The fingerprint of the issuer key
+    private List<String> issuerUserIds; //The PGP userIds of the issuer
 
     /**
      * Default constructor
@@ -70,6 +77,8 @@ public class SignatureResult {
         verified = false;
         missing = false;
         date = 0l;
+        error = null;
+        issuerUserIds = new ArrayList<String>();
     }
 
     /**
@@ -121,5 +130,74 @@ public class SignatureResult {
         return date;
     }
 
+    /**
+     * Sets an error message
+     * @param error
+     */
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    /**
+     * Retrieves any error message
+     * @return error
+     */
+    public String getError() {
+        return error;
+    }
+
+    /**
+     * Gets the ID of the issuer key
+     *
+     * @return The ID of the issuer key
+     */
+    public long getIssuerKeyId() {
+        return this.issuerKeyId;
+    }
+
+    /**
+     * Sets the ID of the issuer key
+     *
+     * @param keyId The ID of the issuer key
+     */
+    public void setIssuerKeyId(long keyId) {
+        this.issuerKeyId = keyId;
+    }
+
+    /**
+     * Gets the fingerprint of the issuer key
+     *
+     * @return The Fingerprint of the issuer key, or null if unknown
+     */
+    public String getIssuerKeyFingerprint() {
+        return this.issuerKeyFingerprint;
+    }
+
+    /**
+     * Sets the fingerprint of the issuer key
+     *
+     * @param fingerprint The fingerprinta of the issuer key
+     */
+    public void setIssuerKeyFingerprint(String fingerprint) {
+        this.issuerKeyFingerprint = fingerprint;
+    }
+
+    /**
+     * Gets the PGP user IDs related to the issuer key
+     *
+     * @return a list of user IDs related to the issuer key
+     */
+    public List<String> getIssuerUserIds(){
+       return this.issuerUserIds;
+    }
+
+    /**
+     * Sets the PGP user IDs related to the issuer key
+     *
+     * @param issuerUserIds The IDs related to the issuer key
+     */
+    public void setIssuerUserIds(List<String> issuerUserIds) {
+       this.issuerUserIds = issuerUserIds;
+    }
 }
 

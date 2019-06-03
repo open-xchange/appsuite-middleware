@@ -49,6 +49,8 @@
 
 package com.openexchange.pgp.core;
 
+import static com.openexchange.java.Autoboxing.l;
+import static com.openexchange.java.Autoboxing.L;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -275,6 +277,49 @@ public class PGPDecrypter {
     }
 
     /**
+     * Gets the ID of the master key for a given PGPPublicKey
+     *
+     * This method searches for sub-key-binding on the given public key and return the ID of the issuer key.
+     *
+     * @param publicKey The public key to get the master key ID from
+     * @return The ID of the publicKey's master key, or null if the mater key could not be determined.
+     */
+    private static Long getPublicMasterKeyId(PGPPublicKey publicKey) {
+
+        if(publicKey.isMasterKey()) {
+            //The given key is the actual master key
+            return L(publicKey.getKeyID());
+        }
+
+        //Get the subkey binding and return the ID of the master key
+        @SuppressWarnings("rawtypes") Iterator subkeyBinding = publicKey.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
+        if(subkeyBinding.hasNext()) {
+            PGPSignature signature = (PGPSignature)subkeyBinding.next();
+            return L(signature.getKeyID());
+        }
+        return null;
+    }
+
+    /**
+     * Tries to obtain the master key for the given key
+     *
+     * @param key The key to obtain the master key from
+     * @return The key if it is an master key, the master-key obtained from sub-key-binding signatures, or null if no binding found
+     * @throws Exception
+     */
+    private PGPPublicKey getMasterKey(PGPPublicKey key) throws Exception {
+        if(key.isMasterKey()) {
+           return key;
+        }
+        Long masterKeyId = getPublicMasterKeyId(key);
+        if(masterKeyId != null) {
+            return this.keyRetrievalStrategy.getPublicKey(l(masterKeyId));
+        }
+
+        return null;
+    }
+
+    /**
      * Controls whether or not to treat a key, fetched from a {@link PGPKeyRetrievalStrategy}, as found.
      *
      * @param key The key to check
@@ -398,7 +443,22 @@ public class PGPDecrypter {
                         PGPSignature signature = signatureList.get(0);
                         if (signatureInitialized) {
                             //Verify signatures
-                            signatureVerificationResults.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
+                            PGPSignatureVerificationResult pgpSignatureVerificationResult = new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature));
+                            if(singatureVerifyKey != null) {
+                               pgpSignatureVerificationResult.setIssuerKey(singatureVerifyKey);
+                               Iterator<String> userIds = null;
+                               PGPPublicKey masterKey = getMasterKey(singatureVerifyKey);
+                               if(masterKey != null) {
+                                   userIds = masterKey.getUserIDs();
+                                   if(userIds != null) {
+                                       //Adding user-id so that it is possible for a caller to determine who created this signature
+                                       while(userIds.hasNext()) {
+                                           pgpSignatureVerificationResult.addIssuerUserId(userIds.next());
+                                       }
+                                   }
+                               }
+                            }
+                            signatureVerificationResults.add(pgpSignatureVerificationResult);
                         }
                         else if (!signatureVerificationKeyFound) {
                             //Key not found for verifying the signature; KeyRetrievalStrategy is responsible for logging this;
