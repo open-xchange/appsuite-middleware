@@ -188,6 +188,20 @@ if [ ${1:-0} -eq 2 ]; then
       ox_scr_done ${SCR}
     }
 
+    SCR=SCR-466
+    ox_scr_todo ${SCR} && {
+      pfile=/opt/open-xchange/etc/AdminUser.properties
+      p_key=DEFAULT_PASSWORD_MECHANISM
+      old_default=SHA
+      new_default=SHA256
+      curr_val=$(ox_read_property ${p_key} ${pfile})
+      if [ "${curr_val}" = "${old_default}" ]
+      then
+        ox_set_property ${p_key} ${new_default} ${pfile}
+      fi
+      ox_scr_done ${SCR}
+    }
+
 fi
 ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
