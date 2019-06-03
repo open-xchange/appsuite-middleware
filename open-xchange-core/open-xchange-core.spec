@@ -631,6 +631,11 @@ EOF
       done
       ox_scr_done ${SCR}
     }
+
+    # SCR-470
+    if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
+      sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
+  fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )

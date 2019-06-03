@@ -604,6 +604,11 @@ EOF
       done
       ox_scr_done ${SCR}
     }
+
+    # SCR-470
+    if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
+        sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
+    fi
 }
 
 setConfigFilePermissions() {
