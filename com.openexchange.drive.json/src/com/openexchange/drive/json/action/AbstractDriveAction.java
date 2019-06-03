@@ -193,7 +193,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          */
         String quota = requestData.getParameter("quota");
         if (Strings.isNotEmpty(quota)) {
-            driveSession.setDiagnostics(Boolean.valueOf(quota));
+            driveSession.setIncludeQuota(Boolean.parseBoolean(quota));
         }
         /*
          * extract columns parameter to fields if present
