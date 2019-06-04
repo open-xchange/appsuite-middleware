@@ -40,6 +40,10 @@ curl http://yourname:yourpassword@localhost:8009/monitoring/jolokia/read/com.ope
 | client=all,name=TotalCount,type=sessiond          | open-xchange-core |||
 | client=all,name=ShortTermCount,type=sessiond      | open-xchange-core |||
 | client=all,name=LongTermCount,type=sessiond       | open-xchange-core |||
+| name=<CacheRegionName>.offeredEvents,type=cache   | open-xchange-core | Offered events for cache region "<CacheRegionName>" ||
+| name=<CacheRegionName>.deliveredEvents,type=cache | open-xchange-core | Delivered events for cache region "<CacheRegionName>" ||
+| name=offeredEvents,type=cache                     | open-xchange-core | Offered events for all cache regions ||
+| name=deliveredEvents,type=cache                   | open-xchange-core | Delivered events for all cache regions ||
 | name=Cache Hit,type=antivirus                     | open-xchange-antivirus |||
 | name=Cache Miss,type=antivirus                    | open-xchange-antivirus |||
 | name=Cache Invalidations,type=antivirus           | open-xchange-antivirus |||

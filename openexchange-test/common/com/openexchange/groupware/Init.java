@@ -66,6 +66,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventConfiguration;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
+import com.openexchange.caching.events.monitoring.CacheEventMetricHandler;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -155,6 +156,8 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -382,6 +385,10 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectNotification();
         System.out.println("startAndInjectNotification took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectMetricService();
+        System.out.println("startAndInjectMetricService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
         startAndInjectCache();
@@ -898,9 +905,9 @@ public final class Init {
     private static void startAndInjectGroupService() {
         if (null == TestServiceRegistry.getInstance().getService(GroupService.class)) {
             // TODO properly inject group service
-//            final GroupService us = new GroupServiceImpl();
-//            services.put(GroupService.class, us);
-//            TestServiceRegistry.getInstance().addService(GroupService.class, us);
+            //            final GroupService us = new GroupServiceImpl();
+            //            services.put(GroupService.class, us);
+            //            TestServiceRegistry.getInstance().addService(GroupService.class, us);
         }
     }
 
@@ -956,6 +963,14 @@ public final class Init {
         }
     }
 
+    private static void startAndInjectMetricService() throws Exception {
+        if (null == TestServiceRegistry.getInstance().getService(MetricService.class)) {
+            MetricService metricService = new DropwizardMetricService();
+            services.put(MetricService.class, metricService);
+            TestServiceRegistry.getInstance().addService(MetricService.class, metricService);
+        }
+    }
+
     public static void startAndInjectCache() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(CacheService.class)) {
             CacheEventConfiguration config = new CacheEventConfiguration() {
@@ -965,8 +980,11 @@ public final class Init {
                     return false;
                 }
             };
+
             ThreadPoolService threadPool = (ThreadPoolService) services.get(ThreadPoolService.class);
-            CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool);
+            MetricService metricService = (MetricService) services.get(MetricService.class);
+            CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(metricService);
+            CacheEventService cacheEventService = new CacheEventServiceImpl(config, threadPool, metricHandler);
             services.put(CacheEventService.class, cacheEventService);
             TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();

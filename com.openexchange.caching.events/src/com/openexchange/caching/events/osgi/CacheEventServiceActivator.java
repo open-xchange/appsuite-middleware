@@ -52,13 +52,14 @@ package com.openexchange.caching.events.osgi;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventConfigurationImpl;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
-import com.openexchange.caching.events.internal.CacheEventServiceLookup;
 import com.openexchange.caching.events.monitoring.CacheEventMBean;
 import com.openexchange.caching.events.monitoring.CacheEventMBeanImpl;
+import com.openexchange.caching.events.monitoring.CacheEventMetricHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.osgi.HousekeepingManagementTracker;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -70,7 +71,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public final class CacheEventServiceActivator extends HousekeepingActivator {
 
-    private CacheEventServiceImpl service;
+    private CacheEventServiceImpl cacheEventService;
+    private CacheEventMetricHandler metricHandler;
 
     /**
      * Initializes a new {@link CacheEventServiceActivator}.
@@ -81,15 +83,21 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class };
+        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class, MetricService.class };
     }
 
     @Override
     protected synchronized void handleAvailability(Class<?> clazz) {
         if (ThreadPoolService.class.equals(clazz)) {
-            CacheEventServiceImpl service = this.service;
+            CacheEventServiceImpl service = this.cacheEventService;
             if (null != service) {
                 service.setThreadPoolService(getService(ThreadPoolService.class));
+            }
+        }
+        if (MetricService.class.equals(clazz)) {
+            CacheEventMetricHandler handler = this.metricHandler;
+            if (null != handler) {
+                handler.setMetricService(getService(MetricService.class));
             }
         }
     }
@@ -97,9 +105,15 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
     @Override
     protected synchronized void handleUnavailability(Class<?> clazz) {
         if (ThreadPoolService.class.equals(clazz)) {
-            CacheEventServiceImpl service = this.service;
+            CacheEventServiceImpl service = this.cacheEventService;
             if (null != service) {
                 service.setThreadPoolService(null);
+            }
+        }
+        if (MetricService.class.equals(clazz)) {
+            CacheEventMetricHandler handler = this.metricHandler;
+            if (null != handler) {
+                handler.setMetricService(null);
             }
         }
     }
@@ -109,11 +123,13 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
 
-        CacheEventServiceLookup.set(this);
-        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class));
-        this.service = service;
+        MetricService metricService = getService(MetricService.class);
+        CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(metricService);
+        this.metricHandler = metricHandler;
+        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class), metricHandler);
+        this.cacheEventService = service;
 
-        track(ManagementService.class, new HousekeepingManagementTracker(context, CacheEventMBean.NAME, CacheEventMBean.DOMAIN, new CacheEventMBeanImpl(service)));
+        track(ManagementService.class, new HousekeepingManagementTracker(context, CacheEventMBean.NAME, CacheEventMBean.DOMAIN, new CacheEventMBeanImpl(metricHandler)));
         openTrackers();
 
         registerService(CacheEventService.class, service);
@@ -124,12 +140,12 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
     protected synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        CacheEventServiceImpl service = this.service;
+        CacheEventServiceImpl service = this.cacheEventService;
         if (null != service) {
             service.shutdown();
-            this.service = null;
+            this.cacheEventService = null;
         }
-        CacheEventServiceLookup.set(null);
+        this.metricHandler = null;
         super.stopBundle();
     }
 

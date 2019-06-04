@@ -198,5 +198,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.principalusecount"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.multifactor"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/net.fortuna.ical4j"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.metrics"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.metrics.dropwizard"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

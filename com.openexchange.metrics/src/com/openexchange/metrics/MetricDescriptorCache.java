@@ -67,6 +67,9 @@ public class MetricDescriptorCache {
 
     /**
      * Initialises a new {@link MetricDescriptorCache}.
+     * 
+     * @param metricService The instance of the {@link MetricService}
+     * @param group The name of the group for with the metric descriptor cache shall be initialised.
      */
     public MetricDescriptorCache(MetricService metricService, String group) {
         super();
