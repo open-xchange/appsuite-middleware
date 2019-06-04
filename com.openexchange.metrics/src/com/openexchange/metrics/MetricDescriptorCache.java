@@ -116,9 +116,12 @@ public class MetricDescriptorCache {
      * Unregisters all metrics and clears the cache
      */
     public void clear() {
+        metricDescriptors.clear();
+        if (metricService == null) {
+            return;
+        }
         for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
             metricService.removeMetric(metricDescriptor);
         }
-        metricDescriptors.clear();
     }
 }
