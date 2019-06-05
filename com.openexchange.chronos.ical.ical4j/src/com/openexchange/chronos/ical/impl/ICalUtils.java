@@ -171,7 +171,7 @@ public class ICalUtils {
         return calendar;
     }
 
-    static ImportedCalendar importCalendar(InputStream iCalFile, ICalMapper mapper, ICalParameters parameters) throws OXException {
+    public static ImportedCalendar importCalendar(InputStream iCalFile, ICalMapper mapper, ICalParameters parameters) throws OXException {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
         return importCalendar(new VCalendar(importCalendar(iCalFile, iCalParameters)), mapper, iCalParameters);
     }
