@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
+import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -363,6 +364,16 @@ public class EventUpdateProcessor implements EventUpdate {
                 if (isSeriesException(originalEvent) && (null == originalSeriesMaster || 
                     false == EventMapper.getInstance().get(EventField.ATTENDEE_PRIVILEGES).equals(originalSeriesMaster, updatedEvent))) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), updatedField);
+                }
+                /*
+                 * restrict changes to event organizer (but ignore if set to 'null')
+                 */
+                if (isGroupScheduled(originalEvent) && false == matches(originalEvent.getOrganizer(), calendarUser)) {
+                    if (null != updatedEvent.getAttendeePrivileges()) {
+                        throw CalendarExceptionCodes.NOT_ORGANIZER.create(
+                            folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getCn());
+                    }
+                    updatedEvent.removeAttendeePrivileges();
                 }
                 break;
             case CLASSIFICATION:
