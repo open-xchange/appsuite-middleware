@@ -210,8 +210,7 @@ public final class DeleteRegistry {
             new POP3DeleteListener(),
             new MailAccountDeleteListener(),
             new UserContextDeleteListener(),
-            new SequenceContextDeleteListener(),
-            new PublicationUserDeleteListener()
+            new SequenceContextDeleteListener()
         };
     }
 
