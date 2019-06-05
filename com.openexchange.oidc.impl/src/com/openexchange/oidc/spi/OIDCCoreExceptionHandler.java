@@ -49,6 +49,7 @@
 
 package com.openexchange.oidc.spi;
 
+import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionHandler;
 
 /**
@@ -58,5 +59,9 @@ import com.openexchange.oidc.OIDCExceptionHandler;
  * @since v7.10.0
  */
 public class OIDCCoreExceptionHandler extends AbstractOIDCExceptionHandler {
+
+	public OIDCCoreExceptionHandler(OIDCBackendConfig config) {
+		super(config);
+	}
     
 }

@@ -267,4 +267,12 @@ public interface OIDCBackendConfig {
      * @return
      */
     List<String> getHosts();
+    
+    /**
+     * Load the redirect URI that should be used if a server error occurs that can be ignored.
+     * For example a redirect to the IDP for another login attempt.
+     *
+     * @return
+     */
+    String getFailureRedirect();
 }
