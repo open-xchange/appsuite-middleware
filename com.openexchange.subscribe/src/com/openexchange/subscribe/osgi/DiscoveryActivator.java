@@ -65,7 +65,6 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -75,13 +74,10 @@ import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.database.SubscriptionUserDeleteListener;
-import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategy;
 import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategy;
-import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterStrategy;
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
-import com.openexchange.subscribe.internal.TaskFolderUpdaterStrategy;
 import com.openexchange.subscribe.secret.SubscriptionSecretHandling;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
@@ -102,9 +98,7 @@ public class DiscoveryActivator extends HousekeepingActivator {
         this.collector = collector;
         final WhiteboardContextService contextService = new WhiteboardContextService(context);
         this.contextService = contextService;
-        final UserService users = getService(UserService.class);
         final UserPermissionService userPermissions = getService(UserPermissionService.class);
-        final InfostoreFacade infostore = getService(InfostoreFacade.class);
         final FolderService folders = getService(FolderService.class);
 
         final Dictionary<String, Object> discoveryDict = new Hashtable<String, Object>();
@@ -118,11 +112,6 @@ public class DiscoveryActivator extends HousekeepingActivator {
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderMultipleUpdaterStrategy(), true));
-        folderUpdaters.add(new StrategyFolderUpdaterService<Task>(new TaskFolderUpdaterStrategy()));
-        folderUpdaters.add(new StrategyFolderUpdaterService<DocumentMetadataHolder>(new DocumentMetadataHolderFolderUpdaterStrategy(
-            users,
-            userPermissions,
-            infostore)));
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
         registerService(SubscriptionExecutionService.class, executor);
