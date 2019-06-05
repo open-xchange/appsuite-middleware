@@ -151,7 +151,13 @@ public enum OIDCBackendProperty implements Property {
     /**
      * hosts - This contains a comma separated list of hosts, that this backend supports.
      */
-    hosts(OIDCProperty.PREFIX, "all");
+    hosts(OIDCProperty.PREFIX, "all"),
+    
+    /**
+     * failureRedirect - Defines where a user should be redirected if an error occurs that 
+     * does not need a special handling.
+     */
+    failureRedirect(OIDCProperty.PREFIX, "");
 
     private final String fqn;
     private final Object defaultValue;
