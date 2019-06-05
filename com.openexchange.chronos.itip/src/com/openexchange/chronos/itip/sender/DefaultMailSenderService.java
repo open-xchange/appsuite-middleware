@@ -287,11 +287,11 @@ public class DefaultMailSenderService implements MailSenderService {
                     }
                     bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
                     String contentId = attachment.getManagedId() + "@" + mail.getEvent().getUid();
-                    bodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, contentId);
+                    bodyPart.setHeader(MessageHeaders.HDR_CONTENT_ID, '<' + contentId + '>');
 
                     // Dirty hack... Attachment reference on event is updated implicit 
                     attachment.setManagedId(0);
-                    attachment.setUri("CID:" + contentId);
+                    attachment.setUri("cid:" + contentId);
                     /*
                      * Append body part
                      */
