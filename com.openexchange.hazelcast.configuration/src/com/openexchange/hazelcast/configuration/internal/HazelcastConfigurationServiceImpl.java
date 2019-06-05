@@ -65,8 +65,10 @@ import com.hazelcast.config.Config;
 import com.hazelcast.config.ConfigLoader;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapIndexConfig;
+import com.hazelcast.config.MemcacheProtocolConfig;
 import com.hazelcast.config.MultiMapConfig;
 import com.hazelcast.config.QueueConfig;
+import com.hazelcast.config.RestApiConfig;
 import com.hazelcast.config.SSLConfig;
 import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
@@ -331,8 +333,19 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setProperty(GroupProperty.HEALTH_MONITORING_LEVEL.getName(), configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
         config.setProperty(GroupProperty.OPERATION_CALL_TIMEOUT_MILLIS.getName(), configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(GroupProperty.ENABLE_JMX.getName(), configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
-        config.setProperty(GroupProperty.MEMCACHE_ENABLED.getName(), configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
-        config.setProperty(GroupProperty.REST_ENABLED.getName(), configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
+        MemcacheProtocolConfig memcacheProtocolConfig = config.getNetworkConfig().getMemcacheProtocolConfig();
+        if (memcacheProtocolConfig == null) {
+            memcacheProtocolConfig = new MemcacheProtocolConfig();
+        }
+        memcacheProtocolConfig.setEnabled(configService.getBoolProperty("com.openexchange.hazelcast.memcache.enabled", false));
+        config.getNetworkConfig().setMemcacheProtocolConfig(memcacheProtocolConfig);
+
+        RestApiConfig restApiConfig = config.getNetworkConfig().getRestApiConfig();
+        if (restApiConfig == null) {
+            restApiConfig = new RestApiConfig();
+        }
+        restApiConfig.setEnabled(configService.getBoolProperty("com.openexchange.hazelcast.rest.enabled", false));
+        config.getNetworkConfig().setRestApiConfig(restApiConfig);
         /*
          * Arbitrary Hazelcast properties
          */
