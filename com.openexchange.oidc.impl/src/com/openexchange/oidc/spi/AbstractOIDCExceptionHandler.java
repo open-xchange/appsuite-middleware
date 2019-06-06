@@ -69,8 +69,8 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
     private OIDCBackendConfig config;
     
     public AbstractOIDCExceptionHandler(OIDCBackendConfig config) {
-    	this.config = config;
-	}
+        this.config = config;
+    }
 
     protected String getDefaultErrorResponsePage(OXException exception, HttpServletRequest request) {
         String result = "";
@@ -113,10 +113,10 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
     public void handleAuthenticationFailed(HttpServletRequest request, HttpServletResponse response, OXException exception) throws IOException {
         LOG.trace("handleAuthenticationFailed(request: {}, HttpServletResponse response, OXException: {})", request.getRequestURI(), exception.getExceptionCode());
         String failureRedirectLocation = this.config.getFailureRedirect();
-		if (failureRedirectLocation.isEmpty() == false && exception.getCode() == OIDCExceptionCode.INVALID_AUTHENTICATION_STATE_NO_USER.getNumber()) {
-			response.sendRedirect(failureRedirectLocation);
-			return;
-		}
+        if (failureRedirectLocation.isEmpty() == false && exception.getCode() == OIDCExceptionCode.INVALID_AUTHENTICATION_STATE_NO_USER.getNumber()) {
+            response.sendRedirect(failureRedirectLocation);
+            return;
+        }
         this.handleResponseException(request, response, exception);
     }
 
