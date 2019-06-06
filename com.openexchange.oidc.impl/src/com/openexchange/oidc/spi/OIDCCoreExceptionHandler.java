@@ -60,8 +60,8 @@ import com.openexchange.oidc.OIDCExceptionHandler;
  */
 public class OIDCCoreExceptionHandler extends AbstractOIDCExceptionHandler {
 
-	public OIDCCoreExceptionHandler(OIDCBackendConfig config) {
-		super(config);
-	}
+    public OIDCCoreExceptionHandler(OIDCBackendConfig config) {
+        super(config);
+    }
     
 }

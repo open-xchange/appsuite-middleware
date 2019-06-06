@@ -213,7 +213,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     
     @Override
     public String getFailureRedirect() {
-    	return this.loadStringProperty(OIDCBackendProperty.failureRedirect);
+        return this.loadStringProperty(OIDCBackendProperty.failureRedirect);
     }
 
     /**
