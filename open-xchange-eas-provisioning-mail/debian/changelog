@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning-mail (7.8.4-59) stable; urgency=medium
+
+  * Build for patch 2019-06-11 (5275)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 06 Jun 2019 16:04:28 +0200
+
 open-xchange-eas-provisioning-mail (7.8.4-58) stable; urgency=medium
 
   * Build for patch 2019-05-14 (5246)
