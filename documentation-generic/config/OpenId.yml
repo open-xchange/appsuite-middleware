@@ -277,7 +277,8 @@ properties:
 
     - key: com.openexchange.oidc.failureRedirect
       description: |
-        Set the redirect location for a failed authentication attempt due to a missing user state.
+        Set the redirect location for a failed authentication attempt because of an internal server error or a timeout
+        since starting the login flow.
       defaultValue:
       version: 7.10.0
       reloadable: true
