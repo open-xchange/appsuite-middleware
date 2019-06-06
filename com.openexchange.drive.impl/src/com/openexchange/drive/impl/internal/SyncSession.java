@@ -263,7 +263,7 @@ public class SyncSession {
      *
      * @return The drive temp helper
      */
-    public DriveTemp getTemp() throws OXException {
+    public DriveTemp getTemp() {
         if (null == temp) {
             temp = new DriveTemp(this);
         }
@@ -343,7 +343,7 @@ public class SyncSession {
      * directories are excluded. Missing directory checksums will be calculated on demand, and the folder is created implicitly in case
      * it not already exists.
      *
-     * @param limit The maximum number of directories to add before throwing an exception, or <code>-1</code> for no limitations
+     * @param path The path to get the directory version for
      * @return The server directory versions
      */
     public ServerDirectoryVersion getServerDirectory(String path) throws OXException {
@@ -359,9 +359,10 @@ public class SyncSession {
     }
 
     /**
-     * Gets a list of directory versions for the supplied mapping of paths to folders. Only synchronized folders are taken into account, 
+     * Gets a list of directory versions for the supplied mapping of paths to folders. Only synchronized folders are taken into account,
      * i.e. invalid and ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
      *
+     * @param folders The mapped folders to get the directory checksums for
      * @return The server directory versions
      */
     List<ServerDirectoryVersion> getServerDirectoryVersions(Map<String, FileStorageFolder> folders) throws OXException {
@@ -390,13 +391,13 @@ public class SyncSession {
             ServerDirectoryVersion directoryVersion = new ServerDirectoryVersion(
                 getStorage().getPath(folderIDs.get(i)), checksums.get(i));
             serverDirectories.add(directoryVersion);
-            if (isTraceEnabled()) {
+            if (null != stringBuilder) {
                 stringBuilder.append(" [").append(directoryVersion.getDirectoryChecksum().getFolderID()).append("] ")
                     .append(directoryVersion.getPath()).append(" | ").append(directoryVersion.getChecksum())
                     .append(" (").append(directoryVersion.getDirectoryChecksum().getSequenceNumber()).append(")\n");
             }
         }
-        if (isTraceEnabled()) {
+        if (null != stringBuilder) {
             trace(stringBuilder);
         }
         return serverDirectories;
