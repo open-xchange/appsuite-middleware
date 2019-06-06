@@ -93,6 +93,8 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String PLAIN_JSON = AJAXServlet.PARAM_PLAIN_JSON;
 
+    private static final String FORCE_JSON = "force_json_response";
+
     private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
     private static final String CONTENTTYPE_HTML = com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
@@ -119,7 +121,12 @@ public class APIResponseRenderer implements ResponseRenderer {
         Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
         if (null == plainJson) {
             boolean b = AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request);
-            plainJson = b ? Boolean.TRUE : null;
+            if (b) {
+                plainJson = Boolean.TRUE;
+            } else {
+                b = AJAXRequestDataTools.parseBoolParameter(FORCE_JSON, request);
+                plainJson = b ? Boolean.TRUE : null;
+            }
         }
 
         Response response = (Response) result.getResultObject();
