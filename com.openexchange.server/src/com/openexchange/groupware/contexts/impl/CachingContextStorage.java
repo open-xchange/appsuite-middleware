@@ -266,7 +266,9 @@ public class CachingContextStorage extends ContextStorage {
                 if (denyImplicitUpdateOnContextLoad()) {
                     context.setUpdateNeeded(true);
                 } else {
-                    context.setUpdating(true);
+                    if (status.needsBlockingUpdates()) {
+                        context.setUpdating(true);
+                    }
                     updater.startUpdate(context);
                 }
             }
