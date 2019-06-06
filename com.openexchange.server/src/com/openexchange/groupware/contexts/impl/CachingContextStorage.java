@@ -255,7 +255,9 @@ public class CachingContextStorage extends ContextStorage {
                 if (denyImplicitUpdateOnContextLoad()) {
                     retval.setUpdateNeeded(true);
                 } else {
-                    retval.setUpdating(true);
+                    if (status.needsBlockingUpdates()) {
+                        retval.setUpdating(true);
+                    }
                     updater.startUpdate(retval);
                 }
             }
