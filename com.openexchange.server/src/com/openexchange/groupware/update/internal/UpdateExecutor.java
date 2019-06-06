@@ -278,31 +278,24 @@ public final class UpdateExecutor {
                 }
             }
 
-            // Is context cache supposed to be invalidated?
-            boolean doRemoveContexts = blocking;
-
             // Either unlock schema or unlock schema and invalidate context cache
-            if (doRemoveContexts) {
-                try {
-                    unlockSchema(blocking, state);
-                } catch (OXException oxe) {
-                    if (!SchemaExceptionCodes.SQL_PROBLEM.equals(oxe)) {
-                        throw oxe;
-                    }
-
-                    Throwable cause = oxe.getCause();
-                    if (!(cause instanceof SQLException) || !Databases.isReadTimeout((SQLException) cause)) {
-                        throw oxe;
-                    }
-
-                    // Unlocking the schema might be successfully executed then...
+            try {
+                unlockSchema(blocking, state);
+            } catch (OXException oxe) {
+                if (!SchemaExceptionCodes.SQL_PROBLEM.equals(oxe)) {
+                    throw oxe;
                 }
 
-                // Remove contexts from cache
-                removeContexts();
-            } else {
-                unlockSchema(blocking, state);
+                Throwable cause = oxe.getCause();
+                if (!(cause instanceof SQLException) || !Databases.isReadTimeout((SQLException) cause)) {
+                    throw oxe;
+                }
+
+                // Unlocking the schema might be successfully executed then...
             }
+
+            // Remove contexts from cache
+            removeContexts();
         }
     }
 
