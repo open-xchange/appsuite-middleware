@@ -173,18 +173,17 @@ public class OIDCSessionInspectorServiceTest {
     
     @Test
     public void onSessionHit_UpdateTokensErrorTest() throws Exception {
-    	AbstractOIDCBackend backend = PowerMockito.spy(new AbstractOIDCBackend() {
-    		@Override
-    		public OIDCBackendConfig getBackendConfig() {
-    			return mockedBackendConfig;
-    		}
-    		
-    		@Override
-    		public void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response)
-    				throws OXException {
-    		}
-		});
-    	
+        AbstractOIDCBackend backend = PowerMockito.spy(new AbstractOIDCBackend() {
+            @Override
+            public OIDCBackendConfig getBackendConfig() {
+                return mockedBackendConfig;
+            }
+
+            @Override
+            public void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+            }
+        });
+
         PowerMockito.doReturn(backend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
         Mockito.when(B(backend.isTokenExpired(mockedSession))).thenReturn(B(true));
         PowerMockito.doThrow(OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create("")).when(backend, PowerMockito.method(AbstractOIDCBackend.class, "loadAccessToken", Session.class)).withArguments(ArgumentMatchers.any(Session.class));

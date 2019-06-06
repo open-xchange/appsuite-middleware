@@ -360,13 +360,13 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LOG.trace("updateOauthTokens(Session session: {})", session.getSessionID());
         AccessTokenResponse accessToken = null;
         try {
-        	accessToken = this.loadAccessToken(session);
+            accessToken = this.loadAccessToken(session);
         } catch (OXException e) {
-        	if (e.getCode() == OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.getNumber()) {
-        		LOG.info(e.getMessage());
-			} else {
-				throw e;
-			}
+            if (e.getCode() == OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.getNumber()) {
+                LOG.info(e.getMessage());
+            } else {
+                throw e;
+            }
         }
         
         if (accessToken == null || accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
