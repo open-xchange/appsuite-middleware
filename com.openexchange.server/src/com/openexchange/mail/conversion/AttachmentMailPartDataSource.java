@@ -81,7 +81,7 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
 
     /**
      * Initializes a new {@link AttachmentMailPartDataSource}.
-     * 
+     *
      */
     public AttachmentMailPartDataSource() {
         super();
@@ -106,7 +106,7 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
 
         // Get the mail with its attachments
         MailPart mail = getMail(arg.getAccountId(), fullname, mailId, session, properties);
-        if (null != mail.getContentType() && mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+        if (null != mail.getContentType() && mail.getContentType().startsWith("multipart/")) {
             for (int i = 0; i < mail.getEnclosedCount(); i++) {
                 MailPart part = mail.getEnclosedMailPart(i);
                 ContentType contentType = part.getContentType();
