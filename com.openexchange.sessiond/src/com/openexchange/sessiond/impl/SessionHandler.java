@@ -809,9 +809,7 @@ public final class SessionHandler {
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-
     protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, Origin origin, List<SessionEnhancement> enhancements, String userAgent) throws OXException {
-
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -829,7 +827,6 @@ public final class SessionHandler {
                 newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
             } else {
                 // Create intermediate SessionDescription instance to offer more flexibility to possible SessionEnhancement implementations
-
                 SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
                 for (SessionEnhancement enhancement: enhancements) {
                     enhancement.enhanceSession(sessionDescription);

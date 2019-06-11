@@ -50,13 +50,11 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
@@ -194,8 +192,23 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
+        // Sanity check for given login request
         sanityChecks(request);
+
+        // Check needed service
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null == sessiondService) {
+            sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+            if (null == sessiondService) {
+                // Giving up...
+                throw ServiceExceptionCode.absentService(SessiondService.class);
+            }
+        }
+
+        // Look-up possible login listeners
         List<LoginListener> listeners = LoginListenerRegistryImpl.getInstance().getLoginListeners();
+
+        // Start login...
         LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         Cookie[] cookies = null;
@@ -285,30 +298,26 @@ public final class LoginPerformer {
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
 
-            //Perform multi-factor authentication if enabled for the user and mark session
-            SessionEnhancement multifactor = null;
-            MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
-            if (multifactorCheck != null) {
-                multifactor = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
-            }
-
-            // Check needed service
-            SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-            if (null == sessiondService) {
-                sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                if (null == sessiondService) {
-                    // Giving up...
-                    throw ServiceExceptionCode.absentService(SessiondService.class);
+            // Perform multi-factor authentication if enabled for the user and mark session
+            SessionEnhancement multifactorSessionEnhancement = null;
+            {
+                MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
+                if (multifactorCheck != null) {
+                    multifactorSessionEnhancement = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
                 }
             }
-            AddSessionParameterImpl addSession = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
+
+            // Compile parameters for adding a session
+            AddSessionParameterImpl addSessionParam = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
             if (SessionEnhancement.class.isInstance(authed)) {
-                addSession.addEnhancement((SessionEnhancement) authed);
+                addSessionParam.addEnhancement((SessionEnhancement) authed);
             }
-            if (multifactor != null) {
-                addSession.addEnhancement(multifactor);
+            if (multifactorSessionEnhancement != null) {
+                addSessionParam.addEnhancement(multifactorSessionEnhancement);
             }
-            Session session = sessiondService.addSession(addSession);
+
+            // Finally, add the session
+            Session session = sessiondService.addSession(addSessionParam);
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
@@ -316,7 +325,6 @@ public final class LoginPerformer {
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
-
 
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
