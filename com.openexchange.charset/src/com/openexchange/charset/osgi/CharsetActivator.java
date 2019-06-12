@@ -82,7 +82,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     }
 
     @Override
-    public CharsetProvider addingService(final ServiceReference<CharsetProvider> reference) {
+    public synchronized CharsetProvider addingService(final ServiceReference<CharsetProvider> reference) {
         CharsetProvider addedService = context.getService(reference);
 
         CollectionCharsetProvider collectionCharsetProvider = this.collectionCharsetProvider;
@@ -100,7 +100,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     }
 
     @Override
-    public void removedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
+    public synchronized void removedService(final ServiceReference<CharsetProvider> reference, final CharsetProvider service) {
         CollectionCharsetProvider collectionCharsetProvider = this.collectionCharsetProvider;
         if (null != collectionCharsetProvider) {
             collectionCharsetProvider.removeCharsetProvider(service);
@@ -115,7 +115,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.charset");
 
         try {
@@ -125,7 +125,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
                 collectionCharsetProvider = (CollectionCharsetProvider) results[1];
             }
             {
-                final CharsetProvider[] results = ModifyCharsetStandardProvider.modifyCharsetExtendedProvider();
+                final CharsetProvider[] results = ModifyCharsetStandardProvider.modifyCharsetStandardProvider();
                 backupStandardCharsetProvider = null == results ? null : results[0];
             }
             LOG.info("Standard & external charset provider replaced with collection charset provider");
@@ -143,7 +143,7 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
     }
 
     @Override
-    public void stopBundle() {
+    public synchronized void stopBundle() {
         LOG.info("stopping bundle: com.openexchange.charset");
         try {
             /*
