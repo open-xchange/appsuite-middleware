@@ -103,11 +103,6 @@ public abstract class AbstractContextMBeanCLI<R> extends AbstractMBeanCLI<R> {
         return invoke(contextId, options, cmd, mbsc);
     }
 
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
     /**
      * Checks if authentication is enabled.
      * <p>

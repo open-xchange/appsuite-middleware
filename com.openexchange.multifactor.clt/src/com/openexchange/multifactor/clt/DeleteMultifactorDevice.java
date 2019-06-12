@@ -173,4 +173,5 @@ public class DeleteMultifactorDevice extends AbstractMultifactorClt {
     protected String getName() {
         return "deletemultifactordevice " + DELETE_MULTIFACTOR_DEVICE_USAGE;
     }
+
 }

@@ -95,8 +95,8 @@ abstract class AbstractUpdateTasksCLT<R> extends AbstractRmiCLI<R> {
      * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
      */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     /*

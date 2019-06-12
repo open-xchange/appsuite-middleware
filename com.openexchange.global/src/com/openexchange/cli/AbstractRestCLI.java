@@ -76,7 +76,7 @@ import com.openexchange.java.Strings;
  * @since v7.8.4
  * @param <R>
  */
-public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Builder> {
+public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Builder, Void> {
 
     protected static final String AUTHORIZATION_HEADER_NAME = "Authorization";
 
@@ -92,12 +92,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         super();
     }
 
-    /**
-     * Adds administrative options
-     *
-     * @param options The {@link Options} instance to add administrative options to.
-     */
-    protected void addAdministrativeOptions(Options options) {
+    @Override
+    protected void addAdministrativeOptions(Options options, boolean mandatory) {
         options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for API authentication (user:password).", true));
     }
 
@@ -124,9 +120,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
         try {
             // Option for help
             options.addOption(createSwitch("h", "help", "Prints this help text", false));
-            if (requiresAdministrativePermission()) {
-                addAdministrativeOptions(options);
-            }
+            boolean requiresAdministrativePermission = optAdministrativeOptions();
 
             // Add other options
             addOptions(options);
@@ -153,10 +147,8 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
             }
 
             executionContext = endpoint.request();
-            if (requiresAdministrativePermission()) {
-                String authString = getAuthorizationHeader(cmd);
-                String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
-                executionContext.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
+            if (requiresAdministrativePermission) {
+                optAuthenticate(cmd);
             }
             R retval = invoke(options, cmd, executionContext);
             error = false;
@@ -259,6 +251,34 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
      */
     @Override
     protected abstract void addOptions(Options options);
+
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, Void authenticator) throws Exception {
+        String authString = getAuthorizationHeader(cmd);
+        String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
+        executionContext.header(AUTHORIZATION_HEADER_NAME, authorizationHeaderValue);
+    }
+
+    @Override
+    protected Void getAuthenticator() {
+        return null;
+    }
+
+    @Override
+    protected int getAuthFailedExitCode() {
+        return 403;
+    }
+
+    @Override
+    protected Boolean requiresAdministrativePermission() {
+        return null;
+    }
+
+    @Override
+    protected boolean isAuthEnabled(Void authenticator) {
+        Boolean b = requiresAdministrativePermission();
+        return b != null && b.booleanValue();
+    }
 
     protected abstract WebTarget getEndpoint(CommandLine cmd);
 }

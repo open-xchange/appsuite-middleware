@@ -63,16 +63,16 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractRmiCLI} - The abstract helper class for RMI-connecting command-line tools.
  *
  * @param <R> - The return type
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.6.2
  */
-public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String> {
+public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String, RemoteAuthenticator> {
 
     protected final static String BASIC_USAGE = "[--responsetimeout <responseTimeout>] | [-h]";
     protected final static String BASIC_MASTER_ADMIN_USAGE = "-A <masterAdmin> -P <masterAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
@@ -80,7 +80,6 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
     protected final static String BASIC_CONTEXT_ONLY_ADMIN_USAGE = "-A <contextAdmin> -P <contextAdminPassword> [-p <RMI-Port>] [-s <RMI-Server] " + BASIC_USAGE;
 
     protected final static AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
-
 
     /**
      * Sets the RMI host name
@@ -146,13 +145,8 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             options.addOption(createArgumentOption("p", "port", "rmiPort", "The optional RMI port (default:1099)", false));
             options.addOption(createArgumentOption(null, "responsetimeout", "timeout", "The optional response timeout in seconds when reading data from server (default: 0s; infinite)", false));
 
-            // Check if administrative permission is required
-            boolean requiresAdministrativePermission = requiresAdministrativePermission();
-            if (requiresAdministrativePermission) {
-                // TODO: Distinguish between master administrative permission and context administrative permission
-                options.addOption(createArgumentOption("A", "adminuser", "adminuser", "Admin username", true));
-                options.addOption(createArgumentOption("P", "adminpass", "adminpassword", "Admin password", true));
-            }
+            // Check if administrative permission is required and add the admin options if necessary
+            boolean requiresAdministrativePermission = optAdministrativeOptions();
 
             // Add other options
             addOptions(options);
@@ -197,27 +191,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             R retval = null;
             try {
                 if (requiresAdministrativePermission) {
-                    RemoteAuthenticator authenticator = authenticatorStub(executionContext);
-                    if (isAuthEnabled(authenticator)) {
-                        // Options for administrative authentication
-                        String adminLogin = cmd.getOptionValue('A');
-                        if (Strings.isEmpty(adminLogin)) {
-                            System.out.println("You must provide administrative credentials to proceed.");
-                            printHelp(options);
-                            System.exit(-1);
-                            return null;
-                        }
-
-                        String adminPassword = cmd.getOptionValue('P');
-                        if (Strings.isEmpty(adminPassword)) {
-                            System.out.println("You must provide administrative credentials to proceed.");
-                            printHelp(options);
-                            System.exit(-1);
-                            return null;
-                        }
-
-                        administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
-                    }
+                    optAuthenticate(cmd);
                 }
                 retval = invoke(options, cmd, executionContext);
             } catch (MalformedURLException x) {
@@ -266,6 +240,16 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         return null;
     }
 
+    @Override
+    protected int getAuthFailedExitCode() {
+        return -1;
+    }
+
+    @Override
+    protected RemoteAuthenticator getAuthenticator() throws Exception {
+        return authenticatorStub(executionContext);
+    }
+
     /**
      * Gets the {@link RemoteAuthenticator} instance.
      *
@@ -280,30 +264,10 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
         return getRmiStub(optRmiHostName, RemoteAuthenticator.RMI_NAME);
     }
 
-    /**
-     * Checks if authentication is enabled.
-     * <p>
-     * By default property <code>"MASTER_AUTHENTICATION_DISABLED"</code> gets examined.
-     *
-     * @param authenticator The authenticator stub
-     * @throws RemoteException If operation fails
-     */
+    @Override
     protected boolean isAuthEnabled(RemoteAuthenticator authenticator) throws RemoteException {
         return !authenticator.isMasterAuthenticationDisabled();
     }
-
-    /**
-     * Performs appropriate administrative authentication.
-     * <p>
-     * This method needs only to be implemented in case {@link #requiresAdministrativePermission()} is supposed to return <code>true</code>.
-     *
-     * @param login The administrator login
-     * @param password The administrator password
-     * @param cmd The command line providing options
-     * @param authenticator The authenticator stub
-     * @throws RemoteException If operation fails
-     */
-    protected abstract void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException;
 
     /**
      * Adds this command-line tool's options.

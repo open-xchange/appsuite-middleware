@@ -97,8 +97,8 @@ public class RemoveAdvertisementConfigs extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     @Override

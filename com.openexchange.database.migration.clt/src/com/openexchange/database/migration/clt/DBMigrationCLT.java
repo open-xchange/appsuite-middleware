@@ -124,8 +124,8 @@ public class DBMigrationCLT extends AbstractRmiCLI<Void> {
      * {@inheritDoc}
      */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     /*

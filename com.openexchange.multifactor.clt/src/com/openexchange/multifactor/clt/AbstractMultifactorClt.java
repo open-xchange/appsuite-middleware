@@ -60,7 +60,7 @@ import com.openexchange.cli.AbstractRestCLI;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.10.2
  */
-public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
+public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void> {
 
     protected static final String PARAM_ENDPOINT_LONG = "api-root";
 
@@ -82,9 +82,7 @@ public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
      */
     protected String getEndpointRoot(CommandLine commandLine) {
         String endPointRoot = commandLine.getOptionValue(PARAM_ENDPOINT_LONG, ENDPOINT_DEFAULT);
-        return endPointRoot.endsWith("/") ?
-            endPointRoot.substring(0, endPointRoot.length() - 1) :
-            endPointRoot;
+        return endPointRoot.endsWith("/") ? endPointRoot.substring(0, endPointRoot.length() - 1) : endPointRoot;
     }
 
     /**
@@ -107,7 +105,7 @@ public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
     }
 
     @Override
-    protected void addAdministrativeOptions(Options options) {
+    protected void addAdministrativeOptions(Options options, boolean mandatory) {
         options.addOption(createArgumentOption("A", "adminuser", "adminuser", "Admin username", true));
         options.addOption(createArgumentOption("P", "adminpass", "adminpassword", "Admin password", true));
     }
@@ -118,7 +116,7 @@ public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void>  {
     }
 
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 }

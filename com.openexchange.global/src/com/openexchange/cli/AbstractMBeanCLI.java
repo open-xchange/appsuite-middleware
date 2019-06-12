@@ -67,7 +67,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AbstractMBeanCLI} - The abstract helper class for MBean-connecting command-line tools.
@@ -75,7 +74,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, MBeanServerConnection> {
+public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, MBeanServerConnection, AuthenticatorMBean> {
 
     private MBeanServerConnection executionContext;
 
@@ -107,12 +106,8 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption(createArgumentOption("l", "login", "jmxLogin", "The optional JMX login (if JMX authentication is enabled)", false));
             options.addOption(createArgumentOption("s", "password", "jmxPassword", "The optional JMX password (if JMX authentication is enabled)", false));
 
-            // Check if administrative permission is required
-            boolean requiresAdministrativePermission = requiresAdministrativePermission();
-            if (requiresAdministrativePermission) {
-                options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", true));
-                options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", true));
-            }
+            // Check if administrative permission is required and add the admin options if necessary
+            boolean requiresAdministrativePermission = optAdministrativeOptions();
 
             // Add other options
             addOptions(options);
@@ -184,29 +179,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
                 executionContext = jmxConnector.getMBeanServerConnection();
                 try {
                     if (requiresAdministrativePermission) {
-                        AuthenticatorMBean authenticator = authenticatorMBean(executionContext);
-                        if (isAuthEnabled(authenticator)) {
-                            // Options for administrative authentication
-                            String adminLogin = cmd.getOptionValue('A');
-                            if (Strings.isEmpty(adminLogin)) {
-                                System.out.println("You must provide administrative credentials to proceed.");
-                                printHelp(options);
-                                // Use correct exit code, see com.openexchange.admin.console.BasicCommandlineOptions.SYSEXIT_MISSING_OPTION
-                                System.exit(104);
-                                return null;
-                            }
-
-                            String adminPassword = cmd.getOptionValue('P');
-                            if (Strings.isEmpty(adminPassword)) {
-                                System.out.println("You must provide administrative credentials to proceed.");
-                                printHelp(options);
-                                // Use correct exit code, see com.openexchange.admin.console.BasicCommandlineOptions.SYSEXIT_MISSING_OPTION
-                                System.exit(104);
-                                return null;
-                            }
-
-                            administrativeAuth(adminLogin, adminPassword, cmd, authenticator);
-                        }
+                        optAuthenticate(cmd);
                     }
                     retval = invoke(options, cmd, executionContext);
                 } catch (Exception e) {
@@ -254,6 +227,17 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
         return null;
     }
 
+    @Override
+    protected int getAuthFailedExitCode() {
+        // Use correct exit code, see com.openexchange.admin.console.BasicCommandlineOptions.SYSEXIT_MISSING_OPTION
+        return 104;
+    }
+
+    @Override
+    protected AuthenticatorMBean getAuthenticator() throws Exception {
+        return authenticatorMBean(executionContext);
+    }
+
     /**
      * Gets the {@link AuthenticatorMBean} instance.
      *
@@ -286,7 +270,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
      * @param password The administrator password
      * @param cmd The command line providing options
      * @param authenticator The authenticator MBean
-     * @throws MBeanException If authentication fails
+     * @throws Exception If authentication fails
      */
     protected abstract void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException;
 
