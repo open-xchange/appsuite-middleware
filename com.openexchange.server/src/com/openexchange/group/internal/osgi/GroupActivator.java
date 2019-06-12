@@ -69,18 +69,18 @@ public class GroupActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { PrincipalUseCountService.class };
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { HideAdminService.class };
+        return new Class[] { HideAdminService.class, PrincipalUseCountService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         VirtualGroupStorage storage = new VirtualGroupStorage(new RdbGroupStorage());
-        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(storage, getServiceSafe(PrincipalUseCountService.class)), this);
+        final GroupService groupService = new FilteringGroupService(new GroupServiceImpl(storage, this), this);
         registerService(GroupService.class, groupService);
         registerService(GroupStorage.class, storage);
     }
