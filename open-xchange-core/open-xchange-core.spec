@@ -21,7 +21,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 58
+%define        ox_release 59
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1592,6 +1592,11 @@ set +e
 # SoftwareChange_Request-175
 ox_add_property com.openexchange.server.migrationRedirectURL "" /opt/open-xchange/etc/server.properties
 
+# SCR-470
+if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
+  sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1633,6 +1638,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Tue Jun 11 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-06-11 (5275)
 * Mon May 13 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-05-14 (5246)
 * Mon May 06 2019 Marcus Klein <marcus.klein@open-xchange.com>

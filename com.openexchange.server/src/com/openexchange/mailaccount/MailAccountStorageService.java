@@ -220,6 +220,27 @@ public interface MailAccountStorageService {
      * @return The user's mail accounts
      * @throws OXException If the mail accounts cannot be returned
      */
+    TransportAccount[] getUserTransportAccounts(int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the mail accounts belonging to specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The user's mail accounts
+     * @throws OXException If the mail accounts cannot be returned
+     */
+    TransportAccount[] getUserTransportAccounts(int userId, int cid, Connection con) throws OXException;
+
+    /**
+     * Gets the mail accounts belonging to specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The user's mail accounts
+     * @throws OXException If the mail accounts cannot be returned
+     */
     MailAccount[] getUserMailAccounts(int userId, int contextId) throws OXException;
 
     /**

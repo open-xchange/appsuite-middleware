@@ -69,8 +69,11 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -136,8 +139,24 @@ public final class TransportMailAction extends AbstractMailAction {
              */
             final UserSettingMail usm = session.getUserSettingMail();
             usm.setNoSave(true);
-            final boolean copy2Sent = AJAXRequestDataTools.parseBoolParameter("copy2Sent", req.getRequest(), !usm.isNoCopyIntoStandardSentFolder());
-            usm.setNoCopyIntoStandardSentFolder(!copy2Sent);
+            {
+                final String paramName = "copy2Sent";
+                String sCopy2Sent = req.getRequest().getParameter(paramName);
+                if (null != sCopy2Sent) { // Provided as URL parameter
+                    if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                        usm.setNoCopyIntoStandardSentFolder(false);
+                    } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                        // Explicitly deny copy to sent folder
+                        usm.setNoCopyIntoStandardSentFolder(true);
+                    }
+                } else {
+                    MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                    if (mass != null && MailAccounts.isGmailTransport(mass.getTransportAccount(accountId, session.getUserId(), session.getContextId()))) {
+                        // Deny copy to sent folder for Gmail
+                        usm.setNoCopyIntoStandardSentFolder(true);
+                    }
+                }
+            }
             /*
              * Transport mail
              */

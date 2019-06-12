@@ -76,24 +76,26 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
      * 
      * @param timer The {@link Timer} metric
      * @param metricDescriptor The {@link MetricDescriptor}
-     * @throws NotCompliantMBeanException
+     * @throws NotCompliantMBeanException When this MBean is not JMX compliant
      */
     public TimerMBeanImpl(DropwizardTimer timer, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
         super(TimerMBean.class, metricDescriptor);
         this.timer = timer;
         this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
-        this.rateFactor = metricDescriptor.getRate().toSeconds(1);
+        this.rateFactor = calculateRateFactor(metricDescriptor.getRate());
         this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1);
         this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US);
     }
 
     /**
-     *
-     * @param unit
-     * @return
+     * Calculates the rate unit using the specified TimeUnit for
+     * the calculation.
+     * 
+     * @param unit The TimeUnit to use for the calculation
+     * @return the rate unit as string
      */
     private String calculateRateUnit(TimeUnit unit) {
-        final String s = unit.toString().toLowerCase(Locale.US);
+        String s = unit.toString().toLowerCase(Locale.US);
         return s.substring(0, s.length() - 1);
     }
 

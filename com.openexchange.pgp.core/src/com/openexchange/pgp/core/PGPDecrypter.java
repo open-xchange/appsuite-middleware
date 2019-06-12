@@ -71,6 +71,7 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.operator.bc.BcKeyFingerprintCalculator;
 import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.bouncycastle.openpgp.operator.jcajce.JcePublicKeyDataDecryptorFactoryBuilder;
+import com.openexchange.exception.OXException;
 import com.openexchange.pgp.core.exceptions.PGPCoreExceptionCodes;
 
 /**
@@ -136,6 +137,118 @@ public class PGPDecrypter {
      */
     private PGPPublicKey getPublicKey(PGPOnePassSignature onePassSignature) throws Exception {
         return this.keyRetrievalStrategy.getPublicKey(onePassSignature.getKeyID());
+    }
+
+    /**
+     * Get a list of keyIds from an EncryptedDataList Padded with "("
+     *
+     * @param encryptedDataList
+     * @return formatted list of 8 digit hex key Ids
+     */
+    private String getMissingKeyIds(PGPEncryptedDataList encryptedDataList) {
+        StringBuilder sb = new StringBuilder();
+        Iterator<PGPPublicKeyEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
+        PGPPublicKeyEncryptedData encryptedData = null;
+        sb.append(" ( ");
+        while (dataListIterator.hasNext()) {
+            encryptedData = dataListIterator.next();
+            String keyId = Long.toHexString(encryptedData.getKeyID()).substring(8).toUpperCase();
+            if (!sb.toString().contains(keyId)) { // avoid repeats
+                if (sb.length() > 8) {
+                    sb.append(", "); // already more than one added
+                }
+                sb.append("0x");
+                sb.append(keyId);
+            }
+        }
+        sb.append(" )");
+        return (sb.toString());
+    }
+
+    /**
+     * Extracts PGP encrypted data from an decoder InputStream
+     *
+     * @param decoderStream the PGP InputStream to extract the PGP encrypted data from.
+     * @return The PGP encrypted data extracted from the PGP stream
+     * @throws IOException
+     * @throws OXException
+     */
+    private PGPEncryptedDataList getPGPEncryptedData(InputStream decoderStream) throws IOException, OXException {
+
+        PGPObjectFactory pgpObjectFactory = new PGPObjectFactory(decoderStream, new BcKeyFingerprintCalculator());
+
+        //reading first part of the stream
+        Object firstObject = pgpObjectFactory.nextObject();
+        if (firstObject == null) {
+            throw PGPCoreExceptionCodes.NO_PGP_DATA_FOUND.create();
+        }
+
+        PGPEncryptedDataList encryptedDataList;
+        //the first object might be a PGP marker packet.
+        if (firstObject instanceof PGPEncryptedDataList) {
+            encryptedDataList = (PGPEncryptedDataList) firstObject;
+        } else {
+            encryptedDataList = (PGPEncryptedDataList) pgpObjectFactory.nextObject();
+        }
+
+        if (encryptedDataList == null) {
+            //No encrypted data found (i.e if a signature was supplied)
+            throw PGPCoreExceptionCodes.NO_PGP_DATA_FOUND.create();
+        }
+        return encryptedDataList;
+    }
+
+    /**
+     * Gets the ID of the master key for a given PGPPublicKey
+     *
+     * This method searches for sub-key-binding on the given public key and return the ID of the issuer key.
+     *
+     * @param publicKey The public key to get the master key ID from
+     * @return The ID of the publicKey's master key, or null if the mater key could not be determined.
+     */
+    private static Long getPublicMasterKeyId(PGPPublicKey publicKey) {
+
+        if(publicKey.isMasterKey()) {
+            //The given key is the actual master key
+            return new Long(publicKey.getKeyID());
+        }
+
+        //Get the subkey binding and return the ID of the master key
+        @SuppressWarnings("rawtypes") Iterator subkeyBinding = publicKey.getSignaturesOfType(PGPSignature.SUBKEY_BINDING);
+        if(subkeyBinding.hasNext()) {
+            PGPSignature signature = (PGPSignature)subkeyBinding.next();
+            return new Long(signature.getKeyID());
+        }
+        return null;
+    }
+
+    /**
+     * Tries to obtain the master key for the given key
+     *
+     * @param key The key to obtain the master key from
+     * @return The key if it is an master key, the master-key obtained from sub-key-binding signatures, or null if no binding found
+     * @throws Exception
+     */
+    private PGPPublicKey getMasterKey(PGPPublicKey key) throws Exception {
+        if(key.isMasterKey()) {
+           return key;
+        }
+        Long masterKeyId = getPublicMasterKeyId(key);
+        if(masterKeyId != null) {
+            return this.keyRetrievalStrategy.getPublicKey(masterKeyId);
+        }
+
+        return null;
+    }
+
+    /**
+     * Controls whether or not to treat a key, fetched from a {@link PGPKeyRetrievalStrategy}, as found.
+     *
+     * @param key The key to check
+     * @return true, if the key should be considered as found, false if it should be considered as not found.
+     */
+    protected boolean keyFound(PGPPrivateKey key) {
+        return key != null;
     }
 
     /**
@@ -257,7 +370,22 @@ public class PGPDecrypter {
                         PGPSignature signature = signatureList.get(0);
                         if (signatureInitialized) {
                             //Verify signatures
-                            ret.add(new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature)));
+                            PGPSignatureVerificationResult pgpSignatureVerificationResult = new PGPSignatureVerificationResult(signature, onePassSignature.verify(signature));
+                            if(singatureVerifyKey != null) {
+                               pgpSignatureVerificationResult.setIssuerKey(singatureVerifyKey);
+                               Iterator<String> userIds = null;
+                               PGPPublicKey masterKey = getMasterKey(singatureVerifyKey);
+                               if(masterKey != null) {
+                                   userIds = masterKey.getUserIDs();
+                                   if(userIds != null) {
+                                       //Adding user-id so that it is possible for a caller to determine who created this signature
+                                       while(userIds.hasNext()) {
+                                           pgpSignatureVerificationResult.addIssuerUserId(userIds.next());
+                                       }
+                                   }
+                               }
+                            }
+                            ret.add(pgpSignatureVerificationResult);
                         }
                         else if (!signatureVerificationKeyFound) {
                             //Key not found for verifying the signature; KeyRetrievalStrategy is responsible for logging this;
@@ -269,34 +397,11 @@ public class PGPDecrypter {
             }
 
             if(encryptedData.isIntegrityProtected() && !encryptedData.verify()) {
-            	throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
+                throw PGPCoreExceptionCodes.PGP_EXCEPTION.create("Integrity check of the message failed.");
             }
         }
         output.flush();
         return ret;
     }
 
-    /**
-     * Get a list of keyIds from an EncryptedDataList
-     * Padded with "("
-     * @param encryptedDataList
-     * @return formatted list of 8 digit hex key Ids
-     */
-    private String getMissingKeyIds (PGPEncryptedDataList encryptedDataList) {
-        StringBuilder sb = new StringBuilder();
-        Iterator<PGPPublicKeyEncryptedData> dataListIterator = encryptedDataList.getEncryptedDataObjects();
-        PGPPublicKeyEncryptedData encryptedData = null;
-        sb.append(" ( ");
-        while (dataListIterator.hasNext()) {
-            encryptedData = dataListIterator.next();
-            String keyId = Long.toHexString(encryptedData.getKeyID()).substring(8).toUpperCase();
-            if (!sb.toString().contains(keyId)) { // avoid repeats
-                if (sb.length() > 8) sb.append(", "); // already more than one added
-                sb.append("0x");
-                sb.append(keyId);
-            }
-        }
-        sb.append(" )");
-        return (sb.toString());
-    }
 }
