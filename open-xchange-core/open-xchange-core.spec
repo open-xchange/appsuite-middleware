@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 13
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -631,6 +631,11 @@ EOF
       done
       ox_scr_done ${SCR}
     }
+
+    # SCR-470
+    if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
+      sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
+  fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -679,6 +684,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Jun 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-06-11 (5274)
 * Mon May 13 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-05-14 (5247)
 * Mon May 06 2019 Marcus Klein <marcus.klein@open-xchange.com>

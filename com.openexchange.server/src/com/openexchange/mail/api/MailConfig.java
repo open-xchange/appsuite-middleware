@@ -444,7 +444,9 @@ public abstract class MailConfig {
                 break;
         }
         if (null == login) {
-            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
+            if (!MailAccounts.isGuestAccount(mailAccount) ) {
+                throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
+            }
         }
         return login;
     }

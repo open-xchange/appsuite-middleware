@@ -394,6 +394,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.AllMessagesFolder.class,
             com.openexchange.groupware.settings.tree.modules.mail.Whitelist.class,
             com.openexchange.groupware.settings.tree.modules.mail.ForwardUnquoted.class,
+            com.openexchange.groupware.settings.tree.modules.mail.IgnoreSubscription.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.mail.MsgFormat.class,
             com.openexchange.groupware.settings.tree.modules.mail.Namespace.class,

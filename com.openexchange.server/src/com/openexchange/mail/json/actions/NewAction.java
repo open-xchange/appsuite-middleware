@@ -118,6 +118,8 @@ import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.MailAccounts;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -476,6 +478,12 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                             // Explicitly deny copy to sent folder
                             usm.setNoCopyIntoStandardSentFolder(true);
                         }
+                    }
+                } else {
+                    MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                    if (mass != null && MailAccounts.isGmailTransport(mass.getTransportAccount(accountId, session.getUserId(), session.getContextId()))) {
+                        // Deny copy to sent folder for Gmail
+                        usm.setNoCopyIntoStandardSentFolder(true);
                     }
                 }
             }

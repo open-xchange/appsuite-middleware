@@ -49,7 +49,7 @@ onlostpointercapture
 onmessage
 onmousedown
 onmouseenter
-onmounseleave
+onmouseleave
 onmousemove
 onmouseout
 onmouseover
