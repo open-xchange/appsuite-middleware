@@ -54,7 +54,7 @@ This command line tool creates log filters for sessions, context and (user/conte
 **-oec**, **--override-exception-categories** *exceptionCategories*
 : Override the exception categories to be suppressed.
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*

@@ -21,7 +21,7 @@ This command line tool retrieves the status of a running or completed update tas
 **-j**, **--job-id** *job-id*
 : The job identifier for which to retrieve its status.
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*

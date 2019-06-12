@@ -28,11 +28,11 @@ Clears all sessions belonging to a given context and/or user.
  **-g**,**--global**
 : Switch instructing the tool to perform a global session clean-up
 
-**-A**, **--adminuser** *AdminUser*
-: The admin user name for authentication.
+**-A**, **--adminuser** *admin*
+: The master or context admin user name for authentication.
 
-**-P**, **--adminpass** *AdminPassword*
-: The admin password for authentication.
+**-P**, **--adminpass** *adminPassword*
+: The master admin or context admin password for authentication.
 
 **-h**, **--help**
 : Prints a help text

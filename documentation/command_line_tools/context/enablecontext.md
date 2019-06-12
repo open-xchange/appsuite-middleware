@@ -25,10 +25,10 @@ This command line tool lists enables contexts.
 : The context name. Mandatory and mutually exclusive with `-c`.
 
 **-A**, **--adminuser** *masterAdmin*
-: Context admin user name for authentication. Optional, depending on your configuration.
+: Master admin user name for authentication. Optional, depending on your configuration.
 
-**-P**, **--adminpass** *contextAdminPassword*
-: Context admin password for authentication. Optional, depending on your configuration.
+**-P**, **--adminpass** *masterAdminPassword*
+: Master admin password for authentication. Optional, depending on your configuration.
 
 **--csv**
 : Format output to csv.

@@ -36,7 +36,7 @@ This command line tool prints the timestamp of last login for specified user for
 **-t**, **--client** *clientId*
 : A client identifier; e.g "open-xchange-appsuite" for App Suite UI. Execute `lastlogintimestamp --listclients` to get a listing of known identifiers.
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*

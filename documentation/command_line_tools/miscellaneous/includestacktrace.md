@@ -30,7 +30,7 @@ This command line tool enables/disables the ability to include the server stackt
 **-u**, **--user** *userId*
 : The user id for which to enable logging.
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*

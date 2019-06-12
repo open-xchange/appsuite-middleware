@@ -25,10 +25,10 @@ This command line tool returns the module access names for a context.
 : The context name. Mandatory and mutually exclusive with `-c`.
 
 **-A**, **--adminuser** *masterAdmin*
-: Context admin user name for authentication. Optional, depending on your configuration.
+: Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *contextAdminPassword*
-: Context admin password for authentication. Optional, depending on your configuration.
+: Master admin password for authentication. Optional, depending on your configuration.
 
 **-h**, **--help**
 : Prints a help text.

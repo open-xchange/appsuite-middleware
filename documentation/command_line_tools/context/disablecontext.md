@@ -27,7 +27,7 @@ This command line tool lists disable contexts. Whenever a customer tries to log 
 **-A**, **--adminuser** *masterAdmin*
 : Context admin user name for authentication. Optional, depending on your configuration.
 
-**-P**, **--adminpass** *contextAdminPassword*
+**-P**, **--adminpass** *masterAdminPassword*
 : Context admin password for authentication. Optional, depending on your configuration.
 
 **--csv**

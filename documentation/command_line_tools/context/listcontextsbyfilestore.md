@@ -22,10 +22,10 @@ This command line tool lists all contexts that are assigned to a specific filest
 : The filestore identifier. Mandatory and mutually exclusive with `-n`.
 
 **-A**, **--adminuser** *masterAdmin*
-: Context admin user name for authentication. Optional, depending on your configuration.
+: Master admin user name for authentication. Optional, depending on your configuration.
 
-**-P**, **--adminpass** *contextAdminPassword*
-: Context admin password for authentication. Optional, depending on your configuration.
+**-P**, **--adminpass** *masterAdminPassword*
+: Master admin password for authentication. Optional, depending on your configuration.
 
 **--csv**
 : Format output to csv.

@@ -24,7 +24,7 @@ This command line tool checks the entry in `login2context` table that belongs to
 **-a**, **--all**
 : The flag to signal that contexts shall be processed. Mandatory and mutually exclusive with `-c`.
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*

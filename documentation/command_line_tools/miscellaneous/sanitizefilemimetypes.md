@@ -29,7 +29,7 @@ This command line tool sanitises broken/corrupt MIME types currently held in dat
 **-i**, **--invalids** *mimetype_1,mimetype_2,...,mimetype_n*
 : An optional comma-separated list of those MIME types that should be considered as broken/corrupt. Default are "application/force-download, application/x-download, application/$suffix".
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*

@@ -22,11 +22,11 @@ Gets the missing services
 **-n**,**--name** *bundleName*
 : The optional bundle's symbolic name
 
-**-A**, **--adminuser** *adminUser*
-: Thge admin user name for authentication. Optional, depending on your configuration.
+**-A**, **--adminuser** *masterAdmin*
+: The master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*
-: The admin password for authentication. Optional, depending on your configuration.
+: The master admin password for authentication. Optional, depending on your configuration.
 
 **-h**, **--help**
 : Prints a help text

@@ -27,7 +27,7 @@ This command line tool calculates missing file checksums.
 **-d**, **--database** *databaseId*
 : The database pool identifier to determine/calculate missing checksums in
 
-**-A**, **--adminuser** *oxadminMaster*
+**-A**, **--adminuser** *masterAdmin*
 : Master admin user name for authentication. Optional, depending on your configuration.
 
 **-P**, **--adminpass** *masterAdminPassword*
