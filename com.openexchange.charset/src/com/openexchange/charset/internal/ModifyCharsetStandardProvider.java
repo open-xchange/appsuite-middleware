@@ -77,7 +77,7 @@ public final class ModifyCharsetStandardProvider {
      * @return An array of {@link CharsetProvider} of length <code>2</code>; the first index is occupied by replaced {@link CharsetProvider}
      *         instance, the second with new instance
      */
-    public static CharsetProvider[] modifyCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException {
+    public static CharsetProvider[] modifyCharsetStandardProvider() throws NoSuchFieldException, IllegalAccessException {
         /*
          * Modify java.nio.charset.Charset class
          */
