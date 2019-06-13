@@ -49,16 +49,19 @@
 
 package com.openexchange.charset.internal;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.java.Strings;
 
 /**
  * {@link <code>CollectionCharsetProvider</code>} - A charset provider which performs the
@@ -71,25 +74,18 @@ public final class CollectionCharsetProvider extends CharsetProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CollectionCharsetProvider.class);
 
-    private final Map<String, Charset> charsetMap;
-
-    private final Set<Charset> charsetSet;
-
-    private boolean gathered;
-
+    private final AtomicReference<Map<String, Charset>> charsetMapReference;
     private final Map<Class<? extends CharsetProvider>, CharsetProvider> providerList;
-
-    private final ReadWriteLock readWriteLock;
+    private final AtomicBoolean gathered;
 
     /**
      * Initializes a new {@link <code>CollectionCharsetProvider</code>}
      */
     public CollectionCharsetProvider() {
         super();
-        providerList = new HashMap<Class<? extends CharsetProvider>, CharsetProvider>(3);
-        charsetMap = new HashMap<String, Charset>();
-        charsetSet = new HashSet<Charset>();
-        readWriteLock = new ReentrantReadWriteLock();
+        providerList = new ConcurrentHashMap<Class<? extends CharsetProvider>, CharsetProvider>(3);
+        charsetMapReference = new AtomicReference<Map<String, Charset>>(Collections.emptyMap());
+        gathered = new AtomicBoolean(false);
     }
 
     /**
@@ -122,79 +118,8 @@ public final class CollectionCharsetProvider extends CharsetProvider {
      * @param charsetProvider The charset provider to add
      */
     public void addCharsetProvider(final CharsetProvider charsetProvider) {
-        readWriteLock.writeLock().lock();
-        try {
-            providerList.put(charsetProvider.getClass(), charsetProvider);
-            gathered = false;
-            charsetSet.clear();
-        } finally {
-            readWriteLock.writeLock().unlock();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.spi.CharsetProvider#charsetForName(java.lang.String)
-     */
-    @Override
-    public Charset charsetForName(final String charsetName) {
-        readWriteLock.readLock().lock();
-        try {
-            gatherProviderCharsets();
-            return charsetMap.get(charsetName.toLowerCase());
-        } finally {
-            readWriteLock.readLock().unlock();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.nio.charset.spi.CharsetProvider#charsets()
-     */
-    @Override
-    public Iterator<Charset> charsets() {
-        readWriteLock.readLock().lock();
-        try {
-            gatherProviderCharsets();
-            return getCharsetSet().iterator();
-        } finally {
-            readWriteLock.readLock().unlock();
-        }
-    }
-
-    private void gatherProviderCharsets() {
-        if (gathered) {
-            return;
-        }
-        if (!charsetMap.isEmpty()) {
-            charsetMap.clear();
-        }
-        final Collection<CharsetProvider> providers = providerList.values();
-        for (final CharsetProvider provider : providers) {
-            for (final Iterator<Charset> iter = provider.charsets(); iter.hasNext();) {
-                final Charset cs = iter.next();
-                putCharset(cs.name().toLowerCase(), cs);
-                for (final Iterator<String> iter2 = cs.aliases().iterator(); iter2.hasNext();) {
-                    putCharset(iter2.next().toLowerCase(), cs);
-                }
-            }
-        }
-        gathered = true;
-    }
-
-    private Set<Charset> getCharsetSet() {
-        if (charsetSet.isEmpty()) {
-            charsetSet.addAll(charsetMap.values());
-        }
-        return charsetSet;
-    }
-
-    private void putCharset(final String name, final Charset charset) {
-        if (charsetMap.containsKey(name)) {
-            LOG.debug("Discarding duplicate charset: {}", name);
-            return;
-        }
-        charsetMap.put(name, charset);
+        providerList.put(charsetProvider.getClass(), charsetProvider);
+        gathered.set(false);
     }
 
     /**
@@ -214,16 +139,86 @@ public final class CollectionCharsetProvider extends CharsetProvider {
      * @return The removed charset provider or <code>null</code> if no collected charset provider is denoted by given class argument
      */
     public CharsetProvider removeCharsetProvider(final Class<? extends CharsetProvider> clazz) {
-        readWriteLock.writeLock().lock();
-        try {
-            final CharsetProvider retval = providerList.remove(clazz);
-            if (null != retval) {
-                gathered = false;
-                charsetSet.clear();
+        CharsetProvider retval = providerList.remove(clazz);
+        if (null != retval) {
+            gathered.set(false);
+        }
+        return retval;
+    }
+
+    @Override
+    public Charset charsetForName(final String charsetName) {
+        if (Strings.isEmpty(charsetName)) {
+            throw new IllegalCharsetNameException(charsetName);
+        }
+        gatherProviderCharsetsIfNeeded();
+        Map<String, Charset> currentCharsetMap = charsetMapReference.get();
+        Charset charset = currentCharsetMap.get(asciiLowerCase(charsetName));
+        if (charset == null) {
+            if (charsetName.charAt(0) == '\'') {
+                String unquoted = unquote(charsetName, true);
+                if (unquoted != null) {
+                    charset = currentCharsetMap.get(asciiLowerCase(unquoted));
+                }
+            } else if (charsetName.charAt(0) == '"') {
+                String unquoted = unquote(charsetName, false);
+                if (unquoted != null) {
+                    charset = currentCharsetMap.get(asciiLowerCase(unquoted));
+                }
             }
-            return retval;
-        } finally {
-            readWriteLock.writeLock().unlock();
+        }
+        return charset;
+    }
+
+    /**
+     * Removes single or double quotes from charset name.
+     *
+     * @param charsetName The charset name to be unquoted
+     * @param singleQuote Whether charset name starts with a single quote or double quote
+     * @return The unquoted charset name or <code>null</code>
+     */
+    private static String unquote(String charsetName, boolean singleQuote) {
+        return charsetName.endsWith(singleQuote ? "'" : "\"") ? charsetName.substring(1, charsetName.length() - 1) : null;
+    }
+
+    @Override
+    public Iterator<Charset> charsets() {
+        gatherProviderCharsetsIfNeeded();
+        return charsetMapReference.get().values().iterator();
+    }
+
+    private void gatherProviderCharsetsIfNeeded() {
+        if (!gathered.get()) {
+            synchronized (this) {
+                if (!gathered.get()) {
+                    Map<String, Charset> charsetMap = new HashMap<>();
+                    for (CharsetProvider provider : providerList.values()) {
+                        for (Iterator<Charset> iter = provider.charsets(); iter.hasNext();) {
+                            // Put by charset name
+                            Charset cs = iter.next();
+                            String name = asciiLowerCase(cs.name());
+                            if (charsetMap.containsKey(name)) {
+                                LOG.debug("Discarding duplicate charset: {}", name);
+                            } else {
+                                charsetMap.put(name, cs);
+                            }
+
+                            // Check charset's aliases
+                            for (String aliaz : cs.aliases()) {
+                                // Put by charset alias
+                                String alias = asciiLowerCase(aliaz);
+                                if (charsetMap.containsKey(alias)) {
+                                    LOG.debug("Discarding duplicate charset: {}", alias);
+                                } else {
+                                    charsetMap.put(alias, cs);
+                                }
+                            }
+                        }
+                    }
+                    charsetMapReference.set(charsetMap);
+                    gathered.set(true);
+                }
+            }
         }
     }
 
