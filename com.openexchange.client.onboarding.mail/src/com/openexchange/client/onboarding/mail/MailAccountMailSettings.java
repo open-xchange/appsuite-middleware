@@ -47,40 +47,52 @@
  *
  */
 
-package com.openexchange.client.onboarding.mail.custom;
+package com.openexchange.client.onboarding.mail;
 
-import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.mailaccount.MailAccount;
 
 /**
- * {@link CustomLoginSource} - Provides the IMAP and SMTP login name for the {@link MailOnboardingProvider}.
+ * {@link MailAccountMailSettings}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface CustomLoginSource {
+public class MailAccountMailSettings implements MailSettings {
+
+    private final MailAccount mailAccount;
 
     /**
-     * Provides the IMAP login for the {@link MailOnboardingProvider}.
-     *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the IMAP login
-     * @throws OXException If IMAP login cannot be returned
+     * Initializes a new {@link MailAccountMailSettings}.
      */
-    String getImapLogin(Session optSession, int userId, int contextId) throws OXException;
+    public MailAccountMailSettings(MailAccount mailAccount) {
+        super();
+        this.mailAccount = mailAccount;
+    }
 
-    /**
-     * Provides the SMTP login for the {@link MailOnboardingProvider}.
-     *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the SMTP login
-     * @throws OXException If SMTP login cannot be returned
-     */
-    String getSmtpLogin(Session optSession, int userId, int contextId) throws OXException;
+    @Override
+    public String getLogin() {
+        return mailAccount.getLogin();
+    }
+
+    @Override
+    public String getPassword() {
+        // Not available
+        return null;
+    }
+
+    @Override
+    public int getPort() {
+        return mailAccount.getMailPort();
+    }
+
+    @Override
+    public String getServer() {
+        return mailAccount.getMailServer();
+    }
+
+    @Override
+    public boolean isSecure() {
+        return mailAccount.isMailSecure();
+    }
 
 }

@@ -47,40 +47,49 @@
  *
  */
 
-package com.openexchange.client.onboarding.mail.custom;
-
-import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+package com.openexchange.client.onboarding.mail;
 
 /**
- * {@link CustomLoginSource} - Provides the IMAP and SMTP login name for the {@link MailOnboardingProvider}.
+ * {@link MailSettings} - Provides mail settings.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface CustomLoginSource {
+public interface MailSettings {
 
     /**
-     * Provides the IMAP login for the {@link MailOnboardingProvider}.
+     * Gets the login.
      *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the IMAP login
-     * @throws OXException If IMAP login cannot be returned
+     * @return the login
      */
-    String getImapLogin(Session optSession, int userId, int contextId) throws OXException;
+    String getLogin();
 
     /**
-     * Provides the SMTP login for the {@link MailOnboardingProvider}.
+     * Gets the password.
      *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the SMTP login
-     * @throws OXException If SMTP login cannot be returned
+     * @return the password
      */
-    String getSmtpLogin(Session optSession, int userId, int contextId) throws OXException;
+    String getPassword();
+
+    /**
+     * Gets the optional port of the server.
+     *
+     * @return The optional port of the server obtained via {@link #getServer()} or <code>-1</code> if no port needed.
+     */
+    int getPort();
+
+    /**
+     * Gets the host name or IP address of the server.
+     *
+     * @return The host name or IP address of the server.
+     */
+    String getServer();
+
+    /**
+     * Checks if a secure connection shall be established.
+     *
+     * @return <code>true</code> if a secure connection shall be established; otherwise <code>false</code>
+     */
+    boolean isSecure();
 
 }

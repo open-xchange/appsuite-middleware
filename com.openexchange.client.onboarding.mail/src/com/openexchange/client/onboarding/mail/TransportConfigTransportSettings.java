@@ -47,40 +47,58 @@
  *
  */
 
-package com.openexchange.client.onboarding.mail.custom;
+package com.openexchange.client.onboarding.mail;
 
-import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.mail.transport.config.TransportAuthSupportAware;
+import com.openexchange.mail.transport.config.TransportConfig;
 
 /**
- * {@link CustomLoginSource} - Provides the IMAP and SMTP login name for the {@link MailOnboardingProvider}.
+ * {@link TransportConfigTransportSettings}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface CustomLoginSource {
+public class TransportConfigTransportSettings implements TransportSettings {
+
+    private final TransportConfig transportConfig;
 
     /**
-     * Provides the IMAP login for the {@link MailOnboardingProvider}.
-     *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the IMAP login
-     * @throws OXException If IMAP login cannot be returned
+     * Initializes a new {@link TransportConfigTransportSettings}.
      */
-    String getImapLogin(Session optSession, int userId, int contextId) throws OXException;
+    public TransportConfigTransportSettings(TransportConfig transportConfig) {
+        super();
+        this.transportConfig = transportConfig;
+    }
 
-    /**
-     * Provides the SMTP login for the {@link MailOnboardingProvider}.
-     *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the SMTP login
-     * @throws OXException If SMTP login cannot be returned
-     */
-    String getSmtpLogin(Session optSession, int userId, int contextId) throws OXException;
+    @Override
+    public String getLogin() {
+        return transportConfig.getLogin();
+    }
+
+    @Override
+    public String getPassword() {
+        return transportConfig.getPassword();
+    }
+
+    @Override
+    public int getPort() {
+        return transportConfig.getPort();
+    }
+
+    @Override
+    public String getServer() {
+        return transportConfig.getServer();
+    }
+
+    @Override
+    public boolean isSecure() {
+        return transportConfig.isSecure();
+    }
+
+    @Override
+    public boolean needsAuthentication() throws OXException {
+        return (!(transportConfig instanceof TransportAuthSupportAware) || (false != ((TransportAuthSupportAware) transportConfig).isAuthSupported()));
+    }
 
 }

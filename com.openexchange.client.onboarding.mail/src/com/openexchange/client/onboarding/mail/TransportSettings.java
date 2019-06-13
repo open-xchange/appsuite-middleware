@@ -47,40 +47,24 @@
  *
  */
 
-package com.openexchange.client.onboarding.mail.custom;
+package com.openexchange.client.onboarding.mail;
 
-import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link CustomLoginSource} - Provides the IMAP and SMTP login name for the {@link MailOnboardingProvider}.
+ * {@link TransportSettings} - Provides mail settings.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface CustomLoginSource {
+public interface TransportSettings extends MailSettings {
 
     /**
-     * Provides the IMAP login for the {@link MailOnboardingProvider}.
+     * Indicates if transport access requires authentication or not.
      *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the IMAP login
-     * @throws OXException If IMAP login cannot be returned
+     * @return <code>true</code> if authentication is needed; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    String getImapLogin(Session optSession, int userId, int contextId) throws OXException;
-
-    /**
-     * Provides the SMTP login for the {@link MailOnboardingProvider}.
-     *
-     * @param optSession The session (if available); otherwise <code>null</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return the SMTP login
-     * @throws OXException If SMTP login cannot be returned
-     */
-    String getSmtpLogin(Session optSession, int userId, int contextId) throws OXException;
+    boolean needsAuthentication() throws OXException;
 
 }
