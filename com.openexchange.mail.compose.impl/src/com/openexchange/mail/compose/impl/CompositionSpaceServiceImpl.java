@@ -1168,31 +1168,24 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             // Determine the meta information for the message (draft)
             if (Type.NEW == type) {
                 message.setMeta(Meta.META_NEW);
+            } else if (Type.FAX == type) {
+                message.setMeta(Meta.META_FAX);
+            } else if (Type.SMS == type) {
+                message.setMeta(Meta.META_SMS);
             } else {
                 OpenState args = new OpenState(uuid, message, Meta.builder());
                 try {
                     Meta.Builder metaBuilder = args.metaBuilder;
-                    metaBuilder.withType(Meta.MetaType.typeFor(type));
+                    metaBuilder.withType(Meta.MetaType.metaTypeFor(type));
 
-                    switch (type) {
-                        case FORWARD:
-                            new Forward(attachmentStorageService, services).doOpenForForward(parameters, args, session);
-                            break;
-                        case REPLY:
-                            // fall-through
-                        case REPLY_ALL:
-                            new Reply(attachmentStorageService, services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
-                            break;
-                        case EDIT:
-                            // fall-through
-                        case COPY:
-                            new EditCopy(attachmentStorageService, services).doOpenForEditCopy(type == Type.EDIT, parameters, args, session);
-                            break;
-                        case RESEND:
-                            new Resend(attachmentStorageService, services).doOpenForResend(parameters, args, session);
-                            break;
-                        default:
-                            break;
+                    if (type == Type.FORWARD) {
+                        new Forward(attachmentStorageService, services).doOpenForForward(parameters, args, session);
+                    } else if (type == Type.REPLY || type == Type.REPLY_ALL) {
+                        new Reply(attachmentStorageService, services).doOpenForReply(type == Type.REPLY_ALL, parameters, args, session);
+                    } else if (type == Type.EDIT || type == Type.COPY) {
+                        new EditCopy(attachmentStorageService, services).doOpenForEditCopy(type == Type.EDIT, parameters, args, session);
+                    } else if (type == Type.RESEND) {
+                        new Resend(attachmentStorageService, services).doOpenForResend(parameters, args, session);
                     }
 
                     message.setMeta(metaBuilder.build());

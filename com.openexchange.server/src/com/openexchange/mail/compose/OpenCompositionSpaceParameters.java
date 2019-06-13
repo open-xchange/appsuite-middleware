@@ -68,11 +68,12 @@ public class OpenCompositionSpaceParameters {
     /**
      * Creates a new builder instance for composing a new message.
      *
+     * @param newType The new type
      * @param mailSetting The user's mail settings
      * @return A new builder instance
      */
-    public static Builder builderForNew(UserSettingMail mailSetting) {
-        return new Builder(Type.NEW, Collections.emptyList(), mailSetting);
+    public static Builder builderForNew(Type newType, UserSettingMail mailSetting) {
+        return new Builder(newType == null ? Type.NEW : newType, Collections.emptyList(), mailSetting);
     }
 
     /**
