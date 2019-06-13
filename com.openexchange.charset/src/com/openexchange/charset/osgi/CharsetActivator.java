@@ -127,6 +127,10 @@ public final class CharsetActivator extends HousekeepingActivator implements Ser
             {
                 final CharsetProvider[] results = ModifyCharsetStandardProvider.modifyCharsetStandardProvider();
                 backupStandardCharsetProvider = null == results ? null : results[0];
+                CharsetProvider newStandardCharsetProvider = null == results ? null : results[1];
+                if (newStandardCharsetProvider != null && collectionCharsetProvider != null) {
+                    collectionCharsetProvider.addCharsetProvider(newStandardCharsetProvider);
+                }
             }
             LOG.info("Standard & external charset provider replaced with collection charset provider");
             /*
