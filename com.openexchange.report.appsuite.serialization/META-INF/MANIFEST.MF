@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.tools,
  com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.strings,
