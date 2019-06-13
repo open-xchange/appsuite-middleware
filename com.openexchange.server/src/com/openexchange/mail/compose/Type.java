@@ -59,39 +59,17 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public enum Type {
-    /**
-     * A new mail is compiled.
-     */
-    NEW("new"),
-    /**
-     * A reply to an existent mail is compiled.
-     */
-    REPLY("reply"),
-    /**
-     * A reply-all to an existent mail is compiled.
-     */
-    REPLY_ALL("replyall"),
-    /**
-     * A forward for an existent mail is compiled.
-     */
-    FORWARD("forward"),
-    /**
-     * A continuation of an existent draft (aka "edit draft") is compiled.
-     */
-    EDIT("edit"),
-    /**
-     * A copy of an existent draft template is compiled. No reference is suppose to be kept.
-     */
-    COPY("copy"),
-    /**
-     * A resend/bounce of an existent mail is compiled.
-     */
-    RESEND("resend");
+public class Type {
 
     private final String id;
 
+    /**
+     * Initializes a new {@link Type}.
+     *
+     * @param id The identifier
+     */
     private Type(String id) {
+        super();
         this.id = id;
     }
 
@@ -104,27 +82,81 @@ public enum Type {
         return id;
     }
 
-    private static final Map<String, Type> MAP;
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * A new mail is compiled.
+     */
+    public static final Type NEW = new Type("new");
+
+    /**
+     * A reply to an existent mail is compiled.
+     */
+    public static final Type REPLY = new Type("reply");
+
+    /**
+     * A reply-all to an existent mail is compiled.
+     */
+    public static final Type REPLY_ALL = new Type("replyall");
+
+    /**
+     * A forward for an existent mail is compiled.
+     */
+    public static final Type FORWARD = new Type("forward");
+
+    /**
+     * A continuation of an existent draft (aka "edit draft") is compiled.
+     */
+    public static final Type EDIT = new Type("edit");
+
+    /**
+     * A copy of an existent draft template is compiled. No reference is suppose to be kept.
+     */
+    public static final Type COPY = new Type("copy");
+
+    /**
+     * A resend/bounce of an existent mail is compiled.
+     */
+    public static final Type RESEND = new Type("resend");
+
+    /**
+     * A new SMS message is compiled.
+     */
+    public static final Type SMS = new Type("sms");
+
+    /**
+     * A new FAX message is compiled.
+     */
+    public static final Type FAX = new Type("fax");
+
+    private static final Map<String, Type> TYPES;
+
     static {
-        Type[] types = Type.values();
-        ImmutableMap.Builder<String, Type> m = ImmutableMap.builderWithExpectedSize(types.length);
-        for (Type type : types) {
-            m.put(type.getId(), type);
-        }
-        MAP = m.build();
+        ImmutableMap.Builder<String, Type> m = ImmutableMap.builderWithExpectedSize(10);
+        m.put(Type.COPY.getId(), Type.COPY);
+        m.put(Type.EDIT.getId(), Type.EDIT);
+        m.put(Type.FAX.getId(), Type.FAX);
+        m.put(Type.FORWARD.getId(), Type.FORWARD);
+        m.put(Type.NEW.getId(), Type.NEW);
+        m.put(Type.REPLY.getId(), Type.REPLY);
+        m.put(Type.REPLY_ALL.getId(), Type.REPLY_ALL);
+        m.put(Type.RESEND.getId(), Type.RESEND);
+        m.put(Type.SMS.getId(), Type.SMS);
+        TYPES = m.build();
     }
 
     /**
      * Gets the type for specified type identifier.
      *
      * @param type The type identifier
-     * @return The type associated with the given identifier or <code>null</code> if there is no such type
+     * @return The type associated with the given identifier
      */
-    public static Type typeFor(String type) {
-        if (null == type) {
-            return null;
+    public static Type typeFor(String id) {
+        if (Strings.isEmpty(id)) {
+            throw new IllegalArgumentException("Identifier must not be null or empty");
         }
 
-        return MAP.get(Strings.asciiLowerCase(type));
+        Type t = TYPES.get(Strings.asciiLowerCase(id));
+        return t == null ? new Type(id) : t;
     }
 }
