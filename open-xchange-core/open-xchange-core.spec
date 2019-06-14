@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -694,6 +694,11 @@ index 3ce3af8146f..61ee86367b8 100644
  ui/mail/showContactImage/configurable = true
 EOF
     fi
+
+    # SCR-470
+    if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
+      sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
+  fi
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
@@ -743,6 +748,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Thu Jun 06 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-06-11 (5261)
 * Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.10.2 release
 * Fri May 10 2019 Marcus Klein <marcus.klein@open-xchange.com>

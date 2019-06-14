@@ -1470,6 +1470,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public TransportAccount[] getUserTransportAccounts(final int userId, final int contextId) throws OXException {
+        final Connection con = Database.get(contextId, false);
+        try {
+            return getUserTransportAccounts(userId, contextId, con);
+        } finally {
+            Database.back(contextId, false, con);
+        }
+    }
+
+    @Override
+    public TransportAccount[] getUserTransportAccounts(final int userId, final int contextId, final Connection con) throws OXException {
+        final int[] ids = getUserTransportAccountIDs(userId, contextId, con);
+        final TransportAccount[] retval = new TransportAccount[ids.length];
+        for (int i = 0; i < ids.length; i++) {
+            retval[i] = getTransportAccount(ids[i], userId, contextId, con);
+        }
+        return retval;
+    }
+
+    @Override
     public MailAccount[] getUserMailAccounts(final int userId, final int contextId) throws OXException {
         final Connection con = Database.get(contextId, false);
         try {

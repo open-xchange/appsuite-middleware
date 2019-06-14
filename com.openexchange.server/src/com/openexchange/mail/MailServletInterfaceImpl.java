@@ -1056,15 +1056,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
-    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, 
-                                                                        boolean includeSent, 
-                                                                        boolean cache, 
-                                                                        int sortCol, 
-                                                                        int order, 
-                                                                        int[] fields, 
-                                                                        String[] headerFields2, 
-                                                                        int[] fromToIndices, 
-                                                                        final long max, 
+    public List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder,
+                                                                        boolean includeSent,
+                                                                        boolean cache,
+                                                                        int sortCol,
+                                                                        int order,
+                                                                        int[] fields,
+                                                                        String[] headerFields2,
+                                                                        int[] fromToIndices,
+                                                                        final long max,
                                                                         SearchTerm<?> searchTerm) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int localAccountId = argument.getAccountId();
