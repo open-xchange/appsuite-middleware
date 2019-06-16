@@ -78,13 +78,11 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
@@ -209,83 +207,37 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         }
     }
 
-    private Configurations getEffectiveConfigurations(UserAndContext userAndContext, Session optSession) throws OXException {
+    private Configurations getEffectiveConfigurations(UserAndContext userAndContext, Session optSession, MailSettings optMailSettings) throws OXException {
+        int userId = userAndContext.getUserId();
+        int contextId = userAndContext.getContextId();
         MailAccount account = null;
+
+        // Determine IMAP settings
+        MailSettings mailSettings = optMailSettings;
+        if (mailSettings == null) {
+            if (optSession == null) {
+                MailAccountStorageService service = services.getService(MailAccountStorageService.class);
+                if (service == null){
+                    throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+                }
+                account = service.getDefaultMailAccount(userId, contextId);
+                mailSettings = new MailAccountMailSettings(account);
+            } else {
+                MailConfig mailConfig = services.getService(MailService.class).getMailConfig(optSession, MailAccount.DEFAULT_ID);
+                mailSettings = new MailConfigMailSettings(mailConfig);
+            }
+        }
 
         // IMAP
         Configuration imapConfiguration;
-        if (optSession != null) {
-            Session session = optSession;
-            MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);;
-            Configuration.Builder configBuilder = Configuration.builder();
-
-            // Host
-            {
-                String imapServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.imap.host", null, session);
-                if (null == imapServer) {
-                    imapServer = imapConfig.getServer();
-                }
-                configBuilder.withHost(imapServer);
-            }
-
-            // Port
-            {
-                Integer imapPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.imap.port", null, session);
-                if (null == imapPort) {
-                    imapPort = Integer.valueOf(imapConfig.getPort());
-                }
-                configBuilder.withPort(imapPort.intValue());
-            }
-
-            // Secure (SSL/TLS)
-            {
-                Boolean imapSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.imap.secure", null, session);
-                if (null == imapSecure) {
-                    imapSecure = Boolean.valueOf(imapConfig.isSecure());
-                }
-                configBuilder.withSecure(imapSecure.booleanValue());
-            }
-
-            // Login
-            {
-                String imapLogin;
-                Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.imap.login.customsource", Boolean.FALSE, session);
-                if (customSource.booleanValue()) {
-                    CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
-                    if (customLoginSource == null) {
-                        LOG.warning("Unable to find any CustomLoginSource services! Falling back to imap config.");
-                        imapLogin = imapConfig.getLogin();
-                    } else {
-                        imapLogin = customLoginSource.getImapLogin(session, session.getUserId(), session.getContextId());
-                    }
-                } else {
-                    imapLogin = imapConfig.getLogin();
-                }
-                configBuilder.withLogin(imapLogin);
-            }
-
-            // Password
-            {
-                String imapPassword = imapConfig.getPassword();
-                configBuilder.withPassword(imapPassword);
-            }
-            imapConfiguration = configBuilder.build();
-        } else {
-            int userId = userAndContext.getUserId();
-            int contextId = userAndContext.getContextId();
-
+        {
             Configuration.Builder configBuilder = Configuration.builder();
 
             // Host
             {
                 String imapServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.imap.host", null, userId, contextId);
                 if (null == imapServer) {
-                    MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                    if (service == null){
-                        throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                    }
-                    account = service.getDefaultMailAccount(userId, contextId);
-                    imapServer = account.getMailServer();
+                    imapServer = mailSettings.getServer();
                 }
                 configBuilder.withHost(imapServer);
             }
@@ -294,14 +246,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             {
                 Integer imapPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.imap.port", null, userId, contextId);
                 if (null == imapPort) {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    imapPort = Integer.valueOf(account.getMailPort());
+                    imapPort = Integer.valueOf(mailSettings.getPort());
                 }
                 configBuilder.withPort(imapPort.intValue());
             }
@@ -310,14 +255,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             {
                 Boolean imapSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.imap.secure", null, userId, contextId);
                 if (null == imapSecure) {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    imapSecure = Boolean.valueOf(account.isMailSecure());
+                    imapSecure = Boolean.valueOf(mailSettings.isSecure());
                 }
                 configBuilder.withSecure(imapSecure.booleanValue());
             }
@@ -330,118 +268,51 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
                     CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
                     if (customLoginSource == null) {
                         LOG.warning("Unable to find any CustomLoginSource services! Falling back to imap config.");
-                        if (account == null) {
-                            MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                            if (service == null){
-                                throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                            }
-                            account = service.getDefaultMailAccount(userId, contextId);
-                        }
-                        imapLogin = account.getLogin();
+                        imapLogin = mailSettings.getLogin();
                     } else {
-                        imapLogin = customLoginSource.getImapLogin(null, userId, contextId);
+                        imapLogin = customLoginSource.getImapLogin(optSession, userId, contextId);
                     }
                 } else {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    imapLogin = account.getLogin();
+                    imapLogin = mailSettings.getLogin();
                 }
                 configBuilder.withLogin(imapLogin);
             }
 
+            // Password
+            {
+                String imapPassword = mailSettings.getPassword();
+                configBuilder.withPassword(imapPassword);
+            }
             imapConfiguration = configBuilder.build();
+        }
+
+        // Determine SMTP settings
+        TransportSettings transportSettings;
+        if (optSession == null) {
+            if (account == null) {
+                MailAccountStorageService service = services.getService(MailAccountStorageService.class);
+                if (service == null){
+                    throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+                }
+                account = service.getDefaultMailAccount(userId, contextId);
+            }
+            transportSettings = new TransportAccountTransportSettings(account);
+        } else {
+            TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(optSession, MailAccount.DEFAULT_ID);
+            TransportConfig.getTransportConfig(smtpConfig, optSession, MailAccount.DEFAULT_ID);
+            transportSettings = new TransportConfigTransportSettings(smtpConfig);
         }
 
         // SMTP
         Configuration smtpConfiguration;
-        if (optSession != null) {
-            Session session = optSession;
-            TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(session, MailAccount.DEFAULT_ID);
-            TransportConfig.getTransportConfig(smtpConfig, session, MailAccount.DEFAULT_ID);
-            Configuration.Builder configBuilder = Configuration.builder();
-
-            // Host
-            {
-                String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.smtp.host", null, session);
-                if (null == smtpServer) {
-                    smtpServer = smtpConfig.getServer();
-                }
-                configBuilder.withHost(smtpServer);
-            }
-
-            // Port
-            {
-                Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.smtp.port", null, session);
-                if (null == smtpPort) {
-                    smtpPort = Integer.valueOf(smtpConfig.getPort());
-                }
-                configBuilder.withPort(smtpPort.intValue());
-            }
-
-            // Secure (SSL/TLS)
-            {
-                Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.secure", null, session);
-                if (null == smtpSecure) {
-                    smtpSecure = Boolean.valueOf(smtpConfig.isSecure());
-                }
-                configBuilder.withSecure(smtpSecure.booleanValue());
-            }
-
-            // Password
-            {
-                String smtpPassword = smtpConfig.getPassword();
-                configBuilder.withPassword(smtpPassword);
-            }
-
-            // Login
-            {
-                String smtpLogin;
-                Boolean customSource = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.login.customsource", Boolean.FALSE, session);
-                if (customSource.booleanValue()) {
-                    CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
-                    if (customLoginSource == null) {
-                        LOG.warning("Unable to find any CustomLoginSource services! Falling back to smtp config.");
-                        smtpLogin = smtpConfig.getLogin();
-                    } else {
-                        smtpLogin = customLoginSource.getSmtpLogin(session, session.getUserId(), session.getContextId());
-                    }
-                } else {
-                    smtpLogin = smtpConfig.getLogin();
-                }
-                configBuilder.withLogin(smtpLogin);
-            }
-
-            // Authentication needed?
-            {
-                if ((smtpConfig instanceof TransportAuthSupportAware) && (false == ((TransportAuthSupportAware) smtpConfig).isAuthSupported())) {
-                    configBuilder.withNeedsAuthentication(false);
-                }
-            }
-
-            smtpConfiguration = configBuilder.build();
-        } else {
-            int userId = userAndContext.getUserId();
-            int contextId = userAndContext.getContextId();
-
+        {
             Configuration.Builder configBuilder = Configuration.builder();
 
             // Host
             {
                 String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.smtp.host", null, userId, contextId);
                 if (null == smtpServer) {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    smtpServer = account.getTransportServer();
+                    smtpServer = transportSettings.getServer();
                 }
                 configBuilder.withHost(smtpServer);
             }
@@ -450,14 +321,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             {
                 Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.smtp.port", null, userId, contextId);
                 if (null == smtpPort) {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    smtpPort = Integer.valueOf(account.getTransportPort());
+                    smtpPort = Integer.valueOf(transportSettings.getPort());
                 }
                 configBuilder.withPort(smtpPort.intValue());
             }
@@ -466,16 +330,15 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             {
                 Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.secure", null, userId, contextId);
                 if (null == smtpSecure) {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    smtpSecure = Boolean.valueOf(account.isTransportSecure());
+                    smtpSecure = Boolean.valueOf(transportSettings.isSecure());
                 }
                 configBuilder.withSecure(smtpSecure.booleanValue());
+            }
+
+            // Password
+            {
+                String smtpPassword = transportSettings.getPassword();
+                configBuilder.withPassword(smtpPassword);
             }
 
             // Login
@@ -486,40 +349,19 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
                     CustomLoginSource customLoginSource = getHighestRankedCustomLoginSource();
                     if (customLoginSource == null) {
                         LOG.warning("Unable to find any CustomLoginSource services! Falling back to smtp config.");
-                        if (account == null) {
-                            MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                            if (service == null){
-                                throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                            }
-                            account = service.getDefaultMailAccount(userId, contextId);
-                        }
-                        smtpLogin = account.getLogin();
+                        smtpLogin = transportSettings.getLogin();
                     } else {
-                        smtpLogin = customLoginSource.getSmtpLogin(null, userId, contextId);
+                        smtpLogin = customLoginSource.getSmtpLogin(optSession, userId, contextId);
                     }
                 } else {
-                    if (account == null) {
-                        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                        if (service == null){
-                            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                        }
-                        account = service.getDefaultMailAccount(userId, contextId);
-                    }
-                    smtpLogin = account.getLogin();
+                    smtpLogin = transportSettings.getLogin();
                 }
                 configBuilder.withLogin(smtpLogin);
             }
 
             // Authentication needed?
             {
-                if (account == null) {
-                    MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-                    if (service == null){
-                        throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
-                    }
-                    account = service.getDefaultMailAccount(userId, contextId);
-                }
-                if (TransportAuth.NONE == account.getTransportAuth()) {
+                if (!transportSettings.needsAuthentication()) {
                     configBuilder.withNeedsAuthentication(false);
                 }
             }
@@ -539,7 +381,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
         Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
         if (null == session) {
-            return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), null);
+            return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), null, null);
         }
 
         // Check if session is suitable to obtain the MailConfig instance
@@ -566,12 +408,12 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             };
             Session sessionWithPassword = sessiondService.findFirstMatchingSessionForUser(userId, contextId, matcher);
             if (null == sessionWithPassword) {
-                return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), null);
+                return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), null, null);
             }
             session = sessionWithPassword;
         }
 
-        return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), session);
+        return getEffectiveConfigurations(UserAndContext.newInstance(userId, contextId), session, new MailConfigMailSettings(mailConfig));
     }
 
     private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
@@ -594,7 +436,12 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        Configurations configurations = getEffectiveConfigurations(UserAndContext.newInstance(session), session);
+        Configurations configurations;
+        {
+            MailConfig mailConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
+            MailSettings mailSettings = new MailConfigMailSettings(mailConfig);
+            configurations = getEffectiveConfigurations(UserAndContext.newInstance(session), session, mailSettings);
+        }
 
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
 
