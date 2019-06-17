@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Ip2Location Geo Location Impl
 Bundle-SymbolicName: com.openexchange.geolocation.ip2location
-Bundle-Version: 7.10.2
+Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.geolocation.ip2location
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
