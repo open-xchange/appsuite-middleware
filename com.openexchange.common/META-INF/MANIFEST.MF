@@ -228,7 +228,6 @@ Export-Package: com.mysql.fabric;version="5.1.47";uses:="com.mysql.jdbc,javax.xm
  javax.jdo.listener,
  javax.jdo.metadata,
  javax.jdo.spi,
- javax.jms,
  net.htmlparser.jericho,
  net.htmlparser.jericho.nodoc,
  org.apache.commons.httpclient;version="3.1.0",
