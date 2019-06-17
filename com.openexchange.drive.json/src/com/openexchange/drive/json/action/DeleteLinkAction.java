@@ -49,12 +49,14 @@
 
 package com.openexchange.drive.json.action;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DeleteLinkAction}
@@ -71,10 +73,20 @@ public class DeleteLinkAction extends AbstractDriveAction {
          */
         DriveShareTarget target = getShareParser().parseTarget((JSONObject) requestData.requireData());
         /*
-         * perform the deletion, return empty result in case of success
+         * perform the deletion, return (possibly) updated share target as result
          */
-        getDriveService().getUtility().deleteLink(session, target);
-        return new AJAXRequestResult(new JSONObject(), "json");
+        target = getDriveService().getUtility().deleteLink(session, target);
+        JSONObject jsonResult = new JSONObject();
+        try {
+            jsonResult.put("path", target.getDrivePath());
+            jsonResult.put("checksum", target.getChecksum());
+            if (false == target.isFolder()) {
+                jsonResult.put("name", target.getName());
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+        return new AJAXRequestResult(jsonResult, "json");
     }
 
 }

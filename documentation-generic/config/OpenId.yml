@@ -274,3 +274,16 @@ properties:
       file: openid.properties 
       packageName: open-xchange-oidc
       tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.failureRedirect
+      description: |
+        Set the redirect location for a failed authentication attempt because of an internal server error or a timeout
+        since starting the login flow.
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: openid.properties 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]

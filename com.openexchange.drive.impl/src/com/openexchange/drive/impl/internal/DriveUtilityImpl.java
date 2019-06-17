@@ -562,8 +562,8 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
-    public void deleteLink(DriveSession session, DriveShareTarget target) throws OXException {
-        new ShareHelper(new SyncSession(session)).deleteLink(target);
+    public DriveShareTarget deleteLink(DriveSession session, DriveShareTarget target) throws OXException {
+        return new ShareHelper(new SyncSession(session)).deleteLink(target);
     }
 
     @Override

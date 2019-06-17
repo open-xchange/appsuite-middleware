@@ -240,7 +240,7 @@ public class PortableCacheKey extends AbstractCustomPortable {
 
     @Override
     public String toString() {
-        return "PortableCacheKey [key=" + key + "]";
+        return String.valueOf(key);
     }
 
 }

@@ -256,8 +256,8 @@ public class CheckConsistency extends AbstractRmiCLI<Void> {
      * @see com.openexchange.cli.AbstractCLI#requiresAdministrativePermission()
      */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     /*

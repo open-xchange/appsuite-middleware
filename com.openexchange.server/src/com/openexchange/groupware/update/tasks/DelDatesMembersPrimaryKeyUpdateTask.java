@@ -81,6 +81,9 @@ public class DelDatesMembersPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tableExists(con, "del_dates_members")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

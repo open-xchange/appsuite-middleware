@@ -78,7 +78,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     /**
      * Entry point
-     * 
+     *
      * @param args The arguments of the command line tool
      */
     public static void main(String[] args) {
@@ -98,7 +98,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
@@ -130,7 +130,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractRmiCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, java.lang.String)
      */
     @Override
@@ -143,7 +143,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -182,7 +182,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      * @param loggersLevels
      * @return a {@link Map} with logger names and their respective logging {@link Level}
      */
-    private static Map<String, Level> getLoggerMap(String[] loggersLevels) {
+    static Map<String, Level> getLoggerMap(String[] loggersLevels) {
         if (loggersLevels == null) {
             return Collections.emptyMap();
         }
@@ -210,7 +210,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      * @param loggersArray
      * @return A list with the logger names
      */
-    private static List<String> getLoggerList(String[] loggersArray) {
+    static List<String> getLoggerList(String[] loggersArray) {
         if (loggersArray == null) {
             return Collections.emptyList();
         }
@@ -239,7 +239,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      * @param category The name of the {@link OXException} category
      * @return <code>true</code> if the specified category is valid; <code>false</code> otherwise
      */
-    private static boolean isValidCategory(String category) {
+    static boolean isValidCategory(String category) {
         if (category == null || category.equals("null")) {
             return false;
         }
@@ -253,7 +253,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
         }
     }
 
-    private static void printResponse(LogbackRemoteResponse response) {
+    static void printResponse(LogbackRemoteResponse response) {
         if (response == null) {
             return;
         }
@@ -271,7 +271,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
      * @param value The integer value as string
      * @return The integer value
      */
-    private static final int getIntValue(String value) {
+    static final int getIntValue(String value) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
@@ -281,10 +281,10 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
     /**
      * Prints the specified {@link Set}
-     * 
+     *
      * @param set The {@link Set} to print
      */
-    private static void printSet(Set<String> set) {
+    static void printSet(Set<String> set) {
         Iterator<String> i = set.iterator();
         while (i.hasNext()) {
             System.out.println(i.next());
@@ -294,7 +294,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
     /**
      * Retrieves the appropriate {@link CommandLineExecutor} according to the set {@link Options} in the {@link CommandLine} tool.
      * If no valid {@link CommandLineExecutor} is found then the usage of this tool is printed and the JVM is terminated.
-     * 
+     *
      * @param options The available {@link Options} of the command line tool
      * @param cmd The {@link CommandLine}
      * @return The {@link CommandLineExecutor}
@@ -464,7 +464,7 @@ public class LogbackConfigurationCLT extends AbstractLogbackConfigurationAdminis
 
         /**
          * Executes the remote method with the specified command line arguments
-         * 
+         *
          * @param commandLine The {@link CommandLine} containing the arguments
          * @param logbackConfigService The {@link LogbackConfigurationRMIService}
          * @throws RemoteException if an error is occurred

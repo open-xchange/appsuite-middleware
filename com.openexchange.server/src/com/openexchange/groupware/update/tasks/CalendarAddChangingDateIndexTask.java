@@ -55,6 +55,7 @@ import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,6 +85,9 @@ public final class CalendarAddChangingDateIndexTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "del_dates")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

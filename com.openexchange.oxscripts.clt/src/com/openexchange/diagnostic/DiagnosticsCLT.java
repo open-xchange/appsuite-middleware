@@ -247,8 +247,8 @@ public class DiagnosticsCLT extends AbstractRmiCLI<Void> {
      * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
      */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.FALSE;
     }
 
     /*

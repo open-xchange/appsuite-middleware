@@ -51,6 +51,7 @@ package com.openexchange.caching.events.ms.internal;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map.Entry;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.events.CacheEvent;
@@ -99,7 +100,7 @@ public final class MsCacheEventHandler implements CacheListener {
         ImmutableList.Builder<MessageListener<PortableCacheEvent>> listeners = ImmutableList.builderWithExpectedSize(topicCount);
         for (int i = 0; i < topicCount; i++) {
             Topic<PortableCacheEvent> topic = getTopic(i);
-            MessageListener<PortableCacheEvent> listener = new CacheEventMessageListener(cacheEvents);
+            MessageListener<PortableCacheEvent> listener = new CacheEventMessageListener(topic.getName(), cacheEvents);
             topic.addMessageListener(listener);
             listeners.add(listener);
         }
@@ -124,42 +125,45 @@ public final class MsCacheEventHandler implements CacheListener {
     public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (false == fromRemote) {
             try {
-                int contextId = getContextId(cacheEvent);
-                Topic<PortableCacheEvent> topic = getTopic(contextId);
-                LOG.debug("Re-publishing locally received cache event to remote: {} [{}]", cacheEvent, topic.getSenderId());
-                topic.publish(PortableCacheEvent.wrap(cacheEvent));
+                for (Entry<String, PortableCacheEvent> entry : PortableCacheEvent.wrap(cacheEvent, topicCount).entrySet()) {
+                    String topic = entry.getKey();
+                    PortableCacheEvent portableEvent = entry.getValue();
+                    LOG.debug("Re-publishing locally received cache event to remote via [{}]: {}", topic, portableEvent);
+                    messagingService.getTopic(topic).publish(portableEvent);
+                }
             } catch (RuntimeException e) {
                 LOG.warn("Error publishing cache event", e);
             }
         }
     }
 
-    private int getContextId(CacheEvent event) {
-        int contextId = 0;
-        if (null != event && null != event.getKeys()) {
-            for (Serializable key : event.getKeys()) {
-                if (CacheKey.class.isInstance(key)) {
-                    CacheKey cacheKey = (CacheKey) key;
-                    contextId = cacheKey.getContextId();
-                    if (contextId > 0) {
-                        break;
-                    }
-                }
-            }
-        }
-        return contextId;
+    private Topic<PortableCacheEvent> getTopic(int contextId) {
+        return messagingService.getTopic(getTopicName(contextId, topicCount));
     }
 
-    private Topic<PortableCacheEvent> getTopic(int contextId) {
-        return messagingService.getTopic(TOPIC_PREFIX + (contextId % topicCount));
+    /**
+     * Gets the topic name to use based for a specific cache key.
+     *
+     * @param key The cache key to get the topic name for
+     * @param topicCount The number of topics to use for distribution
+     * @return The topic name
+     */
+    static String getTopicName(Serializable key, int topicCount) {
+        return getTopicName(null != key && CacheKey.class.isInstance(key) ? ((CacheKey) key).getContextId() % topicCount : 0, topicCount);
+    }
+
+    private static String getTopicName(int contextId, int topicCount) {
+        return TOPIC_PREFIX + (contextId % topicCount);
     }
 
     private static class CacheEventMessageListener implements MessageListener<PortableCacheEvent> {
 
         private final CacheEventService cacheEvents;
+        private final String topic;
 
-        CacheEventMessageListener(CacheEventService cacheEvents) {
+        CacheEventMessageListener(String topic, CacheEventService cacheEvents) {
             super();
+            this.topic = topic;
             this.cacheEvents = cacheEvents;
         }
 
@@ -168,7 +172,7 @@ public final class MsCacheEventHandler implements CacheListener {
             if (null != message && message.isRemote()) {
                 PortableCacheEvent cacheEvent = message.getMessageObject();
                 if (null != cacheEvent) {
-                    LOG.debug("Re-publishing remotely received cache event locally: {} [{}]", message.getMessageObject(), message.getSenderId());
+                    LOG.debug("Re-publishing remotely received cache event via [{}] locally: {}", topic, cacheEvent);
                     cacheEvents.notify(this, PortableCacheEvent.unwrap(cacheEvent), true);
                 } else {
                     LOG.warn("Discarding empty cache event message.");

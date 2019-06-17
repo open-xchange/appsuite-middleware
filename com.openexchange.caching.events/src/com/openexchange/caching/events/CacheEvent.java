@@ -267,13 +267,8 @@ public class CacheEvent implements Serializable {
         StringBuilder sb = new StringBuilder(128).append("CacheEvent [");
         sb.append("operation=").append(operation);
         sb.append(", region=").append(region);
+        sb.append(", groupName=").append(groupName);
         sb.append(", keys=").append(keys);
-        sb.append(", groupName=");
-        if (null == groupName) {
-            sb.append("null");
-        } else {
-            sb.append('\"').append(groupName).append('\"');
-        }
         sb.append(']');
         return sb.toString();
     }

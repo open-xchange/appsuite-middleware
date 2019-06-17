@@ -77,6 +77,9 @@ public class PrgDatesPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tablesExist(con, "prg_dates", "dateExternal")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

@@ -47,35 +47,24 @@
  *
  */
 
-package com.openexchange.sql.schema;
+package com.openexchange.client.onboarding.mail;
 
-import com.openexchange.sql.grammar.Table;
+import com.openexchange.exception.OXException;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link TransportSettings} - Provides mail settings.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class Tables {
+public interface TransportSettings extends MailSettings {
 
-    public static final Table dates = new Table("prg_dates", "pd");
-
-    public static final Table datesMembers = new Table("prg_dates_members", "pdm");
-
-    public static final Table dateMembers = datesMembers;
-
-    public static final Table dateRights = new Table("prg_date_rights", "pdr");
-
-    public static final Table datesRights = dateRights;
-
-    public static final Table delDates = new Table("del_dates", "dd");
-
-    public static final Table delDatesMembers = new Table("del_dates_members", "ddm");
-
-    public static final Table delDateMembers = delDatesMembers;
-
-    public static final Table delDateRights = new Table("del_date_rights", "ddr");
-
-    public static final Table delDatesRights = delDateRights;
-
-    public static final Table subscriptions = new Table("subscriptions");
+    /**
+     * Indicates if transport access requires authentication or not.
+     *
+     * @return <code>true</code> if authentication is needed; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean needsAuthentication() throws OXException;
 
 }

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-04-18 13:11+0300\n"
+"PO-Revision-Date: 2019-05-12 11:06+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: fi_FI\n"
@@ -1226,9 +1226,9 @@ msgstr ""
 msgid "Internal Calendar"
 msgstr "Sisäinen kalenteri"
 
-#. The requested page does not denote to a calendar.
+#. The requested page does not denote a calendar.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:62
-msgid "The requested page does not denote to a calendar."
+msgid "The requested page does not denote a calendar."
 msgstr "Pyydetty sivu ei tarkoita kalenteria."
 
 #. You have no access to this calendar.
@@ -7074,10 +7074,8 @@ msgid "Drafts"
 msgstr "Luonnokset"
 
 #. The internationalized name for the sent mail folder
-#. The name for trash folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:81
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
-msgid "Sent objects"
+msgid "Sent"
 msgstr "Lähetetyt"
 
 #. The alternative internationalized name for the sent mail folder
@@ -7219,6 +7217,11 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:164
 msgid "Dear Sir or Madam"
 msgstr "Hyvä ruova tai herra"
+
+#. The name for trash folder
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:175
+msgid "Sent objects"
+msgstr "Lähetetyt"
 
 #. The name for "Unified Mail" root folder
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:187
@@ -10650,6 +10653,10 @@ msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"
 msgstr "Et voi muuttaa roskakorin tai sen alakansioiden oikeuksia"
+
+#: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:135
+msgid "There is already a folder named \"%1$s\". Please choose another name."
+msgstr "Kansionimi \"%1$s\" on varattu. Valitse toinen nimi."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
@@ -14267,6 +14274,9 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid "The requested page does not denote to a calendar."
+#~ msgstr "Pyydetty sivu ei tarkoita kalenteria."
+
 #~ msgid ""
 #~ "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. "
 #~ msgstr ""
@@ -17733,9 +17743,6 @@ msgstr "Zulu"
 
 #~ msgid "Drafts folder"
 #~ msgstr "Luonnokset"
-
-#~ msgid "Sent"
-#~ msgstr "Lähetetyt"
 
 #~ msgid "Sent folder"
 #~ msgstr "Lähetetyt"

@@ -91,6 +91,9 @@ public final class AppointmentClearDelTablesTasks extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         int rollback = 0;
         try {
+            if (false == Databases.tableExists(con, "del_dates")) {
+                return;
+            }
             con.setAutoCommit(false);
             rollback = 1;
 

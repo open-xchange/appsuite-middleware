@@ -65,9 +65,15 @@ import com.openexchange.session.Session;
  */
 public class MultifactorChecker {
 
-    ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
+    /**
+     * Initializes a new {@link MultifactorChecker}.
+     *
+     * @param serviceLookup The service look-up
+     */
     public MultifactorChecker(ServiceLookup serviceLookup) {
+        super();
         this.serviceLookup = serviceLookup;
     }
 
@@ -77,16 +83,17 @@ public class MultifactorChecker {
      * @param request The login request
      * @param context The user's context
      * @param user The user
-     * @throws OXException if the multi-factor authentication is enabled for the user, but authentication failed.
      */
-    public  SessionEnhancement checkMultiFactorAuthentication(LoginRequest request, Context context, User user) {
+    public SessionEnhancement checkMultiFactorAuthentication(LoginRequest request, Context context, User user) {
         MultifactorLoginService multifactorService = serviceLookup.getOptionalService(MultifactorLoginService.class);
         if (multifactorService == null) {
             return null;
         }
+
         try {
             if (multifactorService.checkMultiFactorAuthentication(user.getId(), context.getContextId(), user.getLocale(), request)) {
-                return new SessionEnhancement () {
+                return new SessionEnhancement() {
+
                     @Override
                     public void enhanceSession(Session session) {
                         session.setParameter(Session.MULTIFACTOR_PARAMETER, Boolean.TRUE);
@@ -95,18 +102,19 @@ public class MultifactorChecker {
                 };
             }
         } catch (OXException ex) {
-         // Failed to auth
-            return new SessionEnhancement () {
+            // Failed to auth
+            return new SessionEnhancement() {
+
                 @Override
                 public void enhanceSession(Session session) {
                     session.setParameter(Session.MULTIFACTOR_PARAMETER, Boolean.TRUE);
                 }
             };
         }
+
+        // No multifactor required
         return null;
     }
-
-
 
     /**
      * Returns true if session is marked for multifactor but not yet authenticated
@@ -114,9 +122,8 @@ public class MultifactorChecker {
      * @param session The user session
      * @return <code>true</code> if session is marked for multifactor but not yet authenticated
      */
-    public static boolean requiresMultifactor (Session session) {
-        return (Boolean.TRUE.equals(session.getParameter(Session.MULTIFACTOR_PARAMETER)) &&
-                !Boolean.TRUE.equals(session.getParameter(Session.MULTIFACTOR_AUTHENTICATED)));
+    public static boolean requiresMultifactor(Session session) {
+        return (Boolean.TRUE.equals(session.getParameter(Session.MULTIFACTOR_PARAMETER)) && !Boolean.TRUE.equals(session.getParameter(Session.MULTIFACTOR_AUTHENTICATED)));
     }
 
 }

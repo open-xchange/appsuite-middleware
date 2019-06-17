@@ -182,7 +182,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public OIDCExceptionHandler getExceptionHandler() {
-        return new OIDCCoreExceptionHandler();
+        return new OIDCCoreExceptionHandler(this.getBackendConfig());
     }
 
     @Override
@@ -358,10 +358,21 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public boolean updateOauthTokens(Session session) throws OXException {
         LOG.trace("updateOauthTokens(Session session: {})", session.getSessionID());
-        AccessTokenResponse accessToken = this.loadAccessToken(session);
-        if (accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
+        AccessTokenResponse accessToken = null;
+        try {
+            accessToken = this.loadAccessToken(session);
+        } catch (OXException e) {
+            if (e.getCode() == OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.getNumber()) {
+                LOG.info(e.getMessage());
+            } else {
+                throw e;
+            }
+        }
+        
+        if (accessToken == null || accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
             return false;
         }
+        
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put(OIDCTools.ACCESS_TOKEN, accessToken.getTokens().getAccessToken().getValue());
         tokenMap.put(OIDCTools.REFRESH_TOKEN, accessToken.getTokens().getRefreshToken().getValue());

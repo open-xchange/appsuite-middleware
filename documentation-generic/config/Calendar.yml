@@ -205,32 +205,10 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Database"]
-    - key: com.openexchange.calendar.useLegacyStorage
-      description: |
-        Forcibly re-enables usage of the 'legacy' tables for the calendar storage. 
-      defaultValue: false
-      version: 7.10.0
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar","Database"]
-    - key: com.openexchange.calendar.replayToLegacyStorage
-      description: |
-        Enables or disables the 'replaying' mode for the calendar storage that is entered automatically after migration. 
-      defaultValue: true
-      version: 7.10.0
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: calendar.properties
-      packageName: open-xchange-core
-      tags: ["Calendar","Database"]
     - key: com.openexchange.calendar.migration.purgeLegacyData
       description: |
-        Manually activates an update task for purging legacy data after the calendar migration took place.  
-      defaultValue: false
+        Manually enables or disables the update task for purging legacy data after the calendar migration took place.  
+      defaultValue: true
       version: 7.10.0
       reloadable: false
       configcascadeAware: false

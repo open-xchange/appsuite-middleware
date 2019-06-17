@@ -213,6 +213,10 @@ public final class FileUtils {
      */
     private static final void extractZipEntry(ZipInputStream zipInputStream, ZipEntry zipEntry, byte[] buffer, List<File> extractedFiles, String extractDirectory, boolean keep) throws IOException {
         String fileName = zipEntry.getName();
+        if (fileName.contains("../")) {
+            System.out.println("Possible path traversal detected! Ignoring file '" + fileName + "'.");
+            return;
+        }
         File newFile = Paths.get(extractDirectory, fileName).toFile();
         if (false == keep) {
             newFile.deleteOnExit();

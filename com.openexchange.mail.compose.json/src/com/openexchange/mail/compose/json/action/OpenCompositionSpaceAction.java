@@ -114,44 +114,48 @@ public class OpenCompositionSpaceAction extends AbstractMailComposeAction {
 
         // Build parameters
         OpenCompositionSpaceParameters.Builder parameters;
-        switch (type) {
-            case COPY:
+        switch (type.getId()) {
+            case "copy":
                 {
                     MailPath copyFor = requireReferencedMail(requestData);
                     parameters = OpenCompositionSpaceParameters.builderForCopy(copyFor, usm);
                 }
                 break;
-            case EDIT:
+            case "edit":
                 {
                     MailPath editFor = requireReferencedMail(requestData);
                     parameters = OpenCompositionSpaceParameters.builderForEdit(editFor, usm);
                 }
                 break;
-            case FORWARD:
+            case "forward":
                 {
                     List<MailPath> forwardsFor = requireReferencedMails(requestData);
                     parameters = OpenCompositionSpaceParameters.builderForForward(forwardsFor, usm);
                 }
                 break;
-            case NEW:
-                parameters = OpenCompositionSpaceParameters.builderForNew(usm);
+            case "new":
+                //$FALL-THROUGH$
+            case "sms":
+                //$FALL-THROUGH$
+            case "fax":
+                parameters = OpenCompositionSpaceParameters.builderForNew(type, usm);
                 break;
-            case REPLY:
-                // fall-through
-            case REPLY_ALL:
+            case "reply":
+                //$FALL-THROUGH$
+            case "replyall":
                 {
                     MailPath replyFor = requireReferencedMail(requestData);
                     parameters = OpenCompositionSpaceParameters.builderForReply(type == Type.REPLY_ALL, replyFor, usm);
                 }
                 break;
-            case RESEND:
+            case "resend":
                 {
                     MailPath resendtFor = requireReferencedMail(requestData);
                     parameters = OpenCompositionSpaceParameters.builderForResend(resendtFor, usm);
                 }
                 break;
             default:
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("type", type.getId());
+                parameters = OpenCompositionSpaceParameters.builderForNew(type, usm);
         }
 
         if (AJAXRequestDataTools.parseBoolParameter("vcard", requestData)) {

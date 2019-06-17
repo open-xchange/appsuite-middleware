@@ -99,6 +99,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("trashContents", new TrashContentsAction());
         actions.put("deleteFromTrash", new DeleteFromTrashAction());
         actions.put("restoreFromTrash", new RestoreFromTrashAction());
+        actions.put("syncfolder", new SyncFolderAction());
         this.actions = actions.build();
     }
 

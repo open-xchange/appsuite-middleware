@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.serialization;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -222,12 +223,12 @@ public class Report implements Serializable {
         Date ed = cal.getTime();
         cal.add(Calendar.YEAR, -1);
         Date sd = cal.getTime();
-        this.defaultTimeframeStart = sd.getTime();
-        this.defaultTimeframeEnd = ed.getTime();
+        this.defaultTimeframeStart = L(sd.getTime());
+        this.defaultTimeframeEnd = L(ed.getTime());
         this.needsComposition = false;
     }
 
-    private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
+    private static Class<?>[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
 
     public void addError(OXException exception) {
         HashMap<String, String> errors = get(Report.ERRORS, Report.IGNORED, new HashMap<String, String>(), HashMap.class);
@@ -423,7 +424,7 @@ public class Report implements Serializable {
     public Long getConsideredTimeframeStart() {
         Long timeframeStart = defaultTimeframeStart;
         if (this.reportConfig.isConfigTimerange()) {
-            timeframeStart = this.reportConfig.getConsideredTimeframeStart();
+            timeframeStart = L(this.reportConfig.getConsideredTimeframeStart());
         }
         return timeframeStart;
     }
@@ -431,7 +432,7 @@ public class Report implements Serializable {
     public Long getConsideredTimeframeEnd() {
         Long timeframeEnd = defaultTimeframeEnd;
         if (this.reportConfig.isConfigTimerange()) {
-            timeframeEnd = this.reportConfig.getConsideredTimeframeEnd();
+            timeframeEnd = L(this.reportConfig.getConsideredTimeframeEnd());
         }
         return timeframeEnd;
     }
@@ -455,7 +456,7 @@ public class Report implements Serializable {
     // Attention, if you add values, also correct the composeReportFromStoredPats(...) method
     public static enum JsonObjectType {
         MAP, ARRAY
-    };
+    }
 
     /**
      * Gather all report parts and merge them into a report-file, with a ".report" ending, inside the

@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.SimpleConvertUtf8ToUtf8mb4UpdateTask;
 
@@ -78,15 +79,19 @@ public class LegacyCalendarTablesUtf8Mb4UpdateTask extends SimpleConvertUtf8ToUt
      */
     @Override
     protected void before(PerformParameters params, Connection connection) throws SQLException {
-        recreateKey(connection, "prg_dates", new String[] { "cid", "uid" }, new int[] { -1, 191 });
-        recreateKey(connection, "del_dates", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+        if (Databases.tablesExist(connection, "prg_dates", "del_dates")) {
+            recreateKey(connection, "prg_dates", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+            recreateKey(connection, "del_dates", new String[] { "cid", "uid" }, new int[] { -1, 191 });
+        }
     }
 
     @Override
     protected void after(PerformParameters params, Connection connection) throws SQLException {
-        // Manually change dateExternal and delDateExternal
-        List<String> columnsToIgnore = Collections.singletonList("mailAddress");
-        changeTable(connection, params.getSchema().getSchema(), "dateExternal", columnsToIgnore);
-        changeTable(connection, params.getSchema().getSchema(), "delDateExternal", columnsToIgnore);
+        if (Databases.tablesExist(connection, "dateExternal", "delDateExternal")) {
+            // Manually change dateExternal and delDateExternal
+            List<String> columnsToIgnore = Collections.singletonList("mailAddress");
+            changeTable(connection, params.getSchema().getSchema(), "dateExternal", columnsToIgnore);
+            changeTable(connection, params.getSchema().getSchema(), "delDateExternal", columnsToIgnore);
+        }
     }
 }

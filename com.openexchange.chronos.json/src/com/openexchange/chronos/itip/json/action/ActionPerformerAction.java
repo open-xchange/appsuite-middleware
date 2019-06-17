@@ -49,8 +49,9 @@
 
 package com.openexchange.chronos.itip.json.action;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -61,7 +62,8 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
@@ -82,6 +84,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
@@ -91,7 +94,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
+ *
  * {@link ActionPerformerAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -99,7 +102,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ActionPerformerAction extends AbstractITipAction {
 
-    private RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing;
+    private final RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing;
 
     public ActionPerformerAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing, RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryListing) {
         super(services, analyzerListing);
@@ -146,7 +149,7 @@ public class ActionPerformerAction extends AbstractITipAction {
 
     /**
      * Adds the actual data to the attachments
-     * 
+     *
      * @param analysisToProcess The analysis already made
      * @param session The {@link CalendarSession}
      */
@@ -156,47 +159,27 @@ public class ActionPerformerAction extends AbstractITipAction {
             if (null == change.getDiff() || containsAttachmentChange(change)) {
                 Event event = change.getNewEvent();
                 if (null != event && event.containsAttachments() && 0 < event.getAttachments().size()) {
-                    final ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
-                    DataSource source = conversionEngine.getDataSource("com.openexchange.mail.attachment");
-                    if (null != source) {
-                        DataArguments dataSource = getDataSource(request);
-                        Iterator<Attachment> it = event.getAttachments().iterator();
-                        while (it.hasNext()) {
-                            Attachment attachment = it.next();
-                            dataSource.put("com.openexchange.mail.conversion.cid", prepareUri(attachment.getUri()));
-                            InputStream stream = null;
-                            ByteArrayFileHolder fileHolder = null;
-                            try {
-                                // Get attachment from mail
-                                Data<InputStream> data = source.getData(InputStream.class, dataSource, session);
-                                // Get stream and properties for file holder
-                                stream = data.getData();
-                                fileHolder = new ByteArrayFileHolder(Streams.stream2bytes(stream));
-                                // Set the attachment to the event
-                                attachment.setData(fileHolder);
-                            } catch (IOException e) {
-                                LOG.error("Couldn't convert input stream to processable data. Removing attachment from event.", e);
-                                it.remove();
-                                Streams.close(fileHolder);
-                            } catch (OXException e) {
-                                // Check for MailExceptionCode.ATTACHMENT_NOT_FOUND
-                                if (e.getErrorCode().equals("MSG-0049")) {
-                                    LOG.warn("Unable to find attachment with CID {}. Removing attachment from event.", attachment.getUri(), e);
-                                    it.remove();
-                                    Streams.close(fileHolder);
-                                } else {
-                                    throw e;
-                                }
-                            } finally {
-                                Streams.close(stream);
+                    for (Iterator<Attachment> iterator = event.getAttachments().iterator(); iterator.hasNext();) {
+                        Attachment attachment = iterator.next();
+                        if (Strings.isEmpty(attachment.getUri())) {
+                            continue;
+                        }
+                        IFileHolder attachmentData = optAttachmentData(request, getContentId(attachment.getUri()));
+                        if (null == attachmentData) {
+                            attachmentData = optAttachmentData(request, prepareUri(attachment.getUri()));
+                            if (null == attachmentData) {
+                                LOG.warn("Unable to find attachment with CID {}. Removing attachment from event.", attachment.getUri());
+                                iterator.remove();
+                                continue;
                             }
                         }
-                    } else {
-                        LOG.error("Unable to get conversion module for attachments. Removing attachments from event.");
-                        if (change.getCurrentEvent().containsAttachments()) {
-                            event.setAttachments(new LinkedList<>());
-                        } else {
-                            event.removeAttachments();
+                        attachment.setData(attachmentData);
+                        attachment.setUri(null);
+                        if (Strings.isNotEmpty(attachmentData.getName())) {
+                            attachment.setFilename(attachmentData.getName());
+                        }
+                        if (Strings.isNotEmpty(attachmentData.getContentType())) {
+                            attachment.setFormatType(attachmentData.getContentType());
                         }
                     }
                 }
@@ -265,6 +248,89 @@ public class ActionPerformerAction extends AbstractITipAction {
         }
         return service;
 
+    }
+
+    /**
+     * Attempts to retrieve data from a MIME attachment referenced by a specific content identifier and store it into a file holder.
+     *
+     * @param requestData The underlying request data providing the targeted e-mail message and session
+     * @param contentId The content identifier of the attachment to retrieve
+     * @return The attachment data loaded into a file holder, or <code>null</code> if not found
+     */
+    private IFileHolder optAttachmentData(AJAXRequestData requestData, String contentId) throws OXException {
+        ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
+        DataSource dataSource = conversionEngine.getDataSource("com.openexchange.mail.attachment");
+        if (null == dataSource) {
+            LOG.warn("Data source \"com.openexchange.mail.attachment\" not available. Unable to access mail attachment data.");
+            return null;
+        }
+
+        ThresholdFileHolder fileHolder = null;
+        InputStream inputStream = null;
+        try {
+            DataArguments dataArguments = getDataSource(requestData);
+            dataArguments.put("com.openexchange.mail.conversion.cid", contentId);
+            Data<InputStream> data = dataSource.getData(InputStream.class, dataArguments, requestData.getSession());
+            if (null != data) {
+                inputStream = data.getData();
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(inputStream);
+                if (null != data.getDataProperties()) {
+                    fileHolder.setContentType(data.getDataProperties().get("com.openexchange.conversion.content-type"));
+                    fileHolder.setName(data.getDataProperties().get("com.openexchange.conversion.name"));
+                }
+                ThresholdFileHolder retval = fileHolder;
+                fileHolder = null;
+                return retval;
+            }
+        } catch (OXException e) {
+            if (e.equalsCode(49, "MSG")) {
+                // Attachment not found
+                return null;
+            }
+            throw e;
+        } finally {
+            Streams.close(inputStream, fileHolder);
+        }
+
+        return null;
+    }
+
+    /**
+     * Converts a "cid" URL to its corresponding <code>Content-ID</code> message header,
+     *
+     * @param cidUrl The "cid" URL to convert
+     * @return The corresponding contentId, or the passed value as-is if not possible
+     */
+    private static String getContentId(String cidUrl) {
+        if (Strings.isEmpty(cidUrl)) {
+            return cidUrl;
+        }
+        /*
+         * https://tools.ietf.org/html/rfc2392#section-2:
+         * A "cid" URL is converted to the corresponding Content-ID message header [MIME] by removing the "cid:" prefix, converting the
+         * % encoded character to their equivalent US-ASCII characters, and enclosing the remaining parts with an angle bracket pair,
+         * "<" and ">".
+         */
+        String contentId = cidUrl;
+        if (contentId.toLowerCase().startsWith("cid:")) {
+            contentId = contentId.substring(4);
+        }
+        try {
+            contentId = URLDecoder.decode(contentId, Charsets.UTF_8_NAME);
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("Unexpected error decoding {}", contentId, e);
+        }
+        if (Strings.isEmpty(contentId)) {
+            return contentId;
+        }
+        if ('<' != contentId.charAt(0)) {
+            contentId = '<' + contentId;
+        }
+        if ('>' != contentId.charAt(contentId.length() - 1)) {
+            contentId = contentId + '>';
+        }
+        return contentId;
     }
 
 }

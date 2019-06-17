@@ -74,6 +74,7 @@ import com.openexchange.oidc.OIDCBackendConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.impl.OIDCSessionInspectorService;
 import com.openexchange.oidc.osgi.OIDCBackendRegistry;
+import com.openexchange.oidc.spi.AbstractOIDCBackend;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
@@ -86,7 +87,7 @@ import com.openexchange.session.inspector.SessionInspectorService;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(OIDCSessionInspectorService.class)
+@PrepareForTest({OIDCSessionInspectorService.class, AbstractOIDCBackend.class})
 public class OIDCSessionInspectorServiceTest {
 
     @Mock
@@ -105,7 +106,7 @@ public class OIDCSessionInspectorServiceTest {
     private Session mockedSession;
 
     @Mock
-    private OIDCBackend mockedBackend;
+    private AbstractOIDCBackend mockedBackend;
 
     @Mock
     private OIDCBackendConfig mockedBackendConfig;
@@ -120,6 +121,7 @@ public class OIDCSessionInspectorServiceTest {
         MockitoAnnotations.initMocks(this);
         Mockito.when(this.mockedBackend.getBackendConfig()).thenReturn(this.mockedBackendConfig);
         Mockito.when(this.mockedOidcBackends.getAllRegisteredBackends()).thenReturn(this.mockedBackendList);
+        Mockito.when(mockedSession.getParameter(OIDCTools.IDTOKEN)).thenReturn(new Object());
         this.inspector = PowerMockito.spy(new OIDCSessionInspectorService(this.mockedOidcBackends));
     }
 
@@ -166,6 +168,28 @@ public class OIDCSessionInspectorServiceTest {
         Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
 
         Mockito.verify(mockedBackend, Mockito.times(1)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
+        assertTrue("Wrong reply", result == Reply.NEUTRAL);
+    }
+    
+    @Test
+    public void onSessionHit_UpdateTokensErrorTest() throws Exception {
+        AbstractOIDCBackend backend = PowerMockito.spy(new AbstractOIDCBackend() {
+            @Override
+            public OIDCBackendConfig getBackendConfig() {
+                return mockedBackendConfig;
+            }
+
+            @Override
+            public void logoutCurrentUser(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+            }
+        });
+
+        PowerMockito.doReturn(backend).when(this.inspector, PowerMockito.method(OIDCSessionInspectorService.class, "loadBackendForSession", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
+        Mockito.when(B(backend.isTokenExpired(mockedSession))).thenReturn(B(true));
+        PowerMockito.doThrow(OIDCExceptionCode.UNABLE_TO_RELOAD_ACCESSTOKEN.create("")).when(backend, PowerMockito.method(AbstractOIDCBackend.class, "loadAccessToken", Session.class)).withArguments(ArgumentMatchers.any(Session.class));
+        Reply result = this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
+
+        Mockito.verify(backend, Mockito.times(1)).logoutCurrentUser(mockedSession, mockedRequest, mockedResponse);
         assertTrue("Wrong reply", result == Reply.NEUTRAL);
     }
 

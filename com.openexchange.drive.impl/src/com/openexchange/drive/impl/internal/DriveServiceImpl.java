@@ -142,7 +142,42 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, boolean includeQuota) throws OXException {
+    public SyncResult<DirectoryVersion> syncFolder(DriveSession session, DirectoryVersion originalVersion, DirectoryVersion clientVersion) throws OXException {
+        /*
+         * get single path from client- or original version
+         */
+        String path;
+        if (null != originalVersion) {
+            path = originalVersion.getPath();
+            if (null != clientVersion && false == Strings.equalsNormalized(path, clientVersion.getPath())) {
+                throw DriveExceptionCodes.INVALID_DIRECTORYVERSION.create(clientVersion.getPath(), clientVersion.getChecksum());
+            }
+        } else if (null != clientVersion) {
+            path = clientVersion.getPath();
+        } else {
+            throw DriveExceptionCodes.INVALID_DIRECTORYVERSION.create("", "");
+        }
+        /*
+         * sync this directory
+         */
+        List<DirectoryVersion> originalVersions = null != originalVersion ? Collections.singletonList(originalVersion) : Collections.emptyList();
+        List<DirectoryVersion> clientVersions = null != clientVersion ? Collections.singletonList(clientVersion) : Collections.emptyList();
+        return syncFolders(session, originalVersions, clientVersions, (SyncSession syncSession) -> {
+            ServerDirectoryVersion serverVersion = syncSession.getServerDirectory(path);
+            return null == serverVersion ? Collections.emptyList() : Collections.singletonList(serverVersion);
+        });
+    }
+
+    @Override
+    public SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions) throws OXException {
+        return syncFolders(session, originalVersions, clientVersions, (SyncSession syncSession) -> {
+            ServerSession serverSession = syncSession.getServerSession();
+            int maxDirectories = DriveConfig.getInstance().getMaxDirectories(serverSession.getContextId(), serverSession.getUserId());
+            return syncSession.getServerDirectories(maxDirectories);
+        });
+    }
+
+    private SyncResult<DirectoryVersion> syncFolders(DriveSession session, List<DirectoryVersion> originalVersions, List<DirectoryVersion> clientVersions, VersionsProvider<ServerDirectoryVersion> serverVersionsProvider) throws OXException {
         ServerSession serverSession = session.getServerSession();
         /*
          * check (hard) version restrictions
@@ -194,7 +229,7 @@ public class DriveServiceImpl implements DriveService {
              */
             final SyncSession driveSession = new SyncSession(session);
             try {
-                serverVersions = driveSession.getServerDirectories(maxDirectories);
+                serverVersions = serverVersionsProvider.getVersions(driveSession);
             } catch (OXException e) {
                 if ("DRV-0035".equals(e.getErrorCode())) {
                     /*
@@ -261,10 +296,7 @@ public class DriveServiceImpl implements DriveService {
                     actionsForClient.add(new ErrorDirectoryAction(null, null, null, error, false, false));
                 }
             }
-            DriveQuota quota = null;
-            if (includeQuota) {
-                quota = getQuota(session);
-            }
+            DriveQuota quota = session.isIncludeQuota() ? getQuota(session) : null;
             /*
              * return actions for client
              */
@@ -277,7 +309,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions, boolean includeQuota) throws OXException {
+    public SyncResult<FileVersion> syncFiles(DriveSession session, final String path, List<FileVersion> originalVersions, List<FileVersion> clientVersions) throws OXException {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateFileVersions(originalVersions);
         DriveVersionValidator.validateFileVersions(clientVersions);
@@ -340,10 +372,7 @@ public class DriveServiceImpl implements DriveService {
                 }
                 throw e;
             }
-            DriveQuota quota = null;
-            if (includeQuota) {
-                quota = getQuota(session);
-            }
+            DriveQuota quota = session.isIncludeQuota() ? getQuota(session) : null;
             /*
              * return actions for client
              */

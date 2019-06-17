@@ -189,6 +189,13 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             driveSession.setDiagnostics(Boolean.valueOf(diagnostics));
         }
         /*
+         * extract quota parameter if present
+         */
+        String quota = requestData.getParameter("quota");
+        if (Strings.isNotEmpty(quota)) {
+            driveSession.setIncludeQuota(Boolean.parseBoolean(quota));
+        }
+        /*
          * extract columns parameter to fields if present
          */
         String columnsValue = requestData.getParameter("columns");
@@ -287,7 +294,8 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         final boolean secure = requestData.isSecure();
         final String httpSessionID = requestData.getRoute();
         final String route = Tools.extractRoute(httpSessionID);
-        final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        final int port = null != servletRequest ? servletRequest.getServerPort() : -1;
         final String host = determineHost(requestData, session);
         final String prefix = Services.getService(DispatcherPrefixService.class, true).getPrefix();
         return new HostData() {

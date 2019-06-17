@@ -96,7 +96,7 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * No user information available for the give state.
      */
-    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the give state.", Category.CATEGORY_ERROR, 9), 
+    INVALID_AUTHENTICATION_STATE_NO_USER("No user information available for the given state.", Category.CATEGORY_ERROR, 9), 
     /**
      * Unable to load user information from IDP after valid authentication: '%1$s'
      */

@@ -50,6 +50,7 @@
 package com.openexchange.client.onboarding.mail.custom;
 
 import com.openexchange.client.onboarding.mail.MailOnboardingProvider;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
@@ -63,17 +64,23 @@ public interface CustomLoginSource {
     /**
      * Provides the IMAP login for the {@link MailOnboardingProvider}.
      *
-     * @param session The session
+     * @param optSession The session (if available); otherwise <code>null</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return the IMAP login
+     * @throws OXException If IMAP login cannot be returned
      */
-    String getImapLogin(Session session);
+    String getImapLogin(Session optSession, int userId, int contextId) throws OXException;
 
     /**
      * Provides the SMTP login for the {@link MailOnboardingProvider}.
      *
-     * @param session The session
+     * @param optSession The session (if available); otherwise <code>null</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return the SMTP login
+     * @throws OXException If SMTP login cannot be returned
      */
-    String getSmtpLogin(Session session);
+    String getSmtpLogin(Session optSession, int userId, int contextId) throws OXException;
 
 }

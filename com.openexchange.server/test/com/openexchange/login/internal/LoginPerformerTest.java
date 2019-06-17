@@ -59,6 +59,8 @@ import java.util.Map.Entry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Cookie;
@@ -71,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link LoginPerformerTest}
@@ -85,108 +88,135 @@ public class LoginPerformerTest {
     Cookie testCookie;
     Header testHeader;
     private LoginRequest loginRequest;
-
-    public LoginPerformerTest() {
-        super();
-    }
+    @Mock
+    private SessiondService sessiondServiceMock;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
+
         performer = LoginPerformer.getInstance();
+        SessiondService.SERVICE_REFERENCE.set(sessiondServiceMock);
         testAuthenticationService = new TestAuthenticationService();
         Authentication.setService(testAuthenticationService);
         testCookie = new Cookie() {
+
             @Override
             public String getValue() {
                 return "cookieValue";
             }
+
             @Override
             public String getName() {
                 return "cookieName";
             }
         };
         testHeader = new Header() {
+
             @Override
             public String getValue() {
                 return "headerValue";
             }
+
             @Override
             public String getName() {
                 return "headerName";
             }
         };
         loginRequest = new LoginRequest() {
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public boolean isSecure() {
                 return false;
             }
+
             @Override
             public String getVersion() {
                 return null;
             }
+
             @Override
             public String getUserAgent() {
                 return null;
             }
+
             @Override
             public int getServerPort() {
                 return 0;
             }
+
             @Override
             public String getServerName() {
                 return null;
             }
+
             @Override
             public String getPassword() {
                 return null;
             }
+
             @Override
             public String getLogin() {
                 return null;
             }
+
             @Override
             public Interface getInterface() {
                 return Interface.HTTP_JSON;
             }
+
             @Override
             public String getHttpSessionID() {
                 return null;
             }
+
             @SuppressWarnings("serial")
             @Override
             public Map<String, List<String>> getHeaders() {
-                return new HashMap<String, List<String>>() {{
-                    put(testHeader.getName(), new ArrayList<String>() {{
-                        add(testHeader.getValue());
-                    }});
-                }};
+                return new HashMap<String, List<String>>() {
+
+                    {
+                        put(testHeader.getName(), new ArrayList<String>() {
+
+                            {
+                                add(testHeader.getValue());
+                            }
+                        });
+                    }
+                };
             }
+
             @Override
             public String getHash() {
                 return null;
             }
+
             @Override
             public Cookie[] getCookies() {
-                return new Cookie[] {
-                    testCookie
+                return new Cookie[] { testCookie
                 };
             }
+
             @Override
             public String getClientToken() {
                 return null;
             }
+
             @Override
             public String getClientIP() {
                 return null;
             }
+
             @Override
             public String getClient() {
                 return null;
             }
+
             @Override
             public String getAuthId() {
                 return null;
@@ -210,8 +240,7 @@ public class LoginPerformerTest {
     }
 
     @After
-    public void tearDown()
- {
+    public void tearDown() {
         loginRequest = null;
         testHeader = null;
         testCookie = null;
@@ -223,8 +252,8 @@ public class LoginPerformerTest {
     /**
      * Verifies that certain properties from the login are passed through to the AuthenticationService.
      */
-     @Test
-     public void testAutoLoginProperties() throws OXException {
+    @Test
+    public void testAutoLoginProperties() throws OXException {
         LoginResult result = performer.doAutoLogin(loginRequest);
         Cookie[] cookies = result.getCookies();
         assertNotNull("Cookies should be passed through", cookies);
@@ -240,8 +269,8 @@ public class LoginPerformerTest {
     /**
      * Verifies that certain properties from the login are passed through to the AuthenticationService.
      */
-     @Test
-     public void testLoginProperties() throws OXException {
+    @Test
+    public void testLoginProperties() throws OXException {
         LoginResult result = performer.doLogin(loginRequest);
         Cookie[] cookies = result.getCookies();
         assertNotNull("Cookies should be passed through", cookies);
@@ -269,15 +298,16 @@ public class LoginPerformerTest {
         public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) {
             Map<String, Object> properties = loginInfo.getProperties();
             Cookie[] cookies = (Cookie[]) properties.get("cookies");
-            @SuppressWarnings("unchecked")
-            Map<String, List<String>> headersMap = (Map<String, List<String>>) properties.get("headers");
+            @SuppressWarnings("unchecked") Map<String, List<String>> headersMap = (Map<String, List<String>>) properties.get("headers");
             List<Header> headers = new ArrayList<Header>();
             for (final Entry<String, List<String>> entry : headersMap.entrySet()) {
                 headers.add(new Header() {
+
                     @Override
                     public String getName() {
                         return entry.getKey();
                     }
+
                     @Override
                     public String getValue() {
                         return entry.getValue().get(0);

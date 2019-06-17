@@ -18,9 +18,10 @@
           $ref: "#/definitions/DriveShareTargetData"
     responses:
       200:
-        description: An empty JSON object. In case of errors the responsible fields in the response are filled.
+        description: |
+          A JSON object containing the (possibly) updated share target. In case of errors the corresponding fields in the response are filled.
         schema:
-          $ref: "#/definitions/CommonResponse"
+          $ref: "#/definitions/DriveShareLinkResponse"
     x-ox-examples:      
       - Example1:
         description: Basic example

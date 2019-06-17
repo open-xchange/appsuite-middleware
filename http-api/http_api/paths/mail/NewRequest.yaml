@@ -59,7 +59,7 @@
       - Mail
     summary: 'Sends or saves a mail as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)).'
     consumes:
-      - text/plain
+      - application/octet-stream
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -78,6 +78,13 @@
           inbox), the parameter "flags" has to be included. If no `folder` parameter is specified, this parameter
           must not be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
         required: false
+      - in: body
+        description: The mail as MIME data block
+        name: mail
+        required: true
+        schema: 
+          type: string
+          format: binary
     responses:
       200:
         description: |

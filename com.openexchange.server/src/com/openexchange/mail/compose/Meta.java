@@ -65,43 +65,21 @@ import com.openexchange.mail.MailPath;
 public class Meta {
 
     /** The type for the meta in formation */
-    public static enum MetaType {
-        /**
-         * A new mail is compiled.
-         */
-        NEW("new"),
-        /**
-         * A reply to an existent mail is compiled.
-         */
-        REPLY("reply"),
-        /**
-         * A reply-all to an existent mail is compiled.
-         */
-        REPLY_ALL("replyall"),
-        /**
-         * A forward for an existent mail is compiled.
-         */
-        FORWARD_INLINE("forward-inline"),
-        /**
-         * A forward for an existent mail is compiled.
-         */
-        FORWARD_ATTACHMENT("forward-attachment"),
-        /**
-         * A continuation of an existent draft (aka "edit draft") is compiled.
-         */
-        EDIT("edit"),
-        /**
-         * A copy of an existent draft template is compiled. No reference is suppose to be kept.
-         */
-        COPY("copy"),
-        /**
-         * A resend/bounce of an existent mail is compiled.
-         */
-        RESEND("resend");
+    public static class MetaType {
 
         private final String id;
 
+        /**
+         * Initializes a new {@link MetaType}.
+         *
+         * @param id The identifier
+         * @throws IllegalArgumentException If identifier is <code>null</code> or empty
+         */
         private MetaType(String id) {
+            super();
+            if (Strings.isEmpty(id)) {
+                throw new IllegalArgumentException("Identifier must not be null or empty");
+            }
             this.id = id;
         }
 
@@ -114,63 +92,125 @@ public class Meta {
             return id;
         }
 
-        private static final Map<String, MetaType> MAP;
+        /**
+         * A new mail is compiled.
+         */
+        public static final MetaType NEW = new MetaType("new");
+
+        /**
+         * A reply to an existent mail is compiled.
+         */
+        public static final MetaType REPLY = new MetaType("reply");
+
+        /**
+         * A reply-all to an existent mail is compiled.
+         */
+        public static final MetaType REPLY_ALL = new MetaType("replyall");
+
+        /**
+         * A forward for an existent mail is compiled.
+         */
+        public static final MetaType FORWARD_INLINE = new MetaType("forward-inline");
+
+        /**
+         * A forward for an existent mail is compiled.
+         */
+        public static final MetaType FORWARD_ATTACHMENT = new MetaType("forward-attachment");
+
+        /**
+         * A continuation of an existent draft (aka "edit draft") is compiled.
+         */
+        public static final MetaType EDIT = new MetaType("edit");
+
+        /**
+         * A copy of an existent draft template is compiled. No reference is suppose to be kept.
+         */
+        public static final MetaType COPY = new MetaType("copy");
+
+        /**
+         * A resend/bounce of an existent mail is compiled.
+         */
+        public static final MetaType RESEND = new MetaType("resend");
+
+        /**
+         * A new SMS message is compiled.
+         */
+        public static final MetaType SMS = new MetaType("sms");
+
+        /**
+         * A new FAX message is compiled.
+         */
+        public static final MetaType FAX = new MetaType("fax");
+
+        private static final Map<String, MetaType> META_TYPES;
+
         static {
-            MetaType[] types = MetaType.values();
-            ImmutableMap.Builder<String, MetaType> m = ImmutableMap.builderWithExpectedSize(types.length);
-            for (MetaType type : types) {
-                m.put(type.getId(), type);
-            }
-            MAP = m.build();
+            ImmutableMap.Builder<String, MetaType> m2 = ImmutableMap.builderWithExpectedSize(10);
+            m2.put(MetaType.COPY.getId(), MetaType.COPY);
+            m2.put(MetaType.EDIT.getId(), MetaType.EDIT);
+            m2.put(MetaType.FAX.getId(), MetaType.FAX);
+            m2.put(MetaType.FORWARD_ATTACHMENT.getId(), MetaType.FORWARD_ATTACHMENT);
+            m2.put(MetaType.FORWARD_INLINE.getId(), MetaType.FORWARD_INLINE);
+            m2.put(MetaType.NEW.getId(), MetaType.NEW);
+            m2.put(MetaType.REPLY.getId(), MetaType.REPLY);
+            m2.put(MetaType.REPLY_ALL.getId(), MetaType.REPLY_ALL);
+            m2.put(MetaType.RESEND.getId(), MetaType.RESEND);
+            m2.put(MetaType.SMS.getId(), MetaType.SMS);
+            META_TYPES = m2.build();
         }
 
         /**
-         * Gets the type for specified type identifier.
+         * Gets the meta type for specified type identifier.
          *
-         * @param type The type identifier
-         * @return The type associated with the given identifier or <code>null</code> if there is no such type
+         * @param type The meta type identifier
+         * @return The meta type associated with the given identifier
          */
         public static MetaType typeFor(String type) {
             if (null == type) {
                 return null;
             }
 
-            return MAP.get(Strings.asciiLowerCase(type));
+            MetaType t = META_TYPES.get(Strings.asciiLowerCase(type));
+            return t == null ? new MetaType(type) : t;
         }
 
         /**
          * Gets the meta-specific type for specified type.
          *
          * @param type The type
-         * @return The mapped type or <code>null</code> if there is no mappable type
+         * @return The mapped type
          */
-        public static MetaType typeFor(Type type) {
+        public static MetaType metaTypeFor(Type type) {
             if (null == type) {
                 return null;
             }
 
-            switch (type) {
-                case COPY:
+            switch (type.getId()) {
+                case "copy":
                     return MetaType.COPY;
-                case EDIT:
+                case "edit":
                     return MetaType.EDIT;
-                case FORWARD:
+                case "forward":
                     return MetaType.FORWARD_INLINE;
-                case NEW:
+                case "new":
                     return MetaType.NEW;
-                case REPLY:
+                case "reply":
                     return MetaType.REPLY;
-                case REPLY_ALL:
+                case "replyall":
                     return MetaType.REPLY_ALL;
-                case RESEND:
+                case "resend":
                     return MetaType.RESEND;
+                case "sms":
+                    return MetaType.SMS;
+                case "fax":
+                    return MetaType.FAX;
                 default:
                     break;
             }
 
-            return null;
+            return new MetaType(type.getId());
         }
-    }
+    } // End of class MetaType
 
     /**
      * Creates a new builder.
@@ -244,6 +284,12 @@ public class Meta {
 
     /** The constant meta information for a new message */
     public static final Meta META_NEW = new Meta(MetaType.NEW, null, null, null, null);
+
+    /** The constant meta information for a new SMS message */
+    public static final Meta META_SMS = new Meta(MetaType.SMS, null, null, null, null);
+
+    /** The constant meta information for a new FAX message */
+    public static final Meta META_FAX = new Meta(MetaType.FAX, null, null, null, null);
 
     private final MetaType type;
     private final Date date;

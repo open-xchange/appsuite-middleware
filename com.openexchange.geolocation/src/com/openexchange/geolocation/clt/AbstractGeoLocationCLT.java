@@ -206,21 +206,21 @@ public abstract class AbstractGeoLocationCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
+     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
      */
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        authenticator.doAuthentication(login, password);
+    protected Boolean requiresAdministrativePermission() {
+        return Boolean.TRUE;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
+     * @see com.openexchange.cli.AbstractRmiCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.rmi.RemoteAuthenticator)
      */
     @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        authenticator.doAuthentication(login, password);
     }
 
     /*

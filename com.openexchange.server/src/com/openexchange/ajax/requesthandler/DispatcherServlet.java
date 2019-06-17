@@ -501,6 +501,9 @@ public class DispatcherServlet extends SessionServlet {
         } catch (UploadException e) {
             exc = e;
             boolean forceJSON = AJAXRequestDataTools.parseBoolParameter(httpRequest.getParameter("force_json_response"));
+            if (!forceJSON) {
+                forceJSON = AJAXRequestDataTools.parseBoolParameter(httpRequest.getParameter("plainJson"));
+            }
             if (!forceJSON && (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e))) {
                 // An upload failed
 

@@ -291,22 +291,7 @@ public class OnboardingUtility {
      */
     public static boolean isScenarioEnabled(String scenarioId, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
-        if (Strings.isEmpty(scenarioId)) {
-            return false;
-        }
-
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<String> property = view.property("com.openexchange.client.onboarding.enabledScenarios", String.class);
-        if (null == property || !property.isDefined()) {
-            // Nothing enabled...
-            return false;
-        }
-
-        String[] ids = Strings.splitByComma(Strings.asciiLowerCase(property.get()));
-        Set<String> set = new HashSet<String>(ids.length, 0.9F);
-        set.addAll(Arrays.asList(ids));
-        return set.contains(Strings.asciiLowerCase(scenarioId));
+        return isScenarioEnabled(scenarioId, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -381,15 +366,7 @@ public class OnboardingUtility {
      */
     public static boolean getBoolValue(String propertyName, boolean defaultValue, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
-        if (null == property || !property.isDefined()) {
-            return defaultValue;
-        }
-
-        return property.get().booleanValue();
+        return getBoolValue(propertyName, defaultValue, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -478,19 +455,7 @@ public class OnboardingUtility {
      */
     public static String getTranslationFromProperty(String propertyName, String defaultValue, boolean translateDefaultValue, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            return translateDefaultValue ? StringHelper.valueOf(getLocaleFor(session)).getString(defaultValue) : defaultValue;
-        }
-
-        String i18nString = property.get();
-        if (Strings.isEmpty(i18nString)) {
-            return translateDefaultValue ? StringHelper.valueOf(getLocaleFor(session)).getString(defaultValue) : defaultValue;
-        }
-        return StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+        return getTranslationFromProperty(propertyName, defaultValue, translateDefaultValue, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -532,16 +497,7 @@ public class OnboardingUtility {
      */
     public static String getValueFromProperty(String propertyName, String defaultValue, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            return defaultValue;
-        }
-
-        String value = property.get();
-        return Strings.isEmpty(value) ? defaultValue : value;
+        return getValueFromProperty(propertyName, defaultValue, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -579,20 +535,7 @@ public class OnboardingUtility {
      */
     public static Integer getIntFromProperty(String propertyName, Integer defaultValue, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            return defaultValue;
-        }
-
-        try {
-            String value = property.get();
-            return Strings.isEmpty(value) ? defaultValue : Integer.valueOf(value.trim());
-        } catch (@SuppressWarnings("unused") NumberFormatException e) {
-            return defaultValue;
-        }
+        return getIntFromProperty(propertyName, defaultValue, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -634,16 +577,7 @@ public class OnboardingUtility {
      */
     public static Boolean getBoolFromProperty(String propertyName, Boolean defaultValue, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
-        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            return defaultValue;
-        }
-
-        String value = property.get();
-        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
+        return getBoolFromProperty(propertyName, defaultValue,session.getUserId(), session.getContextId());
     }
 
     /**

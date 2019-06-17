@@ -158,16 +158,6 @@ public class GetMissingServicesCLT extends AbstractRmiCLI<Void> {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.cli.AbstractAdministrativeCLI#requiresAdministrativePermission()
-     */
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override

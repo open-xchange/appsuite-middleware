@@ -53,7 +53,6 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.sql.schema.Tables.subscriptions;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.IDGiven;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SubscriptionNotFound;
@@ -84,6 +83,7 @@ import com.openexchange.sql.grammar.IN;
 import com.openexchange.sql.grammar.INSERT;
 import com.openexchange.sql.grammar.LIST;
 import com.openexchange.sql.grammar.SELECT;
+import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;
 import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.EncryptedField;
@@ -95,6 +95,8 @@ import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - deleteAllSubscriptionsForUser
  */
 public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage {
+
+    static final Table subscriptions = new Table("subscriptions");
 
     private final DBProvider dbProvider;
     private final DBTransactionPolicy txPolicy;

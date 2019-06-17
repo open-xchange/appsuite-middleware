@@ -140,7 +140,7 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
                 new CalendarEventAddAttendeePrivilegesColumnTask(),
                 new RemoveOrphanedCalendarAlarmsTask()
             ));
-            if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", false)) {
+            if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", true)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));
             }
             registerService(UserServiceInterceptor.class, new CalendarStorageInterceptor(this, defaultDbProvider));

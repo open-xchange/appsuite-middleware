@@ -798,7 +798,7 @@ public final class SessionUtility {
     }
 
     private static boolean isChangeableUserAgent(String userAgent) {
-        return isMediaPlayerAgent(userAgent) || isMSIE11(userAgent);
+        return isMediaPlayerAgent(userAgent) || isMSIE11OrEdge(userAgent);
     }
 
     private static final Set<String> MEDIA_AGENTS = ImmutableSet.of("applecoremedia/", "stagefright/");
@@ -816,12 +816,16 @@ public final class SessionUtility {
         return false;
     }
 
-    private static boolean isMSIE11(String userAgent) {
+    private static boolean isMSIE11OrEdge(String userAgent) {
         if (null == userAgent) {
             return false;
         }
         BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
-        return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
+        return
+            5.0F == bd.getBrowserVersion() &&
+            BrowserDetector.MOZILLA.equals(bd.getBrowserName()) &&
+            BrowserDetector.WINDOWS.equals(bd.getBrowserPlatform()) &&
+            ((bd.getUserAgentString().indexOf("Trident/7.0") > 0) || (bd.getUserAgentString().indexOf("Edge/") > 0));
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
