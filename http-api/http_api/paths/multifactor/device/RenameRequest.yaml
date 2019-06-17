@@ -1,0 +1,25 @@
+/multifactor/device?action=rename:
+  put:
+    operationId: multifactorDeviceActionRename
+    tags:
+      - Multifactor
+    summary: Renames an existing multifactor device
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamMultifactorProviderName'
+    responses:
+      '200':
+        description: |
+          A dev
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MultifactorDeviceResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MultifactorDevice'
+      description: |
+        A device containing the device ID, and the new name.
+      required: true

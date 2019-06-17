@@ -4,60 +4,92 @@
     tags:
       - Drive
     summary: Gets a direct link for a folder or a file into AppSuite.
-    description: |
-      Generates a direct link into the AppSuite UI for a synchronized file or a synchronized folder and a
+    description: >
+      Generates a direct link into the AppSuite UI for a synchronized file or a
+      synchronized folder and a
+
       token for token-based login.
-      
+
+
       #### Use direct link and token with token-based login
+
       `GET [redirectUrl]`
-      
-      Login to AppSuite UI with token-based login via the link created with this request. Don't forget to append the `clientToken`
-      parameter with the value used to retrieve the redirect URL! Example: `GET http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68&clientToken=47d74b1c-81df-11e4-b116-123b93f75cba`.
+
+
+      Login to AppSuite UI with token-based login via the link created with this
+      request. Don't forget to append the `clientToken`
+
+      parameter with the value used to retrieve the redirect URL! Example: `GET
+      http://localhost/appsuite#app=io.ox/editor&folder=273264&id=273264/307438&serverToken=7b90972628e34e89bb9a3946d1372c68&clientToken=47d74b1c-81df-11e4-b116-123b93f75cba`.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: authId
-        type: string
-        description: Identifier for tracing every single login request passed between different systems in a cluster. The value should be some token that is unique for every login request.
+        description: >-
+          Identifier for tracing every single login request passed between
+          different systems in a cluster. The value should be some token that is
+          unique for every login request.
         required: true
+        schema:
+          type: string
       - in: query
         name: clientToken
-        type: string
-        description: Client-side identifier for accessing the session later. The value should be some token that is unique for every login request.
+        description: >-
+          Client-side identifier for accessing the session later. The value
+          should be some token that is unique for every login request.
         required: true
+        schema:
+          type: string
       - in: query
         name: name
-        type: string
-        description: The name of the file in the synchronized folder given in `path` parameter.
+        description: >-
+          The name of the file in the synchronized folder given in `path`
+          parameter.
         required: false
+        schema:
+          type: string
       - in: query
         name: method
-        type: string
-        description: "The method of the jump. Available are: edit (opens the file in AppSuite editor or in text/spreadsheet if available), permissions (opens the file's/folder's change-permission dialog), version_history (opens the file's version history summary), preview (opens the file's/folder's preview). Defaults to preview."
+        description: >-
+          The method of the jump. Available are: edit (opens the file in
+          AppSuite editor or in text/spreadsheet if available), permissions
+          (opens the file's/folder's change-permission dialog), version_history
+          (opens the file's version history summary), preview (opens the
+          file's/folder's preview). Defaults to preview.
         required: false
-        enum:
-          - edit
-          - permissions
-          - version_history
-          - preview
-        default: "preview"
-    responses:
-      200:
-        description: |
-          A JSON object containing the direct link to the file/folder including a server token for token based login.
-          In case of errors the responsible fields in the response are filled.
         schema:
-          $ref: "#/definitions/DriveJumpResponse"
-    x-ox-examples:      
-      - Example1:
+          type: string
+          enum:
+            - edit
+            - permissions
+            - version_history
+            - preview
+          default: preview
+    responses:
+      '200':
+        description: >
+          A JSON object containing the direct link to the file/folder including
+          a server token for token based login.
+
+          In case of errors the responsible fields in the response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveJumpResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> POST http://localhost/ajax/drive?action=jump&session=48a289898ad949faaa46c04e7fb422f5&root=9547&path=/path/to/file&name=file_to_edit.txt&method=edit&authId=41763584-8460-11e4-b116-123b93f75dba
+        example: >
+          ==> POST
+          http://localhost/ajax/drive?action=jump&session=48a289898ad949faaa46c04e7fb422f5&root=9547&path=/path/to/file&name=file_to_edit.txt&method=edit&authId=41763584-8460-11e4-b116-123b93f75dba
+
           > Content: clientToken=47d74b1c-81df-11e4-b116-123b93f75cba
 
+
           <== HTTP 200 OK
+
           <   Content: 
               {
                 "data": {

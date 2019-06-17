@@ -5,16 +5,23 @@
       - User
     summary: Gets a user.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
-        description: Object ID of the requested user. This parameter is optional and the default is the currently logged in user.
+        description: >-
+          Object ID of the requested user. This parameter is optional and the
+          default is the currently logged in user.
         required: false
-    responses:
-      200:
-        description: |
-          An object containing all data of the requested user. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/UserResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          An object containing all data of the requested user. In case of errors
+          the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserResponse'

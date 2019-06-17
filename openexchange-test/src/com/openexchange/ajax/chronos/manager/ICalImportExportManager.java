@@ -100,11 +100,11 @@ public class ICalImportExportManager {
     }
 
     public String exportICalFile(String session, String folder) throws ApiException {
-        return exportApi.exportAsICal(session, folder);
+        return exportApi.exportAsICalGetReq(session, folder);
     }
 
     public String exportICalBatchFile(String session, List<InfoItemExport> body) throws ApiException {
-        return exportApi.exportAsICal_0(session, body);
+        return exportApi.exportAsICal(session, body);
     }
 
     public List<EventId> parseImportJSONResponseToEventIds(String response) throws JSONException {

@@ -4,47 +4,60 @@
     tags:
       - Chronos
     summary: Moves an event to another calendar folder.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosCheckConflicts"
-      - $ref: "#/parameters/QueryParamChronosFolder"
-      - $ref: "#/parameters/QueryParamChronosID"
-      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
-      - $ref: "#/parameters/QueryParamChronosNotification"
-      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
-      - $ref: "#/parameters/QueryParamChronosPushToken"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamChronosCheckConflicts'
+      - $ref: '#/components/parameters/QueryParamChronosFolder'
+      - $ref: '#/components/parameters/QueryParamChronosID'
+      - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
+      - $ref: '#/components/parameters/QueryParamChronosNotification'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - $ref: '#/components/parameters/QueryParamChronosPushToken'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the event.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: targetFolder
-        type: string
         description: ID of the target folder.
         required: true
+        schema:
+          type: string
       - in: query
         name: rangeStart
-        type: string
-        description: |
-          If expand is set to 'true' this parameter defines a lower inclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+        description: >
+          If expand is set to 'true' this parameter defines a lower inclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
           Only events which start on or after this date are returned.
         required: false
+        schema:
+          type: string
       - in: query
         name: rangeEnd
-        type: string
-        description: |
-          If expand is set to 'true' this parameter defines a upper exclusive limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". 
+        description: >
+          If expand is set to 'true' this parameter defines a upper exclusive
+          limit as a utc date-time value as specified in rfc 5545 chapter 3.3.5.
+          E.g. "20170708T220000Z". 
+
           Only events which end before this date are returned.
         required: false
-      - $ref: "#/parameters/QueryParamChronosExpand"
-    responses:
-      200:
-        description: |
-          A JSON object containing containing the result of the update. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/ChronosCalendarResultResponse"
+          type: string
+      - $ref: '#/components/parameters/QueryParamChronosExpand'
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the update. In case
+          of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'

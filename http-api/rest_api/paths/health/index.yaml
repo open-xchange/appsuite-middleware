@@ -1,2 +1,2 @@
-requests:
-  - GetRequest.yaml
+requests: 
+  - HealthRequest.yaml

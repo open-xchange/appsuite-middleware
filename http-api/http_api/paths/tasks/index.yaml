@@ -1,10 +1,10 @@
-requests:
+requests: 
   - AllRequest.yaml
-  - ListRequest.yaml
-  - UpdatesRequest.yaml
-  - GetRequest.yaml
-  - UpdateRequest.yaml
-  - NewRequest.yaml
-  - DeleteRequest.yaml
   - ConfirmRequest.yaml
+  - DeleteRequest.yaml
+  - GetRequest.yaml
+  - ListRequest.yaml
+  - NewRequest.yaml
   - SearchRequest.yaml
+  - UpdateRequest.yaml
+  - UpdatesRequest.yaml

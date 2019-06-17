@@ -72,7 +72,7 @@ import com.openexchange.testing.httpclient.models.AnalyzeResponse;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ConversionDataSource;
-import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.DeleteEventBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.MailDestinationData;
@@ -307,7 +307,7 @@ public abstract class AbstractITipTest extends AbstractChronosTest {
         EventId id = new EventId();
         id.setFolder(data.getFolder());
         id.setId(data.getId());
-        DeleteBody body  = new DeleteBody();
+        DeleteEventBody body  = new DeleteEventBody();
         body.addEventsItem(id);
         chronosApi.deleteEvent(session, now(), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
     }

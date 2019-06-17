@@ -110,7 +110,9 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData expectedEventData = eventManager.createEvent(toCreate, true);
         getAndAssertAlarms(expectedEventData, 1, folderId);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+
+        //AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        List<AlarmTrigger> triggerData = getAndCheckAlarmTrigger(1);
         AlarmTrigger alarmTrigger = findTrigger(expectedEventData.getId(), triggerData);
 
         EventData getEvent = getAndAssertAlarms(expectedEventData, 1, folderId);
@@ -141,7 +143,8 @@ public class AcknowledgeAndSnoozeTest extends AbstractAlarmTriggerTest {
         EventData expectedEventData = eventManager.createEvent(toCreate, true);
         getAndAssertAlarms(expectedEventData, 1, folderId);
 
-        AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        //AlarmTriggerData triggerData = getAndCheckAlarmTrigger(1);
+        List<AlarmTrigger> triggerData = getAndCheckAlarmTrigger(1);
         AlarmTrigger alarmTrigger = findTrigger(expectedEventData.getId(), triggerData);
 
         EventData getEvent = getAndAssertAlarms(expectedEventData, 1, folderId);

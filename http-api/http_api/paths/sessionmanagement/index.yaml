@@ -1,4 +1,4 @@
-requests:
+requests: 
   - AllRequest.yaml
-  - DeleteRequest.yaml
   - ClearRequest.yaml
+  - DeleteRequest.yaml

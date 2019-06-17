@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ./RawMailData.yaml
+  msgref:
+    type: string
+    description: Indicates the ID of the referenced original mail.

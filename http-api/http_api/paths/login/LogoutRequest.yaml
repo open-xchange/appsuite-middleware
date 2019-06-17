@@ -6,9 +6,9 @@
     summary: Does the logout.
     description: Does the logout which invalidates the session.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
+      '200':
         description: A successfull logout
-      403:
+      '403':
         description: FORBIDDEN. The server refuses to respond to the request.

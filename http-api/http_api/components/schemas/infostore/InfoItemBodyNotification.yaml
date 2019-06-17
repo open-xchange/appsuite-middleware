@@ -1,0 +1,10 @@
+type: object
+description: >-
+  Responsible for sending out notifications for changed object permissions of an
+  infoitem.
+properties:
+  transport:
+    type: string
+    description: E.g. "mail".
+  message:
+    type: string

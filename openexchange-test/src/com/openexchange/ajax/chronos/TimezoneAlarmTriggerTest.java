@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import org.junit.Test;
@@ -111,7 +112,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
+            List<AlarmTrigger> triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
@@ -129,7 +130,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
+            List<AlarmTrigger> triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
         }
@@ -157,7 +158,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
+            List<AlarmTrigger> triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), start.getTimeInMillis() - TimeUnit.MINUTES.toMillis(10));
             EventId eventId = new EventId();
@@ -175,7 +176,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
             getAndAssertAlarms(event, 1, folderId);
 
             // Get alarms within the next two days
-            AlarmTriggerData triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
+            List<AlarmTrigger> triggers = getAndCheckAlarmTrigger(currentTriggers + 1); // one trigger
             AlarmTrigger alarmTrigger = findTrigger(event.getId(), triggers);
             checkAlarmTime(alarmTrigger, event.getId(), end.getTimeInMillis() + TimeUnit.MINUTES.toMillis(10));
         }

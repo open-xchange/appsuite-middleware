@@ -1,0 +1,55 @@
+/advertisement/v1/config/name:
+  put:
+    operationId: putAdvertisementByName
+    tags:
+      - Advertisement
+    summary: Sets an advertisement configuration for a given user by name
+    parameters:
+      - name: name
+        in: query
+        description: The user's login name
+        required: true
+        schema:
+          type: string
+      - name: contextId
+        in: query
+        description: The context id
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: The configuration result
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      $ref: '#/components/requestBodies/putAdvertisementByNameBody'
+  delete:
+    operationId: deleteAdvertisementByName
+    tags:
+      - Advertisement
+    summary: Remove the current configuration for the user
+    parameters:
+      - name: name
+        in: query
+        description: The user's login name
+        required: true
+        schema:
+          type: string
+      - name: contextId
+        in: query
+        description: The context id
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: The configuration result
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

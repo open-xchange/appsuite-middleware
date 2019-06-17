@@ -1,0 +1,5 @@
+type: object
+properties:
+  folder_id:
+    type: string
+    description: The object ID of the destination folder.

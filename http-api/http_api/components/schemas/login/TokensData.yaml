@@ -1,0 +1,17 @@
+type: object
+properties:
+  session:
+    type: string
+    description: The session ID.
+  user:
+    type: string
+    description: The username.
+  user_id:
+    type: integer
+    description: The user ID.
+  context_id:
+    type: integer
+    description: The context ID.
+  locale:
+    type: string
+    description: The users locale (e.g. "en_US").

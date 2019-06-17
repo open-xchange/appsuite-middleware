@@ -1,0 +1,9 @@
+type: object
+properties:
+  warnings:
+    type: array
+    description: >-
+      Can contain transport warnings that occured during sending the
+      notifications.
+    items:
+      type: object

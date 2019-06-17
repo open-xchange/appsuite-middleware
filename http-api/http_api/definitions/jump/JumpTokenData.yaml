@@ -1,5 +1,0 @@
-type: object
-properties:
-  token:
-    type: string
-    description: The identifier of the token.

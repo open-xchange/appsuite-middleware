@@ -1,0 +1,53 @@
+/mail/categories?action=train:
+  put:
+    operationId: train
+    tags:
+      - Mail_categories
+    summary: Add a new rule
+    description: >-
+      Adds a new rule with the given mail addresses to the given category and
+      optionally reorganize all existing mails in the inbox.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: category_id
+        description: The identifier of a category.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: apply-for-existing
+        description: >-
+          A flag indicating whether old mails should be reorganized. Defaults to
+          'false'.
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: apply-for-future-ones
+        description: >-
+          A flag indicating whether a rule should be created or not. Defaults to
+          'true'.
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: >
+          'An empty response if everything went well. In case of errors the
+          responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Mail_CategoriesTrainBody'
+      description: >
+        'A JSON object containing a "from" field which contains an array of mail
+        addresses.' 
+      required: true

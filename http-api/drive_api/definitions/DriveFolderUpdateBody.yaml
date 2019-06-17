@@ -1,6 +1,0 @@
-type: object
-properties:
-  folder:
-    $ref: "#/definitions/DriveDirectoryMetadata"
-  notification:
-    $ref: "#/definitions/DriveNotificationData"

@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../../common/CommonResponseData.yaml
+  data:
+    type: boolean
+    description: Indicates whether the the account was updated successfully.

@@ -1,16 +1,16 @@
-requests:
+requests: 
   - AllRequest.yaml
-  - ListRequest.yaml
-  - UpdatesRequest.yaml
-  - GetRequest.yaml
-  - GetAttachmentRequest.yaml
-  - UpdateRequest.yaml
-  - NewRequest.yaml
-  - DeleteRequest.yaml
-  - UpdateAttendeeRequest.yaml
-  - MoveRequest.yaml
-  - FreeBusyRequest.yaml
-  - NeedsActionRequest.yaml
-  - ResolveRequest.yaml
-  - ZipAttachmentsRequest.yaml
   - ChangeOrganizerRequest.yaml
+  - DeleteRequest.yaml
+  - FreeBusyRequest.yaml
+  - GetAttachmentRequest.yaml
+  - GetRequest.yaml
+  - ListRequest.yaml
+  - MoveRequest.yaml
+  - NeedsActionRequest.yaml
+  - NewRequest.yaml
+  - ResolveRequest.yaml
+  - UpdateAttendeeRequest.yaml
+  - UpdateRequest.yaml
+  - UpdatesRequest.yaml
+  - ZipAttachmentsRequest.yaml

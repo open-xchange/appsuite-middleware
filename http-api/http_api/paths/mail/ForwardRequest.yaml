@@ -6,34 +6,48 @@
     summary: Forwards a mail.
     description: Returns the data for the message that shall be forwarded.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamMailFolder'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested message.
         required: true
+        schema:
+          type: string
       - in: query
         name: view
-        type: string
-        description: "Content 'text' forces the server to deliver a text-only version of the requested mail's body, even if content is HTML. 'html' to allow a possible HTML mail body being transferred as it is (but white-list filter applied). NOTE: if set, the corresponding gui config setting will be ignored."
+        description: >-
+          Content 'text' forces the server to deliver a text-only version of the
+          requested mail's body, even if content is HTML. 'html' to allow a
+          possible HTML mail body being transferred as it is (but white-list
+          filter applied). NOTE: if set, the corresponding gui config setting
+          will be ignored.
         required: false
-        enum:
-          - text
-          - html
+        schema:
+          type: string
+          enum:
+            - text
+            - html
       - in: query
         name: max_size
-        type: integer
-        minimum: 10000
-        description: A positive integer number (greater than 10000) to specify how many characters of the message content will be returned. If the number is smaller than 10000 the value will be ignored and 10000 used.
+        description: >-
+          A positive integer number (greater than 10000) to specify how many
+          characters of the message content will be returned. If the number is
+          smaller than 10000 the value will be ignored and 10000 used.
         required: false
-      - $ref: "#/parameters/gblQueryParamsDecrypt"
-      - $ref: "#/parameters/glbQueryParamsCryptoAuth"
-    responses:
-      200:
-        description: |
-          A JSON object containing all data of the requested mail. Not IMAP: with timestamp. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/MailReplyResponse"
+          type: integer
+          minimum: 10000
+      - $ref: '#/components/parameters/gblQueryParamsDecrypt'
+      - $ref: '#/components/parameters/glbQueryParamsCryptoAuth'
+    responses:
+      '200':
+        description: >
+          A JSON object containing all data of the requested mail. Not IMAP:
+          with timestamp. In case of errors the responsible fields in the
 
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailReplyResponse'

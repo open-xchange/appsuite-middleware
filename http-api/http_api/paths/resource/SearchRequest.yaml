@@ -1,0 +1,26 @@
+/resource?action=search:
+  put:
+    operationId: searchResources
+    tags:
+      - Resources
+    summary: Searches for resources.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array of resource objects. In case of
+          errors the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourcesResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResourceSearchBody'
+      description: A JSON object with the search parameters.
+      required: true

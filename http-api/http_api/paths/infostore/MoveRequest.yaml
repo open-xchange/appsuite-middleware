@@ -4,71 +4,88 @@
     tags:
       - Infostore
     summary: Moves one infoitem to another folder.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the infoitem to move.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: folder
-        type: string
         description: ID of the destination folder.
         required: true
+        schema:
+          type: string
       - in: query
         name: id
-        type: string
         description: Object ID of the infoitem that shall be moved.
         required: true
+        schema:
+          type: string
       - in: query
         name: pushToken
-        type: string
         description: The client's push token to restrict the generated drive event
         required: false
-    responses:
-      200:
-        description: |
-          A JSON object with an array of infoitem identifiers that could not be moved (due to a conflict).
-          Th array is empty if everything went fine. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/InfoItemsMovedResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object with an array of infoitem identifiers that could not be
+          moved (due to a conflict).
+
+          Th array is empty if everything went fine. In case of errors the
+          responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoItemsMovedResponse'
   put:
     operationId: moveInfoItems
     tags:
       - Infostore
     summary: Moves one or more infoitems to another folder.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: folder
-        type: string
         description: ID of the destination folder.
         required: true
+        schema:
+          type: string
       - in: query
         name: pushToken
-        type: string
         description: The push token of the drive client
         required: false
-      - in: body
-        name: body
-        description: A JSON array of JSON objects each referencing to an existing infoitem that is supposed to be moved to the destination folder.
-        required: true
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/InfoItemListElement"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object with an array of infoitem identifiers that could not be moved (due to a conflict).
-          Th array is empty if everything went fine. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object with an array of infoitem identifiers that could not be
+          moved (due to a conflict).
+
+          Th array is empty if everything went fine. In case of errors the
+          responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/InfoItemsMovedResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoItemsMovedResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/InfoItemListElement'
+      description: >-
+        A JSON array of JSON objects each referencing to an existing infoitem
+        that is supposed to be moved to the destination folder.
+      required: true

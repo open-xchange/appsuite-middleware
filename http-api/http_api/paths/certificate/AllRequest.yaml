@@ -6,11 +6,15 @@
     summary: Gets all SSL certificates.
     description: Returns all trusted and untrusted SSL certificates
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          A JSON object containing an array with data for all certificates. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object containing an array with data for all certificates. In
+          case of errors the responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CertificatesAllResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificatesAllResponse'

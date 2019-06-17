@@ -1,7 +1,0 @@
-type: object
-properties:
-  closed:
-    type: array
-    description: "Array of the closed session identifiers"
-    items:
-      type: string

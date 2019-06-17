@@ -1,0 +1,684 @@
+gblQueryParamSession:
+  name: session
+  in: query
+  description: A session ID previously obtained from the login module.
+  required: true
+  schema:
+    type: string
+gblPathParamConfigNode:
+  name: path
+  in: path
+  description: The path to the node.
+  required: true
+  schema:
+    type: string
+    enum:
+      - gui
+      - fastgui
+      - context_id
+      - cookielifetime
+      - identifier
+      - contact_id
+      - language
+      - timezone
+      - availableTimeZones
+      - Calendarnotification
+      - tasknotification
+      - reloadTimes
+      - serverVersion
+      - currentTime
+      - maxUploadIdleTimeout
+      - search
+      - trustAllConnections
+      - folder
+      - folder/tasks
+      - folder/calendar
+      - folder/contacts
+      - folder/infostore
+      - folder/eas
+      - mail
+      - mail/addresses
+      - mail/defaultaddress
+      - mail/sendaddress
+      - mail/folder
+      - mail/folder/inbox
+      - mail/folder/drafts
+      - mail/folder/trash
+      - mail/folder/spam
+      - mail/folder/sent
+      - mail/htmlinline
+      - mail/colorquote
+      - mail/emoticons
+      - mail/harddelete
+      - mail/inlineforward
+      - mail/vcard
+      - mail/notifyonreadack
+      - mail/msgpreview
+      - mail/ignorereplytext
+      - mail/nocopytosent
+      - mail/spambutton
+      - participants
+      - participants/autoSearch
+      - participants/maximumNumberParticipants
+      - participants/showWithoutEmail
+      - participants/showDialog
+      - availableModules
+      - minimumSearchCharacters
+      - modules
+      - modules/portal
+      - modules/portal/gui
+      - modules/portal/module
+      - modules/mail
+      - modules/mail/addresses
+      - modules/mail/appendmailtext
+      - modules/mail/allowhtmlimages
+      - modules/mailcolorquoted
+      - modules/mail/contactCollectFolder
+      - modules/mail/contactCollectEnabled
+      - modules/mail/contactCollectOnMailAccess
+      - modules/mail/contactCollectOnMailTransport
+      - modules/mail/defaultaddress
+      - modules/mail/deletemail
+      - modules/mail/emoticons
+      - modules/mail/defaultFolder
+      - modules/mail/defaultFolder/drafts
+      - modules/mail/defaultFolder/inbox
+      - modules/mail/defaultFolder/sent
+      - modules/mail/defaultFolder/spam
+      - modules/mail/defaultFolder/trash
+      - modules/mail/forwardmessage
+      - modules/mail/gui
+      - modules/mail/inlineattachments
+      - modules/mail/linewrap
+      - modules/mail/module
+      - modules/mail/phishingheaders
+      - modules/mail/replyallcc
+      - modules/mail/sendaddress
+      - modules/mail/spambutton
+      - modules/mail/vcard
+      - modules/calendar
+      - modules/calendar/calendar_conflict
+      - modules/calendar/calendar_freebusy
+      - modules/calendar/calendar_teamview
+      - modules/calendar/gui
+      - modules/calendar/module
+      - modules/calendar/notifyNewModifiedDeleted
+      - modules/calendar/notifyAcceptedDeclinedAsCreator
+      - modules/calendar/notifyAcceptedDeclinedAsParticipant
+      - modules/calendar/defaultStatusPrivate
+      - modules/calendar/defaultStatusPublic
+      - modules/contacts
+      - modules/contacts/gui
+      - modules/contacts/mailAddressAutoSearch
+      - modules/contacts/module
+      - modules/contacts/singleFolderSearch
+      - modules/contacts/characterSearch
+      - modules/contacts/allFoldersForAutoComplete
+      - modules/tasks
+      - modules/tasks/gui
+      - modules/tasks/module
+      - modules/tasks/delegate_tasks
+      - modules/tasks/notifyNewModifiedDeleted
+      - modules/tasks/notifyAcceptedDeclinedAsCreator
+      - modules/tasks/notifyAcceptedDeclinedAsParticipant
+      - modules/infostore
+      - modules/infostore/gui
+      - modules/infostore/folder
+      - modules/infostore/folder/trash
+      - modules/infostore/folder/pictures
+      - modules/infostore/folder/documents
+      - modules/infostore/folder/music
+      - modules/infostore/folder/videos
+      - modules/infostore/folder/templates
+      - modules/infostore/module
+      - modules/interfaces
+      - modules/interfaces/ical
+      - modules/interfaces/vcard
+      - modules/interfaces/syncml
+      - modules/folder
+      - modules/folder/gui
+      - modules/folder/public_folders
+      - modules/folder/read_create_shared_folders
+      - modules/folder/tree
+      - modules/com.openexchange.extras
+      - modules/com.openexchange.extras/module
+      - modules/com.openexchange.user.passwordchange
+      - modules/com.openexchange.user.passwordchange/module
+      - modules/com.openexchange.user.personaldata
+      - modules/com.openexchange.user.personaldata/module
+      - modules/com.openexchange.group
+      - modules/com.openexchange.group/enabled
+      - modules/com.openexchange.resource
+      - modules/com.openexchange.resource/enabled
+      - modules/com.openexchange.publish
+      - modules/com.openexchange.publish/enabled
+      - modules/com.openexchange.subscribe
+      - modules/com.openexchange.subscribe/enabled
+      - modules/olox20
+      - modules/olox20/active
+      - modules/olox20/module
+      - modules/com.openexchange.passwordchange
+      - modules/com.openexchange.passwordchange/showStrength
+      - modules/com.openexchange.passwordchange/minLength
+      - modules/com.openexchange.passwordchange/maxLength
+      - modules/com.openexchange.passwordchange/regexp
+      - modules/com.openexchange.passwordchange/special
+gblQueryParamFolderTree:
+  name: tree
+  in: query
+  description: >-
+    The identifier of the folder tree. If missing "0" (primary folder tree) is
+    assumed.
+  required: false
+  schema:
+    type: string
+    default: '0'
+gblQueryParamLanguage:
+  name: language
+  in: query
+  description: >-
+    Optional locale to use instead of the currently configured locale of the
+    user.
+  required: false
+  schema:
+    type: string
+gblQueryParamFolderColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,300". Each column is
+    specified by a numeric column identifier, see [Common folder
+    data](#common-folder-data) and [Detailed folder
+    data](#detailed-folder-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamAllowedModules:
+  name: allowed_modules
+  in: query
+  description: >-
+    An array of modules (either numbers or strings; e.g.
+    "tasks,calendar,contacts,mail") supported by requesting client. If missing,
+    all available modules are considered.
+  required: false
+  schema:
+    type: string
+gblQueryParamTaskFolder:
+  name: folder
+  in: query
+  description: Object ID of the folder who contains the tasks.
+  required: true
+  schema:
+    type: string
+gblQueryParamTaskColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,200". Each column is
+    specified by a numeric column identifier, see [Common object
+    data](#common-object-data), [Detailed task and appointment
+    data](#detailed-task-and-appointment-data) and [Detailed task
+    data](#detailed-task-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamContactFolder:
+  name: folder
+  in: query
+  description: Object ID of the folder who contains the contacts.
+  required: true
+  schema:
+    type: string
+gblQueryParamContactColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,500". Each column is
+    specified by a numeric column identifier, see [Common object
+    data](#common-object-data) and [Detailed contact
+    data](#detailed-contact-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamCalendarFolder:
+  name: folder
+  in: query
+  description: Object ID of the folder who contains the appointments.
+  required: true
+  schema:
+    type: string
+gblQueryParamCalendarColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,500". Each column is
+    specified by a numeric column identifier, see [Common object
+    data](#common-object-data), [Detailed task and appointment
+    data](#detailed-task-and-appointment-data) and [Detailed appointment
+    data](#detailed-appointment-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamRecurrenceMaster:
+  name: recurrence_master
+  in: query
+  description: >-
+    Extract the recurrence to several appointments. The default value is false
+    so every appointment of the recurrence will be calculated.
+  required: false
+  schema:
+    type: boolean
+gblQueryParamMailFolder:
+  name: folder
+  in: query
+  description: Object ID of the folder who contains the mails.
+  required: true
+  schema:
+    type: string
+gblQueryParamMailColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of either columns or header names to return, like
+    "600,601,X-Custom-Header". Each column is specified by a numeric column
+    identifier, see [Detailed mail data](#detailed-mail-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamMailHeaders:
+  name: headers
+  in: query
+  description: >-
+    A comma-separated list of header names to return, like
+    "From,X-Custom-Header". This parameter can be used in addition to the
+    columns parameter.
+  required: false
+  schema:
+    type: string
+gblQueryParamMailUnseen:
+  name: unseen
+  in: query
+  description: If `true` only mails without the `\Seen` flag are returned.
+  required: false
+  schema:
+    type: boolean
+    default: false
+gblQueryParamMailDeleted:
+  name: deleted
+  in: query
+  description: If `false` only mails without the `\Deleted` flag are returned.
+  required: false
+  schema:
+    type: boolean
+    default: true
+gblQueryParamInfostoreFolder:
+  name: folder
+  in: query
+  description: Object ID of the folder who contains the infoitems.
+  required: true
+  schema:
+    type: string
+gblQueryParamInfostoreColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,700". Each column is
+    specified by a numeric column identifier, see [Common object
+    data](#common-object-data) and [Detailed infoitem
+    data](#detailed-infoitem-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamAttached:
+  name: attached
+  in: query
+  description: The ID of the object to which the attachment belongs.
+  required: true
+  schema:
+    type: integer
+gblQueryParamAttachmentsFolder:
+  name: folder
+  in: query
+  description: The folder ID of the object.
+  required: true
+  schema:
+    type: integer
+gblQueryParamAttachmentsModule:
+  name: module
+  in: query
+  description: >-
+    The module type of the object: 1 (appointment), 4 (task), 7 (contact), 137
+    (infostore).
+  required: true
+  schema:
+    type: integer
+gblQueryParamAttachmentsColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,800". Each column is
+    specified by a numeric column identifier, see [Common object
+    data](#common-object-data) and [Attachment data](#attachment-object).
+  required: true
+  schema:
+    type: string
+gblQueryParamAccountColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,800". Each column is
+    specified by a numeric column identifier, see [Mail account
+    data](#mail-account-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamUserColumns:
+  name: columns
+  in: query
+  description: >-
+    A comma-separated list of columns to return, like "1,501,610". Each column
+    is specified by a numeric column identifier, see [Common object
+    data](#common-object-data), [Detailed contact data](#detailed-contact-data)
+    and [Detailed user data](#detailed-user-data).
+  required: true
+  schema:
+    type: string
+gblQueryParamScopes:
+  name: scopes
+  in: query
+  description: >-
+    A space-separated list of scopes to be added. Valid scopes are 'calendar',
+    'contacts', 'mail', 'drive', 'generic'. Note that not all scopes are
+    applicable to every OAuth provider.
+  required: true
+  schema:
+    type: string
+gblQueryParamsDecrypt:
+  name: decrypt
+  in: query
+  description: >-
+    If true, and the object is encrypted, an attempt will be made to decrypt the
+    object.  An error will be thrown if needed authentication isn't available.
+    (Guard Required)
+  required: false
+  schema:
+    type: boolean
+glbQueryParamsCryptoAuth:
+  name: cryptoAuth
+  in: query
+  description: >-
+    Authentication token used for Guard in order to decrypt or sign items. 
+    Required if the token is not attached to the session and the decrypt flag
+    was sent.
+  required: false
+  schema:
+    type: string
+glbQueryParamsAllowEnqueue:
+  in: query
+  name: allow_enqueue
+  description: >-
+    Optional flag that specifies whether the request is allowed for being
+    submitted to job queue.
+  required: false
+  schema:
+    type: boolean
+    default: false
+glbQueryParamsImageTransformationRotate:
+  in: query
+  name: rotate
+  description: >-
+    Adds a 'rotate' transformation, leading to the image being rotated according
+    to the contained EXIF information.
+  required: false
+  schema:
+    type: boolean
+    default: false
+glbQueryParamsImageTransformationWidth:
+  in: query
+  name: width
+  description: The maximum width of the target image.
+  required: false
+  schema:
+    type: integer
+    format: int32
+glbQueryParamsImageTransformationHeight:
+  in: query
+  name: height
+  description: The maximum height of the target image.
+  required: false
+  schema:
+    type: integer
+    format: int32
+glbQueryParamsImageTransformationShrinkOnly:
+  in: query
+  name: shrinkOnly
+  description: Set to true to only scale images 'greater than' target size.
+  required: false
+  schema:
+    type: boolean
+    default: false
+glbQueryParamsImageTransformationScaleType:
+  in: query
+  name: scaleType
+  description: |
+    Defines the scale type.
+    Possible value: 
+    <ul>
+      <li><code>cover</code> - The "cover" scale type, specifying the minimum target dimensions. <br>
+      The source image will be resized in a way that the resulting image covers the target resolution entirely, with the original aspect ratio being preserved. 
+      For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "cover", will result in the picture being resized to 267x200 pixels.</li>
+
+      <li><code>contain</code> - The "contain" scale type, specifying the maximum target dimensions. <br>
+      The source image will be resized in a way that the resulting image fits into the target resolution entirely, with the original aspect ratio being preserved. 
+      For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the picture being resized to 200x150 pixels.</li>
+
+      <li><code>containforcedimension</code> - The "containforcedimension" scale type, specifying the maximum target dimensions. <br>
+      The source image will be resized in a way that the resulting image fits into the target resolution entirely, with the original aspect ratio being preserved while smaller sides get 
+      padded to fit exact dimension. For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "containforcedimension", will result in the picture being 
+      first resized to 200x150 pixels, then height gets padded by 25 pixels per side resulting in exactly 200x200 pixels.</li>
+
+      <li><code>coverandcrop</code> - The "coverandcrop" scale type, specifying the target dimensions. <br>
+      If the source image is bigger than the target dimension, in a first step the image will be resized in a way that the resulting image covers the target resolution entirely, 
+      with the original aspect ratio being preserved. In a second step the image will be cropped to fit the target dimension. For example, scaling an image with an original resolution 
+      of 640x480 pixels to 200x200 pixels and type "coverandcrop", will result in the picture being resized to 267x200 pixels and then cropped to fit 200x200. 
+      In case the image is smaller than then target dimension the image will not be resized and instead it gets padded to fit exact dimension. For example, 
+      with an original resolution of 100x100 pixels and a target dimension of 200x200 pixels and type "coverandcrop", will result in the picture being padded on all sides with 50 pixels.</li>
+
+      <li><code>auto</code> - The "auto" scale type.<br></li>
+    </ul>
+  required: false
+  schema:
+    type: string
+    enum:
+      - cover
+      - contain
+      - containforcedimension
+      - coverandcrop
+      - auto
+glbQueryParamsImageTransformationCropWidth:
+  in: query
+  name: cropWidth
+  description: The width of the specified rectangular region.
+  required: false
+  schema:
+    type: integer
+    format: int32
+glbQueryParamsImageTransformationCropHeight:
+  in: query
+  name: cropHeight
+  description: The height of the specified rectangular region.
+  required: false
+  schema:
+    type: integer
+    format: int32
+glbQueryParamsImageTransformationCropX:
+  in: query
+  name: cropX
+  description: >-
+    The X coordinate of the upper-left corner of the specified rectangular
+    region.
+  required: false
+  schema:
+    type: integer
+    format: int32
+glbQueryParamsImageTransformationCropY:
+  in: query
+  name: cropY
+  description: >-
+    The Y coordinate of the upper-left corner of the specified rectangular
+    region.
+  required: false
+  schema:
+    type: integer
+    format: int32
+QueryParamChronosFolder:
+  name: folder
+  in: query
+  description: ID of the folder who contains the events.
+  required: true
+  schema:
+    type: string
+QueryParamChronosID:
+  name: id
+  in: query
+  description: ID of the event.
+  required: true
+  schema:
+    type: string
+QueryParamChronosRecurrenceID:
+  name: recurrenceId
+  in: query
+  description: The recurrence identifier.
+  required: false
+  schema:
+    type: string
+QueryParamChronosRecurrenceRange:
+  name: recurrenceRange
+  in: query
+  description: The targeted range specified with the recurrence id.
+  required: false
+  schema:
+    type: string
+QueryParamChronosFields:
+  name: fields
+  in: query
+  description: A comma-separated list of field identifiers.
+  required: false
+  schema:
+    type: string
+QueryParamChronosOrder:
+  name: order
+  in: query
+  description: >-
+    The sort order to apply, either <code>ASC</code> for ascending, or
+    <code>DESC</code> for descending.
+  required: false
+  schema:
+    type: string
+QueryParamChronosSort:
+  name: sort
+  in: query
+  description: Specifies the field for sorting the results.
+  required: false
+  schema:
+    type: string
+QueryParamChronosCheckConflicts:
+  name: checkConflicts
+  in: query
+  description: Whether to check for conflicts or not.
+  required: false
+  schema:
+    type: boolean
+    default: false
+QueryParamChronosExpand:
+  name: expand
+  in: query
+  description: Defines if event series should be extended or not.
+  required: false
+  schema:
+    type: boolean
+    default: false
+QueryParamChronosNotification:
+  name: sendInternalNotifications
+  in: query
+  description: >-
+    Specifies that attendees should be notified about the changes when saving a
+    meeting or not.
+  required: false
+  schema:
+    type: boolean
+    default: true
+ChronosFromTimeRange:
+  name: from
+  in: query
+  description: >-
+    Lower inclusive limit of the queried range as a utc date-time value as
+    specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events
+    which start on or after this date are returned.
+  required: true
+  schema:
+    type: string
+ChronosUntilTimeRange:
+  name: until
+  in: query
+  description: >-
+    Upper exclusive limit of the queried range as a utc date-time value as
+    specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events
+    which end before this date are returned.
+  required: true
+  schema:
+    type: string
+QueryParamChronosSchedJoulesLanguage:
+  in: query
+  name: language
+  description: >
+    The language/locale to translate the results to. If none is provided then
+    the locale of the user's session will be used. 
+
+    If that one is not available then falls back to 'en'.
+  required: false
+  schema:
+    type: string
+QueryParamChronosExtendedEntities:
+  in: query
+  name: extendedEntities
+  description: >
+    If set to 'true' attendees of internal users will be extended by a 'contact'
+    field, which contains some of the contact fields of this user.
+  required: false
+  schema:
+    type: boolean
+    default: false
+QueryParamChronosUpdateCache:
+  name: updateCache
+  in: query
+  description: >
+    If set to 'true' the cache will be forced to be updated (e. g. by contacting
+    the underlying external account)
+  required: false
+  schema:
+    type: boolean
+    default: false
+QueryParamChronosPushToken:
+  name: pushToken
+  in: query
+  description: >
+    The client's push token to allow filtering of push events for modified
+    calendar data
+  required: false
+  schema:
+    type: string
+QueryParamMultifactorProviderName:
+  name: providerName
+  in: query
+  required: true
+  description: The name of the multifactor provider
+  schema:
+    type: string
+QueryParamMultifactorDeviceId:
+  in: query
+  name: deviceId
+  required: true
+  description: The ID of the multifactor device
+  schema:
+    type: string

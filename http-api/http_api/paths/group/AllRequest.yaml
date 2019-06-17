@@ -1,0 +1,28 @@
+/group?action=all:
+  put:
+    operationId: getAllGroups
+    tags:
+      - Groups
+    summary: Gets all groups.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: columns
+        description: >-
+          A comma-separated list of columns to return, like "1,700". Each column
+          is specified by a numeric column identifier, see [Group
+          data](#group-data).
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array of group objects. In case of errors
+          the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupsResponse'

@@ -1,0 +1,35 @@
+/share/management?action=sendLink:
+  put:
+    operationId: sendShareLink
+    tags:
+      - Share/Management
+    summary: Sends a share link.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          Transport warnings that occurred during sending the notifications are
+          available in a `warnings` array.
+
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareLinkSendResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ShareLinkSendBody'
+      description: >
+        A JSON object containing the share target and a list of recipients
+        specified in a field `recipients` that
+
+        is a JSON array with a nested two-elements array containing the
+        recipient information (first element is
+
+        personal name, second is email address). An optional field `message` can
+        contain a notification.
+      required: true

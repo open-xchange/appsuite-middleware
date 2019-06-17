@@ -1,0 +1,20 @@
+type: object
+properties:
+  tests:
+    type: array
+    description: Array of available test-objects.
+    items:
+      $ref: "#/components/schemas/MailFilterConfigTestv2"
+  actioncmds:
+    type: array
+    description: Array of available action-objects.
+    items:
+      $ref: "#/components/schemas/MailFilterConfigAction"
+  options:
+    type: object
+    title: Options
+    description: A options object containing additional information for the client.
+    properties:
+      allowNestedTests:
+        type: boolean
+        description: Defines if nested rules should be allowed by the client or not.

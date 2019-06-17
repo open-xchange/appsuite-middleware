@@ -1,0 +1,7 @@
+globalQuery:
+  name: global
+  in: query
+  description: 'Close sessions cluster-wide. Default: true'
+  required: false
+  schema:
+    type: boolean

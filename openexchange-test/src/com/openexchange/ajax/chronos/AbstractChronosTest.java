@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CommonResponse;
-import com.openexchange.testing.httpclient.models.DeleteBody;
+import com.openexchange.testing.httpclient.models.DeleteEventBody;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.FolderPermission;
@@ -76,7 +76,7 @@ import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
-import com.openexchange.testing.httpclient.models.UpdateBody;
+import com.openexchange.testing.httpclient.models.UpdateEventBody;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 
@@ -143,7 +143,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         Exception exception = null;
         try {
             if (eventIds != null) {
-                DeleteBody body = new DeleteBody();
+                DeleteEventBody body = new DeleteEventBody();
                 body.setEvents(new ArrayList<>(eventIds));
                 defaultUserApi.getChronosApi().deleteEvent(defaultUserApi.getSession(), Long.valueOf(Long.MAX_VALUE), body, null, null, Boolean.FALSE, Boolean.FALSE, null, null);
             }
@@ -409,8 +409,8 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @param eventData The {@link EventData} to update
      * @return An {@link UpdateBody}.
      */
-    protected UpdateBody getUpdateBody(EventData eventData) {
-        UpdateBody body = new UpdateBody();
+    protected UpdateEventBody getUpdateBody(EventData eventData) {
+    	UpdateEventBody body = new UpdateEventBody();
         body.setEvent(eventData);
         return body;
     }

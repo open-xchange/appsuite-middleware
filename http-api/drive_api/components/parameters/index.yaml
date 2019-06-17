@@ -1,0 +1,23 @@
+gblQueryParamSession:
+  name: session
+  in: query
+  description: A session ID previously obtained from the login module.
+  required: true
+  schema:
+    type: string
+gblQueryParamRoot:
+  name: root
+  in: query
+  description: The ID of the referenced root folder on the server.
+  required: true
+  schema:
+    type: string
+gblQueryParamPath:
+  name: path
+  in: query
+  description: >-
+    The path to the synchronized folder, relative to the root folder, starting
+    with `/`.
+  required: true
+  schema:
+    type: string

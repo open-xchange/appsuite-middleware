@@ -5,16 +5,22 @@
       - Messaging
     summary: Gets a messaging service.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: The ID of the messaging service to load.
         required: true
-    responses:
-      200:
-        description: |
-          A JSON object containing the data of the messaging service. In case of errors the responsible
-          fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/MessagingServiceResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing the data of the messaging service. In case of
+          errors the responsible
+
+          fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagingServiceResponse'

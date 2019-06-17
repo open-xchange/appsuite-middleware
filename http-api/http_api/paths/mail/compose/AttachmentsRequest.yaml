@@ -1,0 +1,27 @@
+'/mail/compose/{id}/attachments':
+  post:
+    operationId: postAttachments
+    tags:
+      - MailCompose
+    summary: Add new attachment.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: path
+        name: id
+        description: The ID of the composition space
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: A JSON object containing the newly added attachment.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailComposeAttachmentResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      $ref: '#/components/requestBodies/postAttachments'

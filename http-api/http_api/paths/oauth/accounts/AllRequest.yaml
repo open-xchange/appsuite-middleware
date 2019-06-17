@@ -5,16 +5,25 @@
       - OAuth
     summary: Gets all OAuth accounts.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: serviceId
-        type: string
-        description: The service meta data identifier. If missing all accounts of all services are returned; otherwise all accounts of specified service are returned.
+        description: >-
+          The service meta data identifier. If missing all accounts of all
+          services are returned; otherwise all accounts of specified service are
+          returned.
         required: false
-    responses:
-      200:
-        description: |
-          A JSON object containing an array of JSON objects each describing an OAuth account. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/OAuthAccountsResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array of JSON objects each describing an
+          OAuth account. In case of errors the responsible fields in the
+          response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthAccountsResponse'

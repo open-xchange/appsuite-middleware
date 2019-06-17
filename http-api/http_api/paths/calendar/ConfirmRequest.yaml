@@ -4,38 +4,50 @@
     tags:
       - Calendar
     summary: Confirms an appointment.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the appointment that shall be confirmed.
         required: true
-      - $ref: "#/parameters/gblQueryParamCalendarFolder"
+        schema:
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamCalendarFolder'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the appointment.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: occurrence
-        type: integer
-        description: 'The numeric identifier of the occurrence to which the confirmation applies (in case `id` denotes a series appointment).'
+        description: >-
+          The numeric identifier of the occurrence to which the confirmation
+          applies (in case `id` denotes a series appointment).
         required: false
-      - in: body
-        name: body
-        description: A JSON object with the fields `confirmation`, `confirmmessage` and optionally `id`.
-        required: true
         schema:
-          $ref: "#/definitions/AppointmentConfirmationBody"
+          type: integer
     responses:
-      200:
-        description: |
-          Nothing, except the standard response object with empty data, the timestamp of the confirmed and thereby
-          updated appointment, and maybe errors. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          Nothing, except the standard response object with empty data, the
+          timestamp of the confirmed and thereby
+
+          updated appointment, and maybe errors. In case of errors the
+          responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AppointmentConfirmationBody'
+      description: >-
+        A JSON object with the fields `confirmation`, `confirmmessage` and
+        optionally `id`.
+      required: true

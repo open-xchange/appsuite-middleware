@@ -5,22 +5,29 @@
       - Calendar
     summary: Gets an appointment.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested appointment.
         required: true
-      - $ref: "#/parameters/gblQueryParamCalendarFolder"
+        schema:
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamCalendarFolder'
       - in: query
         name: recurrence_position
-        type: integer
         description: Recurrence position of requested appointment.
         required: false
-    responses:
-      200:
-        description: |
-          An object containing all data of the requested appointment. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/AppointmentResponse"
+          type: integer
+    responses:
+      '200':
+        description: >
+          An object containing all data of the requested appointment. In case of
+          errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentResponse'

@@ -5,15 +5,19 @@
       - Infostore
     summary: Unlocks an infoitem.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the infoitem that shall be unlocked.
         required: true
-    responses:
-      200:
-        description: |
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/CommonResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'

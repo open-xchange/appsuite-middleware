@@ -1,28 +1,35 @@
 /certificate?action=update:
   put:
-    operationId: storeCertificate
+    operationId: storeCertificate_put_req
     tags:
       - Certificate
-    summary: Updates the exception for an SSL certificate in combination with a hostname as either trusted or untrusted
-    consumes:
-      - application/json
+    summary: >-
+      Updates the exception for an SSL certificate in combination with a
+      hostname as either trusted or untrusted
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: fingerprint
-        type: string
         description: The fingerprint of the SSL certificate
         required: true
+        schema:
+          type: string
       - in: query
         name: hostname
-        type: string
         description: The hostname for which to trust/untrust the SSL certificate
         required: true
+        schema:
+          type: string
       - in: query
         name: trust
-        type: boolean
-        description: Whether the combination of the SSL certificate and the hostname is to be trusted
+        description: >-
+          Whether the combination of the SSL certificate and the hostname is to
+          be trusted
         required: true
+        schema:
+          type: boolean
     responses:
-      200:
-        description: An empty JSON object. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+      '200':
+        description: >-
+          An empty JSON object. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).

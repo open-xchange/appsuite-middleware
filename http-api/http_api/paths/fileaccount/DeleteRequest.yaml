@@ -1,0 +1,30 @@
+/fileaccount?action=delete:
+  get:
+    operationId: deleteFileAccount
+    tags:
+      - Filestorage
+    summary: Deletes a file storage account.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: filestorageService
+        description: The identifier of the file storage service the account belongs to.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: id
+        description: The ID of the account to delete.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON object containing the number 1 on success. In case of errors
+          the responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileAccountUpdateResponse'

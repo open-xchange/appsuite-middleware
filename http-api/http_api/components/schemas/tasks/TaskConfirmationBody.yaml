@@ -1,0 +1,17 @@
+type: object
+properties:
+  confirmation:
+    type: integer
+    description: |
+      * 0 (none),<br>
+      * 1 (accepted),<br>
+      * 2 (declined),<br>
+      * 3 (tentative).<br>
+    enum:
+      - 0
+      - 1 
+      - 2 
+      - 3 
+  confirmmessage:
+    type: string
+    description: The confirmation message or comment.

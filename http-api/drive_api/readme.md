@@ -58,7 +58,7 @@ list.
       200:
         description: A JSON object containing the metadata of the requested file version. In case of errors the responsible fields in the response are filled.
         schema:
-          $ref: "#/definitions/DriveFileResponse"
+          $ref: "#/components/schemas/DriveFileResponse"
 ```
 Each parameter represents a new list element which is instructed with a dash (`-`) followed by the `in` key that
 specifies the location of the parameter. That can be `query` (for normal query parameters), `formData` (if parameter
@@ -117,7 +117,7 @@ After defining the parameter you can use it in a request's `parameters` section 
       200:
         description: A JSON object containing the metadata of the requested file version. In case of errors the responsible fields in the response are filled.
         schema:
-          $ref: "#/definitions/DriveFileResponse"
+          $ref: "#/components/schemas/DriveFileResponse"
 ```
 
 ## Add a new request
@@ -202,7 +202,7 @@ that provides detailed information on adding parameters. Responses are specified
 		  A JSON object containing a magic number. In case of errors the responsible fields in the response  
 		  are filled.
 		schema:
-		  $ref: "#/definitions/DriveFooBarResponse"
+		  $ref: "#/components/schemas/DriveFooBarResponse"
 ```
 Because a request can have multiple responses each response is identified by its status code as a key.
 Usually this is `200` in case of the Drive API. The key is followed by a description of the response and the
@@ -219,7 +219,7 @@ object you can directly put the definition into the request file like:
 ```
 This indicates that the response is a binary stream. If the response is a complex object like a JSON object, it is
 recommended to outsource the definition of the response in a model and only place a reference to the
-model inside of the response's schema as seen above (`$ref: "#/definitions/DriveFooBarResponse"`). Look at [Add a new response / request body](#add-a-new-response-request-body)
+model inside of the response's schema as seen above (`$ref: "#/components/schemas/DriveFooBarResponse"`). Look at [Add a new response / request body](#add-a-new-response-request-body)
 to learn how to write a response model.
 
 Normally each description of a response of the OX Drive API ends with the sentence "In case of errors the responsible fields in the response are filled.".
@@ -301,11 +301,11 @@ is an object without specifying the `properties` of the object, like:
 	  type: object
 ```
 Otherwise, if the elements are objects with well-defined properties, you should outsource the definition of the object
-in a separate model and reference it using `$ref: "#/definitions/MyObjectModel"`:
+in a separate model and reference it using `$ref: "#/components/schemas/MyObjectModel"`:
 ```yaml
 #...
   data:
-	$ref: "#/definitions/MyObjectModel"
+	$ref: "#/components/schemas/MyObjectModel"
 ```
 
 To create such a model follow the same steps as described in this section. Example: a model with 2 properties stored in _definitions/MyObjectModel.yaml_
@@ -321,7 +321,7 @@ properties:
 ```
 
 The body of every model is stored in a YAML file as seen above. But that is not enough to enable referencing them using the
-well-known `$ref: "#/definitions/ModelName"`. For that we have to navigate to the _defintions_ folder and open
+well-known `$ref: "#/components/schemas/ModelName"`. For that we have to navigate to the _defintions_ folder and open
 the _index.yaml_ file. In this file you find the assemblage of model YAML files and model names. To add a new model
 go to the section of the drive module (see the comments inside the file) and add the new model by applying the name
 as a key and reference the corresponding YAML file. As an example we add the new _DriveFooBarResponse_ model:
@@ -334,7 +334,7 @@ DriveSharingNotificationBody:
 DriveFooBarResponse:
   $ref: ./DriveFooBarResponse.yaml
 ```
-Now it is possible to access the definition of the new model with `$ref: "#/definitions/DriveFooBarResponse"` in
+Now it is possible to access the definition of the new model with `$ref: "#/components/schemas/DriveFooBarResponse"` in
 a request or in another model.
 
 **Attention:** The position of a model in the _defintions/index.yaml_ file is important. If you want to use the model
@@ -358,7 +358,7 @@ of a request body parameter is:
   description: A JSON object ...
   required: true
   schema:
-    $ref: "#/definitions/MyRequestBody"
+    $ref: "#/components/schemas/MyRequestBody"
 ```
 By specifying a request body you have to consider to add a
 ```yaml
@@ -379,7 +379,7 @@ that the array contains.
   schema:
     type: array
 	items:
-	  $ref: "#/definitions/ObjectModelName"
+	  $ref: "#/components/schemas/ObjectModelName"
 ```
 If the request body is not mandatory, set `required` to `false`.
 
@@ -437,8 +437,8 @@ Example 2: you want to refer to a model's definition
 #...
 responses:
   200:
-    description: ... as defined in [DriveAction](#/definitions/DriveAction) model.
+    description: ... as defined in [DriveAction](#/components/schemas/DriveAction) model.
     schema:
-      $ref: "#/definitions/DriveResponse"
+      $ref: "#/components/schemas/DriveResponse"
 #...
 ```

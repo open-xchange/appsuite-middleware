@@ -1,0 +1,5 @@
+type: object
+properties:
+  data:
+    $ref: '#/components/schemas/FolderCheckLimitsResponseData'
+  $ref: ../common/CommonResponseData.yaml

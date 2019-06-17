@@ -1,0 +1,31 @@
+/chronos/alarm?action=ack:
+  get:
+    operationId: acknowledgeAlarm
+    tags:
+      - Chronos
+    summary: Acknowledges an alarm.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamChronosID'
+      - $ref: '#/components/parameters/QueryParamChronosFolder'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - $ref: '#/components/parameters/QueryParamChronosPushToken'
+      - in: query
+        name: alarmId
+        description: |
+          The id of the alarm which shall be acknowledged.
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: >
+          A JSON object containing containing the result of the acknowledge
+          operation. In case of errors the
+
+          responsible fields in the response are filled (see [Error
+          handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosCalendarResultResponse'

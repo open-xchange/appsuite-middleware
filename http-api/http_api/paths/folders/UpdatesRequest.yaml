@@ -3,38 +3,56 @@
     operationId: getFolderUpdates
     tags:
       - Folders
-    summary: Gets the new, modified and deleted folders of a given folder.
+    summary: 'Gets the new, modified and deleted folders of a given folder.'
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: parent
-        type: string
-        description: Object ID of a folder, which is the parent folder of the requested folders.
+        description: >-
+          Object ID of a folder, which is the parent folder of the requested
+          folders.
         required: true
+        schema:
+          type: string
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the requested folders.
         required: true
-      - $ref: "#/parameters/gblQueryParamFolderColumns"
-      - $ref: "#/parameters/gblQueryParamFolderTree"
-      - $ref: "#/parameters/gblQueryParamLanguage"
+        schema:
+          type: integer
+          format: int64
+      - $ref: '#/components/parameters/gblQueryParamFolderColumns'
+      - $ref: '#/components/parameters/gblQueryParamFolderTree'
+      - $ref: '#/components/parameters/gblQueryParamLanguage'
       - in: query
         name: ignore
-        type: string
-        description: Which kinds of updates should be ignored. Currently, the only valid value – "deleted" – causes deleted object IDs not to be returned.
+        description: >-
+          Which kinds of updates should be ignored. Currently, the only valid
+          value – "deleted" – causes deleted object IDs not to be returned.
         required: false
-        enum:
-          - "deleted"
-      - $ref: "#/parameters/gblQueryParamAllowedModules"
-    responses:
-      200:
-        description: |
-          An array with data for new, modified and deleted folders. New and modified folders are represented
-          by arrays. The elements of each array contain the information specified by the corresponding
-          identifiers in the `columns` parameter. Deleted folders (should the ignore parameter be ever implemented)
-          would be identified by their object IDs as plain strings, without being part of a nested array. In case
-          of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/FolderUpdatesResponse"
+          type: string
+          enum:
+            - deleted
+      - $ref: '#/components/parameters/gblQueryParamAllowedModules'
+    responses:
+      '200':
+        description: >
+          An array with data for new, modified and deleted folders. New and
+          modified folders are represented
+
+          by arrays. The elements of each array contain the information
+          specified by the corresponding
+
+          identifiers in the `columns` parameter. Deleted folders (should the
+          ignore parameter be ever implemented)
+
+          would be identified by their object IDs as plain strings, without
+          being part of a nested array. In case
+
+          of errors the responsible fields in the response are filled (see
+          [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderUpdatesResponse'

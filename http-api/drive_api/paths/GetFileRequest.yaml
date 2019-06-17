@@ -5,21 +5,27 @@
       - Drive
     summary: Gets metadata of a specific synchronized file.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: name
-        type: string
         description: The name of the file version.
         required: true
+        schema:
+          type: string
       - in: query
         name: checksum
-        type: string
         description: The checksum of the file version.
         required: true
-    responses:
-      200:
-        description: A JSON object containing the metadata of the requested file version. In case of errors the responsible fields in the response are filled.
         schema:
-          $ref: "#/definitions/DriveFileResponse"
+          type: string
+    responses:
+      '200':
+        description: >-
+          A JSON object containing the metadata of the requested file version.
+          In case of errors the responsible fields in the response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveFileResponse'

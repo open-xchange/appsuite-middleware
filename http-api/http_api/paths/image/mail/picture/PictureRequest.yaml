@@ -1,0 +1,43 @@
+/image/mail/picture:
+  get:
+    operationId: getInlineMailImage
+    tags:
+      - Image
+    summary: Requests an inline image from a mail.
+    parameters:
+      - in: query
+        name: folder
+        description: The folder ID in which the mail resides.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: id
+        description: The object ID of the mail.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: uid
+        description: The identifier of the image inside the referenced mail.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: accountId
+        description: The mail account identifier
+        required: false
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: >-
+          The content of the requested image is directly written into output
+          stream.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      '400':
+        description: If request cannot be handled.

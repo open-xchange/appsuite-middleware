@@ -1,33 +1,33 @@
-requests:
-  - SyncFoldersRequest.yaml
-  - SyncFilesRequest.yaml
-  - DownloadRequest.yaml
-  - UploadRequest.yaml
-  - ListenRequest.yaml
-  - QuotaRequest.yaml
-  - SettingsRequest.yaml
-  - SubscribeRequest.yaml
-  - UnsubscribeRequest.yaml
-  - UpdateTokenRequest.yaml
-  - DirectoryMetadataRequest.yaml
-  - FileMetadataRequest.yaml
-  - JumpRequest.yaml
-  - SubfoldersRequest.yaml
-  - GetLinkRequest.yaml
-  - UpdateLinkRequest.yaml
-  - DeleteLinkRequest.yaml
-  - SendLinkRequest.yaml
-  - SharesRequest.yaml
-  - GetFolderRequest.yaml
-  - GetFileRequest.yaml
-  - UpdateFolderRequest.yaml
-  - UpdateFileRequest.yaml
-  - NotifyRequest.yaml
-  - GetTrashStatsRequest.yaml
-  - EmptyTrashRequest.yaml
+requests: 
   - AutocompleteRequest.yaml
-  - MoveDirectoryRequest.yaml
-  - MoveFileRequest.yaml
-  - GetTrashContentRequest.yaml
   - DeleteFromTrashRequest.yaml
+  - DeleteLinkRequest.yaml
+  - DirectoryMetadataRequest.yaml
+  - DownloadRequest.yaml
+  - EmptyTrashRequest.yaml
+  - FileMetadataRequest.yaml
+  - GetFileRequest.yaml
+  - GetFolderRequest.yaml
+  - GetLinkRequest.yaml
+  - JumpRequest.yaml
+  - ListenRequest.yaml
+  - MoveFileRequest.yaml
+  - MoveFolderRequest.yaml
+  - NotifyRequest.yaml
+  - QuotaRequest.yaml
   - RestoreFromTrashRequest.yaml
+  - SendLinkRequest.yaml
+  - SettingsRequest.yaml
+  - SharesRequest.yaml
+  - SubfoldersRequest.yaml
+  - SubscribeRequest.yaml
+  - SyncFilesRequest.yaml
+  - SyncFoldersRequest.yaml
+  - TrashContentsRequest.yaml
+  - TrashStatsRequest.yaml
+  - UnsubscribeRequest.yaml
+  - UpdateFileRequest.yaml
+  - UpdateFolderRequest.yaml
+  - UpdateLinkRequest.yaml
+  - UpdateTokenRequest.yaml
+  - UploadRequest.yaml

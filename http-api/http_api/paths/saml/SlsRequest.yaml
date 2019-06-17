@@ -1,0 +1,108 @@
+'/saml/{tenant}/sls':
+  get:
+    operationId: sls-req
+    tags:
+      - SAML
+    summary: Single Logout Service for Logout Requests
+    description: >
+      SAML 2.0 Single Logout Service. Accepts `<LogoutRequest>` messages from
+      the IdP
+
+      per `HTTP-Redirect` binding.
+    parameters:
+      - in: path
+        name: tenant
+        required: true
+        description: |
+          In a multi-tenant environment, where different tenants might
+          connect to different identity providers, this parameter denotes
+          the tenant to start a SAML flow for. In single-tenant environments
+          this parameter is superfluous.
+        schema:
+          type: string
+      - in: query
+        name: SAMLRequest
+        description: Base64 encoded SAML 2.0 `<LogoutRequest>` message.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: SigAlg
+        description: Message signature algorithm ID
+        schema:
+          type: string
+      - in: query
+        name: Signature
+        description: Message signature
+        schema:
+          type: string
+      - in: query
+        name: RelayState
+        description: Message exchange relay state
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          HTML response with a self-submitting from that POSTs the
+          `<LoginResponse>`
+
+          back to the IdP.
+      '302':
+        description: |
+          Redirect URI that submits the `<LoginResponse>` back to the IdP per
+          `HTTP-Redirect` binding.
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            schema:
+              type: string
+      '400':
+        description: In case of a missing `SAMLRequest` parameter
+      '500':
+        description: In case of internal server errors
+  post:
+    operationId: sls-resp
+    tags:
+      - SAML
+    summary: Single Logout Service for Logout Responses
+    description: |
+      SAML 2.0 Single Logout Service. Accepts `<LogoutResponse>` messages of the
+      Single Logout Profile per `HTTP-POST` binding.
+    parameters:
+      - in: path
+        name: tenant
+        required: true
+        description: |
+          In a multi-tenant environment, where different tenants might
+          connect to different identity providers, this parameter denotes
+          the tenant to start a SAML flow for. In single-tenant environments
+          this parameter is superfluous.
+        schema:
+          type: string
+    responses:
+      '302':
+        description: Redirect to `/login?action=samlLogout`
+        headers:
+          Location:
+            description: A redirect URI that the client must follow to continue
+            schema:
+              type: string
+      default:
+        description: Environment specific exit path (HTML page or redirect) on any error
+    requestBody:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: object
+            title: slsRespBody
+            properties:
+              SAMLResponse:
+                description: Base64 encoded SAML 2.0 `<LogoutResponse>` message.
+                type: string
+              RelayState:
+                description: Message exchange relay state
+                type: string
+            required:
+              - SAMLResponse
+              - RelayState

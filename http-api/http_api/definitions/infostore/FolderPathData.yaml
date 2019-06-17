@@ -1,8 +1,0 @@
-type: object
-properties:
-  id:
-    type: string
-    description: The folder id
-  title:
-    type: string
-    description: The folder title

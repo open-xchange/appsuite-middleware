@@ -69,11 +69,12 @@ import com.openexchange.testing.httpclient.models.BrowseResponse;
 import com.openexchange.testing.httpclient.models.CountriesResponse;
 import com.openexchange.testing.httpclient.models.CountryData;
 import com.openexchange.testing.httpclient.models.ItemsData;
-import com.openexchange.testing.httpclient.models.ItemsDataInner;
 import com.openexchange.testing.httpclient.models.LanguageData;
 import com.openexchange.testing.httpclient.models.LanguagesResponse;
 import com.openexchange.testing.httpclient.models.PageData;
 import com.openexchange.testing.httpclient.models.PageSectionsData;
+import com.openexchange.testing.httpclient.models.PageSectionsDataItem;
+import com.openexchange.testing.httpclient.models.PageSectionsDataItems;
 import com.openexchange.testing.httpclient.models.SearchData;
 import com.openexchange.testing.httpclient.models.SearchResponse;
 
@@ -196,8 +197,8 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         PageSectionsData pageSectionsData = pageSections.get(0);
         assertNotNull("The page section is null", pageSectionsData);
 
-        ItemsData itemsData = pageSectionsData.getItems();
-        ItemsDataInner itemData = itemsData.get(0);
+        List<PageSectionsDataItems> itemsData = pageSectionsData.getItems();
+        PageSectionsDataItems itemData = itemsData.get(0);
 
         Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesPageResponse.json");
         mock("http://example.com/pages/" + itemData.getItem().getItemId() + "?locale=" + randomLanguage, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);

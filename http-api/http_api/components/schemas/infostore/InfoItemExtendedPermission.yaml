@@ -1,0 +1,36 @@
+type: object
+properties:
+  entity:
+    type: integer
+    description: 'Identifier of the permission entity (i.e. user-, group- or guest-ID).'
+  bits:
+    type: integer
+    description: |
+      A number specifying the permission flags.<br>
+      * 0 (the numerical value indicating no object permissions),<br>
+      * 1 (the numerical value indicating read object permissions),<br>
+      * 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask))
+    enum:
+      - 0 
+      - 1 
+      - 2
+  type:
+    type: string
+    description: >-
+      "user" for an internal user, "group" for a group, "guest" for a guest, or
+      "anonymous" for an anonymous permission entity.
+  display_name:
+    type: string
+    description: A display name for the permission entity.
+  contact:
+    $ref: '#/components/schemas/ContactData'
+  share_url:
+    type: string
+    description: The share link for "anonymous" entities.
+  password:
+    type: string
+    description: The optionally set password for "anonymous" entities.
+  expiry_date:
+    type: integer
+    format: int64
+    description: The optionally set expiry date for "anonymous" entities.

@@ -1,7 +1,0 @@
-type: object
-properties:
-  transport:
-    type: string
-    description: E.g. "mail".
-  message:
-    type: string

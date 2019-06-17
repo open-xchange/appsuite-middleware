@@ -1,8 +1,8 @@
-requests:
+requests: 
   - AllRequest.yaml
-  - ListRequest.yaml
-  - GetRequest.yaml
-  - UpdateRequest.yaml
-  - SearchRequest.yaml
   - GetAttributeRequest.yaml
+  - GetRequest.yaml
+  - ListRequest.yaml
+  - SearchRequest.yaml
   - SetAttributeRequest.yaml
+  - UpdateRequest.yaml

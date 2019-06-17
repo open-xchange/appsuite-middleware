@@ -1,0 +1,25 @@
+/resource?action=get:
+  get:
+    operationId: getResource
+    tags:
+      - Resources
+    summary: Gets a resource.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: The ID of the resource.
+        required: true
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: >
+          A JSON object containing the resource data. In case of errors the
+          responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceResponse'

@@ -5,36 +5,49 @@
       - Chronos
     summary: Gets all changed events since the given timestamp.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/QueryParamChronosFolder'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the requested events.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: rangeStart
-        type: string
-        description: |
-          Lower inclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which start on or after this date are returned.
+        description: >
+          Lower inclusive limit of the queried range as a utc date-time value as
+          specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only
+          events which start on or after this date are returned.
         required: false
+        schema:
+          type: string
       - in: query
         name: rangeEnd
-        type: string
-        description: |
-          Upper exclusive limit of the queried range as a utc date-time value as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only events which end before this date are returned.
+        description: >
+          Upper exclusive limit of the queried range as a utc date-time value as
+          specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000Z". Only
+          events which end before this date are returned.
         required: false
-      - $ref: "#/parameters/QueryParamChronosFields"
-      - $ref: "#/parameters/QueryParamChronosOrder"
-      - $ref: "#/parameters/QueryParamChronosSort"
-      - $ref: "#/parameters/QueryParamChronosExpand"
-      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
-    responses:
-      200:
-        description: |
-          A JSON object containing two arrays. One with new and updated events and another one with deleted events. The events are
-          sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/ChronosUpdatesResponse"
+          type: string
+      - $ref: '#/components/parameters/QueryParamChronosFields'
+      - $ref: '#/components/parameters/QueryParamChronosOrder'
+      - $ref: '#/components/parameters/QueryParamChronosSort'
+      - $ref: '#/components/parameters/QueryParamChronosExpand'
+      - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+    responses:
+      '200':
+        description: >
+          A JSON object containing two arrays. One with new and updated events
+          and another one with deleted events. The events are
+
+          sorted in ascending order by the field `start_date`. In case of errors
+          the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChronosUpdatesResponse'

@@ -4,24 +4,28 @@
     tags:
       - Messaging
     summary: Deletes a messaging account.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: messagingService
-        type: string
         description: The messaging service ID that the account belongs to.
         required: true
+        schema:
+          type: string
       - in: query
         name: id
-        type: integer
         description: The messaging account ID.
         required: true
-    responses:
-      200:
-        description: |
-          A JSON object containing the number 1 if deletion was successful. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/MessagingAccountUpdateResponse"
+          type: integer
+    responses:
+      '200':
+        description: >
+          A JSON object containing the number 1 if deletion was successful. In
+          case of errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagingAccountUpdateResponse'

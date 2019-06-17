@@ -1,0 +1,100 @@
+/image/user/picture:
+  get:
+    operationId: getUserProfileImage
+    tags:
+      - Image
+    summary: Requests a user's profile image.
+    description: >-
+      <b>Important:</b> This endpoint is deprecated and will be removed in the
+      future. Use the new /contacts/picture endpoint instead.
+    deprecated: true
+    parameters:
+      - in: query
+        name: id
+        description: The object ID of the user.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: transformationNeeded
+        description: Indicate if the image needs to be transformed.
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: cropWidth
+        description: >-
+          The width a cropped image should have. Needs to be a bigger value than
+          the images width.
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: cropHeight
+        description: >-
+          The height a cropped image should have. Needs to be a bigger value
+          than the images hight.
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: rotate
+        description: Indicate if the image should get rotated
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: compress
+        description: >-
+          Indicate if the image should be compressed. Output format depends on
+          scaleType.
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: width
+        description: >-
+          The maximum width of the target image. Can not be greater than the
+          value set in 'com.openexchange.tools.images.maxWidth'. Default is
+          4096.
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: height
+        description: >-
+          The maximum height of the target image. Can not be greater than the
+          value set in 'com.openexchange.tools.images.maxHeight'. Default is
+          4096.
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: shrinkOnly
+        description: Set to 'true' to only scale images 'greater than' target size
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: scaleType
+        description: The scale type to use.
+        required: false
+        schema:
+          type: string
+          enum:
+            - contain
+            - containforcedimension
+            - cover
+            - coverandcrop
+    responses:
+      '200':
+        description: >-
+          The content of the requested image is directly written into output
+          stream.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      '400':
+        description: If request cannot be handled.

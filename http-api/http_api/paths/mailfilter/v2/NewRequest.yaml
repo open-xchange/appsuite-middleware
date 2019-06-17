@@ -1,0 +1,39 @@
+/mailfilter/v2?action=new:
+  put:
+    operationId: createRule_v2
+    tags:
+      - Mailfilter
+    summary: Creates a mail filter rule.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: username
+        description: >-
+          Must contain the user name for **admin mode**. So the normal
+          credentials are taken for authentication but the mail filter of the
+          user with this username is being changed.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing the ID of the newly created rule. In case of
+          errors the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailFilterCreationResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailFilterRulev2'
+      description: >-
+        A JSON object describing the mail filter rule. If the field `position`
+        is included, it's taken as the position of the rule in the array on the
+        server side (this value shouldn't be greater than the size of all
+        rules).
+      required: true

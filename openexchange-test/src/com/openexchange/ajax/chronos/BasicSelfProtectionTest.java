@@ -125,7 +125,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         // Update event with expand 'true'
         EventData eventData = actualEventData;
         eventData.setDescription("Changed description");
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), getUpdateBody(eventData), L(eventManager.getLastTimeStamp()), null, null, FALSE, FALSE, FALSE, null, fromStr, untilStr, TRUE, null);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), L(eventManager.getLastTimeStamp()), getUpdateBody(eventData), null, null, FALSE, FALSE, FALSE, null, fromStr, untilStr, TRUE, null);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
 
@@ -175,7 +175,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
             actualEventData.addAttendeesItem(AttendeeFactory.createIndividual(mail));
         }
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), getUpdateBody(actualEventData), L(eventManager.getLastTimeStamp()), null, null, FALSE, FALSE, FALSE, null, null, null, FALSE, null);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), L(eventManager.getLastTimeStamp()), getUpdateBody(actualEventData), null, null, FALSE, FALSE, FALSE, null, null, null, FALSE, null);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }
@@ -214,7 +214,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
             actualEventData.addAlarmsItem(AlarmFactory.createDisplayAlarm("-PT"+x+"M"));
         }
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), getUpdateBody(actualEventData), L(eventManager.getLastTimeStamp()), null, null, FALSE, FALSE, FALSE, null, null, null, FALSE, null);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), L(eventManager.getLastTimeStamp()), getUpdateBody(actualEventData), null, null, FALSE, FALSE, FALSE, null, null, null, FALSE, null);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }

@@ -1,4 +1,4 @@
-requests:
-  - ConfigRequest.yaml
-  - GetPropertyRequest.yaml
-  - SetPropertyRequest.yaml
+requests: 
+  - Get_propertyRequest.yaml
+  - Set_propertyRequest.yaml
+  - PathRequest.yaml

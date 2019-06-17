@@ -4,25 +4,28 @@
     tags:
       - Messaging
     summary: Sends a messaging message.
-    consumes:
-      - spplication/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: recipients
-        type: string
-        description: A list of recipients as defined in [RFC822](https://tools.ietf.org/html/rfc822), like "Joe Doe <joe@doe.org>". If set the message is sent to the given list of recipients, otherwise this defaults to the "To" header of the message.
+        description: >-
+          A list of recipients as defined in
+          [RFC822](https://tools.ietf.org/html/rfc822), like "Joe Doe
+          <joe@doe.org>". If set the message is sent to the given list of
+          recipients, otherwise this defaults to the "To" header of the message.
         required: false
-      - in: body
-        name: body
-        description: A JSON array of JSON arrays with the folder and ID as elements each identifying a message.
-        required: true
         schema:
-          $ref: "#/definitions/MessagingMessageData"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object containing the number 1 if message could be sent. In case of errors the responsible fields in the
+      '200':
+        description: >
+          A JSON object containing the number 1 if message could be sent. In
+          case of errors the responsible fields in the
+
           response are filled (see [Error handling](#error-handling).
-        schema:
-          $ref: "#/definitions/MessagingMessageUpdateResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagingMessageUpdateResponse'
+    requestBody:
+      $ref: '#/components/requestBodies/MessagingMessageData'

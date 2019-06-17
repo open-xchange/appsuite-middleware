@@ -5,31 +5,38 @@
       - Infostore
     summary: Deletes all versions of an infoitem leaving only the base object.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: The ID of the base object.
         required: true
+        schema:
+          type: string
       - in: query
         name: folder
-        type: string
         description: The folder ID of the base object.
         required: true
+        schema:
+          type: string
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the infoitem.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: pushToken
-        type: string
         description: The client's push token to restrict the generated drive event
         required: false
-    responses:
-      200:
-        description: |
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/CommonResponse"
+          type: string
+    responses:
+      '200':
+        description: >
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'

@@ -4,75 +4,106 @@
     tags:
       - Drive
     summary: Synchronizes files in a folder.
-    description: |
-      This request performs the synchronization of a single folder, resulting in different actions that should be
-      executed on the client afterwards. This action is typically executed as result of a `/drive?action=syncfolders`
+    description: >
+      This request performs the synchronization of a single folder, resulting in
+      different actions that should be
+
+      executed on the client afterwards. This action is typically executed as
+      result of a `/drive?action=syncfolders`
+
       request.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: device
-        type: string
-        description: A friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
+        description: >-
+          A friendly name identifying the client device from a user's point of
+          view, e.g. "My Tablet PC".
         required: false
+        schema:
+          type: string
       - in: query
         name: apiVersion
-        type: integer
-        description: The API version that the client is using. If not set, the initial version 0 is assumed.
+        description: >-
+          The API version that the client is using. If not set, the initial
+          version 0 is assumed.
         required: false
-        default: 0
+        schema:
+          type: integer
+          default: 0
       - in: query
         name: diagnostics
-        type: boolean
-        description: If set to `true`, an additional diagnostics trace is supplied in the response.
+        description: >-
+          If set to `true`, an additional diagnostics trace is supplied in the
+          response.
         required: false
+        schema:
+          type: boolean
       - in: query
         name: quota
-        type: boolean
-        description: If set to `true`, additional quota information for the folder is supplied in the response.
+        description: >-
+          If set to `true`, additional quota information for the folder is
+          supplied in the response.
         required: false
+        schema:
+          type: boolean
       - in: query
         name: columns
-        type: string
-        description: A comma-separated list of numeric column identifiers representing additional metadata that is relevant for the client. See [File metadata](#file-metadata). (deprecated, available until API version 2)
+        description: >-
+          A comma-separated list of numeric column identifiers representing
+          additional metadata that is relevant for the client. See [File
+          metadata](#file-metadata). (deprecated, available until API version 2)
         required: false
+        schema:
+          type: string
       - in: query
         name: pushToken
-        type: string
-        description: The client's push registration token to associate it to generated events.
+        description: >-
+          The client's push registration token to associate it to generated
+          events.
         required: false
+        schema:
+          type: string
       - in: query
         name: driveMeta
-        type: string
-        description: Controls the `.drive_meta` synchronization mode. `true`/`false` to forcibly enable or disable metadata synchronization for the request, or `inline` to include `.drive-meta`-data inside a corresponding `download` action as `data`-parameter. (available since v7.8.2)
+        description: >-
+          Controls the `.drive_meta` synchronization mode. `true`/`false` to
+          forcibly enable or disable metadata synchronization for the request,
+          or `inline` to include `.drive-meta`-data inside a corresponding
+          `download` action as `data`-parameter. (available since v7.8.2)
         required: false
-      - in: body
-        name: body
-        description: |
-          A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.
-          Since API version 2, the JSON object may also contain an array named `fileExclusions`.
-        required: true
         schema:
-          $ref: "#/definitions/DriveSyncFilesBody"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object containing an array of actions the client should execute for synchronization. If the
-          `diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field
-          `actions` and the diagnostics trace is provided at `diagnostics`. If `driveMeta` was set to `inline`,
-          `download` actions for `.drive-meta` will carry the metadata in an additional JSON object in `data`
-          field of `action`. In case of errors the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveExtendedActionsResponse"
+      '200':
+        description: >
+          A JSON object containing an array of actions the client should execute
+          for synchronization. If the
+
+          `diagnostics` parameter was set, the array is wrapped into an
+          additional JSON object in the field
+
+          `actions` and the diagnostics trace is provided at `diagnostics`. If
+          `driveMeta` was set to `inline`,
+
+          `download` actions for `.drive-meta` will carry the metadata in an
+          additional JSON object in `data`
+
+          field of `action`. In case of errors the responsible fields in the
+          response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveExtendedActionsResponse'
     x-ox-examples:
-      - Example1:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=syncfiles&root=56&path=/test2&device=Laptop&session=5d0c1e8eb0964a3095438b450ff6810f
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=syncfiles&root=56&path=/test2&device=Laptop&session=5d0c1e8eb0964a3095438b450ff6810f
+
           > Content: 
             {
               "clientVersions" : [{
@@ -91,6 +122,7 @@
             }
 
           <== HTTP 200 OK (6.0004 ms elapsed, 140 bytes received)
+
           <   Content:
               {
                 "data" : [{
@@ -104,10 +136,12 @@
                   }
                 ]
               }
-      - Example2:
+      - Example2: null
         description: Filesync with exclusions
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=syncfiles&root=56&path=/test2&device=Laptop&session=5d0c1e8eb0964a3095438b450ff6810f
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=syncfiles&root=56&path=/test2&device=Laptop&session=5d0c1e8eb0964a3095438b450ff6810f
+
           > Content: 
             {
               "clientVersions" : [{
@@ -132,6 +166,7 @@
             }
 
           <== HTTP 200 OK (6.0004 ms elapsed, 140 bytes received)
+
           <   Content:
               {
                 "data" : [{
@@ -145,10 +180,12 @@
                   }
                 ]
               }
-      - Example3:
+      - Example3: null
         description: Initial sync
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=syncfiles&root=123975&path=/&apiVersion=4&driveMeta=inline&session=0833ca06093a4bad826347a30bf7ace7
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=syncfiles&root=123975&path=/&apiVersion=4&driveMeta=inline&session=0833ca06093a4bad826347a30bf7ace7
+
           > Content: 
             {
               "clientVersions": [],
@@ -156,6 +193,7 @@
             }
 
           <== HTTP 200 OK (27.5238 ms elapsed, 2058 bytes received)
+
           <   Content:
               {
                 "data": {
@@ -249,3 +287,15 @@
                   }]
                 }
               }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveSyncFilesBody'
+      description: >
+        A JSON object containing the fields `clientVersions` and
+        `originalVersions`, both representing JSON arrays.
+
+        Since API version 2, the JSON object may also contain an array named
+        `fileExclusions`.
+      required: true

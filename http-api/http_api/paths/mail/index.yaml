@@ -1,28 +1,28 @@
-requests:
-  - CountRequest.yaml
+requests: 
   - AllRequest.yaml
-  - AutoSaveRequest.yaml
-  - ThreadedAllRequest.yaml
-  - SearchRequest.yaml
-  - ListRequest.yaml
-  - CopyRequest.yaml
-  - UpdateRequest.yaml
-  - AllSeenRequest.yaml
-  - UpdatesRequest.yaml
-  - GetRequest.yaml
-  - GetHeadersRequest.yaml
-  - GetSourceRequest.yaml
-  - ZipMessagesRequest.yaml
+  - All_seenRequest.yaml
   - AttachmentRequest.yaml
-  - ZipAttachmentsRequest.yaml
-  - NewRequest.yaml
-  - ImportRequest.yaml
-  - ReplyRequest.yaml
-  - ReplyAllRequest.yaml
-  - ForwardRequest.yaml
-  - DeleteRequest.yaml
+  - AutosaveRequest.yaml
   - ClearRequest.yaml
-  - ReceiptAckRequest.yaml
-  - ResolveShareReferenceRequest.yaml
+  - CopyRequest.yaml
+  - CountRequest.yaml
+  - DeleteRequest.yaml
   - ExamineRequest.yaml
-  - ThreadReferences.yaml
+  - ForwardRequest.yaml
+  - Get&hdr=1Request.yaml
+  - Get&src=1Request.yaml
+  - GetRequest.yaml
+  - ImportRequest.yaml
+  - ListRequest.yaml
+  - NewRequest.yaml
+  - Receipt_ackRequest.yaml
+  - ReplyRequest.yaml
+  - ReplyallRequest.yaml
+  - Resolve_share_referenceRequest.yaml
+  - SearchRequest.yaml
+  - Thread_referencesRequest.yaml
+  - ThreadedAllRequest.yaml
+  - UpdateRequest.yaml
+  - UpdatesRequest.yaml
+  - Zip_attachmentsRequest.yaml
+  - Zip_messagesRequest.yaml

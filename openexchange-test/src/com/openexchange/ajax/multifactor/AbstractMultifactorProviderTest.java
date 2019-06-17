@@ -339,7 +339,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
         assertThat(authResponse.getErrorDesc(), is(nullValue()));
 
         //Autologin again
-        LoginResponse autologin = loginApi.autologin(Boolean.TRUE, null, null, null);
+        LoginResponse autologin = loginApi.autologin(null, null, null, null);
         assertThat(autologin.getErrorDesc(), is(nullValue()));
 
         //After autologin is must be allowed to perform almost all API actions without re-authenticating
@@ -378,7 +378,7 @@ public abstract class AbstractMultifactorProviderTest extends AbstractMultifacto
 
         //Autologin again
         //This should clear the requirement for "recent authentication" because no device is left
-        LoginResponse autologin = loginApi.autologin(Boolean.TRUE, null, null, null);
+        LoginResponse autologin = loginApi.autologin(null, null, null, null);
         assertThat(autologin.getErrorDesc(), is(nullValue()));
 
         //Thus registering new device should be successful

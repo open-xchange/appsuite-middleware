@@ -1,2 +1,2 @@
-requests:
-  - Request.yaml
+requests: 
+  - MultipleRequest.yaml

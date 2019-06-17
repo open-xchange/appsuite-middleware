@@ -5,11 +5,15 @@
       - sessionmanagement
     summary: Get all user's sessions
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          A JSON object containing the sessions that were found. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object containing the sessions that were found. In case of
+          errors the responsible fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/AllSessionsResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AllSessionsResponse'

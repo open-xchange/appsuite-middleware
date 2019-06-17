@@ -61,6 +61,7 @@ import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.ExtendedProperties;
+import com.openexchange.testing.httpclient.models.ExtendedProperty;
 
 /**
  *
@@ -186,10 +187,13 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             alarm.setId(changedAlarm.getId());
             alarm.setAttendees(changedAlarm.getAttendees());
             ExtendedProperties properties = new ExtendedProperties();
-            HashMap<String, String> map = new HashMap<>();
-            map.put("value", "SERVER");
-            properties.put("ALARM-AGENT", map);
-            alarm.setExtendedProperties(properties);
+            //HashMap<String, String> map = new HashMap<>();
+            //map.put("value", "SERVER");
+            ExtendedProperty extendedProperty = new ExtendedProperty(); 
+            extendedProperty.setName("value");
+            extendedProperty.setValue("server");
+            properties.putExtendedPropertyItem("ALARM-AGENT", extendedProperty);
+            alarm.setExtendedProperties(Collections.singletonList(properties));
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 

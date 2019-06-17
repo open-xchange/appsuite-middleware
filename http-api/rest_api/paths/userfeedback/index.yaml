@@ -1,5 +1,0 @@
-requests:
-  - DeleteRequest.yaml
-  - ExportCSVRequest.yaml
-  - ExportRawRequest.yaml
-  - SendMailRequest.yaml

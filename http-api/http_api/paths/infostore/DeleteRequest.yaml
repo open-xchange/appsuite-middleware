@@ -4,38 +4,50 @@
     tags:
       - Infostore
     summary: Deletes infoitems.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the infoitems to delete.
         required: true
+        schema:
+          type: integer
+          format: int64
       - in: query
         name: hardDelete
-        type: boolean
-        description: Defaults to `false`. If set to `true`, the file is deleted permanently. Otherwise, and if the underlying storage supports a trash folder and the file is not yet located below the trash folder, it is moved to the trash folder.
+        description: >-
+          Defaults to `false`. If set to `true`, the file is deleted
+          permanently. Otherwise, and if the underlying storage supports a trash
+          folder and the file is not yet located below the trash folder, it is
+          moved to the trash folder.
         required: false
+        schema:
+          type: boolean
       - in: query
         name: pushToken
-        type: string
         description: The client's push token to restrict the generated drive event
         required: false
-      - in: body
-        name: body
-        description: A JSON array of objects with the fields `id` and `folder` representing infoitems that shall be deleted.
-        required: true
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/InfoItemListElement"
+          type: string
     responses:
-      200:
-        description: |
-          A JSON object with an empty array if the infoitems were deleted successfully. In case of errors the responsible fields in the
+      '200':
+        description: >
+          A JSON object with an empty array if the infoitems were deleted
+          successfully. In case of errors the responsible fields in the
+
           response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/InfoItemsResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InfoItemsResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/InfoItemListElement'
+      description: >-
+        A JSON array of objects with the fields `id` and `folder` representing
+        infoitems that shall be deleted.
+      required: true

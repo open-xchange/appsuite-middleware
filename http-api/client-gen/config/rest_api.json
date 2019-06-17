@@ -1,0 +1,10 @@
+{
+    "modelPackage" : "com.openexchange.testing.restclient.models",
+    "apiPackage"   : "com.openexchange.testing.restclient.modules",
+    "invokerPackage" : "com.openexchange.testing.restclient.invoker",
+    "groupId" : "com.openexchange.testing",
+    "artifactId"  : "restclient",
+    "fullJavaUtil" : true,
+    "dateLibrary" : "java8",
+    "java8" : true
+}   

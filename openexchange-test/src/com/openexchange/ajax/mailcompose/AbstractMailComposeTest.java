@@ -68,7 +68,6 @@ import com.openexchange.test.TestInit;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.ContactData;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
-import com.openexchange.testing.httpclient.models.InlineResponse2002;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentPostResponse;
 import com.openexchange.testing.httpclient.models.MailComposeAttachmentResponse;
 import com.openexchange.testing.httpclient.models.MailComposeGetResponse;
@@ -223,9 +222,9 @@ public abstract class AbstractMailComposeTest extends AbstractAPIClientSession {
         check(response.getErrorDesc(), response.getError(), response);
     }
 
-    protected void check(InlineResponse2002 response) {
-        assertTrue(b(response.getSuccess()));
-    }
+//    protected void check(InlineResponse2002 response) {
+//        assertTrue(b(response.getSuccess()));
+//    }
 
     protected void check(String errorDesc, String error, Object notNull) {
         assertNotNull(notNull);

@@ -1,0 +1,83 @@
+/mail/compose:
+  parameters:
+    - $ref: '#/components/parameters/gblQueryParamSession'
+  post:
+    operationId: postMailCompose
+    tags:
+      - MailCompose
+    summary: Create a new composition space
+    description: >-
+      For any types but "new", the response provides ready-to-use values, e.g.
+      to, cc, bcc, subject with prefix, attachments. Internally all mime headers
+      are set properly (a..g to maintain threads). Only the content is still
+      original, i.e. the client uses DOMPurify to sanitize and to quote the
+      content.
+    parameters:
+      - name: type
+        in: query
+        description: One of new/reply/replyall/forward/resend/edit/copy
+        required: false
+        schema:
+          type: string
+      - name: vcard
+        in: query
+        description: Attach users vcard
+        required: false
+        schema:
+          type: boolean
+    responses:
+      '200':
+        description: A JSON object containing the newly created message model.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailComposeResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              title: ComposeBody
+              properties:
+                id:
+                  type: string
+                  description: Id of original email
+                folderId:
+                  type: string
+                  description: folder of original email
+      description: >-
+        Array of Objects (id, folderId) to reference mails (reply or multiple on
+        forward as example)
+  get:
+    operationId: getMailCompose
+    tags:
+      - MailCompose
+    summary: Get all open spaces
+    description: Returns a JSON array of compositions spaces
+    parameters:
+      - name: columns
+        in: query
+        description: >-
+          A comma-separated list of columns to return. Each column is specified
+          by the name of the Composition Space attribute. If no columns are
+          specified only the "id" column is set.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: A JSON array containing message models.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailComposeGetResponse'
+      '400':
+        description: 'Bad request, response contains error message.'
+      '401':
+        description: Not authorized

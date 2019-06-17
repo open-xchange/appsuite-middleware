@@ -4,24 +4,33 @@
     tags:
       - Drive
     summary: Gets all shared files and directories.
-    description: Gets all files and directories within the synchronized tree that are shared to others.
+    description: >-
+      Gets all files and directories within the synchronized tree that are
+      shared to others.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
     responses:
-      200:
-        description: |
-          A JSON object containing the fields `directories` and `files` with metadata objects of the shared items.
+      '200':
+        description: >
+          A JSON object containing the fields `directories` and `files` with
+          metadata objects of the shared items.
+
           In case of errors the responsible fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveSharesResponse"
-    x-ox-examples:      
-      - Example1:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveSharesResponse'
+    x-ox-examples:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> GET http://192.168.32.191/ajax/drive?action=shares&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+        example: >
+          ==> GET
+          http://192.168.32.191/ajax/drive?action=shares&session=35d55f0bd2284e78a8eb4dba99b1310b&root=9542
+
 
           <== HTTP 200 OK (191.2707 ms elapsed, 5339 bytes received)
+
           <   Content: 
               {
                 "data": {

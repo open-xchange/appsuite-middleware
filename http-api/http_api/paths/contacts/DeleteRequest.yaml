@@ -4,28 +4,26 @@
     tags:
       - Contacts
     summary: Deletes contacts.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the deleted contacts.
         required: true
-      - in: body
-        name: body
-        description: A JSON array of JSON objects with the id and folder of the contacts.
-        required: true
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/ContactListElement"
+          type: integer
+          format: int64
     responses:
-      200:
-        description: |
-          A JSON array with object IDs of contacts which were modified after the specified timestamp and were therefore not deleted.
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/ContactDeletionsResponse"
+      '200':
+        description: >
+          A JSON array with object IDs of contacts which were modified after the
+          specified timestamp and were therefore not deleted.
+
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactDeletionsResponse'
+    requestBody:
+      $ref: '#/components/requestBodies/ContactListElementArray'

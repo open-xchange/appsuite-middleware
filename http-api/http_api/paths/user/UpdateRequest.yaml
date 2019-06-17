@@ -4,29 +4,40 @@
     tags:
       - User
     summary: Updates a user.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested user.
         required: true
+        schema:
+          type: string
       - in: query
         name: timestamp
-        type: integer
-        format: int64
-        description: Timestamp of the last update of the requested user. If the user was modified after the specified timestamp, then the update must fail.
-        required: true
-      - in: body
-        name: body
-        description: "A JSON object containing the user's data. Only modified fields are present. From [Detailed user data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-user-data) only the fields `timezone` and `locale` are allowed to be updated."
+        description: >-
+          Timestamp of the last update of the requested user. If the user was
+          modified after the specified timestamp, then the update must fail.
         required: true
         schema:
-          $ref: "#/definitions/UserData"
+          type: integer
+          format: int64
     responses:
-      200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserData'
+      description: >-
+        A JSON object containing the user's data. Only modified fields are
+        present. From [Detailed user
+        data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-user-data)
+        only the fields `timezone` and `locale` are allowed to be updated.
+      required: true

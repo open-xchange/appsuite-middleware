@@ -4,21 +4,21 @@
  * Task:		 creates a Swagger JSON file by merging several YAML files in a given folder
  *				 structure
  * Created:		 03-15-2016
- * Last Changed: 04-14-2016
+ * Last Changed: 09-10-2018
  */
 var yaml = require('js-yaml');
 var fs = require('fs');
 var path = require('path');
 var $RefParser = require('json-schema-ref-parser');
-var jsonFileName = "swagger.json";
+var jsonFileName = "openAPI.json";
 var customFileName = false;
 var scriptName = path.basename(process.argv[1]);
 var scriptUsage = "Usage: $>node " + scriptName + " <BASE_FOLDER> [<NAME_OF_JSONFILE>]";
 var scriptExample = "Example: $>node " + scriptName + " http_api/";
-var swagger = require('swagger-tools').specs.v2;
+var SwaggerParser = require('swagger-parser');
 var util = require('util');
 
-var debug=false; 
+var DEBUG=false; 
 
 // check if mandatory command line arguments are missing
 if(process.argv.length < 3) {
@@ -29,6 +29,7 @@ if(process.argv.length < 3) {
 }
 
 var baseFolder = process.argv[2];
+
 
 if(process.argv.length >= 4) {
 	var value = process.argv[3];
@@ -46,9 +47,7 @@ process.argv.forEach((val, index) => {
   if(val.includes("debug")) {
   	debug = true;
   	console.log('!!! debug enabled !!!');
-
-  }
-  	
+  }	
 });
 
 try {
@@ -81,16 +80,19 @@ try {
 			console.log("#################################################################################");
 		}
 
-		// copy the content of each index file inside the base index.yaml (temporary)
+		// copy the content of each index file inside the base index.yaml
+		// (temporary)
 		for (var i = 0; i < indexFileFolders.length; i++) {
 			var indexFileFolder = indexFileFolders[i];    
-
+			
+			console.log("indexFileFolder: " + indexFileFolder)
+			
 			var indexFile = yaml.safeLoad(fs.readFileSync(path.join(indexFileFolder, 'index.yaml'), 'utf8'));
 			if (indexFile.requests) {
+				console.log("indexFile: " + indexFile.requests )
 				for (var j = 0; j < indexFile.requests.length; j++) {
 					var pathFile = path.join(indexFileFolder, indexFile.requests[j]);
 					var pathDefinition = yaml.safeLoad(fs.readFileSync(pathFile, 'utf8'));
-
 					resolvedPaths.push(pathDefinition);
 				}
 			}
@@ -98,93 +100,57 @@ try {
 	}
 	else
 		drawError("No source key found in main index.yaml!", null);
-
 	// do we have some paths definitions?
 	if (resolvedPaths && resolvedPaths.length > 0) {
-		// resolve all external $ref statements in base index.yaml file but no internal ("#/.../...")
-		$RefParser.dereference(path.join(baseFolder, "index.yaml"), {$refs: {internal: false }}).then(function(file) {
+		// resolve all external $ref statements in base index.yaml file but no
+		// internal ("#/.../...")
+		console.log("SIZE: " + resolvedPaths.length)
+		
+		$RefParser.dereference(path.join(baseFolder, "index.yaml"), {$refs: {internal: false}}).then(function(file) {
 			// remove the source key
 			file.paths.source = null;
 			delete file.paths['source'];
 
 			// add all resolved paths to the paths key of the file
 			var mainPathsDef = file.paths;
+			console.log("mainPathsDef: " + mainPathsDef)
 			for (var i = 0, len = resolvedPaths.length; i < len; i++)
 				mainPathsDef = extendPathsDef(mainPathsDef, resolvedPaths[i]);
 
 			file.paths = mainPathsDef;
 
 			console.log("External reference pointers successfully dereferenced!");
-			console.log("Writing " + jsonFileName + " ...");
-			fs.writeFile(path.join(baseFolder, jsonFileName), JSON.stringify(file), function(err) {
+			console.log("Writing " + jsonFileName + " ...");			
+			
+			fs.writeFile(path.join(baseFolder, jsonFileName), JSON.stringify(file, null, 4), function(err) {
 				if (err)
 					drawError("during writing the JSON file", err);
 				else
 					console.log(jsonFileName + " written successfully!");
 				
-				var jsonPath = path.join(process.cwd(), baseFolder, jsonFileName);
+				var jsonPath = path.join(baseFolder, jsonFileName);
 
 				console.log("Validating json definition at '" + jsonPath + "' ...")
-				
-				var swaggerDefinition = require(jsonPath);
-				swagger.validate(swaggerDefinition, function (err, result) {
-				  if (err) {
-				    throw err;
-				  }
-
-				  if (typeof result !== 'undefined') {
-				    if (result.errors.length > 0) {
-				      console.log('The Swagger document is invalid...');
-
-				      console.log('');
-
-				      console.log('Errors');
-				      console.log('------');
-
-				      result.errors.forEach(function (err) {
-				        console.log('#/' + err.path.join('/') + ': ' + err.message);
-				        if(debug) {
-				        	console.log("   ===> " + util.inspect(err, {showHidden: false, depth: null, colors: true}));
-
-				        	console.log(" ")
-				        }
-				      });
-
-				      console.log('');
-				    }
-
-				    if (result.warnings.length > 0) {
-				      console.log('Warnings');
-				      console.log('--------');
-
-				      result.warnings.forEach(function (warn) {
-				        console.log('#/' + warn.path.join('/') + ': ' + warn.message);
-				      });
-				    }
-
-
-
-				    if (result.errors.length > 0) {
-
-				    	if(!debug) {
-				    		console.log('You can add --debug in order to get detailed information about the faulty definitions');
-
-				    	}
-				    	console.log('\r\nOutput file: ' + jsonPath)
-				    	process.exit(1);
-				    }
-				  } else {
-				    console.log('Swagger document is valid');
-				  }
+								
+				SwaggerParser.validate(jsonPath, function (err, api) {
+					if (err) {
+					    console.error(err);
+					  }
+					  else {
+						  console.log('');
+						  console.log('Result: openAPI specification is valid');
+						  console.log('--------');
+					      console.log("API name: %s", api.info.title);
+					      console.log("Version: %s", api.info.version);
+					  }
 				});
-
-				drawInfo();
+								
 			});
 		})
 		.catch(function(err) {
-			drawError("during dereferencing", err);
+			drawFullError("during dereferencing", err);
 		});
-	}
+	}	
 }
 catch (err) {
 	drawError("during resolve process", err);
@@ -217,7 +183,8 @@ function loadIndexFileFolders(fsPath, indexFolders) {
 		var dirContent = fs.readdirSync(fsPath);
 		console.log("Enter folder " + fsPath + " ...");
 		
-		// recursivly inspect all subfolders and save the index.yaml locations inside the array
+		// recursivly inspect all subfolders and save the index.yaml locations
+		// inside the array
 		for (var i = 0, len = dirContent.length; i < len; i++) {
 			var relativeFilePath = path.join(fsPath, dirContent[i]);
 			var fso = fs.statSync(relativeFilePath);
@@ -250,7 +217,8 @@ function loadIndexFileFolders(fsPath, indexFolders) {
 		result.warnings.push("Folder \"" + fsPath + "\" contains no index.yaml but has request files!")
 	}
 	else if(indexFileFound) {
-		// load the index file (temporary) and check the number of request files and the number
+		// load the index file (temporary) and check the number of request files
+		// and the number
 		// of requests that are specified in the index.yaml
 		var indexFile = yaml.safeLoad(fs.readFileSync(path.join(fsPath, 'index.yaml'), 'utf8'));
 		var requestCount = (indexFile.requests !== null) ? indexFile.requests.length : 0;
@@ -276,6 +244,11 @@ function drawInfo() {
 		console.log("INFO: you can specify the file name of the JSON file as optional argument");
 		console.log(scriptUsage);
 	}
+}
+
+function drawFullError(title, err){
+	console.error("ERROR: " + title);
+	console.error(err);
 }
 
 function drawError(title, err) {

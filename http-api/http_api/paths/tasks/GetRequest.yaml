@@ -5,17 +5,22 @@
       - Tasks
     summary: Gets a task.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested task.
         required: true
-      - $ref: "#/parameters/gblQueryParamTaskFolder"
-    responses:
-      200:
-        description: |
-          An object containing all data of the requested task. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/TaskResponse"
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamTaskFolder'
+    responses:
+      '200':
+        description: >
+          An object containing all data of the requested task. In case of errors
+          the responsible fields in the response are
+
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskResponse'

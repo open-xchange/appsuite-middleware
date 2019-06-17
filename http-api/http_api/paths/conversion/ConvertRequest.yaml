@@ -4,14 +4,25 @@
     tags:
       - Conversion
     summary: Converts data from source using a specific data handler.
-    description: |
+    description: >
       #### Saving an iCal email attachment
-      If an iCal file is attached to an email, its content can be saved as appointments and tasks into given
-      calendar and task folder. If the fields "com.openexchange.groupware.calendar.confirmstatus" and
-      "com.openexchange.groupware.calendar.confirmmessage" are set, the data handler inserts the appointment with
-      the given status for the user, if the appointment does not exist. If it is already existing, the handler
+
+      If an iCal file is attached to an email, its content can be saved as
+      appointments and tasks into given
+
+      calendar and task folder. If the fields
+      "com.openexchange.groupware.calendar.confirmstatus" and
+
+      "com.openexchange.groupware.calendar.confirmmessage" are set, the data
+      handler inserts the appointment with
+
+      the given status for the user, if the appointment does not exist. If it is
+      already existing, the handler
+
       just updates the participant status.
+
       ```json
+
       {
         "datasource": {
           "identifier":"com.openexchange.mail.ical",
@@ -33,12 +44,21 @@
           ]
         }
       }
+
       ```
-      The response is a JSON array of JSON objects each providing folder and object ID of added appointments/tasks, e.g.
+
+      The response is a JSON array of JSON objects each providing folder and
+      object ID of added appointments/tasks, e.g.
+
       `[{"folder_id":2567,"id":7689}, ...]`.
+
       #### Converting an iCal email attachment into JSON objects
-      If an iCal file is attached to an email, its content can be converted to JSON appointments and tasks.
+
+      If an iCal file is attached to an email, its content can be converted to
+      JSON appointments and tasks.
+
       ```json
+
       {
         "datasource": {
           "identifier":"com.openexchange.mail.ical",
@@ -59,11 +79,21 @@
           ]
         }
       }
+
       ```
-      The response is a JSON array of JSON objects for each appointment/task. See the TaskData model of the [getTask](#tasks/getTask) request and the AppointmentData model of the [getAttachment](#attachments/getAttachment) request for more informations.
+
+      The response is a JSON array of JSON objects for each appointment/task.
+      See the TaskData model of the [getTask](#tasks/getTask) request and the
+      AppointmentData model of the [getAttachment](#attachments/getAttachment)
+      request for more informations.
+
       #### Saving a vCard email attachment
-      If a vCard file is attached to an email, its content can be saved as contacts into given contact folder.
+
+      If a vCard file is attached to an email, its content can be saved as
+      contacts into given contact folder.
+
       ```json
+
       {
         "datasource": {
           "identifier":"com.openexchange.mail.vcard",
@@ -82,12 +112,20 @@
           ]
         }
       }
+
       ```
-      The response is a JSON array of JSON objects each providing folder and object ID of added contacts, e.g.
+
+      The response is a JSON array of JSON objects each providing folder and
+      object ID of added contacts, e.g.
+
       `[{"folder_id":2567,"id":7689}, ...]`.
+
       #### Contact(s) attached to a new email as a vCard file
+
       Obtain vCard data from spacified contact object(s).
+
       ```json
+
       {
         "datasource": {
           "identifier":"com.openexchange.contact",
@@ -103,23 +141,30 @@
           "args": []
         }
       }
+
       ```
-      The response is a JSON object containing mail data. See the MailData model of the [getMail](#mail/getMail) request.
+
+      The response is a JSON object containing mail data. See the MailData model
+      of the [getMail](#mail/getMail) request.
+
       `[{"folder_id":2567,"id":7689}, ...]`.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - in: body
-        name: body
-        description: A JSON object the data source object and the data handler object.
-        required: true
-        schema:
-          $ref: "#/definitions/ConversionBody"
+      - $ref: '#/components/parameters/gblQueryParamSession'
     responses:
-      200:
-        description: |
-          The conversion result. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          The conversion result. In case of errors the responsible fields in the
+          response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/ConversionResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversionResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConversionBody'
+      description: A JSON object the data source object and the data handler object.
+      required: true

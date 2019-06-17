@@ -4,22 +4,26 @@
     tags:
       - OAuth
     summary: Reauthorises the specified OAuth account
-    produces:
-      - text/html
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: integer
-        description: The account identifier. May also be provided in request body's JSON object by field `id`.
+        description: >-
+          The account identifier. May also be provided in request body's JSON
+          object by field `id`.
         required: true
+        schema:
+          type: integer
       - in: query
         name: serviceId
-        type: string
-        description: The service meta data identifier, e.g. "com.openexchange.oauth.twitter".
+        description: >-
+          The service meta data identifier, e.g.
+          "com.openexchange.oauth.twitter".
         required: true
-      - $ref: "#/parameters/gblQueryParamScopes"
+        schema:
+          type: string
+      - $ref: '#/components/parameters/gblQueryParamScopes'
     responses:
-      200:
+      '200':
         description: |
           The boolean value true if the account was successfully re-authorised.

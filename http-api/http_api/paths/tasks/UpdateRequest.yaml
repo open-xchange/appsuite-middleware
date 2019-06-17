@@ -4,32 +4,39 @@
     tags:
       - Tasks
     summary: Updates a task.
-    consumes:
-      - application/json
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamTaskFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamTaskFolder'
       - in: query
         name: id
-        type: string
         description: Object ID of the requested task.
         required: true
+        schema:
+          type: string
       - in: query
         name: timestamp
-        type: integer
-        format: int64
         description: Timestamp of the last update of the requested tasks.
         required: true
-      - in: body
-        name: body
-        description: A JSON object containing the task's data. Only modified fields are present.
-        required: true
         schema:
-          $ref: "#/definitions/TaskData"
+          type: integer
+          format: int64
     responses:
-      200:
-        description: |
-          A JSON object with a timestamp. In case of errors the responsible fields in the response are
+      '200':
+        description: >
+          A JSON object with a timestamp. In case of errors the responsible
+          fields in the response are
+
           filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/TaskUpdateResponse"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdateResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TaskData'
+      description: >-
+        A JSON object containing the task's data. Only modified fields are
+        present.
+      required: true

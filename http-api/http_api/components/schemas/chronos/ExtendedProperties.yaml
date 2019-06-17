@@ -1,0 +1,11 @@
+type: object
+properties:
+  extendedProperty:
+    additionalProperties:
+      $ref: "#/components/schemas/ExtendedProperty"
+
+
+
+
+
+

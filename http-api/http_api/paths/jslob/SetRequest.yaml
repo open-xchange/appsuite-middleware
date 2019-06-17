@@ -4,28 +4,39 @@
     tags:
       - JSlob
     summary: Stores or deletes a JSlob.
-    description: To delete a JSON configuration just send an empty request body for the specified `id`.
-    consumes:
-      - application/json
+    description: >-
+      To delete a JSON configuration just send an empty request body for the
+      specified `id`.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: '#/components/parameters/gblQueryParamSession'
       - in: query
         name: id
-        type: string
         description: The JSlob indentifier.
+        schema:
+          type: string
       - in: query
         name: serviceId
-        type: string
-        description: The identifier for the JSlob service, default is "com.openexchange.jslob.config".
+        description: >-
+          The identifier for the JSlob service, default is
+          "com.openexchange.jslob.config".
         required: false
-      - in: body
-        name: body
-        description: A JSON object containing the JSON configuration to store. To delete the JSlob just send an empty body.
-        required: true
         schema:
-          type: object
+          type: string
     responses:
-      200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
-        schema:
-          $ref: "#/definitions/CommonResponse"
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+      description: >-
+        A JSON object containing the JSON configuration to store. To delete the
+        JSlob just send an empty body.
+      required: true

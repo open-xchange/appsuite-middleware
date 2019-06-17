@@ -1,9 +1,0 @@
-type: object
-properties:
-  $ref: ../common/CommonResponseData.yaml
-  data:
-    type: object
-    properties:
-      token:
-        type: string
-        description: The token that can be used for a new session.

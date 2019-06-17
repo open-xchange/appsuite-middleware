@@ -1,0 +1,36 @@
+/folders?action=checklimits:
+  put:
+    operationId: checkLimits
+    tags:
+      - Folders
+    summary: Checks the existing upload for given type.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: id
+        description: Object ID of the folder to check.
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: type
+        description: 'The type of the files to upload (e. g. ''filestorage, ''pim'')'
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: |
+          In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FolderCheckLimitsResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FolderCheckLimitsData'
+      description: A JSON object containing an array of file meta data (size and name).
+      required: true

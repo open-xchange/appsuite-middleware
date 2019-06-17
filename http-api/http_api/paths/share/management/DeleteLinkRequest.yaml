@@ -1,0 +1,35 @@
+/share/management?action=deleteLink:
+  put:
+    operationId: deleteShareLink
+    tags:
+      - Share/Management
+    summary: Deletes a share link.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: timestamp
+        description: >-
+          The timestamp of the last modification of the link. Used to detect
+          concurrent modifications.
+        required: true
+        schema:
+          type: integer
+          format: int64
+    responses:
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ShareTargetData'
+      description: >-
+        A JSON object containing the share target where the link should be
+        deleted for.
+      required: true

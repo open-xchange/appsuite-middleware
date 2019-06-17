@@ -1,61 +1,80 @@
-# INFO: in the current Swagger spec it is not possible to add optional path parameters. Therefore, the parameter
-# "filename" is not included in the request. Instead, it is described in the description of the request.
 /infostore?action=document:
   get:
     operationId: getInfoItemDocument
     tags:
       - Infostore
     summary: Gets an infoitem document.
-    description: |
-      It is possible to add a filename to the request's URI like `/infostore/{filename}?action=document`.
-      The filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.
+    description: >
+      It is possible to add a filename to the request's URI like
+      `/infostore/{filename}?action=document`.
 
-      If the file is an image file then it is possible to use the image transformation parameters.
-    produces:
-      - application/octet-stream
+      The filename may be added to the customary infostore path to suggest a
+      filename to a Save-As dialog.
+
+
+      If the file is an image file then it is possible to use the image
+      transformation parameters.
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamInfostoreFolder"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamInfostoreFolder'
       - in: query
         name: id
-        type: string
-        description:  Object ID of the requested infoitem.
+        description: Object ID of the requested infoitem.
         required: true
-      - in: query
-        name: version
-        type: integer
-        description: If present the infoitem data describes the given version. Otherwise the current version is returned.
-        required: false
-      - in: query
-        name: content_type
-        type: string
-        description: If present the response declares the given `content_type` in the Content-Type header.
-        required: false
-      - in: query
-        name: scan
-        type: boolean
-        description: |
-          Flag to request an Anti-Virus scan for the specified document before downloading them. 
-        required: false
-      - in: query
-        name: format
-        type: string
-        description: |
-          Allows to set "metadata" as value to retrieve an image's metadata information (EXIF directory, etc.) as a JSON structure. If there
-          are no metadata available (e.g. infoitem document is not an image) 404 Not Found is returned. 
-        required: false
-      - $ref: "#/parameters/glbQueryParamsImageTransformationRotate"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationWidth"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationHeight"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationShrinkOnly"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationScaleType"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropWidth"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropHeight"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropX"
-      - $ref: "#/parameters/glbQueryParamsImageTransformationCropY"
-    responses:
-      200:
-        description: The raw byte data of the document. The response type for the HTTP request is set accordingly to the defined mimetype for this infoitem or the content_type given.
         schema:
           type: string
-          format: binary
+      - in: query
+        name: version
+        description: >-
+          If present the infoitem data describes the given version. Otherwise
+          the current version is returned.
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: content_type
+        description: >-
+          If present the response declares the given `content_type` in the
+          Content-Type header.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: scan
+        description: >
+          Flag to request an Anti-Virus scan for the specified document before
+          downloading them. 
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: format
+        description: >
+          Allows to set "metadata" as value to retrieve an image's metadata
+          information (EXIF directory, etc.) as a JSON structure. If there
+
+          are no metadata available (e.g. infoitem document is not an image) 404
+          Not Found is returned. 
+        required: false
+        schema:
+          type: string
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationRotate'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationWidth'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationHeight'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationShrinkOnly'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationScaleType'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropWidth'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropHeight'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropX'
+      - $ref: '#/components/parameters/glbQueryParamsImageTransformationCropY'
+    responses:
+      '200':
+        description: >-
+          The raw byte data of the document. The response type for the HTTP
+          request is set accordingly to the defined mimetype for this infoitem
+          or the content_type given.
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary

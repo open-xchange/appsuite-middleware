@@ -1,0 +1,25 @@
+/infostore?action=checkname:
+  get:
+    operationId: checkName
+    tags:
+      - Infostore
+    summary: Checks if a given file name is valid.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: name
+        description: The file name to check.
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          An empty JSON object when file name is valid. In case of errors the
+          responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'

@@ -1,4 +1,4 @@
-requests:
-  - RangeRequest.yaml
+requests: 
   - DeleteRequest.yaml
+  - RangeRequest.yaml
   - RemindAgainRequest.yaml

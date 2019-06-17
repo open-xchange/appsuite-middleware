@@ -79,6 +79,7 @@ import com.openexchange.testing.httpclient.models.ContactListElement;
 import com.openexchange.testing.httpclient.models.ContactResponse;
 import com.openexchange.testing.httpclient.models.ContactUpdateResponse;
 import com.openexchange.testing.httpclient.models.DistributionListMember;
+import com.openexchange.testing.httpclient.models.DistributionListMember.MailFieldEnum;
 import com.openexchange.testing.httpclient.models.FoldersVisibilityResponse;
 import com.openexchange.testing.httpclient.models.UserResponse;
 import com.openexchange.testing.httpclient.modules.ContactsApi;
@@ -155,7 +156,7 @@ public class AbstractApiClientContactTest extends AbstractConfigAwareAPIClientSe
         DistributionListMember result = new DistributionListMember();
         result.setDisplayName(displayName);
         result.setMail(mail);
-        result.setMailField(new BigDecimal(mailField));
+        result.setMailField(MailFieldEnum.values()[mailField]);
         return result;
     }
 

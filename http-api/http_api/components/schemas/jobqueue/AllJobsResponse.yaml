@@ -1,0 +1,10 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: >-
+      Contains the JSON representations for jobs currently held in job queue for
+      a user
+    items:
+      $ref: '#/components/schemas/InfoJobData'

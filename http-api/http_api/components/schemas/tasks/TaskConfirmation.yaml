@@ -1,0 +1,32 @@
+type: object
+properties:
+  type:
+    type: integer
+    description: |
+      Type of participant.<br>
+      * 0 (user),<br>
+      * 5 (external user)
+    enum:
+      - 0 
+      - 5 
+  mail:
+    type: string
+    description: Email address of external participant.
+  display_name:
+    type: string
+    description: Display name of external participant.
+  status:
+    type: integer
+    description: |
+      * 0 (none),<br> 
+      * 1 (accepted),<br>  
+      * 2 (declined),<br>  
+      * 3 (tentative)
+    enum:
+      - 0
+      - 1
+      - 2
+      - 3
+  message:
+    type: string
+    description: Confirm message of the participant.

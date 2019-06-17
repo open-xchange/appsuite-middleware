@@ -1,4 +1,4 @@
-requests:
+requests: 
   - CSVRequest.yaml
   - ICALRequest.yaml
   - VCARDRequest.yaml

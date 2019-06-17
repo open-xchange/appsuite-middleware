@@ -1,0 +1,24 @@
+type: object
+properties:
+  id:
+    type: string
+    description: >-
+      The name of the test, see [Possible tests](#possible-tests) and
+      [Simplified tests](#simplified-tests).
+  comparisons:
+    type: array
+    description: >-
+      An array of the valid comparison types for this test, see [Possible
+      comparisons](#possible-comparisons).
+    items:
+      type: string
+  headers:
+    type: array
+    description: An array of valid headers for the envelope and address tests.
+    items:
+      type: string
+  parts:
+    type: array
+    description: An array of valid address parts for the envelope and address tests.
+    items:
+      type: string

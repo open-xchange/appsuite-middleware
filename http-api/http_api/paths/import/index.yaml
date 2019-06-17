@@ -1,5 +1,5 @@
-requests:
+requests: 
   - CSVRequest.yaml
-  - OUTLOOKCSVRequest.yaml
   - ICALRequest.yaml
+  - OUTLOOK_CSVRequest.yaml
   - VCARDRequest.yaml

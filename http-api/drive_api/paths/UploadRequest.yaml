@@ -4,109 +4,146 @@
     tags:
       - Drive
     summary: Uploads a file to the server.
-    consumes:
-      - application/octet-stream
     parameters:
-      - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/gblQueryParamRoot"
-      - $ref: "#/parameters/gblQueryParamPath"
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - $ref: '#/components/parameters/gblQueryParamRoot'
+      - $ref: '#/components/parameters/gblQueryParamPath'
       - in: query
         name: newName
-        type: string
         description: The target name of the file version to upload.
-        required: true
-      - in: query
-        name: newChecksum
-        type: string
-        description: The target checksum of the file version to upload.
-        required: true
-      - in: query
-        name: name
-        type: string
-        description: The previous name of the file version being uploaded. Only set when uploading an updated version of an existing file to the server.
-        required: false
-      - in: query
-        name: checksum
-        type: string
-        description: The previous checksum of the file version to upload. Only set when uploading an updated version of an extsing file to the server.
-        required: false
-      - in: query
-        name: apiVersion
-        type: integer
-        description: The API version that the client is using. If not set, the initial version 0 is assumed.
-        required: false
-        default: 0
-      - in: query
-        name: contentType
-        type: string
-        description: The content type of the file. If not defined, `application/octet-stream` is assumed.
-        required: false
-        default: "application/octet-stream"
-      - in: query
-        name: offset
-        type: integer
-        format: int64
-        description: The start offset in bytes for the upload when resuming a previous partial upload. If not defined, an offset of 0 is assumed.
-        required: false
-        default: 0
-      - in: query
-        name: totalLength
-        type: integer
-        format: int64
-        description: The total expected length of the file (required to support resume of uploads). If not defined, the upload is assumed completed after the operation.
-        required: false
-      - in: query
-        name: created
-        type: integer
-        format: int64
-        description: The creation time of the file as timestamp.
-        required: false
-      - in: query
-        name: modified
-        type: integer
-        format: int64
-        description: The last modification time of the file as timestamp. Defaults to the current server time if no value or a value larger than the current time is supplied.
-        required: false
-      - in: query
-        name: device
-        type: string
-        description: A friendly name identifying the client device from a user's point of view, e.g. "My Tablet PC".
-        required: false
-      - in: query
-        name: diagnostics
-        type: boolean
-        description: If set to `true`, an additional diagnostics trace is supplied in the response.
-        required: false
-      - in: query
-        name: pushToken
-        type: string
-        description: The client's push registration token to associate it to generated events.
-        required: false
-      - in: body
-        name: body
-        description: The binary content of the file version to upload.
         required: true
         schema:
           type: string
-          format: binary
-    responses:
-      200:
-        description: |
-          A JSON object containing an array of actions the client should execute for synchronization. If the
-          `diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field
-          `actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible
-          fields in the response are filled.
+      - in: query
+        name: newChecksum
+        description: The target checksum of the file version to upload.
+        required: true
         schema:
-          $ref: "#/definitions/DriveActionsResponse"
+          type: string
+      - in: query
+        name: name
+        description: >-
+          The previous name of the file version being uploaded. Only set when
+          uploading an updated version of an existing file to the server.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: checksum
+        description: >-
+          The previous checksum of the file version to upload. Only set when
+          uploading an updated version of an extsing file to the server.
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: apiVersion
+        description: >-
+          The API version that the client is using. If not set, the initial
+          version 0 is assumed.
+        required: false
+        schema:
+          type: integer
+          default: 0
+      - in: query
+        name: contentType
+        description: >-
+          The content type of the file. If not defined,
+          `application/octet-stream` is assumed.
+        required: false
+        schema:
+          type: string
+          default: application/octet-stream
+      - in: query
+        name: offset
+        description: >-
+          The start offset in bytes for the upload when resuming a previous
+          partial upload. If not defined, an offset of 0 is assumed.
+        required: false
+        schema:
+          type: integer
+          format: int64
+          default: 0
+      - in: query
+        name: totalLength
+        description: >-
+          The total expected length of the file (required to support resume of
+          uploads). If not defined, the upload is assumed completed after the
+          operation.
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: created
+        description: The creation time of the file as timestamp.
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: modified
+        description: >-
+          The last modification time of the file as timestamp. Defaults to the
+          current server time if no value or a value larger than the current
+          time is supplied.
+        required: false
+        schema:
+          type: integer
+          format: int64
+      - in: query
+        name: device
+        description: >-
+          A friendly name identifying the client device from a user's point of
+          view, e.g. "My Tablet PC".
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: diagnostics
+        description: >-
+          If set to `true`, an additional diagnostics trace is supplied in the
+          response.
+        required: false
+        schema:
+          type: boolean
+      - in: query
+        name: pushToken
+        description: >-
+          The client's push registration token to associate it to generated
+          events.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >
+          A JSON object containing an array of actions the client should execute
+          for synchronization. If the
+
+          `diagnostics` parameter was set, the array is wrapped into an
+          additional JSON object in the field
+
+          `actions` and the diagnostics trace is provided at `diagnostics`. In
+          case of errors the responsible
+
+          fields in the response are filled.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveActionsResponse'
     x-ox-examples:
-      - Example1:
+      - Example1: null
         description: Basic example
-        example: |
-          ==> PUT http://192.168.32.191/ajax/drive?action=upload&root=56&path=/test2&newName=Penguins.jpg&newChecksum=9d377b10ce778c4938b3c7e2c63a229a&contentType=image/jpeg&offset=0&totalLength=777835&binary=true&device=Laptop&created=1375343426999&modified=1375343427001&session=5d0c1e8eb0964a3095438b450ff6810f
+        example: >
+          ==> PUT
+          http://192.168.32.191/ajax/drive?action=upload&root=56&path=/test2&newName=Penguins.jpg&newChecksum=9d377b10ce778c4938b3c7e2c63a229a&contentType=image/jpeg&offset=0&totalLength=777835&binary=true&device=Laptop&created=1375343426999&modified=1375343427001&session=5d0c1e8eb0964a3095438b450ff6810f
+
           > Content: 
             [application/octet-stream;, 777835 bytes]
 
           <== HTTP 200 OK (108.0062 ms elapsed, 118 bytes received)
+
           <   Content: 
               {
                 "data" : [{
@@ -118,3 +155,11 @@
                   }
                 ]
               }
+    requestBody:
+      content:
+        application/octet-stream:
+          schema:
+            type: string
+            format: byte
+      description: The binary content of the file version to upload.
+      required: true

@@ -1,0 +1,81 @@
+type: object
+properties:
+  $ref: ./RawTaskAndAppointmentData.yaml
+  status:
+    type: integer
+    description: |
+      Status of the task.<br>
+      * 1 (not started),<br>
+      * 2 (in progress),<br>
+      * 3 (done),<br>
+      * 4 (waiting),<br>
+      * 5 (deferred)
+    enum:
+      - 1
+      - 2
+      - 3
+      - 4 
+      - 5 
+  percent_completed:
+    type: integer
+    minimum: 0
+    maximum: 100
+    description: How much of the task is completed. An integer number between 0 and 100.
+  actual_costs:
+    type: number
+    format: double
+    description: >-
+      A monetary attribute to store actual costs of a task. Allowed values must
+      be in the range -9999999999.99 and 9999999999.99.
+  actual_duration:
+    type: string
+    description: 'Actual duration of the task, e.g. in minutes.'
+  after_complete:
+    type: integer
+    format: int64
+    description: >-
+      (DEPRECATED) Only present in AJAX interface. Value will not be stored on
+      OX server.
+  billing_information:
+    type: string
+    description: Billing information of the task.
+  target_costs:
+    type: number
+    format: double
+    description: >-
+      A monetary attribute to store target costs of a task. Allowed values must
+      be in the range -9999999999.99 and 9999999999.99.
+  target_duration:
+    type: string
+    description: 'Target duration of the task, e.g. in minutes.'
+  priority:
+    type: integer
+    description: |
+      The priority of the task.<br>
+      * 1 (low),<br>
+      * 2 (medium),<br>
+      * 3 (high)    
+    enum:
+      - 1
+      - 2 
+      - 3 
+  currency:
+    type: string
+    description: 'The currency, e.g. "EUR".'
+  trip_meter:
+    type: string
+    description: The trip meter.
+  companies:
+    type: string
+    description: Companies.
+  date_completed:
+    type: integer
+    format: int64
+  start_time:
+    type: integer
+    format: int64
+    description: Inclusive start as Date for whole day tasks and Time for normal tasks.
+  end_time:
+    type: integer
+    format: int64
+    description: Exclusive end as Date for whole day tasks and as Time for normal tasks.

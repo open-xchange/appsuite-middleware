@@ -1,0 +1,26 @@
+/mail?action=resolve_share_reference:
+  put:
+    operationId: resolveShareReference
+    tags:
+      - Mail
+    summary: Resolves a given share reference
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+    responses:
+      '200':
+        description: >
+          'The JSON representation for the resolved share reference. In case of
+          errors the responsible fields in the
+
+          response are filled (see [Error handling](#error-handling)).'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveShareReferenceResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ResolveShareReferenceElement'
+      description: A JSON object providing the share reference to resolve
+      required: true

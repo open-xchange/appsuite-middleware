@@ -1,0 +1,24 @@
+type: object
+required:
+  - clientVersions
+  - originalVersions
+properties:
+  clientVersions:
+    type: array
+    description: Lists all current files in the client directory.
+    items:
+      $ref: '#/components/schemas/DriveFileVersion'
+  originalVersions:
+    type: array
+    description: >-
+      Contains all previously known files, i.e. all previously synchronized and
+      acknowledged files.
+    items:
+      $ref: '#/components/schemas/DriveFileVersion'
+  fileExclusions:
+    type: array
+    description: >-
+      Defines client-side exclusion filters for files (since API version 2). See
+      [Client side filtering](#client-side-filtering) for further information.
+    items:
+      $ref: '#/components/schemas/DriveFilePattern'

@@ -1,0 +1,8 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The object ID of the mail
+  folder_id:
+    type: string
+    description: The folder ID of the mail

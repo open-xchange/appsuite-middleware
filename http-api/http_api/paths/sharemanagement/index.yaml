@@ -1,5 +1,0 @@
-requests:
-  - GetLinkRequest.yaml
-  - UpdateLinkRequest.yaml
-  - DeleteLinkRequest.yaml
-  - SendLinkRequest.yaml

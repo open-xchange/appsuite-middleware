@@ -1,0 +1,35 @@
+/mailfilter/v2?action=update:
+  put:
+    operationId: updateRule_v2
+    tags:
+      - Mailfilter
+    summary: Updates a mail filter rule.
+    parameters:
+      - $ref: '#/components/parameters/gblQueryParamSession'
+      - in: query
+        name: username
+        description: >-
+          Must contain the user name for **admin mode**. So the normal
+          credentials are taken for authentication but the mail filter of the
+          user with this username is being changed.
+        required: false
+        schema:
+          type: string
+    responses:
+      '200':
+        description: >-
+          In case of errors the responsible fields in the response are filled
+          (see [Error handling](#error-handling)).
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommonResponse'
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MailFilterRulev2'
+      description: >-
+        A JSON object describing the rule with the `id` set (which identifies
+        the rule to change). Only modified fields are present.
+      required: true

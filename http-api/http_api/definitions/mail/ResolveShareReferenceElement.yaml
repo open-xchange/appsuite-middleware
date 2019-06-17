@@ -1,7 +1,0 @@
-type: object
-required:
-  - reference
-properties:
-  reference:
-    type: string
-    description: The reference string.

@@ -1,0 +1,17 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    type: object
+    title: TrashContent
+    properties:
+      files:
+        type: array
+        description: An array of files.
+        items:
+          $ref: '#/components/schemas/DriveFileMetadata'
+      directories:
+        type: array
+        description: An array of folders.
+        items:
+          $ref: '#/components/schemas/DriveDirectoryMetadata'

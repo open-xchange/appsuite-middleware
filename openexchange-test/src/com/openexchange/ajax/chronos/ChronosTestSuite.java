@@ -59,37 +59,22 @@ import com.openexchange.test.concurrent.ParallelSuite;
 /**
  * {@link ChronosTestSuite}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis
+ *         Chouklis</a>
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    // @formatter:off
-    AcknowledgeAndSnoozeTest.class,
-    BasicAlarmTest.class,
-    BasicAlarmTriggerTest.class,
-    MailAlarmTriggerTest.class,
-    //BasicAvailabilityTest.class,
-    BasicFreeBusyTest.class,
-    SchedJoulesTestSuite.class,
-    BasicSelfProtectionTest.class,
-    BasicSeriesEventTest.class,
-    BasicSingleEventTest.class,
-    ChronosQuotaTest.class,
-    TimezoneAlarmTriggerTest.class,
-    ICalEventImportExportTest.class,
-    RestrictedAttendeePermissionsTest.class,
-    BasicICalCalendarProviderTest.class,
-    ICalImportAccessTest.class,
-    ChronosBugsTestSuite.class,
-    ITipTestSuite.class,
-    BirthdayCalendarExportTest.class,
-    BasicCommentTest.class,
-    ChangeOrganizerTest.class,
-    AttendeePrivilegesTest.class,
-    AlarmPropagationTests.class
-    // @formatter:on
+		// @formatter:off
+		AcknowledgeAndSnoozeTest.class, BasicAlarmTest.class, BasicAlarmTriggerTest.class, MailAlarmTriggerTest.class,
+		// BasicAvailabilityTest.class,
+		BasicFreeBusyTest.class, SchedJoulesTestSuite.class, BasicSelfProtectionTest.class, BasicSeriesEventTest.class,
+		BasicSingleEventTest.class, ChronosQuotaTest.class, TimezoneAlarmTriggerTest.class,
+		ICalEventImportExportTest.class, RestrictedAttendeePermissionsTest.class, BasicICalCalendarProviderTest.class,
+		ICalImportAccessTest.class, ChronosBugsTestSuite.class, ITipTestSuite.class, BirthdayCalendarExportTest.class,
+		BasicCommentTest.class, ChangeOrganizerTest.class, AttendeePrivilegesTest.class, AlarmPropagationTests.class
+		// @formatter:on
 
 })
 public class ChronosTestSuite {
-  // empty
+	// empty
 }

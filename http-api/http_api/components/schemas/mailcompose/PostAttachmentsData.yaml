@@ -1,0 +1,9 @@
+type: object
+title: postAttachmentsBody
+properties:
+  file:
+    description: The file to add
+    type: string
+    format: binary
+required:
+  - file
