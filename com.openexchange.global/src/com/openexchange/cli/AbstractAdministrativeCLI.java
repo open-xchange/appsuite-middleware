@@ -136,8 +136,8 @@ public abstract class AbstractAdministrativeCLI<R, C, A> extends AbstractCLI<R, 
      * @param mandatory Whether the administrative options shall be mandatory
      */
     protected void addAdministrativeOptions(Options option, boolean mandatory) {
-        options.addOption(createArgumentOption("A", "adminuser", "masterAdmin", "Admin username", mandatory));
-        options.addOption(createArgumentOption("P", "adminpass", "masterPassword", "Admin password", mandatory));
+        options.addOption(createArgumentOption("A", "adminuser", "adminUser", "Admin username", mandatory));
+        options.addOption(createArgumentOption("P", "adminpass", "adminPassword", "Admin password", mandatory));
     }
 
     /**

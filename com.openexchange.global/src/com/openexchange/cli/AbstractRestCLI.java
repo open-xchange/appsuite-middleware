@@ -70,11 +70,13 @@ import com.openexchange.java.Strings;
 
 /**
  *
- * {@link AbstractRestCLI}
+ * {@link AbstractRestCLI} - A basic abstract REST Cli implementation that is based
+ * on BasicAuth
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @param <R> - The return type
  * @since v7.8.4
- * @param <R>
  */
 public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Builder, Void> {
 
@@ -94,7 +96,7 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
 
     @Override
     protected void addAdministrativeOptions(Options options, boolean mandatory) {
-        options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for API authentication (user:password).", true));
+        options.addOption(createArgumentOption(USER_SHORT, USER_LONG, "user:password", "Username and password to use for REST API authentication (user:password).", true));
     }
 
     /**
@@ -253,6 +255,15 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
     protected abstract void addOptions(Options options);
 
     @Override
+    protected void optAuthenticate(CommandLine cmd) throws Exception {
+        if (useBasicAuth()) {
+            administrativeAuth(null, null, cmd, null);
+            return;
+        }
+        super.optAuthenticate(cmd);
+    }
+
+    @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, Void authenticator) throws Exception {
         String authString = getAuthorizationHeader(cmd);
         String authorizationHeaderValue = "Basic " + Base64.encodeBase64String(authString.getBytes(Charsets.UTF_8));
@@ -272,6 +283,19 @@ public abstract class AbstractRestCLI<R> extends AbstractAdministrativeCLI<R, Bu
     @Override
     protected Boolean requiresAdministrativePermission() {
         return null;
+    }
+
+    /**
+     * Returns <code>true</code> if basic auth shall be used.
+     * 
+     * <p>
+     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and
+     * <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
+     * 
+     * @return <code>true</code> if basic auth shall be used; <code>false</code> otherwise
+     */
+    protected boolean useBasicAuth() {
+        return true;
     }
 
     @Override

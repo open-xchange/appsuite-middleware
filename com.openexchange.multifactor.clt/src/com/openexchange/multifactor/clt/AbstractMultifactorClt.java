@@ -119,4 +119,9 @@ public abstract class AbstractMultifactorClt extends AbstractRestCLI<Void> {
     protected Boolean requiresAdministrativePermission() {
         return Boolean.TRUE;
     }
+    
+    @Override
+    protected boolean useBasicAuth() {
+        return false;
+    }
 }
