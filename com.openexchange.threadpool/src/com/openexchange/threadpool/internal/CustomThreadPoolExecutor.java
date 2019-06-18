@@ -424,7 +424,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     private void startThread(Thread t) {
         try {
             t.start();
-        } catch (Throwable x) {
+        } catch (Error x) {
             ExceptionUtils.handleThrowable(x);
             throw x;
         }
