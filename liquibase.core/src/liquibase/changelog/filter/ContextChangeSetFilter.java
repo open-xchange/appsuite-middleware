@@ -24,7 +24,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
             if (contexts.length == 1) {
                 if (contexts[0] == null) {
                     //do nothing
-                } else if (contexts[0].indexOf(",") >= 0) {
+                } else if (contexts[0].indexOf(',') >= 0) {
                     this.contexts.addAll(StringUtils.splitAndTrim(contexts[0], ","));
                 } else {
                     this.contexts.add(contexts[0]);

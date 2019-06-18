@@ -2496,9 +2496,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private List<String> extractRealMailAddresses(Collection<String> aliases) {
         List<String> result = new ArrayList<>(aliases.size());
         for (String mail : aliases) {
-            int indexOf = mail.indexOf("<");
+            int indexOf = mail.indexOf('<');
             if (indexOf >= 0) {
-                result.add(mail.substring(indexOf + 1, mail.indexOf(">")));
+                result.add(mail.substring(indexOf + 1, mail.indexOf('>')));
             } else {
                 result.add(mail);
             }

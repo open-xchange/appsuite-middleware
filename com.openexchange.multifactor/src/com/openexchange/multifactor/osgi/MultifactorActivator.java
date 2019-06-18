@@ -127,7 +127,7 @@ public class MultifactorActivator extends HousekeepingActivator {
                 if (components[0] != null) {  // Module must not be null
                     String action = "";
                     if (components.length > 1) {  // Specifying action is optional
-                        action = components[1].contains("=") ? components[1].substring(components[1].indexOf("=") + 1) : components[1];
+                        action = components[1].contains("=") ? components[1].substring(components[1].indexOf('=') + 1) : components[1];
                     }
                     listeners.add(new MultifactorDispatcherListener(mfService, components[0].trim(), action.trim()));
                 }

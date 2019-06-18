@@ -51,7 +51,7 @@ public class CIDRUtils {
 
         /* split CIDR to address and prefix part */
         if (this.cidr.contains("/")) {
-            int index = this.cidr.indexOf("/");
+            int index = this.cidr.indexOf('/');
             String addressPart = this.cidr.substring(0, index);
             String networkPart = this.cidr.substring(index + 1);
 

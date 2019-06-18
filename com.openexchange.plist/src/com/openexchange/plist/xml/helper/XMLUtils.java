@@ -468,7 +468,7 @@ public final class XMLUtils {
             return null;
         }
 
-        final int index = value.indexOf(":");
+        final int index = value.indexOf(':');
 
         if (index == -1) {
             return new QName(value);

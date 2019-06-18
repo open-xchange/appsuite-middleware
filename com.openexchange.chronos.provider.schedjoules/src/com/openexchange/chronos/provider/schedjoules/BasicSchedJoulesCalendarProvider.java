@@ -303,7 +303,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             URL u = new URL(url);
             String path = u.getQuery();
             int startIndex = path.indexOf("l=");
-            int endIndex = path.indexOf("&", startIndex);
+            int endIndex = path.indexOf('&', startIndex);
             String l = path.substring(startIndex + 2, endIndex);
             if (false == l.equals(locale)) {
                 JSONObject item = fetchItem(session.getContextId(), getItemId(session, account, userConfig), locale);

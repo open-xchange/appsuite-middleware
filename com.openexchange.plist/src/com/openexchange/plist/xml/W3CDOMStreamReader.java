@@ -391,8 +391,8 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         String ln = getCurrentNode().getLocalName();
         if (ln == null) {
             ln = getCurrentNode().getNodeName();
-            if (ln.indexOf(":") != -1) {
-                ln = ln.substring(ln.indexOf(":") + 1);
+            if (ln.indexOf(':') != -1) {
+                ln = ln.substring(ln.indexOf(':') + 1);
             }
         }
         return ln;
@@ -403,10 +403,10 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         String ln = getCurrentNode().getLocalName();
         if (ln == null) {
             ln = getCurrentNode().getNodeName();
-            if (ln.indexOf(":") == -1) {
+            if (ln.indexOf(':') == -1) {
                 ln = getNamespaceURI("");
             } else {
-                ln = getNamespaceURI(ln.substring(0, ln.indexOf(":")));
+                ln = getNamespaceURI(ln.substring(0, ln.indexOf(':')));
             }
             return ln;
         }
@@ -418,8 +418,8 @@ public class W3CDOMStreamReader extends AbstractDOMStreamReader<Node, Node> {
         String prefix = getCurrentNode().getPrefix();
         if (prefix == null) {
             final String nodeName = getCurrentNode().getNodeName();
-            if (nodeName.indexOf(":") != -1) {
-                prefix = nodeName.substring(0, nodeName.indexOf(":"));
+            if (nodeName.indexOf(':') != -1) {
+                prefix = nodeName.substring(0, nodeName.indexOf(':'));
             }  else {
                 prefix = "";
             }

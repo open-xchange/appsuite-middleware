@@ -122,7 +122,7 @@ public class Bug22451Test extends CalDAVTest {
             Property rruleProperty = iCalResource.getVEvent().getProperty("RRULE");
             assertNotNull("RRULE not found", rruleProperty);
             int startIndex = rruleProperty.getValue().indexOf("UNTIL=") + 6;
-            int endIndex = rruleProperty.getValue().indexOf(";", startIndex);
+            int endIndex = rruleProperty.getValue().indexOf(';', startIndex);
             String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) : rruleProperty.getValue().substring(startIndex);
             userCalendar.setTime(dateFormat.parse(iCalUntil));
             calendar.setTime(appointment.getUntil());
@@ -166,7 +166,7 @@ public class Bug22451Test extends CalDAVTest {
             Property rruleProperty = iCalResource.getVEvent().getProperty("RRULE");
             assertNotNull("RRULE not found", rruleProperty);
             int startIndex = rruleProperty.getValue().indexOf("UNTIL=") + 6;
-            int endIndex = rruleProperty.getValue().indexOf(";", startIndex);
+            int endIndex = rruleProperty.getValue().indexOf(';', startIndex);
             String iCalUntil = 0 < endIndex ? rruleProperty.getValue().substring(startIndex, endIndex) : rruleProperty.getValue().substring(startIndex);
             userCalendar.setTime(dateFormat.parse(iCalUntil));
             calendar.setTime(appointment.getUntil());

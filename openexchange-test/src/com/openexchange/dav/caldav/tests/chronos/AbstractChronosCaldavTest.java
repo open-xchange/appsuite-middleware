@@ -343,7 +343,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
     
     private String getCaldavFolder(){
         String defaultFolderID = getDefaultFolderID();
-        if(defaultFolderID.indexOf("/")!=-1){
+        if(defaultFolderID.indexOf('/')!=-1){
             defaultFolderID = defaultFolderID.substring(defaultFolderID.lastIndexOf("/")+1, defaultFolderID.length());
         }
         return defaultFolderID;
@@ -351,7 +351,7 @@ public abstract class AbstractChronosCaldavTest extends AbstractChronosTest {
     
     protected String getCaldavFolder(String folderId) {
         String result = folderId;
-        if (result.indexOf("/") != -1) {
+        if (result.indexOf('/') != -1) {
             result = result.substring(result.lastIndexOf("/") + 1, result.length());
         }
         return result;

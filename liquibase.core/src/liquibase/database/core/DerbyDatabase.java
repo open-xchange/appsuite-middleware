@@ -140,7 +140,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         if (driverName != null && driverName.toLowerCase().contains("embedded")) {
             try {
                 if (url.contains(";")) {
-                    url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
+                    url = url.substring(0, url.indexOf(';')) + ";shutdown=true";
                 } else {
                     url += ";shutdown=true";
                 }

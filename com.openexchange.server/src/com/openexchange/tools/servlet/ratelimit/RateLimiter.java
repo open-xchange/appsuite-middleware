@@ -928,11 +928,11 @@ public final class RateLimiter {
             return false;
         }
         final int mlen = s.length() - 1;
-        int pos = s.indexOf("?");
+        int pos = s.indexOf('?');
         if (pos >= 0) {
             return false;
         }
-        pos = s.indexOf("*");
+        pos = s.indexOf('*');
         if (pos >= 0 && pos < mlen) {
             return false;
         }

@@ -1153,7 +1153,7 @@ public final class Tools {
         final Map<String, List<String>> queryPairs = new LinkedHashMap<String, List<String>>();
         final String[] pairs = queryString.split("&");
         for (String pair : pairs) {
-            final int idx = pair.indexOf("=");
+            final int idx = pair.indexOf('=');
             final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), Charsets.UTF_8_NAME) : pair;
             if (!queryPairs.containsKey(key)) {
                 queryPairs.put(key, new LinkedList<String>());

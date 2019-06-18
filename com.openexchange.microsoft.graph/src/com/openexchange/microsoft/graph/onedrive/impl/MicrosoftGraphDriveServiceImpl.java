@@ -599,11 +599,11 @@ public class MicrosoftGraphDriveServiceImpl implements MicrosoftGraphDriveServic
         if (indexOfKey < 0) {
             return null;
         }
-        int indexOfValue = nextLink.indexOf("=", indexOfKey);
+        int indexOfValue = nextLink.indexOf('=', indexOfKey);
         if (indexOfValue < 0) {
             return null;
         }
-        int indexOfLast = nextLink.indexOf("=", indexOfValue);
+        int indexOfLast = nextLink.indexOf('=', indexOfValue);
         return ((indexOfLast < 0)) ? nextLink.substring(indexOfValue) : nextLink.substring(indexOfValue, indexOfLast);
     }
 

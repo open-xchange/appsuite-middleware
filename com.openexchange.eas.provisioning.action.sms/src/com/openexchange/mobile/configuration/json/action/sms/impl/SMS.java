@@ -238,7 +238,7 @@ public class SMS {
 		boolean validNumber = true;
 
 		// number contains more than one "+"
-		if (to.indexOf("+") >= 0) {
+		if (to.indexOf('+') >= 0) {
 			validNumber = false;
 		}
 

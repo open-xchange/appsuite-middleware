@@ -342,7 +342,7 @@ public enum RESTExceptionCodes implements DisplayableOXExceptionCode {
                 int loc = location.indexOf("://");
                 if (loc > -1) {
                     location = location.substring(loc + 3);
-                    loc = location.indexOf("/");
+                    loc = location.indexOf('/');
                     if (loc > -1) {
                         location = location.substring(0, loc);
                         if (location.toLowerCase().contains(API.getServer())) {
