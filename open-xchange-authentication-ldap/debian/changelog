@@ -1,3 +1,9 @@
+open-xchange-authentication-ldap (7.6.3-47) stable; urgency=medium
+
+  * Build for patch 2019-07-01 (5288)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 18 Jun 2019 13:51:25 +0200
+
 open-xchange-authentication-ldap (7.6.3-46) stable; urgency=medium
 
   * Build for patch 2019-05-13 (5231)
