@@ -167,8 +167,12 @@ public final class ResourceCreate extends AbstractResourcePerformer {
         /*
          * Check mandatory fields: identifier, displayName, and mail
          */
-        if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName()) || com.openexchange.java.Strings.isEmpty(resource.getDisplayName()) || com.openexchange.java.Strings.isEmpty(resource.getMail())) {
-            throw ResourceExceptionCode.MANDATORY_FIELD.create();
+        if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName())) {
+            throw ResourceExceptionCode.MANDATORY_FIELD_NAME.create();
+        } else if (com.openexchange.java.Strings.isEmpty(resource.getDisplayName())) {
+            throw ResourceExceptionCode.MANDATORY_FIELD_DISPLAY_NAME.create();
+        } else if (com.openexchange.java.Strings.isEmpty(resource.getMail())) {
+            throw ResourceExceptionCode.MANDATORY_FIELD_MAIL.create();
         }
         /*
          * Check for invalid values

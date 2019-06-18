@@ -95,4 +95,13 @@ public class ResourceExceptionMessage implements LocalizableStrings {
     // Missing mandatory field(s) in given resource.
     public static final String MANDATORY_FIELD_MSG_DISPLAY = "Missing mandatory field(s) in given resource.";
 
+    // Missing mandatory name in given resource.
+    public static final String MANDATORY_FIELD_NAME_MSG_DISPLAY = "Missing mandatory name in given resource.";
+
+    // Missing mandatory display name in given resource.
+    public static final String MANDATORY_FIELD_DISPLAY_NAME_MSG_DISPLAY = "Missing mandatory display name in given resource.";
+
+    // Missing mandatory E-Mail address in given resource.
+    public static final String MANDATORY_FIELD_MAIL_MSG_DISPLAY = "Missing mandatory E-Mail address in given resource.";
+
 }

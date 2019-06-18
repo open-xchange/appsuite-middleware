@@ -193,7 +193,7 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
         }
         if (resource.isSimpleNameSet()) {
             if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName())) {
-                throw ResourceExceptionCode.MANDATORY_FIELD.create();
+                throw ResourceExceptionCode.MANDATORY_FIELD_NAME.create();
             }
             if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
                 throw ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER.create(resource.getSimpleName());
@@ -207,7 +207,7 @@ public final class ResourceUpdate extends AbstractResourcePerformer {
         }
         if (resource.isMailSet()) {
             if (com.openexchange.java.Strings.isEmpty(resource.getMail())) {
-                throw ResourceExceptionCode.MANDATORY_FIELD.create();
+                throw ResourceExceptionCode.MANDATORY_FIELD_MAIL.create();
             }
             if (!ResourceTools.validateResourceEmail(resource.getMail())) {
                 throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
