@@ -232,6 +232,8 @@ Internally, the following semantics apply for the classifications:
 - ``PRIVATE``
   Events are not exposed to non-attending users in shared folders at all. Additionally, such events are only considered in conflict- and free/busy-queries in case of an attending resource attendee. 
 
+When setting the classification property to a value different from ``PUBLIC``, this can only be done for events that are located in one of the acting user's personal calendar folders. This is done to ensure that a non-owner cannot lock himself out of access to a calendar object resource, with no way to undo the operation. Additionally, it is not allowed to set the classification to ``PRIVATE`` for events with resource attendees, to ensure they're always considered during conflict- and free/busy-lookups.   
+
 For synchronization via CalDAV, the event classification is passed and read *as-is*, with the exception of the Apple calendar clients who require some special treatment (in form of a proprietary spec) in this topic. When exporting calendar object resources whose classification is different from ``PUBLIC`` for an Apple client, the parent ``VCALENDAR`` component is decorated with an additional property ``X-CALENDARSERVER-ACCESS``, set to the value of the (series master) event's classification. In the same way during import, the passed value of ``X-CALENDARSERVER-ACCESS`` is considered and transferred from the parent ``VCALENDAR`` component to each contained ``VEVENT``.
 
 ***
