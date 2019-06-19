@@ -93,6 +93,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
@@ -300,13 +301,13 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static Classification classificationIsValid(Classification classification, CalendarFolder folder, List<Attendee> attendees) throws OXException {
         if (null != classification && false == Classification.PUBLIC.equals(classification)) {
-            if (PublicType.getInstance().equals(folder.getType())) {
-                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER.create(String.valueOf(classification), folder.getId(), PublicType.getInstance());
+            if (false == PrivateType.getInstance().equals(folder.getType())) {
+                throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_FOLDER.create(classification, folder.getId(), folder.getType());
             }
             if (Classification.PRIVATE.equals(classification)) {
                 List<Attendee> resourceAttendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.RESOURCE, CalendarUserType.ROOM);
                 if (0 < resourceAttendees.size()) {
-                    throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE.create(String.valueOf(classification), resourceAttendees.get(0));
+                    throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE.create(classification, resourceAttendees.get(0));
                 }
             }
         }
