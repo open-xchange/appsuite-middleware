@@ -12675,7 +12675,7 @@
                             "application/json": {
                                 "schema": {
                                     "type": "string",
-                                    "format": "binary"
+                                    "format": "byte"
                                 }
                             }
                         }
