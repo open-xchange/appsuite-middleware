@@ -839,7 +839,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
              */
             try {
                 DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
-                RecurrenceId lastRecurrenceId = Services.getService(RecurrenceService.class).getLastOccurrence(recurrenceData);
+                RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+                if (recurrenceService == null) {
+                    throw new IllegalStateException("No such service: " + RecurrenceService.class.getName());
+                }
+                RecurrenceId lastRecurrenceId = recurrenceService.getLastOccurrence(recurrenceData);
                 if (null == lastRecurrenceId) {
                     return Long.MAX_VALUE; // never ending series
                 }
