@@ -441,7 +441,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             return AlarmUtils.getTriggerTime(alarm.getTrigger(), event, timeZone);
         }
         try {
-            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, Services.getService(RecurrenceService.class));
+            RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+            if (recurrenceService == null) {
+                throw new IllegalStateException("No such service: " + RecurrenceService.class.getName());
+            }
+            return AlarmUtils.getNextTriggerTime(event, alarm, startDate, timeZone, recurrenceService);
         } catch (OXException e) {
             LOG.warn("Error determining next trigger time for alarm", e);
         }
