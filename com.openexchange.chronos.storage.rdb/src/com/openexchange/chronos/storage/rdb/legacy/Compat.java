@@ -363,6 +363,9 @@ public class Compat {
      */
     private static SortedSet<RecurrenceId> getRecurrenceIDs(RdbEventStorage eventStorage, String eventId, RecurrenceData recurrenceData, Collection<Date> recurrenceDatePositions, EventField field) throws OXException {
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+        if (recurrenceService == null) {
+            throw new IllegalStateException("No such service: " + RecurrenceService.class.getName());
+        }
         try {
             return Appointment2Event.getRecurrenceIDs(recurrenceService, recurrenceData, recurrenceDatePositions);
         } catch (OXException e) {
