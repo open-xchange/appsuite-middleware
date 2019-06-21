@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -839,11 +840,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
              */
             try {
                 DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), null);
-                RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-                if (recurrenceService == null) {
-                    throw new IllegalStateException("No such service: " + RecurrenceService.class.getName());
-                }
-                RecurrenceId lastRecurrenceId = recurrenceService.getLastOccurrence(recurrenceData);
+                RecurrenceId lastRecurrenceId = requireService(RecurrenceService.class, Services.get()).getLastOccurrence(recurrenceData);
                 if (null == lastRecurrenceId) {
                     return Long.MAX_VALUE; // never ending series
                 }
