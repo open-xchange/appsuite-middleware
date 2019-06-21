@@ -1,7 +1,7 @@
 Return-Path: <{{FROM_MAIL}}>
 Delivered-To: {{TO_MAIL}}
 From: {{FROM_CN}} <{{FROM_MAIL}}>
-To: "{{TO_MAIL}}" <{{TO_MAIL}}>
+To: {{TO_CN}} <{{TO_MAIL}}>
 Subject: {{{{SUMMARY}}}}
 Date: {{NOW}}
 Message-ID: 
