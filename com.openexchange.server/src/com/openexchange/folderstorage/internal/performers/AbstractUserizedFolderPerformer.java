@@ -706,30 +706,22 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID.intValue());
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
-                if (isAnonymous(guestInfo)) {
+                if (isAnonymous(guestInfo) && false == isInherited(guestPermission)) {
                     /*
-                     * allow only one not inherited anonymous permission
+                     * allow only one anonymous permission that's not inherited
                      */
                     if (null == addedAnonymousPermission) {
-                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
-                            addedAnonymousPermission = guestPermission;
-                        }
+                        addedAnonymousPermission = guestPermission;
                     } else {
-                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
-                            throw invalidPermissions(folder, guestPermission);
-                        }
+                        throw invalidPermissions(folder, guestPermission);
                     }
                 }
             }
-
-            if(addedAnonymousPermission != null) {
-                /*
-                 * check for an already existing anonymous permission if a new one should be added
-                 */
-                Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
-                if (invalidPermission != null) {
-                    throw invalidPermissions(folder, invalidPermission);
-                }
+            /*
+             * check for an already existing anonymous permission if a new one should be added
+             */
+            if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
+                throw invalidPermissions(folder, addedAnonymousPermission);
             }
         }
         /*
@@ -753,15 +745,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     /*
-                     * allow only one anonymous permission with "read-only" permission bits
+                     * allow only one anonymous permission with "read-only" permission bits that's not inherited
                      */
                     checkIsLinkPermission(folder, guestPermission);
-                    if (null == newAnonymousPermission) {
-                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
+                    if (false == isInherited(guestPermission)) {
+                        if (null == newAnonymousPermission) {
                             newAnonymousPermission = guestPermission;
-                        }
-                    } else {
-                        if (!FolderPermissionType.INHERITED.equals(guestPermission.getType())) {
+                        } else {
                             throw invalidPermissions(folder, guestPermission);
                         }
                     }
@@ -775,33 +765,44 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             /*
              * check for an already existing anonymous permission if a new one should be added
              */
-            Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
-            if (invalidPermission != null) {
-                throw invalidPermissions(folder, invalidPermission);
+            if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
+                throw invalidPermissions(folder, newAnonymousPermission);
             }
         }
     }
 
     /**
+     * Gets a value indicating whether the supplied permission is <i>inherited</i> from a parent folder or not.
+     *
+     * @param permission The permission to check
+     * @return <code>true</code> if the permission is inherited, <code>false</code> otherwise
+     */
+    private static boolean isInherited(Permission permission) {
+        return FolderPermissionType.INHERITED.equals(permission.getType());
+    }
+
+    /**
      * Gets a value indicating whether the original permissions in the supplied compared permissions instance already contain an
-     * "anonymous" entity one or not.
+     * "anonymous" entity one or not. <p/>
+     * System- and group-permissions, as well as inherited permissions are ignored implicitly.
      *
      * @param comparedPermissions The compared permissions to check
      * @return <code>true</code> if there's an "anonymous" entity in the original permissions, <code>false</code>, otherwise
      */
-    private static Permission containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
+    private static boolean containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
         Collection<Permission> originalPermissions = comparedPermissions.getOriginalPermissions();
         if (null != originalPermissions && 0 < originalPermissions.size()) {
             for (Permission originalPermission : originalPermissions) {
-                if (false == originalPermission.isGroup() && !comparedPermissions.isSystemPermission(originalPermission) && originalPermission.getType() == FolderPermissionType.NORMAL) {
-                    GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
-                    if (null != guestInfo && isAnonymous(guestInfo)) {
-                        return originalPermission;
-                    }
+                if (originalPermission.isGroup() || comparedPermissions.isSystemPermission(originalPermission) || isInherited(originalPermission)) {
+                    continue;
+                }
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
+                if (null != guestInfo && isAnonymous(guestInfo)) {
+                    return true;
                 }
             }
         }
-        return null;
+        return false;
     }
 
     /**
