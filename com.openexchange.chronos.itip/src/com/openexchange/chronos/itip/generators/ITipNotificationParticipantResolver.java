@@ -400,6 +400,8 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
                 notificationOrganizer.setLocale(organizerUser.getLocale());
                 notificationOrganizer.setTimezone(TimeZone.getTimeZone(organizerUser.getTimeZone()));
                 notificationOrganizer.setFolderId(getFolderIdForUser(update, ctx.getContextId(), organizer.getEntity()));
+            } else {
+                notificationOrganizer.setLocale(user.getLocale());
             }
             notificationOrganizer.setDisplayName(organizer.getCn());
             notificationOrganizer.setConfiguration(configuration);
