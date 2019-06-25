@@ -49,85 +49,48 @@
 
 package com.openexchange.ajax.task;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import java.io.ByteArrayInputStream;
+import org.junit.Test;
+import com.openexchange.ajax.attach.actions.AttachRequest;
+import com.openexchange.ajax.attach.actions.AttachResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.task.actions.InsertRequest;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.tasks.Create;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.util.UUIDs;
 
 /**
- * Suite for all task tests.
+ * {@link Bug65799Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * Attachment API allows access to private tasks
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    TasksTest.class,
-    TaskAttachmentTests.class,
+public class Bug65799Test extends AbstractAJAXSession {
 
-    // Now several single function tests.
-    InsertTest.class,
-    CharsetTest.class,
-    TruncationTest.class,
-    FloatTest.class,
-    AllTest.class,
-    ListTest.class,
-    UpdatesTest.class,
-    TaskRecurrenceTest.class,
-    ConfirmTest.class,
-    AllAliasTest.class,
-    ListAliasTest.class,
-    TaskDurationAndCostsTest.class,
-    DeleteMultipleTaskTest.class,
-    DateTimeTest.class,
+    @Test
+    public void testAddAttachment() throws Exception {
+        /*
+         * as user a, create a task folder, shared to user b
+         */
+        FolderObject folder = ftm.insertFolderOnServer(ftm.generateSharedFolder(UUIDs.getUnformattedStringFromRandom(), FolderObject.TASK, 
+            getClient().getValues().getPrivateTaskFolder(), getClient().getValues().getUserId(), getClient2().getValues().getUserId()));
+        /*
+         * create a 'private' task in private folder as user a
+         */
+        Task task = Create.createWithDefaults(folder.getObjectID(), "test");
+        task.setPrivateFlag(true);
+        getClient().execute(new InsertRequest(task, getClient().getValues().getTimeZone(), true)).fillTask(task);
+        /*
+         * try and attach a file to the tasks as user 2
+         */
+        AttachResponse attachResponse = getClient2().execute(new AttachRequest(task, "test.txt", new ByteArrayInputStream("wurst".getBytes()), "text/plain"));
+        assertTrue(attachResponse.hasError());
+        assertEquals("TSK-0046", attachResponse.getException().getErrorCode());
+    }
 
-    // Nodes
-    LastModifiedUTCTest.class,
-
-    // And finally bug tests.
-    Bug6335Test.class,
-    Bug7276Test.class,
-    Bug7380Test.class,
-    Bug8935Test.class,
-    Bug9252Test.class,
-    Bug10071Test.class,
-    Bug10119Test.class,
-    Bug10400Test.class,
-    Bug11075Test.class,
-    Bug11190Test.class,
-    Bug11195Test.class,
-    Bug11397Test.class,
-    Bug11619Test.class,
-    Bug11650Test.class,
-    Bug11659Test.class,
-    Bug11848Test.class,
-    Bug12364Test.class,
-    Bug12727Test.class,
-    Bug12926Test.class,
-    Bug13173Test.class,
-    Bug14002Test.class,
-    Bug15291Test.class,
-    Bug15580Test.class,
-    Bug15897Test.class,
-    Bug15937Test.class,
-    Bug16006Test.class,
-    Bug18204Test.class,
-    Bug20008Test.class,
-    Bug21026Test.class,
-    Bug22305Test.class,
-    Bug23444Test.class,
-    Bug26217Test.class,
-    Bug27840Test.class,
-    Bug28089Test.class,
-    Bug30015Test.class,
-    Bug32044Test.class,
-    Bug33258Test.class,
-    Bug35992Test.class,
-    Bug37002Test.class,
-    Bug37424Test.class,
-    Bug37927Test.class,
-    Bug38782Test.class,
-    Bug50739Test.class,
-    Bug58023Test.class,
-    Bug65799Test.class,
-})
-public final class TaskTestSuite {
 }
