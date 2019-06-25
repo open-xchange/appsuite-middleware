@@ -656,7 +656,7 @@ public class AdminCache {
     public PasswordMech getPasswordMechanism(PasswordMechObject user) throws StorageException {
         String passwordMechIdentifier = user.getPasswordMech();
         if (Strings.isEmpty(passwordMechIdentifier) || "null".equals(Strings.toLowerCase(passwordMechIdentifier))) {
-            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA256");
+            passwordMechIdentifier = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
         }
 
         try {
