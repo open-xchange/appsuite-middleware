@@ -193,7 +193,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             extendedProperty.setName("value");
             extendedProperty.setValue("server");
             properties.putExtendedPropertyItem("ALARM-AGENT", extendedProperty);
-            alarm.setExtendedProperties(Collections.singletonList(properties));
+            alarm.setExtendedProperties(properties);
             assertEquals("The created alarm does not match the expected one.", alarm, changedAlarm);
         }
 
