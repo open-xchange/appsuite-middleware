@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
@@ -75,18 +76,18 @@ public class TaskAuthorization implements AttachmentAuthorization {
      */
     @Override
     public void checkMayAttach(ServerSession session, int folderId, int taskId) throws OXException {
-        final TaskStorage storage = TaskStorage.getInstance();
-        final FolderStorage foldStor = FolderStorage.getInstance();
-        try {
-            final Task task = storage.selectTask(session.getContext(), taskId, StorageType.ACTIVE);
-            task.setParentFolderID(folderId);
-            final FolderObject folder = Tools.getFolder(session.getContext(), folderId);
-            Permission.checkWriteInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
-            // Check if task appears in folder.
-            foldStor.selectFolderById(session.getContext(), taskId, folderId, StorageType.ACTIVE);
-        } catch (final OXException e) {
-            throw e;
+        TaskStorage storage = TaskStorage.getInstance();
+        FolderStorage foldStor = FolderStorage.getInstance();
+        Task task = storage.selectTask(session.getContext(), taskId, StorageType.ACTIVE);
+        task.setParentFolderID(folderId);
+        FolderObject folder = Tools.getFolder(session.getContext(), folderId);
+        Permission.checkWriteInFolder(session.getContext(), session.getUser(), session.getUserPermissionBits(), folder, task);
+        // Check if task appears in folder.
+        Folder matchingFolder = foldStor.selectFolderById(session.getContext(), taskId, folderId, StorageType.ACTIVE);
+        if (null == matchingFolder || task.getPrivateFlag() && Tools.isFolderShared(folder, session.getUser())) {
+            throw TaskExceptionCode.NO_PERMISSION.create(I(taskId), I(folderId));
         }
+
     }
 
     /**
