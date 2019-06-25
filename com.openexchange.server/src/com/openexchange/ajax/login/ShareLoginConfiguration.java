@@ -70,12 +70,6 @@ public class ShareLoginConfiguration {
     public enum ShareLoginProperty implements InitProperty {
 
         /**
-         * <code>true</code> if auto-login for shares is enabled, <code>false</code> if not, <code>null</code> to fall back to the
-         * default login configuration
-         */
-        AUTO_LOGIN("com.openexchange.share.autoLogin", null),
-
-        /**
          * The client name to use for automatically logged-in guest sessions
          */
         CLIENT_NAME("com.openexchange.share.clientName", "open-xchange-appsuite"),
@@ -118,7 +112,6 @@ public class ShareLoginConfiguration {
 
     }
 
-    private Boolean shareAutoLogin;
     private String shareClientName;
     private String shareClientVersion;
     private Integer shareCookieTTL;
@@ -127,17 +120,15 @@ public class ShareLoginConfiguration {
     /**
      * Initializes a new {@link ShareLoginConfiguration}.
      *
-     * @param shareAutoLogin <code>true</code> if auto-login for shares is enabled, <code>false</code> if not, <code>null</code> to fall
-     *                       back to the default login configuration
      * @param shareClientName The client name to use for automatically logged-in guest sessions
      * @param shareClientVersion The client version to use for automatically logged-in guest sessions
      * @param shareCookieTTL The TTL for the client cookies written when accessing a share, or <code>null</code> to fall back to the
      *                       default login configuration
      * @param shareTransientSessions <code>true</code> if guest sessions should be transient, <code>false</code>, otherwise
      */
-    public ShareLoginConfiguration(Boolean shareAutoLogin, String shareClientName, String shareClientVersion, Integer shareCookieTTL, boolean shareTransientSessions) {
+    public ShareLoginConfiguration(String shareClientName, String shareClientVersion, Integer shareCookieTTL, boolean shareTransientSessions) {
         super();
-        reinitialise(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
+        reinitialise(shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
 
     /**
@@ -191,7 +182,6 @@ public class ShareLoginConfiguration {
          */
         return new LoginConfiguration(
             defaultConfig.getUiWebPath(), // com.openexchange.UIWebPath
-            null != shareAutoLogin ? shareAutoLogin.booleanValue() : defaultConfig.isSessiondAutoLogin(),
             defaultConfig.getHashSource(), // com.openexchange.cookie.hash
             defaultConfig.getHttpAuthAutoLogin(),
             null != shareClientName ? shareClientName : defaultConfig.getDefaultClient(),
@@ -220,16 +210,13 @@ public class ShareLoginConfiguration {
     /**
      * (Re-)initializes the configuration.
      *
-     * @param shareAutoLogin <code>true</code> if auto-login for shares is enabled, <code>false</code> if not, <code>null</code> to fall
-     *                       back to the default login configuration
      * @param shareClientName The client name to use for automatically logged-in guest sessions
      * @param shareClientVersion The client version to use for automatically logged-in guest sessions
      * @param shareCookieTTL The TTL for the client cookies written when accessing a share, or <code>null</code> to fall back to the
      *                       default login configuration
      * @param shareTransientSessions <code>true</code> if guest sessions should be transient, <code>false</code>, otherwise
      */
-    private void reinitialise(Boolean shareAutoLogin, String shareClientName, String shareClientVersion, Integer shareCookieTTL, boolean shareTransientSessions) {
-        this.shareAutoLogin = shareAutoLogin;
+    private void reinitialise(String shareClientName, String shareClientVersion, Integer shareCookieTTL, boolean shareTransientSessions) {
         this.shareClientName = shareClientName;
         this.shareClientVersion = shareClientVersion;
         this.shareCookieTTL = shareCookieTTL;
@@ -246,14 +233,12 @@ public class ShareLoginConfiguration {
         /*
          * get share-specific login config overrides from configuration service
          */
-        String shareAutoLoginValue = configService.getProperty(ShareLoginProperty.AUTO_LOGIN.getPropertyName());
-        Boolean shareAutoLogin = Strings.isEmpty(shareAutoLoginValue) ? null : Boolean.valueOf(shareAutoLoginValue);
         String shareClientName = configService.getProperty(ShareLoginProperty.CLIENT_NAME.getPropertyName(), ShareLoginProperty.CLIENT_NAME.getDefaultValue());
         String  shareClientVersion = configService.getProperty(ShareLoginProperty.CLIENT_VERSION.getPropertyName(), ShareLoginProperty.CLIENT_VERSION.getDefaultValue());
         String shareCookieTTLValue = configService.getProperty(ShareLoginProperty.COOKIE_TTL.getPropertyName());
         Integer shareCookieTTL = Strings.isEmpty(shareCookieTTLValue) ? null : Integer.valueOf(ConfigTools.parseTimespanSecs(shareCookieTTLValue));
         boolean shareTransientSessions = configService.getBoolProperty(ShareLoginProperty.TRANSIENT_SESSIONS.getPropertyName(), Boolean.parseBoolean(ShareLoginProperty.TRANSIENT_SESSIONS.getDefaultValue()));
-        reinitialise(shareAutoLogin, shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
+        reinitialise(shareClientName, shareClientVersion, shareCookieTTL, shareTransientSessions);
     }
 
     /**
@@ -279,7 +264,6 @@ public class ShareLoginConfiguration {
                  */
                 return new LoginConfiguration(
                     loginConfig.getUiWebPath(),
-                    loginConfig.isSessiondAutoLogin(),
                     loginConfig.getHashSource(),
                     loginConfig.getHttpAuthAutoLogin(),
                     loginConfig.getDefaultClient(),

@@ -85,6 +85,7 @@ import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.SessionSerializationInterceptor;
+import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
@@ -169,8 +170,7 @@ public final class SessionHandler {
         SessionData sessionData = new SessionData(  config.getNumberOfSessionContainers(),
                                                     config.getMaxSessions(),
                                                     config.getRandomTokenTimeout(),
-                                                    config.getNumberOfLongTermSessionContainers(),
-                                                    config.isAutoLogin()
+                                                    config.getNumberOfLongTermSessionContainers()
                                                     );
         // @formatter:on
         SESSION_DATA_REF.set(sessionData);
@@ -1707,16 +1707,14 @@ public final class SessionHandler {
         }
         List<SessionControl> controls = sessionData.rotateShort();
         if (!controls.isEmpty()) {
-            if (config.isAutoLogin()) {
-                for (final SessionControl sessionControl : controls) {
+            for (final SessionControl sessionControl : controls) {
+                if (Sessions.isStaySignedIn(sessionControl.getSession())) {
                     LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
-                }
-                postSessionDataRemoval(controls);
-            } else {
-                for (final SessionControl sessionControl : controls) {
+                    postSessionDataRemoval(controls);
+                } else {
                     LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
+                    postContainerRemoval(controls, true);
                 }
-                postContainerRemoval(controls, true);
             }
         }
     }
@@ -2076,10 +2074,8 @@ public final class SessionHandler {
 
         long containerTimeout = config.getSessionContainerTimeout();
         shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
-        if (config.isAutoLogin()) {
-            long longContainerTimeout = config.getLongTermSessionContainerTimeout();
-            longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
-        }
+        long longContainerTimeout = config.getLongTermSessionContainerTimeout();
+        longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
     }
 
     public static void removeTimerService() {

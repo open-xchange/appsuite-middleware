@@ -283,6 +283,11 @@ public interface Session {
     public final static String MULTIFACTOR_AUTHENTICATED = "multifactorAuthenticated".intern();
 
     /**
+     * The parameter indicating if 'staySignedIn' was set when session was created
+     */
+    public static final String PARAM_STAY_SIGNED_IN = "__session.staysignedin".intern();
+
+    /**
      * Contains the time that the user last verified using multifactor.
      *
      * This parameter is not stored in session storage, and will be essentially set to 0 during a server change, or

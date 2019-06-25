@@ -89,6 +89,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
@@ -389,19 +390,11 @@ public abstract class AbstractLoginRequestHandler implements LoginRequestHandler
 
             // Set cookies
             if (null == cookiesSetter) {
-                // Check for existent secret cookie if auto-login is disabled
-                if (false == conf.isSessiondAutoLogin(req.getServerName(), session)) {
-                    Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-                    String expectedSecretCookieName = LoginServlet.SECRET_PREFIX + session.getHash();
-                    Cookie cookie = cookies.get(expectedSecretCookieName);
-                    if (null != cookie && !session.getSecret().equals(cookie.getValue())) {
-                        // The same client already initiated a session, but performed another login. Drop the old session.
-                        SessionUtility.removeSessionBySecret(cookie.getValue(), session.getUserId(), session.getContextId());
-                    }
-                }
-
                 // Create/re-write secret cookie
                 LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
+
+                // Create/re-write session cookie
+                LoginServlet.writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
             } else {
                 cookiesSetter.setLoginCookies(session, req, resp, conf);
             }

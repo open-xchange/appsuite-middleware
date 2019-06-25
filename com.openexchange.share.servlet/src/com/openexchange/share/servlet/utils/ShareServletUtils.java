@@ -77,6 +77,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -135,9 +136,10 @@ public final class ShareServletUtils {
              * set secret & share cookies
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
-            response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
-            if (loginConfig.isSessiondAutoLogin(request.getServerName(), session)) {
-                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
+            boolean staySignedIn = Sessions.isStaySignedIn(session);
+            response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig, staySignedIn));
+            if (staySignedIn) {
+                response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig, true));
             }
             /*
              * set public session cookie
@@ -147,7 +149,7 @@ public final class ShareServletUtils {
                 String publicCookieName = getPublicSessionCookieName(request, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) });
                 Cookie cookie = Cookies.cookieMapFor(request).get(publicCookieName);
                 if (null == cookie || false == alternativeID.equals(cookie.getValue())) {
-                    response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig));
+                    response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig, staySignedIn));
                 }
             }
             /*

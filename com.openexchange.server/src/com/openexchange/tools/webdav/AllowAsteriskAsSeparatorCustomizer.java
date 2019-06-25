@@ -175,6 +175,10 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public boolean isStoreLocale() {
                 return loginReq.isStoreLocale();
             }
+
+            public boolean isStaySignedIn() {
+                return loginReq.isStaySignedIn();
+            }
         };
     }
 }

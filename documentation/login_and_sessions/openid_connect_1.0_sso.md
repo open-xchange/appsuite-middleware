@@ -106,10 +106,6 @@ Like mentioned before, it is recomended to extend the core implementation of tho
 If you don't specify a distinct UI web path for your backend, via `com.openexchange.oidc.uiWebPath`, you have to configure the default path of the web UI, which is used in several places, via `/opt/open-xchange/etc/server.properties`. 
 If you haven't already (because of other requirements), set [com.openexchange.UIWebPath](https://documentation.open-xchange.com/components/middleware/config/{{ site.baseurl }}/index.html#com.openexchange.UIWebPath) to `/appsuite/`.
 
-### Autologin configuration
-
-If you want to use the OpenId login feature, you have to make sure that the regular autologin mechanism is disabled by setting the assosiated Sessiond property to false `com.openexchange.sessiond.autologin=false`. This is a crucial precondition for any of the provided autologin mechanisms. 
-
 ### Frontend Configuration
 
 The frontend plugin `open-xchange-appsuite-oidc` is deactivated by default. In order to enable the special OpenID login handling, enable the oidcLogin flag via the `/opt/open-xchange/etc/as-config.yml`. E.g.:

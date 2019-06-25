@@ -101,4 +101,20 @@ public final class Sessions {
         return "true".equalsIgnoreCase(obj.toString().trim());
     }
 
+    /**
+     * Tests if specified session is annotated to 'stay signed in'
+     * 
+     * @param session The session to check
+     * @return <code>true</code> if 'stay signed in' was requested when logging in, <code>false</code> otherwise
+     */
+    public static boolean isStaySignedIn(Session session) {
+        if (session.containsParameter(Session.PARAM_STAY_SIGNED_IN)) {
+            Object value = session.getParameter(Session.PARAM_STAY_SIGNED_IN);
+            if (Boolean.class.isInstance(value)) {
+                return (Boolean) value;
+            }
+            return Boolean.parseBoolean((String) value);
+        }
+        return false;
+    }
 }

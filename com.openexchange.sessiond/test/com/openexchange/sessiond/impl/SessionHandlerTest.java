@@ -148,11 +148,6 @@ public class SessionHandlerTest {
         config = new SessiondConfigInterface() {
 
             @Override
-            public boolean isAutoLogin() {
-                return false;
-            }
-
-            @Override
             public boolean isAsyncPutToSessionStorage() {
                 return false;
             }

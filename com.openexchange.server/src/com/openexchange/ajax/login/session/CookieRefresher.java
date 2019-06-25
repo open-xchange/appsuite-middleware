@@ -58,6 +58,7 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 
 
 /**
@@ -83,6 +84,9 @@ public class CookieRefresher implements SessionServletInterceptor {
 
     @Override
     public void intercept(Session session, HttpServletRequest req, HttpServletResponse resp) throws OXException {
+        if (!Sessions.isStaySignedIn(session)) {
+            return;
+        }
         String host = req.getServerName();
         if (needsCookieRefresh(session, host)) {
             String hash = session.getHash();
@@ -92,7 +96,7 @@ public class CookieRefresher implements SessionServletInterceptor {
 
             // Refresh HTTP session, too
             req.getSession();
-        } else if (needsSessionCookieRefresh(session) && conf.isSessiondAutoLogin(host, session)) {
+        } else if (needsSessionCookieRefresh(session)) {
             String hash = session.getHash();
 
             // Check whether to write session cookie as well
@@ -141,7 +145,7 @@ public class CookieRefresher implements SessionServletInterceptor {
                 }
 
                 session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
-                if (conf.isSessiondAutoLogin(host, session)) {
+                if (Sessions.isStaySignedIn(session)) {
                     // Set marker for session cookie for the next request
                     session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
                 }

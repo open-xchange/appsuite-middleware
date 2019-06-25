@@ -3,9 +3,9 @@
     operationId: autologin
     tags:
       - Login
-    summary: Reuse old session saved in cookies by store request
+    summary: Reuse old session saved if session cookie were persisted by choosing to 'stay signed in' when logging in
     description: |
-      If the session ID was stored in a cookie before via the store request, 
+      If the session ID was stored in a cookie before by choosing to 'stay signed in' when logging in, 
       the user can reuse his old session by using the autologin request.
     parameters:
       - in: query

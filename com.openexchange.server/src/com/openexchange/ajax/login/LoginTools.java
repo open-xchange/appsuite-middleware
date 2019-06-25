@@ -114,7 +114,7 @@ public final class LoginTools {
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
     private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
 
-    public static String generateRedirectURL(String uiWebPathParam, String shouldStore, String sessionId, String uiWebPath) {
+    public static String generateRedirectURL(String uiWebPathParam, String sessionId, String uiWebPath) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
@@ -125,9 +125,6 @@ public final class LoginTools {
         // since it is interpreted by the Browser as "http://".
         retval = PATTERN_DSLASH.matcher(retval).replaceAll("/");
         retval = addFragmentParameter(retval, PARAMETER_SESSION, sessionId);
-        if (shouldStore != null) {
-            retval = addFragmentParameter(retval, "store", shouldStore);
-        }
         return retval;
     }
 
@@ -295,6 +292,7 @@ public final class LoginTools {
         b.cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
         b.language(parseLanguage(req)).storeLanguage(parseStoreLanguage(req)).tranzient(parseTransient(req));
+        b.staySignedIn(parseStaySignedIn(req));
         return b.build();
     }
 
@@ -421,6 +419,18 @@ public final class LoginTools {
     private static boolean containedInAllowedRedirectPaths(URI referrerUri, boolean defaultValue) {
         AllowedRedirectUris allowedRedirectUris = AllowedRedirectUris.getInstance();
         return allowedRedirectUris.isEmpty() ? defaultValue : allowedRedirectUris.isAllowed(referrerUri);
+    }
+
+    public static boolean parseStaySignedIn(HttpServletRequest req) {
+        String staySignedIn = req.getParameter(LoginFields.STAY_SIGNED_IN);
+        if (Strings.isNotEmpty(staySignedIn)) {
+            return AJAXRequestDataTools.parseBoolParameter(staySignedIn);
+        }
+        String autologin = req.getParameter(LoginFields.AUTOLOGIN_PARAM);
+        if (Strings.isNotEmpty(autologin)) {
+            return AJAXRequestDataTools.parseBoolParameter(autologin);
+        }
+        return false;
     }
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -60,9 +59,9 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 
 /**
  * {@link CookieLifetime}
@@ -107,8 +106,7 @@ public class CookieLifetime implements PreferencesItemService {
                 /*
                  * Check if auto-login is enabled
                  */
-                String hostName = (String) session.getParameter(Session.PARAM_HOST_NAME);
-                if (null != service && ((Strings.isNotEmpty(hostName) && LoginServlet.isAutologinActivated(hostName)) || service.getBoolProperty("com.openexchange.sessiond.autologin", false))) {
+                if (Sessions.isStaySignedIn(session)) {
                     maxAge = ConfigTools.parseTimespanSecs(service.getProperty("com.openexchange.cookie.ttl", "1W"));
                 } 
                 setting.setSingleValue(Integer.valueOf(maxAge));

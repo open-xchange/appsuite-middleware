@@ -100,6 +100,8 @@ public class LoginFields {
 
     public static final String TRANSIENT = "transient";
 
+    public static final String STAY_SIGNED_IN = "staySignedIn";
+
     private LoginFields() {
         super();
     }

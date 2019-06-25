@@ -1429,7 +1429,6 @@ public class SAMLWebSSOProviderTest {
             super();
             conf = new LoginConfiguration(
                 "/appsuite/",
-                false,
                 CookieHashSource.CALCULATE,
                 "false",
                 "open-xchange-appsuite",

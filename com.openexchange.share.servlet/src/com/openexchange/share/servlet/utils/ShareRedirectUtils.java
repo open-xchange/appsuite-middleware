@@ -99,7 +99,6 @@ public class ShareRedirectUtils {
          */
         StringBuilder stringBuilder = new StringBuilder(getLoginLink()).append("#!");
         stringBuilder.append("&session=").append(session.getSessionID());
-        stringBuilder.append("&store=").append(loginConfig.isSessiondAutoLogin(host, session) ? true : false);
         stringBuilder.append("&user=").append(urlEncode(user.getMail()));
         stringBuilder.append("&user_id=").append(user.getId());
         stringBuilder.append("&context_id=").append(session.getContextId());

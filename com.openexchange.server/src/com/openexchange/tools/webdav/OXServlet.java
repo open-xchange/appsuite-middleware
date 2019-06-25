@@ -246,6 +246,11 @@ public abstract class OXServlet extends WebDavServlet {
         public boolean isStoreLocale() {
             return LoginTools.parseStoreLocale(req);
         }
+
+        @Override
+        public boolean isStaySignedIn() {
+            return LoginTools.parseStaySignedIn(req);
+        }
     }
 
     /**

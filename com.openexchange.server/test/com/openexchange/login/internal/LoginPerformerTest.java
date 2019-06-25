@@ -242,6 +242,10 @@ public class LoginPerformerTest {
                 return false;
             }
 
+            public boolean isStaySignedIn() {
+                return false;
+            }
+
             @Override
             public Map<String, String[]> getRequestParameter() {
                 return null;

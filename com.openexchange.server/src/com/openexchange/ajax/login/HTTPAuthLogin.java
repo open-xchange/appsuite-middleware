@@ -75,6 +75,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRequest;
@@ -161,6 +162,8 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 Map<String, List<String>> headers = copyHeaders(req);
                 com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
                 String httpSessionId = req.getSession(true).getId();
+                String httpAuthAutoLogin = conf.getHttpAuthAutoLogin();
+                boolean staySignedIn = Strings.isNotEmpty(httpAuthAutoLogin) && Boolean.parseBoolean(httpAuthAutoLogin);
 
                 LoginRequestImpl.Builder b = new LoginRequestImpl.Builder().login(creds.getLogin()).password(creds.getPassword()).clientIP(clientIP);
                 b.userAgent(userAgent).authId(UUIDs.getUnformattedString(UUID.randomUUID())).client(client).version(version);
@@ -168,6 +171,7 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
                 b.iface(HTTP_JSON).headers(headers).requestParameter(req.getParameterMap());
                 b.cookies(cookies).secure(Tools.considerSecure(req, conf.isCookieForceHTTPS()));
                 b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+                b.staySignedIn(staySignedIn);
                 request = b.build();
             }
 
@@ -187,7 +191,8 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
         Tools.disableCaching(resp);
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         LoginServlet.addHeadersAndCookies(loginResult, resp);
-        resp.sendRedirect(LoginTools.generateRedirectURL(null, conf.getHttpAuthAutoLogin(), session.getSessionID(), conf.getUiWebPath()));
+        LoginServlet.writeSessionCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName());
+        resp.sendRedirect(LoginTools.generateRedirectURL(null, session.getSessionID(), conf.getUiWebPath()));
     }
 
     /**

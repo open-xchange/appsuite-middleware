@@ -99,11 +99,9 @@ import com.openexchange.groupware.userconfiguration.service.PermissionAvailabili
 import com.openexchange.java.BoolReference;
 import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareTool;
@@ -223,8 +221,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
     private final ServiceLookup services;
 
-    private volatile Boolean autologin;
-
     /**
      * Registry that provides the registered JSON bundles to check for permissions
      */
@@ -290,56 +286,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
     }
 
-    private boolean autologin() {
-        Boolean tmp = autologin;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = autologin;
-                if (null == tmp) {
-                    final ConfigurationService configurationService = services.getService(ConfigurationService.class);
-                    if (null == configurationService) {
-                        // Return default value
-                        return false;
-                    }
-                    tmp = Boolean.valueOf(configurationService.getBoolProperty("com.openexchange.sessiond.autologin", false));
-                    autologin = tmp;
-                }
-            }
-        }
-
-        String hostname = LogProperties.getHostName();
-        if (Strings.isEmpty(hostname)) {
-            return tmp.booleanValue();
-        }
-
-        // Determine "autologin" capability by host name
-        return isAutologinEnabledForHost(hostname, tmp.booleanValue());
-    }
-
-    private boolean isAutologinEnabledForHost(String hostname, boolean defaultValue) {
-        boolean isEnabled = defaultValue;
-        ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
-        if (serverConfigService != null) {
-            try {
-                List<Map<String, Object>> applicableConfigs = serverConfigService.getCustomHostConfigurations(hostname, -1, -1);
-                isEnabled = getBooleanPropertyFromMaps(applicableConfigs, "com.openexchange.sessiond.autologin", isEnabled);
-            } catch (OXException e) {
-                LOG.error("", e);
-            }
-        }
-        return isEnabled;
-    }
-
-    private boolean getBooleanPropertyFromMaps(List<Map<String, Object>> applicableConfigs, String propertyName, boolean defaultValue) {
-        for (Map<String, Object> map : applicableConfigs) {
-            Object obj = map.get(propertyName);
-            if (obj instanceof Boolean) {
-                return ((Boolean) obj).booleanValue();
-            }
-        }
-        return defaultValue;
-    }
-
+    // TODO: Remove capability for MW-1125?
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
@@ -398,7 +345,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
          */
         CapabilitySet capabilities = new CapabilitySet(64);
         Map<Capability, Boolean> forcedCapabilities = new HashMap<Capability, Boolean>(4);
-        applyAutoLogin(capabilities);
+        capabilities.add(CAP_AUTO_LOGIN);
         applyUserPermissions(capabilities, user, context);
         applyConfiguredCapabilities(capabilities, forcedCapabilities, user, context, allowCache);
         BoolReference putIntoCache = new BoolReference(true);
@@ -443,17 +390,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             } catch (OXException e) {
                 LOG.warn("Failed to invalidate '{}' cache", REGION_NAME, e);
             }
-        }
-    }
-
-    /**
-     * Checks if autologin is enabled and adds the according capability to the passed set, if so.
-     *
-     * @param capabilities The capability set
-     */
-    private void applyAutoLogin(CapabilitySet capabilities) {
-        if (autologin()) {
-            capabilities.add(CAP_AUTO_LOGIN);
         }
     }
 

@@ -77,11 +77,6 @@ public interface SessiondConfigInterface {
     int getNumberOfLongTermSessionContainers();
 
     /**
-     * @return <code>true</code> if autologin is enabled.
-     */
-    boolean isAutoLogin();
-
-    /**
      * Whether to enforce putting sessions into session storage asynchronously.
      *
      * @return <code>true</code> for async put; otherwise <code>false</code>

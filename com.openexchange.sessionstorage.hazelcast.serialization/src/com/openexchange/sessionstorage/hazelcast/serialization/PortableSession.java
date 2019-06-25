@@ -113,6 +113,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
     public static final String PARAMETER_LOCAL_LAST_ACTIVE = "localLastActive";
     public static final String PARAMETER_REMOTE_PARAMETERS = "remoteParameters";
     public static final String PARAMETER_ORIGIN = "origin";
+    public static final String PARAMETER_STAY_SIGNED_IN = "staySignedIn";
 
     /** The class definition for PortableSession */
     public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
@@ -135,6 +136,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         .addLongField(PARAMETER_LOCAL_LAST_ACTIVE)
         .addUTFField(PARAMETER_REMOTE_PARAMETERS)
         .addUTFField(PARAMETER_ORIGIN)
+        .addUTFField(PARAMETER_STAY_SIGNED_IN)
         .build();
 
     // -------------------------------------------------------------------------------------------------
@@ -248,6 +250,10 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         }
         writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
         {
+            Object staySignedIn = parameters.get(PARAM_STAY_SIGNED_IN);
+            writer.writeBoolean(PARAMETER_STAY_SIGNED_IN, null != staySignedIn ? ((Boolean) staySignedIn).booleanValue() : false);
+        }
+        {
             Set<String> remoteParameterNames = this.remoteParameterNames;
             JSONObject jRemoteParameters = null;
             for (String parameterName : remoteParameterNames) {
@@ -333,6 +339,10 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
 
             String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
             origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
+        }
+        {
+            boolean staySignedIn = reader.readBoolean(PARAMETER_STAY_SIGNED_IN);
+            parameters.put(PARAM_STAY_SIGNED_IN, Boolean.valueOf(staySignedIn));
         }
         {
             String sRemoteParameters = reader.readUTF(PARAMETER_REMOTE_PARAMETERS);

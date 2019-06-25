@@ -141,4 +141,6 @@ public interface LoginRequest {
     
     boolean isStoreLocale();
 
+    boolean isStaySignedIn();
+
 }

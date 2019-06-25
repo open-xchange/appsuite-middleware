@@ -102,16 +102,9 @@
                   Version of the HTTP/JSON interface client. Only for statistic
                   evaluations.
                 type: string
-              autologin:
+              staySignedIn:
                 description: >
-                  '’True’ or ’false’. True tells the UI to issue a store request
-                  for the session cookie. This store
-
-                  request is necessary if you want the autologin request not to
-                  fail. This must be enabled on
-
-                  the server and a client can test with the autologin request if
-                  it is enabled or not.'
+                  '’True’ or ’false’. Cookies will be persisted if user chose to stay signed in.
                 type: boolean
               uiWebPath:
                 description: >
@@ -146,4 +139,3 @@
               - clientToken
               - client
               - version
-              - autologin

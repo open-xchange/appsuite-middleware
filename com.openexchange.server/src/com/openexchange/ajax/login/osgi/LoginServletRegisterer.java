@@ -161,7 +161,6 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (null != tmp) {
                 params.put(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName(), tmp);
             }
-            addProperty(params, ConfigurationProperty.SESSIOND_AUTOLOGIN);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_AUTOLOGIN);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_CLIENT);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_VERSION);

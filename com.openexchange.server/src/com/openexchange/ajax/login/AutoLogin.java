@@ -123,17 +123,6 @@ public class AutoLogin extends AbstractLoginRequestHandler {
              */
             LoginResult loginResult = AutoLoginTools.tryGuestAutologin(shareConf.getLoginConfig(), req, resp);
             if (null == loginResult) {
-                if (false == conf.isSessiondAutoLogin(req.getServerName())) {
-                    // Auto-login disabled per configuration.
-                    // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
-                    if (doAutoLogin(req, resp)) {
-                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
-                            return;
-                        }
-                        throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
-                    }
-                    return;
-                }
                 /*
                  * try auto-login for regular user
                  */

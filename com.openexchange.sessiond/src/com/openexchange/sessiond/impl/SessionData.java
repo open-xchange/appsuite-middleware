@@ -62,6 +62,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
@@ -85,7 +86,6 @@ final class SessionData {
 
     private final int maxSessions;
     private final long randomTokenTimeout;
-    private final boolean autoLogin;
     private final Map<String, String> randoms;
 
     /** Plain array+direct indexing is the fastest technique of iterating. So, use CopyOnWriteArrayList since 'sessionList' is seldom modified (see rotateShort()) */
@@ -118,15 +118,13 @@ final class SessionData {
      * @param maxSessions The max. number of total sessions
      * @param randomTokenTimeout The timeout for random tokens
      * @param longTermContainerCount The container count for long-term sessions
-     * @param autoLogin Whether auto-login is enabled or not
      */
-    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount, boolean autoLogin) {
+    SessionData(int containerCount, int maxSessions, long randomTokenTimeout, int longTermContainerCount) {
         super();
         threadPoolService = new AtomicReference<ThreadPoolService>();
         timerService = new AtomicReference<TimerService>();
         this.maxSessions = maxSessions;
         this.randomTokenTimeout = randomTokenTimeout;
-        this.autoLogin = autoLogin;
 
         randoms = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
 
@@ -158,7 +156,7 @@ final class SessionData {
     List<SessionControl> rotateShort() {
         // This is the only location which alters 'sessionList' during runtime
         List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
-        if (autoLogin && false == removedSessions.isEmpty()) {
+        if (false == removedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
 
             try {
@@ -167,9 +165,14 @@ final class SessionData {
                     final SessionControl control = it.next();
                     final SessionImpl session = control.getSession();
                     if (false == session.isTransient()) {
-                        // A regular, non-transient session
-                        first.putBySessionId(session.getSessionID(), control);
-                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        if (Sessions.isStaySignedIn(session)) {
+                            // A regular, non-transient session
+                            first.putBySessionId(session.getSessionID(), control);
+                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                        } else {
+                            // User did not choose to stay signed in, let session time out
+                            continue;
+                        }
                     } else {
                         // A transient session -- do not move to long-term container
                         it.remove();

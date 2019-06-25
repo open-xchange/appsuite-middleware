@@ -184,7 +184,7 @@ public class RedeemReservationLogin implements LoginRequestHandler {
             uiWebPath = conf.getUiWebPath();
         }
 
-        resp.sendRedirect(generateRedirectURL(session, uiWebPath, conf.getHttpAuthAutoLogin()));
+        resp.sendRedirect(generateRedirectURL(session, uiWebPath));
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
@@ -230,15 +230,12 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         return user.getLoginInfo() + '@' + context.getLoginInfo()[0];
     }
 
-    private static String generateRedirectURL(Session session, String uiWebPath, String shouldStore) {
+    private static String generateRedirectURL(Session session, String uiWebPath) {
         String retval = uiWebPath;
 
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        if (shouldStore != null) {
-            retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
-        }
         return retval;
     }
 

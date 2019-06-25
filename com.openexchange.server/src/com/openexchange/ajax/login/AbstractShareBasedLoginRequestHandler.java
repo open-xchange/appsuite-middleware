@@ -50,6 +50,7 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
 import static com.openexchange.ajax.LoginServlet.configureCookie;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.ajax.LoginServlet.getShareCookieName;
@@ -65,7 +66,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.BasicAuthenticationService;
@@ -94,6 +94,7 @@ import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -423,29 +424,20 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         LoginCookiesSetter cookiesSetter = new LoginCookiesSetter() {
             @Override
             public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {
-                /*
-                 * drop by existent secret cookie if auto-login is disabled
-                 */
                 String expectedSecretCookieName = SECRET_PREFIX + session.getHash();
-                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
-                if (false == conf.isSessiondAutoLogin(request.getServerName(), session)) {
-                    Cookie cookie = cookies.get(expectedSecretCookieName);
-                    if (null != cookie && !session.getSecret().equals(cookie.getValue())) {
-                        // The same client already initiated a session, but performed another login. Drop the old session.
-                        SessionUtility.removeSessionBySecret(cookie.getValue(), session.getUserId(), session.getContextId());
-                    }
-                }
+                String expectedSessionCookieName = SESSION_PREFIX + session.getHash();
                 /*
-                 * set secret & share cookies
+                 * set cookies
                  */
-                response.addCookie(configureCookie(new Cookie(expectedSecretCookieName, session.getSecret()), request, loginConfig));
-                if (loginConfig.isSessiondAutoLogin(httpRequest.getServerName(), session)) {
-                    response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
-                }
+                boolean staySignedIn = Sessions.isStaySignedIn(session);
+                response.addCookie(configureCookie(new Cookie(expectedSecretCookieName, session.getSecret()), request, loginConfig, staySignedIn));
+                response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig, staySignedIn));
+                response.addCookie(configureCookie(new Cookie(expectedSessionCookieName, session.getSessionID()), request, loginConfig, staySignedIn));
                 /*
                  * set public session cookie if not yet present
                  */
                 String[] additionals = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
                 Cookie publicSessionCookie = cookies.get(getPublicSessionCookieName(request, additionals));
                 if (null == publicSessionCookie) {
                     /*
@@ -454,7 +446,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                     if (null != altId) {
                         publicSessionCookie = new Cookie(getPublicSessionCookieName(request, additionals), altId);
-                        response.addCookie(configureCookie(publicSessionCookie, request, loginConfig));
+                        response.addCookie(configureCookie(publicSessionCookie, request, loginConfig, staySignedIn));
                     }
                 }
             }

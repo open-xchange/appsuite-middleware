@@ -49,6 +49,7 @@
 
 package com.openexchange.login.internal;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.HashMap;
@@ -322,6 +323,14 @@ public final class LoginPerformer {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
+
+            // Check if Session.PARAM_STAY_SIGNED_IN was set before via SessionEnhancement
+            // set value from login request otherwise
+            if (null == session.getParameter(Session.PARAM_STAY_SIGNED_IN)) {
+                boolean staySignedIn = request.isStaySignedIn();
+                session.setParameter(Session.PARAM_STAY_SIGNED_IN, B(staySignedIn));
+            }
+
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);

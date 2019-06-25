@@ -50,7 +50,6 @@
 package com.openexchange.login;
 
 import com.openexchange.configuration.InitProperty;
-import com.openexchange.sessiond.SessiondProperty;
 
 /**
  * {@link ConfigurationProperty}
@@ -98,10 +97,6 @@ public enum ConfigurationProperty implements InitProperty {
      */
     INSECURE("com.openexchange.ajax.login.insecure", Boolean.FALSE.toString()),
 
-    /**
-     * Whether autologin is allowed or not.
-     */
-    SESSIOND_AUTOLOGIN(SessiondProperty.SESSIOND_AUTOLOGIN.getPropertyName(), SessiondProperty.SESSIOND_AUTOLOGIN.getDefaultValue()),
     NO_IP_CHECK_RANGE("com.openexchange.noIPCheckRange", null),
 
     /**
