@@ -25,3 +25,17 @@ components:
 
   requestBodies: 
    $ref: ./components/requestBodies/index.yaml
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+      description: HTTP Basic Authentication.
+    contextAdminAuth:
+      type: http
+      scheme: basic
+      description: The API can be accessed via HTTP Basic Auth with context administrator credentials or reseller/master administrator credentials if MASTER_ACCOUNT_OVERRIDE is enabled.
+    masterAdminAuth:
+      type: http
+      scheme: basic
+      description: The API can be accessed via HTTP Basic Auth with reseller/master administrator credentials.
