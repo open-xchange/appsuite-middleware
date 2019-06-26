@@ -49,21 +49,10 @@
 
 package com.openexchange.regional.impl.service;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.regional.RegionalSettingField;
-import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.RegionalSettingsService;
-import com.openexchange.session.Session;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link RegionalSettingsPreferenceItem}
@@ -78,7 +67,7 @@ public class RegionalSettingsPreferenceItem implements PreferencesItemService, C
     private static final String TREE_PATH = "localeData";
     private static final String[] PATH = new String[] { TREE_PATH };
 
-    private final RegionalSettingsService service;
+    private final IValueHandler valueHandler;
 
     /**
      * Initializes a new {@link RegionalSettingsPreferenceItem}.
@@ -87,7 +76,7 @@ public class RegionalSettingsPreferenceItem implements PreferencesItemService, C
      */
     public RegionalSettingsPreferenceItem(RegionalSettingsService service) {
         super();
-        this.service = service;
+        this.valueHandler = new RegionalSettingsValueHandler(service);
     }
 
     @Override
@@ -97,76 +86,7 @@ public class RegionalSettingsPreferenceItem implements PreferencesItemService, C
 
     @Override
     public IValueHandler getSharedValue() {
-        return new IValueHandler() {
-
-            @Override
-            public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
-                JSONObject settings = extractBody(setting.getSingleValue());
-                if (settings.isEmpty()) {
-                    service.delete(ctx.getContextId(), user.getId());
-                    return;
-                }
-                try {
-                    service.save(ctx.getContextId(), user.getId(), deserialize(settings, RegionalSettingField.values()), user.getLocale());
-                } catch (JSONException e) {
-                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e);
-                }
-            }
-
-            @Override
-            public boolean isWritable() {
-                return true;
-            }
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                RegionalSettings regionalSettings = service.get(session.getContextId(), session.getUserId());
-                if (null != regionalSettings) {
-                    try {
-                        setting.setSingleValue(serialize(regionalSettings, RegionalSettingField.values()));
-                    } catch (JSONException e) {
-                        throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-                    }
-                }
-            }
-
-            @Override
-            public int getId() {
-                return -1;
-            }
-
-            /**
-             * Extracts the body from the specified single value object
-             * 
-             * @param singleValue The single value object
-             * @return The JSONObject with the extracted values or an empty JSONObject
-             *         if the specified value does not denote a valid value or denotes
-             *         an empty JSONObject.
-             */
-            private JSONObject extractBody(Object singleValue) {
-                try {
-                    if (false == (singleValue instanceof JSONObject)) {
-                        return new JSONObject();
-                    }
-                    JSONObject settings = (JSONObject) singleValue;
-                    if (false == settings.hasAndNotNull("data")) {
-                        return settings;
-                    }
-                    Object bodyCandidate = settings.get("data");
-                    if (bodyCandidate instanceof String) {
-                        return new JSONObject((String) bodyCandidate);
-                    }
-                    return new JSONObject();
-                } catch (JSONException e) {
-                    return new JSONObject();
-                }
-            }
-        };
+        return valueHandler;
     }
 
     @Override
@@ -178,43 +98,5 @@ public class RegionalSettingsPreferenceItem implements PreferencesItemService, C
     public String getJslobPath() {
         return JSLOB_PATH;
     }
-
-    /////////////////////////////////////////////////////// HELPERS /////////////////////////////////////////////////////
-
-    /**
-     * De-serializes the specified {@link JSONObject} to a {@link RegionalSettings} object
-     *
-     * @param settings The {@link JSONObject} with the settings
-     * @param values The set fields
-     * @return The {@link RegionalSettings} object
-     */
-    private RegionalSettings deserialize(JSONObject settings, RegionalSettingField[] values) throws JSONException {
-        RegionalSettingsImpl.Builder builder = RegionalSettingsImpl.newBuilder();
-        for (RegionalSettingField field : values) {
-            SerialiserUtil.setField(builder, field, settings.opt(field.getName()));
-        }
-        return builder.build();
-    }
-
-    /**
-     * Serialises the specified {@link RegionalSettings} object to a {@link JSONObject}
-     *
-     * @param regionalSettings The settings to serialise
-     * @param values The set fields
-     * @return The serialised {@link JSONObject}
-     */
-    private JSONObject serialize(RegionalSettings regionalSettings, RegionalSettingField[] values) throws JSONException {
-        if (regionalSettings == null) {
-            return null;
-        }
-        JSONObject j = new JSONObject();
-        for (RegionalSettingField field : values) {
-            if (regionalSettings.isFieldSet(field)) {
-                j.put(field.getName(), SerialiserUtil.getField(regionalSettings, field));
-            }
-        }
-        return j.isEmpty() ? null : j;
-    }
-
 
 }

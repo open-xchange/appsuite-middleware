@@ -49,6 +49,7 @@
 
 package com.openexchange.regional.impl.service;
 
+import static com.openexchange.java.Autoboxing.i;
 import com.openexchange.regional.RegionalSettingField;
 import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.impl.service.RegionalSettingsImpl.Builder;
@@ -110,7 +111,7 @@ class SerialiserUtil {
             return null;
         }
         try {
-            return WeekDay.getWeekDayByNumber(num);
+            return WeekDay.getWeekDayByNumber(i(num));
         } catch (IllegalArgumentException e) {
             return WeekDay.sunday;
         }
@@ -161,14 +162,14 @@ class SerialiserUtil {
                     }
                     builder.withFirstDayOfWeek(weekday.getNumber());
                 } else if (object instanceof Integer) {
-                    builder.withFirstDayOfWeek((Integer) object);
+                    builder.withFirstDayOfWeek(i((Integer) object));
                 }
                 break;
             case FIRST_DAY_OF_YEAR:
                 if (object instanceof String) {
                     builder.withFirstDayOfYear(Integer.parseInt((String) object));
                 } else if (object instanceof Integer) {
-                    builder.withFirstDayOfYear((Integer) object);
+                    builder.withFirstDayOfYear(i((Integer) object));
                 }
                 break;
             case NUMBER:

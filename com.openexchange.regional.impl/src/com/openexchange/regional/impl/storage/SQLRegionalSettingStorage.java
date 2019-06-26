@@ -49,6 +49,7 @@
 
 package com.openexchange.regional.impl.storage;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.Types;
 import com.openexchange.database.DatabaseService;
@@ -100,12 +101,12 @@ public class SQLRegionalSettingStorage extends AbstractRegionalSettingStorage im
             if (null == settings.getFirstDayOfWeek()) {
                 statement.setNull(arg++, Types.INTEGER);
             } else {
-                statement.setInt(arg++, settings.getFirstDayOfWeek());
+                statement.setInt(arg++, i(settings.getFirstDayOfWeek()));
             }
             if (null == settings.getFirstDayOfYear()) {
                 statement.setNull(arg++, Types.INTEGER);
             } else {
-                statement.setInt(arg++, settings.getFirstDayOfYear());
+                statement.setInt(arg++, i(settings.getFirstDayOfYear()));
             }
 
             statement.setString(arg++, settings.getTimeFormat());
@@ -119,12 +120,12 @@ public class SQLRegionalSettingStorage extends AbstractRegionalSettingStorage im
             if (null == settings.getFirstDayOfWeek()) {
                 statement.setNull(arg++, Types.INTEGER);
             } else {
-                statement.setInt(arg++, settings.getFirstDayOfWeek());
+                statement.setInt(arg++, i(settings.getFirstDayOfWeek()));
             }
             if (null == settings.getFirstDayOfYear()) {
                 statement.setNull(arg++, Types.INTEGER);
             } else {
-                statement.setInt(arg++, settings.getFirstDayOfYear());
+                statement.setInt(arg++, i(settings.getFirstDayOfYear()));
             }
         });
     }

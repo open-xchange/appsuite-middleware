@@ -50,6 +50,7 @@
 package com.openexchange.regional.impl.service;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.c;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -152,13 +153,13 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
         Character groupingSeparator = getGroupingSeparator(settings);
         DecimalFormatSymbols unusualSymbols = new DecimalFormatSymbols(null != locale ? locale : FALLBACK_REGION);
         if (null != decimalSeparator && Character.MIN_VALUE != decimalSeparator.charValue()) {
-            unusualSymbols.setDecimalSeparator(decimalSeparator);
+            unusualSymbols.setDecimalSeparator(c(decimalSeparator));
         }
         if (null != groupingSeparator && Character.MIN_VALUE != groupingSeparator.charValue()) {
-            unusualSymbols.setGroupingSeparator(groupingSeparator);
+            unusualSymbols.setGroupingSeparator(c(groupingSeparator));
         }
         NumberFormat numberFormat = new DecimalFormat(format, unusualSymbols);
-        if (Character.MIN_VALUE == groupingSeparator) {
+        if (null != groupingSeparator && Character.MIN_VALUE == c(groupingSeparator)) {
             numberFormat.setGroupingUsed(false);
         }
         return numberFormat;

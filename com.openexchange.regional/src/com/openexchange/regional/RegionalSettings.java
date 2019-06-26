@@ -129,5 +129,4 @@ public interface RegionalSettings extends Serializable {
      */
     Integer getFirstDayOfYear();
 
-    boolean isFieldSet(RegionalSettingField field);
 }

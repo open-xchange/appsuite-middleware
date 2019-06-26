@@ -54,7 +54,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import com.openexchange.regional.RegionalSettingField;
 import com.openexchange.regional.RegionalSettings;
 
 /**
@@ -88,8 +87,7 @@ public class RegionalSettingsImpl implements RegionalSettings {
     private final Integer firstDayOfWeek;
     private final Integer firstDayOfYear;
 
-    private RegionalSettingsImpl(String timeFormat, String timeFormatLong, String dateFormat, String dateFormatShort, String dateFormatMedium, String dateFormatFull, String dateFormatLong, String numberFormat, Integer firstDayOfWeek,
-        Integer firstDayOfYear) {
+    RegionalSettingsImpl(String timeFormat, String timeFormatLong, String dateFormat, String dateFormatShort, String dateFormatMedium, String dateFormatFull, String dateFormatLong, String numberFormat, Integer firstDayOfWeek, Integer firstDayOfYear) {
         super();
         this.timeFormat = timeFormat;
         this.timeFormatLong = timeFormatLong;
@@ -154,11 +152,6 @@ public class RegionalSettingsImpl implements RegionalSettings {
     }
 
     @Override
-    public boolean isFieldSet(RegionalSettingField field) {
-        return true;
-    }
-
-    @Override
     public String toString() {
         return "RegionalSettingsImpl [ timeFormat=" + timeFormat + " | timeFormatLong=" + timeFormatLong + " | dateFormat=" + dateFormat + " | dateFormatLong=" + dateFormatLong + " | numberFormat=" + numberFormat + " | firstDayOfWeek=" + firstDayOfWeek + " | firstDayOfYear=" + firstDayOfYear + "]";
     }
@@ -186,7 +179,7 @@ public class RegionalSettingsImpl implements RegionalSettings {
         /**
          * Initializes a new {@link RegionalSettingsImpl.Builder}.
          */
-        private Builder() {
+        Builder() {
             super();
         }
 
@@ -250,8 +243,8 @@ public class RegionalSettingsImpl implements RegionalSettings {
             withTimeFormat(((SimpleDateFormat) SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, locale)).toPattern());
             withTimeFormatLong(((SimpleDateFormat) SimpleDateFormat.getTimeInstance(SimpleDateFormat.DEFAULT, locale)).toPattern());
             Calendar cal = Calendar.getInstance(locale);
-            withFirstDayOfWeek(I(cal.getFirstDayOfWeek()));
-            withFirstDayOfYear(I(cal.getMinimalDaysInFirstWeek()));
+            withFirstDayOfWeek(cal.getFirstDayOfWeek());
+            withFirstDayOfYear(cal.getMinimalDaysInFirstWeek());
             return this;
         }
 

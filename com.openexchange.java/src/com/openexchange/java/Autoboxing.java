@@ -163,7 +163,28 @@ public final class Autoboxing {
     }
 
     /**
+     * Short method name for {@link Character#charValue()}.
+     * 
+     * @param c {@link Character} object to be converted to a char value.
+     * @return char value.
+     */
+    public static char c(Character c) {
+        return c.charValue();
+    }
+
+    /**
+     * Short method name for {@link Character#valueOf(char)} that uses cached instances.
+     * 
+     * @param c char value to be converted to a Character object.
+     * @return Character object.
+     */
+    public static Character C(char c) {
+        return Character.valueOf(c);
+    }
+
+    /**
      * Short method name for {@link Double#doubleValue()}.
+     * 
      * @param b {@link Double} object to be converted to a double value.
      * @return double value.
      */
