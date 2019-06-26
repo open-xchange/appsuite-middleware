@@ -56,12 +56,21 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
  * {@link DocumentMetadataHolder}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class DocumentMetadataHolder {
-    public String dataLink;
-    public DocumentMetadata documentMetadata;
 
+    /** The data link */
+    public final String dataLink;
+
+    /** The document metadata */
+    public final DocumentMetadata documentMetadata;
+
+    /**
+     * Initializes a new {@link DocumentMetadataHolder}.
+     *
+     * @param dataLink The data link
+     * @param documentMetadata The document metadata
+     */
     public DocumentMetadataHolder(String dataLink, DocumentMetadata documentMetadata) {
         super();
         this.dataLink = dataLink;
