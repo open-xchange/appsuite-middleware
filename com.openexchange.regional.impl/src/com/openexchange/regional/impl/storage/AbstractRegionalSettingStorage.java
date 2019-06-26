@@ -56,8 +56,8 @@ import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.regional.RegionalSettings;
-import com.openexchange.regional.exception.RegionalSettingsExceptionCodes;
 import com.openexchange.regional.impl.service.RegionalSettingsImpl;
 import com.openexchange.regional.impl.service.RegionalSettingsImpl.Builder;
 import com.openexchange.server.ServiceLookup;
@@ -98,7 +98,7 @@ abstract class AbstractRegionalSettingStorage {
             resultSet = stmt.executeQuery();
             return resultSet.next() ? readSettings(resultSet) : null;
         } catch (SQLException e) {
-            throw asOXException(e);
+            throw OXExceptions.database(e);
         } finally {
             Databases.closeSQLStuff(resultSet);
             databaseService.backReadOnly(contextId, con);
@@ -136,7 +136,7 @@ abstract class AbstractRegionalSettingStorage {
             consumer.accept(stmt);
             stmt.executeUpdate();
         } catch (SQLException e) {
-            throw asOXException(e);
+            throw OXExceptions.database(e);
         } finally {
             if (connectionInit) {
                 databaseService.backWritable(contextId, writeCon);
@@ -154,16 +154,6 @@ abstract class AbstractRegionalSettingStorage {
      */
     private DatabaseService getDatabaseService() throws OXException {
         return services.getServiceSafe(DatabaseService.class);
-    }
-
-    /**
-     * OXceptionise the specified SQL exception
-     * 
-     * @param e The SQL exception to oxceptionise
-     * @return The OXceptionised SQL exception
-     */
-    private OXException asOXException(SQLException e) {
-        return RegionalSettingsExceptionCodes.DB_ERROR.create(e, e.getMessage());
     }
 
     /**
