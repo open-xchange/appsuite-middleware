@@ -328,6 +328,9 @@ public class DefaultShareService implements ShareService {
         Context context = utils.getContext(session);
         ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         TargetProxy proxy = moduleSupport.load(target, session);
+        if (false == proxy.mayAdjust()) {
+            return null; // don't expose share link info if no admin access to target  
+        }
         DefaultShareInfo shareInfo = optLinkShare(session, context, proxy, null);
         return null != shareInfo ? new DefaultShareLink(shareInfo, proxy.getTimestamp(), false) : null;
     }
