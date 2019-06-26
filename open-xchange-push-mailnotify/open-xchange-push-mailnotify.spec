@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +55,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Wed Jun 26 2019 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2019-06-27 (5299)
 * Thu Jun 06 2019 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2019-06-11 (5261)
 * Fri May 10 2019 Carsten Hoeger <choeger@open-xchange.com>
