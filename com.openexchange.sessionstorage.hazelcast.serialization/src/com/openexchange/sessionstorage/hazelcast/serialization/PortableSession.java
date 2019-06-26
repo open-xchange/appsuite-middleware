@@ -136,7 +136,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
         .addLongField(PARAMETER_LOCAL_LAST_ACTIVE)
         .addUTFField(PARAMETER_REMOTE_PARAMETERS)
         .addUTFField(PARAMETER_ORIGIN)
-        .addUTFField(PARAMETER_STAY_SIGNED_IN)
+        .addBooleanField(PARAMETER_STAY_SIGNED_IN)
         .build();
 
     // -------------------------------------------------------------------------------------------------
