@@ -6,17 +6,6 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -28,37 +17,37 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:83
 msgctxt "verb"
 msgid "accepted"
 msgstr ""
 
 #. The adjective "accepted", like "The users status is 'accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:85
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:86
 msgctxt "adjective"
 msgid "accepted"
 msgstr ""
 
 #. The verb "declined", like "User A has declined an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:101
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:115
 msgctxt "verb"
 msgid "declined"
 msgstr ""
 
 #. The adjective "declined", like "The users status is 'declined'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:104
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:118
 msgctxt "adjective"
 msgid "declined"
 msgstr ""
 
 #. The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:120
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:134
 msgctxt "verb"
 msgid "tentatively accepted"
 msgstr ""
 
 #. The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:123
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:137
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr ""
