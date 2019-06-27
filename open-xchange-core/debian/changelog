@@ -1,3 +1,9 @@
+open-xchange-core (7.10.2-7) stable; urgency=medium
+
+  * Build for patch 2019-07-01 (5291)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 27 Jun 2019 12:45:32 +0200
+
 open-xchange-core (7.10.2-6) stable; urgency=medium
 
   * Build for patch 2019-06-27 (5299)
