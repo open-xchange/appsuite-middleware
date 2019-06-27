@@ -268,7 +268,7 @@ public final class IMAPFolderConverter {
                     if (!shared) {
                         final String[] shares = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId);
                         final String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
-                        for (int i = 0; !shared && i < shares.length; i++) {
+                        for (int i = 0; !isPublic && i < shares.length; i++) {
                             final String sharedNamespace = shares[i];
                             if (!com.openexchange.java.Strings.isEmpty(sharedNamespace)) {
                                 if (imapFullName.equals(sharedNamespace)) {
