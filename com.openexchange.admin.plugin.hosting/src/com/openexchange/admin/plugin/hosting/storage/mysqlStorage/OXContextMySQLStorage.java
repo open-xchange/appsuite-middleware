@@ -88,7 +88,6 @@ import java.util.concurrent.locks.LockSupport;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.openexchange.admin.plugin.hosting.exceptions.TargetDatabaseException;
-import com.openexchange.admin.plugin.hosting.osgi.PluginHostingActivator;
 import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
 import com.openexchange.admin.plugin.hosting.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.plugin.hosting.tools.database.TableColumnObject;
@@ -141,7 +140,6 @@ import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Autoboxing;
@@ -1984,14 +1982,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @return the translated group name if a corresponding service is available.
      */
     private String translateGroupName(final User administrator) {
-        final Locale locale = LocaleTools.getLocale(administrator.getLanguage());
-
-        I18nServiceRegistry registry = PluginHostingActivator.services.getOptionalService(I18nServiceRegistry.class);
-        if (registry == null) {
-            return Groups.STANDARD_GROUP;
+        I18nServiceRegistry registry = AdminServiceRegistry.getInstance().getService(I18nServiceRegistry.class);
+        if (null != registry) {
+            Locale locale = LocaleTools.getLocale(administrator.getLanguage());
+            return registry.getI18nService(locale).getLocalized(Groups.STANDARD_GROUP);
         }
-        I18nService i18nService = registry.getI18nService(locale);
-        return i18nService.getLocalized(Groups.STANDARD_GROUP);
+        return Groups.STANDARD_GROUP;
     }
 
     /*

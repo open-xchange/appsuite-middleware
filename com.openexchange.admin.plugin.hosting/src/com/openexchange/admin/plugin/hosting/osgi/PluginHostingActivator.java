@@ -75,7 +75,6 @@ import com.openexchange.management.osgi.HousekeepingManagementTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
@@ -85,8 +84,6 @@ public class PluginHostingActivator extends HousekeepingActivator {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PluginHostingActivator.class);
 
     private PluginStarter starter = null;
-    
-    public static ServiceLookup services;
 
     /**
      * Initializes a new {@link PluginHostingActivator}.
@@ -124,6 +121,7 @@ public class PluginHostingActivator extends HousekeepingActivator {
         track(CacheService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), CacheService.class));
         track(DatabaseService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));
         track(SessiondService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), SessiondService.class));
+        track(I18nServiceRegistry.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), I18nServiceRegistry.class));
 
         // Register and track
         registerService(OXContextGroupStorageInterface.class, new OXContextGroupMySQLStorage());
@@ -180,8 +178,4 @@ public class PluginHostingActivator extends HousekeepingActivator {
         return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, ConfigViewFactory.class };
     }
     
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] {I18nServiceRegistry.class};
-    }
 }
