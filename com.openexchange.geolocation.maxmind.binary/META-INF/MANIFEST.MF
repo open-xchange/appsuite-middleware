@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange GeoLocation MaxMind Binary Storage Bundle
 Bundle-SymbolicName: com.openexchange.geolocation.maxmind.binary
-Bundle-Version: 7.10.3
+Bundle-Version: 7.10.2
 Bundle-Vendor: OX Software GmbH
 Automatic-Module-Name: com.openexchange.geolocation.maxmind.binary
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

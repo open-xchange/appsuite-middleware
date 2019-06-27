@@ -59,10 +59,6 @@ GLOBIGNORE='*'
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/lib/
-/opt/open-xchange/lib
-%dir /opt/open-xchange/sbin/
-/opt/open-xchange/sbin/*
 
 %changelog
 * Tue Jul 09 2019 Thorben Betten <thorben.betten@open-xchange.com>
