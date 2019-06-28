@@ -63,5 +63,5 @@ final class SQLStatements {
                                                  + "VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE timeFormat=?,timeFormatLong=?,dateFormat=?,dateFormatShort=?,dateFormatMedium=?,dateFormatLong=?,dateFormatFull=?,numberFormat=?,firstDayOfWeek=?,firstDayOfYear=?;";
     //@formatter:on
     public static final String DELETE_USER = "DELETE FROM regional_settings WHERE cid=? AND userId=?";
-    public static final String DELETE_CONTEXT = "SELECT * FROM regional_settings WHERE cid=?";
+    public static final String DELETE_CONTEXT = "DELETE FROM regional_settings WHERE cid=?";
 }
