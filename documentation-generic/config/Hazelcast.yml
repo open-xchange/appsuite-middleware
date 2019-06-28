@@ -7,7 +7,6 @@ feature_description: |
   When setting up a cluster of multiple nodes, at least the following parameters should be configured additionally:
   <ul>
   <li><code>com.openexchange.hazelcast.group.name</code></li>
-  <li><code>com.openexchange.hazelcast.group.password</code></li>
   <li><code>com.openexchange.hazelcast.network.join</code> (including join-specific options)</li>
   <li><code>com.openexchange.hazelcast.network.interfaces</code></li>
   </ul>
@@ -52,17 +51,6 @@ properties:
       file: hazelcast.properties
       packageName: open-xchange-core
       tags: ["Hazelcast"]
-    - key: com.openexchange.hazelcast.group.password
-      description: |
-        The password used when joining the cluster. Please change this value, and ensure it's equal on all nodes in the cluster!!!
-      defaultValue: wtV6$VQk8#+3ds!a
-      version:
-      reloadable: false
-      configcascadeAware: false
-      related:
-      file: hazelcast.properties
-      packageName: open-xchange-core
-      tags: ["Hazelcast", "Credential"]
     - key: com.openexchange.hazelcast.network.join
       description: |
         Specifies which mechanism is used to discover other backend nodes in the cluster. 

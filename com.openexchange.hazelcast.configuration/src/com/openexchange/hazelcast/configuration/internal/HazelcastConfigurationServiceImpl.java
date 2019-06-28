@@ -202,13 +202,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         } else if (false == NETWORK_JOIN_EMPTY.equalsIgnoreCase(join)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.hazelcast.group.name");
         }
-        String groupPassword = configService.getProperty("com.openexchange.hazelcast.group.password");
-        if (Strings.isNotEmpty(groupPassword)) {
-            if ("wtV6$VQk8#+3ds!a".equalsIgnoreCase(groupPassword)) {
-                LOG.warn("The value 'wtV6$VQk8#+3ds!a' for 'com.openexchange.hazelcast.group.password' has not been changed from its "
-                    + "default. Please do so to restrict access to your cluster.");
-            }
-            config.getGroupConfig().setPassword(groupPassword);
+        if (Strings.isNotEmpty(configService.getProperty("com.openexchange.hazelcast.group.password"))) {
+            LOG.info("The configured value for 'com.openexchange.hazelcast.group.password' is no longer used and should be removed.");
         }
         config.setLiteMember(configService.getBoolProperty("com.openexchange.hazelcast.liteMember", config.isLiteMember()));
         /*
