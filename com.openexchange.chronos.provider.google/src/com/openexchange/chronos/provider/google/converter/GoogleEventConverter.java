@@ -432,10 +432,14 @@ public class GoogleEventConverter {
             @Override
             public void serialize(Event to, com.google.api.services.calendar.model.Event from) {
                 if (from.getRecurringEventId() != null) {
-
-                    String dateTimeStr = from.getId().substring(from.getRecurringEventId().length() + 1);
-                    RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
-                    to.setRecurrenceId(recId);
+                    try {
+                        String dateTimeStr = from.getId().substring(from.getRecurringEventId().length() + 1);
+                        RecurrenceId recId = new DefaultRecurrenceId(dateTimeStr);
+                        to.setRecurrenceId(recId);
+                    } catch (RuntimeException e) {
+                        LOG.warn("Error deriving recurrence identifier from Id={}, RecurringEventId={}", from.getId(), from.getRecurringEventId(), e);
+                        throw e;
+                    }
                 } else if (from.getId().indexOf('_') > 0) {
                     /*
                      * Additional check in case recurringEventId isn't set (null)
