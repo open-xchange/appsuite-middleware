@@ -73,6 +73,14 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
+import com.amazonaws.auth.policy.actions.S3Actions;
+import com.amazonaws.auth.policy.conditions.BooleanCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition;
+import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Builder;
@@ -86,15 +94,10 @@ import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
-import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.auth.policy.Principal;
-import com.amazonaws.auth.policy.Resource;
-import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.auth.policy.actions.S3Actions;
-import com.amazonaws.auth.policy.conditions.BooleanCondition;
-import com.amazonaws.auth.policy.conditions.StringCondition;
-import com.amazonaws.auth.policy.conditions.StringCondition.StringComparisonType;
 import com.openexchange.config.ConfigTools;
+import com.openexchange.config.ConfigurationInterestAware;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -109,7 +112,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class S3FileStorageFactory implements FileStorageProvider {
+public class S3FileStorageFactory implements FileStorageProvider, ConfigurationInterestAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorageFactory.class);
 
@@ -137,6 +140,11 @@ public class S3FileStorageFactory implements FileStorageProvider {
      */
     private static final int RANKING = 5634;
 
+    /**
+     * The configuration filename of interest
+     */
+    private static final String CONFIG_FILENAME = "filestore-s3.properties";
+
     private final ServiceLookup services;
 
     /**
@@ -147,6 +155,11 @@ public class S3FileStorageFactory implements FileStorageProvider {
     public S3FileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles(CONFIG_FILENAME);
     }
 
     @Override

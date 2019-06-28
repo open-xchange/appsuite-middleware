@@ -50,20 +50,17 @@
 package com.openexchange.config;
 
 /**
- * {@link Reloadable} - Marks services that perform necessary actions in order to apply (possibly) new configuration.
+ * {@link ConfigurationInterestAware}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc
- * @since 7.6.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public interface Reloadable extends ConfigurationInterestAware {
+public interface ConfigurationInterestAware {
 
     /**
-     * Signals that the configuration has been reloaded.
-     * <p>
-     * This {@link Reloadable} instance should perform necessary actions in order to apply (possibly) new configuration.
+     * Gets the interests in property names and/or configuration files.
      *
-     * @param configService The configuration service providing newly initialized properties
+     * @return The interests
      */
-    void reloadConfiguration(ConfigurationService configService);
+    Interests getInterests();
 }

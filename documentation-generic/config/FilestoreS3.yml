@@ -19,7 +19,7 @@ properties:
         endpoint this client will communicate with.
       defaultValue: s3.amazonaws.com
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -35,7 +35,7 @@ properties:
         details. This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -60,7 +60,7 @@ properties:
         </ul>
       defaultValue: us-west-2
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -75,7 +75,7 @@ properties:
         details.
       defaultValue: true
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -87,7 +87,7 @@ properties:
         Configures the AWS access key to use. This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -99,7 +99,7 @@ properties:
         Configures the AWS secret key to use. This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -122,7 +122,7 @@ properties:
         Policy Files" accordingly.
       defaultValue: none
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -137,7 +137,7 @@ properties:
         [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
@@ -152,7 +152,7 @@ properties:
         [[com.openexchange.filestore.s3.[filestoreID].encryption]] is set to <code>rsa</code>.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: com.openexchange.filestore.s3.[filestoreID].encryption
       file: filestore-s3.properties
@@ -174,7 +174,7 @@ properties:
         like Frankfurt or Beijing.
       defaultValue: S3SignerType
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -190,7 +190,7 @@ properties:
         5 MB.
       defaultValue: 5 MB
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -213,7 +213,7 @@ properties:
         Defines the connect timeout in milliseconds when connecting to S3 end-point.
       defaultValue: 10000
       version: 7.10.2
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -225,7 +225,7 @@ properties:
         Defines the socket read timeout in milliseconds when reading responses from to S3 end-point.
       defaultValue: 50000
       version: 7.10.2
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties
@@ -237,7 +237,7 @@ properties:
         Defines the maximum number of allowed open HTTP connections.
       defaultValue: 50
       version: 7.10.2
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-s3.properties

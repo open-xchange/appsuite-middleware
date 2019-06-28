@@ -53,16 +53,30 @@ package com.openexchange.filestore.impl;
 import java.io.File;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.openexchange.config.ConfigurationInterestAware;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CompositeFileStorageService}
@@ -76,37 +90,40 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
 
     /** The bundle context */
     private final BundleContext bundleContext;
+    
+    private final Map<Long, ServiceRegistration<Reloadable>> reloadableRegistrations;
+
+    /** The cache holding initialized storages for previously requested file storage URIs */
+    private final LoadingCache<URI, FileStorage> storageCache;
 
     /**
      * Initializes a new {@link CompositeFileStorageService}.
+     * 
+     * @param bundleContext A reference to the bundle context
      */
     public CompositeFileStorageService(BundleContext bundleContext) {
         super();
         this.bundleContext = bundleContext;
-    }
+        this.reloadableRegistrations = new HashMap<Long, ServiceRegistration<Reloadable>>();
+        this.storageCache = CacheBuilder.newBuilder()
+            .maximumSize(50000)
+            .expireAfterAccess(2, TimeUnit.HOURS)
+        .build(new CacheLoader<URI, FileStorage>() {
 
+            @Override
+            public FileStorage load(URI key) throws Exception {
+                return initFileStorage(key);
+            }
+        });
+    }
+    
     @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
-        if (null == uri) {
-            return null;
+        try {
+            return null == uri ? null : storageCache.get(FileStorages.ensureScheme(uri));
+        } catch (ExecutionException e) {
+            throw ThreadPools.launderThrowable(e, OXException.class);
         }
-
-        URI fsUri = FileStorages.ensureScheme(uri);
-        FileStorageProvider candidate = null;
-        for (FileStorageProvider fac : providers) {
-            if (fac.supports(fsUri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
-                candidate = fac;
-            }
-        }
-        if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
-            return new CloseableTrackingFileStorage(candidate.getFileStorage(fsUri));
-        }
-
-        /*
-         * Fall back to default implementation
-         */
-
-        return new CloseableTrackingFileStorage(getInternalFileStorage(fsUri));
     }
 
     @Override
@@ -114,7 +131,6 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         if (null == uri) {
             return null;
         }
-
         try {
             LocalFileStorage standardFS = new LocalFileStorage(uri);
             HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
@@ -134,21 +150,62 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         return Integer.MAX_VALUE;
     }
 
+    private FileStorage initFileStorage(URI uri) throws OXException {
+        /*
+         * Lookup suitable provider with highest ranking
+         */
+        FileStorageProvider candidate = null;
+        for (FileStorageProvider provider : providers) {
+            if (provider.supports(uri) && (null == candidate || provider.getRanking() > candidate.getRanking())) {
+                candidate = provider;
+            }
+        }
+        if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
+            return new CloseableTrackingFileStorage(candidate.getFileStorage(uri));
+        }
+        /*
+         * Fall back to default implementation
+         */
+        return new CloseableTrackingFileStorage(getInternalFileStorage(uri));
+    }
+
     // ---------------------------------------- ServiceTracker methods --------------------------------------------------
 
     @Override
-    public FileStorageProvider addingService(ServiceReference<FileStorageProvider> reference) {
+    public synchronized FileStorageProvider addingService(ServiceReference<FileStorageProvider> reference) {
         FileStorageProvider provider = bundleContext.getService(reference);
-        synchronized (this) {
-            List<FileStorageProvider> providers = this.providers;
-            if (!providers.contains(provider)) {
-                providers.add(provider);
-                return provider;
-            }
+        /*
+         * remember provider unless already known
+         */
+        List<FileStorageProvider> providers = this.providers;
+        if (providers.contains(provider)) {
+            bundleContext.ungetService(reference);
+            return null;
         }
+        providers.add(provider);
+        /*
+         * register reloadable callback for this provider's interests if applicable
+         */
+        if (ConfigurationInterestAware.class.isInstance(provider)) {
+            Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+            reloadableRegistrations.put(serviceId, bundleContext.registerService(Reloadable.class, new Reloadable() {
 
-        bundleContext.ungetService(reference);
-        return null;
+                @Override
+                public Interests getInterests() {
+                    return ((ConfigurationInterestAware) provider).getInterests();
+                }
+
+                @Override
+                public void reloadConfiguration(ConfigurationService configService) {
+                    /*
+                     * invalidate any cached storages upon configuration changes
+                     */
+                    storageCache.invalidateAll();
+                    org.slf4j.LoggerFactory.getLogger(CompositeFileStorageService.class).info("Cached file storages invalidated successfully.");
+                }
+            }, null));
+        }
+        return provider;
     }
 
     @Override
@@ -157,10 +214,17 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
     }
 
     @Override
-    public void removedService(ServiceReference<FileStorageProvider> reference, FileStorageProvider provider) {
-        boolean contained = providers.remove(provider);
-        if (contained) {
+    public synchronized void removedService(ServiceReference<FileStorageProvider> reference, FileStorageProvider provider) {
+        /*
+         * remove previously remembered provider & unregister appropriate reloadable callback if applicable
+         */
+        if (providers.remove(provider)) {
             bundleContext.ungetService(reference);
+            Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+            ServiceRegistration<Reloadable> reloadableRegistration = reloadableRegistrations.remove(serviceId);
+            if (null != reloadableRegistration) {
+                reloadableRegistration.unregister();
+            }
         }
     }
 

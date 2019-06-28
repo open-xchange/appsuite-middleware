@@ -133,21 +133,6 @@ public interface QuotaFileStorageService {
     StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException;
 
     /**
-     * Invalidates the cache entries bound to given context
-     *
-     * @param contextId The context identifier
-     */
-    void invalidateCacheFor(int contextId);
-
-    /**
-     * Invalidates the cache entries bound to given user
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     */
-    void invalidateCacheFor(int userId, int contextId);
-
-    /**
      * Checks if the specified user has an individual file storage configured that he/she owns.
      *
      * @param userId The user identifier

@@ -268,8 +268,6 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
-                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-                qfsCache.invalidateGroup(Integer.toString(contextId));
                 Cache contextCache = cacheService.getCache("Context");
                 contextCache.remove(ctx.getId());
             } catch (Exception e) {

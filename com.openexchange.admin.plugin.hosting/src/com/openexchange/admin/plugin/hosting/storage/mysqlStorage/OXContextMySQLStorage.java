@@ -2986,14 +2986,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             prep.setLong(1, qmt);
             prep.setInt(2, ctx.getId().intValue());
             prep.executeUpdate();
-
-            try {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-                qfsCache.invalidateGroup(ctx.getId().toString());
-            } catch (Exception e) {
-                LOG.error("Failed to invalidate caches. Restart recommended.", e);
-            }
         } finally {
             Databases.closeSQLStuff(prep);
         }

@@ -258,8 +258,6 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                 CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
                 Cache cache = cacheService.getCache("Filestore");
                 cache.clear();
-                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-                qfsCache.invalidateGroup(Integer.toString(contextId));
                 Cache userCache = cacheService.getCache("User");
                 userCache.remove(cacheService.newCacheKey(contextId, userId));
             } catch (Exception e) {

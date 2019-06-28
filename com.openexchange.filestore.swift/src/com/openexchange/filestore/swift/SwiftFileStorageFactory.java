@@ -72,7 +72,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.ConfigurationInterestAware;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -109,7 +112,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class SwiftFileStorageFactory implements FileStorageProvider {
+public class SwiftFileStorageFactory implements FileStorageProvider, ConfigurationInterestAware {
 
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftFileStorageFactory.class);
@@ -118,6 +121,8 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
      * The URI scheme identifying <a href="http://docs.openstack.org/developer/swift/">Swift</a> file storages.
      */
     private static final String SWIFT_SCHEME = "swift";
+
+    private static final String CONFIG_FILENAME = "filestore-swift.properties";
 
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
@@ -226,7 +231,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
 
     @Override
     public boolean supports(URI uri) {
-         return null != uri && SWIFT_SCHEME.equalsIgnoreCase(uri.getScheme());
+        return null != uri && SWIFT_SCHEME.equalsIgnoreCase(uri.getScheme());
     }
 
     @Override
@@ -335,7 +340,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     /**
      * Initializes a new HTTP client and end-point pool for a configured Swift file storage.
      *
-     * @param filestoreID The  file storage ID
+     * @param filestoreID The file storage ID
      * @return The configured items
      * @throws OXException
      */
@@ -376,11 +381,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         int heartbeatInterval = optIntProperty(filestoreID, "heartbeatInterval", 60000, nameBuilder, config);
 
         // Create the HTTP client
-        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
-            .setMaxTotalConnections(maxConnections)
-            .setMaxConnectionsPerRoute(maxConnectionsPerHost)
-            .setConnectionTimeout(connectionTimeout)
-            .setSocketReadTimeout(socketReadTimeout));
+        CloseableHttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance().setMaxTotalConnections(maxConnections).setMaxConnectionsPerRoute(maxConnectionsPerHost).setConnectionTimeout(connectionTimeout).setSocketReadTimeout(socketReadTimeout));
         try {
             // Create the auth info
             AuthInfo authInfo = new AuthInfo(authValue, authType, tenantName, domain, identityUrl);
@@ -497,6 +498,11 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
         }
         return authority;
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles(CONFIG_FILENAME);
     }
 
 }

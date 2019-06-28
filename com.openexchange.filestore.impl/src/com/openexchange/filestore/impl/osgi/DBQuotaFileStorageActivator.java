@@ -49,13 +49,9 @@
 
 package com.openexchange.filestore.impl.osgi;
 
-import java.io.ByteArrayInputStream;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
-import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -122,73 +118,9 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
             trackService(UserService.class);
             trackService(ConfigViewFactory.class);
 
-            {
-                ServiceTrackerCustomizer<CacheService, CacheService> customizer = new ServiceTrackerCustomizer<CacheService, CacheService>() {
-
-                    private final String[] regionNames = { "QuotaFileStorages" };
-
-                    @Override
-                    public CacheService addingService(ServiceReference<CacheService> reference) {
-                        CacheService cacheService = context.getService(reference);
-
-                        int idleSeconds = 7200; // 2 hours
-                        int shrinkInterval = 600; // Every 10 minutes
-
-                        for (String regionName : regionNames) {
-                            try {
-                                byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
-                                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
-                                "jcs.region."+regionName+".cacheattributes.MaxObjects=50000\n" +
-                                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
-                                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
-                                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleSeconds+"\n" +
-                                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkInterval+"\n" +
-                                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
-                                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
-                                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
-                                "jcs.region."+regionName+".elementattributes.IdleTime="+idleSeconds+"\n" +
-                                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
-                                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
-                                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-                                cacheService.loadConfiguration(new ByteArrayInputStream(ccf), true);
-                            } catch (Exception e) {
-                                // Failed to initialize cache region
-                                logger.warn("Failed to initialize cache region {}", regionName, e);
-                            }
-                        }
-
-                        addService(CacheService.class, cacheService);
-                        return cacheService;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<CacheService> reference, CacheService service) {
-                        // Ignore
-                    }
-
-                    @Override
-                    public void removedService(ServiceReference<CacheService> reference, CacheService service) {
-                        for (String regionName : regionNames) {
-                            try {
-                                service.freeCache(regionName);
-                            } catch (Exception e) {
-                                // Ignore
-                            }
-                        }
-                        removeService(CacheService.class);
-                        context.ungetService(reference);
-                    }
-                };
-
-                track(CacheService.class, customizer);
-            }
-
-            DatabaseAccessServiceImpl registry = new DatabaseAccessServiceImpl(context);
-            rememberTracker(tracker);
-
             openTrackers();
 
-            registerService(DatabaseAccessService.class, registry);
+            registerService(DatabaseAccessService.class, new DatabaseAccessServiceImpl(context));
         }
 
         // Update tasks
@@ -205,16 +137,6 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         Services.setServiceLookup(null);
         Logger logger = org.slf4j.LoggerFactory.getLogger(DBQuotaFileStorageActivator.class);
         logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
-    }
-
-    @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
     }
 
 }

@@ -2301,8 +2301,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             cache.remove(key);
                             cache = cacheService.getCache("Capabilities");
                             cache.removeFromGroup(user.getId(), ctx.getId().toString());
-                            cache = cacheService.getCache("QuotaFileStorages");
-                            cache.invalidateGroup(Integer.toString(contextId));
                         } catch (final OXException e) {
                             LOG.error("", e);
                         }
@@ -2987,7 +2985,5 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         Cache cache = cacheService.getCache("Capabilities");
         cache.removeFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
-        cache = cacheService.getCache("QuotaFileStorages");
-        cache.invalidateGroup(Integer.toString(contextId));
     }
 }

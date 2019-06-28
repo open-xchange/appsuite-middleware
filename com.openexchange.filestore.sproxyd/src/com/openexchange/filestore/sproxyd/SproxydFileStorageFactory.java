@@ -63,7 +63,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
+import com.openexchange.config.ConfigurationInterestAware;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -92,7 +95,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SproxydFileStorageFactory implements FileStorageProvider {
+public class SproxydFileStorageFactory implements FileStorageProvider, ConfigurationInterestAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorageFactory.class);
 
@@ -100,6 +103,8 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
      * The URI scheme identifying sproxyd file storages.
      */
     private static final String SPROXYD_SCHEME = "sproxyd";
+    
+    private static final String CONFIG_FILENAME = "filestore-sproxyd.properties";
 
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
@@ -375,4 +380,8 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
         return authority;
     }
 
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles(CONFIG_FILENAME);
+    }
 }
