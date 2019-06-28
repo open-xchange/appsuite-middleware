@@ -101,7 +101,7 @@ public class FolderApi {
      * @throws Exception
      */
     protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, null, null, null, null, null, null);
+        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, null, "true", null, null, null, null, null);
         if (doLogin.getError() == null) {
             LOG.info("Login succesfull for user " + login);
             return doLogin;
