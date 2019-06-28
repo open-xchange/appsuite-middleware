@@ -50,8 +50,6 @@
 package com.openexchange.messaging.json.actions.services;
 
 import org.json.JSONException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -94,11 +92,11 @@ public abstract class AbstractMessagingServiceAction implements AJAXActionServic
     protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
 
     protected final MessagingServiceWriter getWriter(final ServerSession session) {
-        I18nServiceRegistry registry = Services.getService(I18nServiceRegistry.class);
+        I18nServiceRegistry registry = Services.optService(I18nServiceRegistry.class);
         if(registry == null) {
             return  new MessagingServiceWriter(Translator.EMPTY);
         }
-        
+
         I18nService service = registry.getI18nService(session.getUser().getLocale());
         return new MessagingServiceWriter(null == service ? Translator.EMPTY : new I18nTranslator(service));
     }
