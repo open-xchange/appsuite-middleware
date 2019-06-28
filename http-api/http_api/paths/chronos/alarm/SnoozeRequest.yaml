@@ -10,6 +10,7 @@
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - $ref: '#/components/parameters/QueryParamChronosPushToken'
+      - $ref: '#/components/parameters/QueryParamChronosFields'
       - in: query
         name: alarmId
         description: |
