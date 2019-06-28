@@ -93,6 +93,6 @@ public class Base64 {
      * @return the decoded data.
      */
     public static byte[] decode(final String source) {
-        return java.util.Base64.getDecoder().decode(source);
+        return org.apache.commons.codec.binary.Base64.decodeBase64(Charsets.toAsciiBytes(source));
     }
 }
