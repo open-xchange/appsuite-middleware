@@ -59,6 +59,7 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.AdministrativeRdbAlarmTriggerStorage;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmAddTimestampColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmTriggerCorrectFolderTask;
+import com.openexchange.chronos.storage.rdb.groupware.CalendarAlarmTriggerRemoveOrphanedTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarAttendeeAddHiddenColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddAttendeePrivilegesColumnTask;
 import com.openexchange.chronos.storage.rdb.groupware.CalendarEventAddRDateColumnTask;
@@ -138,7 +139,8 @@ public class RdbCalendarStorageActivator extends HousekeepingActivator {
                 new CalendarAlarmAddTimestampColumnTask(),
                 new CalendarAlarmTriggerCorrectFolderTask(),
                 new CalendarEventAddAttendeePrivilegesColumnTask(),
-                new RemoveOrphanedCalendarAlarmsTask()
+                new RemoveOrphanedCalendarAlarmsTask(),
+                new CalendarAlarmTriggerRemoveOrphanedTask()
             ));
             if (getService(ConfigurationService.class).getBoolProperty("com.openexchange.calendar.migration.purgeLegacyData", true)) {
                 registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ChronosStoragePurgeLegacyDataTask()));

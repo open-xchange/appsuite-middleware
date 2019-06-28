@@ -532,9 +532,9 @@ public class AlarmHelper {
     int changeDefaultAlarms(CalendarStorage storage, List<Alarm> defaultAlarms, List<Alarm> defaultDateAlarms, List<Event> events) throws OXException {
         int count = 0;
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId = new HashMap<String, Map<Integer, List<Alarm>>>(events.size());
-        List<String> alarmsToDelete = new ArrayList<>(events.size());
+        List<String> affectedEventIds = new ArrayList<>(events.size());
         for (Event event : events) {
-            alarmsToDelete.add(event.getId());
+            affectedEventIds.add(event.getId());
             List<Alarm> newAlarms;
             if (CalendarUtils.isAllDay(event)) {
                 if (defaultDateAlarms == null || defaultDateAlarms.isEmpty()) {
@@ -551,7 +551,8 @@ public class AlarmHelper {
             alarmsByUserByEventId.put(event.getId(), Collections.singletonMap(I(account.getUserId()), newAlarms));
             count += newAlarms.size();
         }
-        storage.getAlarmStorage().deleteAlarms(alarmsToDelete);
+        storage.getAlarmTriggerStorage().deleteTriggers(affectedEventIds);
+        storage.getAlarmStorage().deleteAlarms(affectedEventIds);
         storage.getAlarmStorage().insertAlarms(alarmsByUserByEventId);
         storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, events);
         return count;
