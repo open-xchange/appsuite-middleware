@@ -110,7 +110,6 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     private CLIOption timeoutOption = null;
     protected CLIOption jmxpass = null;
     protected CLIOption jmxuser = null;
-    protected CLIOption jmxpasshash = null;
     protected String hostname = "localhost";
     protected int port = DEFAULT_JMX_SERVER_PORT;
     protected int timeout = 15000;
