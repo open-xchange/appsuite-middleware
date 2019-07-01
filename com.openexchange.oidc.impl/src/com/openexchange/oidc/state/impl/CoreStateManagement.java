@@ -87,7 +87,7 @@ public class CoreStateManagement implements StateManagement {
         try {
             hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).set(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo), ttl , timeUnit);
         } catch (RuntimeException e) {
-            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_AUTHREQUEST_INFO_MAP, e);
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(e, HAZELCAST_AUTHREQUEST_INFO_MAP);
         }
     }
 
@@ -98,7 +98,7 @@ public class CoreStateManagement implements StateManagement {
         try {
             portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);
         } catch (RuntimeException e) {
-            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_AUTHREQUEST_INFO_MAP, e);
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(e, HAZELCAST_AUTHREQUEST_INFO_MAP);
         }
 
         if (null == portable) {
@@ -113,7 +113,7 @@ public class CoreStateManagement implements StateManagement {
         try {
             hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).put(logoutRequestInfo.getState(), new PortableLogoutRequest(logoutRequestInfo), ttl , timeUnit);
         } catch (RuntimeException e) {
-            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_LOGOUT_REQUEST_INFO_MAP, e);
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(e, HAZELCAST_LOGOUT_REQUEST_INFO_MAP);
         }
     }
 
@@ -124,7 +124,7 @@ public class CoreStateManagement implements StateManagement {
         try {
             portableLogoutRequest = (PortableLogoutRequest) hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).remove(state);
         } catch (RuntimeException e) {
-            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_LOGOUT_REQUEST_INFO_MAP, e);
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(e, HAZELCAST_LOGOUT_REQUEST_INFO_MAP);
         }
         if (null == portableLogoutRequest) {
             return null;
