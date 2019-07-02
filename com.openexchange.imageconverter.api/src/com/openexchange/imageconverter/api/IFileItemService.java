@@ -3,7 +3,7 @@ package com.openexchange.imageconverter.api;
 import java.io.Closeable;
 import java.util.Properties;
 import java.util.function.Consumer;
-
+import org.json.JSONObject;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -77,6 +77,25 @@ public interface IFileItemService {
      *  <code>false</code> otherwise
      */
     public boolean hasCustomKey(final String groupId, final String customKey) throws FileItemException;
+
+    /**
+     * Querying the user data for the group.
+     *
+     * @param groupId The groupId of the group to query for user data
+     * @return The user data as {@link JSONObject}.
+     *  If no user data is set, an empty object will be returned.
+     */
+    public JSONObject getUserData(final String groupId) throws FileItemException;
+
+    /**
+     * Setting the user data for the group.
+     *
+     * @param groupId The groupId of the group to set the user data for.
+     * @param userData The user data to set as {@link JSONObject}
+     * @return <code>true</code>, if the user data was successfully set for the given group,
+     *  <code>false</code> otherwise
+     */
+    public boolean setUserData(final String groupId, final JSONObject userData) throws FileItemException;
 
     // -------------------------------------------------------------------------
 
