@@ -115,8 +115,14 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
         if (null == bytes) {
             throw new IllegalArgumentException("bytes is null.");
         }
-        buf = bytes instanceof UnsynchronizedByteArrayOutputStream ? ((UnsynchronizedByteArrayOutputStream) bytes).buf : bytes.toByteArray();
-        count = buf.length;
+        if (bytes instanceof UnsynchronizedByteArrayOutputStream) {
+            UnsynchronizedByteArrayOutputStream src = (UnsynchronizedByteArrayOutputStream) bytes;
+            buf = src.buf;
+            count = src.count;
+        } else {
+            buf = bytes.toByteArray();
+            count = buf.length;
+        }
     }
 
     /**

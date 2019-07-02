@@ -126,16 +126,18 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
         List<Attendee> attendees = update.getAttendees();
         if (attendees != null) {
             for (final Attendee attendee : attendees) {
-                if (CalendarUtils.isInternalUser(attendee)) {
-                    userIds.put(I(attendee.getEntity()), attendee);
-                } else if (CalendarUtils.isExternalUser(attendee)) {
+                if (CalendarUtils.isInternal(attendee)) {
+                    if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                        resourceIds.add(I(attendee.getEntity()));
+                    } else if (false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
+                        userIds.put(I(attendee.getEntity()), attendee);
+                    }
+                } else {
                     String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
                     if (!externalGuardian.contains(mail)) {
                         externalParticipants.add(attendee);
                         externalGuardian.add(mail);
                     }
-                } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType())) {
-                    resourceIds.add(I(attendee.getEntity()));
                 }
             }
         }
@@ -144,11 +146,13 @@ public class ITipNotificationParticipantResolver implements NotificationParticip
             attendees = original.getAttendees();
             if (attendees != null) {
                 for (Attendee attendee : attendees) {
-                    if (CalendarUtils.isInternalUser(attendee)) {
-                        if (!userIds.containsKey(I(attendee.getEntity()))) {
+                    if (CalendarUtils.isInternal(attendee)) {
+                        if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) || CalendarUserType.ROOM.equals(attendee.getCuType())) {
+                            resourceIds.add(I(attendee.getEntity()));
+                        } else if (false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
                             userIds.put(I(attendee.getEntity()), attendee);
                         }
-                    } else if (CalendarUtils.isExternalUser(attendee)) {
+                    } else {
                         String mail = CalendarUtils.extractEMailAddress(attendee.getUri());
                         if (!externalGuardian.contains(mail)) {
                             externalParticipants.add(attendee);
