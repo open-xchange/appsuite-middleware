@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -118,6 +118,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
+* Thu Jun 27 2019 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2019-07-01 (5291)
 * Wed Jun 26 2019 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2019-06-27 (5299)
 * Thu Jun 06 2019 Carsten Hoeger <choeger@open-xchange.com>

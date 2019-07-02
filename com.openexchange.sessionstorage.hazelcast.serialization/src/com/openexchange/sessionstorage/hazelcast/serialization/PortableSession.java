@@ -270,7 +270,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
                     LOG.debug("Put remote parameter '{}' with value '{}' into portable session {} ({}@{})", parameterName, value, sessionId, Integer.valueOf(userId), Integer.valueOf(contextId));
                 } else {
                     if (value == null) {
-                        LOG.warn("No value available for remote parameter name '{}' in session {}.", parameterName, sessionId);
+                        LOG.debug("No value available for remote parameter name '{}' in session {}.", parameterName, sessionId);
                     } else {
                         LOG.warn("Denied remote parameter name '{}' in session {}. Seems to be no ordinary Java object: {}", parameterName, sessionId, value.getClass().getName());
                     }
