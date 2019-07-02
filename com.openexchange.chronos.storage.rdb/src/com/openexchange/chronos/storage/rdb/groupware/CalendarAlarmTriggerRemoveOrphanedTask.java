@@ -83,7 +83,7 @@ public class CalendarAlarmTriggerRemoveOrphanedTask extends UpdateTaskAdapter {
             /*
              * remove all entries in calendar_alarm_trigger that don't have a corresponding entry in calendar_alarm
              */
-            String sql = "DELETE FROM calendar_alarm_trigger AS t WHERE NOT EXISTS " +
+            String sql = "DELETE t FROM calendar_alarm_trigger AS t WHERE NOT EXISTS " +
                 "(SELECT 1 FROM calendar_alarm AS a WHERE a.cid=t.cid AND a.account=t.account AND a.id=t.alarm);";
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 int updated = stmt.executeUpdate();
