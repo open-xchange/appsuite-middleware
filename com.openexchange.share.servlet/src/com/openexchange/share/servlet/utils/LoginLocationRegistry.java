@@ -143,7 +143,7 @@ public class LoginLocationRegistry {
 
         String token = UUIDs.getUnformattedString(UUID.randomUUID());
         cache.put(token, loginLocation);
-        response.sendRedirect(LoginLocation.buildRedirectWith(token, loginLocation, allowedAttributes));
+        response.sendRedirect(LoginLocation.buildRedirectWith(token, loginLocation, allowedAttributes, null));
     }
 
     /**

@@ -228,6 +228,12 @@ public class ModuleSupportImpl implements ModuleSupport {
             if (FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
                 return false;
             }
+            if (FolderExceptionErrorMessage.INVALID_FOLDER_ID.equals(e)) {
+                return false;
+            }
+            if (FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.equals(e)) {
+                return false;
+            }
             throw e;
         }
     }

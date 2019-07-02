@@ -118,7 +118,7 @@ public class RedeemLoginLocationTokenServlet extends AbstractShareServlet {
                 return;
             }
 
-            Map<String, String> loginLocationParameters = location.asMap();
+            Map<String, String> loginLocationParameters = location.asMap(translator);
             JSONObject jLoginLocation = new JSONObject(loginLocationParameters.size());
             for (Entry<String, String> loginLocationParameter : loginLocationParameters.entrySet()) {
                 jLoginLocation.put(loginLocationParameter.getKey(), loginLocationParameter.getValue());

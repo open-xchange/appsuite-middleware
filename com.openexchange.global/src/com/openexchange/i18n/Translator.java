@@ -49,6 +49,8 @@
 
 package com.openexchange.i18n;
 
+import java.util.Locale;
+
 /**
  * Simple interface for passing translations.
  *
@@ -63,6 +65,11 @@ public interface Translator {
         public String translate(final String toTranslate) {
             return toTranslate;
         }
+
+        @Override
+        public Locale getLocale() {
+            return LocaleTools.DEFAULT_LOCALE;
+        }
     };
 
     /**
@@ -72,5 +79,12 @@ public interface Translator {
      * @return The translated string (if translation available) or the passed string
      */
     String translate(String toTranslate);
+
+    /**
+     * Gets the underlying locale.
+     * 
+     * @return The locale
+     */
+    Locale getLocale();
 
 }

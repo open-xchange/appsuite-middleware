@@ -103,9 +103,13 @@ public class ShareToken {
         if (null == token || 48 > token.length() || false == TOKEN_PATTERN.matcher(token.substring(0, 48)).matches()) {
             throw ShareExceptionCodes.INVALID_TOKEN.create(token);
         }
-        baseToken = token.substring(16, 48);
-        contextID = Integer.parseInt(token.substring(0, 8), 16) ^ getContextObfuscator(baseToken);
-        userID = Integer.parseInt(token.substring(8, 16), 16) ^ getUserObfuscator(baseToken);
+        try {
+            baseToken = token.substring(16, 48);
+            contextID = Integer.parseInt(token.substring(0, 8), 16) ^ getContextObfuscator(baseToken);
+            userID = Integer.parseInt(token.substring(8, 16), 16) ^ getUserObfuscator(baseToken);
+        } catch (NumberFormatException e) {
+            throw ShareExceptionCodes.INVALID_TOKEN.create(token, e);
+        }
     }
 
     /**
