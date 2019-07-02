@@ -181,6 +181,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
         String[] hosts = this.loadStringProperty(OIDCBackendProperty.hosts).split(",");
         return Arrays.asList(hosts);
     }
+    
+    @Override
+    public String getProxyName() {
+        return this.loadStringProperty(OIDCBackendProperty.proxyName);
+    }
 
     @Override
     public boolean isAutologinEnabled() {

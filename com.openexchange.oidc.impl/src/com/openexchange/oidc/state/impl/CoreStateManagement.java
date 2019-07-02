@@ -94,6 +94,9 @@ public class CoreStateManagement implements StateManagement {
     @Override
     public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) throws OXException {
         LOG.trace("getAndRemoveAuthenticationInfo(state: {})", state);
+        if (state == null || state.isEmpty()) {
+            return null;
+        }
         PortableAuthenticationRequest portable = null;
         try {
             portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);

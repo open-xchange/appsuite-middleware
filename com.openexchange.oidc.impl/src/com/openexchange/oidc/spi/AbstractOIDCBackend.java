@@ -233,7 +233,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         JWSAlgorithm expectedJWSAlg = this.getJWSAlgorithm();
         try {
             IDTokenValidator idTokenValidator = new IDTokenValidator(new Issuer(this.getBackendConfig().getOpIssuer()), new ClientID(this.getBackendConfig().getClientID()), expectedJWSAlg, new URL(this.getBackendConfig().getOpJwkSetEndpoint()));
-            result = idTokenValidator.validate(idToken, new Nonce(nounce));
+            result = idTokenValidator.validate(idToken, nounce != null ? new Nonce(nounce) : null);
         } catch (BadJOSEException e) {
             throw OIDCExceptionCode.IDTOKEN_VALIDATON_FAILED_CONTENT.create(e, e.getMessage());
         } catch (JOSEException e) {

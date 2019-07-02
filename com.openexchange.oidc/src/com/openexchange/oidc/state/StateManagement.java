@@ -73,7 +73,7 @@ public interface StateManagement {
      * Load the {@link AuthenticationRequestInfo} which is identified by the state.
      *
      * @param state The state to identify the {@link AuthenticationRequestInfo}
-     * @return The {@link AuthenticationRequestInfo}
+     * @return The {@link AuthenticationRequestInfo} or null if no state is given or no user information is stored
      */
     AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) throws OXException;
 
