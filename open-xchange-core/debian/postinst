@@ -307,17 +307,6 @@ EOF
       cat $TMPFILE > /opt/open-xchange/etc/logback.xml
       rm -f $TMPFILE
     fi
-    # Bug #53993: Zap duplicate loggers
-    rm -f $TMPFILE
-    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
-<configuration>
-    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
-</configuration>
-EOF
-    if [ -e $TMPFILE ]; then
-      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-      rm -f $TMPFILE
-    fi
 
     # SoftwareChange_Request-4059
     ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
