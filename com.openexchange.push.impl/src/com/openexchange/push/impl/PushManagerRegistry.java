@@ -68,6 +68,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccounts;
@@ -601,7 +602,8 @@ public final class PushManagerRegistry implements PushListenerService {
             for (PushManagerExtendedService extendedService : getExtendedPushManagers()) {
                 try {
                     // Stop listener for session
-                    StopResult stopped = stopPermanentListenerFor(pushUser, extendedService, true);
+                    boolean tryToReconnect = "true".equals(LogProperties.get(LogProperties.Name.PNS_NO_RECONNECT)) ? false : true;
+                    StopResult stopped = stopPermanentListenerFor(pushUser, extendedService, tryToReconnect);
                     if (stopped != StopResult.NONE) {
                         LOG.debug("{} push listener for user {} in context {} by push manager \"{}\"", stopped.getWord(), I(userId), I(contextId), extendedService);
                     }
