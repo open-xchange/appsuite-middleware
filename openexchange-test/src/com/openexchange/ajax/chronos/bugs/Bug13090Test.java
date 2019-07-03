@@ -80,7 +80,7 @@ public class Bug13090Test extends AbstractChronosTest {
         EventData series = EventFactory.createSeriesEvent(getCalendaruser(), "Bug13090Test", 4, folderId);
         EventData createEvent = eventManager.createEvent(series);
         try {
-            ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().moveEvent(getSessionId(), folderId, createEvent.getId(), L(eventManager.getLastTimeStamp()), defaultFolderId, Boolean.FALSE, null, Boolean.FALSE, Boolean.FALSE, null, null, null, Boolean.FALSE);
+            ChronosCalendarResultResponse response = defaultUserApi.getChronosApi().moveEvent(getSessionId(), folderId, createEvent.getId(), L(eventManager.getLastTimeStamp()), defaultFolderId, Boolean.FALSE, null, Boolean.FALSE, Boolean.FALSE, null, null, null, null, Boolean.FALSE);
             eventManager.handleUpdate(response, true);
         } catch (ChronosApiException e) {
             assertEquals("Wrong exception code.", CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create().getErrorCode(), e.getErrorCode());
