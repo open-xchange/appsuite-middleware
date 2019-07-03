@@ -76,8 +76,6 @@ import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.service.SortOrder;
-import com.openexchange.chronos.service.SortOrder.Order;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
@@ -118,13 +116,11 @@ public class ClearPerformer extends AbstractUpdatePerformer {
          * delete all events in folder in batches
          */
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
-        SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.ID, Order.ASC));
-        int deleted = 0;
+        SearchOptions searchOptions = new SearchOptions().setLimits(0, BATCH_SIZE);
+        int deleted;
         do {
-            int nextOffset = searchOptions.getOffset() + deleted;
-            searchOptions.setLimits(nextOffset, nextOffset + BATCH_SIZE);
             deleted = deleteEvents(searchTerm, searchOptions, clientTimestamp);
-        } while (deleted >= BATCH_SIZE);
+        } while (0 < deleted);
         /*
          * return calendar result
          */
