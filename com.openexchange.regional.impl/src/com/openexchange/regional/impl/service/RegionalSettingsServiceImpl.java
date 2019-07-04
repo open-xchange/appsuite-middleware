@@ -147,6 +147,28 @@ public class RegionalSettingsServiceImpl implements RegionalSettingsService {
     }
 
     @Override
+    public DateFormat getDateTimeFormat(int contextId, int userId, Locale locale, int dateStyle, int timeStyle) {
+        RegionalSettings settings = get(contextId, userId);
+        if (null != settings) {
+            String datePattern = getDatePattern(settings, dateStyle);
+            String timePattern = getTimePattern(settings, timeStyle);
+            if (null == datePattern) {
+                datePattern = ((SimpleDateFormat) SimpleDateFormat.getDateInstance(dateStyle, locale)).toLocalizedPattern();
+            }
+            if (null == timePattern) {
+                timePattern = ((SimpleDateFormat) SimpleDateFormat.getTimeInstance(timeStyle, locale)).toLocalizedPattern();
+            }
+            String pattern = datePattern + ' ' + timePattern;
+            try {
+                return new SimpleDateFormat(datePattern + ' ' + timePattern);
+            } catch (Exception e) {
+                LOG.error("Error applying date/time format {}, falling back to defaults for user {} in context {}.", pattern, I(userId), I(contextId), e);
+            }
+        }
+        return SimpleDateFormat.getDateTimeInstance(dateStyle, timeStyle, locale);
+    }
+
+    @Override
     public NumberFormat getNumberFormat(int contextId, int userId, Locale locale, String format) {
         RegionalSettings settings = get(contextId, userId);
         Character decimalSeparator = getDecimalSeparator(settings);

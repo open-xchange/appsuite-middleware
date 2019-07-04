@@ -116,6 +116,18 @@ public interface RegionalSettingsService {
     DateFormat getTimeFormat(int contextId, int userId, Locale locale, int type);
 
     /**
+     * Gets a date/time format for the specified locale. If the user has a custom format defined this format is used instead.
+     * 
+     * @param contextId The context id
+     * @param userId The user id
+     * @param locale The locale of the user
+     * @param dateStyle The formatting style. @see {@link DateFormat#getDateInstance(int, Locale)}
+     * @param timeStyle The formatting style. @see {@link DateFormat#getTimeInstance(int, Locale)}
+     * @return The {@link DateFormat}
+     */
+    DateFormat getDateTimeFormat(int contextId, int userId, Locale locale, int dateStyle, int timeStyle);
+
+    /**
      * Gets a number format for the specified locale. If the user has a custom format defined this format is used instead.
      * 
      * @param contextId The context id
