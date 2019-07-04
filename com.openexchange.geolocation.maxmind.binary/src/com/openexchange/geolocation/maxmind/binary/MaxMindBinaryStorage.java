@@ -69,6 +69,7 @@ import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationStorageService;
 import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
  * {@link MaxMindBinaryStorage2}
@@ -80,6 +81,7 @@ public class MaxMindBinaryStorage implements GeoLocationStorageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaxMindBinaryStorage.class);
     private static final String SERVICE_PROVIDER_ID = "maxmind-bin";
+    private static final String DATABASE_PATH_PROPERTY = "com.openexchange.geolocation.maxmind.databasePath";
 
     private final DatabaseReader databaseReader;
 
@@ -87,9 +89,13 @@ public class MaxMindBinaryStorage implements GeoLocationStorageService {
      * Initialises a new {@link MaxMindBinaryStorage}.
      * 
      * @param databasePath The path to the MaxMind city database to use
+     * @throws OXException if the database path property is empty or any other error is occurred
      */
     public MaxMindBinaryStorage(String databasePath) throws OXException {
         super();
+        if (Strings.isEmpty(databasePath)) {
+            throw GeoLocationExceptionCodes.STORAGE_SERVICE_PROVIDER_NOT_CONFIGURED.create(DATABASE_PATH_PROPERTY);
+        }
         this.databaseReader = initReader(databasePath);
     }
 
@@ -119,7 +125,14 @@ public class MaxMindBinaryStorage implements GeoLocationStorageService {
         return SERVICE_PROVIDER_ID;
     }
 
-    private static DatabaseReader initReader(String databasePath) throws OXException {
+    /**
+     * Initialises the database reader
+     * 
+     * @param databasePath The database path
+     * @return The new {@link DatabaseReader}
+     * @throws OXException if an error is occurred
+     */
+    private DatabaseReader initReader(String databasePath) throws OXException {
         try {
             return new DatabaseReader.Builder(new FileInputStream(databasePath)).withCache(new CHMCache()).build();
         } catch (Exception e) {
