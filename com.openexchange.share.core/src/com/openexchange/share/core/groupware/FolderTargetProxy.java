@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.ImmutableTypePermission;
@@ -61,6 +60,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.i18n.Translator;
 import com.openexchange.java.Strings;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -243,9 +243,9 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     }
     
     @Override
-    public String getLocalizedTitle(Locale locale){
-        if(locale != null) {
-            String result = folder.getLocalizedName(locale);
+    public String getLocalizedTitle(Translator translator) {
+        if (null != translator) {
+            String result = folder.getLocalizedName(translator.getLocale());
             return Strings.isEmpty(result) ? getTitle() : result;
         }
         return getTitle();

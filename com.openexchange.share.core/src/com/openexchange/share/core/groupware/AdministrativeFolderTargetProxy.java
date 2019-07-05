@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.i18n.Translator;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -289,6 +290,14 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     public List<OCLPermission> getRemovedPermissions() {
         return removedPermissions;
+    }
+
+    @Override
+    public String getLocalizedTitle(Translator translator) {
+        if (folder.isDefaultFolder() && null != translator) {
+            return translator.translate(getTitle());
+        }
+        return getTitle();
     }
 
 }

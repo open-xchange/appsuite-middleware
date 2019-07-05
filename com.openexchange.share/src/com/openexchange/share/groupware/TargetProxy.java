@@ -51,7 +51,7 @@ package com.openexchange.share.groupware;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+import com.openexchange.i18n.Translator;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 
@@ -173,9 +173,9 @@ public interface TargetProxy {
     /**
      * Similar to {@link #getTitle()} but tries to translate it if possible (e.g. for standard folder names).
      *
-     * @param locale An optional locale to use
+     * @param translator The translator to use
      * @return The title
      */
-    String getLocalizedTitle(Locale locale);
+    String getLocalizedTitle(Translator translator);
 
 }

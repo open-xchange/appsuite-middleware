@@ -163,7 +163,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                     t.translate(ShareServletStrings.SHARE_WITH_TARGET), 
                     FullNameBuilder.buildFullName(sharingUser, t),
                     t.translate(targetPath.isFolder() ? ShareServletStrings.FOLDER : ShareServletStrings.FILE),
-                    shareRequest.getTargetProxy().getLocalizedTitle(t.getLocale())
+                    shareRequest.getTargetProxy().getLocalizedTitle(t)
             ));
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getGuestID(), guestInfo.getContextID());

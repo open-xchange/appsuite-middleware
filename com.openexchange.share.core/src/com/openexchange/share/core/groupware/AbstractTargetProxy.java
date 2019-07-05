@@ -54,9 +54,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.openexchange.i18n.Translator;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 
@@ -184,7 +184,7 @@ public abstract class AbstractTargetProxy implements TargetProxy {
     
    
     @Override
-    public String getLocalizedTitle(Locale locale){
+    public String getLocalizedTitle(Translator translator) {
         return getTitle();
     }
 
