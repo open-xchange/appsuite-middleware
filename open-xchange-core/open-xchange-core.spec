@@ -722,6 +722,18 @@ EOF
     ox_scr_done ${SCR}
   }
 
+    SCR=SCR-489
+    ox_scr_todo ${SCR} && {
+      pfile_sessiond=/opt/open-xchange/etc/sessiond.properties
+      pkey_sessiond=com.openexchange.sessiond.autologin
+      pfile_share=/opt/open-xchange/etc/share.properties
+      pkey_share=com.openexchange.share.autoLogin
+
+      ox_remove_property ${pkey_sessiond} ${pfile_sessiond}
+      ox_remove_property ${pkey_share} ${pfile_share}
+
+      ox_scr_done ${SCR}
+    }
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
