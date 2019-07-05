@@ -76,6 +76,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.java.AsciiReader;
+import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
@@ -231,10 +232,11 @@ public class ExtendedPropertiesCodec {
         }
     }
 
-    private static void encodeDeflatedJson(JSONValue json, ByteArrayOutputStream outputStream) throws IOException {
-        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
-            byte[] jsonBytes = json.toString().getBytes(Charsets.US_ASCII);
-            deflaterOutputStream.write(jsonBytes);
+    private static void encodeDeflatedJson(JSONValue json, ByteArrayOutputStream outputStream) throws IOException, JSONException {
+        try (DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream); 
+            AsciiWriter writer = new AsciiWriter(deflaterOutputStream)) {
+            json.write(writer, true);
+            writer.flush();
             deflaterOutputStream.finish();
         }
     }
