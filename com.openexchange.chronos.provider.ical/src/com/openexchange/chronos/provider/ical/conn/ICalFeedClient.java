@@ -293,6 +293,7 @@ public class ICalFeedClient {
                     if (tmp == null) {
                         ClientConfig config = ClientConfig.newInstance();
                         config.setUserAgent("Open-Xchange Calendar Feed Client");
+                        config.setDenyLocalRedirect(true);
                         init(config);
                         tmp = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
                         httpClient = tmp;
