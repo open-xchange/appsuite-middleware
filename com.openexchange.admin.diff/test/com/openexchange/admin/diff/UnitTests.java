@@ -75,7 +75,7 @@ import com.openexchange.admin.diff.file.type.ConfFileHandlerTest;
     PropertyHandlerTest.class,
     ConfFolderFileProviderTest.class,
     JarFileProviderTest.class,
-    RecursiveFileProviderTest.class
+    RecursiveFileProviderTest.class,
 })
 public class UnitTests {
 
