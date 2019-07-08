@@ -131,21 +131,4 @@ public interface JSlobStorage {
      */
     JSlob remove(JSlobId id) throws OXException;
 
-    /**
-     * Marks the entry associated with given identifier as locked.
-     *
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     *
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
-
 }

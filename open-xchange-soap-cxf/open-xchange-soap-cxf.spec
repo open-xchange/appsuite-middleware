@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 46
+%define        ox_release 47
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -64,6 +64,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Jun 18 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-07-01 (5288)
 * Fri May 03 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-05-13 (5231)
 * Wed Mar 13 2019 Marcus Klein <marcus.klein@open-xchange.com>
