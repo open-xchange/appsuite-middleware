@@ -1360,7 +1360,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         for (int i = len - 1; b && i >= 0; i--) {
                             JSONObject jObject = attachments.get(i);
                             if (jObject.getString(keyContentType).startsWith("text/plain") && jObject.hasAndNotNull(keyContent)) {
-                                String newContent = jObject.getString(keyContent) + sanitizeResult.getContent();
+                                String currentContent = jObject.getString(keyContent);
+                                String toAppend = sanitizeResult.getContent();
+                                String newContent;
+                                if (currentContent.endsWith("\n") || toAppend.startsWith("\n")) {
+                                    newContent = currentContent + toAppend;
+                                } else {
+                                    newContent = currentContent + "\r\n" + toAppend;
+                                }
                                 jObject.put(keyContent, newContent);
                                 jObject.put(keySize, newContent.length());
                                 if (includePlainText && jObject.has("plain_text")) {
