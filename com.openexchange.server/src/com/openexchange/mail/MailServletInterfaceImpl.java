@@ -70,6 +70,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -3352,7 +3353,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         try {
             // Invariants
             UserSettingMail currentUsm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
-            List<String> ids = new ArrayList<>(transportMails.size());
+            int numberOfTransportMails = transportMails.size();
+            List<String> ids = new ArrayList<>(numberOfTransportMails);
             boolean settingsAllowAppendToSend = accessAvailable && !currentUsm.isNoCopyIntoStandardSentFolder();
 
             // State variables
@@ -3360,6 +3362,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             OXException oxError = null;
             boolean first = true;
             String messageId = null;
+            List<Set<InternetAddress>> unsentMails = new ArrayList<>(numberOfTransportMails);
             for (ComposedMailMessage composedMail : transportMails) {
                 boolean mailSent = false;
                 try {
@@ -3498,19 +3501,37 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 } catch (OXException e) {
                     if (!mailSent) {
-                        throw e;
+                        if (numberOfTransportMails == 1) {
+                            throw e;
+                        }
+
+                        Set<InternetAddress> recipients = new LinkedHashSet<>(Arrays.asList(composedMail.getAllRecipients()));
+                        unsentMails.add(recipients);
                     }
                     e.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(e);
                 } catch (RuntimeException e) {
                     OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     if (!mailSent) {
-                        throw oxe;
+                        if (numberOfTransportMails == 1) {
+                            throw oxe;
+                        }
+
+                        Set<InternetAddress> recipients = new LinkedHashSet<>(Arrays.asList(composedMail.getAllRecipients()));
+                        unsentMails.add(recipients);
                     }
                     oxe.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(oxe);
                 }
                 first = false;
+            }
+
+            if (numberOfTransportMails > 0 && unsentMails.size() == numberOfTransportMails) {
+                Set<InternetAddress> recipients = new LinkedHashSet<>();
+                for (Set<InternetAddress> addrs : unsentMails) {
+                    recipients.addAll(addrs);
+                }
+                MimeMailExceptionCode.SEND_FAILED.create(recipients.toString());
             }
 
             if (!accessAvailable) {
