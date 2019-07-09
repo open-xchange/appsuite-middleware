@@ -50,11 +50,13 @@
 package com.openexchange.chronos.provider.composition.impl.osgi;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.provider.composition.impl.CalendarPrintingCapabilityChecker;
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderRegistryImpl;
 import com.openexchange.chronos.provider.composition.impl.CalendarProviderTracker;
 import com.openexchange.chronos.provider.composition.impl.CompositingIDBasedCalendarAccessFactory;
@@ -104,7 +106,13 @@ public class CompositingCalendarProviderActivator extends HousekeepingActivator 
             openTrackers();
             CalendarProviderRegistryImpl providerRegistry = new CalendarProviderRegistryImpl(providerTracker, freeBusyProviders);
             /*
-             * register services
+             * declare calendar-printing capability & register appropriate checker
+             */
+            getService(CapabilityService.class).declareCapability(CalendarPrintingCapabilityChecker.CAPABILITY_NAME);
+            registerService(CapabilityChecker.class, new CalendarPrintingCapabilityChecker(getService(ConfigViewFactory.class)), 
+                singletonDictionary(CapabilityChecker.PROPERTY_CAPABILITIES, CalendarPrintingCapabilityChecker.CAPABILITY_NAME));
+            /*
+             * register further services
              */
             registerService(CalendarProviderRegistry.class, providerRegistry);
             registerService(IDBasedCalendarAccessFactory.class, new CompositingIDBasedCalendarAccessFactory(providerRegistry, this));

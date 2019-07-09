@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,52 @@
  *
  */
 
-package com.openexchange.calendar.printing.blocks;
+package com.openexchange.chronos.provider.composition.impl;
 
-import java.util.LinkedList;
-import java.util.List;
-import com.openexchange.calendar.printing.CPCalendar;
-import com.openexchange.calendar.printing.CPEvent;
-import com.openexchange.calendar.printing.CPType;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link CalendarPrintingCapabilityChecker}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.3
  */
-public class CPFactory {
+public class CalendarPrintingCapabilityChecker implements CapabilityChecker {
 
-    private CPType type;
+    public static final String CAPABILITY_NAME = "calendar-printing";
 
-    private CPCalendar calendar;
+    private final ConfigViewFactory configViewFactory;
 
-    private final List<CPPartitioningStrategy> strategies = new LinkedList<CPPartitioningStrategy>();
-
-    public void setTypeToProduce(CPType type) {
-        this.type = type;
+    /**
+     * Initializes a new {@link CalendarPrintingCapabilityChecker}.
+     * 
+     * @param configViewFactory A reference to the config view factory
+     */
+    public CalendarPrintingCapabilityChecker(ConfigViewFactory configViewFactory) {
+        super();
+        this.configViewFactory = configViewFactory;
     }
 
-    public void setCalendar(CPCalendar calendar){
-        this.calendar = calendar;
-
-        if(strategies != null) {
-            for(CPPartitioningStrategy strategy: strategies) {
-                strategy.setCalendar(calendar);
+    @Override
+    public boolean isEnabled(String capability, Session session) throws OXException {
+        if (CAPABILITY_NAME.equals(capability)) {
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            if (serverSession.isAnonymous() || false == serverSession.getUserPermissionBits().hasCalendar()) {
+                return false;
             }
+            /*
+             * enabled if either absent, or explicitly true
+             */
+            ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            return view.opt("com.openexchange.capability.calendar-printing", Boolean.class, Boolean.TRUE).booleanValue();
         }
+        return true;
     }
 
-    public void addStrategy(CPPartitioningStrategy strategy) {
-        strategies.add(strategy);
-        if(calendar != null) {
-            strategy.setCalendar(calendar);
-        }
-    }
-
-    public CPPartition partition(List<CPEvent> appointments) {
-        for (CPPartitioningStrategy strategy : strategies) {
-            if (strategy.isPackaging(type)) {
-                return strategy.partition(appointments);
-            }
-        }
-        return new CPPartition();
-    }
 }
