@@ -45,7 +45,7 @@ spec:
         timestamps()
     }
     triggers {
-        cron('master' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '')
+        cron('develop' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '')
     }
     stages {
         stage('POT') {
