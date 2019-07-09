@@ -17,7 +17,7 @@ kind: Pod
 spec:
   containers:
   - name: gradle
-    image: gradle:5.4-alpine
+    image: gradle:5.5-jdk8
     command:
     - cat
     tty: true
@@ -26,6 +26,14 @@ spec:
     command:
     - cat
     tty: true
+  - name: java-gettext
+    image: gitlab.open-xchange.com:4567/jenkins/slave-gettext:latest
+    command:
+    - cat
+    tty: true
+    securityContext:
+      runAsUser: 1000
+      allowPrivilegeEscalation: false
   imagePullSecrets:
   - name: gitlab
 """
@@ -37,9 +45,56 @@ spec:
         timestamps()
     }
     triggers {
-        cron('H H(20-23) * * 1-5')
+        cron('master' == env.BRANCH_NAME ? 'H H(20-23) * * 1-5' : '')
     }
     stages {
+        stage('POT') {
+            tools {
+                ant 'ant'
+            }
+            steps {
+                dir('automation') {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: '*/master']],
+                        browser: [$class: 'GitWeb', repoUrl: 'https://gitweb.open-xchange.com/?p=automation'],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [],
+                        gitTool: 'Linux',
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[credentialsId: '2cb98438-7e92-4038-af72-dad91b4ff6be', url: "https://code.open-xchange.com/git/automation"]]
+                    ])
+                }
+                dir('automation/backendI18N') {
+                    container('java-gettext') {
+                        sh "ant -file backendPot.xml -DcheckoutDir=${env.WORKSPACE}/backend -DproductToGenerate=backend -DpotDir=${env.WORKSPACE}/backend/l10n create-server-pot"
+                    }
+                }
+                dir('backend') {
+                    script {
+                        def gitStatus = sh script: 'git status --porcelain', returnStdout: true
+                        if (gitStatus.contains('l10n/backend.pot')) {
+                            sh 'git add l10n/backend.pot'
+                            sh 'git commit -m "Automatic POT generation"'
+                            sh 'git show HEAD'
+                            sshagent(['9a40d6b1-813a-4c46-9b0d-18320a0a4ef4']) {
+                                sh "git push origin HEAD:${env.BRANCH_NAME}"
+                            }
+                        }
+                    }
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'backend/l10n/backend.pot', onlyIfSuccessful: true
+                }
+                always {
+                    dir('automation') {
+                        deleteDir()
+                    }
+                }
+            }
+        }
         stage('Configuration documentation') {
             when {
                 allOf {
@@ -161,5 +216,6 @@ String version4ConfigDocProcessor(String branchName) {
         return branchName.substring(7)
     if (branchName.startsWith('release-'))
         return branchName.substring(8)
-    error "Processing configuration documentation is not intended for branch ${branchName}"
+    return null
 }
+
