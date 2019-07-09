@@ -64,20 +64,32 @@ import com.openexchange.metrics.MetricType;
  */
 public final class CacheEventMetricHandler implements CacheEventMonitor {
 
-    private final MetricDescriptorCache metricDescriptorCache;
-    private final AtomicReference<MetricService> metricServiceRef;
+    private static class MetricServiceAndCache {
+
+        final MetricDescriptorCache metricDescriptorCache;
+        final MetricService metricService;
+
+        MetricServiceAndCache(MetricService metricService) {
+            super();
+            this.metricDescriptorCache = new MetricDescriptorCache(metricService, "cache");
+            this.metricService = metricService;
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<MetricServiceAndCache> metricServiceRef;
     private final AtomicLong numOfferedEvents;
     private final AtomicLong numDeliveredEvents;
 
     /**
      * Initialises a new {@link CacheEventMetricHandler}.
-     * 
+     *
      * @param metricService The instance of the {@link MetricService}
      */
     public CacheEventMetricHandler(MetricService metricService) {
         super();
-        this.metricServiceRef = new AtomicReference<MetricService>(metricService);
-        this.metricDescriptorCache = new MetricDescriptorCache(metricService, "cache");
+        this.metricServiceRef = new AtomicReference<>(metricService == null ? null : new MetricServiceAndCache(metricService));
         this.numOfferedEvents = new AtomicLong();
         this.numDeliveredEvents = new AtomicLong();
     }
@@ -98,7 +110,7 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
      * @param metricService The metricService or <code>null</code>
      */
     public void setMetricService(MetricService metricService) {
-        metricServiceRef.set(metricService);
+        metricServiceRef.set(metricService == null ? null : new MetricServiceAndCache(metricService));
     }
 
     /**
@@ -116,10 +128,12 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
         /*
          * increment overall and region-specific metrics
          */
-        MetricService metricService = metricServiceRef.get();
-        if (null == metricService) {
+        MetricServiceAndCache metricServiceAndCache = metricServiceRef.get();
+        if (null == metricServiceAndCache) {
             return;
         }
+        MetricService metricService = metricServiceAndCache.metricService;
+        MetricDescriptorCache metricDescriptorCache = metricServiceAndCache.metricDescriptorCache;
         metricService.getMeter(metricDescriptorCache.getMetricDescriptor(
             MetricType.METER, "offeredEvents", "Offered events for all cache regions", "events", TimeUnit.MINUTES)).mark();
         if (null != region) {
@@ -143,10 +157,12 @@ public final class CacheEventMetricHandler implements CacheEventMonitor {
         /*
          * increment overall and region-specific metrics
          */
-        MetricService metricService = metricServiceRef.get();
-        if (null == metricService) {
+        MetricServiceAndCache metricServiceAndCache = metricServiceRef.get();
+        if (null == metricServiceAndCache) {
             return;
         }
+        MetricService metricService = metricServiceAndCache.metricService;
+        MetricDescriptorCache metricDescriptorCache = metricServiceAndCache.metricDescriptorCache;
         metricService.getMeter(metricDescriptorCache.getMetricDescriptor(
             MetricType.METER, "deliveredEvents", "Delivered events for all cache regions", "events", TimeUnit.MINUTES)).mark();
         if (null != region) {

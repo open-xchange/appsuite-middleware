@@ -72,7 +72,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     private CacheEventServiceImpl cacheEventService;
-    private CacheEventMetricHandler metricHandler;
 
     /**
      * Initializes a new {@link CacheEventServiceActivator}.
@@ -83,7 +82,7 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class, MetricService.class };
+        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override
@@ -92,12 +91,6 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
             CacheEventServiceImpl service = this.cacheEventService;
             if (null != service) {
                 service.setThreadPoolService(getService(ThreadPoolService.class));
-            }
-        }
-        if (MetricService.class.equals(clazz)) {
-            CacheEventMetricHandler handler = this.metricHandler;
-            if (null != handler) {
-                handler.setMetricService(getService(MetricService.class));
             }
         }
     }
@@ -110,12 +103,6 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
                 service.setThreadPoolService(null);
             }
         }
-        if (MetricService.class.equals(clazz)) {
-            CacheEventMetricHandler handler = this.metricHandler;
-            if (null != handler) {
-                handler.setMetricService(null);
-            }
-        }
     }
 
     @Override
@@ -123,12 +110,11 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
         logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
 
-        MetricService metricService = getService(MetricService.class);
-        CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(metricService);
-        this.metricHandler = metricHandler;
+        CacheEventMetricHandler metricHandler = new CacheEventMetricHandler(null);
         CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)), getService(ThreadPoolService.class), metricHandler);
         this.cacheEventService = service;
 
+        track(MetricService.class, new MetricServiceTracker(metricHandler, context));
         track(ManagementService.class, new HousekeepingManagementTracker(context, CacheEventMBean.NAME, CacheEventMBean.DOMAIN, new CacheEventMBeanImpl(metricHandler)));
         openTrackers();
 
@@ -145,7 +131,6 @@ public final class CacheEventServiceActivator extends HousekeepingActivator {
             service.shutdown();
             this.cacheEventService = null;
         }
-        this.metricHandler = null;
         super.stopBundle();
     }
 

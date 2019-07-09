@@ -67,7 +67,7 @@ public class MetricDescriptorCache {
 
     /**
      * Initialises a new {@link MetricDescriptorCache}.
-     * 
+     *
      * @param metricService The instance of the {@link MetricService}
      * @param group The name of the group for with the metric descriptor cache shall be initialised.
      */
@@ -80,7 +80,7 @@ public class MetricDescriptorCache {
 
     /**
      * Retrieves the metric descriptor for the metric type
-     * 
+     *
      * @param metricType The {@link MetricType}
      * @param name the method name
      * @param description The metric's description
@@ -93,7 +93,7 @@ public class MetricDescriptorCache {
 
     /**
      * Retrieves the metric descriptor for the metric type
-     * 
+     *
      * @param metricType The {@link MetricType}
      * @param name the method name
      * @param description The metric's description
@@ -120,6 +120,7 @@ public class MetricDescriptorCache {
      */
     public void clear() {
         metricDescriptors.clear();
+        MetricService metricService = this.metricService;
         if (metricService == null) {
             return;
         }
