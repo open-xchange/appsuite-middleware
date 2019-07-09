@@ -111,7 +111,7 @@ public class CalendarEventRemoveStaleFolderReferencesTask extends UpdateTaskAdap
                     List<Integer> validIds = idsWithValidFolderReferences.get(entry.getKey());
                     for (Iterator<Integer> iterator = entry.getValue().iterator(); iterator.hasNext();) {
                         Integer id = iterator.next();
-                        if (false == validIds.contains(id)) {
+                        if (null == validIds || false == validIds.contains(id)) {
                             /*
                              * no other valid folder reference found, so all event data can be removed
                              */
