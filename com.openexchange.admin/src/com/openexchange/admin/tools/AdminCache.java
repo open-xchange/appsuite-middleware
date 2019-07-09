@@ -63,6 +63,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Base64;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -736,7 +737,7 @@ public class AdminCache {
                 if (user_pass_combination.length == 4) {
                     String salt = user_pass_combination[3];
                     if (Strings.isNotEmpty(salt)) {
-                        masterCredentials.setSalt(salt.getBytes());
+                        masterCredentials.setSalt(Base64.getUrlDecoder().decode(salt));
                     }
                 }
                 return masterCredentials;
