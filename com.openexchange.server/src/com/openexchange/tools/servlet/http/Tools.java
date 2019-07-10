@@ -335,8 +335,17 @@ public final class Tools {
     }
 
     /**
-     * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
-     * a download.
+     * The magic spell to disable caching... Sets <code>"Expires"</code>, <code>"Cache-Control"</code>, and <code>"Pragma"</code> headers to
+     * disable caching:
+     * <ul>
+     * <li><code>"Expires: "Sat, 6 May 1995 12:00:00 GMT"</code><br>Set to expire far in the past<br>&nbsp;</li>
+     * <li><code>"Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0"</code><br>Set standard HTTP/1.1 no-cache headers as well as IE extended HTTP/1.1 no-cache headers<br>&nbsp;</li>
+     * <li><code>"Pragma: no-cache"</code><br>Set standard HTTP/1.0 no-cache header<br>&nbsp;</li>
+     * </ul>
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Do <b>not</b> use these headers if response is directly written into servlet's output stream to initiate a download.
+     * </div>
      *
      * @param resp the servlet response.
      * @see #removeCachingHeader(HttpServletResponse)
@@ -348,8 +357,8 @@ public final class Tools {
     }
 
     /**
-     * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
-     * do not allow this header.
+     * Removes <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream, because then some
+     * Browsers do not allow this header.
      *
      * @param resp the servlet response.
      */
