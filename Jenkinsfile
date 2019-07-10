@@ -49,6 +49,10 @@ spec:
     }
     stages {
         stage('POT') {
+            when {
+                // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
+                expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.BRANCH_INDEXING) }
+            }
             tools {
                 ant 'ant'
             }
