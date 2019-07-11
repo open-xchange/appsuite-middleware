@@ -690,6 +690,24 @@ EOF
     if ! contains "onmouseleave" /opt/open-xchange/etc/globaleventhandlers.list; then
       sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
   fi
+
+  SCR=SCR-481
+  ox_scr_todo ${SCR} && {
+    pfile=/opt/open-xchange/etc/hazelcast.properties
+    pkey=com.openexchange.hazelcast.group.password
+    comment="# - ${pkey}"
+
+    if contains "${comment}" ${pfile}
+    then
+      sed -i -e "/^# If this is a single-node installation/,/^# - com.openexchange.hazelcast.network.interfaces/{
+        /${comment}/d
+      }" ${pfile}
+    fi
+
+    ox_remove_property ${pkey} ${pfile}
+    ox_scr_done ${SCR}
+  }
+
 fi
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
