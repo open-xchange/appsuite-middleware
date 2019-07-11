@@ -106,8 +106,6 @@ public class SchedJoulesRESTResponseParser extends AbstractRESTResponseParser {
 
         // Assert the 5xx codes
         switch (statusCode) {
-            case 500:
-                throw SchedJoulesAPIExceptionCodes.REMOTE_INTERNAL_SERVER_ERROR.create(httpResponse.getStatusLine().getReasonPhrase());
             case 503:
                 throw SchedJoulesAPIExceptionCodes.REMOTE_SERVICE_UNAVAILABLE.create(httpResponse.getStatusLine().getReasonPhrase());
         }

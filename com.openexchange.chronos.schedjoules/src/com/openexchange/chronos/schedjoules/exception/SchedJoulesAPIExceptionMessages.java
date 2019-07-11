@@ -64,10 +64,8 @@ final class SchedJoulesAPIExceptionMessages implements LocalizableStrings {
     public static final String NO_ACCESS_MSG = "You have no access to this calendar.";
     // The requested page was not found.
     public static final String PAGE_NOT_FOUND = "The requested page was not found.";
-    // The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
-    public static final String REMOTE_SERVICE_UNAVAILABLE_MSG = "The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.";
-    // An internal server error occurred on SchedJoules side. There is nothing we can do about it.
-    public static final String REMOTE_INTERNAL_SERVER_ERROR_MSG = "An internal server error occurred on SchedJoules side. There is nothing we can do about it.";
-    // A remote server error occurred on SchedJoules side. There is nothing we can do about it.
-    public static final String REMOTE_SERVER_ERROR_MSG = "A remote server error occurred on SchedJoules side. There is nothing we can do about it.";
+    // The remote calendar service is unavailable at the moment. Please try again later.
+    public static final String REMOTE_SERVICE_UNAVAILABLE_MSG = "The remote calendar service is unavailable at the moment. Please try again later.";
+    // An error occurred on the remote calendar service. Please try again later.
+    public static final String REMOTE_SERVER_ERROR_MSG = "An error occurred at the remote calendar service. Please try again later.";
 }

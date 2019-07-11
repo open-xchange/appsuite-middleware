@@ -117,17 +117,12 @@ public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
      */
     PAGE_NOT_FOUND("The requested page was not found.", SchedJoulesAPIExceptionMessages.PAGE_NOT_FOUND, CATEGORY_ERROR, 12),
     /**
-     * <li>The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.</li>
+     * <li>The remote calendar service is unavailable at the moment. Please try again later.</li>
      * <li>The remote service is unavailable at the moment: %1$s. Please try again later.</li>
      */
     REMOTE_SERVICE_UNAVAILABLE("The remote service is unavailable at the moment: %1$s. Please try again later.", SchedJoulesAPIExceptionMessages.REMOTE_SERVICE_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 13),
     /**
-     * <li>An internal server error occurred on SchedJoules side. There is nothing we can do about it.</li>
-     * <li>A remote internal server error occurred: %1$s</li>
-     */
-    REMOTE_INTERNAL_SERVER_ERROR("A remote internal server error occurred: %1$s", SchedJoulesAPIExceptionMessages.REMOTE_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 14),
-    /**
-     * <li>A remote server error occurred on SchedJoules side. There is nothing we can do about it.</li>
+     * <li>An error occurred on the remote calendar service. Please try again later.</li>
      * <li>A remote server error occurred: %1$s</li>
      */
     REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", SchedJoulesAPIExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 15),
