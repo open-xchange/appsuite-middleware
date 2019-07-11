@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizerSchedulingResource;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getResolvableEntities;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
@@ -59,6 +60,7 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +70,6 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -166,15 +167,12 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         }
         storage.getAlarmTriggerStorage().insertTriggers(createdEvent, alarmsPerUserId);
         /*
-         * prepare invitation messages
-         */
-        if (CalendarUtils.isOrganizer(createdEvent, calendarUserId) && false == isNullOrEmpty(newEvent.getAttendees())) {
-            resultTracker.trackSchedulingRequests(createdEvent);
-        }
-        /*
-         * track creation & return result
+         * track creation, prepare scheduling messages & return result
          */
         resultTracker.trackCreation(createdEvent);
+        if (isOrganizerSchedulingResource(createdEvent, calendarUserId)) {
+            resultTracker.trackSchedulingRequests(Collections.singletonList(createdEvent));
+        }
         return resultTracker.getResult();
     }
 

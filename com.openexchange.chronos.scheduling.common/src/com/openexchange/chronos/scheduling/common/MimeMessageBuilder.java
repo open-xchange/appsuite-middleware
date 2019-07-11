@@ -172,7 +172,7 @@ public class MimeMessageBuilder {
     public MimeMessageBuilder setSubject(UserService userService, int contextId) throws MessagingException, OXException {
         Locale locale = Utils.getLocale(userService, contextId, message.getOriginator(), message.getRecipient());
         StringHelper helper = StringHelper.valueOf(locale);
-        String summary = MailUtils.getSummary(message.getResource().getCalendarObject());
+        String summary = MailUtils.getSummary(message.getResource().getEvents());
         String subject;
         switch (message.getMethod()) {
             case ADD:
@@ -287,7 +287,7 @@ public class MimeMessageBuilder {
             return this;
         }
 
-        List<Event> calendarObject = message.getResource().getCalendarObject();
+        List<Event> calendarObject = message.getResource().getEvents();
         String objectId = calendarObject.get(0).getId();
         String folderId;
         if (null != calendarObject.get(0).getFolderId()) {
@@ -437,7 +437,7 @@ public class MimeMessageBuilder {
         if (Attendee.class.isAssignableFrom(message.getOriginator().getClass())) {
             return ((Attendee) message.getOriginator()).getPartStat();
         }
-        for (Event e : message.getResource().getCalendarObject()) {
+        for (Event e : message.getResource().getEvents()) {
             Attendee attendee = CalendarUtils.find(e.getAttendees(), message.getOriginator().getEntity());
             if (null != attendee) {
                 return attendee.getPartStat();

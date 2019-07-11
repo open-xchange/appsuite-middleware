@@ -50,13 +50,12 @@
 package com.openexchange.chronos.impl.scheduling;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.scheduling.MessageBuilder;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.service.CalendarSession;
@@ -84,47 +83,20 @@ public class CreateMessageBuilder extends AbstractMessageBuilder {
     }
 
     /**
-     * Builds invitation messages for each given attendee
+     * Builds invitation messages for all attendees (master and exceptions)
      *
-     * @param createdEvent The created event
-     * @param attendees The attendees to build a message for
+     * @param createdEvents The created events
      * @return A {@link List} of messages
      * @throws OXException In case message can't be build
      */
-    public List<SchedulingMessage> build(Event createdEvent, List<Attendee> attendees) throws OXException {
-        if (isEmpty(attendees) || inITipTransaction()) {
-            return messages;
-        }
-        for (Attendee attendee : attendees) {
-            //@formatter:off
-            messages.add(new MessageBuilder()
-                .setMethod(SchedulingMethod.REQUEST)
-                .setOriginator(originator)
-                .setRecipient(attendee)
-                .setResource(new DefaultCalendarObjectResource(serviceLookup, session.getContextId(), createdEvent))
-                .setDescription(descriptionService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(),createdEvent))
-                .setAdditionals(getAdditionalsFromSession())
-                .build());
-            //@formatter:on
-        }
-        return messages;
-    }
-
-    /**
-     * Builds invitation messages for a series
-     *
-     * @param events The event of the series
-     * @return A {@link List} of messages
-     * @throws OXException In case message can't be build
-     */
-    public List<SchedulingMessage> buildForSeries(List<Event> events) throws OXException {
-        if (isEmpty(events) || inITipTransaction()) {
+    public List<SchedulingMessage> build(List<Event> createdEvents) throws OXException {
+        if (isEmpty(createdEvents) || inITipTransaction()) {
             return messages;
         }
         /*
          * Generate invitation for all attendees in master event
          */
-        List<Event> sorted = CalendarUtils.sortSeriesMasterFirst(events);
+        List<Event> sorted = CalendarUtils.sortSeriesMasterFirst(createdEvents);
         Event masterEvent = sorted.get(0);
         for (Attendee attendee : masterEvent.getAttendees()) {
             //@formatter:off
@@ -132,8 +104,9 @@ public class CreateMessageBuilder extends AbstractMessageBuilder {
                 .setMethod(SchedulingMethod.REQUEST)
                 .setOriginator(originator)
                 .setRecipient(attendee)
-                .setResource(new DefaultCalendarObjectResource(serviceLookup, session.getContextId(), events))
+                .setResource(new DefaultCalendarObjectResource(createdEvents))
                 .setDescription(descriptionService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), masterEvent))
+                .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
                 .setAdditionals(getAdditionalsFromSession())
                 .build());
             //@formatter:on
@@ -144,14 +117,52 @@ public class CreateMessageBuilder extends AbstractMessageBuilder {
          */
         List<Attendee> notifiedAttendees = new ArrayList<>(masterEvent.getAttendees());
         for (int i = 1; i < sorted.size(); i++) {
-            Event e = sorted.get(i);
-            for (Attendee a : e.getAttendees()) {
-                if (false == CalendarUtils.contains(notifiedAttendees, a)) {
-                    build(e, Collections.singletonList(a));
+            Event event = sorted.get(i);
+            for (Attendee attendee : event.getAttendees()) {
+                if (false == CalendarUtils.contains(notifiedAttendees, attendee)) {
+                    build(event, attendee);
                 }
             }
         }
 
+        return messages;
+    }
+
+    /**
+     * Builds invitation messages for each given attendee
+     *
+     * @param createdEvent The created event
+     * @param attendees The attendees to build a message for
+     * @return A {@link List} of messages
+     * @throws OXException In case message can't be build
+     */
+    List<SchedulingMessage> build(Event createdEvent, List<Attendee> attendees) throws OXException {
+        for (Attendee a : attendees) {
+            build(createdEvent, a);
+        }
+        return messages;
+    }
+
+    /**
+     * Builds invitation messages for each given attendee
+     *
+     * @param createdEvent The created event
+     * @param attendee The attendee to build a message for
+     * @return A {@link List} of messages
+     * @throws OXException In case message can't be build
+     */
+    private List<SchedulingMessage> build(Event createdEvent, Attendee attendee) throws OXException {
+        //@formatter:off
+        messages.add(new MessageBuilder()
+            .setMethod(SchedulingMethod.REQUEST)
+            .setOriginator(originator)
+            .setRecipient(attendee)
+            .setResource(new DefaultCalendarObjectResource(createdEvent))
+            .setDescription(descriptionService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), createdEvent))
+            .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
+            .setAdditionals(getAdditionalsFromSession())
+            .build());
+        //@formatter:on
         return messages;
     }
 

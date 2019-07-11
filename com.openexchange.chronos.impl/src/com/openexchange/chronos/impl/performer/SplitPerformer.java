@@ -257,7 +257,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
                 resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));
             }
         }
-        resultTracker.trackSchedulingRequestAfterSplit(createdSeries);
+        resultTracker.trackSchedulingRequests(createdSeries);
         
         /*
          * update the original event series; also decorate original change exceptions on or after the split with the related-to marker

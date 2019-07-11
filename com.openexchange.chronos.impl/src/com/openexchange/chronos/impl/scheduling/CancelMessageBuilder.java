@@ -49,11 +49,13 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.scheduling.MessageBuilder;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.service.CalendarSession;
@@ -81,30 +83,104 @@ public class CancelMessageBuilder extends AbstractMessageBuilder {
     }
 
     /**
-     * 
-     * Build an cancel message for each given attendee
+     * Build an cancel message for all attendees within the events
      *
-     * @param deleted The deleted event
-     * @param attendees The attendees to build a message for
+     * @param deletedEvents The deleted events
      * @return A {@link List} of messages
      * @throws OXException
      */
-    public List<SchedulingMessage> build(Event deleted, List<Attendee> attendees) throws OXException {
-        if (isEmpty(attendees) || inITipTransaction()) {
+    public List<SchedulingMessage> build(List<Event> deletedEvents) throws OXException {
+        if (isEmpty(deletedEvents) || inITipTransaction()) {
             return messages;
         }
+        List<Event> sorted = CalendarUtils.sortSeriesMasterFirst(deletedEvents);
+        Event master = sorted.get(0);
+        build(deletedEvents, master.getAttendees());
+
+        /*
+         * Check if any additional attendees need to be informed about the cancellation
+         */
+        List<Attendee> notifiedAttendees = new ArrayList<>(master.getAttendees());
+        for (int i = 1; i < sorted.size(); i++) {
+            Event e = sorted.get(i);
+            for (Attendee a : e.getAttendees()) {
+                if (false == CalendarUtils.contains(notifiedAttendees, a)) {
+                    build(e, a);
+                }
+            }
+        }
+
+        return messages;
+    }
+
+    /**
+     * Build an cancel message for each given attendee
+     *
+     * @param deletedEvents The deleted events
+     * @param attendees The attendees to inform
+     * @return A {@link List} of messages
+     * @throws OXException
+     */
+    public List<SchedulingMessage> build(List<Event> deletedEvents, List<Attendee> attendees) throws OXException {
+        if (isEmpty(deletedEvents) || inITipTransaction()) {
+            return messages;
+        }
+        /*
+         * Generate cancellation messages for all attendees in the master event
+         */
+        List<Event> sorted = CalendarUtils.sortSeriesMasterFirst(deletedEvents);
+        Event masterEvent = sorted.get(0);
         for (Attendee attendee : attendees) {
             //@formatter:off
             messages.add(new MessageBuilder()
                 .setMethod(SchedulingMethod.CANCEL)
                 .setOriginator(originator)
                 .setRecipient(attendee)
-                .setResource(new AttachmentSuppressingResource(deleted))
-                .setDescription(descriptionService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), deleted))
+                .setResource(new DefaultCalendarObjectResource(deletedEvents))
+                .setDescription(descriptionService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), masterEvent))
                 .setAdditionals(getAdditionalsFromSession())
                 .build());
             //@formatter:on
         }
+        return messages;
+    }
+
+    /**
+     * 
+     * Build an cancel message for each given attendee
+     *
+     * @param deleted The deleted event
+     * @param attendee The attendee to build a message for
+     * @return A {@link List} of messages
+     * @throws OXException
+     */
+    List<SchedulingMessage> build(Event deleted, List<Attendee> attendees) throws OXException {
+        for (Attendee attendee : attendees) {
+            build(deleted, attendee);
+        }
+        return messages;
+    }
+
+    /**
+     * 
+     * Build an cancel message for each given attendee
+     *
+     * @param deleted The deleted event
+     * @param attendee The attendee to build a message for
+     * @return A {@link List} of messages
+     * @throws OXException
+     */
+    private List<SchedulingMessage> build(Event deleted, Attendee attendee) throws OXException {
+        //@formatter:off
+        messages.add(new MessageBuilder()
+            .setMethod(SchedulingMethod.CANCEL)
+            .setOriginator(originator)
+            .setRecipient(attendee)
+            .setResource(new DefaultCalendarObjectResource(deleted))
+            .setDescription(descriptionService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), deleted))
+            .setAdditionals(getAdditionalsFromSession())
+            .build());
+        //@formatter:on
         return messages;
     }
 

@@ -47,13 +47,10 @@
  *
  */
 
-package com.openexchange.chronos.scheduling;
+package com.openexchange.chronos;
 
-import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.Event;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link CalendarObjectResource}
@@ -62,23 +59,47 @@ import com.openexchange.exception.OXException;
  * @since v7.10.3
  */
 public interface CalendarObjectResource {
+    
+    /**
+     * Gets the common unique identifier of this calendar object resource.
+     * 
+     * @return The unique identifier
+     */
+    String getUid();
+    
+    /**
+     * Gets the common organizer of this calendar object resource.
+     * 
+     * @return The organizer, or <code>null</code> if not set
+     */
+    Organizer getOrganizer();
+    
+    /**
+     * Gets all events in this calendar object resource.
+     * 
+     * @return The events
+     */
+    List<Event> getEvents();
 
     /**
-     * Get the calendar objects
+     * Gets the series master event in case it is available in this calendar object resource. 
      * 
-     * @return The calendar objects as {@link List} of {@link Event}
+     * @return The series master event, or <code>null</code> if not available
      */
-    @NonNull
-    List<Event> getCalendarObject();
+    Event getSeriesMaster();
 
     /**
-     * Get the file attachments of the scheduling object, see {@link #getCalendarObject()}
+     * Gets all overridden instances / change exceptions contained in this calendar object resource. 
      * 
-     * @param managedId The identifier of the managed file
-     * @return The attachment as {@link InputStream}
-     * @throws OXException In case attachment can't be loaded
+     * @return The change exceptions, or an empty list if there are none
      */
-    @NonNull
-    InputStream getAttachmentData(int managedId) throws OXException;
+    List<Event> getChangeExceptions();
+
+    /**
+     * Gets the (maximum) timestamp of all contained events in this calendar object resource.
+     * 
+     * @return The timestamp
+     */
+    Date getTimestamp();
 
 }

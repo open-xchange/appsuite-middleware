@@ -86,10 +86,12 @@ import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -755,6 +757,39 @@ public class Utils {
          */
         long usage = storage.getEventStorage().countEvents();
         return new Quota(QuotaType.AMOUNT, limit, usage);
+    }
+
+    /**
+     * Initializes a {@link DelegatingEvent} that overrides the participation status of a attendee matching a specific calendar user.
+     * 
+     * @param event The event to override the participation status in
+     * @param calendarUser The calendar user to override the participation status for
+     * @param partStat The participation status to indicate for the matching attendee
+     * @return A delegating event that overrides the participation status accordingly
+     */
+    public static Event overridePartStat(Event event, CalendarUser calendarUser, ParticipationStatus partStat) {
+        return new DelegatingEvent(event) {
+
+            @Override
+            public List<Attendee> getAttendees() {
+                List<Attendee> attendees = super.getAttendees();
+                if (null != attendees && 0 < attendees.size()) {
+                    List<Attendee> modifiedAttendees = new ArrayList<Attendee>(attendees.size());
+                    for (Attendee attendee : attendees) {
+                        if (matches(calendarUser, attendee)) {
+                            try {
+                                attendee = AttendeeMapper.getInstance().copy(attendee, null, (AttendeeField[]) null);
+                            } catch (OXException e) {
+                                org.slf4j.LoggerFactory.getLogger(Utils.class).warn("Unexpected error copying attendee data", e);
+                            }
+                            attendee.setPartStat(partStat);
+                        }
+                        modifiedAttendees.add(attendee);
+                    }
+                }
+                return attendees;
+            }
+        };
     }
 
     /**

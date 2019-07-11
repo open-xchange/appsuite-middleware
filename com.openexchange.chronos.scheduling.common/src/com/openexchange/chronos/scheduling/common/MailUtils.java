@@ -186,21 +186,6 @@ public class MailUtils {
      * @return The unique identifier or <code>null</code> if not found
      * @throws OXException If mapping for field {@link EventField#UID} can't be found
      */
-    public static String getUid(List<Event> events) throws OXException {
-        Object field = getEventField(events, EventField.UID);
-        if (null != field) {
-            return field.toString();
-        }
-        return null;
-    }
-
-    /**
-     * Get the unique identifier of a specific event.
-     *
-     * @param events The events to search in
-     * @return The unique identifier or <code>null</code> if not found
-     * @throws OXException If mapping for field {@link EventField#UID} can't be found
-     */
     public static String getSummary(List<Event> events) throws OXException {
         Object field = getEventField(events, EventField.SUMMARY);
         if (null != field) {

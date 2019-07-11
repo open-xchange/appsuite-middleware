@@ -57,8 +57,8 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
-import com.openexchange.chronos.scheduling.MessageBuilder;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.changes.Description;
@@ -200,8 +200,9 @@ public class UpdateMessageBuilder extends AbstractMessageBuilder {
                 .setMethod(SchedulingMethod.REQUEST)
                 .setOriginator(originator)
                 .setRecipient(attendee)
-                .setResource(new DefaultCalendarObjectResource(serviceLookup, session.getContextId(), eventUpdate.getUpdate()))
+                .setResource(new DefaultCalendarObjectResource(eventUpdate.getUpdate()))
                 .setDescription(f.getDescription(attendee, eventUpdate))
+                .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
                 .setAdditionals(getAdditionalsFromSession())
                 .build());
             //@formatter:on

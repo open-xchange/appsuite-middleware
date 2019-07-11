@@ -52,11 +52,14 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizerSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -139,47 +142,35 @@ public class DeletePerformer extends AbstractUpdatePerformer {
             /*
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
-            List<Attendee> attendees = new ArrayList<>(originalEvent.getAttendees());
             requireDeletePermissions(originalEvent);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent);
             } else {
-                gatherAttendees(originalEvent, attendees);
                 delete(originalEvent);
             }
-
-            if (CalendarUtils.isOrganizer(originalEvent, calendarUserId)) {
-                /*
-                 * Cancel event or series
-                 */
-                resultTracker.trackSchedulingCancelation(originalEvent, attendees);
-            } else {
-                /*
-                 * Send a reply to the organizer, therefore decline for the user
-                 */
-                resultTracker.trackAttendeeDeclineScheduling(originalEvent);
-            }
-            return;
-        }
-        Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
-        if (null != userAttendee) {
+        } else {
             /*
              * deletion as one of the attendees
              */
+            Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
+            if (null == userAttendee) {
+                throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
+            }
             requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent, userAttendee);
             } else {
                 delete(originalEvent, userAttendee);
             }
-            resultTracker.trackSchedulingAttendeeUpdate(originalEvent, loadEventData(originalEvent.getId()));
-
-            return;
         }
         /*
-         * no delete permissions, otherwise
+         * prepare cancel or reply scheduling message representing the delete operation
          */
-        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
+        if (isOrganizerSchedulingResource(originalEvent, calendarUserId)) {
+            resultTracker.trackSchedulingCancellation(Collections.singletonList(originalEvent), collectAffectedAttendees(originalEvent));
+        } else if (isAttendeeSchedulingResource(originalEvent, calendarUserId)) {
+            resultTracker.trackAttendeeDeclineScheduling(Collections.singletonList(originalEvent));
+        }
     }
 
     /**
@@ -240,38 +231,40 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                         new Exception("Deletion of existing change exception not supported"), recurrenceId, new DefaultRecurrenceData(originalEvent));
                 } else {
                     /*
-                     * creation of new delete exception
+                     * create new delete exception in master & prepare cancel or reply scheduling message representing the delete operation
                      */
-                    Event exception = loadDeleteException(originalEvent, recurrenceId);
+                    Event virtualException = prepareException(originalEvent, recurrenceId, originalEvent.getId());
                     addDeleteExceptionDate(originalEvent, recurrenceId);
-                    if (CalendarUtils.isOrganizer(originalEvent, calendarUserId)) {
-                        resultTracker.trackSchedulingCancelation(exception);
-                    } else {
-                        /*
-                         * Send a reply to the organizer, therefore decline for the user
-                         */
-                        resultTracker.trackAttendeeDeclineScheduling(exception);
+                    if (isOrganizerSchedulingResource(originalEvent, calendarUserId)) {
+                        resultTracker.trackSchedulingCancellation(Collections.singletonList(virtualException));
+                    } else if (isAttendeeSchedulingResource(originalEvent, calendarUserId)) {
+                        resultTracker.trackAttendeeDeclineScheduling(Collections.singletonList(virtualException));
                     }
                 }
-                return;
             } else if (isSeriesException(originalEvent)) {
                 /*
-                 * deletion of existing change exception
+                 * delete existing change exception & prepare cancel or reply scheduling message representing the delete operation
                  */
                 deleteException(originalEvent);
-                resultTracker.trackSchedulingCancelation(originalEvent);
-                return;
+                if (isOrganizerSchedulingResource(originalEvent, calendarUserId)) {
+                    resultTracker.trackSchedulingCancellation(Collections.singletonList(originalEvent));
+                } else if (isAttendeeSchedulingResource(originalEvent, calendarUserId)) {
+                    resultTracker.trackAttendeeDeclineScheduling(Collections.singletonList(originalEvent));
+                }
+            } else {
+                /*
+                 * unsupported, otherwise
+                 */
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
             }
+        } else {
             /*
-             * unsupported, otherwise
+             * deletion as one of the attendees
              */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
-        }
-        Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
-        if (null != userAttendee) {
-            /*
-             * deletion as attendee
-             */
+            Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
+            if (null == userAttendee) {
+                throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
+            }
             requireDeletePermissions(originalEvent, userAttendee);
             if (isSeriesMaster(originalEvent)) {
                 recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
@@ -293,24 +286,19 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
                     sendDeclineMessage(originalEvent, recurrenceId);
                 }
-                return;
             } else if (isSeriesException(originalEvent)) {
                 /*
                  * deletion of existing change exception
                  */
                 deleteException(originalEvent, userAttendee);
                 sendDeclineMessage(originalEvent, recurrenceId);
-                return;
+            } else {
+                /*
+                 * unsupported, otherwise
+                 */
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
             }
-            /*
-             * unsupported, otherwise
-             */
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(originalEvent.getId(), String.valueOf(recurrenceId));
         }
-        /*
-         * no delete permissions, otherwise
-         */
-        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
     }
 
     /**
@@ -320,8 +308,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceId The recurrence identifier of the occurrence to add
+     * @return The updated master event, or <code>null</code> if it's gone after the last occurrence was deleted
      */
-    private void addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceId) throws OXException {
+    private Event addDeleteExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceId) throws OXException {
         /*
          * build new set of delete exception dates
          */
@@ -343,38 +332,39 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * delete series master
              */
             delete(originalMasterEvent);
-        } else {
-            /*
-             * re-build exception date lists based on existing series master to guarantee consistency
-             */
-            SortedSet<RecurrenceId> changeExceptionDates = loadChangeExceptionDates(originalMasterEvent.getSeriesId());
-            for (RecurrenceId changeExceptionDate : changeExceptionDates) {
-                if (deleteExceptionDates.remove(changeExceptionDate)) {
-                    LOG.warn("Skipping {} in delete exception date collection due to existing change exception event.", changeExceptionDate);
-                }
-            }
-            /*
-             * update series master accordingly
-             */
-            resultTracker.rememberOriginalEvent(originalMasterEvent);
-            Event eventUpdate = new Event();
-            eventUpdate.setId(originalMasterEvent.getId());
-            eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
-            if (false == changeExceptionDates.equals(originalMasterEvent.getChangeExceptionDates())) {
-                eventUpdate.setChangeExceptionDates(changeExceptionDates);
-            }
-            if (CalendarUtils.isInternal(originalMasterEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
-                eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
-            }
-            Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
-            storage.getEventStorage().updateEvent(eventUpdate);
-            Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-            updateAlarmTrigger(originalMasterEvent, updatedMasterEvent);
-            /*
-             * track update of master in result
-             */
-            resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
+            return null;
         }
+        /*
+         * re-build exception date lists based on existing series master to guarantee consistency
+         */
+        SortedSet<RecurrenceId> changeExceptionDates = loadChangeExceptionDates(originalMasterEvent.getSeriesId());
+        for (RecurrenceId changeExceptionDate : changeExceptionDates) {
+            if (deleteExceptionDates.remove(changeExceptionDate)) {
+                LOG.warn("Skipping {} in delete exception date collection due to existing change exception event.", changeExceptionDate);
+            }
+        }
+        /*
+         * update series master accordingly
+         */
+        resultTracker.rememberOriginalEvent(originalMasterEvent);
+        Event eventUpdate = new Event();
+        eventUpdate.setId(originalMasterEvent.getId());
+        eventUpdate.setDeleteExceptionDates(deleteExceptionDates);
+        if (false == changeExceptionDates.equals(originalMasterEvent.getChangeExceptionDates())) {
+            eventUpdate.setChangeExceptionDates(changeExceptionDates);
+        }
+        if (CalendarUtils.isInternal(originalMasterEvent.getOrganizer(), CalendarUserType.INDIVIDUAL)) {
+            eventUpdate.setSequence(originalMasterEvent.getSequence() + 1);
+        }
+        Consistency.setModified(session, timestamp, eventUpdate, calendarUserId);
+        storage.getEventStorage().updateEvent(eventUpdate);
+        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
+        updateAlarmTrigger(originalMasterEvent, updatedMasterEvent);
+        /*
+         * track update of master in result
+         */
+        resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
+        return updatedMasterEvent;
     }
 
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
@@ -408,19 +398,21 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      *
      * @param originalExceptionEvent The original exception event
      * @param originalAttendee The original attendee to delete
+     * @return The updated event
      */
-    private void deleteException(Event originalExceptionEvent, Attendee originalAttendee) throws OXException {
+    private Event deleteException(Event originalExceptionEvent, Attendee originalAttendee) throws OXException {
         /*
          * delete the attendee in the exception
          */
         String seriesId = originalExceptionEvent.getSeriesId();
-        delete(originalExceptionEvent, originalAttendee);
+        Event updatedEvent = delete(originalExceptionEvent, originalAttendee);
         /*
          * 'touch' the series master accordingly & track result
          */
         Event originalMasterEvent = loadEventData(seriesId);
         touch(seriesId);
         resultTracker.trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
+        return updatedEvent;
     }
 
     /**
@@ -431,20 +423,24 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @throws OXException See {@link #sendDeclineMessage(Event, Event)}
      */
     private void sendDeclineMessage(Event originalEvent, RecurrenceId recurrenceId) throws OXException {
-        resultTracker.trackAttendeeDeclineScheduling(loadDeleteException(originalEvent, recurrenceId));
+        Event virtualException = prepareException(originalEvent, recurrenceId, originalEvent.getId());
+        resultTracker.trackAttendeeDeclineScheduling(Collections.singletonList(virtualException));
     }
 
     /**
-     * Gathers all attendees that need to be notified of the deletion.
+     * Collects all attendees that need to be notified of a deletion.
      * <p>
      * Adds attendees that might be added in change exceptions of a series.
      *
      * @param originalEvent The original event
-     * @param attendees A {@link List} of attendees
      * @return A {@link List} of {@link Attendee} that need to be notified about the deletion
      * @throws OXException
      */
-    private List<Attendee> gatherAttendees(Event originalEvent, List<Attendee> attendees) throws OXException {
+    private List<Attendee> collectAffectedAttendees(Event originalEvent) throws OXException {
+        List<Attendee> attendees = new ArrayList<Attendee>();
+        if (null != originalEvent.getAttendees()) {
+            attendees.addAll(originalEvent.getAttendees());
+        }
         if (isSeriesMaster(originalEvent)) {
             for (Event exception : loadExceptionData(originalEvent)) {
                 for (Attendee attendee : exception.getAttendees()) {
@@ -452,9 +448,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                         attendees.add(attendee);
                     }
                 }
-
             }
         }
         return attendees;
     }
+
 }

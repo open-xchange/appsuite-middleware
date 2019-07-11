@@ -49,60 +49,44 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.scheduling.CalendarObjectResource;
+import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AttachmentSuppressingResource}
+ * {@link AttachmentDataProvider}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.3
  */
-public class AttachmentSuppressingResource implements CalendarObjectResource {
+public class AttachmentDataProvider {
 
-    private List<Event> events;
-
-    /**
-     * Initializes a new {@link AttachmentSuppressingResource}.
-     * 
-     * @param event The event
-     */
-    public AttachmentSuppressingResource(Event event) {
-        this(Collections.singletonList(event));
-    }
+    private final ServiceLookup services;
+    private final int contextId;
 
     /**
-     * Initializes a new {@link AttachmentSuppressingResource}.
+     * Initializes a new {@link AttachmentDataProvider}.
      * 
-     * @param events The list of events
+     * @param services A service lookup reference
+     * @param contextId The context identifier
      */
-    public AttachmentSuppressingResource(List<Event> events) {
-        this.events = new LinkedList<>(events);
+    public AttachmentDataProvider(ServiceLookup services, int contextId) {
+        super();
+        this.services = services;
+        this.contextId = contextId;
     }
 
-    @SuppressWarnings("null")
-    @Override
-    @NonNull
-    public List<Event> getCalendarObject() {
-        return events;
-    }
-
-    @Override
-    @NonNull
     public InputStream getAttachmentData(int managedId) throws OXException {
-        String id = null;
-        if (null != getCalendarObject().get(0)) {
-            id = getCalendarObject().get(0).getId();
-        }
-        throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), id);
+        return new OSGiCalendarStorageOperation<InputStream>(services, contextId, Utils.ACCOUNT_ID) {
+
+            @Override
+            protected InputStream call(CalendarStorage storage) throws OXException {
+                return storage.getAttachmentStorage().loadAttachmentData(managedId);
+            }
+        }.executeQuery();
     }
 
 }

@@ -104,12 +104,16 @@ import com.openexchange.chronos.impl.scheduling.ReplyMessageBuilder;
 import com.openexchange.chronos.impl.scheduling.UpdateMessageBuilder;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.UserService;
 
 /**
  * {@link ResultTracker}
@@ -342,21 +346,11 @@ public class ResultTracker {
     /**
      * Generates and tracks a scheduling request messages
      *
-     * @param createdEvent The created event
+     * @param createdEvents The created events
      * @throws OXException If generation fails
      */
-    public void trackSchedulingRequests(Event createdEvent) throws OXException {
-        trackMessage(new CreateMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(createdEvent, createdEvent.getAttendees()));
-    }
-
-    /**
-     * Generates and tracks a scheduling request messages after an series was splitted
-     *
-     * @param events A {@link List} of created events with the same UID
-     * @throws OXException If generation fails
-     */
-    public void trackSchedulingRequestAfterSplit(List<Event> events) throws OXException {
-        trackMessage(new CreateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildForSeries(events));
+    public void trackSchedulingRequests(List<Event> createdEvents) throws OXException {
+        trackMessage(new CreateMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(createdEvents));
     }
 
     /**
@@ -364,11 +358,11 @@ public class ResultTracker {
      * <p>
      * <b>Note:</b> This is not a decline! Use only as organizer or on behalf of the organizer
      *
-     * @param deleted The deleted event
+     * @param deletedEvents The deleted event
      * @throws OXException If generation fails
      */
-    public void trackSchedulingCancelation(Event deleted) throws OXException {
-        trackSchedulingCancelation(deleted, deleted.getAttendees());
+    public void trackSchedulingCancellation(List<Event> deletedEvents) throws OXException {
+        trackMessage(new CancelMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(deletedEvents));
     }
 
     /**
@@ -376,16 +370,16 @@ public class ResultTracker {
      * <p>
      * <b>Note:</b> This is not a decline! Use only as organizer or on behalf of the organizer
      *
-     * @param deleted The deleted event
+     * @param deletedEvents The deleted event
      * @param attendees The list of attendees to send the cancel to
      * @throws OXException If generation fails
      */
-    public void trackSchedulingCancelation(Event deleted, List<Attendee> attendees) throws OXException {
-        trackMessage(new CancelMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(deleted, attendees));
+    public void trackSchedulingCancellation(List<Event> deletedEvents, List<Attendee> attendees) throws OXException {
+        trackMessage(new CancelMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(deletedEvents, attendees));
     }
 
     /**
-     * Generates and tracks a scheduling update messages. 
+     * Generates and tracks a scheduling update messages.
      * Does generate invitation or cancel messages for added or removed attendees, too.
      *
      * @param original The original event
@@ -445,33 +439,90 @@ public class ResultTracker {
     /**
      * Generates and tracks a decline message for the current user
      *
-     * @param event The event to decline with untouched attendees
+     * @param toDecline The events to decline with untouched attendees
      * @throws OXException In case copying of the attendee or sending fails
      */
-    public void trackAttendeeDeclineScheduling(Event event) throws OXException {
-        Attendee updatedAttendee = AttendeeMapper.getInstance().copy(CalendarUtils.find(event.getAttendees(), calendarUser), null, (AttendeeField[]) null);
-        updatedAttendee.setHidden(true);
-        updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
-        updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
+    public void trackAttendeeDeclineScheduling(List<Event> toDecline) throws OXException {
+        if (null == toDecline || toDecline.isEmpty()) {
+            return;
+        }
 
-        List<Attendee> attendees = new LinkedList<>(event.getAttendees());
-        attendees.remove(CalendarUtils.find(attendees, calendarUser));
-        attendees.add(updatedAttendee);
-        Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
-        copy.setAttendees(attendees);
+        /*
+         * Decline each given event for the calendar user
+         */
+        List<Event> copies = new LinkedList<Event>();
+        for (Event event : toDecline) {
+            List<Attendee> attendees = new LinkedList<>(event.getAttendees());
+            Attendee originator = CalendarUtils.find(event.getAttendees(), calendarUser);
 
-        trackSchedulingAttendeeUpdate(event, copy);
+            Attendee updatedAttendee = AttendeeMapper.getInstance().copy(originator, null, (AttendeeField[]) null);
+            updatedAttendee.setHidden(true);
+            updatedAttendee.setPartStat(ParticipationStatus.DECLINED);
+            updatedAttendee.setTransp(TimeTransparency.TRANSPARENT);
+            if (calendarUser.getEntity() != session.getUserId() && null == updatedAttendee.getSentBy()) {
+                /*
+                 * User is acting on behalf of the originator.
+                 */
+                User user = Services.getService(UserService.class, true).getUser(session.getUserId(), session.getContextId());
+                CalendarUser acting = new CalendarUser();
+                acting.setCn(user.getDisplayName());
+                acting.setEMail(user.getMail());
+                acting.setEntity(user.getId());
+                acting.setUri(CalendarUtils.getURI(user.getMail()));
+                updatedAttendee.setSentBy(acting);
+            }
+
+            attendees.remove(originator);
+            attendees.add(updatedAttendee);
+
+            Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
+            copy.setAttendees(attendees);
+            copies.add(copy);
+        }
+        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(CalendarUtils.sortSeriesMasterFirst(toDecline).get(0), copies));
     }
 
     /**
      * Generates and tracks a reply message to the organizer
      *
      * @param original The original event
-     * @param updated The updated event
+     * @param updated The updated events
      * @throws OXException If generation fails
      */
-    public void trackSchedulingAttendeeUpdate(Event original, Event updated) throws OXException {
-        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(original, updated));
+    public void trackSchedulingAttendeeUpdate(Event original, List<Event> updated) throws OXException {
+        List<Event> notify = new LinkedList<Event>();
+        for (Event event : updated) {
+            EventUpdate update = DefaultEventUpdate.builder().originalEvent(original).updatedEvent(event).considerUnset(true).build();
+            if (isNotifiableAttendeeUpdate(update.getAttendeeUpdates())) {
+                notify.add(event);
+            }
+        }
+        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(original, notify));
+    }
+
+    private static final AttendeeField[] ATTENDEE_FIELDS_TO_REPORT = { AttendeeField.PARTSTAT };
+
+    private boolean isNotifiableAttendeeUpdate(CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) {
+        if (null == attendeeUpdates || attendeeUpdates.isEmpty()) {
+            return false;
+        }
+        
+        if (null != attendeeUpdates.getAddedItems() && false == attendeeUpdates.getAddedItems().isEmpty()) {
+            return true;
+        }
+        if (null != attendeeUpdates.getRemovedItems() && false == attendeeUpdates.getRemovedItems().isEmpty()) {
+            return true;
+        }
+        if (null != attendeeUpdates.getUpdatedItems() && false == attendeeUpdates.getUpdatedItems().isEmpty()) {
+            List<? extends ItemUpdate<Attendee, AttendeeField>> updatedItems = attendeeUpdates.getUpdatedItems();
+            for (ItemUpdate<Attendee, AttendeeField> itemUpdate : updatedItems) {
+                if (itemUpdate.containsAnyChangeOf(ATTENDEE_FIELDS_TO_REPORT)) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
     }
 
     /**

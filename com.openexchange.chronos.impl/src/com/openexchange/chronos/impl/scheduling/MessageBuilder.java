@@ -47,13 +47,22 @@
  *
  */
 
-package com.openexchange.chronos.scheduling;
+package com.openexchange.chronos.impl.scheduling;
 
+import static com.openexchange.java.Autoboxing.I;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
+import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.exception.OXException;
 
@@ -70,6 +79,7 @@ public class MessageBuilder {
     CalendarUser recipient;
     CalendarObjectResource resource;
     Description description;
+    AttachmentDataProvider attachmentDataProvider;
     Map<String, Object> additionals = new HashMap<>();
 
     /**
@@ -124,13 +134,6 @@ public class MessageBuilder {
     }
 
     /**
-     * Sets the {@link Description}
-     *
-     * @param description The {@link Description} to set
-     * @return This {@link MessageBuilder} instance
-     */
-
-    /**
      * Set the description for the message
      *
      * @param description The {@link Description}
@@ -138,6 +141,17 @@ public class MessageBuilder {
      */
     public MessageBuilder setDescription(Description description) {
         this.description = description;
+        return this;
+    }
+
+    /**
+     * Set the attachment data provider for the message
+     *
+     * @param attachmentDataProvider The attachment data provider
+     * @return This {@link MessageBuilder} instance
+     */
+    public MessageBuilder setAttachmentDataProvider(AttachmentDataProvider attachmentDataProvider) {
+        this.attachmentDataProvider = attachmentDataProvider;
         return this;
     }
 
@@ -182,6 +196,7 @@ class Message implements SchedulingMessage {
     private final @NonNull CalendarUser recipient;
     private final @NonNull CalendarObjectResource resource;
     private final @NonNull Description description;
+    private final AttachmentDataProvider attachmentDataProvider;
     private final Map<String, Object> additionals;
 
     /**
@@ -197,6 +212,7 @@ class Message implements SchedulingMessage {
         this.recipient = notNull(builder.recipient);
         this.resource = notNull(builder.resource);
         this.description = notNull(builder.description);
+        this.attachmentDataProvider = builder.attachmentDataProvider;
         this.additionals = builder.additionals;
     }
 
@@ -228,6 +244,20 @@ class Message implements SchedulingMessage {
     @NonNull
     public Description getDescription() {
         return description;
+    }
+
+    @Override
+    public InputStream getAttachmentData(int managedId) throws OXException {
+        List<Event> calendarObject = getResource().getEvents();
+        Check.containsAttachment(calendarObject, managedId);
+        if (null == attachmentDataProvider) {
+            String id = null;
+            if (null != calendarObject.get(0)) {
+                id = calendarObject.get(0).getId();
+            }
+            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), id);
+        }
+        return attachmentDataProvider.getAttachmentData(managedId);
     }
 
     @Override

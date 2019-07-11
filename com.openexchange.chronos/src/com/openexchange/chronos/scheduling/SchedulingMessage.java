@@ -49,10 +49,13 @@
 
 package com.openexchange.chronos.scheduling;
 
+import java.io.InputStream;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.scheduling.changes.Description;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SchedulingMessage} - A message containing all relevant information for scheduling / iTIP
@@ -108,6 +111,15 @@ public interface SchedulingMessage {
      */
     @NonNull
     Description getDescription();
+
+    /**
+     * Gets the binary attachment data for one of the attachments referenced by the calendar object resource.
+     * 
+     * @param managedId The identifier of the managed attachment
+     * @return The attachment as {@link InputStream}
+     * @throws OXException In case attachment can't be loaded
+     */
+    InputStream getAttachmentData(int managedId) throws OXException;
 
     /**
      * Get additional information.

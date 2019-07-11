@@ -49,11 +49,18 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
-import com.openexchange.chronos.scheduling.MessageBuilder;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.service.CalendarSession;
@@ -84,31 +91,57 @@ public class ReplyMessageBuilder extends AbstractMessageBuilder {
      * 
      * Builds an reply message for the organizer
      *
-     * @param original The original event
-     * @param updated The updated event
+     * @param originalsToUpdated A map containing the original events mapped to the updated ones
      * @return A {@link List} of messages
      * @throws OXException
      */
-    public List<SchedulingMessage> build(Event original, Event updated) throws OXException {
+    public List<SchedulingMessage> build(Event original, List<Event> updated) throws OXException {
+        if (inITipTransaction() || isEmpty(updated)) {
+            return messages;
+        }
         //@formatter:off
         messages.add(new MessageBuilder()
             .setMethod(SchedulingMethod.REPLY)
             .setOriginator(originator)
-            .setRecipient(updated.getOrganizer())
-            .setResource(new AttachmentSuppressingResource(updated))
+            .setRecipient(original.getOrganizer())
+            .setResource(new DefaultCalendarObjectResource(ensureSingleAttendee(updated)))
             .setDescription(descriptionService.describeReply(
                 session.getContextId(), 
                 originator, 
-                updated.getOrganizer(),
+                original.getOrganizer(),
                 getCommentForRecipient(),
                 DefaultEventUpdate.builder()
                     .considerUnset(false)
                     .originalEvent(original)
-                    .updatedEvent(updated)
+                    .updatedEvent(CalendarUtils.sortSeriesMasterFirst(updated).get(0))
                     .build()))
             .setAdditionals(getAdditionalsFromSession())
             .build());
         //@formatter:on
         return messages;
+    }
+
+    /**
+     * Ensures that only the originator is within the attendees list
+     * <p>
+     *
+     * @param events The events to strip
+     * @return Stripped events
+     * @throws OXException If copying fails
+     * @see <a href="https://tools.ietf.org/html/rfc5546#section-3.2.3">RFC5546 section-3.2.3</a>
+     */
+    private List<Event> ensureSingleAttendee(Collection<Event> events) throws OXException {
+        ArrayList<Event> stripped = new ArrayList<Event>(events.size());
+        for (Event e : events) {
+            Event copy = EventMapper.getInstance().copy(e, null, (EventField[]) null);
+            /*
+             * Ensure only acting user is within the attendees list
+             */
+            Attendee attendee = CalendarUtils.find(e.getAttendees(), originator);
+            copy.setAttendees(Collections.singletonList(attendee));
+            stripped.add(copy);
+
+        }
+        return stripped;
     }
 }

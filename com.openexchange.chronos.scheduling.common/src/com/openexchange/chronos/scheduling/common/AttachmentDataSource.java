@@ -56,7 +56,7 @@ import javax.activation.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attachment;
-import com.openexchange.chronos.scheduling.CalendarObjectResource;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.exception.OXException;
 
 /**
@@ -69,18 +69,18 @@ public class AttachmentDataSource implements DataSource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AttachmentDataSource.class);
 
-    private CalendarObjectResource calendarObjectResource;
+    private SchedulingMessage schedulingMessage;
     private Attachment attachment;
 
     /**
      * Initializes a new {@link AttachmentDataSource}.
      * 
-     * @param calendarObjectResource The {@link CalendarObjectResource} to get the attachments data from
+     * @param schedulingMessage The underlying scheduling message
      * @param attachment The {@link Attachment} to load
      */
-    public AttachmentDataSource(CalendarObjectResource calendarObjectResource, Attachment attachment) {
+    public AttachmentDataSource(SchedulingMessage schedulingMessage, Attachment attachment) {
         super();
-        this.calendarObjectResource = calendarObjectResource;
+        this.schedulingMessage = schedulingMessage;
         this.attachment = attachment;
     }
 
@@ -97,7 +97,7 @@ public class AttachmentDataSource implements DataSource {
         }
 
         try {
-            return calendarObjectResource.getAttachmentData(attachment.getManagedId());
+            return schedulingMessage.getAttachmentData(attachment.getManagedId());
         } catch (OXException e) {
             LOGGER.info("Unable to retrive attachment from storage", e);
             throw new IOException(e.getMessage(), e);

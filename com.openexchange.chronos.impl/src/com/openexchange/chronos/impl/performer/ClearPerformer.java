@@ -217,12 +217,11 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         /*
          * Notify about cancellation of event or attendee
          */
-        for (Event event : idsToCancel.values()) {
-            if (CalendarUtils.isOrganizer(event, calendarUserId)) {
-                resultTracker.trackSchedulingCancelation(event);
-            } else {
-                resultTracker.trackAttendeeDeclineScheduling(event);
-            }
+        List<Event> events = new ArrayList<>(idsToCancel.values());
+        if (CalendarUtils.isOrganizer(events.get(0), calendarUserId)) {
+            resultTracker.trackSchedulingCancellation(events);
+        } else {
+            resultTracker.trackAttendeeDeclineScheduling(events);
         }
         /*
          * track deletions in result
@@ -269,7 +268,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
             touch(originalEvent.getId());
             Event updatedEvent = loadEventData(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, updatedEvent);
-            resultTracker.trackAttendeeDeclineScheduling(originalEvent);
+            resultTracker.trackAttendeeDeclineScheduling(Collections.singletonList(originalEvent));
         }
     }
 

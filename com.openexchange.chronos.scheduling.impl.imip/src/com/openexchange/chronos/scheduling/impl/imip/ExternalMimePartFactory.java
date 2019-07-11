@@ -69,13 +69,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.scheduling.CalendarObjectResource;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.common.AbstractMimePartFactory;
@@ -176,7 +176,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
             default:
                 break;
         }
-        for (Event e : message.getResource().getCalendarObject()) {
+        for (Event e : message.getResource().getEvents()) {
             if (e.containsAttachments() && null != e.getAttachments() && false == e.getAttachments().isEmpty()) {
                 for (Attachment a : e.getAttachments()) {
                     if (a.getManagedId() > 0) {
@@ -221,7 +221,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         CalendarExport export = iCalService.exportICal(iCalService.initParameters());
         export.setMethod(message.getMethod().name());
 
-        for (Event e : message.getResource().getCalendarObject()) {
+        for (Event e : message.getResource().getEvents()) {
             Event event = EventMapper.getInstance().copy(e, new Event(), (EventField[]) null);
             switch (message.getMethod()) {
                 case REPLY:
@@ -297,7 +297,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
      * @throws OXException In case of error
      */
     private MimeMultipart generateAttachmentPart(MimeMultipart multipart) throws OXException {
-        for (Event event : message.getResource().getCalendarObject()) {
+        for (Event event : message.getResource().getEvents()) {
             if (false == event.containsAttachments() || event.getAttachments().isEmpty()) {
                 continue;
             }
@@ -334,7 +334,7 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
         }
         ct = new ContentType(mimeType);
 
-        bodyPart.setDataHandler(new DataHandler(new AttachmentDataSource(message.getResource(), attachment)));
+        bodyPart.setDataHandler(new DataHandler(new AttachmentDataSource(message, attachment)));
 
         final String fileName = attachment.getFilename();
         if (Strings.isNotEmpty(fileName)) {

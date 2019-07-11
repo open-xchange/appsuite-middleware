@@ -210,7 +210,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         touch(originalEvent.getId());
         Event updatedEvent = loadEventData(originalEvent.getId());
         resultTracker.trackUpdate(originalEvent, updatedEvent);
-        createSchedulingMessage(originalEvent, updatedEvent, false);
+        if (CalendarUtils.isOrganizerSchedulingResource(updatedEvent, calendarUserId)) {
+            resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
+        } else {
+            resultTracker.trackSchedulingAttendeeUpdate(originalEvent, Collections.singletonList(updatedEvent));
+        }
         if (isSeriesException(originalEvent)) {
             /*
              * also 'touch' the series master in case of an exception update
@@ -259,7 +263,12 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
                 resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
 
-                createSchedulingMessage(originalEvent, updatedExceptionEvent, true);
+                if (CalendarUtils.isOrganizerSchedulingResource(updatedExceptionEvent, calendarUserId)) {
+                        resultTracker.trackSchedulingExceptionUpdate(originalEvent, updatedExceptionEvent);
+                } else {
+                    resultTracker.trackSchedulingAttendeeUpdate(originalEvent, Collections.singletonList(updatedExceptionEvent));
+                }
+                
                 /*
                  * add change exception date to series master & track results
                  */
@@ -355,18 +364,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         } else {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
-        }
-    }
-
-    private void createSchedulingMessage(Event originalEvent, Event updatedEvent, boolean isExceptionCreate) throws OXException {
-        if (CalendarUtils.isOrganizer(updatedEvent, calendarUserId)) {
-            if (isExceptionCreate) {
-                resultTracker.trackSchedulingExceptionUpdate(originalEvent, updatedEvent);
-            } else {
-                resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
-            }
-        } else {
-            resultTracker.trackSchedulingAttendeeUpdate(originalEvent, updatedEvent);
         }
     }
 }
