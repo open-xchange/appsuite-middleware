@@ -1,3 +1,9 @@
+open-xchange-meta (7.10.0-32) stable; urgency=medium
+
+  * Build for patch 2019-07-09 (5303)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 05 Jul 2019 13:04:16 +0200
+
 open-xchange-meta (7.10.0-31) stable; urgency=medium
 
   * Build for patch 2019-05-13 (5234)
