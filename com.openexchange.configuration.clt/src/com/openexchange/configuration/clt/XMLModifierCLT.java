@@ -148,6 +148,9 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
                 String scr = cmd.getOptionValue('s');
                 scr = scr == null ? "" : scr.trim();
                 switch (scr) {
+                    case "480":
+                        scr_480(document);
+                        break;
                     case "4249":
                         scr_4249(document);
                         break;
@@ -668,7 +671,38 @@ public class XMLModifierCLT extends AbstractCLI<Integer, Void> {
                 }
             }
         } catch (Exception e) {
-            throw new SCRException(e);
+            throw new SCRException("SCR 4249", e);
+        }
+    }
+    
+    /**
+     * Apply SCR 480: Revert com.hazelcast logger to default INFO level if still set to WARN
+     * and drop then superfluous diagnostics logger if still set to INFO
+     * 
+     * <logger level="WARN" name="com.hazelcast"/>
+     * <logger level="INFO" name="com.hazelcast.internal.diagnostics"/>
+     *
+     * @param doc The document to which the SCR should be applied
+     * @throws SCRException if applying the Software Change Request fails
+     */
+    static void scr_480(Document doc) throws SCRException {
+        try {
+            XPath path = xf.newXPath();
+            XPathExpression HZ_WARN = path.compile("/configuration/logger[(@name='com.hazelcast') and (@level='WARN')]");
+            XPathExpression HZID_INFO = path.compile("/configuration/logger[(@name='com.hazelcast.internal.diagnostics') and (@level='INFO')]");
+            
+            NodeList hzwarnList = (NodeList) HZ_WARN.evaluate(doc, XPathConstants.NODESET);
+            int hz_removed = Logback.removeNodeList(hzwarnList);
+            if (hz_removed > 0) {
+            	System.out.println("Removed com.hazelcast WARN logger config from logback.xml based on Software Change Request 480");
+            	NodeList hzidList = (NodeList) HZID_INFO.evaluate(doc, XPathConstants.NODESET);
+            	int hzid_removed = Logback.removeNodeList(hzidList);
+            	if (hzid_removed > 0) {
+            		System.out.println("Removed com.hazelcast.internal.diagnostics INFO logger config from logback.xml based on Software Change Request 480");
+            	}
+            }
+        } catch (Exception e) {
+            throw new SCRException("SCR-480", e);
         }
     }
 }

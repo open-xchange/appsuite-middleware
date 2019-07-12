@@ -691,6 +691,20 @@ EOF
       sed -i "s/onmounseleave/onmouseleave/" /opt/open-xchange/etc/globaleventhandlers.list
   fi
 
+  SCR=SCR-480
+  ox_scr_todo ${SCR} && {
+    set -e
+    TMPFILE=$(mktemp)
+    rm -f $TMPFILE
+    /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 480 -o $TMPFILE
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
+    fi
+    set +e
+    ox_scr_done ${SCR}
+  }
+
   SCR=SCR-481
   ox_scr_todo ${SCR} && {
     pfile=/opt/open-xchange/etc/hazelcast.properties
