@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
@@ -100,6 +101,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -296,12 +298,23 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
                     folderID = eventInPeriod.getFolderId();
                 }
                 if (isSeriesMaster(eventInPeriod)) {
-                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(session, eventInPeriod, from, until);
+                    /*
+                     * expand & add all (non overridden) instances of event series in period, expanded by the actual event duration
+                     */
+                    Date iteratorFrom = from;
+                    if (null != eventInPeriod.getEndDate()) {
+                        Duration duration = CalendarUtils.getDuration(eventInPeriod.getEndDate(), eventInPeriod.getStartDate());
+                        iteratorFrom = new Date(duration.addTo(TimeZones.UTC, from.getTime()));
+                    }
+                    Iterator<RecurrenceId> iterator = getRecurrenceIterator(session, eventInPeriod, iteratorFrom, until);
                     while (iterator.hasNext()) {
                         put(eventsPerAttendee, attendee, getResultingOccurrence(eventInPeriod, iterator.next(), folderID));
                         getSelfProtection().checkEventCollection(eventsPerAttendee.get(attendee));
                     }
                 } else {
+                    /*
+                     * add event in period
+                     */
                     put(eventsPerAttendee, attendee, getResultingEvent(eventInPeriod, folderID));
                     getSelfProtection().checkEventCollection(eventsPerAttendee.get(attendee));
                 }
