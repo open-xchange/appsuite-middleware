@@ -904,9 +904,15 @@ public class JSONArray extends AbstractJSONValue implements Iterable<Object> {
                 return EMPTY;
             }
 
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(n << 4);
-            write(writer, asciiOnly);
-            return writer.toString();
+            while (true) {
+                try {
+                    final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(n << 4);
+                    write(writer, asciiOnly);
+                    return writer.toString();
+                } catch (java.util.ConcurrentModificationException e) {
+                    // JSON array modified while trying to generate string. Retry...
+                }
+            }
         } catch (final Exception e) {
             final Logger logger = JSONObject.LOGGER.get();
             if (null != logger) {
