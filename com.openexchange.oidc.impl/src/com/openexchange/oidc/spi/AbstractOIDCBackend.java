@@ -368,11 +368,11 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
                 throw e;
             }
         }
-        
+
         if (accessToken == null || accessToken.getTokens() == null || accessToken.getTokens().getAccessToken() == null || accessToken.getTokens().getRefreshToken() == null) {
             return false;
         }
-        
+
         Map<String, String> tokenMap = new HashMap<>();
         tokenMap.put(OIDCTools.ACCESS_TOKEN, accessToken.getTokens().getAccessToken().getValue());
         tokenMap.put(OIDCTools.REFRESH_TOKEN, accessToken.getTokens().getRefreshToken().getValue());
@@ -441,7 +441,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         SessionUtility.removeJSESSIONID(request, response);
         if (this.getBackendConfig().isAutologinEnabled()) {
             Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, getLoginConfiguration());
-            SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+            if (autologinCookie != null) {
+                SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
+            }
         }
     }
 
