@@ -210,6 +210,11 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     public String getBackendPath() {
         return this.loadStringProperty(OIDCBackendProperty.backendPath);
     }
+    
+    @Override
+    public String getFailureRedirect() {
+        return this.loadStringProperty(OIDCBackendProperty.failureRedirect);
+    }
 
     /**
      * Load the given {@link String} property. If a custom backendName is stored, this name

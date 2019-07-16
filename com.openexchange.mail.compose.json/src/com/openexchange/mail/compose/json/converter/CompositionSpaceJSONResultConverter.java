@@ -241,7 +241,7 @@ public class CompositionSpaceJSONResultConverter implements ResultConverter {
         }
 
         JSONObject jMeta = new JSONObject(8);
-        jMeta.putOpt("type", meta.getType().name());
+        jMeta.putOpt("type", meta.getType().getId());
         jMeta.putOpt("date", getNullable(meta.getDate()));
 
         MailPath replyFor = meta.getReplyFor();

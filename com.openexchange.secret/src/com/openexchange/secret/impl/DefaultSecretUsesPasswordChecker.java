@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,40 @@
  *
  */
 
-package com.openexchange.secret.recovery.json.osgi;
+package com.openexchange.secret.impl;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.osgi.ServiceSet;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
-import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.secret.recovery.json.SecretRecoveryActionFactory;
-import com.openexchange.secret.recovery.json.preferences.Enabled;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
-public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
+/**
+ * {@link DefaultSecretUsesPasswordChecker}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
+ */
+public class DefaultSecretUsesPasswordChecker implements SecretUsesPasswordChecker {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SecretRecoveryJSONActivator.class);
+    private final TokenBasedSecretService tokenBasedSecretService;
+    private final boolean usesPassword;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SecretInconsistencyDetector.class, SecretService.class };
+    /**
+     * Initializes a new {@link DefaultSecretUsesPasswordChecker}.
+     *
+     * @param tokenBasedSecretService The token entry possibly using password
+     * @param usesPassword Whether password is used or not
+     */
+    public DefaultSecretUsesPasswordChecker(TokenBasedSecretService tokenBasedSecretService, boolean usesPassword) {
+        this.tokenBasedSecretService = tokenBasedSecretService;
+        this.usesPassword = usesPassword;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            ServiceSet<SecretMigrator> secretMigrators = new ServiceSet<SecretMigrator>();
-            ServiceSet<EncryptedItemCleanUpService> cleanUpServices = new ServiceSet<EncryptedItemCleanUpService>();
-
-            track(SecretMigrator.class, secretMigrators);
-            track(EncryptedItemCleanUpService.class, cleanUpServices);
-            trackService(SecretUsesPasswordChecker.class);
-
-            openTrackers();
-
-            registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this), secretMigrators, cleanUpServices), "recovery/secret");
-            registerService(PreferencesItemService.class, new Enabled());
-        } catch (final Exception x) {
-            LOG.error("", x);
-            throw x;
-        }
-
+    public boolean usesPassword() {
+        return usesPassword;
     }
 
+    @Override
+    public SecretService passwordUsingSecretService() {
+        return usesPassword ? tokenBasedSecretService : null;
+    }
 }

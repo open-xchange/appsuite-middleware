@@ -326,6 +326,12 @@ public final class LogProperties {
          * com.openexchange.localhost.version
          */
         LOCALHOST_VERSION("com.openexchange.localhost.version"),
+        /**
+         * com.openexchange.pns.noReconnect
+         * <p>
+         * A special log property that controls whether an attempt is made to reconnect a dropped listener using another active session
+         */
+        PNS_NO_RECONNECT("com.openexchange.pns.noReconnect"),
 
         ;
 
