@@ -253,7 +253,14 @@ public final class HttpClients {
     private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, HttpClientConnectionManager ccm) {
         HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom()
             .setConnectionManager(ccm)
-            .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(config.connectionTimeout).setSocketTimeout(config.socketReadTimeout).setProxy(config.proxy).setCookieSpec("lenient").build());
+            .setDefaultRequestConfig(RequestConfig.custom()
+                .setConnectTimeout(config.connectionTimeout)
+                .setSocketTimeout(config.socketReadTimeout)
+                .setConnectionRequestTimeout(config.connectionRequestTimeout)
+                .setProxy(config.proxy)
+                .setCookieSpec("lenient")
+            .build()
+        );
 
         if (config.keepAliveStrategy == null) {
             clientBuilder.setKeepAliveStrategy(new KeepAliveStrategy(config.keepAliveDuration));
@@ -354,6 +361,7 @@ public final class HttpClients {
 
         int socketReadTimeout = DEFAULT_TIMEOUT_MILLIS;
         int connectionTimeout = DEFAULT_TIMEOUT_MILLIS;
+        int connectionRequestTimeout = DEFAULT_TIMEOUT_MILLIS;
         int maxTotalConnections = MAX_TOTAL_CONNECTIONS;
         int maxConnectionsPerRoute = MAX_CONNECTIONS_PER_ROUTE;
         int keepAliveDuration = KEEP_ALIVE_DURATION_SECS;
@@ -473,6 +481,19 @@ public final class HttpClients {
         }
 
         /**
+         * Sets the connection request timeout in milliseconds defining the maximum time to wait for a connection from the pool. A timeout
+         * value of zero is interpreted as an infinite timeout.
+         * <p/>
+         * Default: {@value #DEFAULT_TIMEOUT_MILLIS}
+         *
+         * @param connectionRequestTimeout The timeout in milliseconds
+         */
+        public ClientConfig setConnectionRequestTimeout(int connectionRequestTimeout) {
+            this.connectionRequestTimeout = connectionRequestTimeout;
+            return this;
+        }
+
+        /**
          * Sets the max. number of concurrent connections that can be opened by the
          * client instance.
          * Default: {@value #MAX_TOTAL_CONNECTIONS}
@@ -582,6 +603,7 @@ public final class HttpClients {
             builder.append("[");
             builder.append("socketReadTimeout=").append(socketReadTimeout);
             builder.append(", connectionTimeout=").append(connectionTimeout);
+            builder.append(", connectionRequestTimeout=").append(connectionRequestTimeout);
             builder.append(", maxTotalConnections=").append(maxTotalConnections);
             builder.append(", maxConnectionsPerRoute=").append(maxConnectionsPerRoute);
             builder.append(", keepAliveDuration=").append(keepAliveDuration);
