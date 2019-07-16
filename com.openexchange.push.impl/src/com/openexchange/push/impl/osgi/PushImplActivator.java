@@ -86,6 +86,7 @@ import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableS
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
+import com.openexchange.push.impl.jobqueue.PermanentListenerJobQueue;
 import com.openexchange.push.impl.mbean.PushMBeanImpl;
 import com.openexchange.push.mbean.PushMBean;
 import com.openexchange.session.ObfuscatorService;
@@ -202,6 +203,8 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 rescheduler.stop();
                 this.rescheduler = null;
             }
+
+            PermanentListenerJobQueue.getInstance().stop();
 
             Services.setServiceLookup(null);
             removeService(CredentialStorageProvider.class);
