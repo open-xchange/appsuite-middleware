@@ -265,6 +265,18 @@ public final class FileStorages {
 
         FileStorageInfo fsInfo = infoService.getFileStorageInfo(filestoreId);
         URI baseUri = fsInfo.getUri();
+        return getFullyQualifyingUriForPrefix(prefix, baseUri);
+    }
+
+    /**
+     * Gets the fully qualifying URI for given prefix; sets returned URI's scheme to <code>"file"</code> if absent in base URI.
+     *
+     * @param prefix The prefix; e.g. <code>"1337_ctx_store"</code>
+     * @param baseUri The file storage's base URI
+     * @return The fully qualifying URI
+     * @throws OXException If fully qualifying URI cannot be returned
+     */
+    public static URI getFullyQualifyingUriForPrefix(String prefix, URI baseUri) throws OXException {
         String path = ensureEndingSlash(baseUri.getPath()) + prefix;
         try {
             String scheme = baseUri.getScheme();

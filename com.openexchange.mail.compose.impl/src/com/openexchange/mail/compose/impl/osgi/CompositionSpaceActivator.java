@@ -49,11 +49,12 @@
 
 package com.openexchange.mail.compose.impl.osgi;
 
+import static com.openexchange.osgi.Tools.withRanking;
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -92,15 +93,19 @@ import com.openexchange.mail.compose.impl.CompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.CryptoCompositionSpaceService;
 import com.openexchange.mail.compose.impl.attachment.AttachmentImageDataSource;
 import com.openexchange.mail.compose.impl.attachment.AttachmentStorageServiceImpl;
-import com.openexchange.mail.compose.impl.attachment.FileStorageAttachmentStorage;
-import com.openexchange.mail.compose.impl.attachment.FileStrorageAttachmentFileLocationHandler;
-import com.openexchange.mail.compose.impl.attachment.RdbAttachmentStorage;
+import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
+import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
+import com.openexchange.mail.compose.impl.attachment.filestore.FileStrorageAttachmentFileLocationHandler;
+import com.openexchange.mail.compose.impl.attachment.rdb.RdbAttachmentStorage;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddContentEncryptedFlag;
+import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStorageIdentifier;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
+import com.openexchange.mail.compose.impl.rmi.RemoteCompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.security.CompositionSpaceKeyStorageServiceImpl;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
+import com.openexchange.mail.compose.impl.security.FileStorageKeyStorageFileLocationHandler;
 import com.openexchange.mail.compose.impl.security.HazelcastCompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.inmemory.InMemoryCompositionSpaceStorageService;
@@ -209,22 +214,16 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(CompositionSpaceKeyStorageService.class, keyStorageService);
-        {
-            Dictionary<String, Object> properties = new Hashtable<>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(CompositionSpaceKeyStorage.class, hzCompositionSpaceKeyStorage, properties);
-        }
-        {
-            Dictionary<String, Object> properties = new Hashtable<>(2);
-            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
-            registerService(CompositionSpaceKeyStorage.class, FileStorageCompositionSpaceKeyStorage.initInstance(this), properties);
-        }
+        registerService(CompositionSpaceKeyStorage.class, hzCompositionSpaceKeyStorage, withRanking(0));
+        registerService(CompositionSpaceKeyStorage.class, FileStorageCompositionSpaceKeyStorage.initInstance(this), withRanking(1));
+        registerService(FileLocationHandler.class, new FileStorageKeyStorageFileLocationHandler(this));
 
         registerService(AttachmentStorageService.class, attachmentStorageService);
 
-        registerService(AttachmentStorage.class, new FileStorageAttachmentStorage(this));
+        registerService(AttachmentStorage.class, new DedicatedFileStorageAttachmentStorage(this), withRanking(2));
+        registerService(AttachmentStorage.class, new ContextAssociatedFileStorageAttachmentStorage(this), withRanking(1));
         registerService(FileLocationHandler.class, new FileStrorageAttachmentFileLocationHandler());
-        registerService(AttachmentStorage.class, new RdbAttachmentStorage(this));
+        registerService(AttachmentStorage.class, new RdbAttachmentStorage(this), withRanking(0));
 
         {
             AttachmentImageDataSource attachmentImageDataSource = AttachmentImageDataSource.getInstance();
@@ -323,9 +322,12 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CompositionSpaceCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
             new CompositionSpaceCreateTableTask(),
-            new CompositionSpaceAddContentEncryptedFlag()
+            new CompositionSpaceAddContentEncryptedFlag(),
+            new CompositionSpaceAddFileStorageIdentifier()
         ));
-        registerService(DeleteListener.class, new CompositionSpaceDeleteListener());
+        registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
+
+        registerService(Remote.class, new RemoteCompositionSpaceServiceImpl(this));
     }
 
     @Override

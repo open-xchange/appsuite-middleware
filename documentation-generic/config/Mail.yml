@@ -937,3 +937,15 @@ properties:
       file: mail.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.compose.fileStorageId
+      description: |
+        Specifies a dedicated file storage that is supposed to be used for mail compose attachments.
+        Once a file storage associated has been configured, it should not be changed.
+      defaultValue: 
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

@@ -47,25 +47,26 @@
  *
  */
 
-package com.openexchange.mail.compose;
+package com.openexchange.mail.compose.rmi;
 
 
 /**
- * {@link AttachmentStorageType} - The storage type.
- * <p>
- * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
- * Please pay respect to reserved types used in {@link KnownAttachmentStorageType}.
- * </div>
+ * RMI wrapper exception.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface AttachmentStorageType {
+public class RemoteCompositionSpaceServiceException extends Exception {
+
+    private static final long serialVersionUID = 8418048533033038831L;
 
     /**
-     * Gets the type.
+     * Initializes a new {@link RemoteCompositionSpaceServiceException}.
      *
-     * @return The type
+     * @param message The detail message
      */
-    int getType();
+    public RemoteCompositionSpaceServiceException(String message) {
+        super(message);
+    }
 
 }

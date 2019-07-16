@@ -110,6 +110,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "csid BINARY(16) NOT NULL,"
         + "refType TINYINT unsigned NOT NULL,"
         + "refId VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,"
+        + "dedicatedFileStorageId INT4 UNSIGNED NOT NULL DEFAULT 0,"
         + "name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
         + "size BIGINT(64) unsigned NOT NULL,"
         + "mimeType VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,"
@@ -143,6 +144,7 @@ public class CompositionSpaceCreateTableService extends AbstractCreateTableImpl 
         + "cid INT4 UNSIGNED NOT NULL,"
         + "user INT4 UNSIGNED NOT NULL,"
         + "refId VARCHAR(255) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,"
+        + "dedicatedFileStorageId INT4 UNSIGNED NOT NULL DEFAULT 0,"
         + "PRIMARY KEY (uuid),"
         + "INDEX `userIndex` (cid, user)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";

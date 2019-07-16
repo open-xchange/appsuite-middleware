@@ -47,58 +47,72 @@
  *
  */
 
-package com.openexchange.mail.compose;
+package com.openexchange.mail.compose.impl.attachment.filestore;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.database.Databases;
+import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
+import com.openexchange.mail.compose.KnownAttachmentStorageType;
 
 /**
- * {@link AttachmentStorageReference}
+ * {@link FileStrorageAttachmentFileLocationHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class AttachmentStorageReference {
+public class FileStrorageAttachmentFileLocationHandler extends AbstractFileLocationHandler {
 
-    private final AttachmentStorageIdentifier storageIdentifier;
-    private final AttachmentStorageType storageType;
+    private final int fileStorageType;
 
     /**
-     * Initializes a new {@link AttachmentStorageReference}.
+     * Initializes a new {@link FileStrorageAttachmentFileLocationHandler}.
      */
-    public AttachmentStorageReference(AttachmentStorageIdentifier storageIdentifier, AttachmentStorageType referenceType) {
+    public FileStrorageAttachmentFileLocationHandler() {
         super();
-        this.storageIdentifier = storageIdentifier;
-        this.storageType = referenceType;
-    }
-
-    /**
-     * Gets the identifier of the resource held in the storage.
-     *
-     * @return The storage identifier
-     */
-    public AttachmentStorageIdentifier getStorageIdentifier() {
-        return storageIdentifier;
-    }
-
-    /**
-     * Gets the storage type.
-     *
-     * @return The storage type
-     */
-    public AttachmentStorageType getStorageType() {
-        return storageType;
+        fileStorageType = KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE.getType();
     }
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("[");
-        if (storageIdentifier != null) {
-            builder.append("storageIdentifier=").append(storageIdentifier).append(", ");
+    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
+        String selectStmt = "SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=" + fileStorageType + " AND refId IN ";
+        String updateStmt = "UPDATE compositionSpaceAttachmentMeta SET refId = ? WHERE cid = ? AND refId = ?";
+        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws SQLException {
+        // Files for attachments are always stored in context-related storage
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, fileStorageType);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptySet();
+            }
+
+            Set<String> locations = new LinkedHashSet<String>();
+            do {
+                locations.add(rs.getString(1));
+            } while (rs.next());
+            return locations;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
-        if (storageType != null) {
-            builder.append("storageType=").append(storageType);
-        }
-        builder.append("]");
-        return builder.toString();
     }
 
 }

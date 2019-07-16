@@ -104,8 +104,10 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.report.internal.Tools;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.ObfuscatorService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -772,11 +774,11 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
 
             if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
-                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=?");
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=0");
                 stmt.setInt(1, ctx.getContextId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
-                    retval.add(rs.getString(1));
+                    retval.add(unobfuscate(rs.getString(1)));
                 }
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
@@ -822,12 +824,12 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
 
             if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
-                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=?");
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=? AND dedicatedFileStorageId=0");
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, user.getId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
-                    retval.add(rs.getString(1));
+                    retval.add(unobfuscate(rs.getString(1)));
                 }
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
@@ -1142,5 +1144,35 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             retval.put(entity, recorder.getProblems());
         }
         return retval;
+    }
+
+    /**
+     * Obfuscates given string.
+     *
+     * @param s The string
+     * @return The obfuscated string
+     * @throws OXException If service is missing
+     */
+    private String obfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.obfuscate(s);
+    }
+
+    /**
+     * Un-Obfuscates given string.
+     *
+     * @param s The obfuscated string
+     * @return The plain string
+     * @throws OXException If service is missing
+     */
+    private String unobfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.unobfuscate(s);
     }
 }

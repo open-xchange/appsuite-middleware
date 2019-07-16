@@ -50,6 +50,8 @@
 package com.openexchange.osgi;
 
 import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.Stack;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -170,6 +172,29 @@ public class Tools {
      */
     public static boolean isNoFragmentAndActive(final Bundle bundle) {
         return (isNoFragment(bundle) && (Bundle.ACTIVE == bundle.getState()));
+    }
+
+    /**
+     * Creates a new dictionary containing the specified ranking number to be used on service registration.
+     * <p>
+     * The service ranking is used by the Framework to determine the <i>natural
+     * order</i> of services, see {@link ServiceReference#compareTo(Object)},
+     * and the <i>default</i> service to be returned from a call to the
+     * {@link BundleContext#getServiceReference(Class)} or
+     * {@link BundleContext#getServiceReference(String)} method.
+     * <p>
+     * The default ranking is zero (0). A service with a ranking of
+     * {@code Integer.MAX_VALUE} is very likely to be returned as the default
+     * service, whereas a service with a ranking of {@code Integer.MIN_VALUE} is
+     * very unlikely to be returned.
+     *
+     * @param ranking The ranking
+     * @return The newly created directory containing the specified ranking number
+     */
+    public static Dictionary<String, Object> withRanking(int ranking) {
+        Dictionary<String, Object> properties = new Hashtable<>(2);
+        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(ranking));
+        return properties;
     }
 
     private Tools() {

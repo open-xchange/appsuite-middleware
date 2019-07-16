@@ -57,6 +57,7 @@ import com.openexchange.consistency.rmi.ConsistencyRMIServiceImpl;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.ObfuscatorService;
 
 /**
  * {@link ConsistencyActivator}
@@ -82,6 +83,7 @@ public final class ConsistencyActivator extends HousekeepingActivator {
         trackService(VCardStorageMetadataStore.class);
         trackService(DatabaseService.class);
         trackService(ConsistencyService.class);
+        trackService(ObfuscatorService.class);
 
         openTrackers();
     }

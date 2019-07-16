@@ -55,6 +55,7 @@ import java.security.Key;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -105,8 +106,8 @@ public class CryptoAttachmentStorage extends AbstractCryptoAware implements Atta
     }
 
     @Override
-    public List<String> neededCapabilities() {
-        return attachmentStorage.neededCapabilities();
+    public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
+        return attachmentStorage.isApplicableFor(capabilities, session);
     }
 
     @Override

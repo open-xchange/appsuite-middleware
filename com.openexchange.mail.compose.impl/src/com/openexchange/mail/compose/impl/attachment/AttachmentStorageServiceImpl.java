@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.compose.impl.attachment;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import com.openexchange.capabilities.CapabilityService;
@@ -105,32 +104,16 @@ public class AttachmentStorageServiceImpl extends RankingAwareNearRegistryServic
 
     @Override
     public AttachmentStorage getAttachmentStorageFor(Session session) throws OXException {
-        CapabilitySet capabilities = null;
-        for (AttachmentStorage attachmentStorage : this) {
-            List<String> neededCapabilities = attachmentStorage.neededCapabilities();
-            if (null == neededCapabilities) {
-                // No required capabilities
-                return new CryptoAttachmentStorage(attachmentStorage, compositionSpaceStorage.get(), keyStorageService, services);
-            }
+        // Obtain user's capabilities
+        CapabilitySet capabilities = getCapabilitySet(session);
 
-            // Obtain user's capabilities (if not done yet) and check if required ones are covered
-            if (null == capabilities) {
-                capabilities = getCapabilitySet(session);
-            }
-            if (isApplicable(neededCapabilities, capabilities)) {
+        // Find suitable attachment storage
+        for (AttachmentStorage attachmentStorage : this) {
+            if (attachmentStorage.isApplicableFor(capabilities, session)) {
                 return new CryptoAttachmentStorage(attachmentStorage, compositionSpaceStorage.get(), keyStorageService, services);
             }
         }
         throw CompositionSpaceErrorCode.NO_ATTACHMENT_STORAGE.create();
-    }
-
-    private boolean isApplicable(List<String> neededCapabilities, CapabilitySet capabilities) {
-        for (String capability : neededCapabilities) {
-            if (false == capabilities.contains(capability)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private CapabilitySet getCapabilitySet(Session session) throws OXException {
