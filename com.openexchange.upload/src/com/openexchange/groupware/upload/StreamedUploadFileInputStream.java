@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,24 +49,36 @@
 
 package com.openexchange.groupware.upload;
 
-import java.io.IOException;
+import java.io.FilterInputStream;
 import java.io.InputStream;
+import com.openexchange.filestore.Spool;
 
 /**
- * {@link StreamedUploadFile} - An upload file backed by a stream.
- * <p>
- * This instance is supposed to be directly handled.
+ * {@link StreamedUploadFileInputStream} - The data stream from a streamed upload file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface StreamedUploadFile extends BasicUploadFile {
+@Spool
+public class StreamedUploadFileInputStream extends FilterInputStream {
 
     /**
-     * Gets the {@link InputStream} for the uploaded file.
+     * Gets the instance for given input stream
      *
-     * @return The <tt>InputStream</tt> instance
-     * @throws IOException If stream cannot be returned
+     * @param in The underlying input stream
+     * @return The instance
      */
-    StreamedUploadFileInputStream getStream() throws IOException;
+    public static StreamedUploadFileInputStream streamFor(InputStream in) {
+        return in instanceof StreamedUploadFileInputStream ? ((StreamedUploadFileInputStream) in) : new StreamedUploadFileInputStream(in);
+    }
+
+    /**
+     * Initializes a new {@link StreamedUploadFileInputStream}.
+     *
+     * @param in The underlying input stream
+     */
+    private StreamedUploadFileInputStream(InputStream in) {
+        super(in);
+    }
 
 }

@@ -63,16 +63,32 @@ public final class SproxydConfig {
 
     private final EndpointPool endpointPool;
 
+    /**
+     * Initializes a new {@link SproxydConfig}.
+     *
+     * @param httpClient The HTTP client to use
+     * @param endpointPool The pool managing available end-points
+     */
     public SproxydConfig(HttpClient httpClient, EndpointPool endpointPool) {
         super();
         this.httpClient = httpClient;
         this.endpointPool = endpointPool;
     }
 
+    /**
+     * Gets the HTTP client to use.
+     *
+     * @return The HTTP client to use
+     */
     public HttpClient getHttpClient() {
         return httpClient;
     }
 
+    /**
+     * Gets the end-point pool.
+     *
+     * @return The end-point pool
+     */
     public EndpointPool getEndpointPool() {
         return endpointPool;
     }

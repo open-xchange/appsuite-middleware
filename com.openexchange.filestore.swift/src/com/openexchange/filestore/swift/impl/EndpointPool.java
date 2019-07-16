@@ -86,6 +86,7 @@ public class EndpointPool {
     private final List<Endpoint> available;
     private final List<Endpoint> blacklist;
     private final AtomicInteger counter;
+    private final int numberOfEndpoints;
     final String filestoreId;
     private final AtomicReference<Token> tokenRef;
     private volatile ScheduledTimerTask heartbeat;
@@ -106,6 +107,7 @@ public class EndpointPool {
             throw new IllegalArgumentException("Paramater 'hosts' must not be empty");
         }
 
+        numberOfEndpoints = size;
         this.filestoreId = filestoreId;
         tokenRef = new AtomicReference<Token>();
         available = new ArrayList<Endpoint>(size);
@@ -123,6 +125,15 @@ public class EndpointPool {
 
         LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
+    }
+
+    /**
+     * Gets the number of end-points
+     *
+     * @return The number of end-points
+     */
+    public int getNumberOfEndpoints() {
+        return numberOfEndpoints;
     }
 
     /**

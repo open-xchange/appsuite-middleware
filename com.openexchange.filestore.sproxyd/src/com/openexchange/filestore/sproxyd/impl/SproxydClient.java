@@ -220,13 +220,19 @@ public class SproxydClient {
     }
 
     /**
-     * Handles communication errors. If the endpoint is not available it is blacklisted.
+     * Handles communication errors. If the end-point is not available it is blacklisted.
      *
-     * @param endpoint The endpoint for which the exception occurred.
+     * @param endpoint The end-point for which the exception occurred.
      * @param e The exception
      * @return An OXException to re-throw
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
+        if (org.apache.http.conn.ConnectionPoolTimeoutException.class.isInstance(e)) {
+            // Waiting for an available connection in HttpClient pool expired.
+            // Avoid additional stress for that pool by preventing unavailable check, which might in turn wait for a lease.
+            return FileStorageCodes.IOERROR.create(e, e.getMessage());
+        }
+
         if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
             LOG.warn("Sproxyd endpoint is unavailable: " + endpoint);
             endpoints.blacklist(endpoint.getBaseUrl());
