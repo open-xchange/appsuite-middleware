@@ -68,6 +68,7 @@ import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DataProvider;
+import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -88,7 +89,7 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
 
     @Override
     public AttachmentStorageType getStorageType() {
-        return AttachmentStorageType.DATABASE;
+        return KnownAttachmentStorageType.DATABASE;
     }
 
     @Override

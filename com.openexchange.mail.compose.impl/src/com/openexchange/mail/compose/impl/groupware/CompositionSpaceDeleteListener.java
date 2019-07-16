@@ -62,7 +62,7 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.mail.compose.AttachmentStorageType;
+import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.impl.attachment.FileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
 
@@ -109,7 +109,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             if (null != fileStorage) {
                 stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=?");
                 stmt.setInt(1, contextId);
-                stmt.setInt(2, AttachmentStorageType.FILE_STORAGE.getType());
+                stmt.setInt(2, KnownAttachmentStorageType.FILE_STORAGE.getType());
                 rs = stmt.executeQuery();
                 Set<String> storageIdentifers = null;
                 if (rs.next()) {
@@ -206,7 +206,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND user=? AND refType=?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setInt(3, AttachmentStorageType.FILE_STORAGE.getType());
+                stmt.setInt(3, KnownAttachmentStorageType.FILE_STORAGE.getType());
                 rs = stmt.executeQuery();
                 Set<String> storageIdentifers = null;
                 if (rs.next()) {

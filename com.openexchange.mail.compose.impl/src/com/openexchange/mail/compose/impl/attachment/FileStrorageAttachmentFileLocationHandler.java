@@ -59,7 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
-import com.openexchange.mail.compose.AttachmentStorageType;
+import com.openexchange.mail.compose.KnownAttachmentStorageType;
 
 /**
  * {@link FileStrorageAttachmentFileLocationHandler}
@@ -76,7 +76,7 @@ public class FileStrorageAttachmentFileLocationHandler extends AbstractFileLocat
      */
     public FileStrorageAttachmentFileLocationHandler() {
         super();
-        fileStorageType = AttachmentStorageType.FILE_STORAGE.getType();
+        fileStorageType = KnownAttachmentStorageType.FILE_STORAGE.getType();
     }
 
     @Override

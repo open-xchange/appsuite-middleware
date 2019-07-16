@@ -51,17 +51,26 @@ package com.openexchange.mail.compose;
 
 
 /**
- * {@link AttachmentStorageType} - storage types.
+ * {@link KnownAttachmentStorageType} - storage types.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface AttachmentStorageType {
+public enum KnownAttachmentStorageType implements AttachmentStorageType {
 
     /**
-     * Gets the type.
-     *
-     * @return The type
+     * The type for database storage.
      */
-    int getType();
+    DATABASE,
+    /**
+     * The type for file storage.
+     */
+    FILE_STORAGE,
+
+    ;
+
+    @Override
+    public int getType() {
+        return ordinal();
+    }
 
 }

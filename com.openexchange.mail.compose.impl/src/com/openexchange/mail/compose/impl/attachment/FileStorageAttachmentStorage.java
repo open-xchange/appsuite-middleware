@@ -60,6 +60,7 @@ import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.DataProvider;
+import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.SeekingDataProvider;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -83,7 +84,7 @@ public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
 
     @Override
     public AttachmentStorageType getStorageType() {
-        return AttachmentStorageType.FILE_STORAGE;
+        return KnownAttachmentStorageType.FILE_STORAGE;
     }
 
     @Override
