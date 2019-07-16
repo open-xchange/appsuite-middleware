@@ -106,6 +106,8 @@ import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageUnregisterListener;
@@ -254,6 +256,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             } catch (final PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
+            invalidateDBPoolCache();
         }
     }
 
@@ -1516,6 +1519,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
             }
+            invalidateDBPoolCache();
         }
     }
 
@@ -2262,6 +2266,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
             }
+            invalidateDBPoolCache();
         }
     }
 
@@ -2653,6 +2658,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             } catch (final PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
+            invalidateDBPoolCache();
         }
     }
 
@@ -4177,4 +4183,21 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
+
+    /**
+     * Invalidates any cached database assignments in the <i>OXDBPoolCache</i> by invoking {@link Cache#clear()} on the associated cache
+     * reference. Invalidation is performed cluster-wide implicitly.
+     */
+    private static void invalidateDBPoolCache() {
+        try {
+            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                Cache cache = cacheService.getCache("OXDBPoolCache");
+                cache.clear();
+            }
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(OXUserMySQLStorage.class).warn("Unexpected error invalidating \"OXDBPoolCache\"", e);
+        }
+    }
+
 }
