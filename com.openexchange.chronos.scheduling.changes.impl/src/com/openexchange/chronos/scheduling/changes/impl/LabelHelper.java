@@ -159,9 +159,9 @@ public class LabelHelper {
 
     public String getShowAs() {
         if (update.getTransp() != null && Transp.TRANSPARENT.equals(update.getTransp().getValue())) {
-            return new Sentence(Messages.FREE).getMessage(locale);
+            return new SentenceImpl(Messages.FREE).getMessage(locale);
         }
-        return new Sentence(Messages.RESERVERD).getMessage(locale);
+        return new SentenceImpl(Messages.RESERVERD).getMessage(locale);
     }
 
     public String getShowAsClass() {
@@ -201,11 +201,11 @@ public class LabelHelper {
     }
 
     public String getCounterOrganizerIntroduction() {
-        return new Sentence(Messages.COUNTER_ORGANIZER_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.COUNTER_ORGANIZER_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
     }
 
     public String getCounterParticipantIntroduction() {
-        return new Sentence(Messages.COUNTER_PARTICIPANT_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getOrganizer().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.COUNTER_PARTICIPANT_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getOrganizer().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
     }
 
     public String getCreateIntroduction() throws OXException {
@@ -213,11 +213,11 @@ public class LabelHelper {
     }
 
     public String getCreateExceptionIntroduction() {
-        return new Sentence(Messages.CREATE_EXCEPTION_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(dateHelper.getRecurrenceDatePosition(), ArgumentType.UPDATED).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.CREATE_EXCEPTION_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(dateHelper.getRecurrenceDatePosition(), ArgumentType.UPDATED).getMessage(wrapper, locale);
     }
 
     public String getRefreshIntroduction() {
-        return new Sentence(Messages.REFRESH_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.REFRESH_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
     }
 
     public String getDeclineCounterIntroduction() throws OXException {
@@ -236,7 +236,7 @@ public class LabelHelper {
         if (null == extendedProperties || null != extendedProperties.get(CalendarParameters.PARAMETER_COMMENT).getValue()) {
             return "";
         }
-        return new Sentence(Messages.COMMENT_INTRO).add(extendedProperties.get(CalendarParameters.PARAMETER_COMMENT).getValue(), ArgumentType.ITALIC).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.COMMENT_INTRO).add(extendedProperties.get(CalendarParameters.PARAMETER_COMMENT).getValue(), ArgumentType.ITALIC).getMessage(wrapper, locale);
     }
 
     public String getDeleteIntroduction() throws OXException {
@@ -301,43 +301,43 @@ public class LabelHelper {
         if (update.getAttachments() == null || update.getAttachments().isEmpty() || false == Utils.isInternalCalendarUser(recipient)) {
             return "";
         }
-        return new Sentence(Messages.HAS_ATTACHMENTS).add(getDirectLink(), ArgumentType.REFERENCE).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.HAS_ATTACHMENTS).add(getDirectLink(), ArgumentType.REFERENCE).getMessage(wrapper, locale);
     }
 
     public String getWhenLabel() {
-        return new Sentence(Messages.LABEL_WHEN).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_WHEN).getMessage(wrapper, locale);
     }
 
     public String getWhereLabel() {
-        return new Sentence(Messages.LABEL_WHERE).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_WHERE).getMessage(wrapper, locale);
     }
 
     public String getAttendeesLabel() {
-        return new Sentence(Messages.LABEL_ATTENDEES).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_ATTENDEES).getMessage(wrapper, locale);
     }
 
     public String getResourcesLabel() {
-        return new Sentence(Messages.LABEL_RESOURCES).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_RESOURCES).getMessage(wrapper, locale);
     }
 
     public String getDetailsLabel() {
-        return new Sentence(Messages.LABEL_DETAILS).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_DETAILS).getMessage(wrapper, locale);
     }
 
     public String getShowAsLabel() {
-        return new Sentence(Messages.LABEL_SHOW_AS).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_SHOW_AS).getMessage(wrapper, locale);
     }
 
     public String getCreatedLabel() {
-        return new Sentence(Messages.LABEL_CREATED).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_CREATED).getMessage(wrapper, locale);
     }
 
     public String getDirectLinkLabel() {
-        return new Sentence(Messages.LINK_LABEL).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LINK_LABEL).getMessage(wrapper, locale);
     }
 
     public String getModifiedLabel() {
-        return new Sentence(Messages.LABEL_MODIFIED).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.LABEL_MODIFIED).getMessage(wrapper, locale);
     }
 
     public String getCreator() {
@@ -352,7 +352,7 @@ public class LabelHelper {
     }
 
     public String getTimezoneInfo() {
-        return new Sentence(Messages.TIMEZONE).add(timeZone.getDisplayName(locale), ArgumentType.EMPHASIZED).getMessage(wrapper, locale);
+        return new SentenceImpl(Messages.TIMEZONE).add(timeZone.getDisplayName(locale), ArgumentType.EMPHASIZED).getMessage(wrapper, locale);
     }
 
     public String getJustification() {
@@ -360,9 +360,9 @@ public class LabelHelper {
         //            return new Sentence(Messages.PRINCIPAL_JUSTIFICATION).getMessage(wrapper, locale);
         //        } else 
         if (CalendarUtils.matches(recipient, update.getOrganizer())) {
-            return new Sentence(Messages.ORGANIZER_JUSTIFICATION).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.ORGANIZER_JUSTIFICATION).getMessage(wrapper, locale);
         } else if (Attendee.class.isAssignableFrom(recipient.getClass()) && CalendarUserType.RESOURCE.matches(((Attendee) recipient).getCuType())) {
-            return new Sentence(Messages.RESOURCE_MANAGER_JUSTIFICATION).add(recipient.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.RESOURCE_MANAGER_JUSTIFICATION).add(recipient.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
         return null;
     }
@@ -402,17 +402,17 @@ public class LabelHelper {
                 msg = Messages.NONE_ON_YOUR_BEHALF_INTRO;
                 statusString = Messages.NONE;
             }
-            return new Sentence(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
+            return new SentenceImpl(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
         }
 
         @Override
         public String getDeleteIntroduction() {
-            return new Sentence(Messages.DELETE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.DELETE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
         public String getUpdateIntroduction() {
-            return new Sentence(Messages.UPDATE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.UPDATE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
@@ -422,7 +422,7 @@ public class LabelHelper {
 
         @Override
         public String getCreateIntroduction() {
-            return new Sentence(Messages.CREATE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.CREATE_ON_YOUR_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
     }
@@ -444,27 +444,27 @@ public class LabelHelper {
                 msg = Messages.NONE_ON_BEHALF_INTRO;
                 statusString = Messages.NONE;
             }
-            return new Sentence(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(msg).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
         public String getDeleteIntroduction() throws OXException {
-            return new Sentence(Messages.DELETE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.DELETE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
         public String getUpdateIntroduction() throws OXException {
-            return new Sentence(Messages.UPDATE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.UPDATE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
         public String getDeclineCounterIntroduction() throws OXException {
-            return new Sentence(Messages.DECLINECOUNTER_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.DECLINECOUNTER_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
         }
 
         @Override
         public String getCreateIntroduction() throws OXException {
-            return new Sentence(Messages.CREATE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn()).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.CREATE_ON_BEHALF_INTRO).add(originator.getSentBy().getCn(), ArgumentType.PARTICIPANT).add(originator.getCn()).getMessage(wrapper, locale);
         }
 
     }
@@ -481,27 +481,27 @@ public class LabelHelper {
                 msg = Messages.NONE_INTRO;
                 statusString = Messages.NONE;
             }
-            return new Sentence(msg).add(originator.getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
+            return new SentenceImpl(msg).add(originator.getCn(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
         }
 
         @Override
         public String getDeleteIntroduction() {
-            return new Sentence(Messages.DELETE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.DELETE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
         public String getUpdateIntroduction() {
-            return new Sentence(Messages.UPDATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.UPDATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
 
         @Override
         public String getDeclineCounterIntroduction() {
-            return new Sentence(Messages.DECLINECOUNTER_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.DECLINECOUNTER_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).add(update.getSummary(), ArgumentType.UPDATED).getMessage(wrapper, locale);
         }
 
         @Override
         public String getCreateIntroduction() {
-            return new Sentence(Messages.CREATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+            return new SentenceImpl(Messages.CREATE_INTRO).add(originator.getCn(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
         }
     }
 

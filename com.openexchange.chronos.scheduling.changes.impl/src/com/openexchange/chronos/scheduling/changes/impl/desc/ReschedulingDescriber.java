@@ -50,6 +50,7 @@
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,13 +59,14 @@ import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
-import com.openexchange.chronos.scheduling.changes.impl.Change;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
@@ -79,16 +81,15 @@ public class ReschedulingDescriber implements ChangeDescriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReschedulingDescriber.class);
 
-    private static final EventField[] FIELDS = { EventField.START_DATE, EventField.END_DATE };
-
     @Override
+    @NonNull
     public EventField[] getFields() {
-        return FIELDS;
+        return new EventField[] { EventField.START_DATE, EventField.END_DATE };
     }
 
     @Override
-    public Change describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
-        List<Sentence> sentences = new LinkedList<>();
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+        List<SentenceImpl> sentences = new LinkedList<>();
 
         handleTimezoneChange(sentences, eventUpdate.getOriginal(), eventUpdate.getUpdate());
 
@@ -97,16 +98,16 @@ public class ReschedulingDescriber implements ChangeDescriber {
         }
 
         if (sentences.isEmpty()) {
-            return Change.EMPTY;
+            return null;
         }
-        return new Change(sentences, getFields());
+        return new DefaultDescription(sentences, Arrays.asList(getFields()));
     }
 
     /*
      * ----------------- Helpers -----------------
      */
 
-    private void handleTimezoneChange(List<Sentence> sentences, Event original, Event update) {
+    private void handleTimezoneChange(List<SentenceImpl> sentences, Event original, Event update) {
         String originalStartId = getTimezone(original, EventField.START_DATE);
         String originalEndId = getTimezone(original, EventField.END_DATE);
         String updatedStartId = getTimezone(update, EventField.START_DATE);
@@ -115,17 +116,17 @@ public class ReschedulingDescriber implements ChangeDescriber {
         // Both dates were the same and changed to the same?
         if (originalStartId.equals(originalEndId) && updatedStartId.equals(updatedEndId)) {
             if (false == originalStartId.equals(updatedStartId)) {
-                sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
+                sentences.add(new SentenceImpl(Messages.HAS_RESCHEDULED_TIMEZONE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
             }
             // Nothing changed
             return;
         }
         // Separate start and end date sentences
         if (false == originalStartId.equals(updatedStartId)) {
-            sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_START_DATE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
+            sentences.add(new SentenceImpl(Messages.HAS_RESCHEDULED_TIMEZONE_START_DATE).add(originalStartId, ArgumentType.ORIGINAL).add(updatedStartId, ArgumentType.UPDATED));
         }
         if (false == originalEndId.equals(updatedEndId)) {
-            sentences.add(new Sentence(Messages.HAS_RESCHEDULED_TIMEZONE_END_DATE).add(originalEndId, ArgumentType.ORIGINAL).add(updatedEndId, ArgumentType.UPDATED));
+            sentences.add(new SentenceImpl(Messages.HAS_RESCHEDULED_TIMEZONE_END_DATE).add(originalEndId, ArgumentType.ORIGINAL).add(updatedEndId, ArgumentType.UPDATED));
         }
     }
 
@@ -145,10 +146,10 @@ public class ReschedulingDescriber implements ChangeDescriber {
         return false == (original.getStartDate().getTimestamp() == update.getStartDate().getTimestamp() && original.getEndDate().getTimestamp() == update.getEndDate().getTimestamp());
     }
 
-    private void handleRescheduling(List<Sentence> sentences, EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    private void handleRescheduling(List<SentenceImpl> sentences, EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
         String originalDate = time(eventUpdate, eventUpdate.getOriginal(), timeZone, locale);
         String updatedDate = time(eventUpdate, eventUpdate.getUpdate(), timeZone, locale);
-        sentences.add(new Sentence(Messages.HAS_RESCHEDULED).add(originalDate, ArgumentType.ORIGINAL).add(updatedDate, ArgumentType.UPDATED));
+        sentences.add(new SentenceImpl(Messages.HAS_RESCHEDULED).add(originalDate, ArgumentType.ORIGINAL).add(updatedDate, ArgumentType.UPDATED));
     }
 
     private String time(EventUpdate eventUpdate, Event event, TimeZone timezone, Locale locale) {

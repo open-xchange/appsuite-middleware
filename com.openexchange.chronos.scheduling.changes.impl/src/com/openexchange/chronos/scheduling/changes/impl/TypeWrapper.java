@@ -83,5 +83,7 @@ public interface TypeWrapper {
     String convert(List<String> descriptions);
 
     static final ImmutableMap<String, TypeWrapper> WRAPPER = ImmutableMap.of("text", new PassthroughWrapper(), "html", new HTMLWrapper());
+    
+    String getType();
 
 }

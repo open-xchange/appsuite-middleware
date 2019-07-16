@@ -49,53 +49,30 @@
 
 package com.openexchange.chronos.scheduling.changes;
 
+import java.util.List;
+import com.openexchange.chronos.EventField;
+
 /**
  * {@link Description}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
+ * @see <a href="https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-schedulingchanges.txt">Proposal caldav-schedulingchanges</a>
  */
 public interface Description {
 
     /**
-     * Gets the description in text format
+     * Get the properties that have been changed
      *
-     * @return The description as text
+     * @return The changed properties described as {@link EventField}
      */
-    String getText();
+    List<EventField> getChangedFields();
 
     /**
-     * Gets the description in HTML format
+     * Get a list of descriptions
      *
-     * @return The description as HTML
+     * @return A list of descriptions
      */
-    String getHtml();
-
-    /**
-     * Get the {@link ChangeAction}
-     *
-     * @return The {@link ChangeAction}
-     */
-    ChangeAction getAction();
-    
-    
-    final static Description EMPTY = new Description() {
-
-        @Override
-        public String getText() {
-            return "".intern();
-        }
-
-        @Override
-        public String getHtml() {
-            return "".intern();
-        }
-
-        @Override
-        public ChangeAction getAction() {
-            return ChangeAction.NONE;
-        }
-
-    };
+    List<Sentence> getSentences();
 
 }

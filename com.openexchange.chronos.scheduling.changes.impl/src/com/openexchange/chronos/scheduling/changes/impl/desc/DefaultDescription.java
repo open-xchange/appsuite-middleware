@@ -47,38 +47,57 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes.impl;
+package com.openexchange.chronos.scheduling.changes.impl.desc;
 
-import java.util.Locale;
-import java.util.TimeZone;
-import com.openexchange.annotation.NonNull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.scheduling.changes.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 
 /**
- * {@link ChangeDescriber}
+ * {@link DefaultDescription}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
-public interface ChangeDescriber {
+public class DefaultDescription implements Description {
+
+    private final List<EventField> fields;
+    private final List<Sentence> sentences;
 
     /**
-     * Get the {@link EventField} the {@link ChangeDescriber} can describe
+     * Initializes a new {@link DefaultDescription}.
      * 
-     * @return The {@link EventField}
+     * @param sentences The sentences
+     * @param field The field
      */
-    @NonNull
-    EventField[] getFields();
+    public DefaultDescription(List<SentenceImpl> sentences, EventField field) {
+        this(sentences, Collections.singletonList(field));
+    }
+
     /**
-     * Describe the change
+     * Initializes a new {@link DefaultDescription}.
      * 
-     * @param eventUpdate The {@link EventUpdate} to describe
-     * @param timeZone The {@link TimeZone} of the user
-     * @param locale The locale of the messages text
-     * @return A {@link Description}
+     * @param sentences The sentences
+     * @param fields The fields
      */
-    Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale);
+    public DefaultDescription(List<SentenceImpl> sentences, List<EventField> fields) {
+        super();
+        this.sentences = new ArrayList<>(sentences);
+        this.fields = fields;
+    }
+
+    @Override
+    public List<EventField> getChangedFields() {
+        return fields;
+    }
+
+    @Override
+    public List<Sentence> getSentences() {
+        return sentences;
+    }
 
 }

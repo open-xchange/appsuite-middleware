@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.scheduling;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -129,7 +130,6 @@ public class CancelMessageBuilder extends AbstractMessageBuilder {
          * Generate cancellation messages for all attendees in the master event
          */
         List<Event> sorted = CalendarUtils.sortSeriesMasterFirst(deletedEvents);
-        Event masterEvent = sorted.get(0);
         for (Attendee attendee : attendees) {
             //@formatter:off
             messages.add(new MessageBuilder()
@@ -137,7 +137,7 @@ public class CancelMessageBuilder extends AbstractMessageBuilder {
                 .setOriginator(originator)
                 .setRecipient(attendee)
                 .setResource(new DefaultCalendarObjectResource(deletedEvents))
-                .setDescription(descriptionService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), masterEvent))
+                .setScheduleChange(schedulingChangeService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), sorted))
                 .setAdditionals(getAdditionalsFromSession())
                 .build());
             //@formatter:on
@@ -177,7 +177,7 @@ public class CancelMessageBuilder extends AbstractMessageBuilder {
             .setOriginator(originator)
             .setRecipient(attendee)
             .setResource(new DefaultCalendarObjectResource(deleted))
-            .setDescription(descriptionService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), deleted))
+            .setScheduleChange(schedulingChangeService.describeCancel(session.getContextId(), originator, attendee, getCommentForRecipient(), Collections.singletonList(deleted)))
             .setAdditionals(getAdditionalsFromSession())
             .build());
         //@formatter:on

@@ -528,7 +528,7 @@ public class CalendarServiceImpl implements CalendarService {
              */
             SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
             if (null != schedulingBroker) {
-                schedulingBroker.handle(result.getSession().getSession(), result.getSchedulingMessages());
+                schedulingBroker.handleScheduling(result.getSession().getSession(), result.getSchedulingMessages());
             }
         }));
         return result;

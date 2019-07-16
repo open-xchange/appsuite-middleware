@@ -63,9 +63,8 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -75,17 +74,14 @@ import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.scheduling.SchedulingMessage;
+import com.openexchange.chronos.scheduling.changes.ChangeAction;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -93,7 +89,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
 import com.openexchange.version.VersionService;
 
 /**
@@ -106,35 +101,27 @@ public class MimeMessageBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MimeMessageBuilder.class);
 
-    private final SchedulingMessage message;
-
-    private final int contextId;
-
     private final MimeMessage mime;
 
     /**
      * Initializes a new {@link MimeMessageBuilder}.
-     * 
-     * @param contextId The context identifier
-     * @param message The {@link SchedulingMessage}
      */
-    public MimeMessageBuilder(int contextId, SchedulingMessage message) {
+    public MimeMessageBuilder() {
         super();
-        this.contextId = contextId;
-        this.message = message;
         this.mime = new MimeMessage(MimeDefaultSession.getDefaultSession());
     }
 
     /**
      * Set the <code>FROM</code> header
      * 
+     * @param originator The {@link CalendarUser} who sends the message
      * @return This {@link MimeMessageBuilder} instance
      * @throws OXException If mail is missing
      */
-    public MimeMessageBuilder setFrom() throws OXException {
+    public MimeMessageBuilder setFrom(CalendarUser originator) throws OXException {
         try {
-            InternetAddress[] addresses = parseAddressList(getQuotedAddress(message.getOriginator()), false, false);
-            checkAddress(addresses, message.getOriginator());
+            InternetAddress[] addresses = parseAddressList(getQuotedAddress(originator), false, false);
+            checkAddress(addresses, originator);
             mime.setFrom(addresses[0]);
             mime.setReplyTo(addresses);
         } catch (MessagingException e) {
@@ -146,13 +133,14 @@ public class MimeMessageBuilder {
     /**
      * Set the <code>TO</code> header
      * 
+     * @param recipient The {@link CalendarUser} which receives the message
      * @return This {@link MimeMessageBuilder} instance
      * @throws OXException If mail is missing
      */
-    public MimeMessageBuilder setTo() throws OXException {
+    public MimeMessageBuilder setTo(CalendarUser recipient) throws OXException {
         try {
-            InternetAddress[] addresses = parseAddressList(getQuotedAddress(message.getRecipient()), false, false);
-            checkAddress(addresses, message.getOriginator());
+            InternetAddress[] addresses = parseAddressList(getQuotedAddress(recipient), false, false);
+            checkAddress(addresses, recipient);
             mime.setRecipients(RecipientType.TO, addresses);
         } catch (MessagingException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Recipient email could not be set", e);
@@ -163,64 +151,11 @@ public class MimeMessageBuilder {
     /**
      * Set the <code>SUBJECT</code> header
      * 
-     * @param userService The {@link UserService} to get locale information from
-     * @param contextId The context identifier
+     * @param subject The subject to set to the mail
      * @return This {@link MimeMessageBuilder} instance
      * @throws MessagingException If subject can't be set
-     * @throws OXException In case participant status can't be found when generating subject for a reply
      */
-    public MimeMessageBuilder setSubject(UserService userService, int contextId) throws MessagingException, OXException {
-        Locale locale = Utils.getLocale(userService, contextId, message.getOriginator(), message.getRecipient());
-        StringHelper helper = StringHelper.valueOf(locale);
-        String summary = MailUtils.getSummary(message.getResource().getEvents());
-        String subject;
-        switch (message.getMethod()) {
-            case ADD:
-                subject = Messages.SUBJECT_CHANGED_APPOINTMENT;
-                break;
-            case CANCEL:
-                subject = Messages.SUBJECT_CANCELLED_APPOINTMENT;
-                break;
-            case COUNTER:
-                subject = Messages.SUBJECT_COUNTER_APPOINTMENT;
-                break;
-            case DECLINE_COUNTER:
-                subject = Messages.SUBJECT_DECLINECOUNTER;
-                break;
-            case PUBLISH:
-                subject = Messages.SUBJECT_NEW_APPOINTMENT;
-                break;
-            case REFRESH:
-                subject = Messages.SUBJECT_REFRESH;
-                break;
-            case REPLY:
-                subject = Messages.SUBJECT_STATE_CHANGED;
-                //@formatter:off
-                mime.setSubject(
-                    String.format(
-                        helper.getString(subject), 
-                        message.getOriginator().getCn(), 
-                        ContextSensitiveMessages.getInstance().getDescription(getOriginatorPartStat(), locale, ContextSensitiveMessages.Context.VERB),
-                        summary
-                        ), 
-                    MailProperties.getInstance().getDefaultMimeCharset());
-                //@formatter:on
-                return this;
-            case REQUEST:
-                switch (message.getDescription().getAction()) {
-                    case CREATE:
-                        subject = Messages.SUBJECT_NEW_APPOINTMENT;
-                        break;
-                    default:
-                        subject = Messages.SUBJECT_CHANGED_APPOINTMENT;
-                        break;
-                }
-                break;
-            default:
-                subject = Messages.SUBJECT_NONE;
-                break;
-        }
-        subject = String.format(helper.getString(subject), summary);
+    public MimeMessageBuilder setSubject(String subject) throws MessagingException {
         mime.setSubject(subject, MailProperties.getInstance().getDefaultMimeCharset());
         return this;
     }
@@ -240,27 +175,30 @@ public class MimeMessageBuilder {
     }
 
     /**
-     * Adds additional header.
-     * <p>
-     * Headers will be looked up with {@link SchedulingMessage#getAdditional(String, Class)}. Used keys:
-     * <li> {@link Constants#ADDITIONAL_HEADER_READ_RECEIPT}</li>
-     * <li> {@link Constants#ADDITIONAL_HEADER_MAIL_HEADERS}</li>
+     * Adds additional header to set.
      * 
+     * @param additionalHeaders
      * @return This {@link MimeMessageBuilder} instance
      * @throws MessagingException If setting fails
      */
-    public MimeMessageBuilder setAdditionalHeader() throws MessagingException {
-        Boolean readReceipt = message.getAdditional(Constants.ADDITIONAL_HEADER_READ_RECEIPT, Boolean.class);
-        if (null != readReceipt && readReceipt.booleanValue()) {
-            mime.setHeader(HEADER_DISPNOTTO, message.getOriginator().getEMail());
-        }
-
-        @SuppressWarnings("unchecked") Map<String, String> additionalHeaders = message.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
+    public MimeMessageBuilder setAdditionalHeader(Map<String, String> additionalHeaders) throws MessagingException {
         if (null != additionalHeaders) {
             for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
                 mime.setHeader(header.getKey(), header.getValue());
             }
         }
+        return this;
+    }
+
+    /**
+     * Adds additional header for a read receipt
+     * 
+     * @param originator The {@link CalendarUser} to send the receipt to
+     * @return This {@link MimeMessageBuilder} instance
+     * @throws MessagingException If setting fails
+     */
+    public MimeMessageBuilder setReadReceiptHeader(CalendarUser originator) throws MessagingException {
+        mime.setHeader(HEADER_DISPNOTTO, originator.getEMail());
         return this;
     }
 
@@ -278,35 +216,26 @@ public class MimeMessageBuilder {
     /**
      * Set the header necessary for processing notification mails in the UI
      * 
+     * @param recipient The recipient
+     * @param action The {@link ChangeAction} to set as type
+     * @param event The changed event
      * @return This {@link MimeMessageBuilder} instance
      * @throws MessagingException If header can't be set
      * @throws OXException In case folder can't be loaded
      */
-    public MimeMessageBuilder setOXHeader() throws MessagingException, OXException {
-        if (false == Utils.isInternalCalendarUser(message.getRecipient())) {
+    public MimeMessageBuilder setOXHeader(CalendarUser recipient, ChangeAction action, Event event) throws MessagingException, OXException {
+        if (false == Utils.isInternalCalendarUser(recipient) || null == event) {
             return this;
         }
+        String folderId = CalendarUtils.getFolderView(event, recipient.getEntity());
 
-        List<Event> calendarObject = message.getResource().getEvents();
-        String objectId = calendarObject.get(0).getId();
-        String folderId;
-        if (null != calendarObject.get(0).getFolderId()) {
-            folderId = calendarObject.get(0).getFolderId();
-        } else {
-            if (CalendarUtils.isInternal(message.getRecipient(), CalendarUserType.INDIVIDUAL)) {
-                folderId = CalendarUtils.getFolderView(calendarObject.get(0), message.getRecipient().getEntity());
-            } else {
-                folderId = CalendarUtils.getFolderView(calendarObject.get(0), message.getOriginator().getEntity());
-            }
-        }
-
-        mime.setHeader(Constants.HEADER_X_OX_REMINDER, new StringBuilder().append(objectId).append(',').append(folderId).append(',').append(1).toString());
+        mime.setHeader(Constants.HEADER_X_OX_REMINDER, new StringBuilder().append(event.getId()).append(',').append(folderId).append(',').append(1).toString());
         mime.setHeader(Constants.HEADER_X_OX_MODULE, Constants.VALUE_X_OX_MODULE);
-        mime.setHeader(Constants.HEADER_X_OX_TYPE, message.getDescription().getAction().toString());
-        mime.setHeader(Constants.HEADER_X_OX_OBJECT, objectId);
-        mime.setHeader(Constants.HEADER_X_OX_UID, calendarObject.get(0).getUid());
-        if (null != calendarObject.get(0).getRecurrenceId()) {
-            mime.setHeader(Constants.HEADER_X_OX_RECURRENCE_DATE, calendarObject.get(0).getRecurrenceId().toString());
+        mime.setHeader(Constants.HEADER_X_OX_TYPE, action.name());
+        mime.setHeader(Constants.HEADER_X_OX_OBJECT, event.getId());
+        mime.setHeader(Constants.HEADER_X_OX_UID, event.getUid());
+        if (null != event.getRecurrenceId()) {
+            mime.setHeader(Constants.HEADER_X_OX_RECURRENCE_DATE, event.getRecurrenceId().toString());
         }
 
         return this;
@@ -350,6 +279,7 @@ public class MimeMessageBuilder {
      * Set the {@value #HEADER_ORGANIZATION} if the organization can be retrieved by the {@link ContactService}
      * 
      * @param contactService The {@link ContactService}
+     * @param session The {@link Session}
      * @return This {@link MimeMessageBuilder} instance
      * @throws MessagingException If header can't be set
      */
@@ -371,17 +301,17 @@ public class MimeMessageBuilder {
     /**
      * Set the {@value #HEADER_DATE} header.
      * 
-     * @param userService The {@link UserService} to get time zone information from
+     * @param timeZone The {@link TimeZone} to set as date header
      * @return This {@link MimeMessageBuilder} instance
      * @throws MessagingException If header can't be set
      * @throws OXException If date format can't be obtained
      */
-    public MimeMessageBuilder setSentDate(UserService userService) throws MessagingException, OXException {
+    public MimeMessageBuilder setSentDate(TimeZone timeZone) throws MessagingException, OXException {
         /*
          * Set sent date in UTC time
          */
         if (mime.getSentDate() == null) {
-            final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(Utils.getTimeZone(userService, contextId, message.getOriginator(), message.getRecipient()).getID());
+            final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(timeZone.getID());
             synchronized (mdf) {
                 mime.setHeader(HEADER_DATE, mdf.format(new Date()));
             }
@@ -425,25 +355,6 @@ public class MimeMessageBuilder {
         if (null == addresses || 1 != addresses.length) {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(calendarUser.getUri(), I(calendarUser.getEntity()), CalendarUserType.INDIVIDUAL);
         }
-    }
-
-    /**
-     * Get the updated {@link ParticipationStatus} of the originator based on the given events by {@link #message}
-     * 
-     * @return The {@link ParticipationStatus} of the originator
-     * @throws OXException In case participant status can't be found
-     */
-    private ParticipationStatus getOriginatorPartStat() throws OXException {
-        if (Attendee.class.isAssignableFrom(message.getOriginator().getClass())) {
-            return ((Attendee) message.getOriginator()).getPartStat();
-        }
-        for (Event e : message.getResource().getEvents()) {
-            Attendee attendee = CalendarUtils.find(e.getAttendees(), message.getOriginator().getEntity());
-            if (null != attendee) {
-                return attendee.getPartStat();
-            }
-        }
-        throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to find correct participant status");
     }
 
     /**

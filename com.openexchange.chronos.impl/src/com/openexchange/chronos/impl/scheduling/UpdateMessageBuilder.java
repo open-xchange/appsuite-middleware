@@ -51,17 +51,19 @@ package com.openexchange.chronos.impl.scheduling;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
-import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
-import com.openexchange.chronos.scheduling.changes.Description;
+import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -90,130 +92,161 @@ public class UpdateMessageBuilder extends AbstractMessageBuilder {
     }
 
     /**
-     * 
-     * Build update messages for each given attendee
+     * Builds scheduling messages for the given updated events
      *
-     * @param deleted The deleted event
-     * @param attendees The attendees to build a message for
-     * @return A {@link List} of messages
-     * @throws OXException
+     * @param originalsToUpdated Original events mapped to the updated events
+     * @return Scheduling messages
+     * @throws OXException In case of error
      */
-    public List<SchedulingMessage> build(Event original, Event updated) throws OXException {
-        return build(original, updated, (attendee, eventUpdate) -> descriptionService.describeUpdateRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), eventUpdate));
+    public List<SchedulingMessage> build(Map<Event, Event> originalsToUpdated) throws OXException {
+        DescriptionServiceCallback callback = (e, r) -> descriptionService.describe(e, session.getContextId(), originator, r, (EventField[]) null);
+        List<EventUpdate> eventUpdates = convert(originalsToUpdated);
+        return build(eventUpdates, (recipient, events) -> {
+            return schedulingChangeService.describeUpdateRequest(session.getContextId(), originator, recipient, getCommentForRecipient(), events, getChanges(eventUpdates, recipient, callback));
+        });
     }
 
     /**
+     * Builds scheduling messages for the given new change exceptions
      * 
-     * Build update messages for each given attendee
-     *
-     * @param deleted The deleted event
-     * @param attendees The attendees to build a message for
-     * @return A {@link List} of messages
-     * @throws OXException
+     * @param originalsToNewExceptions Original events mapped to the new change exceptions
+     * @return Scheduling messages
+     * @throws OXException In case of error
      */
-    public List<SchedulingMessage> buildForNewException(Event original, Event changeException) throws OXException {
-        return build(original, changeException, (attendee, eventUpdate) -> descriptionService.describeNewException(session.getContextId(), originator, attendee, getCommentForRecipient(), eventUpdate));
+    public List<SchedulingMessage> buildForNewExceptions(Map<Event, Event> originalsToNewExceptions) throws OXException {
+        DescriptionServiceCallback callback = (e, r) -> descriptionService.describe(e, session.getContextId(), originator, r, (EventField[]) null);
+        List<EventUpdate> eventUpdates = convert(originalsToNewExceptions);
+        return build(eventUpdates, (recipient, events) -> {
+            return schedulingChangeService.describeNewException(session.getContextId(), originator, recipient, getCommentForRecipient(), events, getChanges(eventUpdates, recipient, callback));
+        });
     }
 
     /**
-     * 
      * Build update messages after an series split
      *
-     * @param masterEvent The master event
-     * @param updates The event that were updated
-     * @return A {@link List} of messages
-     * @throws OXException
+     * @param eventUpdates The event updates
+     * @return Scheduling messages
+     * @throws OXException In case of error
      */
-    public List<SchedulingMessage> buildAfterSplit(Event masterEvent, List<UpdateResult> updates) throws OXException {
-        List<Attendee> attendees = masterEvent.getAttendees();
-        for (UpdateResult update : updates) {
-            Event event = update.getOriginal();
-            if (CalendarUtils.isSeriesMaster(event)) {
-                /*
-                 * Send complete update to attendees
-                 */
-                build(update, event.getAttendees(), (a, eventUpdate) -> descriptionService.describeUpdateAfterSplit(session.getContextId(), calendarUser, a, getCommentForRecipient(), update));
-            } else {
-                /*
-                 * Inform additional attendees as needed
-                 */
-                for (Attendee attendee : event.getAttendees()) {
-                    if (false == CalendarUtils.contains(attendees, attendee)) {
-                        build(update, Collections.singletonList(attendee), (a, eventUpdate) -> descriptionService.describeUpdateAfterSplit(session.getContextId(), calendarUser, a, getCommentForRecipient(), update));
-                    }
-                }
-            }
-        }
-        return messages;
+    public List<SchedulingMessage> buildAfterSplit(List<UpdateResult> eventUpdates) throws OXException {
+        /*
+         * Participant status will be reset by a split. Therefore suppress attendee description
+         */
+        DescriptionServiceCallback callback = (e, r) -> descriptionService.describe(e, session.getContextId(), originator, r, EventField.ATTENDEES);
+        return build(eventUpdates, (recipient, events) -> {
+            return schedulingChangeService.describeUpdateRequest(session.getContextId(), originator, recipient, getCommentForRecipient(), events, getChanges(eventUpdates, recipient, callback));
+        });
     }
 
     /**
-     * 
-     * Build update messages for each given attendee
+     * Builds the schedule messages
      *
-     * @param original The original event
-     * @param updated The updated event
-     * @param f Callback to get description
-     * @return A {@link List} of messages
-     * @throws OXException
+     * @param eventUpdates The event updates to generate messages for
+     * @param callback The callback to generate changes for a specific recipient
+     * @return The generated messages
+     * @throws OXException In case of error
      */
-    private List<SchedulingMessage> build(Event original, Event updated, DescWrapper f) throws OXException {
-        EventUpdate eventUpdate = DefaultEventUpdate.builder().considerUnset(true).originalEvent(original).updatedEvent(updated).build();
-        return build(eventUpdate, eventUpdate.getUpdate().getAttendees(), f);
-    }
-
-    /**
-     * 
-     * Build update messages for each given attendee
-     *
-     * @param eventUpdate The event update to propagate
-     * @param attendees The attendees to build a message for
-     * @param f Callback to get description
-     * @return A {@link List} of messages
-     * @throws OXException
-     */
-    private List<SchedulingMessage> build(EventUpdate eventUpdate, List<Attendee> toNotify, DescWrapper f) throws OXException {
-        if (inITipTransaction()) {
+    private List<SchedulingMessage> build(List<? extends EventUpdate> eventUpdates, ScheduleChangeCallback callback) throws OXException {
+        if (inITipTransaction() || isEmpty(eventUpdates)) {
             return messages;
         }
 
         /*
+         * Search for master update and gather updates to send
+         */
+        EventUpdate masterUpdate = getMasterUpdate(eventUpdates);
+        List<Event> updates = new LinkedList<Event>();
+        for (EventUpdate eventUpdate : eventUpdates) {
+            updates.add(eventUpdate.getUpdate());
+        }
+        updates = CalendarUtils.sortSeriesMasterFirst(updates);
+
+        /*
          * Send invitations to added attendees, send cancel mails to removed attendees
          */
-        List<Attendee> attendees = new ArrayList<>(toNotify);
-        if (null != eventUpdate.getAttendeeUpdates() && false == eventUpdate.getAttendeeUpdates().isEmpty()) {
-            CollectionUpdate<Attendee, AttendeeField> attendeeUpdate = eventUpdate.getAttendeeUpdates();
-            // Avoid sending an update to added attendees
+        List<Attendee> attendees = new ArrayList<>(masterUpdate.getUpdate().getAttendees());
+        if (null != masterUpdate.getAttendeeUpdates() && false == masterUpdate.getAttendeeUpdates().isEmpty()) {
+            CollectionUpdate<Attendee, AttendeeField> attendeeUpdate = masterUpdate.getAttendeeUpdates();
             if (null != attendeeUpdate.getAddedItems() && false == isEmpty(attendeeUpdate.getAddedItems())) {
+                messages.addAll(new CreateMessageBuilder(serviceLookup, session, calendarUser).build(updates, attendeeUpdate.getAddedItems()));
                 // Avoid sending an update to added attendees
-                messages.addAll(new CreateMessageBuilder(serviceLookup, session, calendarUser).build(eventUpdate.getUpdate(), attendeeUpdate.getAddedItems()));
                 attendees.removeAll(attendeeUpdate.getAddedItems());
             }
-            messages.addAll(new CancelMessageBuilder(serviceLookup, session, calendarUser).build(eventUpdate.getUpdate(), eventUpdate.getAttendeeUpdates().getRemovedItems()));
+            messages.addAll(new CancelMessageBuilder(serviceLookup, session, calendarUser).build(masterUpdate.getUpdate(), attendeeUpdate.getRemovedItems()));
         }
+
         /*
          * Send update notification to existing attendees
          */
         for (Attendee attendee : attendees) {
-            //@formatter:off
-            messages.add(new MessageBuilder()
-                .setMethod(SchedulingMethod.REQUEST)
-                .setOriginator(originator)
-                .setRecipient(attendee)
-                .setResource(new DefaultCalendarObjectResource(eventUpdate.getUpdate()))
-                .setDescription(f.getDescription(attendee, eventUpdate))
-                .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
-                .setAdditionals(getAdditionalsFromSession())
-                .build());
-            //@formatter:on
+            messages.add(build(updates, callback, attendee));
         }
+
+        /*
+         * Handle exceptions with additional attendees
+         */
+        attendees = new ArrayList<>(masterUpdate.getUpdate().getAttendees());
+        for (Event update : updates) {
+            if (false == isEmpty(update.getAttendees())) {
+                for (Attendee attendee : update.getAttendees()) {
+                    if (false == CalendarUtils.contains(attendees, attendee)) {
+                        build(Collections.singletonList(update), callback, attendee);
+                    }
+                }
+            }
+        }
+
         return messages;
     }
 
-    @FunctionalInterface
-    interface DescWrapper {
+    private SchedulingMessage build(List<Event> updates, ScheduleChangeCallback callback, Attendee attendee) throws OXException {
+        //@formatter:off
+        return new MessageBuilder()
+            .setMethod(SchedulingMethod.REQUEST)
+            .setOriginator(originator)
+            .setRecipient(attendee)
+            .setResource(new DefaultCalendarObjectResource(updates))
+            .setScheduleChange(callback.getChange(attendee, updates))
+            .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
+            .setAdditionals(getAdditionalsFromSession())
+            .build();
+        //@formatter:on
+    }
 
-        Description getDescription(Attendee attendee, EventUpdate eventUpdate) throws OXException;
+    private EventUpdate getMasterUpdate(List<? extends EventUpdate> eventUpdates) {
+        /*
+         * Look up if the master was updated
+         */
+        for (EventUpdate eventUpdate : eventUpdates) {
+            if (CalendarUtils.isSeriesMaster(eventUpdate.getUpdate())) {
+                return eventUpdate;
+            }
+        }
+        /*
+         * Order is irrelevant ..
+         */
+        return eventUpdates.get(0);
+    }
+
+    /**
+     * 
+     * {@link ScheduleChangeCallback} - Callback to generate scheduling changes
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.3
+     */
+    @FunctionalInterface
+    interface ScheduleChangeCallback {
+
+        /**
+         * Generates a schedule change for the given recipient
+         *
+         * @param recipient The recipient
+         * @param events The events to describe in the change
+         * @return A schedule change
+         * @throws OXException In case of error
+         */
+        ScheduleChange getChange(CalendarUser recipient, List<Event> events) throws OXException;
     }
 
 }

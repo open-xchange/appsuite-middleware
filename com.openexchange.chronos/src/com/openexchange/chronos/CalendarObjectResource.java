@@ -96,6 +96,13 @@ public interface CalendarObjectResource {
     List<Event> getChangeExceptions();
 
     /**
+     * Gets the <i>first</i> event in this calendar object resource.
+     * 
+     * @return The first event
+     */
+    Event getFirstEvent();
+
+    /**
      * Gets the (maximum) timestamp of all contained events in this calendar object resource.
      * 
      * @return The timestamp

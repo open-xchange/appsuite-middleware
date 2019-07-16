@@ -117,5 +117,11 @@ public class PassthroughWrapper implements TypeWrapper {
         });
         return sb.toString();
     }
+    
+    
+    @Override
+    public String getType() {
+        return "text";
+    }
 
 }

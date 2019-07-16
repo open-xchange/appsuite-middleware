@@ -53,7 +53,6 @@ import static com.openexchange.chronos.scheduling.common.MailUtils.saveChangesSa
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -63,7 +62,6 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
-import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.TransportProvider;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
@@ -95,34 +93,6 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         super();
         this.serviceLookup = serviceLookup;
     }
-
-    @Override
-    public int getRanking() {
-        return 100;
-    }
-
-    @Override
-    @NonNull
-    public ScheduleStatus send(@NonNull Session session, @NonNull SchedulingMessage message) {
-        try {
-            return sendMail(session, message);
-        } catch (OXException | MessagingException e) {
-            LOGGER.error("Unable to send message from {} to {}", message.getOriginator().getEMail(), message.getRecipient().getEMail(), e);
-        }
-        return ScheduleStatus.NOT_DELIVERED;
-    }
-
-    /**
-     * 
-     * Send the actual mail
-     *
-     * @param message The {@link SchedulingMessage}
-     * @param session The {@link Session}
-     * @return The {@link ScheduleStatus} of the message after sending
-     * @throws OXException In case of error
-     * @throws MessagingException In case mail can't be sent
-     */
-    public abstract @NonNull ScheduleStatus sendMail(Session session, SchedulingMessage message) throws OXException, MessagingException;
 
     protected @NonNull ScheduleStatus transportMail(Session session, MimeMessage mime) throws OXException {
         saveChangesSafe(serviceLookup.getOptionalService(HostnameService.class), mime, session.getContextId(), session.getUserId());

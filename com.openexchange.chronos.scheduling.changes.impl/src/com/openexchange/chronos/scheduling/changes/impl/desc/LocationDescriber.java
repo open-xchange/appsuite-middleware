@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
 
 /**
@@ -72,8 +72,8 @@ public class LocationDescriber extends AbstractChangeDescriber<String> {
     }
 
     @Override
-    List<Sentence> describe(String original, String updated) {
-        return Collections.singletonList(new Sentence(Messages.HAS_CHANGED_LOCATION).add(updated, ArgumentType.UPDATED));
+    List<SentenceImpl> describe(String original, String updated) {
+        return Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_LOCATION).add(updated, ArgumentType.UPDATED));
     }
 
 }

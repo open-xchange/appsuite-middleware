@@ -47,55 +47,62 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes.impl;
+package com.openexchange.chronos.scheduling.changes;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.EventField;
+import org.dmfs.rfc5545.DateTime;
 
 /**
- * {@link Change}
+ * {@link ScheduleChange}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
+ * @see <a href="https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-schedulingchanges.txt">Proposal caldav-schedulingchanges</a>
  */
-public class Change {
-
-    public final static Change EMPTY = new Change(Collections.emptyList(), (EventField[]) null);
-
-    private final List<EventField> fields;
-
-    private final List<Sentence> sentences;
+public interface ScheduleChange {
 
     /**
-     * Initializes a new {@link Change}.
+     * The date when the change was created
+     *
+     * @return The date of the change
+     */
+    DateTime getTimeStamp();
+
+    /**
      * 
-     * @param sentences A {@link List} of {@link Sentence}
-     * @param fields The {@link EventField} that has been described
+     * The change action
+     *
+     * @return The {@link ChangeAction}
      */
-    public Change(List<Sentence> sentences, EventField... fields) {
-        super();
-        this.sentences = sentences;
-        this.fields = null == fields ? null : Arrays.asList(fields);
-    }
+    ChangeAction getAction();
 
     /**
-     * Gets the sentences
+     * 
+     * Get the actual changes
      *
-     * @return The sentences
+     * @return The changes or an empty list
      */
-    public List<Sentence> getSentences() {
-        return sentences;
-    }
+    List<Change> getChanges();
 
     /**
-     * Get a list of fields that has been described
+     * Get the changes describes in text format
      *
-     * @return A {@link List}
+     * @return The changes described
      */
-    public List<EventField> getDescribedFields() {
-        return fields;
-    }
+    String getText();
+
+    /**
+     * Get the changes describes in HTML format
+     *
+     * @return The changes described
+     */
+    String getHtml();
+
+    /*
+     * Get the changes describes in XML format
+     *
+     * @return The changes described
+     */
+    //    String getXml();
 
 }

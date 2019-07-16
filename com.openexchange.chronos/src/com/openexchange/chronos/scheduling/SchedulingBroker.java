@@ -50,7 +50,6 @@
 package com.openexchange.chronos.scheduling;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
@@ -68,8 +67,17 @@ public interface SchedulingBroker {
      * 
      * @param session A {@link Session}
      * @param messages A {@link List} of {@link SchedulingMessage} to send to the recipient
-     * @return A {@link Map} containing the hash value of the message and its {@link ScheduleStatus} of delivery
+     * @return A list containing the {@link ScheduleStatus} of delivery in order of the given messages
      */
-    Map<Integer, ScheduleStatus> handle(Session session, List<SchedulingMessage> messages);
+    List<ScheduleStatus> handleScheduling(Session session, List<SchedulingMessage> messages);
+
+    /**
+     * Handles a scheduling event.
+     * 
+     * @param session A {@link Session}
+     * @param notifications A {@link List} of {@link ChangeNotification} to send to the recipient
+     * @return A list containing the {@link ScheduleStatus} of delivery in order of the given messages
+     */
+    List<ScheduleStatus> handleNotifications(Session session, List<ChangeNotification> notifications);
 
 }

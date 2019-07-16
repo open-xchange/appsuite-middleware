@@ -189,13 +189,12 @@ public class ChangeOrganizerPerformer extends AbstractUpdatePerformer {
         /*
          * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
          */
-        Event updateSeries = updateSeries(loadEventData(originalEvent.getId()), organizer);
+        updateSeries(loadEventData(originalEvent.getId()), organizer);
         
         /*
-         * Notify (internal) attendees about the change
+         * Notify attendees about the change
          */
-        resultTracker.trackSchedulingUpdateAfterSplit(updateSeries, result.getCalendarEvent().getUpdates());
-
+        resultTracker.trackSchedulingUpdateAfterSplit(result.getCalendarEvent().getUpdates());
         return resultTracker.getResult();
     }
 

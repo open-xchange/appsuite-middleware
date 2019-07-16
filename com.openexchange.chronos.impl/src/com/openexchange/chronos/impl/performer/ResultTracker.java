@@ -70,6 +70,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -387,7 +388,7 @@ public class ResultTracker {
      * @throws OXException If generation fails
      */
     public void trackSchedulingUpdate(Event original, Event updated) throws OXException {
-        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(original, updated));
+        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(Collections.singletonMap(original, updated)));
     }
 
     //@formatter:off
@@ -397,21 +398,17 @@ public class ResultTracker {
         EventField.ATTENDEES, EventField.CHANGE_EXCEPTION_DATES, EventField.ORGANIZER, EventField.ATTACHMENTS, EventField.TRANSP 
     };
     //@formatter:on
-
+    
     /**
-     * Generates and tracks a scheduling request messages.
-     * <p>
-     * Does only generate messages when an field changed, that needs an update on client side
+     * Gets a value indicating whether the updated event contains changes that must be reported via scheduling
      *
      * @param original The original event
      * @param updated The updated event
-     * @throws OXException If generation fails
+     * @return <code>true</code> if the change must be reported, <code>false</code> otherwise
      */
-    public void trackNecessarySchedulingUpdate(Event original, Event updated) throws OXException {
+    public boolean isReportableScheduleChange(Event original, Event updated) {
         EventUpdate eventUpdate = DefaultEventUpdate.builder().considerUnset(true).originalEvent(original).updatedEvent(updated).build();
-        if (eventUpdate.containsAnyChangeOf(FIELDS_TO_REPORT)) {
-            trackSchedulingUpdate(original, updated);
-        }
+        return eventUpdate.containsAnyChangeOf(FIELDS_TO_REPORT);
     }
 
     /**
@@ -422,18 +419,17 @@ public class ResultTracker {
      * @throws OXException If generation fails
      */
     public void trackSchedulingExceptionUpdate(Event original, Event updated) throws OXException {
-        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildForNewException(original, updated));
+        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildForNewExceptions(Collections.singletonMap(original, updated)));
     }
 
     /**
      * Generates and tracks a scheduling request messages after an series split. This includes update messages to attendees within change exceptions.
      *
-     * @param masterEvent The updated master event
-     * @param updates A {@link List} of {@link UpdateResult}
+     * @param eventUpdates The event updates
      * @throws OXException If generation fails
      */
-    public void trackSchedulingUpdateAfterSplit(Event masterEvent, List<UpdateResult> updates) throws OXException {
-        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildAfterSplit(masterEvent, updates));
+    public void trackSchedulingUpdateAfterSplit(List<UpdateResult> eventUpdates) throws OXException {
+        trackMessage(new UpdateMessageBuilder(Services.getServiceLookup(), session, calendarUser).buildAfterSplit(eventUpdates));
     }
 
     /**
@@ -450,7 +446,7 @@ public class ResultTracker {
         /*
          * Decline each given event for the calendar user
          */
-        List<Event> copies = new LinkedList<Event>();
+        Map<Event, Event> copies = new LinkedHashMap<Event, Event>(toDecline.size());
         for (Event event : toDecline) {
             List<Attendee> attendees = new LinkedList<>(event.getAttendees());
             Attendee originator = CalendarUtils.find(event.getAttendees(), calendarUser);
@@ -477,27 +473,26 @@ public class ResultTracker {
 
             Event copy = EventMapper.getInstance().copy(event, null, (EventField[]) null);
             copy.setAttendees(attendees);
-            copies.add(copy);
+            copies.put(event, copy);
         }
-        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(CalendarUtils.sortSeriesMasterFirst(toDecline).get(0), copies));
+        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(copies));
     }
 
     /**
      * Generates and tracks a reply message to the organizer
      *
-     * @param original The original event
-     * @param updated The updated events
+     * @param originalsToUpdated The original events mapped to the updated event
      * @throws OXException If generation fails
      */
-    public void trackSchedulingAttendeeUpdate(Event original, List<Event> updated) throws OXException {
-        List<Event> notify = new LinkedList<Event>();
-        for (Event event : updated) {
-            EventUpdate update = DefaultEventUpdate.builder().originalEvent(original).updatedEvent(event).considerUnset(true).build();
+    public void trackSchedulingAttendeeUpdate(Map<Event, Event> originalsToUpdated) throws OXException {
+        Map<Event, Event> notify = new LinkedHashMap<Event, Event>(originalsToUpdated.size());
+        for (Entry<Event, Event> entry : originalsToUpdated.entrySet()) {
+            EventUpdate update = DefaultEventUpdate.builder().originalEvent(entry.getKey()).updatedEvent(entry.getValue()).considerUnset(true).build();
             if (isNotifiableAttendeeUpdate(update.getAttendeeUpdates())) {
-                notify.add(event);
+                notify.put(entry.getKey(), entry.getValue());
             }
         }
-        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(original, notify));
+        trackMessage(new ReplyMessageBuilder(Services.getServiceLookup(), session, calendarUser).build(notify));
     }
 
     private static final AttendeeField[] ATTENDEE_FIELDS_TO_REPORT = { AttendeeField.PARTSTAT };

@@ -57,41 +57,47 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.scheduling.changes.Sentence;
 import com.openexchange.chronos.scheduling.common.ContextSensitiveMessages;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link Sentence}
+ * {@link SentenceImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Moved with v7.10.3
  */
-public class Sentence {
+public class SentenceImpl implements Sentence {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(Sentence.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(SentenceImpl.class);
 
     private final String message;
     private final List<Object> arguments = new ArrayList<Object>();
     private final List<ArgumentType> types = new ArrayList<ArgumentType>();
     private final List<Object[]> extra = new ArrayList<Object[]>();
 
-    public Sentence(String message) {
+    public SentenceImpl(String message) {
         this.message = message;
     }
 
-    public Sentence add(Object argument, ArgumentType type, Object... extra) {
+    public SentenceImpl add(Object argument, ArgumentType type, Object... extra) {
         arguments.add(argument);
         types.add(type);
         this.extra.add(extra);
         return this;
     }
 
-    public Sentence add(Object argument) {
+    public SentenceImpl add(Object argument) {
         return add(argument, ArgumentType.NONE);
     }
 
-    public Sentence addStatus(ParticipationStatus status) {
+    public SentenceImpl addStatus(ParticipationStatus status) {
         return add("", ArgumentType.STATUS, status);
+    }
+
+    @Override
+    public String getMessage(String format, Locale locale) {
+        return "html".equalsIgnoreCase(format) ? getMessage(new HTMLWrapper(), locale) : getMessage(locale);
     }
 
     public String getMessage(TypeWrapper wrapper, Locale locale) {

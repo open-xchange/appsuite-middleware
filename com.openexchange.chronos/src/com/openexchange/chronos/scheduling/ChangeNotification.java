@@ -47,38 +47,77 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes.impl;
+package com.openexchange.chronos.scheduling;
 
-import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.chronos.CalendarObjectResource;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.scheduling.changes.ChangeAction;
+import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 
 /**
- * {@link ChangeDescriber}
+ * {@link ChangeNotification}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
-public interface ChangeDescriber {
+public interface ChangeNotification {
 
     /**
-     * Get the {@link EventField} the {@link ChangeDescriber} can describe
+     * The {@link ChangeAction} that triggered the notification
      * 
-     * @return The {@link EventField}
+     * @return The {@link ChangeAction}
+     */
+    ChangeAction getAction();
+
+    /**
+     * The originator of the scheduling event. The originator can be
+     * <li> an attendee</li>
+     * <li> the organizer</li>
+     * of an event. An attendee becomes originator e.g. if he declines an event an thus triggers an scheduling event.
+     * The organizer is the originator e.g. if he changes the start time of the event.
+     * 
+     * In case another user acts on behalf of an calendar user, this acting user should be set like described in
+     * <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.3">RFC 5545, Section 3.8.4.3</a>
+     * 
+     * @return The originator of the message.
      */
     @NonNull
-    EventField[] getFields();
+    CalendarUser getOriginator();
+
     /**
-     * Describe the change
+     * The recipient of the message. Can be either an attendee or the organizer
      * 
-     * @param eventUpdate The {@link EventUpdate} to describe
-     * @param timeZone The {@link TimeZone} of the user
-     * @param locale The locale of the messages text
-     * @return A {@link Description}
+     * @return The recipient of the message.
      */
-    Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale);
+    @NonNull
+    CalendarUser getRecipient();
+
+    /**
+     * Get a the {@link CalendarObjectResource}.
+     * 
+     * @return {@link CalendarObjectResource}
+     */
+    @NonNull
+    CalendarObjectResource getResource();
+
+    /**
+     * Get the {@link ScheduleChange} of what changes has been performed.
+     *
+     * @return A {@link ScheduleChange}
+     */
+    @NonNull
+    ScheduleChange getScheduleChange();
+
+    /**
+     * Get additional information.
+     * 
+     * @param key The key for the value
+     * @param clazz The class the value has
+     * @return The value casted to the given class or <code>null</code> if not found
+     */
+    @Nullable
+    <T> T getAdditional(String key, Class<T> clazz);
 
 }

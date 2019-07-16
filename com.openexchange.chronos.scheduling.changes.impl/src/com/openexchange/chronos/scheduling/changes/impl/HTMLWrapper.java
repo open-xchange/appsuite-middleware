@@ -149,7 +149,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<i>" + escapeHtml(argument.toString()) + "</i>";
     }
-    
+
     @Override
     public String convert(List<String> descriptions) {
         StringBuilder sb = new StringBuilder();
@@ -157,6 +157,11 @@ public class HTMLWrapper extends PassthroughWrapper {
             sb.append(s).append("<br>");
         });
         return sb.toString();
+    }
+
+    @Override
+    public String getType() {
+        return "html";
     }
 
 }

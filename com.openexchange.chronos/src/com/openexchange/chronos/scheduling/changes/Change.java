@@ -47,38 +47,33 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes.impl;
+package com.openexchange.chronos.scheduling.changes;
 
-import java.util.Locale;
-import java.util.TimeZone;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
+import java.util.List;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.chronos.RecurrenceId;
 
 /**
- * {@link ChangeDescriber}
+ * {@link Change}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
+ * @see <a href="https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-schedulingchanges.txt">Proposal caldav-schedulingchanges</a>
  */
-public interface ChangeDescriber {
+public interface Change {
 
     /**
-     * Get the {@link EventField} the {@link ChangeDescriber} can describe
-     * 
-     * @return The {@link EventField}
+     * Get the recurrence ID of the change
+     *
+     * @return The {@link RecurrenceId} or <code>null</code> if the change is about the master event
      */
-    @NonNull
-    EventField[] getFields();
-    /**
-     * Describe the change
-     * 
-     * @param eventUpdate The {@link EventUpdate} to describe
-     * @param timeZone The {@link TimeZone} of the user
-     * @param locale The locale of the messages text
-     * @return A {@link Description}
-     */
-    Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale);
+    @Nullable
+    RecurrenceId getRecurrenceId();
 
+    /**
+     * Get the changes as description
+     *
+     * @return Descriptions of the changes
+     */
+    List<Description> getDescriptions();
 }

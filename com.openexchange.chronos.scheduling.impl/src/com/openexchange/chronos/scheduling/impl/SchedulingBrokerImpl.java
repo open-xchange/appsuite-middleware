@@ -49,15 +49,14 @@
 
 package com.openexchange.chronos.scheduling.impl;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
@@ -87,15 +86,15 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
     }
 
     @Override
-    public Map<Integer, ScheduleStatus> handle(Session session, List<SchedulingMessage> messages) {
-        Map<Integer, ScheduleStatus> result = new HashMap<>(messages.size() + 1, 0.99f);
+    public List<ScheduleStatus> handleScheduling(Session session, List<SchedulingMessage> messages) {
+        List<ScheduleStatus> result = new LinkedList<>();
         for (SchedulingMessage message : messages) {
             try {
                 ScheduleStatus status = handle(session, message);
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("An message for {} sent by {} has been handeled with the status {}.", message.getRecipient(), message.getOriginator(), status);
                 }
-                result.put(I(message.hashCode()), status);
+                result.add(status);
             } catch (Throwable t) {
                 LOGGER.debug("Unable to send message", t);
             }
@@ -123,4 +122,38 @@ public class SchedulingBrokerImpl extends RankingAwareNearRegistryServiceTracker
         }
         return ScheduleStatus.NO_TRANSPORT;
     }
+
+    @Override
+    public List<ScheduleStatus> handleNotifications(Session session, List<ChangeNotification> notifications) {
+        List<ScheduleStatus> result = new LinkedList<>();
+        for (ChangeNotification message : notifications) {
+            try {
+                ScheduleStatus status = handleNotification(session, message);
+                if (LOGGER.isTraceEnabled()) {
+                    LOGGER.trace("An message for {} sent by {} has been handeled with the status {}.", message.getRecipient(), message.getOriginator(), status);
+                }
+                result.add(status);
+            } catch (Throwable t) {
+                LOGGER.debug("Unable to send message", t);
+            }
+        }
+        return result;
+    }
+
+    private ScheduleStatus handleNotification(Session session, ChangeNotification notification) {
+        if (null != notification && null != session) {
+            /*
+             * Try to send message. Stop once the message is send successfully
+             */
+            for (Iterator<TransportProvider> iterator = iterator(); iterator.hasNext();) {
+                TransportProvider transportProvider = iterator.next();
+                ScheduleStatus status = transportProvider.send(session, notification);
+                if (SUCCESS.contains(status)) {
+                    return status;
+                }
+            }
+        }
+        return ScheduleStatus.NO_TRANSPORT;
+    }
+
 }

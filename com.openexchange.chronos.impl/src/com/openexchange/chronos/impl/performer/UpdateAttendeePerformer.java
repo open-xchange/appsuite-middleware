@@ -213,7 +213,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (CalendarUtils.isOrganizerSchedulingResource(updatedEvent, calendarUserId)) {
             resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
         } else {
-            resultTracker.trackSchedulingAttendeeUpdate(originalEvent, Collections.singletonList(updatedEvent));
+            resultTracker.trackSchedulingAttendeeUpdate(Collections.singletonMap(originalEvent, updatedEvent));
         }
         if (isSeriesException(originalEvent)) {
             /*
@@ -266,7 +266,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 if (CalendarUtils.isOrganizerSchedulingResource(updatedExceptionEvent, calendarUserId)) {
                         resultTracker.trackSchedulingExceptionUpdate(originalEvent, updatedExceptionEvent);
                 } else {
-                    resultTracker.trackSchedulingAttendeeUpdate(originalEvent, Collections.singletonList(updatedExceptionEvent));
+                    resultTracker.trackSchedulingAttendeeUpdate(Collections.singletonMap(originalEvent, updatedExceptionEvent));
                 }
                 
                 /*

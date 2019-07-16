@@ -52,12 +52,13 @@ package com.openexchange.chronos.scheduling.changes.impl.desc;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
-import com.openexchange.chronos.scheduling.changes.impl.Change;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
@@ -77,30 +78,31 @@ public class AttachmentDescriber implements ChangeDescriber {
     public AttachmentDescriber() {}
 
     @Override
+    @NonNull
     public EventField[] getFields() {
         return new EventField[] { EventField.ATTACHMENTS };
     }
 
     @Override
-    public Change describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
         SimpleCollectionUpdate<Attachment> updates = eventUpdate.getAttachmentUpdates();
         if (null == updates || updates.isEmpty()) {
-            return Change.EMPTY;
+            return null;
         }
         /*
          * Describe added and removed attachments
          */
-        ArrayList<Sentence> sentences = new ArrayList<Sentence>(updates.getAddedItems().size() + updates.getRemovedItems().size());
+        ArrayList<SentenceImpl> sentences = new ArrayList<SentenceImpl>(updates.getAddedItems().size() + updates.getRemovedItems().size());
         for (Attachment attachment : updates.getAddedItems()) {
             if (null != attachment && Strings.isNotEmpty(attachment.getFilename())) {
-                sentences.add(new Sentence(Messages.HAS_ADDED_ATTACHMENT).add(attachment.getFilename(), ArgumentType.ITALIC));
+                sentences.add(new SentenceImpl(Messages.HAS_ADDED_ATTACHMENT).add(attachment.getFilename(), ArgumentType.ITALIC));
             }
         }
         for (Attachment attachment : updates.getRemovedItems()) {
             if (null != attachment && Strings.isNotEmpty(attachment.getFilename())) {
-                sentences.add(new Sentence(Messages.HAS_REMOVED_ATTACHMENT).add(attachment.getFilename(), ArgumentType.ITALIC));
+                sentences.add(new SentenceImpl(Messages.HAS_REMOVED_ATTACHMENT).add(attachment.getFilename(), ArgumentType.ITALIC));
             }
         }
-        return new Change(sentences, EventField.ATTACHMENTS);
+        return new DefaultDescription(sentences, EventField.ATTACHMENTS);
     }
 }

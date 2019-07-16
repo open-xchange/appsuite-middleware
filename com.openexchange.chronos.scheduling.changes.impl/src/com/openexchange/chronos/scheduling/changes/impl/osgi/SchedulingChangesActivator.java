@@ -52,7 +52,9 @@ package com.openexchange.chronos.scheduling.changes.impl.osgi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
+import com.openexchange.chronos.scheduling.changes.SchedulingChangeService;
 import com.openexchange.chronos.scheduling.changes.impl.DescriptionServiceImpl;
+import com.openexchange.chronos.scheduling.changes.impl.SchedulingChangeServiceImpl;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
@@ -85,8 +87,9 @@ public class SchedulingChangesActivator extends HousekeepingActivator {
         LOGGER.info("Starting scheduling related description services");
 
         /*
-         * Register a description service
+         * Register a description services
          */
+        registerService(SchedulingChangeService.class, new SchedulingChangeServiceImpl(this));
         registerService(DescriptionService.class, new DescriptionServiceImpl(this));
     }
 

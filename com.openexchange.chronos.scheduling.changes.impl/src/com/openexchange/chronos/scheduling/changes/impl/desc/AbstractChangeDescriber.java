@@ -54,12 +54,13 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.scheduling.changes.impl.Change;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
@@ -98,19 +99,20 @@ public abstract class AbstractChangeDescriber<T> implements ChangeDescriber {
      * @param helper The {@link StringHelper} to get description in the correct {@link Locale}
      * @return The change description
      */
-    abstract List<Sentence> describe(T original, T updated);
+    abstract List<SentenceImpl> describe(T original, T updated);
 
     @Override
+    @NonNull
     public EventField[] getFields() {
         return new EventField[] { field };
     }
 
     @Override
-    public Change describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
         if (eventUpdate.getUpdatedFields().contains(field)) {
-            return new Change(describe(castValueTo(clazz, field, eventUpdate.getOriginal()), castValueTo(clazz, field, eventUpdate.getUpdate())), field);
+            return new DefaultDescription(describe(castValueTo(clazz, field, eventUpdate.getOriginal()), castValueTo(clazz, field, eventUpdate.getUpdate())), field);
         }
-        return Change.EMPTY;
+        return null;
     }
 
     /**
@@ -125,7 +127,7 @@ public abstract class AbstractChangeDescriber<T> implements ChangeDescriber {
     static <T> T castValueTo(Class<T> clazz, EventField field, Event event) throws IllegalArgumentException {
         try {
             Object value = getValue(field, event);
-            if(null == value) {
+            if (null == value) {
                 return null;
             }
             if (clazz.isAssignableFrom(value.getClass())) {

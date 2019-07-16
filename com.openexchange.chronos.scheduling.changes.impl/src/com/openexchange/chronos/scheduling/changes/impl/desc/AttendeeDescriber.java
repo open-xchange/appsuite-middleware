@@ -58,16 +58,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
-import com.openexchange.chronos.scheduling.changes.impl.Change;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
@@ -101,16 +102,17 @@ public class AttendeeDescriber implements ChangeDescriber {
     private static final CalendarUserType[] DESCRIBABLE_TYPES = { CalendarUserType.INDIVIDUAL, CalendarUserType.GROUP, CalendarUserType.RESOURCE };
 
     @Override
+    @NonNull
     public EventField[] getFields() {
         return new EventField[] { EventField.ATTENDEES };
     }
 
     @Override
-    public Change describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
-        List<Sentence> sentences = new LinkedList<>();
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+        List<SentenceImpl> sentences = new LinkedList<>();
         CollectionUpdate<Attendee, AttendeeField> attendeeChanges = eventUpdate.getAttendeeUpdates();
         if (null == attendeeChanges || attendeeChanges.isEmpty()) {
-            return Change.EMPTY;
+            return null;
         }
         describeChange(sentences, attendeeChanges.getAddedItems(), ADD_MESSAGE_MAP);
 
@@ -119,7 +121,7 @@ public class AttendeeDescriber implements ChangeDescriber {
                 Attendee attendee = updatedItems.getUpdate();
                 if (CalendarUserType.INDIVIDUAL.matches(attendee.getCuType()) && false == ParticipationStatus.NEEDS_ACTION.matches(attendee.getPartStat())) {
                     // Avoid generating messages with empty status
-                    Sentence sentence = new Sentence(Messages.HAS_CHANGED_STATE).add(getReferenceName(attendee), ArgumentType.PARTICIPANT);
+                    SentenceImpl sentence = new SentenceImpl(Messages.HAS_CHANGED_STATE).add(getReferenceName(attendee), ArgumentType.PARTICIPANT);
                     sentence.addStatus(attendee.getPartStat());
                     sentences.add(sentence);
                 }
@@ -127,7 +129,7 @@ public class AttendeeDescriber implements ChangeDescriber {
         }
 
         describeChange(sentences, attendeeChanges.getRemovedItems(), DELETE_MESSAGE_MAP);
-        return new Change(sentences, getFields());
+        return new DefaultDescription(sentences, EventField.ATTENDEES);
     }
 
     /*
@@ -138,12 +140,12 @@ public class AttendeeDescriber implements ChangeDescriber {
         return Strings.isEmpty(attendee.getCn()) ? attendee.getUri() : attendee.getCn();
     }
 
-    private void describeChange(List<Sentence> sentences, List<Attendee> attendees, Map<CalendarUserType, String> messages) {
+    private void describeChange(List<SentenceImpl> sentences, List<Attendee> attendees, Map<CalendarUserType, String> messages) {
         for (CalendarUserType cuType : DESCRIBABLE_TYPES) {
             boolean isIndividual = CalendarUserType.INDIVIDUAL.matches(cuType);
             String message = messages.get(cuType);
             for (Attendee attendee : getAttendees(attendees, cuType)) {
-                Sentence sentence = new Sentence(message).add(getReferenceName(attendee), ArgumentType.PARTICIPANT);
+                SentenceImpl sentence = new SentenceImpl(message).add(getReferenceName(attendee), ArgumentType.PARTICIPANT);
                 if (isIndividual) {
                     sentence.addStatus(attendee.getPartStat());
                 }

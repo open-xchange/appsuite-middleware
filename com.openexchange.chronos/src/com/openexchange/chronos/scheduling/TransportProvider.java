@@ -70,5 +70,15 @@ public interface TransportProvider extends Ranked {
      */
     @NonNull
     ScheduleStatus send(@NonNull Session session, @NonNull SchedulingMessage message);
+    
+    /**
+     * Handles a scheduling event.
+     * 
+     * @param session The {@link Session}
+     * @param message The {@link ChangeNotification}
+     * @return A {@link ScheduleStatus}
+     */
+    @NonNull
+    ScheduleStatus send(@NonNull Session session, @NonNull ChangeNotification message);
 
 }

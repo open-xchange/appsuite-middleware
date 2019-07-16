@@ -52,12 +52,13 @@ package com.openexchange.chronos.scheduling.changes.impl.desc;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
-import com.openexchange.chronos.scheduling.changes.impl.Change;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.HumanReadableRecurrences;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.java.Strings;
@@ -78,17 +79,18 @@ public class RRuleDescriber implements ChangeDescriber {
     }
 
     @Override
+    @NonNull
     public EventField[] getFields() {
         return new EventField[] { EventField.RECURRENCE_RULE };
     }
 
     @Override
-    public Change describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
         if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
             HumanReadableRecurrences update = new HumanReadableRecurrences(eventUpdate.getUpdate(), locale);
-            return new Change(Collections.singletonList(new Sentence(Messages.HAS_CHANGED_RRULE).add(getReadableUpdate(update), ArgumentType.NONE)), EventField.RECURRENCE_RULE);
+            return new DefaultDescription(Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_RRULE).add(getReadableUpdate(update), ArgumentType.NONE)), EventField.RECURRENCE_RULE);
         }
-        return Change.EMPTY;
+        return null;
     }
 
     private String getReadableUpdate(HumanReadableRecurrences update) {

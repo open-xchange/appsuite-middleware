@@ -144,6 +144,11 @@ public class DefaultCalendarObjectResource implements CalendarObjectResource {
     }
 
     @Override
+    public Event getFirstEvent() {
+        return events.get(0);
+    }
+
+    @Override
     public Date getTimestamp() {
         return getMaximumTimestamp(events);
     }

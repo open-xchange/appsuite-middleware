@@ -54,7 +54,7 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.scheduling.changes.Description;
+import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.exception.OXException;
 
 /**
@@ -105,12 +105,12 @@ public interface SchedulingMessage {
     CalendarObjectResource getResource();
 
     /**
-     * Get the {@link Description} of what changes has been performed.
+     * Get the {@link ScheduleChange} of what changes has been performed.
      *
-     * @return A {@link Description}
+     * @return A {@link ScheduleChange}
      */
     @NonNull
-    Description getDescription();
+    ScheduleChange getScheduleChange();
 
     /**
      * Gets the binary attachment data for one of the attachments referenced by the calendar object resource.

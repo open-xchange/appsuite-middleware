@@ -54,7 +54,7 @@ import java.util.List;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
-import com.openexchange.chronos.scheduling.changes.impl.Sentence;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
 
 /**
@@ -73,8 +73,8 @@ public class OrganizerDescriber extends AbstractChangeDescriber<Organizer> {
     }
 
     @Override
-    List<Sentence> describe(Organizer original, Organizer updated) {
-        return Collections.singletonList(new Sentence(Messages.ORGANIZER_CHANGE).add(updated.getEMail(), ArgumentType.EMPHASIZED));
+    List<SentenceImpl> describe(Organizer original, Organizer updated) {
+        return Collections.singletonList(new SentenceImpl(Messages.ORGANIZER_CHANGE).add(updated.getEMail(), ArgumentType.EMPHASIZED));
     }
 
 }

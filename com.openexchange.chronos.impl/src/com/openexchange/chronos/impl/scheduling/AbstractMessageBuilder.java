@@ -49,17 +49,26 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
-import static com.openexchange.chronos.scheduling.changes.Description.EMPTY;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
+import com.openexchange.chronos.scheduling.changes.Change;
+import com.openexchange.chronos.scheduling.changes.ChangeAction;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
+import com.openexchange.chronos.scheduling.changes.ScheduleChange;
+import com.openexchange.chronos.scheduling.changes.SchedulingChangeService;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventUpdate;
@@ -76,17 +85,15 @@ import com.openexchange.user.UserService;
  */
 abstract class AbstractMessageBuilder {
 
+    protected final ServiceLookup serviceLookup;
+    protected final SchedulingChangeService schedulingChangeService;
+    protected final DescriptionService descriptionService;
+
     protected final List<SchedulingMessage> messages;
 
-    protected final ServiceLookup serviceLookup;
-
     protected final CalendarSession session;
-
     protected final CalendarUser calendarUser;
-
     protected final CalendarUser originator;
-
-    protected final DescriptionService descriptionService;
 
     /**
      * Initializes a new {@link AbstractMessageBuilder}.
@@ -103,6 +110,7 @@ abstract class AbstractMessageBuilder {
         this.calendarUser = calendarUser;
         this.messages = new ArrayList<>();
         this.originator = getOriginator();
+        this.schedulingChangeService = getSchedulingChangeService();
         this.descriptionService = getDescriptionService();
     }
 
@@ -141,17 +149,6 @@ abstract class AbstractMessageBuilder {
         return cu;
     }
 
-    protected DescriptionService getDescriptionService() {
-        DescriptionService descriptionService = serviceLookup.getOptionalService(DescriptionService.class);
-        if (null == descriptionService) {
-            /*
-             * If no service is registered, user empty descriptions. Still construct messages.
-             */
-            return new EmptyDescriptionService();
-        }
-        return descriptionService;
-    }
-
     /**
      * 
      * Whether the given list is empty or not
@@ -184,6 +181,81 @@ abstract class AbstractMessageBuilder {
     }
 
     /**
+     * Build an event update from the given event pair
+     *
+     * @param entry The event pair
+     * @return An event update
+     */
+    protected EventUpdate buildEventUpdate(Entry<Event, Event> entry) {
+        return DefaultEventUpdate.builder().considerUnset(true).originalEvent(entry.getKey()).updatedEvent(entry.getValue()).build();
+    }
+
+    /**
+     * Converts a map of original and updated events to a list of event updates
+     *
+     * @param originalsToUpdated The events to convert
+     * @return A list of event updates
+     */
+    protected List<EventUpdate> convert(Map<Event, Event> originalsToUpdated) {
+        List<EventUpdate> updates = new LinkedList<EventUpdate>();
+        for (Entry<Event, Event> entry : originalsToUpdated.entrySet()) {
+            updates.add(buildEventUpdate(entry));
+        }
+        return updates;
+    }
+
+    /**
+     * Get the changes to describe
+     *
+     * @param originalsToUpdated original events mapped to updated
+     * @param recipient The recipient
+     * @param callback A {@link DescriptionServiceCallback}
+     * @return A list of changes
+     */
+    protected List<Change> getChanges(List<? extends EventUpdate> eventUpdates, CalendarUser recipient, DescriptionServiceCallback callback) {
+        List<Change> changes = new LinkedList<Change>();
+        for (EventUpdate eventUpdate : eventUpdates) {
+            changes.add(getChange(eventUpdate, recipient, callback));
+        }
+        return changes;
+    }
+
+    /**
+     * Describes the change for the given event update.
+     * <p>
+     * Does only describe the change on the replying originators participant status
+     *
+     * @param eventUpdate The event update
+     * @param recipient The recipient
+     * @return A change containing the description
+     */
+    private Change getChange(EventUpdate eventUpdate, CalendarUser recipient, DescriptionServiceCallback callback) {
+        //@formatter:off
+        return new ChangeBuilder()
+            .setRecurrenceId(eventUpdate.getUpdate().getRecurrenceId())
+            .setDescriptions(callback.getDescriptions(eventUpdate, recipient))
+            .build();
+        //@formatter:on
+    }
+
+    @FunctionalInterface
+    interface DescriptionServiceCallback {
+
+        List<Description> getDescriptions(EventUpdate eventUpdate, CalendarUser recipient);
+    }
+
+    private DescriptionService getDescriptionService() {
+        DescriptionService descriptionService = serviceLookup.getOptionalService(DescriptionService.class);
+        if (null == descriptionService) {
+            /*
+             * If no service is registered, user empty descriptions. Still construct messages.
+             */
+            return new EmptyDescriptionService();
+        }
+        return descriptionService;
+    }
+
+    /**
      * 
      * {@link EmptyDescriptionService} - Always return empty descriptions
      *
@@ -193,42 +265,98 @@ abstract class AbstractMessageBuilder {
     class EmptyDescriptionService implements DescriptionService {
 
         @Override
-        public Description describeCancel(int contextId, CalendarUser originator, CalendarUser recipient, String comment, Event removedEvent) throws OXException {
+        public List<Description> describe(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... ignorees) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<Description> describeOnly(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... toDescribe) {
+            return Collections.emptyList();
+        }
+
+    }
+
+    private SchedulingChangeService getSchedulingChangeService() {
+        SchedulingChangeService schedulingChangeService = serviceLookup.getOptionalService(SchedulingChangeService.class);
+        if (null == schedulingChangeService) {
+            /*
+             * If no service is registered, user empty changes. Still construct messages.
+             */
+            return new EmptyChangeService();
+        }
+        return schedulingChangeService;
+    }
+
+    /**
+     * 
+     * {@link EmptyChangeService} - Always return empty changes
+     *
+     * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+     * @since v7.10.3
+     */
+    class EmptyChangeService implements SchedulingChangeService {
+
+        private final ScheduleChange EMPTY = new ScheduleChange() {
+
+            @Override
+            public DateTime getTimeStamp() {
+                return new DateTime(0);
+            }
+
+            @Override
+            public ChangeAction getAction() {
+                return ChangeAction.NONE;
+            }
+
+            @Override
+            public List<Change> getChanges() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public String getText() {
+                return "".intern();
+            }
+
+            @Override
+            public String getHtml() {
+                return "".intern();
+            }
+
+        };
+
+        @Override
+        public ScheduleChange describeCancel(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> removedEvents) throws OXException {
             return EMPTY;
         }
 
         @Override
-        public Description describeCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, EventUpdate eventUpdate, boolean isExceptionCreate) throws OXException {
+        public ScheduleChange describeCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> countered, List<Change> changes, boolean isExceptionCreate) throws OXException {
             return EMPTY;
         }
 
         @Override
-        public Description describeDeclineCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, Event declinedEvent) throws OXException {
+        public ScheduleChange describeDeclineCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> declinedEvent) throws OXException {
             return EMPTY;
         }
 
         @Override
-        public Description describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, EventUpdate eventUpdate) throws OXException {
+        public ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> change) throws OXException {
             return EMPTY;
         }
 
         @Override
-        public Description describeCreationRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, Event created) throws OXException {
+        public ScheduleChange describeCreationRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> created) throws OXException {
             return EMPTY;
         }
 
         @Override
-        public Description describeUpdateRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, EventUpdate eventUpdate) throws OXException {
+        public ScheduleChange describeUpdateRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException {
             return EMPTY;
         }
 
         @Override
-        public Description describeNewException(int contextId, CalendarUser originator, CalendarUser recipient, String comment, EventUpdate eventUpdate) throws OXException {
-            return EMPTY;
-        }
-
-        @Override
-        public Description describeUpdateAfterSplit(int contextId, CalendarUser originator, CalendarUser recipient, String comment, EventUpdate eventUpdate) throws OXException {
+        public ScheduleChange describeNewException(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException {
             return EMPTY;
         }
 

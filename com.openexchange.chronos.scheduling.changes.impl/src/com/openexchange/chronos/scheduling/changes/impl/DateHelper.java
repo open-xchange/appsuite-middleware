@@ -160,7 +160,7 @@ public class DateHelper {
 
     public String formatInterval(Event event) {
         if (event.getStartDate().isAllDay()) {
-            return new Sentence(Messages.FULL_TIME).getMessage(locale);
+            return new SentenceImpl(Messages.FULL_TIME).getMessage(locale);
         }
         // TODO: Longer than a day
         Date startDate = new Date(event.getStartDate().getTimestamp());

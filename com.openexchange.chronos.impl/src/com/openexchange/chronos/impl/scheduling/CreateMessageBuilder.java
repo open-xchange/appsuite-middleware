@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.scheduling;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
@@ -105,7 +106,7 @@ public class CreateMessageBuilder extends AbstractMessageBuilder {
                 .setOriginator(originator)
                 .setRecipient(attendee)
                 .setResource(new DefaultCalendarObjectResource(createdEvents))
-                .setDescription(descriptionService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), masterEvent))
+                .setScheduleChange(schedulingChangeService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), sorted))
                 .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
                 .setAdditionals(getAdditionalsFromSession())
                 .build());
@@ -131,14 +132,24 @@ public class CreateMessageBuilder extends AbstractMessageBuilder {
     /**
      * Builds invitation messages for each given attendee
      *
-     * @param createdEvent The created event
+     * @param createdEvents The created events
      * @param attendees The attendees to build a message for
      * @return A {@link List} of messages
      * @throws OXException In case message can't be build
      */
-    List<SchedulingMessage> build(Event createdEvent, List<Attendee> attendees) throws OXException {
-        for (Attendee a : attendees) {
-            build(createdEvent, a);
+    List<SchedulingMessage> build(List<Event> createdEvents, List<Attendee> attendees) throws OXException {
+        for (Attendee attendee : attendees) {
+            //@formatter:off
+            messages.add(new MessageBuilder()
+                .setMethod(SchedulingMethod.REQUEST)
+                .setOriginator(originator)
+                .setRecipient(attendee)
+                .setResource(new DefaultCalendarObjectResource(createdEvents))
+                .setScheduleChange(schedulingChangeService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), createdEvents))
+                .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
+                .setAdditionals(getAdditionalsFromSession())
+                .build());
+            //@formatter:on
         }
         return messages;
     }
@@ -158,7 +169,7 @@ public class CreateMessageBuilder extends AbstractMessageBuilder {
             .setOriginator(originator)
             .setRecipient(attendee)
             .setResource(new DefaultCalendarObjectResource(createdEvent))
-            .setDescription(descriptionService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), createdEvent))
+            .setScheduleChange(schedulingChangeService.describeCreationRequest(session.getContextId(), originator, attendee, getCommentForRecipient(), Collections.singletonList(createdEvent)))
             .setAttachmentDataProvider(new AttachmentDataProvider(serviceLookup, session.getContextId()))
             .setAdditionals(getAdditionalsFromSession())
             .build());

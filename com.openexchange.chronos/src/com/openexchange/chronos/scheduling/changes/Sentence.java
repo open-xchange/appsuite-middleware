@@ -47,38 +47,25 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes.impl;
+package com.openexchange.chronos.scheduling.changes;
 
 import java.util.Locale;
-import java.util.TimeZone;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.service.EventUpdate;
 
 /**
- * {@link ChangeDescriber}
+ * {@link Sentence}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
-public interface ChangeDescriber {
+public interface Sentence {
 
     /**
-     * Get the {@link EventField} the {@link ChangeDescriber} can describe
-     * 
-     * @return The {@link EventField}
+     * Get the message in a specific format
+     *
+     * @param format The format. For <code>null</code>, format <code>text</code> is assumed
+     * @param locale The local to translate the sentence in
+     * @return The sentence
      */
-    @NonNull
-    EventField[] getFields();
-    /**
-     * Describe the change
-     * 
-     * @param eventUpdate The {@link EventUpdate} to describe
-     * @param timeZone The {@link TimeZone} of the user
-     * @param locale The locale of the messages text
-     * @return A {@link Description}
-     */
-    Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale);
+    String getMessage(String format, Locale locale);
 
 }

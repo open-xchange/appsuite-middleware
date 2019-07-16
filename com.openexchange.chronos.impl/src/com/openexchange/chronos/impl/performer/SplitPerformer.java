@@ -280,7 +280,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         }
         InternalCalendarResult result = resultTracker.getResult();
         if (generateUpdateMessages) {
-            resultTracker.trackSchedulingUpdateAfterSplit(updatedEventMaster, result.getCalendarEvent().getUpdates());
+            resultTracker.trackSchedulingUpdateAfterSplit(result.getCalendarEvent().getUpdates());
         }
         return result;
     }

@@ -169,7 +169,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             // Fall through and update exception
         }
         updateEvent(originalEvent, updatedEventData);
-        resultTracker.trackNecessarySchedulingUpdate(originalEvent, loadEventData(originalEvent.getId()));
+        
+        Event updatedEvent = loadEventData(originalEvent.getId());
+        if (resultTracker.isReportableScheduleChange(originalEvent, updatedEvent)) {
+            resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
+        }
         return resultTracker.getResult();
     }
 
@@ -202,7 +206,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             updatedEventData = adjustSeriesAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData);
             updatedMasterEvent = updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
-            resultTracker.trackSchedulingUpdateAfterSplit(updatedMasterEvent, result.getCalendarEvent().getUpdates());
+            resultTracker.trackSchedulingUpdateAfterSplit(result.getCalendarEvent().getUpdates());
         } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
             /*
              * update for existing change exception, perform update, touch master & track results
@@ -210,7 +214,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Check.recurrenceRangeMatches(recurrenceId, null);
             Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
             updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
-            resultTracker.trackNecessarySchedulingUpdate(originalExceptionEvent, loadEventData(originalExceptionEvent.getId()));
+            Event updatedExceptionEvent = loadEventData(originalExceptionEvent.getId());
+            if (resultTracker.isReportableScheduleChange(originalExceptionEvent, updatedExceptionEvent)) {
+                resultTracker.trackSchedulingUpdate(originalExceptionEvent, updatedExceptionEvent);
+            }
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
         } else {

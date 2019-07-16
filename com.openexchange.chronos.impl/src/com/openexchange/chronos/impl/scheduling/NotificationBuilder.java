@@ -49,54 +49,47 @@
 
 package com.openexchange.chronos.impl.scheduling;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.Check;
-import com.openexchange.chronos.scheduling.SchedulingMessage;
-import com.openexchange.chronos.scheduling.SchedulingMethod;
+import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.changes.ChangeAction;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link MessageBuilder}
+ * {@link NotificationBuilder}
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
-public class MessageBuilder {
+public class NotificationBuilder {
 
-    protected SchedulingMethod method;
+    protected ChangeAction action;
     protected CalendarUser originator;
     protected CalendarUser recipient;
     protected CalendarObjectResource resource;
     protected ScheduleChange scheduleChange;
-    protected AttachmentDataProvider attachmentDataProvider;
     protected Map<String, Object> additionals = new HashMap<>();
 
     /**
-     * Initializes a new {@link MessageBuilder}.
+     * Initializes a new {@link NotificationBuilder}.
      */
-    public MessageBuilder() {
+    public NotificationBuilder() {
         super();
     }
 
     /**
      * Sets the method
      *
-     * @param method The method to set
-     * @return This {@link MessageBuilder} instance
+     * @param action The action to set
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder setMethod(SchedulingMethod method) {
-        this.method = method;
+    public NotificationBuilder setMethod(ChangeAction action) {
+        this.action = action;
         return this;
     }
 
@@ -104,9 +97,9 @@ public class MessageBuilder {
      * Sets the originator
      *
      * @param originator The originator to set
-     * @return This {@link MessageBuilder} instance
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder setOriginator(CalendarUser originator) {
+    public NotificationBuilder setOriginator(CalendarUser originator) {
         this.originator = originator;
         return this;
     }
@@ -115,9 +108,9 @@ public class MessageBuilder {
      * Sets the recipient
      *
      * @param recipient The recipient to set
-     * @return This {@link MessageBuilder} instance
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder setRecipient(CalendarUser recipient) {
+    public NotificationBuilder setRecipient(CalendarUser recipient) {
         this.recipient = recipient;
         return this;
     }
@@ -126,32 +119,21 @@ public class MessageBuilder {
      * Sets the resource
      *
      * @param resource The resource to set
-     * @return This {@link MessageBuilder} instance
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder setResource(CalendarObjectResource resource) {
+    public NotificationBuilder setResource(CalendarObjectResource resource) {
         this.resource = resource;
         return this;
     }
 
     /**
-     * Set the description for the message
+     * Set the schedule change for the message
      *
-     * @param scheduleChange The {@link ScheduleChange}
-     * @return This {@link MessageBuilder} instance
+     * @param scheduleChange The change
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder setScheduleChange(ScheduleChange scheduleChange) {
+    public NotificationBuilder setScheduleChange(ScheduleChange scheduleChange) {
         this.scheduleChange = scheduleChange;
-        return this;
-    }
-
-    /**
-     * Set the attachment data provider for the message
-     *
-     * @param attachmentDataProvider The attachment data provider
-     * @return This {@link MessageBuilder} instance
-     */
-    public MessageBuilder setAttachmentDataProvider(AttachmentDataProvider attachmentDataProvider) {
-        this.attachmentDataProvider = attachmentDataProvider;
         return this;
     }
 
@@ -160,9 +142,9 @@ public class MessageBuilder {
      *
      * @param key The key to identify
      * @param value The value to add
-     * @return This {@link MessageBuilder} instance
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder addAdditionals(String key, Object value) {
+    public NotificationBuilder addAdditionals(String key, Object value) {
         additionals.put(key, value);
         return this;
     }
@@ -171,55 +153,54 @@ public class MessageBuilder {
      * Adds multiple additional informations
      *
      * @param additionals A {@link Map} with additional information
-     * @return This {@link MessageBuilder} instance
+     * @return This {@link NotificationBuilder} instance
      */
-    public MessageBuilder setAdditionals(Map<String, Object> additionals) {
+    public NotificationBuilder setAdditionals(Map<String, Object> additionals) {
         this.additionals.putAll(additionals);
         return this;
     }
 
     /**
-     * Builds a new {@link SchedulingMessage}
+     * Builds a new {@link ChangeNotification}
      *
-     * @return The {@link SchedulingMessage}
+     * @return The {@link ChangeNotification}
      * @throws OXException In case data is incomplete
      */
-    public SchedulingMessage build() throws OXException {
-        return new Message(this);
+    public ChangeNotification build() throws OXException {
+        return new Notification(this);
     }
+
 }
 
-class Message implements SchedulingMessage {
+class Notification implements ChangeNotification {
 
-    private final @NonNull SchedulingMethod method;
+    private final @NonNull ChangeAction action;
     private final @NonNull CalendarUser originator;
     private final @NonNull CalendarUser recipient;
     private final @NonNull CalendarObjectResource resource;
     private final @NonNull ScheduleChange scheduleChange;
-    private final AttachmentDataProvider attachmentDataProvider;
     private final Map<String, Object> additionals;
 
     /**
-     * Initializes a new {@link Message}.
+     * Initializes a new {@link Notification}.
      * 
-     * @param builder The {@link MessageBuilder}
+     * @param builder The {@link NotificationBuilder}
      * @throws OXException In case data is incomplete
      */
-    public Message(MessageBuilder builder) throws OXException {
+    public Notification(NotificationBuilder builder) throws OXException {
         super();
-        this.method = notNull(builder.method);
+        this.action = notNull(builder.action);
         this.originator = notNull(builder.originator);
         this.recipient = notNull(builder.recipient);
         this.resource = notNull(builder.resource);
         this.scheduleChange = notNull(builder.scheduleChange);
-        this.attachmentDataProvider = builder.attachmentDataProvider;
         this.additionals = builder.additionals;
     }
 
     @Override
     @NonNull
-    public SchedulingMethod getMethod() {
-        return method;
+    public ChangeAction getAction() {
+        return action;
     }
 
     @Override
@@ -247,20 +228,6 @@ class Message implements SchedulingMessage {
     }
 
     @Override
-    public InputStream getAttachmentData(int managedId) throws OXException {
-        List<Event> calendarObject = getResource().getEvents();
-        Check.containsAttachment(calendarObject, managedId);
-        if (null == attachmentDataProvider) {
-            String id = null;
-            if (null != calendarObject.get(0)) {
-                id = calendarObject.get(0).getId();
-            }
-            throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), id);
-        }
-        return attachmentDataProvider.getAttachmentData(managedId);
-    }
-
-    @Override
     @Nullable
     public <T> T getAdditional(String key, Class<T> clazz) {
         if (null == additionals || additionals.isEmpty()) {
@@ -285,7 +252,7 @@ class Message implements SchedulingMessage {
 
     @Override
     public String toString() {
-        return "SchedulingMessage:[method:" + getMethod() + ", recipient:" + getRecipient().toString() + "]";
+        return "ChangeNotification:[action:" + getAction() + ", recipient:" + getRecipient().toString() + "]";
     }
 
     @Override
@@ -294,7 +261,7 @@ class Message implements SchedulingMessage {
         int result = 1;
         result = prime * result + ((additionals == null) ? 0 : additionals.hashCode());
         result = prime * result + scheduleChange.hashCode();
-        result = prime * result + method.hashCode();
+        result = prime * result + action.hashCode();
         result = prime * result + originator.hashCode();
         result = prime * result + recipient.hashCode();
         result = prime * result + resource.hashCode();
@@ -312,7 +279,7 @@ class Message implements SchedulingMessage {
         if (!(obj instanceof Message)) {
             return false;
         }
-        Message other = (Message) obj;
+        Notification other = (Notification) obj;
         if (additionals == null) {
             if (other.additionals != null) {
                 return false;
@@ -323,7 +290,7 @@ class Message implements SchedulingMessage {
         if (!scheduleChange.equals(other.scheduleChange)) {
             return false;
         }
-        if (method != other.method) {
+        if (action != other.action) {
             return false;
         }
         if (!originator.equals(other.originator)) {
