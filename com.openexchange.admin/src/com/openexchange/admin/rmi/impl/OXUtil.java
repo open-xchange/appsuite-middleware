@@ -498,11 +498,13 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         if (!tool.existsDatabase(i(database.getId()))) {
             throw new InvalidDataException("No such database " + database);
         }
-        if (tool.poolInUse(i(database.getId()))) {
+
+        boolean isMaster = tool.isMasterDatabase(i(database.getId()));
+        if (isMaster && tool.poolInUse(i(database.getId()))) {
             throw new StorageException("Pool is in use " + database);
         }
 
-        oxutil.unregisterDatabase(i(database.getId()), tool.isMasterDatabase(i(database.getId())));
+        oxutil.unregisterDatabase(i(database.getId()), isMaster);
     }
 
     @Override
