@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -93,13 +94,16 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.infostore.utils.UploadSizeValidation;
 import com.openexchange.groupware.upload.StreamedUploadFile;
+import com.openexchange.groupware.upload.StreamedUploadFileInputStream;
 import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Reference;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -552,10 +556,17 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
         if (null != streamedUploadFile) {
+            StreamedUploadFileInputStream stream = null;
             try {
-                return streamedUploadFile.getStream();
+                stream = streamedUploadFile.getStream();
+                LogProperties.put(LogProperties.Name.FILESTORE_SPOOL, "true");
+                LogPropertyDroppingStream toReturn = new LogPropertyDroppingStream(stream);
+                stream = null;
+                return toReturn;
             } catch (IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(stream);
             }
         }
 
@@ -1127,6 +1138,23 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_COLUMNS, unknownColumns.toString());
             }
         }
+    }
+
+    private static class LogPropertyDroppingStream extends FilterInputStream {
+
+        LogPropertyDroppingStream(InputStream in) {
+            super(in);
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                super.close();
+            } finally {
+                LogProperties.remove(LogProperties.Name.FILESTORE_SPOOL);
+            }
+        }
+
     }
 
 }

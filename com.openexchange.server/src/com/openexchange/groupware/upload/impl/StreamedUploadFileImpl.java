@@ -52,6 +52,7 @@ package com.openexchange.groupware.upload.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.groupware.upload.StreamedUploadFile;
+import com.openexchange.groupware.upload.StreamedUploadFileInputStream;
 
 
 /**
@@ -67,7 +68,7 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
     private String preparedFileName;
     private String contentType;
     private String contentId;
-    private InputStream stream;
+    private StreamedUploadFileInputStream stream;
 
     /**
      * Initializes a new {@link StreamedUploadFileImpl}.
@@ -157,7 +158,7 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
     }
 
     @Override
-    public InputStream getStream() throws IOException {
+    public StreamedUploadFileInputStream getStream() throws IOException {
         return stream;
     }
 
@@ -167,7 +168,7 @@ public class StreamedUploadFileImpl implements StreamedUploadFile {
      * @param stream The stream to set
      */
     public void setStream(InputStream stream) {
-        this.stream = stream;
+        this.stream = StreamedUploadFileInputStream.streamFor(stream);
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,26 +47,43 @@
  *
  */
 
-package com.openexchange.groupware.upload;
+package com.openexchange.filestore;
 
-import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link StreamedUploadFile} - An upload file backed by a stream.
- * <p>
- * This instance is supposed to be directly handled.
+ * {@link SpoolingCapableQuotaFileStorage} - A {@link FileStorage file storage} that is quota aware and offers the possibility to spool a
+ * passed stream to a temporary file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface StreamedUploadFile extends BasicUploadFile {
+public interface SpoolingCapableQuotaFileStorage extends QuotaFileStorage {
 
     /**
-     * Gets the {@link InputStream} for the uploaded file.
+     * Saves a new file
      *
-     * @return The <tt>InputStream</tt> instance
-     * @throws IOException If stream cannot be returned
+     * @param file The file to save
+     * @param sizeHint The appr. file size or <code>-1</code> if unknown
+     * @param spoolToFile Whether to spool given stream to a temporary file
+     * @return The identifier of the newly saved file
+     * @throws OXException If save operation fails
+     * @see Spool
      */
-    StreamedUploadFileInputStream getStream() throws IOException;
+    String saveNewFile(InputStream file, long sizeHint, boolean spoolToFile) throws OXException;
 
+    /**
+     * Appends specified stream to the supplied file.
+     *
+     * @param file The stream to append to the file
+     * @param name The existing file's path in associated file storage
+     * @param offset The offset in bytes where to append the data, must be equal to the file's current length
+     * @param sizeHint A size hint about the expected stream length in bytes, or <code>-1</code> if unknown
+     * @param spoolToFile Whether to spool given stream to a temporary file
+     * @return The updated length of the file
+     * @throws OXException If appending file fails
+     * @see Spool
+     */
+    long appendToFile(InputStream file, String name, long offset, long sizeHint, boolean spoolToFile) throws OXException;
 }
