@@ -80,15 +80,11 @@ public class EndpointPool {
     private static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
     private final List<String> available;
-
     private final List<String> blacklist;
-
     private final AtomicInteger counter;
-
     private final String filestoreId;
-
+    private final int numberOfEndpoints;
     private ScheduledTimerTask heartbeat;
 
     /**
@@ -104,6 +100,7 @@ public class EndpointPool {
         super();
         this.filestoreId = filestoreId;
         int size = endpointUrls.size();
+        numberOfEndpoints = size;
         available = new ArrayList<>(endpointUrls);
         blacklist = new ArrayList<>(size);
         counter = new AtomicInteger(size);
@@ -113,6 +110,15 @@ public class EndpointPool {
 
         LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this, httpClient), heartbeatInterval, heartbeatInterval);
+    }
+
+    /**
+     * Gets the number of end-points
+     *
+     * @return The number of end-points
+     */
+    public int getNumberOfEndpoints() {
+        return numberOfEndpoints;
     }
 
     /**

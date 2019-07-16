@@ -332,6 +332,13 @@ public final class LogProperties {
          * A special log property that controls whether an attempt is made to reconnect a dropped listener using another active session
          */
         PNS_NO_RECONNECT("com.openexchange.pns.noReconnect"),
+        /**
+         * com.openexchange.filestore.spool
+         * <p>
+         * A special log property that controls whether passed stream to quota-aware file storage is supposed to be spooled to a temporary
+         * file in order to not exhaust/block storage resources (e.g. connection pool)
+         */
+        FILESTORE_SPOOL("com.openexchange.filestore.spool"),
 
         RT2_CLIENT_UID("com.ox.rt2.client.uid"),
 
