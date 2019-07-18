@@ -367,7 +367,11 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
      * @throws OXException If file storage cannot be returned
      */
     private FileStorageRef getFileStorage(Session session) throws OXException {
-        int fileStorageId = getFileStorageId(session);
+        // Acquire config view for session-associated user
+        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        int fileStorageId = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view);
         return getFileStorage(fileStorageId, session);
     }
 
@@ -379,7 +383,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    private FileStorageRef getFileStorage(int fileStorageId, Session session) throws OXException {
+    private static FileStorageRef getFileStorage(int fileStorageId, Session session) throws OXException {
         // Acquire needed service
         FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
@@ -402,15 +406,6 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         // Grab quota-aware file storage to determine fully qualifying URI
         QuotaFileStorage quotaFileStorage = quotaStorageService.getQuotaFileStorage(session.getContextId(), Info.general());
         return new FileStorageRef(storageService.getFileStorage(quotaFileStorage.getUri()), 0);
-    }
-
-    private int getFileStorageId(Session session) throws OXException {
-        // Acquire config view for session-associated user
-        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        // Check if a dedicated file storage is configured
-        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view);
     }
 
     private static class FileStorageRef {
