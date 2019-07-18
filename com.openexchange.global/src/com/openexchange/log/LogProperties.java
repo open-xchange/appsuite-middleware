@@ -339,20 +339,34 @@ public final class LogProperties {
          * file in order to not exhaust/block storage resources (e.g. connection pool)
          */
         FILESTORE_SPOOL("com.openexchange.filestore.spool"),
-
-        RT2_CLIENT_UID("com.ox.rt2.client.uid"),
-
-        RT2_DOC_UID("com.ox.rt2.document.uid"),
-
-        RT2_BACKEND_UID("com.ox.rt2.backend.uid"),
-
-        RT2_BACKEND_PART("com.ox.rt2.backend.type"),
-
-        RT2_BACKEND_RECIPIENTS("com.ox.rt2.backend.recipients"),
-
-        RT2_REQUEST_TYPE("com.ox.rt2.request.type"),
-
-        RT2_ADMIN_MSG("com.ox.rt2.admin.type")
+        /**
+         * com.openexchange.rt2.client.uid
+         */
+        RT2_CLIENT_UID("com.openexchange.rt2.client.uid"),
+        /**
+         * com.openexchange.rt2.document.uid
+         */
+        RT2_DOC_UID("com.openexchange.rt2.document.uid"),
+        /**
+         * com.openexchange.rt2.backend.uid
+         */
+        RT2_BACKEND_UID("com.openexchange.rt2.backend.uid"),
+        /**
+         * com.openexchange.rt2.backend.type
+         */
+        RT2_BACKEND_PART("com.openexchange.rt2.backend.type"),
+        /**
+         * com.openexchange.rt2.backend.recipients
+         */
+        RT2_BACKEND_RECIPIENTS("com.openexchange.rt2.backend.recipients"),
+        /**
+         * com.openexchange.rt2.request.type
+         */
+        RT2_REQUEST_TYPE("com.openexchange.rt2.request.type"),
+        /**
+         * com.openexchange.rt2.admin.type
+         */
+        RT2_ADMIN_MSG("com.openexchange.rt2.admin.type")
 
         ;
 
