@@ -100,12 +100,14 @@ import com.openexchange.mail.compose.impl.groupware.CompositionSpaceAddFileStora
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableService;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceCreateTableTask;
 import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListener;
+import com.openexchange.mail.compose.impl.rmi.RemoteCompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.security.CompositionSpaceKeyStorageServiceImpl;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.impl.security.HazelcastCompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.inmemory.InMemoryCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.security.CryptoCompositionSpaceStorageService;
+import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceService;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
@@ -321,6 +323,8 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddFileStorageIdentifier()
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener());
+
+        registerService(RemoteCompositionSpaceService.class, new RemoteCompositionSpaceServiceImpl(this));
     }
 
     @Override
