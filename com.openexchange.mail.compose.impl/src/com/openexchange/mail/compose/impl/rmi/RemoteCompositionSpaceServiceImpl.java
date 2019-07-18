@@ -49,13 +49,16 @@
 
 package com.openexchange.mail.compose.impl.rmi;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getFileStorage;
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -133,6 +136,10 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
+                if (!columnExists(con, "compositionSpaceAttachmentMeta", "dedicatedFileStorageId") || !columnExists(con, "compositionSpaceKeyStorage", "dedicatedFileStorageId")) {
+                    return;
+                }
+
                 stmt = con.prepareStatement("SELECT cid, refId FROM compositionSpaceAttachmentMeta WHERE dedicatedFileStorageId=? AND refType="+KnownAttachmentStorageType.DEDICATED_FILE_STORAGE.getType());
                 stmt.setInt(1, fileStorageId);
                 rs = stmt.executeQuery();
@@ -235,6 +242,8 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                         }
                     }
                 } // End of loop traversing context identifiers
+            } catch (SQLSyntaxErrorException e) {
+                // Assume that column 'dedicatedFileStorageId' does not exist in context-associated schema. Therefore ignore.
             } catch (SQLException e) {
                 throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -277,6 +286,38 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
             throw ServiceExceptionCode.absentService(ObfuscatorService.class);
         }
         return obfuscatorService.unobfuscate(s);
+    }
+
+    /**
+     * Checks if specified column exists.
+     *
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if specified column exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
+    private boolean columnExists(Connection con, String table, String column) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
+            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            if (!retval) {
+                return false;
+            }
+            closeSQLStuff(rs);
+            rs = null;
+
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                retval = rs.getString(4).equalsIgnoreCase(column);
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
     }
 
 }
