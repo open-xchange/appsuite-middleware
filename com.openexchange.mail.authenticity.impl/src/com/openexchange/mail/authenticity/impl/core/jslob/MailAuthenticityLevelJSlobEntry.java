@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,35 +47,30 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.core;
+package com.openexchange.mail.authenticity.impl.core.jslob;
 
-import static com.openexchange.java.Autoboxing.B;
 import java.util.Map;
-import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.jslob.JSlobKeys;
-import com.openexchange.mail.authenticity.MailAuthenticityProperty;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailAuthenticityJSlobEntry}
+ * {@link MailAuthenticityLevelJSlobEntry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since v7.10.3
  */
-public class MailAuthenticityJSlobEntry implements JSlobEntry {
+public class MailAuthenticityLevelJSlobEntry implements JSlobEntry {
 
-    private static final String NAME = "features/authenticity";
-
-    private final ServiceLookup services;
+    private static final String NAME = "authenticity/level";
+    private static final String VALUE = "fail_suspicious_pass_trusted";
 
     /**
-     * Initialises a new {@link MailAuthenticityJSlobEntry}.
+     * Initializes a new {@link MailAuthenticityLevelJSlobEntry}.
      */
-    public MailAuthenticityJSlobEntry(ServiceLookup services) {
+    public MailAuthenticityLevelJSlobEntry() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -90,24 +85,23 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     @Override
     public boolean isWritable(Session session) throws OXException {
+        // Nope
         return false;
     }
 
     @Override
-    public Object getValue(Session session) throws OXException {
-        LeanConfigurationService configService = services.getService(LeanConfigurationService.class);
-        return B(configService.getBooleanProperty(session.getUserId(), session.getContextId(), MailAuthenticityProperty.ENABLED));
+    public Object getValue(Session sessiond) throws OXException {
+        return VALUE;
     }
 
-
     @Override
-    public void setValue(Object value, Session session) throws OXException {
-        // not writable
+    public void setValue(Object value, Session sessiond) throws OXException {
+        // Read-only
     }
 
     @Override
     public Map<String, Object> metadata(Session session) throws OXException {
-        // nope
+        // Nope
         return null;
     }
 }

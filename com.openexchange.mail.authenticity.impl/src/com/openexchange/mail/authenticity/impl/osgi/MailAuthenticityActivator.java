@@ -69,7 +69,8 @@ import com.openexchange.mail.authenticity.impl.core.CustomRuleChecker;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegistryImpl;
-import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
+import com.openexchange.mail.authenticity.impl.core.jslob.MailAuthenticityFeatureJSlobEntry;
+import com.openexchange.mail.authenticity.impl.core.jslob.MailAuthenticityLevelJSlobEntry;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
@@ -130,7 +131,8 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry, getService(ThreadPoolService.class));
         registerService(MailFetchListener.class, fetchListener);
 
-        registerService(JSlobEntry.class, new MailAuthenticityJSlobEntry(this));
+        registerService(JSlobEntry.class, new MailAuthenticityFeatureJSlobEntry(this));
+        registerService(JSlobEntry.class, new MailAuthenticityLevelJSlobEntry());
 
         {
             // Register image data source
