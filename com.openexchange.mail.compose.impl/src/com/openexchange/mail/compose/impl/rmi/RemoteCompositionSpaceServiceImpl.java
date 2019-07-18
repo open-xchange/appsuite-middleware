@@ -310,6 +310,7 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
             closeSQLStuff(rs);
             rs = null;
 
+            retval = false;
             rs = metaData.getColumns(null, null, table, column);
             while (rs.next()) {
                 retval = rs.getString(4).equalsIgnoreCase(column);
