@@ -49,21 +49,26 @@
 
 package com.openexchange.mail.compose.impl.groupware;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCode;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
-import com.openexchange.mail.compose.impl.attachment.FileStorageAttachmentStorage;
+import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
+import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
+import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
 
 /**
@@ -105,11 +110,10 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            QuotaFileStorage fileStorage = FileStorageAttachmentStorage.optFileStorage(contextId);
-            if (null != fileStorage) {
+            {
                 stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=?");
                 stmt.setInt(1, contextId);
-                stmt.setInt(2, KnownAttachmentStorageType.FILE_STORAGE.getType());
+                stmt.setInt(2, KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE.getType());
                 rs = stmt.executeQuery();
                 Set<String> storageIdentifers = null;
                 if (rs.next()) {
@@ -123,14 +127,53 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 stmt = null;
 
                 if (null != storageIdentifers) {
-                    try {
-                        Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
-                        if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
-                            LoggerHolder.LOG.warn("Failed to delete the following files on filestore: {}", undeletedFiles);
+                    FileStorage fileStorage = ContextAssociatedFileStorageAttachmentStorage.optFileStorage(contextId);
+                    if (null != fileStorage) {
+                        try {
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on context-associated filestore: {}", undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on context-associated filestore", e);
                         }
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete files on filestore", e);
                     }
+                    storageIdentifers = null;
+                }
+            }
+
+            {
+                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE.getType());
+                rs = stmt.executeQuery();
+                Set<AttachmentStorageIdentifier> storageIdentifers = null;
+                if (rs.next()) {
+                    storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
+                    do {
+                        storageIdentifers.add(storageIdentifierFrom(rs));
+                    } while (rs.next());
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                if (null != storageIdentifers) {
+                    for (AttachmentStorageIdentifier storageIdentifier : storageIdentifers) {
+                        Optional<Integer> dedicatedFileStorageId = storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER);
+                        int fileStorageId = dedicatedFileStorageId.get().intValue();
+
+                        try {
+                            FileStorage fileStorage = getFileStorage(fileStorageId, contextId);
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", I(fileStorageId), undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on filestore {}", I(fileStorageId), e);
+                        }
+                    }
+                    storageIdentifers = null;
                 }
             }
 
@@ -146,13 +189,13 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            if (null != fileStorage) {
+            {
                 FileStorageCompositionSpaceKeyStorage keyStorage = FileStorageCompositionSpaceKeyStorage.getInstance();
                 if (null != keyStorage) {
                     keyStorage.clearCache();
                 }
 
-                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=?");
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=0");
                 stmt.setInt(1, contextId);
                 rs = stmt.executeQuery();
                 Set<String> storageIdentifers = null;
@@ -167,14 +210,52 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 stmt = null;
 
                 if (null != storageIdentifers) {
-                    try {
-                        Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
-                        if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
-                            LoggerHolder.LOG.warn("Failed to delete the following files on filestore: {}", undeletedFiles);
+                    FileStorage fileStorage = ContextAssociatedFileStorageAttachmentStorage.optFileStorage(contextId);
+                    if (null != fileStorage) {
+                        try {
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on context-associated filestore: {}", undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on context-associated filestore", e);
                         }
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete files on filestore", e);
                     }
+                    storageIdentifers = null;
+                }
+            }
+
+            {
+                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=1");
+                stmt.setInt(1, contextId);
+                rs = stmt.executeQuery();
+                Set<AttachmentStorageIdentifier> storageIdentifers = null;
+                if (rs.next()) {
+                    storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
+                    do {
+                        storageIdentifers.add(storageIdentifierFrom(rs));
+                    } while (rs.next());
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                if (null != storageIdentifers) {
+                    for (AttachmentStorageIdentifier storageIdentifier : storageIdentifers) {
+                        Optional<Integer> dedicatedFileStorageId = storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER);
+                        int fileStorageId = dedicatedFileStorageId.get().intValue();
+
+                        try {
+                            FileStorage fileStorage = getFileStorage(fileStorageId, contextId);
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", I(fileStorageId), undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on filestore {}", I(fileStorageId), e);
+                        }
+                    }
+                    storageIdentifers = null;
                 }
             }
 
@@ -201,12 +282,11 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            QuotaFileStorage fileStorage = FileStorageAttachmentStorage.optFileStorage(contextId);
-            if (null != fileStorage) {
+            {
                 stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND user=? AND refType=?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setInt(3, KnownAttachmentStorageType.FILE_STORAGE.getType());
+                stmt.setInt(3, KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE.getType());
                 rs = stmt.executeQuery();
                 Set<String> storageIdentifers = null;
                 if (rs.next()) {
@@ -220,14 +300,54 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 stmt = null;
 
                 if (null != storageIdentifers) {
-                    try {
-                        Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
-                        if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
-                            LoggerHolder.LOG.warn("Failed to delete the following files on filestore: {}", undeletedFiles);
+                    FileStorage fileStorage = ContextAssociatedFileStorageAttachmentStorage.optFileStorage(contextId);
+                    if (null != fileStorage) {
+                        try {
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on context-associated filestore: {}", undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on context-associated filestore", e);
                         }
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete files on filestore", e);
                     }
+                    storageIdentifers = null;
+                }
+            }
+
+            {
+                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceAttachmentMeta WHERE cid=? AND user=? AND refType=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                stmt.setInt(3, KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE.getType());
+                rs = stmt.executeQuery();
+                Set<AttachmentStorageIdentifier> storageIdentifers = null;
+                if (rs.next()) {
+                    storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
+                    do {
+                        storageIdentifers.add(storageIdentifierFrom(rs));
+                    } while (rs.next());
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                if (null != storageIdentifers) {
+                    for (AttachmentStorageIdentifier storageIdentifier : storageIdentifers) {
+                        Optional<Integer> dedicatedFileStorageId = storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER);
+                        int fileStorageId = dedicatedFileStorageId.get().intValue();
+
+                        try {
+                            FileStorage fileStorage = getFileStorage(fileStorageId, contextId);
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", I(fileStorageId), undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on filestore {}", I(fileStorageId), e);
+                        }
+                    }
+                    storageIdentifers = null;
                 }
             }
 
@@ -245,13 +365,13 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            if (null != fileStorage) {
+            {
                 FileStorageCompositionSpaceKeyStorage keyStorage = FileStorageCompositionSpaceKeyStorage.getInstance();
                 if (null != keyStorage) {
                     keyStorage.clearCache();
                 }
 
-                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=?");
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=? AND dedicatedFileStorageId=0");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 rs = stmt.executeQuery();
@@ -267,14 +387,53 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 stmt = null;
 
                 if (null != storageIdentifers) {
-                    try {
-                        Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
-                        if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
-                            LoggerHolder.LOG.warn("Failed to delete the following files on filestore: {}", undeletedFiles);
+                    FileStorage fileStorage = ContextAssociatedFileStorageAttachmentStorage.optFileStorage(contextId);
+                    if (null != fileStorage) {
+                        try {
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on context-associated filestore: {}", undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on context-associated filestore", e);
                         }
-                    } catch (Exception e) {
-                        LoggerHolder.LOG.warn("Failed to delete files on filestore", e);
                     }
+                    storageIdentifers = null;
+                }
+            }
+
+            {
+                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE cid=? AND user=? AND dedicatedFileStorageId=1");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                rs = stmt.executeQuery();
+                Set<AttachmentStorageIdentifier> storageIdentifers = null;
+                if (rs.next()) {
+                    storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
+                    do {
+                        storageIdentifers.add(storageIdentifierFrom(rs));
+                    } while (rs.next());
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+
+                if (null != storageIdentifers) {
+                    for (AttachmentStorageIdentifier storageIdentifier : storageIdentifers) {
+                        Optional<Integer> dedicatedFileStorageId = storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER);
+                        int fileStorageId = dedicatedFileStorageId.get().intValue();
+
+                        try {
+                            FileStorage fileStorage = getFileStorage(fileStorageId, contextId);
+                            Set<String> undeletedFiles = fileStorage.deleteFiles(storageIdentifers.toArray(new String[storageIdentifers.size()]));
+                            if (null != undeletedFiles && !undeletedFiles.isEmpty()) {
+                                LoggerHolder.LOG.warn("Failed to delete the following files on filestore {}: {}", I(fileStorageId), undeletedFiles);
+                            }
+                        } catch (Exception e) {
+                            LoggerHolder.LOG.warn("Failed to delete files on filestore {}", I(fileStorageId), e);
+                        }
+                    }
+                    storageIdentifers = null;
                 }
             }
 
@@ -289,6 +448,23 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    private static FileStorage getFileStorage(int dedicatedFileStorageId, int contextId) {
+        try {
+            return DedicatedFileStorageAttachmentStorage.getFileStorage(dedicatedFileStorageId, contextId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static AttachmentStorageIdentifier storageIdentifierFrom(ResultSet rs) throws SQLException {
+        String storageIdentifier = rs.getString("refId");
+        int dedicatedFileStorageId = rs.getInt("dedicatedFileStorageId");
+        if (dedicatedFileStorageId <= 0) {
+            return new AttachmentStorageIdentifier(storageIdentifier);
+        }
+        return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(dedicatedFileStorageId));
     }
 
 }

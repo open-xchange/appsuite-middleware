@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,25 +47,62 @@
  *
  */
 
-package com.openexchange.mail.compose;
+package com.openexchange.mail.compose.impl.groupware;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AttachmentStorageType} - The storage type.
- * <p>
- * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
- * Please pay respect to reserved types used in {@link KnownAttachmentStorageType}.
- * </div>
+ * {@link CompositionSpaceAddFileStorageIdentifier}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.2
  */
-public interface AttachmentStorageType {
+public class CompositionSpaceAddFileStorageIdentifier extends UpdateTaskAdapter {
 
     /**
-     * Gets the type.
-     *
-     * @return The type
+     * Initializes a new {@link CompositionSpaceAddFileStorageIdentifier}.
      */
-    int getType();
+    public CompositionSpaceAddFileStorageIdentifier() {
+        super();
+    }
+
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        int rollback = 0;
+        try {
+            con.setAutoCommit(false);
+            rollback = 1;
+
+            Column col = new Column("dedicatedFileStorageId", "INT4 UNSIGNED NOT NULL DEFAULT 0");
+            Tools.checkAndAddColumns(con, "compositionSpaceAttachmentMeta", col);
+            Tools.checkAndAddColumns(con, "compositionSpaceKeyStorage", col);
+
+            con.commit();
+            rollback = 2;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    Databases.rollback(con);
+                }
+                Databases.autocommit(con);
+            }
+        }
+    }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { CompositionSpaceAddContentEncryptedFlag.class.getName() };
+    }
 
 }

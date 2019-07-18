@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,25 +47,30 @@
  *
  */
 
-package com.openexchange.mail.compose;
+package com.openexchange.mail.compose.rmi;
 
+import java.rmi.RemoteException;
+import java.util.List;
 
 /**
- * {@link AttachmentStorageType} - The storage type.
- * <p>
- * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
- * Please pay respect to reserved types used in {@link KnownAttachmentStorageType}.
- * </div>
+ * {@link RemoteCompositionSpaceService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public interface AttachmentStorageType {
+public interface RemoteCompositionSpaceService {
 
     /**
-     * Gets the type.
-     *
-     * @return The type
+     * RMI name to be used in the naming lookup.
      */
-    int getType();
+    public static final String RMI_NAME = RemoteCompositionSpaceService.class.getSimpleName();
 
+    /**
+     * Deletes orphaned files or references from given file storages that are used as dedicated attachment storages for mail compose.
+     *
+     * @param fileStorageIds The listing of file storage identifiers
+     * @throws RemoteCompositionSpaceServiceException If providers cannot be returned
+     * @throws RemoteException If a communication-related error occurs
+     */
+    void deleteOrphanedReferences(List<Integer> fileStorageIds) throws RemoteCompositionSpaceServiceException, RemoteException;
 }

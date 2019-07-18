@@ -772,7 +772,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
 
             if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
-                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=?");
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=0");
                 stmt.setInt(1, ctx.getContextId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
@@ -822,7 +822,7 @@ public class ConsistencyServiceImpl implements ConsistencyService {
             }
 
             if (DBUtils.tableExists(con, "compositionSpaceKeyStorage")) {
-                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=?");
+                stmt = con.prepareStatement("SELECT refId FROM compositionSpaceKeyStorage WHERE cid=? AND user=? AND dedicatedFileStorageId=0");
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, user.getId());
                 rs = stmt.executeQuery();

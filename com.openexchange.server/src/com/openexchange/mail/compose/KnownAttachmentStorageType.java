@@ -62,9 +62,13 @@ public enum KnownAttachmentStorageType implements AttachmentStorageType {
      */
     DATABASE,
     /**
-     * The type for file storage.
+     * The type for context-associated file storage.
      */
-    FILE_STORAGE,
+    CONTEXT_ASSOCIATED_FILE_STORAGE,
+    /**
+     * The type for dedicated file storage.
+     */
+    DEDICATED_FILE_STORAGE,
 
     ;
 

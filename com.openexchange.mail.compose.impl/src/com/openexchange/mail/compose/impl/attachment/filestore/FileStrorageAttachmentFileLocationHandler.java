@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.attachment;
+package com.openexchange.mail.compose.impl.attachment.filestore;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -76,7 +76,7 @@ public class FileStrorageAttachmentFileLocationHandler extends AbstractFileLocat
      */
     public FileStrorageAttachmentFileLocationHandler() {
         super();
-        fileStorageType = KnownAttachmentStorageType.FILE_STORAGE.getType();
+        fileStorageType = KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE.getType();
     }
 
     @Override

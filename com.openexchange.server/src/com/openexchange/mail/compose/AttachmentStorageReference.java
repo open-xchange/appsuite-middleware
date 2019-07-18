@@ -57,13 +57,13 @@ package com.openexchange.mail.compose;
  */
 public class AttachmentStorageReference {
 
-    private final String storageIdentifier;
+    private final AttachmentStorageIdentifier storageIdentifier;
     private final AttachmentStorageType storageType;
 
     /**
      * Initializes a new {@link AttachmentStorageReference}.
      */
-    public AttachmentStorageReference(String storageIdentifier, AttachmentStorageType referenceType) {
+    public AttachmentStorageReference(AttachmentStorageIdentifier storageIdentifier, AttachmentStorageType referenceType) {
         super();
         this.storageIdentifier = storageIdentifier;
         this.storageType = referenceType;
@@ -74,7 +74,7 @@ public class AttachmentStorageReference {
      *
      * @return The storage identifier
      */
-    public String getStorageIdentifier() {
+    public AttachmentStorageIdentifier getStorageIdentifier() {
         return storageIdentifier;
     }
 

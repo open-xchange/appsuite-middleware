@@ -47,92 +47,68 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.attachment;
+package com.openexchange.mail.compose.impl.attachment.filestore;
 
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
+import java.util.Optional;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.mail.compose.AttachmentStorageType;
-import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
-import com.openexchange.mail.compose.SeekingDataProvider;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link FileStorageAttachmentStorage}
+ * {@link ContextAssociatedFileStorageAttachmentStorage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.2
  */
-public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
+public class ContextAssociatedFileStorageAttachmentStorage extends FileStorageAttachmentStorage {
 
     /**
-     * Initializes a new {@link FileStorageAttachmentStorage}.
+     * Initializes a new {@link ContextAssociatedFileStorageAttachmentStorage}.
      */
-    public FileStorageAttachmentStorage(ServiceLookup services) {
+    public ContextAssociatedFileStorageAttachmentStorage(ServiceLookup services) {
         super(services);
     }
 
     @Override
     public AttachmentStorageType getStorageType() {
-        return KnownAttachmentStorageType.FILE_STORAGE;
+        return KnownAttachmentStorageType.CONTEXT_ASSOCIATED_FILE_STORAGE;
     }
 
     @Override
-    public List<String> neededCapabilities() {
-        return Collections.singletonList("filestore");
+    public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
+        return capabilities.contains("filestore");
     }
 
     @Override
-    protected DataProvider getDataProviderFor(String storageIdentifier, Session session) throws OXException {
-        return new FileStorageDataProvider(session, storageIdentifier);
+    protected FileStorageReference getFileStorage(Optional<Integer> dedicatedFileStorageId, Session session) throws OXException {
+        return new FileStorageReference(getFileStorage(session.getContextId()));
     }
 
-    @Override
-    protected String saveData(InputStream input, long size, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
-        return fileStorage.saveNewFile(input, size);
-    }
-
-    @Override
-    protected boolean deleteData(String storageIdentifier, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
-        return fileStorage.deleteFile(storageIdentifier);
-    }
-
-    /**
-     * Returns the {@link FileStorage} assigned to session-associated context
-     *
-     * @param session The session providing context identifier
-     * @return The file storage
-     * @throws OXException If file storage cannot be returned
-     */
-    protected static QuotaFileStorage getFileStorage(Session session) throws OXException {
-        return getFileStorage(session.getContextId());
-    }
-
-    /**
-     * Returns the {@link FileStorage} assigned to the given context
-     *
-     * @param contextId The context identifier
-     * @return The file storage
-     * @throws OXException If file storage cannot be returned
-     */
-    protected static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+    private static FileStorage getFileStorage(int contextId) throws OXException {
+        FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
+            throw ServiceExceptionCode.absentService(FileStorageService.class);
+        }
+
+        QuotaFileStorageService quotaStorageService = FileStorages.getQuotaFileStorageService();
+        if (null == quotaStorageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
-        return storageService.getQuotaFileStorage(contextId, Info.general());
+
+        // Grab quota-aware file storage to determine fully qualifying URI
+        QuotaFileStorage quotaFileStorage = quotaStorageService.getQuotaFileStorage(contextId, Info.general());
+        return storageService.getFileStorage(quotaFileStorage.getUri());
     }
 
     /**
@@ -141,38 +117,11 @@ public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
      * @param contextId The context identifier
      * @return The file storage or <code>null</code>
      */
-    public static QuotaFileStorage optFileStorage(int contextId) throws OXException {
-        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
-        if (null == storageService) {
+    public static FileStorage optFileStorage(int contextId) {
+        try {
+            return getFileStorage(contextId);
+        } catch (Exception e) {
             return null;
-        }
-        return storageService.getQuotaFileStorage(contextId, Info.general());
-    }
-
-    private static class FileStorageDataProvider implements SeekingDataProvider {
-
-        private final Session session;
-        private final String storageIdentifier;
-
-        /**
-         * Initializes a new {@link DataProviderImplementation}.
-         */
-        FileStorageDataProvider(Session session, String storageIdentifier) {
-            super();
-            this.session = session;
-            this.storageIdentifier = storageIdentifier;
-        }
-
-        @Override
-        public InputStream getData() throws OXException {
-            QuotaFileStorage fileStorage = getFileStorage(session);
-            return fileStorage.getFile(storageIdentifier);
-        }
-
-        @Override
-        public InputStream getData(long offset, long length) throws OXException {
-            QuotaFileStorage fileStorage = getFileStorage(session);
-            return fileStorage.getFile(storageIdentifier, offset, length);
         }
     }
 

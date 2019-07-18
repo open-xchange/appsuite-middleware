@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.compose.impl.attachment;
+package com.openexchange.mail.compose.impl.attachment.rdb;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
@@ -56,19 +56,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.CompositionSpaces;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
+import com.openexchange.mail.compose.impl.attachment.AbstractAttachmentStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -93,17 +94,17 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
     }
 
     @Override
-    public List<String> neededCapabilities() {
-        return Collections.emptyList();
+    public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
+        return true;
     }
 
     @Override
-    protected DataProvider getDataProviderFor(String storageIdentifier, Session session) throws OXException {
-        return new RdbDataProvider(session, storageIdentifier, requireDatabaseService());
+    protected DataProvider getDataProviderFor(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException {
+        return new RdbDataProvider(session, storageIdentifier.getIdentifier(), requireDatabaseService());
     }
 
     @Override
-    protected String saveData(InputStream input, long size, Session session) throws OXException {
+    protected AttachmentStorageIdentifier saveData(InputStream input, long size, Session session) throws OXException {
         if (null == input) {
             throw CompositionSpaceErrorCode.ERROR.create("Attempted attachment storage without an input stream");
         }
@@ -118,7 +119,7 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
         }
     }
 
-    private String saveData(InputStream input, Session session, Connection con) throws OXException {
+    private AttachmentStorageIdentifier saveData(InputStream input, Session session, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO compositionSpaceAttachmentBinary (uuid, cid, user, data) VALUES (?, ?, ?, ?)");
@@ -128,7 +129,7 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
             stmt.setInt(3, session.getUserId());
             stmt.setBinaryStream(4, input);
             stmt.executeUpdate();
-            return UUIDs.getUnformattedString(uuid);
+            return new AttachmentStorageIdentifier(UUIDs.getUnformattedString(uuid));
         } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -137,15 +138,15 @@ public class RdbAttachmentStorage extends AbstractAttachmentStorage {
     }
 
     @Override
-    protected boolean deleteData(String storageIdentifier, Session session) throws OXException {
-        if (Strings.isEmpty(storageIdentifier)) {
+    protected boolean deleteData(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException {
+        if (storageIdentifier == null || Strings.isEmpty(storageIdentifier.getIdentifier())) {
             throw CompositionSpaceErrorCode.ERROR.create("Attempted attachment deletion without an identifier");
         }
 
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getWritable(session.getContextId());
         try {
-            return deleteData(storageIdentifier, session, con);
+            return deleteData(storageIdentifier.getIdentifier(), session, con);
         } finally {
             databaseService.backWritable(session.getContextId(), con);
         }

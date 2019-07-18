@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.security;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -67,10 +68,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -141,8 +147,8 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
     }
 
     @Override
-    public List<String> neededCapabilities() {
-        return Collections.singletonList("filestore");
+    public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
+        return capabilities.contains("filestore");
     }
 
     @Override
@@ -171,7 +177,8 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
     }
 
     Key loadOrCreateKeyfor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
+        FileStorageRef fileStorageRef = getFileStorage(session);
+        FileStorage fileStorage = fileStorageRef.fileStorage;
 
         String fileStorageLocation = loadFileStorageLocation(compositionSpaceId, session);
         if (null != fileStorageLocation) {
@@ -196,9 +203,9 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         Key newRandomKey = generateRandomKey();
         String newObfuscatedBase64EncodedKey = obfuscate(key2Base64EncodedString(newRandomKey));
         byte[] bytes = Charsets.toAsciiBytes(newObfuscatedBase64EncodedKey);
-        String newFileStorageLocation = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes), bytes.length);
+        String newFileStorageLocation = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
         try {
-            insertFileStorageLocation(newFileStorageLocation, compositionSpaceId, session);
+            insertFileStorageLocation(newFileStorageLocation, fileStorageRef.dedicatedFileStorageId, compositionSpaceId, session);
             newFileStorageLocation = null;
             return newRandomKey;
         } finally {
@@ -210,7 +217,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
 
     @Override
     public List<UUID> deleteKeysFor(Collection<UUID> compositionSpaceIds, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
+        FileStorage fileStorage = getFileStorage(session).fileStorage;
 
         List<UUID> nonDeletedKeys = null;
         for (UUID compositionSpaceId : compositionSpaceIds) {
@@ -252,7 +259,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, refId FROM compositionSpaceKeyStorage WHERE uuid=?");
+            stmt = con.prepareStatement("SELECT cid, user, refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE uuid=?");
             stmt.setBytes(1, UUIDs.toByteArray(compositionSpaceId));
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -266,6 +273,11 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
             if (session.getUserId() != rs.getInt(2)) {
                 // User does not match
                 return null;
+            }
+
+            int dedicatedFileStorageId = rs.getInt("dedicatedFileStorageId");
+            if (dedicatedFileStorageId > 0 && dedicatedFileStorageId != getFileStorageId(session)) {
+                throw OXException.general("Key storage association changed for user " + session.getUserId() + " in context " + session.getContextId() + ". Please correct setting for \"com.openexchange.mail.compose.fileStorageId\" property to " + dedicatedFileStorageId);
             }
 
             return unobfuscate(rs.getString(3));
@@ -304,28 +316,29 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         }
     }
 
-    private boolean insertFileStorageLocation(String fileStorageLocation, UUID compositionSpaceId, Session session) throws OXException {
+    private boolean insertFileStorageLocation(String fileStorageLocation, int dedicatedFileStorageId, UUID compositionSpaceId, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getWritable(session.getContextId());
         try {
-            return insertFileStorageLocation(fileStorageLocation, compositionSpaceId, session, con);
+            return insertFileStorageLocation(fileStorageLocation, dedicatedFileStorageId, compositionSpaceId, session, con);
         } finally {
             databaseService.backWritable(session.getContextId(), con);
         }
     }
 
-    private boolean insertFileStorageLocation(String fileStorageLocation, UUID compositionSpaceId, Session session, Connection con) throws OXException {
+    private boolean insertFileStorageLocation(String fileStorageLocation, int dedicatedFileStorageId, UUID compositionSpaceId, Session session, Connection con) throws OXException {
         if (null == con) {
-            return insertFileStorageLocation(fileStorageLocation, compositionSpaceId, session);
+            return insertFileStorageLocation(fileStorageLocation, dedicatedFileStorageId, compositionSpaceId, session);
         }
 
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO compositionSpaceKeyStorage (uuid, cid, user, refId) VALUES (?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO compositionSpaceKeyStorage (uuid, cid, user, refId, dedicatedFileStorageId) VALUES (?, ?, ?, ?, ?)");
             stmt.setBytes(1, UUIDs.toByteArray(compositionSpaceId));
             stmt.setInt(2, session.getContextId());
             stmt.setInt(3, session.getUserId());
             stmt.setString(4, obfuscate(fileStorageLocation));
+            stmt.setInt(5, dedicatedFileStorageId);
             int rows = stmt.executeUpdate();
             return rows > 0;
         } catch (SQLException e) {
@@ -350,29 +363,57 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
     }
 
     /**
-     * Returns the {@link FileStorage} assigned to session-associated context
-     *
-     * @param session The session providing context identifier
-     * @return The file storage
-     * @throws OXException If file storage cannot be returned
-     */
-    private static QuotaFileStorage getFileStorage(Session session) throws OXException {
-        return getFileStorage(session.getContextId());
-    }
-
-    /**
      * Returns the {@link FileStorage} assigned to the given context
      *
-     * @param contextId The context identifier
+     * @param session The session
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    private static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+    private FileStorageRef getFileStorage(Session session) throws OXException {
+        // Acquire needed service
+        FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
+            throw ServiceExceptionCode.absentService(FileStorageService.class);
+        }
+
+        int fileStorageId = getFileStorageId(session);
+        if (fileStorageId > 0) {
+            // Use dedicated file storage with prefix; e.g. "1337_mailcompose_store"
+            String prefix = new StringBuilder(32).append(session.getContextId()).append("_mailcompose_store").toString();
+            URI uri = FileStorages.getFullyQualifyingUriFor(fileStorageId, prefix);
+            return new FileStorageRef(storageService.getFileStorage(uri), fileStorageId);
+        }
+
+        // Acquire needed service
+        QuotaFileStorageService quotaStorageService = FileStorages.getQuotaFileStorageService();
+        if (null == quotaStorageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
-        return storageService.getQuotaFileStorage(contextId, Info.general());
+
+        // Grab quota-aware file storage to determine fully qualifying URI
+        QuotaFileStorage quotaFileStorage = quotaStorageService.getQuotaFileStorage(session.getContextId(), Info.general());
+        return new FileStorageRef(storageService.getFileStorage(quotaFileStorage.getUri()), 0);
+    }
+
+    private int getFileStorageId(Session session) throws OXException {
+        // Acquire config view for session-associated user
+        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        // Check if a dedicated file storage is configured
+        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view);
+    }
+
+    private static class FileStorageRef {
+
+        final FileStorage fileStorage;
+        final int dedicatedFileStorageId;
+
+        FileStorageRef(FileStorage fileStorage, int dedicatedFileStorageId) {
+            super();
+            this.fileStorage = fileStorage;
+            this.dedicatedFileStorageId = dedicatedFileStorageId;
+        }
     }
 
 }

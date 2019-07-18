@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.Service;
 import com.openexchange.session.Session;
@@ -80,11 +81,14 @@ public interface AttachmentStorage {
     AttachmentStorageType getStorageType();
 
     /**
-     * Signals the list of needed capabilities or <code>null</code>/empty list if nothing is needed.
+     * Checks if this attachment storage is applicable for given session and capabilities.
      *
-     * @return The list of needed capabilities or <code>null</code>
+     * @param capabilities The capabilities granted to session-associated user
+     * @param session The session providing user data
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException
      */
-    List<String> neededCapabilities();
+    boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException;
 
     /**
      * Gets the attachment associated with given identifier
