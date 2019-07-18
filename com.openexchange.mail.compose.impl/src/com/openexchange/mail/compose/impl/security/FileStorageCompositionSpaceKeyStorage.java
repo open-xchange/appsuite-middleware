@@ -177,12 +177,11 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
     }
 
     Key loadOrCreateKeyfor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
-        FileStorageRef fileStorageRef = getFileStorage(session);
-        FileStorage fileStorage = fileStorageRef.fileStorage;
-
-        String fileStorageLocation = loadFileStorageLocation(compositionSpaceId, session);
+        StorageIdentifier fileStorageLocation = loadFileStorageLocation(compositionSpaceId, session);
         if (null != fileStorageLocation) {
-            InputStream file = fileStorage.getFile(fileStorageLocation);
+            FileStorageRef fileStorageRef = getFileStorage(fileStorageLocation.dedicatedFileStorageId, session);
+            FileStorage fileStorage = fileStorageRef.fileStorage;
+            InputStream file = fileStorage.getFile(fileStorageLocation.identifier);
             try {
                 if (null != file) {
                     String obfuscatedBase64EncodedKey = Charsets.toAsciiString(Streams.stream2bytes(file));
@@ -200,6 +199,8 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
             return null;
         }
 
+        FileStorageRef fileStorageRef = getFileStorage(session);
+        FileStorage fileStorage = fileStorageRef.fileStorage;
         Key newRandomKey = generateRandomKey();
         String newObfuscatedBase64EncodedKey = obfuscate(key2Base64EncodedString(newRandomKey));
         byte[] bytes = Charsets.toAsciiBytes(newObfuscatedBase64EncodedKey);
@@ -217,19 +218,19 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
 
     @Override
     public List<UUID> deleteKeysFor(Collection<UUID> compositionSpaceIds, Session session) throws OXException {
-        FileStorage fileStorage = getFileStorage(session).fileStorage;
-
         List<UUID> nonDeletedKeys = null;
         for (UUID compositionSpaceId : compositionSpaceIds) {
             cachedKeys.invalidate(compositionSpaceId);
-            String fileStorageLocation = loadFileStorageLocation(compositionSpaceId, session);
+            StorageIdentifier fileStorageLocation = loadFileStorageLocation(compositionSpaceId, session);
             if (null == fileStorageLocation) {
                 if (null == nonDeletedKeys) {
                     nonDeletedKeys = new ArrayList<UUID>(compositionSpaceIds.size());
                 }
                 nonDeletedKeys.add(compositionSpaceId);
             } else {
-                fileStorage.deleteFile(fileStorageLocation);
+                FileStorageRef fileStorageRef = getFileStorage(fileStorageLocation.dedicatedFileStorageId, session);
+                FileStorage fileStorage = fileStorageRef.fileStorage;
+                fileStorage.deleteFile(fileStorageLocation.identifier);
                 if (!deleteFileStorageLocation(compositionSpaceId, session)) {
                     if (null == nonDeletedKeys) {
                         nonDeletedKeys = new ArrayList<UUID>(compositionSpaceIds.size());
@@ -241,7 +242,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         return null == nonDeletedKeys ? Collections.emptyList() : nonDeletedKeys;
     }
 
-    private String loadFileStorageLocation(UUID compositionSpaceId, Session session) throws OXException {
+    private StorageIdentifier loadFileStorageLocation(UUID compositionSpaceId, Session session) throws OXException {
         DatabaseService databaseService = requireDatabaseService();
         Connection con = databaseService.getReadOnly(session.getContextId());
         try {
@@ -251,7 +252,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         }
     }
 
-    private String loadFileStorageLocation(UUID compositionSpaceId, Session session, Connection con) throws OXException {
+    private StorageIdentifier loadFileStorageLocation(UUID compositionSpaceId, Session session, Connection con) throws OXException {
         if (null == con) {
             return loadFileStorageLocation(compositionSpaceId, session);
         }
@@ -275,12 +276,8 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
                 return null;
             }
 
-            int dedicatedFileStorageId = rs.getInt("dedicatedFileStorageId");
-            if (dedicatedFileStorageId > 0 && dedicatedFileStorageId != getFileStorageId(session)) {
-                throw OXException.general("Key storage association changed for user " + session.getUserId() + " in context " + session.getContextId() + ". Please correct setting for \"com.openexchange.mail.compose.fileStorageId\" property to " + dedicatedFileStorageId);
-            }
-
-            return unobfuscate(rs.getString(3));
+            int dedicatedFileStorageId = rs.getInt(4);
+            return new StorageIdentifier(unobfuscate(rs.getString(3)), dedicatedFileStorageId);
         } catch (SQLException e) {
             throw CompositionSpaceErrorCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -363,20 +360,32 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
     }
 
     /**
-     * Returns the {@link FileStorage} assigned to the given context
+     * Gets the {@link FileStorage} for given session.
      *
      * @param session The session
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
     private FileStorageRef getFileStorage(Session session) throws OXException {
+        int fileStorageId = getFileStorageId(session);
+        return getFileStorage(fileStorageId, session);
+    }
+
+    /**
+     * Gets the {@link FileStorage} for given arguments.
+     *
+     * @param fileStorageId The file storage identifier or <code>0</code>
+     * @param session The session
+     * @return The file storage
+     * @throws OXException If file storage cannot be returned
+     */
+    private FileStorageRef getFileStorage(int fileStorageId, Session session) throws OXException {
         // Acquire needed service
         FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(FileStorageService.class);
         }
 
-        int fileStorageId = getFileStorageId(session);
         if (fileStorageId > 0) {
             // Use dedicated file storage with prefix; e.g. "1337_mailcompose_store"
             String prefix = new StringBuilder(32).append(session.getContextId()).append("_mailcompose_store").toString();
@@ -412,6 +421,18 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         FileStorageRef(FileStorage fileStorage, int dedicatedFileStorageId) {
             super();
             this.fileStorage = fileStorage;
+            this.dedicatedFileStorageId = dedicatedFileStorageId;
+        }
+    }
+
+    private static class StorageIdentifier {
+
+        final String identifier;
+        final int dedicatedFileStorageId;
+
+        StorageIdentifier(String identifier, int dedicatedFileStorageId) {
+            super();
+            this.identifier = identifier;
             this.dedicatedFileStorageId = dedicatedFileStorageId;
         }
     }
