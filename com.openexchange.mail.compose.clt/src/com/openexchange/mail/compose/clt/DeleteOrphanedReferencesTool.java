@@ -103,6 +103,11 @@ public class DeleteOrphanedReferencesTool extends AbstractRmiCLI<Void> {
         {
             String ids = cmd.getOptionValue("filestores");
             String[] arr = Strings.splitByComma(ids);
+            if (arr.length <= 0) {
+                System.err.println("Missing file storage identifiers");
+                printHelp();
+                System.exit(-1);
+            }
             fileStorageIds = new ArrayList<Integer>(arr.length);
             for (String id : arr) {
                 try {
@@ -142,7 +147,7 @@ public class DeleteOrphanedReferencesTool extends AbstractRmiCLI<Void> {
 
     @Override
     protected String getName() {
-        return "deleteorphaned " + BASIC_MASTER_ADMIN_USAGE;
+        return "deleteorphanedattachments " + BASIC_MASTER_ADMIN_USAGE;
     }
 
 }
