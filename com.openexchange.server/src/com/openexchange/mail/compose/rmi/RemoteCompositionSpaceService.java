@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.rmi;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
@@ -58,7 +59,7 @@ import java.util.List;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public interface RemoteCompositionSpaceService {
+public interface RemoteCompositionSpaceService extends Remote {
 
     /**
      * RMI name to be used in the naming lookup.

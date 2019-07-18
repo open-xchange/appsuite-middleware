@@ -71,7 +71,9 @@ import com.openexchange.mail.compose.CompositionSpaceErrorCode;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceService;
 import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceServiceException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.ObfuscatorService;
 
 /**
  * {@link RemoteCompositionSpaceServiceImpl}
@@ -162,7 +164,7 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                         storageIdentifiers = new HashSet<String>();
                         keyIdentifiers.put(contextId, storageIdentifiers);
                     }
-                    storageIdentifiers.add(rs.getString(2));
+                    storageIdentifiers.add(unobfuscate(rs.getString(2)));
                 }
                 Databases.closeSQLStuff(rs, stmt);
                 stmt = null;
@@ -225,7 +227,7 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                                 stmt = con.prepareStatement("DELETE FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=? AND refId=?");
                                 stmt.setInt(1, contextId.intValue());
                                 stmt.setInt(2, fileStorageId);
-                                stmt.setString(3, nonExistingStorageIdentifier);
+                                stmt.setString(3, obfuscate(nonExistingStorageIdentifier));
                                 stmt.executeUpdate();
                                 Databases.closeSQLStuff(stmt);
                                 stmt = null;
@@ -245,6 +247,36 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                 databaseService.backWritable(representativeContextId, con);
             }
         }
+    }
+
+    /**
+     * Obfuscates given string.
+     *
+     * @param s The string
+     * @return The obfuscated string
+     * @throws OXException If service is missing
+     */
+    private String obfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.obfuscate(s);
+    }
+
+    /**
+     * Un-Obfuscates given string.
+     *
+     * @param s The obfuscated string
+     * @return The plain string
+     * @throws OXException If service is missing
+     */
+    private String unobfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.unobfuscate(s);
     }
 
 }

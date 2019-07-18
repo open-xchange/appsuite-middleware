@@ -70,6 +70,9 @@ import com.openexchange.mail.compose.AttachmentStorageIdentifier.KnownArgument;
 import com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.ObfuscatorService;
 
 /**
  * {@link CompositionSpaceDeleteListener}
@@ -84,11 +87,14 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
         static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositionSpaceDeleteListener.class);
     }
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link CompositionSpaceDeleteListener}.
      */
-    public CompositionSpaceDeleteListener() {
+    public CompositionSpaceDeleteListener(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -151,7 +157,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 if (rs.next()) {
                     storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
                     do {
-                        storageIdentifers.add(storageIdentifierFrom(rs));
+                        storageIdentifers.add(storageIdentifierFrom(rs, false));
                     } while (rs.next());
                 }
                 Databases.closeSQLStuff(rs, stmt);
@@ -202,7 +208,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 if (rs.next()) {
                     storageIdentifers = new HashSet<String>();
                     do {
-                        storageIdentifers.add(rs.getString(1));
+                        storageIdentifers.add(unobfuscate(rs.getString(1)));
                     } while (rs.next());
                 }
                 Databases.closeSQLStuff(rs, stmt);
@@ -226,14 +232,14 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
             }
 
             {
-                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId=1");
+                stmt = con.prepareStatement("SELECT refId, dedicatedFileStorageId FROM compositionSpaceKeyStorage WHERE cid=? AND dedicatedFileStorageId > 0");
                 stmt.setInt(1, contextId);
                 rs = stmt.executeQuery();
                 Set<AttachmentStorageIdentifier> storageIdentifers = null;
                 if (rs.next()) {
                     storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
                     do {
-                        storageIdentifers.add(storageIdentifierFrom(rs));
+                        storageIdentifers.add(storageIdentifierFrom(rs, true));
                     } while (rs.next());
                 }
                 Databases.closeSQLStuff(rs, stmt);
@@ -325,7 +331,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 if (rs.next()) {
                     storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
                     do {
-                        storageIdentifers.add(storageIdentifierFrom(rs));
+                        storageIdentifers.add(storageIdentifierFrom(rs, false));
                     } while (rs.next());
                 }
                 Databases.closeSQLStuff(rs, stmt);
@@ -379,7 +385,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 if (rs.next()) {
                     storageIdentifers = new HashSet<String>();
                     do {
-                        storageIdentifers.add(rs.getString(1));
+                        storageIdentifers.add(unobfuscate(rs.getString(1)));
                     } while (rs.next());
                 }
                 Databases.closeSQLStuff(rs, stmt);
@@ -411,7 +417,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
                 if (rs.next()) {
                     storageIdentifers = new HashSet<AttachmentStorageIdentifier>();
                     do {
-                        storageIdentifers.add(storageIdentifierFrom(rs));
+                        storageIdentifers.add(storageIdentifierFrom(rs, true));
                     } while (rs.next());
                 }
                 Databases.closeSQLStuff(rs, stmt);
@@ -450,6 +456,21 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
         }
     }
 
+    /**
+     * Un-Obfuscates given string.
+     *
+     * @param s The obfuscated string
+     * @return The plain string
+     * @throws OXException If service is missing
+     */
+    private String unobfuscate(String s) throws OXException {
+        ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+        if (null == obfuscatorService) {
+            throw ServiceExceptionCode.absentService(ObfuscatorService.class);
+        }
+        return obfuscatorService.unobfuscate(s);
+    }
+
     private static FileStorage getFileStorage(int dedicatedFileStorageId, int contextId) {
         try {
             return DedicatedFileStorageAttachmentStorage.getFileStorage(dedicatedFileStorageId, contextId);
@@ -458,8 +479,8 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
         }
     }
 
-    private static AttachmentStorageIdentifier storageIdentifierFrom(ResultSet rs) throws SQLException {
-        String storageIdentifier = rs.getString("refId");
+    private AttachmentStorageIdentifier storageIdentifierFrom(ResultSet rs, boolean unobfuscate) throws SQLException, OXException {
+        String storageIdentifier = unobfuscate ? unobfuscate(rs.getString("refId")) : rs.getString("refId");
         int dedicatedFileStorageId = rs.getInt("dedicatedFileStorageId");
         if (dedicatedFileStorageId <= 0) {
             return new AttachmentStorageIdentifier(storageIdentifier);

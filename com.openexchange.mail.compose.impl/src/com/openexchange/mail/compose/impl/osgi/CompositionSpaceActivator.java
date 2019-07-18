@@ -50,6 +50,7 @@
 package com.openexchange.mail.compose.impl.osgi;
 
 import static com.openexchange.osgi.Tools.withRanking;
+import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -103,11 +104,11 @@ import com.openexchange.mail.compose.impl.groupware.CompositionSpaceDeleteListen
 import com.openexchange.mail.compose.impl.rmi.RemoteCompositionSpaceServiceImpl;
 import com.openexchange.mail.compose.impl.security.CompositionSpaceKeyStorageServiceImpl;
 import com.openexchange.mail.compose.impl.security.FileStorageCompositionSpaceKeyStorage;
+import com.openexchange.mail.compose.impl.security.FileStorageKeyStorageFileLocationHandler;
 import com.openexchange.mail.compose.impl.security.HazelcastCompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.impl.storage.db.RdbCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.inmemory.InMemoryCompositionSpaceStorageService;
 import com.openexchange.mail.compose.impl.storage.security.CryptoCompositionSpaceStorageService;
-import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceService;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorage;
 import com.openexchange.mail.compose.security.CompositionSpaceKeyStorageService;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
@@ -214,6 +215,7 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         registerService(CompositionSpaceKeyStorageService.class, keyStorageService);
         registerService(CompositionSpaceKeyStorage.class, hzCompositionSpaceKeyStorage, withRanking(0));
         registerService(CompositionSpaceKeyStorage.class, FileStorageCompositionSpaceKeyStorage.initInstance(this), withRanking(1));
+        registerService(FileLocationHandler.class, new FileStorageKeyStorageFileLocationHandler(this));
 
         registerService(AttachmentStorageService.class, attachmentStorageService);
 
@@ -322,9 +324,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
             new CompositionSpaceAddContentEncryptedFlag(),
             new CompositionSpaceAddFileStorageIdentifier()
         ));
-        registerService(DeleteListener.class, new CompositionSpaceDeleteListener());
+        registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 
-        registerService(RemoteCompositionSpaceService.class, new RemoteCompositionSpaceServiceImpl(this));
+        registerService(Remote.class, new RemoteCompositionSpaceServiceImpl(this));
     }
 
     @Override

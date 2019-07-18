@@ -97,7 +97,7 @@ public class FileStrorageAttachmentFileLocationHandler extends AbstractFileLocat
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid=? AND refType=?");
+            stmt = con.prepareStatement("SELECT refId FROM compositionSpaceAttachmentMeta WHERE cid=? AND refType=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, fileStorageType);
             rs = stmt.executeQuery();
