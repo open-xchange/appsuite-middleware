@@ -512,7 +512,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
 	}
 
     @Override
-    public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
+    public SyncStatus<WebdavResource> getSyncStatus(String token, int limit) throws WebdavProtocolException {
         if (null != token && 0 < token.length()) {
             /*
              * check for overridden sync-token for this client
@@ -524,7 +524,7 @@ public class CardDAVCollection extends FolderCollection<Contact> {
                 LOG.debug("Overriding sync token to '{}' for user '{}'.", token, this.factory.getUser());
             }
         }
-        return super.getSyncStatus(token);
+        return super.getSyncStatus(token, limit);
     }
 
     @Override

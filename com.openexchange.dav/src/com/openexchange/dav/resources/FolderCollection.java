@@ -244,9 +244,10 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * Gets an updated {@link SyncStatus} based on the supplied sync token for this collection.
      *
      * @param syncToken The last sync token as supplied by the client, or <code>null</code> for the initial synchronization
+     * @param limit The maximum number of items to return in the response, or <code>-1</code> if unlimited
      * @return The sync status
      */
-    public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
+    public SyncStatus<WebdavResource> getSyncStatus(String token, int limit) throws WebdavProtocolException {
         Date since = null;
         if (Strings.isNotEmpty(token)) {
             try {
@@ -263,7 +264,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
             /*
              * get sync-status
              */
-            return getSyncStatus(since);
+            return 0 < limit ? getSyncStatus(since, limit) : getSyncStatus(since);
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }
@@ -418,6 +419,23 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * @return the sync status
      */
     protected abstract SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException;
+
+    /**
+     * Create a 'sync-status' multistatus report considering all changes since the supplied time.
+     * <p/>
+     * The default implementation delegates to {@link #getSyncStatus(Date)} if no limit is specified and throws an exception otherwise.
+     * Override if applicable.
+     * 
+     * @param since The time, or <code>null</code> for the initial synchronization
+     * @param limit The maximum number of items to return in the response, or <code>-1</code> if unlimited
+     * @return The sync status
+     */
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since, int limit) throws OXException {
+        if (0 < limit) {
+            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "number-of-matches-within-limits", getUrl(), DAVProtocol.SC_INSUFFICIENT_STORAGE);
+        }
+        return getSyncStatus(since);
+    }
 
     /**
      * Gets a new folder with "settable" properties to apply any property changes. The actual {@link #save()}-operation that is called

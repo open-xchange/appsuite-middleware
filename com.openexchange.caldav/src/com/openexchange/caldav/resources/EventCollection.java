@@ -302,6 +302,11 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
 
     @Override
     protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+        return getSyncStatus(since, -1);
+    }
+
+    @Override
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since, int limit) throws OXException {
         SyncStatus<WebdavResource> syncStatus = new SyncStatus<WebdavResource>();
         /*
          * get new, modified & deleted objects since client token within synchronized interval
@@ -310,13 +315,17 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
 
             @Override
             protected UpdatesResult perform(IDBasedCalendarAccess access) throws OXException {
+                int maxResults = getMaxResults();
+                if (0 < limit) {
+                    maxResults = 0 < maxResults ? Math.min(maxResults, limit) : limit;
+                }
                 if (null == since) {
                     access.set(CalendarParameters.PARAMETER_IGNORE, new String[] { "deleted" }); // exclude deleted events for initial sync
                 }
                 access.set(CalendarParameters.PARAMETER_FIELDS, SYNC_STATUS_FIELDS);
                 access.set(CalendarParameters.PARAMETER_RANGE_START, minDateTime.getMinDateTime());
                 access.set(CalendarParameters.PARAMETER_RANGE_END, maxDateTime.getMaxDateTime());
-                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(getMaxResults()));
+                access.set(CalendarParameters.PARAMETER_RIGHT_HAND_LIMIT, I(maxResults));
                 return access.getUpdatedEventsInFolder(folderID, null == since ? 0L : since.getTime());
             }
         }.execute(factory.getSession());
