@@ -234,7 +234,7 @@ public class GlobalEventHandler implements Reloadable {
         "onmessage",
         "onmousedown",
         "onmouseenter",
-        "onmounseleave",
+        "onmouseleave",
         "onmousemove",
         "onmouseout",
         "onmouseover",

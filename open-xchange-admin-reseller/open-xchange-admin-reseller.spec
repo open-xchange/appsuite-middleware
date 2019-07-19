@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 47
+%define        ox_release 48
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -71,6 +71,8 @@ done
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Tue Jul 09 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2019-07-12 (5315)
 * Tue Jun 18 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2019-07-01 (5288)
 * Fri May 03 2019 Jan Bauerdick <jan.bauerdick@open-xchange.com>

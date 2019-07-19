@@ -1,3 +1,9 @@
+open-xchange-ajp (7.6.3-48) stable; urgency=medium
+
+  * Build for patch 2019-07-12 (5315)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 09 Jul 2019 11:43:21 +0200
+
 open-xchange-ajp (7.6.3-47) stable; urgency=medium
 
   * Build for patch 2019-07-01 (5288)
