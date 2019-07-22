@@ -56,7 +56,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
@@ -482,6 +484,11 @@ public class QuotaFileStorageTest {
         }
 
         @Override
+        public Set<String> getDistinctGroupsPerSchema() {
+            return Collections.emptySet();
+        }
+
+        @Override
         public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
             return null;
         }
@@ -490,6 +497,7 @@ public class QuotaFileStorageTest {
         public SchemaInfo getSchemaInfo(int contextId) throws OXException {
             return null;
         }
+
     }
 
     private static void rmdir(final File tempFile) {
