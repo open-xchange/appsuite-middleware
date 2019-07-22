@@ -94,7 +94,7 @@ public class GlobalDbConfig {
      * @param serverID The server identifier to use
      * @return The assignment
      */
-    public AssignmentImpl getAssignment(int serverID) throws OXException {
+    public AssignmentImpl getAssignment(int serverID) {
         return new AssignmentImpl(0, serverID, readPoolId, writePoolId, schema);
     }
 

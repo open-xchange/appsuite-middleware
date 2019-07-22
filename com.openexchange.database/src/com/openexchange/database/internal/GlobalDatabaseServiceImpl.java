@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.Bundle;
@@ -251,6 +252,18 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
         String group = configViewFactory.getView(-1, contextId).opt("com.openexchange.context.group", String.class, null);
         return isGlobalDatabaseAvailable(group);
+    }
+
+    @Override
+    public Set<String> getDistinctGroupsPerSchema() {
+        Set<String> addedSchemas = new HashSet<String>();
+        Set<String> distinctGroupsPerSchema = new HashSet<String>();
+        for (Entry<String, GlobalDbConfig> entry : globalDbConfigs.entrySet()) {
+            if (addedSchemas.add(entry.getValue().getSchema())) {
+                distinctGroupsPerSchema.add(entry.getKey());
+            }
+        }
+        return distinctGroupsPerSchema;
     }
 
     @Override

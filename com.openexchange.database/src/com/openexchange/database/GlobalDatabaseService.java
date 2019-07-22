@@ -50,6 +50,7 @@
 package com.openexchange.database;
 
 import java.sql.Connection;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -83,6 +84,14 @@ public interface GlobalDatabaseService {
      * @return <code>true</code> if a global database is available, <code>false</code>, otherwise
      */
     boolean isGlobalDatabaseAvailable(int contextId) throws OXException;
+
+    /**
+     * Gets a collection of exactly one (exemplary) context group per global database schema. Useful when iterating over all available
+     * global database schemas.
+     *
+     * @return A listing of distinct context groups per schema, or an empty set if there are none
+     */
+    Set<String> getDistinctGroupsPerSchema();
 
     /**
      * Gets a connection for read-only access to the global database of a specific context group.

@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -287,6 +288,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
         return globalDatabaseService.isGlobalDatabaseAvailable(contextId);
+    }
+
+    @Override
+    public Set<String> getDistinctGroupsPerSchema() {
+        return globalDatabaseService.getDistinctGroupsPerSchema();
     }
 
     @Override
