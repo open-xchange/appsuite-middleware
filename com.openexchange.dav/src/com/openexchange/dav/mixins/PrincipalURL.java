@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.dav.Tools;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -72,7 +73,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The principal URL
      */
     public static String forUser(int userID) {
-        return "/principals/users/" + userID;
+        return Tools.getPathPrefix() + "/principals/users/" + userID;
     }
 
     /**
@@ -82,7 +83,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The principal URL
      */
     public static String forGroup(int groupID) {
-        return "/principals/groups/" + groupID;
+        return Tools.getPathPrefix() + "/principals/groups/" + groupID;
     }
 
     /**
@@ -92,7 +93,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The principal URL
      */
     public static String forResource(int resourceID) {
-        return "/principals/resources/" + resourceID;
+        return Tools.getPathPrefix() + "/principals/resources/" + resourceID;
     }
 
     /**
@@ -110,7 +111,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
                     // ignore
                 }
             }
-            if (principalURL.startsWith("/principals/")) {
+            if (principalURL.startsWith(Tools.getPathPrefix() + "/principals/")) {
                 Matcher matcher = URL_PATTERN.matcher(principalURL);
                 if (matcher.find() && 2 == matcher.groupCount()) {
                     try {
@@ -133,7 +134,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
         return null;
     }
 
-    private static final Pattern URL_PATTERN = Pattern.compile("/principals/(resources|users|groups)/(\\d+)/?");
+    private static final Pattern URL_PATTERN = Pattern.compile(Tools.getPathPrefix() + "/principals/(resources|users|groups)/(\\d+)/?");
     private static final String PROPERTY_NAME = "principal-URL";
 
     private final int principalID;

@@ -65,6 +65,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVServlet;
+import com.openexchange.dav.Tools;
 import com.openexchange.dav.push.DAVPushEventHandler;
 import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
@@ -117,7 +118,12 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
              */
             PushSubscribePerformer performer = new PushSubscribePerformer(this);
             this.factory = performer.getFactory();
-            getService(HttpService.class).registerServlet("/servlet/dav/subscribe", new DAVServlet(performer, Interface.CALDAV), null, null);
+            ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+            String pathPrefix = "";
+            if (null != configViewFactory) {
+                pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+            }
+            getService(HttpService.class).registerServlet(pathPrefix + "/subscribe", new DAVServlet(performer, Interface.CALDAV), null, null);
             /*
              * register push message generators
              */

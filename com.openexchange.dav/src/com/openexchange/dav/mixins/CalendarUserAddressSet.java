@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.Tools;
 import com.openexchange.group.Group;
 import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
@@ -134,7 +135,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (String address : addresses) {
-            stringBuilder.append("<D:href>").append(address).append("</D:href>");
+            stringBuilder.append("<D:href>").append(Tools.getPathPrefix()).append(address).append("</D:href>");
         }
         return stringBuilder.toString();
     }

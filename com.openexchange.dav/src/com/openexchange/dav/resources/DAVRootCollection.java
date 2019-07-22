@@ -51,6 +51,7 @@ package com.openexchange.dav.resources;
 
 import java.util.Date;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.Tools;
 import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
@@ -74,7 +75,7 @@ public abstract class DAVRootCollection extends DAVCollection {
         new BasicPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
             Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false))
     };
-    private static final WebdavPath ROOT_URL = new WebdavPath();
+    private static final WebdavPath ROOT_URL = new WebdavPath(Tools.getPathPrefix());
 
     private final String displayName;
 

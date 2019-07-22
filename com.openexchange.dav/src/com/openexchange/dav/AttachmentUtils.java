@@ -152,10 +152,11 @@ public class AttachmentUtils {
      * @return The URI
      */
     public static URI buildURI(HostData hostData, AttachmentMetadata metadata) throws URISyntaxException {
+        String pathPrefix = Tools.getPathPrefix();
         return new URI(new URIBuilder()
             .setScheme(hostData.isSecure() ? "https" : "http")
             .setHost(hostData.getHost())
-            .setPath(new StringBuilder("/attachments/").append(encodeName(metadata)).append('/').append(metadata.getFilename()).toString())
+            .setPath(new StringBuilder(pathPrefix).append("/attachments/").append(encodeName(metadata)).append('/').append(metadata.getFilename()).toString())
         .toString());
     }
 
@@ -170,11 +171,18 @@ public class AttachmentUtils {
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
+        String pathPrefix = Tools.getPathPrefix();
+        if (Strings.isNotEmpty(pathPrefix)) {
+            int index = path.indexOf(pathPrefix);
+            if (-1 == index) {
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+        }
         int index = path.indexOf("attachments/");
         if (-1 == index) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        path = path.substring(13);
+        path = path.substring(13 + pathPrefix.length());
         index = path.indexOf('/');
         if (-1 != index) {
             path = path.substring(0, index);

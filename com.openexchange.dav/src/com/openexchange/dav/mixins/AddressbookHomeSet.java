@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.dav.Tools;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -73,7 +74,7 @@ public class AddressbookHomeSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + ADDRESSBOOK_HOME + "/</D:href>";
+        return "<D:href>" + Tools.getPathPrefix() + ADDRESSBOOK_HOME + "/</D:href>";
     }
 
 }

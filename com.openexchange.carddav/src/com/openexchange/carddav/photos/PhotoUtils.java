@@ -55,6 +55,7 @@ import java.util.Date;
 import org.apache.http.client.utils.URIBuilder;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.Tools;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Charsets;
@@ -86,7 +87,7 @@ public class PhotoUtils {
             return new URI(new URIBuilder()
                 .setScheme(hostData.isSecure() ? "https" : "http")
                 .setHost(hostData.getHost())
-                .setPath(new StringBuilder("/photos/").append(encodeName(contact)).append('/')
+                .setPath(new StringBuilder(Tools.getPathPrefix()).append("/photos/").append(encodeName(contact)).append('/')
                     .append("image1.").append(MimeType2ExtMap.getFileExtension(contact.getImageContentType(), "jpg")).toString())
             .toString());
         } catch (URISyntaxException e) {
@@ -105,11 +106,18 @@ public class PhotoUtils {
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
+        String pathPrefix = Tools.getPathPrefix();
+        if (Strings.isNotEmpty(pathPrefix)) {
+            int index = path.indexOf(pathPrefix);
+            if (-1 == index) {
+                throw new IllegalArgumentException(String.valueOf(uri));
+            }
+        }
         int index = path.indexOf("photos/");
         if (-1 == index) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        path = path.substring(7);
+        path = path.substring(7 + pathPrefix.length());
         index = path.indexOf('/');
         if (-1 != index) {
             path = path.substring(0, index);

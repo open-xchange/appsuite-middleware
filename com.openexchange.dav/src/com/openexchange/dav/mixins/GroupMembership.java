@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.dav.Tools;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -77,7 +78,7 @@ public class GroupMembership extends SingleXMLPropertyMixin {
         StringBuilder stringBuilder = new StringBuilder();
         if (null != groups) {
             for (int group : groups) {
-                stringBuilder.append("<D:href>").append(PrincipalURL.forGroup(group)).append("</D:href>");
+                stringBuilder.append("<D:href>").append(Tools.getPathPrefix()).append(PrincipalURL.forGroup(group)).append("</D:href>");
             }
         }
         return stringBuilder.toString();

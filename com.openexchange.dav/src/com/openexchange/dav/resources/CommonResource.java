@@ -64,7 +64,7 @@ import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.dav.AttachmentUtils;
-import com.openexchange.dav.internal.Tools;
+import com.openexchange.dav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;

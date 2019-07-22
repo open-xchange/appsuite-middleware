@@ -65,6 +65,7 @@ import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.Tools;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -421,6 +422,10 @@ public abstract class DAVAction extends AbstractAction {
         } catch (URISyntaxException e) {
             org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error instantiating an URI from {}", href, e);
             path = href;
+        }
+        String pathPrefix = Tools.getPathPrefix();
+        if (Strings.isNotEmpty(pathPrefix) && path.startsWith(pathPrefix)) {
+            path = path.substring(pathPrefix.length());
         }
         String urlPrefix = request.getURLPrefix();
         if (Strings.isNotEmpty(urlPrefix) && path.startsWith(urlPrefix)) {

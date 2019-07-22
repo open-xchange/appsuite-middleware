@@ -205,6 +205,8 @@ public class AJAXConfig extends AbstractConfig {
         TEST_DIR("testMailDir"),
 
         MAIL_PORT("mailPort"),
+        
+        PATH_PREFIX("pathPrefix"),
 
         ;
 

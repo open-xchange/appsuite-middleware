@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.dav.Tools;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -70,7 +71,7 @@ public class PrincipalCollectionSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>/principals/</D:href>";
+        return "<D:href>" + Tools.getPathPrefix() + "/principals/</D:href>";
     }
 
 }

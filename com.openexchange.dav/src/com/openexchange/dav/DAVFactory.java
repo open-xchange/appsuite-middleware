@@ -143,6 +143,9 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      * @return <code>true</code> if it's the root path, <code>false</code>, otherwise
      */
     protected boolean isRoot(WebdavPath url) {
+        if (new WebdavPath(Tools.getPathPrefix()).equals(url)) {
+            return true;
+        }
         return 0 == url.size();
     }
 
@@ -153,6 +156,9 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      * @return The sanitized path
      */
     protected WebdavPath sanitize(WebdavPath url) {
+        if (url.toString().startsWith(Tools.getPathPrefix())) {
+            url = new WebdavPath(url.toString().substring(Tools.getPathPrefix().length()));
+        }
         WebdavPath prefixPath = new WebdavPath(getURLPrefix());
         return 0 < prefixPath.size() && url.startsWith(prefixPath) ? url.subpath(1) : url;
     }

@@ -107,7 +107,7 @@ public class WebDAVClient {
             httpClient = newDefaultHTTPClient();
             this.setCredentials(testUser.getLogin(), testUser.getPassword());
         }
-        this.setBaseURI(Config.getBaseUri());
+        this.setBaseURI(Config.getBaseUri() + Config.getPathPrefix());
         this.setUserAgent(userAgent);
     }
 

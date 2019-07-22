@@ -55,7 +55,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.AttachmentUtils;
-import com.openexchange.dav.internal.Tools;
+import com.openexchange.dav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;

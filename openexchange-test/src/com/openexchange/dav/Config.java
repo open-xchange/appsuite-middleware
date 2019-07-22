@@ -68,7 +68,7 @@ public final class Config {
     }
 
     public static String getBaseUri() throws OXException {
-        return getProtocol() + "://" + getHostname();
+        return getProtocol() + "://" + getHostname() + getPathPrefix();
     }
 
     public static String getHostname() throws OXException {
@@ -85,5 +85,9 @@ public final class Config {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.PROTOCOL.getPropertyName());
         }
         return hostname;
+    }
+
+    public static String getPathPrefix() {
+        return AJAXConfig.getProperty(Property.PATH_PREFIX);
     }
 }

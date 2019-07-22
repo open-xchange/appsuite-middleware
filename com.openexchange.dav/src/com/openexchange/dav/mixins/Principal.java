@@ -50,6 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.Tools;
 import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -65,9 +66,8 @@ public class Principal extends SingleXMLPropertyMixin {
 
     /**
      * Initializes a new {@link Principal}.
-     *
-     * @param factory The DAV factory
-     * @param collection The collection
+     * 
+     * @param principal The principal 
      */
     public Principal(User principal) {
         super(DAVProtocol.DAV_NS.getURI(), "principal");
@@ -76,7 +76,7 @@ public class Principal extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + PrincipalURL.forUser(principal.getId()) + "</D:href>";
+        return "<D:href>" + Tools.getPathPrefix() + PrincipalURL.forUser(principal.getId()) + "</D:href>";
     }
 
 }

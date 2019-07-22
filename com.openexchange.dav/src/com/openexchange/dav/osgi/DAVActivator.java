@@ -87,22 +87,27 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+        String pathPrefix = "";
+        if (null != configViewFactory) {
+            pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+        }
         HttpService httpService = getService(HttpService.class);
         /*
          * root
          */
         RootPerformer rootPerformer = new RootPerformer(this);
-        httpService.registerServlet("/servlet/dav", new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(pathPrefix, new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
         /*
          * attachments
          */
         AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
-        httpService.registerServlet("/servlet/dav/attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(pathPrefix + "/attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-        httpService.registerServlet("/servlet/dav/principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
+        httpService.registerServlet(pathPrefix + "/principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
         this.mixin = mixin;

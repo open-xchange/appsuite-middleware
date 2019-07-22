@@ -82,8 +82,8 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	public ServletWebdavRequest(WebdavFactory factory, HttpServletRequest req) {
 		super(factory);
 		this.req = req;
-		this.urlPrefix = req.getServletPath().endsWith("/") ? req.getServletPath() : req.getServletPath() + '/';
-		LOG.debug("WEBDAV URL PREFIX FROM CONTAINER: {}", this.urlPrefix);
+        this.urlPrefix = req.getServletPath();
+        LOG.debug("WEBDAV URL PREFIX FROM CONTAINER: {}", this.urlPrefix);
         this.url = toWebdavURL(req.getRequestURI());
 	}
 
@@ -126,41 +126,38 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		return destUrl = toWebdavURL(req.getHeader("destination"));
 	}
 
-	protected WebdavPath toWebdavURL(String url) {
-		if (url == null) {
-			return null;
-		}
+    protected WebdavPath toWebdavURL(String url) {
+        if (url == null) {
+            return null;
+        }
 
-		if (false == url.startsWith("/")) {
-    		try {
-    			final URL urlO = new URL(url);
-    			url = urlO.getPath();
-    		} catch (MalformedURLException x ){
-    			LOG.debug("",x);
-    		}
-		}
+        if (false == url.startsWith("/")) {
+            try {
+                final URL urlO = new URL(url);
+                url = urlO.getPath();
+            } catch (MalformedURLException x) {
+                LOG.debug("", x);
+            }
+        }
 
-		if (url.startsWith(req.getServletPath())) {
-			url =  url.substring(req.getServletPath().length());
-		}
-		try {
+        try {
             String encoding = req.getCharacterEncoding();
             if (encoding == null) {
                 encoding = ServerConfig.getProperty(Property.DefaultEncoding);
             }
             final WebdavPath path = new WebdavPath();
-            for(final String component : url.split("/+")) {
-                if (component.equals("")){
+            for (final String component : url.split("/+")) {
+                if (component.equals("")) {
                     continue;
                 }
 
-                path.append(decode(component,encoding));
+                path.append(decode(component, encoding));
             }
             return path;
-		} catch (UnsupportedEncodingException e) {
-			return new WebdavPath(url);
-		}
-	}
+        } catch (UnsupportedEncodingException e) {
+            return new WebdavPath(url);
+        }
+    }
 
     public String decode(final String component, final String encoding) throws UnsupportedEncodingException {
         return URL_DECODER.decode(component, encoding);

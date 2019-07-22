@@ -103,9 +103,9 @@ import com.openexchange.xml.jdom.JDOMParser;
  */
 public class CaldavActivator extends HousekeepingActivator {
 
-    private static final String SERVLET_PATH = "/servlet/dav/caldav";
+    private static final String SERVLET_PATH = "/caldav";
 
-    private static final String NULL_PATH = "/servlet/dav/dev/null";
+    private static final String NULL_PATH = "/dev/null";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
@@ -133,9 +133,12 @@ public class CaldavActivator extends HousekeepingActivator {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
 
-            httpService.registerServlet(SERVLET_PATH, new CalDAV(performer), null, null);
-            httpService.registerServlet("/servlet/dav/.well-known/caldav", new WellKnownServlet("/caldav", Interface.CALDAV), null, null);
-            httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
+            ConfigViewFactory factory = getService(ConfigViewFactory.class);
+            String pathPrefix = factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+
+            httpService.registerServlet(pathPrefix + SERVLET_PATH, new CalDAV(performer), null, null);
+            httpService.registerServlet(pathPrefix + NULL_PATH, new DevNullServlet(), null, null);
+            httpService.registerServlet(pathPrexif + ".well-known/caldav", new WellKnownServlet("/caldav", Interface.CALDAV), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);

@@ -66,6 +66,9 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
@@ -134,21 +137,35 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return Arrays.asList(response);
 	}
 
-	public Element marshalHREF(final WebdavPath uri, boolean trailingSlash) {
-		final Element href = new Element("href", DAV_NS);
-        final StringBuilder builder = new StringBuilder(uriPrefix);
-        if (builder.charAt(builder.length()-1) != '/') {
-			builder.append('/');
-		}
-        for(final String component : uri) {
+    public Element marshalHREF(WebdavPath uri, boolean trailingSlash) {
+        final Element href = new Element("href", DAV_NS);
+        final StringBuilder builder = new StringBuilder("/");
+
+        WebdavPath pathPrefix = new WebdavPath(getPathPrefix());
+        if (pathPrefix.size() > 0) {
+            for (String s : pathPrefix) {
+                builder.append(escape(s)).append("/");
+            }
+            uri = removePathPrefix(uri, pathPrefix);
+        }
+        if (builder.charAt(builder.length() - 1) == '/') {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+
+        builder.append(this.uriPrefix);
+
+        if (builder.charAt(builder.length() - 1) != '/') {
+            builder.append('/');
+        }
+        for (final String component : uri) {
             builder.append(escape(component)).append('/');
         }
         if (!trailingSlash) {
-            builder.setLength(builder.length()-1);
+            builder.setLength(builder.length() - 1);
         }
         href.setText(builder.toString());
-		return href;
-	}
+        return href;
+    }
 
 	private String escape(final String string) {
 		final PropfindResponseUrlEncoder encoder = BehaviourLookup.getInstance().get(PropfindResponseUrlEncoder.class);
@@ -253,6 +270,23 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 			return DAV_NS;
 		}
 		return Namespace.getNamespace(namespace);
+	}
+
+	private WebdavPath removePathPrefix(WebdavPath path, WebdavPath toRemove) {
+	    String sPath = path.toString();
+	    String sToRemove = toRemove.toString();
+	    if (Strings.isNotEmpty(sPath) && Strings.isNotEmpty(sToRemove) && sPath.startsWith(sToRemove)) {
+	        return path.subpath(toRemove.size());
+	    }
+	    return path;
+	}
+	
+	private String getPathPrefix() {
+	    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+	    if (null != service) {
+	        return service.getProperty("com.openexchange.dav.pathPrefix");
+	    }
+	    return "";
 	}
 
 }

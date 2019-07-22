@@ -112,8 +112,10 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register CardDAV servlet & WebDAV path
              */
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(performer), null, null);
-            getService(HttpService.class).registerServlet("/servlet/dav/.well-known/carddav", new WellKnownServlet("/carddav", Interface.CARDDAV), null, null);
+            String pathPrefix = getServletPathPrefix();
+            getService(HttpService.class).registerServlet(pathPrefix + "/carddav", new CardDAV(performer), null, null);
+            getService(HttpService.class).registerServlet(pathprefix + ".well-known/carddav", new WellKnownServlet("/carddav", Interface.CARDDAV), null, null);
+            
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {
@@ -123,7 +125,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register Photo performer for referenced contact images in vCards
              */
-            getService(HttpService.class).registerServlet("/servlet/dav/photos", new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
+            getService(HttpService.class).registerServlet(pathPrefix + "/photos", new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
             /*
              * track optional services
              */
@@ -153,9 +155,14 @@ public class CarddavActivator extends HousekeepingActivator {
          */
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            httpService.unregister("/servlet/dav/carddav");
+            httpService.unregister(getServletPathPrefix() + "/carddav");
         }
         super.stopBundle();
+    }
+
+    private String getServletPathPrefix() throws Exception {
+        ConfigViewFactory factory = getService(ConfigViewFactory.class);
+        return factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
     }
 
 }
