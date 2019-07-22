@@ -53,10 +53,10 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.rmi.RemoteCompositionSpaceService;
 
 /**
@@ -92,7 +92,9 @@ public class DeleteOrphanedReferencesTool extends AbstractRmiCLI<Void> {
 
     @Override
     protected void addOptions(Options options) {
-        options.addOption(createArgumentOption("f", "filestores", "filestores", "Accepts a comma-separated value of one or more file storage identifiers", true));
+        Option filestoresOption = createArgumentOption("f", "filestores", "filestores", "Accepts one or more file storage identifiers", true);
+        filestoresOption.setArgs(Option.UNLIMITED_VALUES);
+        options.addOption(filestoresOption);
     }
 
     @Override
@@ -101,15 +103,14 @@ public class DeleteOrphanedReferencesTool extends AbstractRmiCLI<Void> {
 
         List<Integer> fileStorageIds;
         {
-            String ids = cmd.getOptionValue("filestores");
-            String[] arr = Strings.splitByComma(ids);
-            if (arr.length <= 0) {
+            String[] values = cmd.getOptionValues("f");
+            if (values == null || values.length <= 0) {
                 System.err.println("Missing file storage identifiers");
                 printHelp();
                 System.exit(-1);
             }
-            fileStorageIds = new ArrayList<Integer>(arr.length);
-            for (String id : arr) {
+            fileStorageIds = new ArrayList<Integer>(values.length);
+            for (String id : values) {
                 try {
                     fileStorageIds.add(Integer.valueOf(id));
                 } catch (NumberFormatException e) {
