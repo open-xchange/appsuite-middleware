@@ -84,7 +84,7 @@ public final class CollectionCharsetProvider extends CharsetProvider {
     public CollectionCharsetProvider() {
         super();
         providerList = new ConcurrentHashMap<Class<? extends CharsetProvider>, CharsetProvider>(3);
-        charsetMapReference = new AtomicReference<Map<String, Charset>>(Collections.emptyMap());
+        charsetMapReference = new AtomicReference<Map<String, Charset>>(Collections.<String, Charset> emptyMap());
         gathered = new AtomicBoolean(false);
     }
 
