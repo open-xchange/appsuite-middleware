@@ -50,6 +50,8 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.removeInvalid;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
@@ -57,11 +59,16 @@ import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
@@ -109,6 +116,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
          * perform search & filter the results based on user's access permissions
          */
         List<Event> changeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        changeExceptions = removeInvalidChangeExceptions(seriesId, changeExceptions);
         if (null == changeExceptions || 0 == changeExceptions.size()) {
             return Collections.emptyList();
         }
@@ -120,6 +128,31 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
             }
         }
         return postProcessor().process(changeExceptions, folder).getEvents();
+    }
+
+    private List<Event> removeInvalidChangeExceptions(String seriesId, List<Event> changeExceptions) {
+        if (null == changeExceptions || changeExceptions.isEmpty()) {
+            return changeExceptions;
+        }
+        try {
+            EventField[] fields = new EventField[] { EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.RECURRENCE_DATES };
+            Event seriesMaster = storage.getEventStorage().loadEvent(seriesId, fields);
+            if (null == seriesMaster) {
+                return changeExceptions;
+            }
+            RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster);
+            SortedSet<RecurrenceId> validIds = removeInvalid(getRecurrenceIds(changeExceptions), recurrenceData, session.getRecurrenceService());
+            for (Iterator<Event> iterator = changeExceptions.iterator(); iterator.hasNext();) {
+                Event changeException = iterator.next();
+                if (false == validIds.contains(changeException.getRecurrenceId())) {
+                    session.addWarning(CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(changeException.getRecurrenceId(), recurrenceData));
+                    iterator.remove();
+                }
+            }
+        } catch (OXException e) {
+            session.addWarning(CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, "Error checking change exception validity"));
+        }
+        return changeExceptions;
     }
 
 }

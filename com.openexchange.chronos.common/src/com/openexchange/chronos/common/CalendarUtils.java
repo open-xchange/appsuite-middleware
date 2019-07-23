@@ -1197,6 +1197,56 @@ public class CalendarUtils {
     }
 
     /**
+     * Filters out those recurrence identifiers that are not produced by the recurrence set generated from the supplied recurrence data.
+     * 
+     * @param recurrenceIds The recurrence identifiers to filter the invalid ones
+     * @param recurrenceData The recurrence data to check against
+     * @param recurrenceService A reference to the recurrence service
+     * @return A new sorted set of recurrence identifiers that exist in the recurrence set, or an empty set if none were valid
+     */
+    public static SortedSet<RecurrenceId> removeInvalid(SortedSet<RecurrenceId> recurrenceIds, RecurrenceData recurrenceData, RecurrenceService recurrenceService) {
+        SortedSet<RecurrenceId> validRecurrenceIds = new TreeSet<RecurrenceId>();
+        if (null == recurrenceIds || recurrenceIds.isEmpty()) {
+            return validRecurrenceIds;
+        }
+        /*
+         * initialize recurrence iterator
+         */
+        RecurrenceIterator<RecurrenceId> iterator;
+        try {
+            iterator = recurrenceService.iterateRecurrenceIds(recurrenceData);
+        } catch (OXException e) {
+            getLogger(CalendarUtils.class).info("Error getting iterator for \"{}\", assuming all recurrence ids as invalid.", recurrenceData, e);
+            return validRecurrenceIds;
+        }
+        if (false == iterator.hasNext()) {
+            return validRecurrenceIds;
+        }
+        TimeZone timeZone = recurrenceData.getSeriesStart().getTimeZone();
+        RecurrenceId validRecurrenceId = iterator.next();
+        /*
+         * check each recurrence identifier, forwarding the iterator as needed
+         */
+        for (RecurrenceId recurrenceId : recurrenceIds) {
+            int comparison = validRecurrenceId.compareTo(recurrenceId, timeZone);
+            while (0 > comparison && iterator.hasNext()) {
+                /*
+                 * forward until this recurrence identifier is reached or passed, remembering the last compare result
+                 */
+                validRecurrenceId = iterator.next();
+                comparison = validRecurrenceId.compareTo(recurrenceId, timeZone);
+            }
+            /*
+             * consider as valid if recurrence identifiers match
+             */
+            if (0 == comparison) {
+                validRecurrenceIds.add(recurrenceId);
+            }
+        }
+        return validRecurrenceIds;
+    }
+
+    /**
      * Filters a list of attendees based on their calendaruser type, and whether they represent "internal" attendees or not.
      *
      * @param attendees The attendees to filter
