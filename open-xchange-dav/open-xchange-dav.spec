@@ -21,7 +21,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:       @OXVERSION@
-%define        ox_release 59
+%define        ox_release 60
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -96,6 +96,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue Jul 23 2019 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2019-07-29 (5339)
 * Tue Jun 11 2019 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2019-06-11 (5275)
 * Mon May 13 2019 Steffen Templin <marcus.klein@open-xchange.com>
