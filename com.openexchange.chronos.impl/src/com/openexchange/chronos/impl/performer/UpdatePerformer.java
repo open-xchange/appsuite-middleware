@@ -207,7 +207,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * reload the (now splitted) series event & apply the update, taking over a new recurrence rule as needed
              */
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
-            updatedEventData = applyRecurrenceRuleAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData);
+            updatedEventData = adjustSeriesAfterSplit(originalSeriesMaster, updatedMasterEvent, updatedEventData);
             updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
         } else if (contains(originalSeriesMaster.getChangeExceptionDates(), recurrenceId)) {
             /*
@@ -567,15 +567,31 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Selects the recurrence rule to use for the event update after a split has been performed on a recurring event series. This may be
-     * necessary when the rule's <code>COUNT</code> attribute was modified during the split operation.
+     * Adjusts the intermediate updated data of the series master event after a series split has been performed. 
+     * <p/> 
+     * This includes the selection of an appropriate recurrence rule, which may be necessary when the rule's <code>COUNT</code> attribute 
+     * was modified during the split operation.
+     * <p/>
+     * Also, the sequence number is forcibly incremented unless not already done before.
      *
      * @param originalSeriesMaster The original series master event (before the split)
      * @param updatedSeriesMaster The updated series master event (after the split)
      * @param clientUpdate The updated event data as passed by the client
      * @return The (possibly modified) updated event data to take over
      */
-    private static Event applyRecurrenceRuleAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
+    private static Event adjustSeriesAfterSplit(Event originalSeriesMaster, Event updatedSeriesMaster, Event clientUpdate) throws OXException {
+        /*
+         * ensure the sequence number is incremented
+         */
+        if (originalSeriesMaster.getSequence() >= updatedSeriesMaster.getSequence() && 
+            (false == clientUpdate.containsSequence() || originalSeriesMaster.getSequence() >= clientUpdate.getSequence())) {
+            clientUpdate = EventMapper.getInstance().copy(clientUpdate, null, (EventField[]) null);
+            clientUpdate.setSequence(updatedSeriesMaster.getSequence() + 1);
+            clientUpdate = new UnmodifiableEvent(clientUpdate);
+        }
+        /*
+         * adjust recurrence rule as needed
+         */        
         Mapping<? extends Object, Event> rruleMapping = EventMapper.getInstance().get(EventField.RECURRENCE_RULE);
         if (false == rruleMapping.isSet(clientUpdate) || rruleMapping.equals(updatedSeriesMaster, clientUpdate)) {
             /*
