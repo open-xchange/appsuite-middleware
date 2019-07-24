@@ -183,7 +183,7 @@ public class ITipChange {
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
             int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
             if (position > 0) {
-                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), CalendarUtils.asDate(newEvent.getEndDate()));
+                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), null);
                 while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
                     Event event = recurrenceIterator.next();
                     if (position == recurrenceIterator.getPosition()) {
