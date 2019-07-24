@@ -298,9 +298,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * recursively perform pending deletions of change exceptions if required, checking permissions as needed
          */
-        for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
-            requireDeletePermissions(removedException);
-            delete(removedException);
+        if (0 < eventUpdate.getExceptionUpdates().getRemovedItems().size()) {
+            requireWritePermissions(originalEvent, assumeExternalOrganizerUpdate);
+            for (Event removedException : eventUpdate.getExceptionUpdates().getRemovedItems()) {
+                delete(removedException);
+            }
         }
         /*
          * update event data in storage, checking permissions as required

@@ -55,6 +55,7 @@ import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
 import static com.openexchange.chronos.common.CalendarUtils.combine;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
@@ -241,8 +242,7 @@ public class EventUpdateProcessor implements EventUpdate {
 
     /**
      * Adjusts any change- and delete exceptions of a recurring event along with the update of the series master, in case the original
-     * event represents no <i>attendee scheduling resource</i>.
-     * 
+     * event is not organized externally.
      * <p/>
      * In particular, the following changes are applied for the changed event and -exceptions:
      * <ul>
@@ -260,7 +260,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @return The resulting list of (possibly adjusted) change exceptions
      */
     private List<Event> adjustExceptions(Event originalEvent, Event changedEvent, List<Event> originalChangeExceptions) throws OXException {
-        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity())) {
+        if (hasExternalOrganizer(originalEvent)) {
             return originalChangeExceptions;
         }
         if (false == isSeriesMaster(originalEvent)) {
