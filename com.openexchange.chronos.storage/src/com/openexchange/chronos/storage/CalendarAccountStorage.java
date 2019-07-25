@@ -75,14 +75,19 @@ public interface CalendarAccountStorage {
 
     /**
      * Inserts a new calendar account.
+     * <p/>
+     * If the account was not inserted due to an already existing account with the same identifier for the user, this is indicated via
+     * {@link CalendarExceptionCodes#ACCOUNT_NOT_WRITTEN}.
      *
      * @param account The account data to insert
      */
     void insertAccount(CalendarAccount account) throws OXException;
 
     /**
-     * Inserts a new calendar account, obeying the maximum number of allowed accounts for this provider and user. If the account was not
-     * inserted, this is indicated via {@link CalendarExceptionCodes#ACCOUNT_NOT_WRITTEN}.
+     * Inserts a new calendar account, obeying the maximum number of allowed accounts for this provider and user.
+     * <p/>
+     * If the account was not inserted, either due to the maximum number of accounts being exceeded, or due to an already existing account
+     * with the same identifier for the user, this is indicated via {@link CalendarExceptionCodes#ACCOUNT_NOT_WRITTEN}.
      *
      * @param account The account data to insert
      * @param maxAccounts The maximum number of accounts allowed for this provider and user
