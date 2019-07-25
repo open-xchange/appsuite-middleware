@@ -71,15 +71,15 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 
 /**
- * {@link ChangeExceptions}
+ * {@link ChangeExceptionsTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
 @RunWith(Parameterized.class)
-public class ChangeExceptions extends AbstractSingleTimeZoneTest {
+public class ChangeExceptionsTest extends AbstractSingleTimeZoneTest {
 
-    public ChangeExceptions(String timeZone) {
+    public ChangeExceptionsTest(String timeZone) {
         super(timeZone);
     }
 
@@ -95,9 +95,9 @@ public class ChangeExceptions extends AbstractSingleTimeZoneTest {
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         setStartAndEndDates(master, "01.10.2008 14:45:00", "01.10.2008 15:45:00", false, tz);
-        SortedSet<RecurrenceId> changeExceptionDates = new TreeSet<RecurrenceId>();
-        changeExceptionDates.add(new DefaultRecurrenceId(DT("03.10.2008 14:45:00", tz, false)));
-        master.setDeleteExceptionDates(changeExceptionDates);
+        SortedSet<RecurrenceId> deleteExceptionDates = new TreeSet<RecurrenceId>();
+        deleteExceptionDates.add(new DefaultRecurrenceId(DT("03.10.2008 14:45:00", tz, false)));
+        master.setDeleteExceptionDates(deleteExceptionDates);
 
         Event change = getInstance(master, D("03.10.2008 14:45:00", tz), D("03.10.2008 18:45:00", tz), D("03.10.2008 19:45:00", tz));
         List<Event> changeExceptions = new ArrayList<Event>();

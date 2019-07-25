@@ -69,15 +69,15 @@ import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.time.TimeTools;
 
 /**
- * {@link DeleteExceptions}
+ * {@link DeleteExceptionsTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
 @RunWith(Parameterized.class)
-public class DeleteExceptions extends AbstractSingleTimeZoneTest {
+public class DeleteExceptionsTest extends AbstractSingleTimeZoneTest {
 
-    public DeleteExceptions(String timeZone) {
+    public DeleteExceptionsTest(String timeZone) {
         super(timeZone);
     }
 
