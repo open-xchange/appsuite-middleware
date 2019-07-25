@@ -52,6 +52,7 @@ package com.openexchange.dav.caldav.bugs;
 import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
@@ -69,7 +70,7 @@ public class Bug44304Test extends CalDAVTest {
         DeleteMethod delete = null;
         try {
             String href = "/caldav/schedule-inbox/BD9B8F1B-78ED-4768-BE8C-3AB687AC2A90.ics";
-            delete = new DeleteMethod(getBaseUri() + href);
+            delete = new DeleteMethod(getBaseUri() + Config.getPathPrefix() + href);
             Assert.assertEquals("response code wrong", 204, getWebDAVClient().executeMethod(delete));
         } finally {
             release(delete);

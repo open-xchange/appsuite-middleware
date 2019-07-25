@@ -58,6 +58,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.Headers;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -101,7 +102,7 @@ public class Bug58220Test extends CardDAVTest {
         /*
          * create vCard resource on server
          */
-        String href = "/carddav/" + collection + "/" + uid + ".vcf";
+        String href = Config.getPathPrefix() + "/carddav/" + collection + "/" + uid + ".vcf";
         PutMethod put = null;
         try {
             put = new PutMethod(getBaseUri() + href);

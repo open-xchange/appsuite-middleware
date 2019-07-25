@@ -66,6 +66,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
@@ -185,7 +186,7 @@ public class Bug44309Test extends CalDAVTest {
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.CALENDAR_DATA);
         ReportInfo reportInfo = new CalendarMultiGetReportInfo(new String[] { iCalResource.getHref() }, props);
-        MultiStatusResponse[] responses = getWebDAVClient().doReport(reportInfo, getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/");
+        MultiStatusResponse[] responses = getWebDAVClient().doReport(reportInfo, getBaseUri() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + "/");
         assertNotNull(responses);
         assertEquals(1, responses.length);
         MultiStatusResponse response = responses[0];

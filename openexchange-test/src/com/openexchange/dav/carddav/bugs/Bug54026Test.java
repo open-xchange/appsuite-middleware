@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 import com.openexchange.ajax.user.actions.GetRequest;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -102,7 +103,7 @@ public class Bug54026Test extends CardDAVTest {
         /*
          * get vcard resource
          */
-        String href = "/carddav/" + gabCollection + "/" + contact.getUid() + ".vcf";
+        String href = Config.getPathPrefix() + "/carddav/" + gabCollection + "/" + contact.getUid() + ".vcf";
         VCardResource card = getVCardResource(href);
         assertNotNull(card);
         /*
@@ -121,7 +122,7 @@ public class Bug54026Test extends CardDAVTest {
          * verify updated contact on client
          */
 
-        Map<String, String> eTags = syncCollection(syncToken, "/carddav/" + gabCollection + "/").getETagsStatusOK();
+        Map<String, String> eTags = syncCollection(syncToken, Config.getPathPrefix() + "/carddav/" + gabCollection + "/").getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = addressbookMultiget(gabCollection, eTags.keySet());
         card = assertContains(contact.getUid(), addressData);

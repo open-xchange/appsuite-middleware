@@ -282,11 +282,16 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 	
 	private String getPathPrefix() {
+	    String prefix ="";
 	    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
 	    if (null != service) {
-	        return service.getProperty("com.openexchange.dav.pathPrefix");
+	        prefix = service.getProperty("com.openexchange.dav.pathPrefix");
 	    }
-	    return "";
+	    if (Strings.isEmpty(prefix)) {
+	        org.slf4j.LoggerFactory.getLogger(PropertiesMarshaller.class).debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.");
+	        prefix = "/servlet/dav";
+	    }
+	    return prefix;
 	}
 
 }

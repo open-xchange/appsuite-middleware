@@ -68,7 +68,7 @@ public final class Config {
     }
 
     public static String getBaseUri() throws OXException {
-        return getProtocol() + "://" + getHostname() + getPathPrefix();
+        return getProtocol() + "://" + getHostname();
     }
 
     public static String getHostname() throws OXException {

@@ -65,7 +65,6 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVServlet;
-import com.openexchange.dav.Tools;
 import com.openexchange.dav.push.DAVPushEventHandler;
 import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.dav.push.apn.DAVApnOptionsProvider;
@@ -121,7 +120,12 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
             ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
             String pathPrefix = "";
             if (null != configViewFactory) {
-                pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+                try {
+                    pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+                } catch (OXException e) {
+                    org.slf4j.LoggerFactory.getLogger(DAVPushActivator.class).debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
+                    pathPrefix = "/servlet/dav";
+                }
             }
             getService(HttpService.class).registerServlet(pathPrefix + "/subscribe", new DAVServlet(performer, Interface.CALDAV), null, null);
             /*

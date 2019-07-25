@@ -99,7 +99,7 @@ public class ScheduleDefaultCalendarURL extends SingleXMLPropertyMixin {
             if (null != defaultFolder) {
                 value = Tools.encodeFolderId(defaultFolder.getID());
             }
-            return null == value ? null : "<D:href>" + factory.getConfigValue("com.openexchange.dav.pathPrefix", "") + "/caldav/" + value + "/</D:href>";
+            return null == value ? null : "<D:href>" + com.openexchange.dav.Tools.getPathPrefix() + "/caldav/" + value + "/</D:href>";
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(ScheduleDefaultCalendarURL.class).warn("Error determining 'schedule-default-calendar-URL'", e);
             return null;

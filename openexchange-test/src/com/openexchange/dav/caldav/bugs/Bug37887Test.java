@@ -61,6 +61,7 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -105,7 +106,7 @@ public class Bug37887Test extends CalDAVTest {
          */
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CALENDAR_COLOR);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/caldav/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);
@@ -115,7 +116,8 @@ public class Bug37887Test extends CalDAVTest {
          */
         Boolean found = null;
         for (MultiStatusResponse response : responses) {
-            if ("/caldav/".equals(response.getHref()) || "/caldav/schedule-inbox/".equals(response.getHref()) || "/caldav/schedule-outbox/".equals(response.getHref())) {
+            if ((Config.getPathPrefix() + "/caldav/").equals(response.getHref()) || (Config.getPathPrefix() + "/caldav/schedule-inbox/").equals(response.getHref()) ||
+                (Config.getPathPrefix() + "/caldav/schedule-outbox/").equals(response.getHref())) {
                 continue;
             }
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.CALENDAR_COLOR)) {

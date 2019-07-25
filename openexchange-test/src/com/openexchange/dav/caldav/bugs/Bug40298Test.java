@@ -56,6 +56,7 @@ import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.caldav.CalDAVTest;
 
@@ -80,7 +81,7 @@ public class Bug40298Test extends CalDAVTest {
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SUPPORTED_CALENDAR_COMPONENT_SET);
         props.add(PropertyNames.GETCTAG);
-        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/caldav/" + encodeFolderID(getDefaultFolderID()), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+        PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         MultiStatusResponse response = assertSingleResponse(responses);

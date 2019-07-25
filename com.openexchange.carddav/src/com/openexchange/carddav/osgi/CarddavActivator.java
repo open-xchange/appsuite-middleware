@@ -50,6 +50,7 @@
 package com.openexchange.carddav.osgi;
 
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoPerformer;
@@ -62,6 +63,7 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.dav.WellKnownServlet;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -80,6 +82,8 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CarddavActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CarddavActivator.class);
 
     private OSGiPropertyMixin mixin;
 
@@ -101,7 +105,7 @@ public class CarddavActivator extends HousekeepingActivator {
     @Override
     protected synchronized void startBundle() throws Exception {
         try {
-            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("starting bundle: \"com.openexchange.carddav\"");
+            LOG.info("starting bundle: \"com.openexchange.carddav\"");
             /*
              * prepare CardDAV performer & initialize global OSGi property mixin
              */
@@ -140,7 +144,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("stopping bundle: \"com.openexchange.carddav\"");
+        LOG.info("stopping bundle: \"com.openexchange.carddav\"");
         /*
          * close OSGi property mixin
          */
@@ -159,9 +163,15 @@ public class CarddavActivator extends HousekeepingActivator {
         super.stopBundle();
     }
 
-    private String getServletPathPrefix() throws Exception {
+    private String getServletPathPrefix() {
         ConfigViewFactory factory = getService(ConfigViewFactory.class);
-        return factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+        try {
+            return factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+        } catch (OXException e) {
+            LOG.debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
+            return "/servlet/dav";
+            
+        }
     }
 
 }

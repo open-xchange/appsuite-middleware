@@ -53,6 +53,7 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -74,7 +75,7 @@ public class Bug63360Test extends CalDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         PropFindMethod propFind = null;
         try {
-            propFind = new PropFindMethod(getBaseUri(), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+            propFind = new PropFindMethod(getBaseUri() + Config.getPathPrefix(), DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
             propFind.addRequestHeader("If-None-Match", "JoplinIgnore-42130");
             getWebDAVClient().doPropFind(propFind, StatusCodes.SC_MULTISTATUS);
         } finally {

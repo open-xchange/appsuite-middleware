@@ -61,6 +61,7 @@ import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.principals.PrincipalPerformer;
 import com.openexchange.dav.root.RootPerformer;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.login.Interface;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -90,7 +91,12 @@ public class DAVActivator extends HousekeepingActivator {
         ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         String pathPrefix = "";
         if (null != configViewFactory) {
-            pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+            try {
+                pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(DAVActivator.class).debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
+                pathPrefix = "/servlet/dav";
+            }
         }
         HttpService httpService = getService(HttpService.class);
         /*

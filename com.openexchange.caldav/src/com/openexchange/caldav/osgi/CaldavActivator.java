@@ -133,8 +133,14 @@ public class CaldavActivator extends HousekeepingActivator {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
 
+            String pathPrefix;
             ConfigViewFactory factory = getService(ConfigViewFactory.class);
-            String pathPrefix = factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+            try {
+                pathPrefix = factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
+            } catch (OXException e) {
+                LOG.debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
+                pathPrefix = "/servlet/dav";
+            }
 
             httpService.registerServlet(pathPrefix + SERVLET_PATH, new CalDAV(performer), null, null);
             httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(pathPrefix + "/caldav", Interface.CALDAV), null, null);

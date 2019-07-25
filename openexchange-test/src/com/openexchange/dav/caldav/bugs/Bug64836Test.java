@@ -63,6 +63,7 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -122,7 +123,7 @@ public class Bug64836Test extends CalDAVTest {
         String response = null;
         ReportMethod report = null;
         try {
-            report = new ReportMethod(getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + '/', reportInfo) {
+            report = new ReportMethod(getBaseUri() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + '/', reportInfo) {
 
                 @Override
                 protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
@@ -198,7 +199,7 @@ public class Bug64836Test extends CalDAVTest {
         String response = null;
         ReportMethod report = null;
         try {
-            report = new ReportMethod(getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + '/', reportInfo) {
+            report = new ReportMethod(getBaseUri() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + '/', reportInfo) {
 
                 @Override
                 protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {
@@ -275,7 +276,7 @@ public class Bug64836Test extends CalDAVTest {
         String response = null;
         ReportMethod report = null;
         try {
-            report = new ReportMethod(getBaseUri() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + '/', reportInfo) {
+            report = new ReportMethod(getBaseUri() + Config.getPathPrefix() + "/caldav/" + encodeFolderID(getDefaultFolderID()) + '/', reportInfo) {
 
                 @Override
                 protected void processResponseBody(HttpState httpState, HttpConnection httpConnection) {

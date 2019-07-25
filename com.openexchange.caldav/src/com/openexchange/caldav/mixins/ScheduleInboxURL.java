@@ -50,6 +50,7 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.dav.Tools;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -73,7 +74,7 @@ public class ScheduleInboxURL extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>/caldav/" + SCHEDULE_INBOX + "</D:href>";
+        return "<D:href>" + Tools.getPathPrefix() + "/caldav/" + SCHEDULE_INBOX + "</D:href>";
     }
 
 }

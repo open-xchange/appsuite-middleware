@@ -59,6 +59,7 @@ import org.apache.jackrabbit.webdav.security.Principal;
 import org.apache.jackrabbit.webdav.security.Privilege;
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.dav.Config;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.UserAgents;
@@ -86,18 +87,18 @@ public class Bug61998Test extends CalDAVTest {
          * create calendar folder on server
          */
         FolderObject folder = createFolder(randomUID());
-        String href = "/caldav/" + encodeFolderID(String.valueOf(folder.getObjectID()));
+        String href = Config.getPathPrefix() + "/caldav/" + encodeFolderID(String.valueOf(folder.getObjectID()));
         /*
          * prepare ace grant for user 1 and user 2
          */
-        Principal principal1 = Principal.getHrefPrincipal("/principals/users/" + getClient().getValues().getUserId());
+        Principal principal1 = Principal.getHrefPrincipal(Config.getPathPrefix() + "/principals/users/" + getClient().getValues().getUserId());
         Privilege[] privileges1 = { 
             Privilege.PRIVILEGE_BIND, Privilege.PRIVILEGE_READ, Privilege.PRIVILEGE_READ_ACL, 
             Privilege.PRIVILEGE_READ_CURRENT_USER_PRIVILEGE_SET,  Privilege.PRIVILEGE_UNBIND, Privilege.PRIVILEGE_WRITE, 
             Privilege.PRIVILEGE_WRITE_ACL, Privilege.PRIVILEGE_WRITE_CONTENT, Privilege.PRIVILEGE_WRITE_PROPERTIES
         };
         Ace grantAce1 = AclProperty.createGrantAce(principal1, privileges1, false, false, null);
-        Principal principal2 = Principal.getHrefPrincipal("/principals/users/" + getClient2().getValues().getUserId());
+        Principal principal2 = Principal.getHrefPrincipal(Config.getPathPrefix() + "/principals/users/" + getClient2().getValues().getUserId());
         Privilege[] privileges2 = { Privilege.PRIVILEGE_READ };
         Ace grantAce2 = AclProperty.createGrantAce(principal2, privileges2, false, false, null);
         /*

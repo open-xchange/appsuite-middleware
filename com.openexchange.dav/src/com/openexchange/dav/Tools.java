@@ -135,10 +135,16 @@ public class Tools {
     public static String getPathPrefix() {
         String prefix = "";
         try {
-            ConfigurationService service = Services.getService(ConfigurationService.class);
-            prefix = service.getProperty("com.openexchange.dav.pathPrefix");
+            ConfigurationService configService = Services.getService(ConfigurationService.class);
+            if (null != configService) {
+                prefix = configService.getProperty("com.openexchange.dav.pathPrefix");
+            }
         } catch (OXException e) {
-            LOG.warn("No value for \"com.openexchange.dav.pathPrefix\" configured.");
+            LOG.warn("ConfigurationService is not available.");
+        }
+        if (Strings.isEmpty(prefix)) {
+            LOG.debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.");
+            prefix = "/servlet/dav";
         }
         return prefix;
     }

@@ -82,4 +82,14 @@ properties:
       file: carddav.properties
       packageName: open-xchange-dav
       tags: ["CardDAV", "Folder"]
+    - key: com.openexchange.dav.pathPrefix
+      description: Prefix to use when registering *DAV servlets
+      defaultValue: /servlet/dav
+      version: 7.10.3
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: dav.properties
+      packageName: open-xchange-dav
+      tags: ["CalDAV", "CardDAV"]
       
