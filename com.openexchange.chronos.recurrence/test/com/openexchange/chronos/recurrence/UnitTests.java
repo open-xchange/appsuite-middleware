@@ -67,8 +67,10 @@ import org.junit.runners.Suite.SuiteClasses;
     DSTShiftTest.class,
     HourlyTest.class,
     MultipleTimeZonesHourly.class,
-    DeleteExceptions.class,
-    ChangeExceptions.class,
+    DeleteExceptionsTest.class,
+    ChangeExceptionsTest.class,
+    RecurrenceIteratorTest.class,
+    RecurrenceIdIteratorTest.class,
     com.openexchange.chronos.recurrence.compat.RecurrenceTests.class,
     com.openexchange.chronos.recurrence.compat.RecurrencePositionTest.class
 })
