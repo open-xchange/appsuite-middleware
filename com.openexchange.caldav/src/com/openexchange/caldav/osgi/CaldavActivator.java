@@ -70,6 +70,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.dav.WellKnownServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
@@ -82,6 +83,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -132,6 +134,7 @@ public class CaldavActivator extends HousekeepingActivator {
             final HttpService httpService = getService(HttpService.class);
 
             httpService.registerServlet(SERVLET_PATH, new CalDAV(performer), null, null);
+            httpService.registerServlet("/servlet/dav/.well-known/caldav", new WellKnownServlet("/caldav", Interface.CALDAV), null, null);
             httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);

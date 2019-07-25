@@ -61,6 +61,7 @@ import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.dav.DAVServlet;
+import com.openexchange.dav.WellKnownServlet;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -112,6 +113,7 @@ public class CarddavActivator extends HousekeepingActivator {
              * register CardDAV servlet & WebDAV path
              */
             getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(performer), null, null);
+            getService(HttpService.class).registerServlet("/servlet/dav/.well-known/carddav", new WellKnownServlet("/carddav", Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {
