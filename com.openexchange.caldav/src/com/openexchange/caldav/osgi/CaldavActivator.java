@@ -137,6 +137,7 @@ public class CaldavActivator extends HousekeepingActivator {
             String pathPrefix = factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
 
             httpService.registerServlet(pathPrefix + SERVLET_PATH, new CalDAV(performer), null, null);
+            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(pathPrefix + "/caldav", Interface.CALDAV), null, null);
             httpService.registerServlet(pathPrefix + NULL_PATH, new DevNullServlet(), null, null);
             httpService.registerServlet(pathPrexif + ".well-known/caldav", new WellKnownServlet("/caldav", Interface.CALDAV), null, null);
 

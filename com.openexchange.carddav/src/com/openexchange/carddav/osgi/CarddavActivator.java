@@ -114,8 +114,7 @@ public class CarddavActivator extends HousekeepingActivator {
              */
             String pathPrefix = getServletPathPrefix();
             getService(HttpService.class).registerServlet(pathPrefix + "/carddav", new CardDAV(performer), null, null);
-            getService(HttpService.class).registerServlet(pathprefix + ".well-known/carddav", new WellKnownServlet("/carddav", Interface.CARDDAV), null, null);
-            
+            getService(HttpService.class).registerServlet(pathprefix + ".well-known/carddav", new WellKnownServlet(pathPrefix + "/carddav", Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {
