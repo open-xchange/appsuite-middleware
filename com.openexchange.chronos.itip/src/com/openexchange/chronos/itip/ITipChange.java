@@ -179,16 +179,9 @@ public class ITipChange {
             RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
             Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
-            int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
-            if (position > 0) {
-                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), null);
-                while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
-                    Event event = recurrenceIterator.next();
-                    if (position == recurrenceIterator.getPosition()) {
-                        diff = new ITipEventUpdate(event, newEvent, true, AbstractITipAnalyzer.SKIP);
-                        return;
-                    }
-                }
+            Event occurrence = CalendarUtils.getOccurrence(recurrenceService, master, newEvent.getRecurrenceId());
+            if(null != occurrence) {
+                diff = new ITipEventUpdate(occurrence, newEvent, true, AbstractITipAnalyzer.SKIP);
             }
         }
     }
