@@ -58,8 +58,9 @@ import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.injectRecurrenceData;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -70,12 +71,15 @@ import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
@@ -124,10 +128,9 @@ public class SplitPerformer extends AbstractUpdatePerformer {
      * @param splitPoint The (minimum inclusive) date or date-time where the split is to occur
      * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
      * @param clientTimestamp The client timestamp to catch concurrent modifications
-     * @param generateUpdateMessages <code>true</code> to generate update messages for the attendees, <code>false</code> otherwise
      * @return The split result
      */
-    public InternalCalendarResult perform(String objectId, DateTime splitPoint, String uid, long clientTimestamp, boolean generateUpdateMessages) throws OXException {
+    public InternalCalendarResult perform(String objectId, DateTime splitPoint, String uid, long clientTimestamp) throws OXException {
         /*
          * load original event data & check permissions
          */
@@ -137,8 +140,31 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         }
         Check.eventIsInFolder(originalEvent, folder);
         requireWritePermissions(originalEvent);
-        Map<Integer, List<Alarm>> originalAlarmsByUserId = storage.getAlarmStorage().loadAlarms(originalEvent);
-        List<Event> originalChangeExceptions = loadExceptionData(originalEvent);
+        /*
+         * perform the split, track scheduling messages & return result
+         */
+        Entry<CalendarObjectResource, CalendarObjectResource> splitResult = split(originalEvent, splitPoint, uid);
+        if (null != splitResult.getKey()) {
+            schedulingHelper.trackCreation(splitResult.getKey());
+        }
+        DefaultEventUpdate eventUpdate = new DefaultEventUpdate(originalEvent, splitResult.getValue().getSeriesMaster());
+        schedulingHelper.trackUpdate(splitResult.getValue(), eventUpdate);
+        return resultTracker.getResult();
+    }
+    
+    /**
+     * Performs the split operation.
+     * <p/>
+     * Any event creations and updates are tracked accordingly in the underlying result tracker, but no
+     * scheduling messages or notifications are prepared yet.
+     *
+     * @param originalEvent The original series master event to split
+     * @param splitPoint The (minimum inclusive) date or date-time where the split is to occur
+     * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
+     * @return A map entry, where the key holds the (newly created) <i>detached</i> resource prior the split point (or <code>null</code>
+     *         if no split took place), and the value the updated resource after it
+     */
+    Entry<CalendarObjectResource, CalendarObjectResource> split(Event originalEvent, DateTime splitPoint, String uid) throws OXException {
         /*
          * check the supplied split point for validity & derive next recurrence
          */
@@ -153,8 +179,10 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         }
         RecurrenceId nextRecurrenceId = iterator.next();
         /*
-         * prepare common related-to value to link the splitted series
+         * load further data of original series & prepare common related-to value to link the splitted series
          */
+        Map<Integer, List<Alarm>> originalAlarmsByUserId = storage.getAlarmStorage().loadAlarms(originalEvent);
+        List<Event> originalChangeExceptions = loadExceptionData(originalEvent);
         RelatedTo relatedTo = new RelatedTo("X-CALENDARSERVER-RECURRENCE-SET", UUID.randomUUID().toString());
         /*
          * prepare a new series event representing the 'detached' part prior to the split time, based on the original series master
@@ -209,7 +237,8 @@ public class SplitPerformer extends AbstractUpdatePerformer {
             /*
              * no occurrences in 'detached' series, so no split is needed
              */
-            return resultTracker.getResult();
+            CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(originalEvent, originalChangeExceptions);
+            return new AbstractMap.SimpleEntry<CalendarObjectResource, CalendarObjectResource>(null, updatedResource);
         }
         /*
          * adjust recurrence rule, start- and end-date for the updated event series to begin on or after the split point
@@ -229,7 +258,8 @@ public class SplitPerformer extends AbstractUpdatePerformer {
             /*
              * no occurrences in updated series, so no split is needed
              */
-            return resultTracker.getResult();
+            CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(originalEvent, originalChangeExceptions);
+            return new AbstractMap.SimpleEntry<CalendarObjectResource, CalendarObjectResource>(null, updatedResource);
         }
         /*
          * insert the new detached series event, taking over any auxiliary data from the original series
@@ -242,29 +272,29 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         storage.getAlarmTriggerStorage().insertTriggers(detachedSeriesMaster, newAlarmsByUserId);
         detachedSeriesMaster = loadEventData(detachedSeriesMaster.getId());
         resultTracker.trackCreation(detachedSeriesMaster);
-        List<Event> createdSeries = new LinkedList<>();
-        createdSeries.add(detachedSeriesMaster);
         /*
          * assign existing change exceptions to new detached event series, if prior split time
          */
+        List<Event> detachedChangeExceptions = new ArrayList<Event>();
         for (Event originalChangeException : originalChangeExceptions) {
             if (0 > compare(originalChangeException.getRecurrenceId().getValue(), splitPoint, timeZone)) {
                 Event exceptionUpdate = EventMapper.getInstance().copy(originalChangeException, null, EventField.ID);
                 EventMapper.getInstance().copy(detachedSeriesMaster, exceptionUpdate, EventField.SERIES_ID, EventField.UID, EventField.FILENAME, EventField.RELATED_TO);
                 Consistency.setModified(session, timestamp, exceptionUpdate, session.getUserId());
                 storage.getEventStorage().updateEvent(exceptionUpdate);
-                createdSeries.add(exceptionUpdate);
-                resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));
+                Event updatedChangeException = loadEventData(originalChangeException.getId());
+                resultTracker.trackUpdate(originalChangeException, updatedChangeException);
+                detachedChangeExceptions.add(updatedChangeException);
             }
         }
-        resultTracker.trackSchedulingRequests(createdSeries);
-        
+        CalendarObjectResource detachedResource = new DefaultCalendarObjectResource(detachedSeriesMaster, detachedChangeExceptions);
         /*
          * update the original event series; also decorate original change exceptions on or after the split with the related-to marker
          */
         storage.getEventStorage().updateEvent(updatedSeriesMaster);
-        Event updatedEventMaster = loadEventData(originalEvent.getId());
-        resultTracker.trackUpdate(originalEvent, updatedEventMaster);
+        updatedSeriesMaster = loadEventData(originalEvent.getId());
+        resultTracker.trackUpdate(originalEvent, updatedSeriesMaster);
+        List<Event> updatedChangeExceptions = new ArrayList<Event>();
         for (Event originalChangeException : originalChangeExceptions) {
             if (0 <= compare(originalChangeException.getRecurrenceId().getValue(), splitPoint, timeZone)) {
                 Event exceptionUpdate = EventMapper.getInstance().copy(originalChangeException, null, EventField.ID);
@@ -276,13 +306,11 @@ public class SplitPerformer extends AbstractUpdatePerformer {
                 storage.getEventStorage().updateEvent(exceptionUpdate);
                 Event updatedChangeException = loadEventData(originalChangeException.getId());
                 resultTracker.trackUpdate(originalChangeException, updatedChangeException);
+                updatedChangeExceptions.add(updatedChangeException);
             }
         }
-        InternalCalendarResult result = resultTracker.getResult();
-        if (generateUpdateMessages) {
-            resultTracker.trackSchedulingUpdateAfterSplit(result.getCalendarEvent().getUpdates());
-        }
-        return result;
+        CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedSeriesMaster, updatedChangeExceptions);
+        return new AbstractMap.SimpleEntry<CalendarObjectResource, CalendarObjectResource>(detachedResource, updatedResource);
     }
 
 }

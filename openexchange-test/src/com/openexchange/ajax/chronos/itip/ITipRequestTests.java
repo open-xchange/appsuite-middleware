@@ -138,13 +138,18 @@ public class ITipRequestTests extends AbstractITipTest {
         List<Attendee> attendees = new LinkedList<>();
 
         attendee = convertToAttendee(testUser, Integer.valueOf(0));
+        attendee.uri("mailto:" + userResponseC1.getData().getEmail1());
+        attendee.email(userResponseC1.getData().getEmail1());
         attendees.add(attendee);
         organizer = convertToAttendee(testUserC2, apiClientC2.getUserId());
+        organizer.uri("mailto:" + userResponseC2.getData().getEmail1());
+        organizer.email(userResponseC2.getData().getEmail1());
         organizer.setPartStat(PartStat.ACCEPTED.toString());
         attendees.add(organizer);
 
         event.setAttendees(attendees);
         CalendarUser c = new CalendarUser();
+        c.uri("mailto:" + userResponseC2.getData().getEmail1());
         c.cn(userResponseC2.getData().getDisplayName());
         c.email(userResponseC2.getData().getEmail1());
         c.entity(Integer.valueOf(userResponseC2.getData().getId()));

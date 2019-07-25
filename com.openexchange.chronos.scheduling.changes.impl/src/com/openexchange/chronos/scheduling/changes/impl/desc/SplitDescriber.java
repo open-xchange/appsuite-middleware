@@ -49,42 +49,57 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
+import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Transp;
-import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.RelatedTo;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
+import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
+import com.openexchange.chronos.service.EventUpdate;
 
 /**
- * {@link TransperencyDescriber}
+ * {@link SplitDescriber}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.3
  */
-public class TransperencyDescriber extends AbstractChangeDescriber<Transp> {
+public class SplitDescriber implements ChangeDescriber {
 
-    /**
-     * Initializes a new {@link TransperencyDescriber}.
-     */
-    public TransperencyDescriber() {
-        super(EventField.TRANSP, Transp.class);
+    @Override
+    @NonNull
+    public EventField[] getFields() {
+        return new EventField[] { EventField.RELATED_TO };
     }
 
     @Override
-    public List<SentenceImpl> describe(Transp original, Transp updated) {
-        SentenceImpl sentence = new SentenceImpl(Messages.HAS_CHANGED_TRANSPARENCY).add(transpToString(updated), ArgumentType.SHOWN_AS, shown(updated));
-        return Collections.singletonList(sentence);
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+        if (false == indicatesSplit(eventUpdate)) {
+            return null;
+        }
+        DateTime startDate = eventUpdate.getUpdate().getStartDate();
+        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, locale);
+        dateFormat.setTimeZone(startDate.isAllDay() ? TimeZone.getTimeZone("UTC") : timeZone);
+        String beginningDate = dateFormat.format(new Date(startDate.getTimestamp()));
+        SentenceImpl sentence = new SentenceImpl(Messages.HAS_SPLIT).add(beginningDate, ArgumentType.UPDATED);
+        return new DefaultDescription(Collections.singletonList(sentence), Arrays.asList(getFields()));
     }
-
-    private String transpToString(Transp transparency) {
-        return null != transparency && Transp.TRANSPARENT.equals(transparency.getValue()) ? Messages.FREE : Messages.RESERVERD;
-    }
-
-    private ShownAsTransparency shown(Transp transparency) {
-        return null != transparency && Transp.TRANSPARENT.equals(transparency.getValue()) ? ShownAsTransparency.FREE : ShownAsTransparency.RESERVED;
+    
+    private static boolean indicatesSplit(EventUpdate eventUpdate) {
+        RelatedTo originalRelatedTo = eventUpdate.getOriginal().getRelatedTo();
+        RelatedTo updatedRelatedTo = eventUpdate.getUpdate().getRelatedTo();
+        return CalendarUtils.isSeriesMaster(eventUpdate.getUpdate()) && 
+            false == Objects.equals(originalRelatedTo, updatedRelatedTo) && "X-CALENDARSERVER-RECURRENCE-SET".equals(updatedRelatedTo.getRelType());
     }
 
 }

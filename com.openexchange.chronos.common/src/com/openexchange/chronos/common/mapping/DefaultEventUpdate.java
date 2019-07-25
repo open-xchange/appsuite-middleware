@@ -187,6 +187,18 @@ public class DefaultEventUpdate extends DefaultItemUpdate<Event, EventField> imp
 
     /**
      * Initializes a new {@link DefaultEventUpdate} containing the event update providing the differences.
+     * <p/>
+     * <i>Unset</i> fields of the original are considered, and no fields are ignored.
+     * 
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    public DefaultEventUpdate(Event originalEvent, Event updatedEvent) {
+        this(originalEvent, updatedEvent, true, (EventField[]) null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultEventUpdate} containing the event update providing the differences.
      *
      * @param originalEvent The original event
      * @param updatedEvent The updated event

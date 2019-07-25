@@ -47,65 +47,58 @@
  *
  */
 
-package com.openexchange.chronos.itip.performers;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.SchedulingControl;
-import com.openexchange.chronos.itip.ITipAction;
-import com.openexchange.chronos.itip.ITipAnalysis;
-import com.openexchange.chronos.itip.ITipAttributes;
-import com.openexchange.chronos.itip.ITipChange;
-import com.openexchange.chronos.itip.ITipIntegrationUtility;
-import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
-import com.openexchange.chronos.itip.sender.MailSenderService;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos;
 
 /**
- * 
- * {@link ITipChange}
+ * {@link SchedulingControl}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.10.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.3
+ * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-calext-caldav-scheduling-controls/">CalDAV SchedControl</a>
  */
-public class CancelPerformer extends AbstractActionPerformer {
+public class SchedulingControl extends EnumeratedProperty {
 
-    public CancelPerformer(ITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
-        super(util, sender, generators);
+    /**
+     * Instructs the server to follow the behavior in <a href="https://tools.ietf.org/html/rfc6638#section-3.2">RFC 6638, section 3.2</a>.
+     */
+    public static final SchedulingControl ALL = new SchedulingControl("all");
+
+    /**
+     * Instructs the server to perform no scheduling at all, and to just store the event (useful for restoring from backup).
+     */
+    public static final SchedulingControl NONE = new SchedulingControl("none");
+
+    /**
+     * Instructs the server to update the events in other calendars within its system where that can be done silently, but not to send
+     * visible notifications to users (where permitted by policy). This is useful when importing multiple related calendars into a new
+     * system without flooding external parties with notifications.
+     */
+    public static final SchedulingControl INTERNAL_ONLY = new SchedulingControl("internal-only");
+
+    /**
+     * Instructs the server to import the data without updating local calendars, but to send notifications to external attendees so they
+     * are aware of the event. This is useful when migrating calendar events to a new system where external parties need to have a way to
+     * update their participation status in the new system.
+     */
+    public static final SchedulingControl EXTERNAL_ONLY = new SchedulingControl("external-only");
+
+    /**
+     * Initializes a new {@link SchedulingControl}.
+     *
+     * @param value The property value
+     */
+    public SchedulingControl(String value) {
+        super(value);
     }
 
     @Override
-    public Collection<ITipAction> getSupportedActions() {
-        return EnumSet.of(ITipAction.DELETE);
+    public String getDefaultValue() {
+        return ALL.getValue();
     }
 
     @Override
-    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
-        // Suppress iTip
-        session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
-
-        List<ITipChange> changes = analysis.getChanges();
-        List<Event> deleted = new ArrayList<Event>();
-
-        for (ITipChange change : changes) {
-            Event event = change.getDeletedEvent();
-            if (event == null) {
-                continue;
-            }
-            // TODO: appointment.setNotification(true);
-            if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
-                event = change.getCurrentEvent();
-                event.setRecurrenceId(change.getDeletedEvent().getRecurrenceId());
-            }
-            deleted.add(event);
-            util.deleteEvent(event, session, new Date(Long.MAX_VALUE));
-        }
-        return deleted;
+    protected String[] getStandardValues() {
+        return getValues(ALL, NONE, INTERNAL_ONLY, EXTERNAL_ONLY);
     }
+
 }

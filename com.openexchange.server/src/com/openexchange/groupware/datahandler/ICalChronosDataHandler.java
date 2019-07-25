@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -182,7 +183,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         try {
             IDBasedCalendarAccess access = services.getServiceSafe(IDBasedCalendarAccessFactory.class).createAccess(session);
             access.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
-            access.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            access.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
             access.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
             List<ImportResult> importEvents = access.importEvents(calendarFolder, events);
             for (ImportResult importEvent : importEvents) {

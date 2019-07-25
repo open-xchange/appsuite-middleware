@@ -50,12 +50,15 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.chronos.impl.Utils.isReply;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -73,13 +76,11 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -209,11 +210,13 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         storage.getAttendeeStorage().updateAttendee(originalEvent.getId(), attendeeUpdate);
         touch(originalEvent.getId());
         Event updatedEvent = loadEventData(originalEvent.getId());
+        Attendee updatedAttendee = find(updatedEvent.getAttendees(), originalAttendee);
+        /*
+         * track update & attendee reply as needed
+         */
         resultTracker.trackUpdate(originalEvent, updatedEvent);
-        if (CalendarUtils.isOrganizerSchedulingResource(updatedEvent, calendarUserId)) {
-            resultTracker.trackSchedulingUpdate(originalEvent, updatedEvent);
-        } else {
-            resultTracker.trackSchedulingAttendeeUpdate(Collections.singletonMap(originalEvent, updatedEvent));
+        if (isReply(originalAttendee, updatedAttendee)) {
+            schedulingHelper.trackReply(updatedEvent, originalAttendee, updatedAttendee);
         }
         if (isSeriesException(originalEvent)) {
             /*
@@ -261,14 +264,11 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                     storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
                 }
                 Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+                Attendee updatedAttendee = find(updatedExceptionEvent.getAttendees(), originalAttendee);
                 resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
-
-                if (CalendarUtils.isOrganizerSchedulingResource(updatedExceptionEvent, calendarUserId)) {
-                        resultTracker.trackSchedulingExceptionUpdate(originalEvent, updatedExceptionEvent);
-                } else {
-                    resultTracker.trackSchedulingAttendeeUpdate(Collections.singletonMap(originalEvent, updatedExceptionEvent));
+                if (isReply(originalAttendee, updatedAttendee)) {
+                    schedulingHelper.trackReply(updatedExceptionEvent, originalAttendee, updatedAttendee);
                 }
-                
                 /*
                  * add change exception date to series master & track results
                  */
@@ -355,7 +355,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
-        CalendarFolder targetFolder = Utils.getFolder(session, updatedFolderID);
+        CalendarFolder targetFolder = getFolder(session, updatedFolderID);
         if (folder.getCreatedBy() != targetFolder.getCreatedBy()) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }

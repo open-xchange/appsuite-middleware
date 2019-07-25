@@ -83,6 +83,18 @@ public class DefaultCalendarObjectResource implements CalendarObjectResource {
     }
 
     /**
+     * Initializes a new {@link DefaultCalendarObjectResource} from one specific and further events.
+     * 
+     * @param event One event of the calendar object resource
+     * @param events Further events of the calendar object resource
+     * 
+     * @throws IllegalArgumentException If passed events do not represent a valid calendar object resource
+     */
+    public DefaultCalendarObjectResource(Event event, List<Event> events) {
+        this(merge(event, events));
+    }
+
+    /**
      * Initializes a new {@link DefaultCalendarObjectResource}.
      * 
      * @param events The events of the calendar object resource
@@ -91,6 +103,17 @@ public class DefaultCalendarObjectResource implements CalendarObjectResource {
     public DefaultCalendarObjectResource(List<Event> events) {
         super();
         this.events = sortSeriesMasterFirst(new ArrayList<Event>(checkObjectResource(events)));
+    }
+
+    private static List<Event> merge(Event event, List<Event> events) {
+        List<Event> mergedEvents = new ArrayList<Event>();
+        if (null != event) {
+            mergedEvents.add(event);
+        }
+        if (null != events) {
+            mergedEvents.addAll(events);
+        }
+        return mergedEvents;
     }
 
     private static List<Event> checkObjectResource(List<Event> events) throws IllegalArgumentException {

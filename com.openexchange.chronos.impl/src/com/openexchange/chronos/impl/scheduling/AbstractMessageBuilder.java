@@ -54,12 +54,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
@@ -121,7 +124,7 @@ abstract class AbstractMessageBuilder {
      * @return <code>true</code> if an iTIP transaction is in progress, <code>false</code> otherwise
      */
     protected boolean inITipTransaction() {
-        return session.get(CalendarSession.PARAMETER_SUPPRESS_ITIP, Boolean.class, Boolean.FALSE).booleanValue();
+        return SchedulingControl.NONE.equals(session.get(CalendarSession.PARAMETER_SCHEDULING, SchedulingControl.class));
     }
 
     /**
@@ -176,7 +179,7 @@ abstract class AbstractMessageBuilder {
      */
     protected Map<String, Object> getAdditionalsFromSession() {
         Map<String, Object> map = new HashMap<>(2);
-        map.put(CalendarParameters.PARAMETER_NOTIFICATION, session.get(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.class, Boolean.TRUE));
+        map.put(CalendarParameters.PARAMETER_SCHEDULING, session.get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class));
         return map;
     }
 
@@ -271,6 +274,16 @@ abstract class AbstractMessageBuilder {
 
         @Override
         public List<Description> describeOnly(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... toDescribe) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<Description> describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... ignorees) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<Description> describeOnly(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... toDescribe) {
             return Collections.emptyList();
         }
 

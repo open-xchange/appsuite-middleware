@@ -69,6 +69,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -188,12 +189,8 @@ public class ITipHandler implements CalendarHandler {
         }
 
         if (event.getCalendarParameters() != null) {
-
-            if (event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP)) {
-                Boolean suppress = event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
-                if (suppress != null && suppress.booleanValue()) {
-                    return false;
-                }
+            if (SchedulingControl.NONE.equals(event.getCalendarParameters().get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class))) {
+                return false;
             }
         }
 

@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
@@ -134,7 +135,7 @@ public class ICalUtil {
             CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class).init(session);
             calendarSession.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
             calendarSession.set(CalendarParameters.PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS, Boolean.TRUE);
-            calendarSession.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            calendarSession.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
             for (Event event : events) {
                 CalendarResult result = calendarSession.getCalendarService().createEvent(calendarSession, String.valueOf(folderID), event);
                 results.addAll(result.getCreations());

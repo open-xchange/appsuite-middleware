@@ -53,12 +53,12 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CHEC
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_MASK_ID;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_PUSH_TOKEN;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SCHEDULING;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDATE_CACHE;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -75,6 +75,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
@@ -293,8 +294,16 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, SortOrder.Order>(PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
             case PARAMETER_FIELDS:
                 return new AbstractMap.SimpleEntry<String, EventField[]>(PARAMETER_FIELDS, parseFields(value));
+                
+            case PARAMETER_SCHEDULING:
+                SchedulingControl schedulingControl = new SchedulingControl(value);
+                if (false == schedulingControl.isStandard()) {
+                    throw new IllegalArgumentException("Unexpected scheduling control value \"" + value + "\"");
+                }
+                return new AbstractMap.SimpleEntry<String, SchedulingControl>(PARAMETER_SCHEDULING, schedulingControl);
             case PARAM_SEND_INTERNAL_NOTIFICATIONS:
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
+                return new AbstractMap.SimpleEntry<String, SchedulingControl>(
+                    PARAMETER_SCHEDULING, Boolean.parseBoolean(value) ? SchedulingControl.ALL : SchedulingControl.EXTERNAL_ONLY);
             case PARAMETER_MASK_ID:
                 return new AbstractMap.SimpleEntry<String, String>(PARAMETER_MASK_ID, value);
             case PARAMETER_PUSH_TOKEN:

@@ -78,6 +78,7 @@ import java.util.TreeSet;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarStrings;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -90,6 +91,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -760,7 +762,7 @@ public class Utils {
     }
 
     /**
-     * Initializes a {@link DelegatingEvent} that overrides the participation status of a attendee matching a specific calendar user.
+     * Initializes a {@link DelegatingEvent} that overrides the participation status of the attendee matching a specific calendar user.
      * 
      * @param event The event to override the participation status in
      * @param calendarUser The calendar user to override the participation status for
@@ -790,6 +792,43 @@ public class Utils {
                 return attendees;
             }
         };
+    }
+
+    /**
+     * Initializes a calendar object resource based on {@link DelegatingEvent}s that override the participation status of the attendee
+     * matching a specific calendar user.
+     * 
+     * @param resource The resource to override the participation status in
+     * @param calendarUser The calendar user to override the participation status for
+     * @param partStat The participation status to indicate for the matching attendee
+     * @return A new calendar object resource that overrides the participation status accordingly
+     */
+    public static CalendarObjectResource overridePartStat(CalendarObjectResource resource, CalendarUser calendarUser, ParticipationStatus partStat) {
+        List<Event> overriddenEvents = new ArrayList<Event>();
+        for (Event event : resource.getEvents()) {
+            overriddenEvents.add(overridePartStat(event, calendarUser, partStat));
+        }
+        return new DefaultCalendarObjectResource(overriddenEvents);
+    }
+
+    /**
+     * Gets a valued indicating whether changed properties in an updated attendee represents a modification that needs to be reported as
+     * <i>reply</i> to the of a group scheduled event organizer or not.
+     * 
+     * @param originalAttendee The original attendee
+     * @param updatedAttendee The updated attendee
+     * @return <code>true</code> if the changed properties represent a reply, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.3">RFC 6638, section 3.2.2.3</a>
+     */
+    public static boolean isReply(Attendee originalAttendee, Attendee updatedAttendee) throws OXException {
+        if (null == originalAttendee) {
+            return false;
+        }
+        if (null == updatedAttendee) {
+            return true;
+        }
+        return false == AttendeeMapper.getInstance().get(AttendeeField.PARTSTAT).equals(originalAttendee, updatedAttendee) ||
+            false == AttendeeMapper.getInstance().get(AttendeeField.COMMENT).equals(originalAttendee, updatedAttendee);
     }
 
     /**

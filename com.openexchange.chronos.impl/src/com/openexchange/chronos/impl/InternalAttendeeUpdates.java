@@ -81,14 +81,20 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.type.PublicType;
 
 /**
- * {@link AttendeeHelper}
+ * {@link InternalAttendeeUpdates}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField> {
+public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, AttendeeField> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InternalAttendeeUpdates.class);
+
+    /**
+     * Attendee fields that, when modified, indicate that a <i>reply</i> of the associated calendar object resource is assumed, usually
+     * leading to appropriate notifications and scheduling messages being sent out to the organizer.
+     */
+    private static final AttendeeField[] REPLY_FIELDS = { AttendeeField.PARTSTAT, AttendeeField.COMMENT };
 
     private final CalendarSession session;
     private final CalendarFolder folder;
@@ -98,53 +104,53 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
     private final List<ItemUpdate<Attendee, AttendeeField>> attendeesToUpdate;
 
     /**
-     * Initializes a new {@link AttendeeHelper} for a new event.
+     * Initializes a new {@link InternalAttendeeUpdates} for a new event.
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param event The event data holding the list of attendees, as supplied by the client
      */
-    public static AttendeeHelper onNewEvent(CalendarSession session, CalendarFolder folder, Event event) throws OXException {
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, null);
+    public static InternalAttendeeUpdates onNewEvent(CalendarSession session, CalendarFolder folder, Event event) throws OXException {
+        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, null);
         attendeeHelper.processNewEvent(emptyForNull(event.getAttendees()), getResolvableEntities(session, folder, event));
         return attendeeHelper;
     }
 
     /**
-     * Initializes a new {@link AttendeeHelper} for an updated event.
+     * Initializes a new {@link InternalAttendeeUpdates} for an updated event.
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original event holding the original attendees
      * @param updatedAttendees The updated event holding the new/updated list of attendees, as supplied by the client
      */
-    public static AttendeeHelper onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalEvent.getAttendees());
+    public static InternalAttendeeUpdates onUpdatedEvent(CalendarSession session, CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
+        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalEvent.getAttendees());
         attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()), getResolvableEntities(session, folder, originalEvent));
         return attendeeHelper;
     }
 
     /**
-     * Initializes a new {@link AttendeeHelper} for a deleted event.
+     * Initializes a new {@link InternalAttendeeUpdates} for a deleted event.
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original list of attendees
      */
-    public static AttendeeHelper onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
-        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
+    public static InternalAttendeeUpdates onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
+        InternalAttendeeUpdates attendeeHelper = new InternalAttendeeUpdates(session, folder, originalAttendees);
         attendeeHelper.processDeletedEvent();
         return attendeeHelper;
     }
 
     /**
-     * Initializes a new {@link AttendeeHelper}.
+     * Initializes a new {@link InternalAttendeeUpdates}.
      *
      * @param session The calendar session
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original attendees of the event, or <code>null</code> for new event creations
      */
-    private AttendeeHelper(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
+    private InternalAttendeeUpdates(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) {
         super();
         this.session = session;
         this.folder = folder;
@@ -172,6 +178,39 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
     @Override
     public List<? extends ItemUpdate<Attendee, AttendeeField>> getUpdatedItems() {
         return attendeesToUpdate;
+    }
+
+    /**
+     * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
+     * calendar object resource or not, depending on the modified attendee fields.
+     * 
+     * @return <code>true</code> if the underlying calendar resource is replied to along with the update, <code>false</code>, otherwise
+     */
+    public boolean isReply(CalendarUser calendarUser) {
+        for (ItemUpdate<Attendee, AttendeeField> itemUpdate : getUpdatedItems()) {
+            if (matches(itemUpdate.getOriginal(), calendarUser)) {
+                return itemUpdate.containsAnyChangeOf(REPLY_FIELDS);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a list of attendees that neither have been added, nor removed along with the update. I.e. the resulting list is constructed
+     * based on the list of original attendees, minus the removed, updates of updated attendees being applied, minus the newly added
+     * attendees.
+     * 
+     * @return The retained attendees, or an empty list if there are none
+     */
+    public List<Attendee> getRetainedItems() throws OXException {
+        List<Attendee> retainedAttendees = new ArrayList<Attendee>(originalAttendees);
+        retainedAttendees.removeAll(attendeesToDelete);
+        for (ItemUpdate<Attendee, AttendeeField> attendeeToUpdate : attendeesToUpdate) {
+            retainedAttendees.remove(attendeeToUpdate.getOriginal());
+            retainedAttendees.add(apply(attendeeToUpdate));
+        }
+        retainedAttendees.removeAll(attendeesToInsert);
+        return retainedAttendees;
     }
 
     /**

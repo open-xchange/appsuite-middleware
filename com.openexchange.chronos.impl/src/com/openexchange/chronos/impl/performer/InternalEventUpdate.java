@@ -74,6 +74,7 @@ import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
@@ -84,16 +85,17 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DeltaEvent;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.InternalAttendeeUpdates;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -108,28 +110,40 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 
 /**
- * {@link EventUpdateProcessor}
+ * {@link InternalEventUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventUpdateProcessor implements EventUpdate {
+public class InternalEventUpdate implements EventUpdate {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventUpdateProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InternalEventUpdate.class);
+
+    /**
+     * Event fields that, when modified, indicate that a <i>re-scheduling</i> of the calendar object resource is assumed, usually leading
+     * to appropriate notifications and scheduling messages being sent out to the attendees.
+     */
+    private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
+        EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO,
+        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP,
+        EventField.RECURRENCE_RULE, EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES
+    };
 
     private final CalendarSession session;
     private final CalendarUser calendarUser;
     private final CalendarFolder folder;
 
-    private final AttendeeHelper attendeeUpdates;
+    private final InternalAttendeeUpdates attendeeUpdates;
     private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
     private final CollectionUpdate<Alarm, AlarmField> alarmUpdates;
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
+    private final List<Event> originalChangeExceptions;
+    private final List<Event> changedChangeExceptions;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
 
     /**
-     * Initializes a new {@link EventUpdateProcessor}.
+     * Initializes a new {@link InternalEventUpdate}.
      *
      * @param session The calendar session
      * @param folder The folder the update operation is performed in
@@ -140,11 +154,12 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param timestamp The timestamp to apply in the updated event data
      * @param ignoredFields Additional fields to ignore during the update
      */
-    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event originalSeriesMasterEvent, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
+    public InternalEventUpdate(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event originalSeriesMasterEvent, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
         this.calendarUser = Utils.getCalendarUser(session, folder);
+        this.originalChangeExceptions = originalChangeExceptions;
         /*
          * apply, check, adjust event update as needed
          */
@@ -157,10 +172,11 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalEvent, changedEvent, true);
         this.eventUpdate = new DefaultItemUpdate<Event, EventField>(originalEvent, changedEvent, differentFields);
-        this.attendeeUpdates = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent, changedEvent);
+        this.attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, changedEvent);
         this.attachmentUpdates = CalendarUtils.getAttachmentUpdates(originalEvent.getAttachments(), changedEvent.getAttachments());
         this.alarmUpdates = AlarmUtils.getAlarmUpdates(originalEvent.getAlarms(), changedEvent.getAlarms());
         this.exceptionUpdates = CalendarUtils.getEventUpdates(originalChangeExceptions, changedChangeExceptions, EventField.ID);
+        this.changedChangeExceptions = changedChangeExceptions;
         /*
          * generate special 'delta' event on top of the changed event data to indicate actual differences during storage update
          */
@@ -184,6 +200,45 @@ public class EventUpdateProcessor implements EventUpdate {
     public Event getDelta() {
         return deltaEvent;
     }
+    
+    /**
+     * Gets the <i>updated</i> calendar object resource, i.e. the calendar resource after all changes to all affected events have been
+     * applied.
+     * 
+     * @return The updated calendar object resource
+     */
+    public CalendarObjectResource getUpdatedResource() {
+        return new DefaultCalendarObjectResource(getUpdate(), changedChangeExceptions);
+    }
+
+    /**
+     * Gets the <i>original</i> calendar object resource, i.e. the calendar resource before any changes have been applied.
+     * 
+     * @return The original calendar object resource
+     */
+    public CalendarObjectResource getOriginalResource() {
+        return new DefaultCalendarObjectResource(getOriginal(), originalChangeExceptions);
+    }
+
+    /**
+     * Gets a value indicating whether the applied changes represent a <i>re-scheduling</i> of the calendar object resource or not,
+     * depending on the modified event fields.
+     * <p/>
+     * Besides changes to the event's recurrence, start- or end-time, this also includes further important event properties, or changes
+     * in the attendee line-up.
+     * 
+     * @return <code>true</code> if the calendar resource is re-scheduled along with the update, <code>false</code>, otherwise
+     */
+    public boolean isReschedule() {
+        if (containsAnyChangeOf(RESCHEDULE_FIELDS)) {
+            return true;
+        }
+        InternalAttendeeUpdates attendeeUpdates = getAttendeeUpdates();
+        if (0 < attendeeUpdates.getAddedItems().size() || 0 < attendeeUpdates.getRemovedItems().size()) {
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public Event getOriginal() {
@@ -206,7 +261,7 @@ public class EventUpdateProcessor implements EventUpdate {
     }
 
     @Override
-    public AttendeeHelper getAttendeeUpdates() {
+    public InternalAttendeeUpdates getAttendeeUpdates() {
         return attendeeUpdates;
     }
 
@@ -498,7 +553,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * (virtually) apply & take over attendee updates in changed event
          */
         if (updatedFields.contains(EventField.ATTENDEES)) {
-            List<Attendee> changedAttendees = AttendeeHelper.onUpdatedEvent(session, folder, originalEvent, updatedEvent).previewChanges();
+            List<Attendee> changedAttendees = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalEvent, updatedEvent).previewChanges();
             /*
              * only consider 'own' attendee in attendee scheduling resources as needed
              */
@@ -652,7 +707,7 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * apply added & removed attendees
          */
-        AttendeeHelper attendeeUpdates = AttendeeHelper.onUpdatedEvent(session, folder, originalMaster, updatedMaster);
+        InternalAttendeeUpdates attendeeUpdates = InternalAttendeeUpdates.onUpdatedEvent(session, folder, originalMaster, updatedMaster);
         changedChangeExceptions = propagateAttendeeUpdates(attendeeUpdates, changedChangeExceptions);
         return changedChangeExceptions;
     }

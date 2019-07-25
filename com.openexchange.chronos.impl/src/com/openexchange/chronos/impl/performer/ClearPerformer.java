@@ -64,6 +64,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -71,7 +72,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
@@ -183,17 +184,8 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         Map<String, List<Attachment>> attachmentsByEventId = new HashMap<String, List<Attachment>>();
         List<Event> eventTombstones = new ArrayList<Event>(eventsToDelete.size());
         Map<String, List<Attendee>> attendeeTombstonesByEventId = new HashMap<String, List<Attendee>>(eventsToDelete.size());
-        Map<String, Event> idsToCancel = new HashMap<>(eventsToDelete.size());
         for (Event originalEvent : eventsToDelete) {
             eventIds.add(originalEvent.getId());
-            if (idsToCancel.containsKey(originalEvent.getSeriesId())) {
-                if (CalendarUtils.isSeriesMaster(originalEvent)) {
-                    // TODO Check for additional attendees in exceptions
-                    idsToCancel.put(originalEvent.getId(), originalEvent);
-                } //Ignore
-            } else {
-                idsToCancel.put(originalEvent.getId(), originalEvent);
-            }
             eventTombstones.add(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             if (null != originalEvent.getAttendees() && 0 < originalEvent.getAttendees().size()) {
                 attendeeTombstonesByEventId.put(originalEvent.getId(), storage.getUtilities().getTombstones(originalEvent.getAttendees()));
@@ -215,19 +207,20 @@ public class ClearPerformer extends AbstractUpdatePerformer {
             storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getId(), attachmentsByEventId));
         }
         /*
-         * Notify about cancellation of event or attendee
+         * track deletions in result & group corresponding calendar object resources
          */
-        List<Event> events = new ArrayList<>(idsToCancel.values());
-        if (CalendarUtils.isOrganizer(events.get(0), calendarUserId)) {
-            resultTracker.trackSchedulingCancellation(events);
-        } else {
-            resultTracker.trackAttendeeDeclineScheduling(events);
-        }
-        /*
-         * track deletions in result
-         */
+        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
         for (Event originalEvent : eventsToDelete) {
             resultTracker.trackDeletion(originalEvent);
+            if (null != originalEvent.getUid()) {
+                com.openexchange.tools.arrays.Collections.put(eventsByUID, originalEvent.getUid(), originalEvent);
+            }
+        }
+        /*
+         * track notifications and scheduling messages for deleted resources
+         */
+        for (List<Event> value : eventsByUID.values()) {
+            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(value));
         }
     }
 
@@ -261,14 +254,23 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         storage.getEventStorage().insertEventTombstones(eventTombstones);
         storage.getAttendeeStorage().insertAttendeeTombstones(attendeeTombstonesByEventId);
         /*
-         * 'touch' modified events, track results and send notifications
+         * 'touch' modified events, track updates in result & group corresponding calendar object resources
          */
+        Map<String, List<Event>> eventsByUID = new LinkedHashMap<String, List<Event>>();
         for (Entry<Event, Attendee> attendeeToDeleteByEvent : attendeesToDeleteByEvent) {
             Event originalEvent = attendeeToDeleteByEvent.getKey();
             touch(originalEvent.getId());
             Event updatedEvent = loadEventData(originalEvent.getId());
             resultTracker.trackUpdate(originalEvent, updatedEvent);
-            resultTracker.trackAttendeeDeclineScheduling(Collections.singletonList(originalEvent));
+            if (null != originalEvent.getUid()) {
+                com.openexchange.tools.arrays.Collections.put(eventsByUID, originalEvent.getUid(), originalEvent);
+            }
+        }
+        /*
+         * track notifications and scheduling messages for deleted resources
+         */
+        for (List<Event> value : eventsByUID.values()) {
+            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(value));
         }
     }
 

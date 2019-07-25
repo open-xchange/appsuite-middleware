@@ -54,6 +54,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 
 /**
@@ -136,12 +137,11 @@ public interface CalendarParameters {
     static final String PARAMETER_SKIP_EXTERNAL_ATTENDEE_URI_CHECKS = "skipExternalAttendeeURIChecks";
 
     /**
-     * {@link Boolean}
+     * {@link SchedulingControl}
      * <p/>
-     * Specifies that attendees should be notified about the changes when saving a meeting or not.
-     * The value <code>true</code> means that notifications should be send.
+     * Allows to control if and to whom scheduling messages and notifications are sent along with the calendar operation.
      */
-    static final String PARAMETER_NOTIFICATION = "notification";
+    static final String PARAMETER_SCHEDULING = "scheduling";
 
     /**
      * {@link Integer}
@@ -282,14 +282,6 @@ public interface CalendarParameters {
      * <p/>
      */
     static final String PARAMETER_PRINCIPAL_EMAIL = "itip.principalEmail";
-
-    /**
-     * {@link Boolean}
-     * <p/>
-     * Boolean to suppress ITip roundtrip. Necessary when already inside an itip handling and additional actions are performed.
-     * <p/>
-     */
-    static final String PARAMETER_SUPPRESS_ITIP = "itip.suppress";
 
     /**
      * {@link String}

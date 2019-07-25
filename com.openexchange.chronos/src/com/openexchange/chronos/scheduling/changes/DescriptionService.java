@@ -50,6 +50,8 @@
 package com.openexchange.chronos.scheduling.changes;
 
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventUpdate;
@@ -63,8 +65,7 @@ import com.openexchange.chronos.service.EventUpdate;
 public interface DescriptionService {
 
     /**
-     * 
-     * Describe an event update
+     * Describes an event update.
      *
      * @param eventUpdate The event update to describe
      * @param contextId The context identifier
@@ -76,8 +77,18 @@ public interface DescriptionService {
     List<Description> describe(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... ignorees);
 
     /**
-     * 
-     * Describe an event update. Only consider given fields
+     * Describes an event update.
+     *
+     * @param eventUpdate The event update to describe
+     * @param timeZone The timezone to use
+     * @param locale The locale to use
+     * @param ignorees The fields to ignore
+     * @return A list of descriptions
+     */
+    List<Description> describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... ignorees);
+
+    /**
+     * Describes an event update, only considering given fields.
      *
      * @param eventUpdate The event update to describe
      * @param contextId The context identifier
@@ -87,5 +98,17 @@ public interface DescriptionService {
      * @return A list of descriptions
      */
     List<Description> describeOnly(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... toDescribe);
+
+    /**
+     * Describes an event update, only considering given fields.
+     *
+     * @param eventUpdate The event update to describe
+     * @param contextId The context identifier
+     * @param timeZone The timezone to use
+     * @param locale The locale to use
+     * @param toDescribe The fields to describe only
+     * @return A list of descriptions
+     */
+    List<Description> describeOnly(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... toDescribe);
 
 }

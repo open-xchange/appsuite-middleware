@@ -66,6 +66,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.impl.performer.AlarmTriggersPerformer;
 import com.openexchange.chronos.impl.performer.AllPerformer;
@@ -88,7 +89,9 @@ import com.openexchange.chronos.impl.performer.UpdateAttendeePerformer;
 import com.openexchange.chronos.impl.performer.UpdatePerformer;
 import com.openexchange.chronos.impl.performer.UpdatesPerformer;
 import com.openexchange.chronos.impl.session.DefaultCalendarSession;
+import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.SchedulingBroker;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarEventNotificationService;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -422,7 +425,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new SplitPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), splitPoint, uid, clientTimestamp, true);
+                return new SplitPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), splitPoint, uid, clientTimestamp);
 
             }
         }.executeUpdate()).getUserizedResult();
@@ -445,12 +448,12 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
-        Boolean oldSuppressItip = session.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        SchedulingControl oldScheduling = session.get(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.class);
         Boolean oldIgnoreStorageWarnings = session.get(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.class);
         Boolean oldCheckConflicts = session.get(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.class);
         try {
-            if (null == oldSuppressItip) {
-                session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+            if (null == oldScheduling) {
+                session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
             }
             if (null == oldIgnoreStorageWarnings) {
                 session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, Boolean.TRUE);
@@ -478,7 +481,7 @@ public class CalendarServiceImpl implements CalendarService {
             }
             return importResults;
         } finally {
-            session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, oldSuppressItip);
+            session.set(CalendarParameters.PARAMETER_SCHEDULING, oldScheduling);
             session.set(CalendarParameters.PARAMETER_IGNORE_STORAGE_WARNINGS, oldIgnoreStorageWarnings);
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, oldCheckConflicts);
         }
@@ -528,7 +531,14 @@ public class CalendarServiceImpl implements CalendarService {
              */
             SchedulingBroker schedulingBroker = services.getService(SchedulingBroker.class);
             if (null != schedulingBroker) {
-                schedulingBroker.handleScheduling(result.getSession().getSession(), result.getSchedulingMessages());
+                List<SchedulingMessage> messages = result.getSchedulingMessages();
+                if (null != messages && 0 < messages.size()) {
+                    schedulingBroker.handleScheduling(result.getSession().getSession(), messages);
+                }
+                List<ChangeNotification> notifications = result.getChangeNotifications();
+                if (null != notifications && 0 < notifications.size()) {
+                    schedulingBroker.handleNotifications(result.getSession().getSession(), notifications);
+                }
             }
         }));
         return result;

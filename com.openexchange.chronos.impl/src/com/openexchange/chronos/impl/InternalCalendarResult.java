@@ -65,6 +65,7 @@ import com.openexchange.chronos.common.DefaultCalendarEvent;
 import com.openexchange.chronos.common.DefaultCalendarResult;
 import com.openexchange.chronos.common.DeleteResultImpl;
 import com.openexchange.chronos.common.UpdateResultImpl;
+import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarResult;
@@ -93,8 +94,8 @@ public class InternalCalendarResult {
     private List<UpdateResult> userizedUpdates;
     private List<DeleteResult> deletions;
     private List<DeleteResult> userizedDeletions;
-    
-    private List<SchedulingMessage> messages;
+    private List<SchedulingMessage> schedulingMessages;
+    private List<ChangeNotification> changeNotifications;
 
     /**
      * Initializes a new {@link InternalCalendarResult}.
@@ -109,7 +110,6 @@ public class InternalCalendarResult {
         this.calendarUserId = calendarUserId;
         this.folder = folder;
         this.affectedFolderIds = new HashSet<String>();
-        this.messages = new ArrayList<>();
     }
 
     public CalendarSession getSession() {
@@ -313,8 +313,19 @@ public class InternalCalendarResult {
         return this;
     }
     
-    public InternalCalendarResult addScheulingMessage(SchedulingMessage message) {
-        this.messages.add(message);
+    public InternalCalendarResult addSchedulingMessage(SchedulingMessage message) {
+        if (null == schedulingMessages) {
+            schedulingMessages = new ArrayList<SchedulingMessage>();
+        }
+        schedulingMessages.add(message);
+        return this;
+    }
+
+    public InternalCalendarResult addChangeNotification(ChangeNotification notification) {
+        if (null == changeNotifications) {
+            changeNotifications = new ArrayList<ChangeNotification>();
+        }
+        this.changeNotifications.add(notification);
         return this;
     }
 
@@ -324,9 +335,12 @@ public class InternalCalendarResult {
      * @return The messages that needs to be scheduled
      */
     public List<SchedulingMessage> getSchedulingMessages() {
-        return this.messages;
+        return this.schedulingMessages;
     }
     
+    public List<ChangeNotification> getChangeNotifications() {
+        return changeNotifications;
+    }
 
     /**
      * Gets the calendar event representing the system-wide view on the performed calendar changes.

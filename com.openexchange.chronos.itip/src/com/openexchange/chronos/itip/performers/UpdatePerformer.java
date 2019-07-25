@@ -63,6 +63,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.SchedulingControl;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -106,7 +107,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     @Override
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
-        session.<Boolean> set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+        session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
         List<ITipChange> changes = analysis.getChanges();
         List<Event> result = new ArrayList<Event>(changes.size());
 

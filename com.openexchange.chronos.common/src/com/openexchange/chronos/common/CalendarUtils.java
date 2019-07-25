@@ -92,6 +92,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.AttendeePrivileges;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
@@ -115,6 +116,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
@@ -204,16 +206,16 @@ public class CalendarUtils {
     }
 
     /**
-     * Looks up a specific calendar user in a collection of attendees, utilizing the {@link CalendarUtils#matches} routine.
+     * Looks up a specific calendar user in a collection of calendar users, utilizing the {@link CalendarUtils#matches} routine.
      *
-     * @param attendees The attendees to search
+     * @param calendarUsers The calendar users to search
      * @param calendarUser The calendar user to lookup
      * @return The matching calendar user, or <code>null</code> if not found
      * @see CalendarUtils#matches
      */
-    public static Attendee find(List<Attendee> attendees, CalendarUser calendarUser) {
-        if (null != attendees && 0 < attendees.size()) {
-            for (Attendee candidateAttendee : attendees) {
+    public static <T extends CalendarUser> T find(Collection<T> calendarUsers, CalendarUser calendarUser) {
+        if (null != calendarUsers && 0 < calendarUsers.size()) {
+            for (T candidateAttendee : calendarUsers) {
                 if (matches(calendarUser, candidateAttendee)) {
                     return candidateAttendee;
                 }
@@ -223,16 +225,16 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether a specific calendar user is present in a collection of attendees, utilizing the
+     * Gets a value indicating whether a specific calendar user is present in a collection of calendar users, utilizing the
      * {@link CalendarUtils#matches} routine.
      *
-     * @param attendees The attendees to search
+     * @param calendarUsers The calendar users to search
      * @param calendarUser The calendar user to lookup
      * @return <code>true</code> if the calendar user is contained in the collection of attendees, <code>false</code>, otherwise
      * @see CalendarUtils#matches
      */
-    public static boolean contains(List<Attendee> attendees, CalendarUser calendarUser) {
-        return null != find(attendees, calendarUser);
+    public static <T extends CalendarUser> boolean contains(Collection<T> calendarUsers, CalendarUser calendarUser) {
+        return null != find(calendarUsers, calendarUser);
     }
 
     /**
@@ -490,6 +492,17 @@ public class CalendarUtils {
      */
     public static boolean hasExternalOrganizer(Event event) {
         return null != event.getOrganizer() && 0 >= event.getOrganizer().getEntity();
+    }
+
+    /**
+     * Gets a value indicating whether a specific calendar resource is organized externally, i.e. no internal organizer entity is
+     * responsible.
+     *
+     * @param resource The resource to check
+     * @return <code>true</code> if the resource has an <i>external</i> organizer, <code>false</code>, otherwise
+     */
+    public static boolean hasExternalOrganizer(CalendarObjectResource resource) {
+        return hasExternalOrganizer(resource.getFirstEvent());
     }
 
     /**
@@ -1317,6 +1330,29 @@ public class CalendarUtils {
     }
 
     /**
+     * Collects all attendees that attend at least one of the events of a calendar object resource. Attendees are matched based on the
+     * {@link CalendarUtils#matches} routine.
+     *
+     * @param resource The calendar object resource
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to consider both
+     * @param cuTypes The {@link CalendarUserType}s to consider, or <code>null</code> to consider any types
+     * @return The collected attendees, or an empty list if there are none
+     * @see CalendarUtils#matches
+     */
+    public static List<Attendee> collectAttendees(CalendarObjectResource resource, Boolean internal, CalendarUserType... cuTypes) {
+        List<Attendee> collectedAttendees = new ArrayList<Attendee>();
+        for (Event event : resource.getEvents()) {
+            for (Attendee attendee : filter(event.getAttendees(), internal, cuTypes)) {
+                if (false == contains(collectedAttendees, attendee)) {
+                    collectedAttendees.add(attendee);
+                }
+            }
+        }
+        return collectedAttendees;
+    }
+
+    /**
      * Collects all events with a specific unique identifier (UID) from the given event collection.
      *
      * @param events The events to filter
@@ -1779,6 +1815,19 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a calendar object resource represents an <i>attendee scheduling object resource</i> or not, i.e.
+     * a group-scheduled event the calendar user attends, organized by a different entity.
+     *
+     * @param resource The resource to check
+     * @param calendarUserId The identifier of the calendar user representing the view on the event
+     * @return <code>true</code> if the resource is an attendee scheduling object resource, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    public static boolean isAttendeeSchedulingResource(CalendarObjectResource resource, int calendarUserId) {
+        return isAttendeeSchedulingResource(resource.getFirstEvent(), calendarUserId);
+    }
+
+    /**
      * Gets a value indicating whether an event represents an <i>organizer scheduling object resource</i> or not, i.e. a group-scheduled
      * event where the calendar user matches the organizer.
      *
@@ -1789,6 +1838,19 @@ public class CalendarUtils {
      */
     public static boolean isOrganizerSchedulingResource(Event event, int calendarUserId) {
         return isGroupScheduled(event) && null != event.getOrganizer() && event.getOrganizer().getEntity() == calendarUserId;
+    }
+
+    /**
+     * Gets a value indicating whether a calendar object resource represents an <i>organizer scheduling object resource</i> or not, i.e.
+     * a group-scheduled event where the calendar user matches the organizer.
+     *
+     * @param resource The resource to check
+     * @param calendarUserId The identifier of the calendar user representing the view on the event
+     * @return <code>true</code> if the resource is an organizer scheduling object resource, <code>false</code>, otherwise
+     * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
+     */
+    public static boolean isOrganizerSchedulingResource(CalendarObjectResource resource, int calendarUserId) {
+        return isOrganizerSchedulingResource(resource.getFirstEvent(), calendarUserId);
     }
 
     /**
@@ -2092,6 +2154,20 @@ public class CalendarUtils {
                 }
             }
         };
+    }
+
+    /**
+     * Constructs a calendar object resource consisting of the <i>updated</i> events from the supplied event update collection.
+     * 
+     * @param eventUpdates The event updates to build the calendar object resource from
+     * @return The calendar object resource
+     */
+    public static CalendarObjectResource getUpdatedResource(List<EventUpdate> eventUpdates) {
+        List<Event> events = new ArrayList<Event>();
+        for (EventUpdate eventUpdate : eventUpdates) {
+            events.add(eventUpdate.getUpdate());
+        }
+        return new DefaultCalendarObjectResource(events);
     }
 
     /**

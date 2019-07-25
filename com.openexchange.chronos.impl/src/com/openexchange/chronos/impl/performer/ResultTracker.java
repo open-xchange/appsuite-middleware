@@ -103,6 +103,7 @@ import com.openexchange.chronos.impl.scheduling.CancelMessageBuilder;
 import com.openexchange.chronos.impl.scheduling.CreateMessageBuilder;
 import com.openexchange.chronos.impl.scheduling.ReplyMessageBuilder;
 import com.openexchange.chronos.impl.scheduling.UpdateMessageBuilder;
+import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -345,6 +346,24 @@ public class ResultTracker {
     }
 
     /**
+     * Track a scheduling message.
+     * 
+     * @param message The scheduling message to track
+     */
+    public void trackSchedulingMessage(SchedulingMessage message) {
+        result.addSchedulingMessage(message);
+    }
+
+    /**
+     * Track a change notification.
+     * 
+     * @param message The scheduling message to track
+     */
+    public void trackChangeNotification(ChangeNotification notification) {
+        result.addChangeNotification(notification);
+    }
+
+    /**
      * Generates and tracks a scheduling request messages
      *
      * @param createdEvents The created events
@@ -527,7 +546,7 @@ public class ResultTracker {
      */
     private void trackMessage(List<SchedulingMessage> messages) {
         for (SchedulingMessage message : messages) {
-            this.result.addScheulingMessage(message);
+            this.result.addSchedulingMessage(message);
         }
     }
 

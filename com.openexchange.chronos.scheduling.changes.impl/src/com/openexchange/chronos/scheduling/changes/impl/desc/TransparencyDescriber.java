@@ -47,65 +47,44 @@
  *
  */
 
-package com.openexchange.chronos.itip.performers;
+package com.openexchange.chronos.scheduling.changes.impl.desc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.SchedulingControl;
-import com.openexchange.chronos.itip.ITipAction;
-import com.openexchange.chronos.itip.ITipAnalysis;
-import com.openexchange.chronos.itip.ITipAttributes;
-import com.openexchange.chronos.itip.ITipChange;
-import com.openexchange.chronos.itip.ITipIntegrationUtility;
-import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
-import com.openexchange.chronos.itip.sender.MailSenderService;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
+import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
+import com.openexchange.chronos.scheduling.common.Messages;
 
 /**
- * 
- * {@link ITipChange}
+ * {@link TransparencyDescriber}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.10.0
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.10.3
  */
-public class CancelPerformer extends AbstractActionPerformer {
+public class TransparencyDescriber extends AbstractChangeDescriber<Transp> {
 
-    public CancelPerformer(ITipIntegrationUtility util, MailSenderService sender, ITipMailGeneratorFactory generators) {
-        super(util, sender, generators);
+    /**
+     * Initializes a new {@link TransparencyDescriber}.
+     */
+    public TransparencyDescriber() {
+        super(EventField.TRANSP, Transp.class);
     }
 
     @Override
-    public Collection<ITipAction> getSupportedActions() {
-        return EnumSet.of(ITipAction.DELETE);
+    public List<SentenceImpl> describe(Transp original, Transp updated) {
+        SentenceImpl sentence = new SentenceImpl(Messages.HAS_CHANGED_TRANSPARENCY).add(transpToString(updated), ArgumentType.SHOWN_AS, shown(updated));
+        return Collections.singletonList(sentence);
     }
 
-    @Override
-    public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
-        // Suppress iTip
-        session.set(CalendarParameters.PARAMETER_SCHEDULING, SchedulingControl.NONE);
-
-        List<ITipChange> changes = analysis.getChanges();
-        List<Event> deleted = new ArrayList<Event>();
-
-        for (ITipChange change : changes) {
-            Event event = change.getDeletedEvent();
-            if (event == null) {
-                continue;
-            }
-            // TODO: appointment.setNotification(true);
-            if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
-                event = change.getCurrentEvent();
-                event.setRecurrenceId(change.getDeletedEvent().getRecurrenceId());
-            }
-            deleted.add(event);
-            util.deleteEvent(event, session, new Date(Long.MAX_VALUE));
-        }
-        return deleted;
+    private String transpToString(Transp transparency) {
+        return null != transparency && Transp.TRANSPARENT.equals(transparency.getValue()) ? Messages.FREE : Messages.RESERVERD;
     }
+
+    private ShownAsTransparency shown(Transp transparency) {
+        return null != transparency && Transp.TRANSPARENT.equals(transparency.getValue()) ? ShownAsTransparency.FREE : ShownAsTransparency.RESERVED;
+    }
+
 }

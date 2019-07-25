@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.session;
 import static com.openexchange.chronos.impl.Utils.PROVIDER_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.osgi.Tools.requireService;
 import java.sql.Connection;
 import java.util.List;
@@ -63,11 +64,15 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -185,9 +190,95 @@ public class CalendarUserSettings {
             }
         } catch (OXException e) {
             LOG.warn("Error getting default participation status for user {}, falling back to \"{}\"",
-                I(userId), ParticipationStatus.NEEDS_ACTION);
+                I(userId), ParticipationStatus.NEEDS_ACTION, e);
         }
         return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
+    }
+
+    /**
+     * Gets a value indicating whether notifications for newly created / scheduled events are enabled or not.
+     * <p/>
+     * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
+     * calendar owner in case the operation is performed by another user on his behalf.
+     * 
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
+     */
+    public boolean isNotifyOnCreate() {
+        return isNotifyOnUpdate();
+    }
+
+    /**
+     * Gets a value indicating whether notifications for updated / re-scheduled events are enabled or not.
+     * <p/>
+     * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
+     * calendar owner in case the operation is performed by another user on his behalf.
+     * <p/>
+     * This setting is <b>not</b> used for changes towards a user's participation status (reply operations).
+     * 
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointments()
+     */
+    public boolean isNotifyOnUpdate() {
+        try {
+            return getUserSettingMail().isNotifyAppointments();
+        } catch (OXException e) {
+            LOG.warn("Error getting notification preferences from mail settings", e);
+        }
+        return true;
+    }
+
+    /**
+     * Gets a value indicating whether notifications for deleted (cancelled) events are enabled or not.
+     * <p/>
+     * This setting is either used for internal user attendees when the operation is performed by the organizer, or for the organizer or
+     * calendar owner in case the operation is performed by another user on his behalf.
+     * 
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.groupware.notify.NotificationConfig.NotificationProperty#NOTIFY_ON_DELETE
+     */
+    public boolean isNotifyOnDelete() {
+        try {
+            ConfigView configView = requireService(ConfigViewFactory.class, services).getView(userId, contextId);
+            return b(configView.opt("notify_participants_on_delete", Boolean.class, Boolean.TRUE));
+        } catch (OXException e) {
+            LOG.warn("Error getting notification preferences from confic cascade", e);
+        }
+        return true;
+    }
+
+    /**
+     * Gets a value indicating whether notifications for replies of attendees are enabled or not.
+     * <p/>
+     * This setting used if the user is the event organizer and the operation is performed by an invited attendee.
+     * 
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointmentsConfirmOwner()
+     */
+    public boolean isNotifyOnReply() {
+        try {
+            return getUserSettingMail().isNotifyAppointmentsConfirmOwner();
+        } catch (OXException e) {
+            LOG.warn("Error getting notification preferences from mail settings", e);
+        }
+        return true;
+    }
+
+    /**
+     * Gets a value indicating whether notifications for replies of attendees are enabled or not.
+     * <p/>
+     * This setting used if the user is an attendee and the operation is performed by other invited attendee.
+     * 
+     * @return <code>true</code> of notifications are enabled, <code>false</code>, otherwise
+     * @see com.openexchange.mail.usersetting.UserSettingMail#isNotifyAppointmentsConfirmParticipant()
+     */
+    public boolean isNotifyOnReplyAsAttendee() {
+        try {
+            return getUserSettingMail().isNotifyAppointmentsConfirmParticipant();
+        } catch (OXException e) {
+            LOG.warn("Error getting notification preferences from mail settings", e);
+        }
+        return true;
     }
 
     private OXFolderAccess getFolderAccess() throws OXException {
@@ -199,6 +290,10 @@ public class CalendarUserSettings {
             context = ServerSessionAdapter.valueOf(optSession.getSession()).getContext();
         }
         return null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
+    }
+
+    private UserSettingMail getUserSettingMail() throws OXException {
+        return UserSettingMailStorage.getInstance().getUserSettingMail(userId, contextId);
     }
 
     private ServerUserSetting getServerUserSettings() {

@@ -54,7 +54,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.google.common.collect.ImmutableSet;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
@@ -66,8 +65,9 @@ import com.openexchange.chronos.scheduling.changes.impl.desc.LocationDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.OrganizerDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.RRuleDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.ReschedulingDescriber;
+import com.openexchange.chronos.scheduling.changes.impl.desc.SplitDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.SummaryDescriber;
-import com.openexchange.chronos.scheduling.changes.impl.desc.TransperencyDescriber;
+import com.openexchange.chronos.scheduling.changes.impl.desc.TransparencyDescriber;
 import com.openexchange.chronos.scheduling.common.Utils;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.server.ServiceLookup;
@@ -81,20 +81,20 @@ import com.openexchange.user.UserService;
  */
 public class DescriptionServiceImpl implements DescriptionService {
 
-    private static final AttendeeDescriber ATTENDEE_DESCRIBER = new AttendeeDescriber();
-
     //@formatter:off
-    private static final ImmutableSet<ChangeDescriber> DESCRIPTIONS = ImmutableSet.of(
-        ATTENDEE_DESCRIBER,
-        new DescriptionDescriber(), 
-        new LocationDescriber(),
-        new OrganizerDescriber(),
+    private static final ChangeDescriber[] DESCRIBERS = {
+        new SplitDescriber(),
+        new RRuleDescriber(),
         new ReschedulingDescriber(),
+        new OrganizerDescriber(),
         new SummaryDescriber(),
-        new TransperencyDescriber(),
+        new LocationDescriber(),
+        new DescriptionDescriber(), 
+        new TransparencyDescriber(),
         new AttachmentDescriber(),
-        new RRuleDescriber()
-        );
+        new AttendeeDescriber(),
+        
+    };
     //@formatter:on
 
     private final ServiceLookup serviceLookup;
@@ -114,8 +114,13 @@ public class DescriptionServiceImpl implements DescriptionService {
         UserService userService = serviceLookup.getOptionalService(UserService.class);
         TimeZone timeZone = Utils.getTimeZone(userService, contextId, originator, recipient);
         Locale locale = Utils.getLocale(userService, contextId, originator, recipient);
+        return describe(eventUpdate, timeZone, locale, ignorees);
+    }
+
+    @Override
+    public List<Description> describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... ignorees) {
         List<Description> descriptions = new LinkedList<>();
-        for (ChangeDescriber describer : DESCRIPTIONS) {
+        for (ChangeDescriber describer : DESCRIBERS) {
             if (null == ignorees || false == contains(describer.getFields(), ignorees) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
                 Description description = describer.describe(eventUpdate, timeZone, locale);
                 if (null != description) {
@@ -128,14 +133,19 @@ public class DescriptionServiceImpl implements DescriptionService {
 
     @Override
     public List<Description> describeOnly(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... toDescribe) {
-        if (null == toDescribe) {
-            return Collections.emptyList();
-        }
         UserService userService = serviceLookup.getOptionalService(UserService.class);
         TimeZone timeZone = Utils.getTimeZone(userService, contextId, originator, recipient);
         Locale locale = Utils.getLocale(userService, contextId, originator, recipient);
+        return describeOnly(eventUpdate, timeZone, locale, toDescribe);
+    }
+
+    @Override
+    public List<Description> describeOnly(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... toDescribe) {
+        if (null == toDescribe) {
+            return Collections.emptyList();
+        }
         List<Description> descriptions = new LinkedList<>();
-        for (ChangeDescriber describer : DESCRIPTIONS) {
+        for (ChangeDescriber describer : DESCRIBERS) {
             if (contains(describer.getFields(), toDescribe) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
                 descriptions.add(describer.describe(eventUpdate, timeZone, locale));
             }
@@ -143,7 +153,7 @@ public class DescriptionServiceImpl implements DescriptionService {
         return descriptions;
     }
 
-    private boolean contains(EventField[] describedFields, EventField... fieldsToMatch) {
+    private static boolean contains(EventField[] describedFields, EventField... fieldsToMatch) {
         for (EventField f : describedFields) {
             for (EventField i : fieldsToMatch) {
                 if (f.equals(i)) {
