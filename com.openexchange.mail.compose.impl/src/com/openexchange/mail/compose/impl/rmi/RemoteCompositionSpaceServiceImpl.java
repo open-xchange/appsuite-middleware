@@ -178,7 +178,7 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                 rs = null;
 
                 for (Integer contextId : contextIds) {
-                    FileStorage fileStorage = getFileStorage(fileStorageId, contextId.intValue());
+                    FileStorage fileStorage = getFileStorage(fileStorageId, contextId.intValue()).getFirst();
 
                     SortedSet<String> fileList = fileStorage.getFileList();
 

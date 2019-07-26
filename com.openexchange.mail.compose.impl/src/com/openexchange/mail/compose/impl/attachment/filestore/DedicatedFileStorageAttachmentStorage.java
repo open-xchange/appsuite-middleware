@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.server.ServiceExceptionCode;
@@ -116,7 +117,8 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
         }
 
         // Use dedicated file storage with prefix; e.g. "1337_mailcompose_store"
-        return new FileStorageReference(getFileStorage(fileStorageId, session.getContextId()), fileStorageId);
+        Pair<FileStorage, URI> fsAndUri = getFileStorage(fileStorageId, session.getContextId());
+        return new FileStorageReference(fsAndUri.getFirst(), fileStorageId, fsAndUri.getSecond());
     }
 
     /**
@@ -127,7 +129,7 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    public static FileStorage getFileStorage(int fileStorageId, int contextId) throws OXException {
+    public static Pair<FileStorage, URI> getFileStorage(int fileStorageId, int contextId) throws OXException {
         // Acquire needed service
         FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
@@ -136,7 +138,7 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
 
         String prefix = new StringBuilder(32).append(contextId).append("_mailcompose_store").toString();
         URI uri = FileStorages.getFullyQualifyingUriFor(fileStorageId, prefix);
-        return storageService.getFileStorage(uri);
+        return new Pair<>(storageService.getFileStorage(uri), uri);
     }
 
     /**

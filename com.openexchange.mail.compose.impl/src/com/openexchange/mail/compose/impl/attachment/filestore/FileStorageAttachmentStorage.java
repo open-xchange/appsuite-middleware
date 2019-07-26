@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.attachment.filestore;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
@@ -120,13 +121,17 @@ public abstract class FileStorageAttachmentStorage extends AbstractAttachmentSto
         /** The optional identifier for dedicated file storage */
         protected final int dedicatedFileStorageId;
 
+        /** The URI that fully qualifies the file storage */
+        protected final URI uri;
+
         /**
          * Initializes a new {@link FileStorageReference}.
          *
          * @param fileStorage The file storage
+         * @param uri The URI that fully qualifies the file storage
          */
-        protected FileStorageReference(FileStorage fileStorage) {
-            this(fileStorage, 0);
+        protected FileStorageReference(FileStorage fileStorage, URI uri) {
+            this(fileStorage, 0, uri);
         }
 
         /**
@@ -134,11 +139,13 @@ public abstract class FileStorageAttachmentStorage extends AbstractAttachmentSto
          *
          * @param fileStorage The file storage
          * @param dedicatedFileStorageId The dedicated file storage identifier or <code>0</code>
+         * @param uri The URI that fully qualifies the file storage
          */
-        protected FileStorageReference(FileStorage fileStorage, int dedicatedFileStorageId) {
+        protected FileStorageReference(FileStorage fileStorage, int dedicatedFileStorageId, URI uri) {
             super();
             this.fileStorage = fileStorage;
             this.dedicatedFileStorageId = dedicatedFileStorageId <= 0 ? 0 : dedicatedFileStorageId;
+            this.uri = uri;
         }
     }
 

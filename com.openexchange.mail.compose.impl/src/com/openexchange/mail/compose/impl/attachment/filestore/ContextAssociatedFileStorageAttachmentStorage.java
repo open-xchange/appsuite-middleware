@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl.attachment.filestore;
 
+import java.net.URI;
 import java.util.Optional;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
@@ -56,8 +57,8 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.AttachmentStorageType;
 import com.openexchange.mail.compose.KnownAttachmentStorageType;
 import com.openexchange.server.ServiceExceptionCode;
@@ -92,10 +93,11 @@ public class ContextAssociatedFileStorageAttachmentStorage extends FileStorageAt
 
     @Override
     protected FileStorageReference getFileStorage(Optional<Integer> dedicatedFileStorageId, Session session) throws OXException {
-        return new FileStorageReference(getFileStorage(session.getContextId()));
+        Pair<FileStorage, URI> fsAndUri = getFileStorage(session.getContextId());
+        return new FileStorageReference(fsAndUri.getFirst(), fsAndUri.getSecond());
     }
 
-    private static FileStorage getFileStorage(int contextId) throws OXException {
+    private static Pair<FileStorage, URI> getFileStorage(int contextId) throws OXException {
         FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(FileStorageService.class);
@@ -107,8 +109,8 @@ public class ContextAssociatedFileStorageAttachmentStorage extends FileStorageAt
         }
 
         // Grab quota-aware file storage to determine fully qualifying URI
-        QuotaFileStorage quotaFileStorage = quotaStorageService.getQuotaFileStorage(contextId, Info.general());
-        return storageService.getFileStorage(quotaFileStorage.getUri());
+        URI uri = quotaStorageService.getQuotaFileStorage(contextId, Info.general()).getUri();
+        return new Pair<>(storageService.getFileStorage(uri), uri);
     }
 
     /**
@@ -117,7 +119,7 @@ public class ContextAssociatedFileStorageAttachmentStorage extends FileStorageAt
      * @param contextId The context identifier
      * @return The file storage or <code>null</code>
      */
-    public static FileStorage optFileStorage(int contextId) {
+    public static Pair<FileStorage, URI> optFileStorage(int contextId) {
         try {
             return getFileStorage(contextId);
         } catch (Exception e) {
