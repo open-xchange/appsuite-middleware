@@ -76,10 +76,10 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -97,6 +97,11 @@ import com.openexchange.session.Session;
  * @since v7.10.2
  */
 public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSpaceKeyStorage {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStorageCompositionSpaceKeyStorage.class);
+    }
 
     private static final AtomicReference<FileStorageCompositionSpaceKeyStorage> INSTANCE_REFERENCE = new AtomicReference<>();
 
@@ -181,13 +186,20 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         if (null != fileStorageLocation) {
             FileStorageRef fileStorageRef = getFileStorage(fileStorageLocation.dedicatedFileStorageId, session);
             FileStorage fileStorage = fileStorageRef.fileStorage;
-            InputStream file = fileStorage.getFile(fileStorageLocation.identifier);
+            InputStream file = null;
             try {
+                file = fileStorage.getFile(fileStorageLocation.identifier);
                 if (null != file) {
                     String obfuscatedBase64EncodedKey = Charsets.toAsciiString(Streams.stream2bytes(file));
                     Key key = base64EncodedString2Key(unobfuscate(obfuscatedBase64EncodedKey));
                     return key;
                 }
+            } catch (OXException e) {
+                if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    LoggerHolder.LOG.warn("Missing key file \"{}\" in file storage \"{}\"", fileStorageLocation.identifier, fileStorageRef.uri);
+                    return null;
+                }
+                throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
             } catch (IOException e) {
                 throw CompositionSpaceErrorCode.IO_ERROR.create(e, e.getMessage());
             } finally {
@@ -394,7 +406,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
             // Use dedicated file storage with prefix; e.g. "1337_mailcompose_store"
             String prefix = new StringBuilder(32).append(session.getContextId()).append("_mailcompose_store").toString();
             URI uri = FileStorages.getFullyQualifyingUriFor(fileStorageId, prefix);
-            return new FileStorageRef(storageService.getFileStorage(uri), fileStorageId);
+            return new FileStorageRef(storageService.getFileStorage(uri), fileStorageId, uri);
         }
 
         // Acquire needed service
@@ -404,19 +416,21 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         }
 
         // Grab quota-aware file storage to determine fully qualifying URI
-        QuotaFileStorage quotaFileStorage = quotaStorageService.getQuotaFileStorage(session.getContextId(), Info.general());
-        return new FileStorageRef(storageService.getFileStorage(quotaFileStorage.getUri()), 0);
+        URI uri = quotaStorageService.getQuotaFileStorage(session.getContextId(), Info.general()).getUri();
+        return new FileStorageRef(storageService.getFileStorage(uri), 0, uri);
     }
 
     private static class FileStorageRef {
 
         final FileStorage fileStorage;
         final int dedicatedFileStorageId;
+        final URI uri;
 
-        FileStorageRef(FileStorage fileStorage, int dedicatedFileStorageId) {
+        FileStorageRef(FileStorage fileStorage, int dedicatedFileStorageId, URI uri) {
             super();
             this.fileStorage = fileStorage;
             this.dedicatedFileStorageId = dedicatedFileStorageId;
+            this.uri = uri;
         }
     }
 
