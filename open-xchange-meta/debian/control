@@ -97,3 +97,10 @@ Priority: extra
 Description: Empty transitional package.
  This package can be removed as the integration of Open-Xchange with LinkedIn
  was discontinued.
+
+Package: open-xchange-calendar-printing
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Empty transitional package.
+ This package can be removed as the printing logic was moved to the client-side.

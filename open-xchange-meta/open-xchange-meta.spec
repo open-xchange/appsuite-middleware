@@ -260,11 +260,25 @@ Authors:
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-linkedin
 Group:          Applications/Productivity
-Summary:        The Open-Xchange Meta package for OX6 backend packages
+Summary:        Empty transitional package.
 
 %description -n open-xchange-linkedin
 Empty transitional package. This package can be removed as the integration of
 Open-Xchange with LinkedIn was discontinued.
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-calendar-printing
+Group:          Applications/Productivity
+Summary:        Empty transitional package.
+
+%description -n open-xchange-calendar-printing
+Empty transitional package. This package can be removed as the printing logic
+was moved to the client-side.
 
 Authors:
 --------
@@ -362,6 +376,10 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-linkedin
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-calendar-printing
 %defattr(-,root,root)
 %doc README.TXT
 

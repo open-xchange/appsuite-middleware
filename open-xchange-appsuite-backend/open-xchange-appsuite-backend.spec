@@ -74,8 +74,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
 %config(noreplace) /opt/open-xchange/etc/settings/appsuite.properties
 %config(noreplace) /opt/open-xchange/etc/settings/upsell-appsuite.properties
-%dir /opt/open-xchange/templates/
-%config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
 * Mon Jun 17 2019 Marcus Klein <marcus.klein@open-xchange.com>
