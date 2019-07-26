@@ -57,6 +57,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.java.util.Pair;
@@ -136,8 +137,27 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
             throw ServiceExceptionCode.absentService(FileStorageService.class);
         }
 
-        String prefix = new StringBuilder(32).append(contextId).append("_mailcompose_store").toString();
-        URI uri = FileStorages.getFullyQualifyingUriFor(fileStorageId, prefix);
+        FileStorageInfoService infoService = FileStorages.getFileStorageInfoService();
+        if (null == infoService) {
+            throw ServiceExceptionCode.absentService(FileStorageInfoService.class);
+        }
+
+        // Determine base URI and scheme
+        URI baseUri = infoService.getFileStorageInfo(fileStorageId).getUri();
+        String scheme = baseUri.getScheme();
+        if (scheme == null) {
+            scheme = "file";
+        }
+
+        // Prefer a static prefix in case of "file"-schemed file storage
+        String prefix;
+        if ("file".equals(scheme)) {
+            prefix = "mailcompose_store";
+        } else {
+            prefix = new StringBuilder(32).append(contextId).append("_mailcompose_store").toString();
+        }
+
+        URI uri = FileStorages.getFullyQualifyingUriForPrefix(prefix, baseUri);
         return new Pair<>(storageService.getFileStorage(uri), uri);
     }
 
@@ -147,7 +167,7 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param services The service look-up
-     * @return The identifier of the dedicated file storage or <code>0</code> if there is none
+     * @return The identifier of the dedicated file storage or <code>0</code> (zero) if there is none
      * @throws OXException If file storage identifier cannot be returned
      */
     public static int getFileStorageId(int userId, int contextId, ServiceLookup services) throws OXException {

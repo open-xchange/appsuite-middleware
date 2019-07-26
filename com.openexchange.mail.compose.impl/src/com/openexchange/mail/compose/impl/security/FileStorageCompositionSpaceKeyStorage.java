@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.compose.impl.security;
 
+import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getFileStorageId;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -69,9 +70,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -83,8 +81,10 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
+import com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -379,12 +379,8 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
      * @throws OXException If file storage cannot be returned
      */
     private FileStorageRef getFileStorage(Session session) throws OXException {
-        // Acquire config view for session-associated user
-        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        int fileStorageId = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view);
-        return getFileStorage(fileStorageId, session);
+        // Acquire file storage identifier
+        return getFileStorage(getFileStorageId(session.getUserId(), session.getContextId(), services), session);
     }
 
     /**
@@ -403,10 +399,9 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         }
 
         if (fileStorageId > 0) {
-            // Use dedicated file storage with prefix; e.g. "1337_mailcompose_store"
-            String prefix = new StringBuilder(32).append(session.getContextId()).append("_mailcompose_store").toString();
-            URI uri = FileStorages.getFullyQualifyingUriFor(fileStorageId, prefix);
-            return new FileStorageRef(storageService.getFileStorage(uri), fileStorageId, uri);
+            // Use dedicated file storage
+            Pair<FileStorage, URI> fsAndUri = DedicatedFileStorageAttachmentStorage.getFileStorage(fileStorageId, session.getContextId());
+            return new FileStorageRef(fsAndUri.getFirst(), fileStorageId, fsAndUri.getSecond());
         }
 
         // Acquire needed service
