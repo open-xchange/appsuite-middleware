@@ -89,11 +89,6 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
 
     @Override
     public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
-        if (false == capabilities.contains("filestore")) {
-            // "filestore" is required
-            return false;
-        }
-
         // Acquire config view for session-associated user
         ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
