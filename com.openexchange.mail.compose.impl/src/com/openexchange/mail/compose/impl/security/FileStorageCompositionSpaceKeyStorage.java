@@ -400,7 +400,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
 
         if (fileStorageId > 0) {
             // Use dedicated file storage
-            Pair<FileStorage, URI> fsAndUri = DedicatedFileStorageAttachmentStorage.getFileStorage(fileStorageId, session.getContextId());
+            Pair<FileStorage, URI> fsAndUri = DedicatedFileStorageAttachmentStorage.getDedicatedFileStorage(fileStorageId, session.getContextId());
             return new FileStorageRef(fsAndUri.getFirst(), fileStorageId, fsAndUri.getSecond());
         }
 

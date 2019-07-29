@@ -50,7 +50,6 @@
 package com.openexchange.mail.compose.impl.attachment.filestore;
 
 import java.net.URI;
-import java.util.Optional;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -89,23 +88,14 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
 
     @Override
     public boolean isApplicableFor(CapabilitySet capabilities, Session session) throws OXException {
-        // Acquire config view for session-associated user
-        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
         // Check if a dedicated file storage is configured
-        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view) > 0;
+        return getFileStorageId(session.getUserId(), session.getContextId(), services) > 0;
     }
 
     @Override
-    protected FileStorageReference getFileStorage(Optional<Integer> dedicatedFileStorageId, Session session) throws OXException {
+    protected FileStorageAndId getFileStorage(Session session) throws OXException {
         // Determine file storage identifier
-        int fileStorageId;
-        if (dedicatedFileStorageId.isPresent()) {
-            fileStorageId = dedicatedFileStorageId.get().intValue();
-        } else {
-            fileStorageId = getFileStorageId(session.getUserId(), session.getContextId(), services);
-        }
+        int fileStorageId = getFileStorageId(session.getUserId(), session.getContextId(), services);
 
         // Check determined file storage identifier
         if (fileStorageId <= 0) {
@@ -113,8 +103,26 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
         }
 
         // Use dedicated file storage with prefix; e.g. "1337_mailcompose_store"
-        Pair<FileStorage, URI> fsAndUri = getFileStorage(fileStorageId, session.getContextId());
-        return new FileStorageReference(fsAndUri.getFirst(), fileStorageId, fsAndUri.getSecond());
+        Pair<FileStorage, URI> fsAndUri = getDedicatedFileStorage(fileStorageId, session.getContextId());
+        return new FileStorageAndId(fsAndUri.getFirst(), fileStorageId, fsAndUri.getSecond());
+    }
+
+    /**
+     * Gets the session-associated configured identifier of the dedicated file storage (if any).
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param services The service look-up
+     * @return The identifier of the dedicated file storage or <code>0</code> (zero) if there is none
+     * @throws OXException If file storage identifier cannot be returned
+     */
+    public static int getFileStorageId(int userId, int contextId, ServiceLookup services) throws OXException {
+        // Acquire config view for session-associated user
+        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        // Check if a dedicated file storage is configured
+        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view);
     }
 
     /**
@@ -125,7 +133,7 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    public static Pair<FileStorage, URI> getFileStorage(int fileStorageId, int contextId) throws OXException {
+    public static Pair<FileStorage, URI> getDedicatedFileStorage(int fileStorageId, int contextId) throws OXException {
         // Acquire needed service
         FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
@@ -154,24 +162,6 @@ public class DedicatedFileStorageAttachmentStorage extends FileStorageAttachment
 
         URI uri = FileStorages.getFullyQualifyingUriForPrefix(prefix, baseUri);
         return new Pair<>(storageService.getFileStorage(uri), uri);
-    }
-
-    /**
-     * Gets the session-associated configured identifier of the dedicated file storage (if any).
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param services The service look-up
-     * @return The identifier of the dedicated file storage or <code>0</code> (zero) if there is none
-     * @throws OXException If file storage identifier cannot be returned
-     */
-    public static int getFileStorageId(int userId, int contextId, ServiceLookup services) throws OXException {
-        // Acquire config view for session-associated user
-        ConfigViewFactory viewFactory = services.getServiceSafe(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(userId, contextId);
-
-        // Check if a dedicated file storage is configured
-        return ConfigViews.getDefinedIntPropertyFrom("com.openexchange.mail.compose.fileStorageId", 0, view);
     }
 
 }

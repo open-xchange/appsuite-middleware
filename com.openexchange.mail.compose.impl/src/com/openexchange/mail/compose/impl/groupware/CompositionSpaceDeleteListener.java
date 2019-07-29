@@ -520,7 +520,7 @@ public class CompositionSpaceDeleteListener implements DeleteListener {
 
     private static Pair<FileStorage, URI> getFileStorage(int dedicatedFileStorageId, int contextId) {
         try {
-            return DedicatedFileStorageAttachmentStorage.getFileStorage(dedicatedFileStorageId, contextId);
+            return DedicatedFileStorageAttachmentStorage.getDedicatedFileStorage(dedicatedFileStorageId, contextId);
         } catch (Exception e) {
             return null;
         }

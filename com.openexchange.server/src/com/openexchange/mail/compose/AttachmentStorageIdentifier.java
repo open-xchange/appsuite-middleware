@@ -148,7 +148,7 @@ public class AttachmentStorageIdentifier {
      * @return The argument
      */
     public <A> Optional<A> getArgument(KnownArgument knownArgument) {
-        return knownArgument == null ? null : getArgument(knownArgument.getName());
+        return knownArgument == null ? Optional.empty() : getArgument(knownArgument.getName());
     }
 
     /**

@@ -50,7 +50,6 @@
 package com.openexchange.mail.compose.impl.attachment.filestore;
 
 import java.net.URI;
-import java.util.Optional;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
@@ -92,12 +91,19 @@ public class ContextAssociatedFileStorageAttachmentStorage extends FileStorageAt
     }
 
     @Override
-    protected FileStorageReference getFileStorage(Optional<Integer> dedicatedFileStorageId, Session session) throws OXException {
-        Pair<FileStorage, URI> fsAndUri = getFileStorage(session.getContextId());
-        return new FileStorageReference(fsAndUri.getFirst(), fsAndUri.getSecond());
+    protected FileStorageAndId getFileStorage(Session session) throws OXException {
+        Pair<FileStorage, URI> fsAndUri = getContextAssociatedFileStorage(session.getContextId());
+        return new FileStorageAndId(fsAndUri.getFirst(), fsAndUri.getSecond());
     }
 
-    private static Pair<FileStorage, URI> getFileStorage(int contextId) throws OXException {
+    /**
+     * Gets the context-associated file storage for given context identifier.
+     *
+     * @param contextId The context identifier
+     * @return The context-associated file storage
+     * @throws OXException If context-associated file storage cannot be returned
+     */
+    public static Pair<FileStorage, URI> getContextAssociatedFileStorage(int contextId) throws OXException {
         FileStorageService storageService = FileStorages.getFileStorageService();
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(FileStorageService.class);
@@ -121,7 +127,7 @@ public class ContextAssociatedFileStorageAttachmentStorage extends FileStorageAt
      */
     public static Pair<FileStorage, URI> optFileStorage(int contextId) {
         try {
-            return getFileStorage(contextId);
+            return getContextAssociatedFileStorage(contextId);
         } catch (Exception e) {
             return null;
         }

@@ -877,7 +877,7 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         String storageIdentifier = rs.getString("refId");
         int dedicatedFileStorageId = rs.getInt("dedicatedFileStorageId");
         if (dedicatedFileStorageId <= 0) {
-            return new AttachmentStorageIdentifier(storageIdentifier);
+            return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(0));
         }
         return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(dedicatedFileStorageId));
     }

@@ -51,7 +51,7 @@ package com.openexchange.mail.compose.impl.rmi;
 
 import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getFileStorage;
+import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getDedicatedFileStorage;
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -178,7 +178,7 @@ public class RemoteCompositionSpaceServiceImpl implements RemoteCompositionSpace
                 rs = null;
 
                 for (Integer contextId : contextIds) {
-                    FileStorage fileStorage = getFileStorage(fileStorageId, contextId.intValue()).getFirst();
+                    FileStorage fileStorage = getDedicatedFileStorage(fileStorageId, contextId.intValue()).getFirst();
 
                     SortedSet<String> fileList = fileStorage.getFileList();
 

@@ -50,11 +50,14 @@
 package com.openexchange.mail.compose.impl.attachment.filestore;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.mail.compose.impl.attachment.filestore.ContextAssociatedFileStorageAttachmentStorage.getContextAssociatedFileStorage;
+import static com.openexchange.mail.compose.impl.attachment.filestore.DedicatedFileStorageAttachmentStorage.getDedicatedFileStorage;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Optional;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.compose.AttachmentStorageIdentifier;
 import com.openexchange.mail.compose.DataProvider;
 import com.openexchange.mail.compose.SeekingDataProvider;
@@ -87,7 +90,29 @@ public abstract class FileStorageAttachmentStorage extends AbstractAttachmentSto
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    protected abstract FileStorageReference getFileStorage(Optional<Integer> dedicatedFileStorageId, Session session) throws OXException;
+    protected FileStorageAndId getFileStorage(Optional<Integer> dedicatedFileStorageId, Session session) throws OXException {
+        if (dedicatedFileStorageId.isPresent()) {
+            int fileStorageId = dedicatedFileStorageId.get().intValue();
+            if (fileStorageId > 0) {
+                Pair<FileStorage, URI> fsAndUri = getDedicatedFileStorage(fileStorageId, session.getContextId());
+                return new FileStorageAndId(fsAndUri.getFirst(), fileStorageId, fsAndUri.getSecond());
+            }
+
+            Pair<FileStorage, URI> fsAndUri = getContextAssociatedFileStorage(session.getContextId());
+            return new FileStorageAndId(fsAndUri.getFirst(), fsAndUri.getSecond());
+        }
+
+        return getFileStorage(session);
+    }
+
+    /**
+     * Gets the appropriate {@link FileStorage} to use for this <code>FileStorageAttachmentStorage</code> instance.
+     *
+     * @param session The session providing user/context data
+     * @return The file storage
+     * @throws OXException If file storage cannot be returned
+     */
+    protected abstract FileStorageAndId getFileStorage(Session session) throws OXException;
 
     @Override
     protected DataProvider getDataProviderFor(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException {
@@ -96,24 +121,24 @@ public abstract class FileStorageAttachmentStorage extends AbstractAttachmentSto
 
     @Override
     protected AttachmentStorageIdentifier saveData(InputStream input, long size, Session session) throws OXException {
-        FileStorageReference fileStorageRef = getFileStorage(Optional.empty(), session);
+        FileStorageAndId fileStorageRef = getFileStorage(Optional.empty(), session);
         String storageIdentifier = fileStorageRef.fileStorage.saveNewFile(input);
         if (fileStorageRef.dedicatedFileStorageId <= 0) {
-            return new AttachmentStorageIdentifier(storageIdentifier);
+            return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(0));
         }
         return new AttachmentStorageIdentifier(storageIdentifier, KnownArgument.FILE_STORAGE_IDENTIFIER, I(fileStorageRef.dedicatedFileStorageId));
     }
 
     @Override
     protected boolean deleteData(AttachmentStorageIdentifier storageIdentifier, Session session) throws OXException {
-        FileStorageReference fileStorageRef = getFileStorage(storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER), session);
-        return fileStorageRef.fileStorage.deleteFile(storageIdentifier.getIdentifier());
+        FileStorage fileStorage = getFileStorage(storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER), session).fileStorage;
+        return fileStorage.deleteFile(storageIdentifier.getIdentifier());
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------------
 
     /** Reference to actual file storage and optional dedicated file storage identifier */
-    protected static class FileStorageReference {
+    protected static class FileStorageAndId {
 
         /** The  actual file storage */
         protected final FileStorage fileStorage;
@@ -125,23 +150,23 @@ public abstract class FileStorageAttachmentStorage extends AbstractAttachmentSto
         protected final URI uri;
 
         /**
-         * Initializes a new {@link FileStorageReference}.
+         * Initializes a new {@link FileStorageAndId}.
          *
          * @param fileStorage The file storage
          * @param uri The URI that fully qualifies the file storage
          */
-        protected FileStorageReference(FileStorage fileStorage, URI uri) {
+        protected FileStorageAndId(FileStorage fileStorage, URI uri) {
             this(fileStorage, 0, uri);
         }
 
         /**
-         * Initializes a new {@link FileStorageReference}.
+         * Initializes a new {@link FileStorageAndId}.
          *
          * @param fileStorage The file storage
-         * @param dedicatedFileStorageId The dedicated file storage identifier or <code>0</code>
+         * @param dedicatedFileStorageId The dedicated file storage identifier or <code>0</code> (zero)
          * @param uri The URI that fully qualifies the file storage
          */
-        protected FileStorageReference(FileStorage fileStorage, int dedicatedFileStorageId, URI uri) {
+        protected FileStorageAndId(FileStorage fileStorage, int dedicatedFileStorageId, URI uri) {
             super();
             this.fileStorage = fileStorage;
             this.dedicatedFileStorageId = dedicatedFileStorageId <= 0 ? 0 : dedicatedFileStorageId;
@@ -165,16 +190,18 @@ public abstract class FileStorageAttachmentStorage extends AbstractAttachmentSto
             this.attachmentStorage = attachmentStorage;
         }
 
+        private FileStorage getFileStorage() throws OXException {
+            return attachmentStorage.getFileStorage(storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER), session).fileStorage;
+        }
+
         @Override
         public InputStream getData() throws OXException {
-            FileStorageReference fileStorageAndId = attachmentStorage.getFileStorage(storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER), session);
-            return fileStorageAndId.fileStorage.getFile(storageIdentifier.getIdentifier());
+            return getFileStorage().getFile(storageIdentifier.getIdentifier());
         }
 
         @Override
         public InputStream getData(long offset, long length) throws OXException {
-            FileStorageReference fileStorageAndId = attachmentStorage.getFileStorage(storageIdentifier.getArgument(KnownArgument.FILE_STORAGE_IDENTIFIER), session);
-            return fileStorageAndId.fileStorage.getFile(storageIdentifier.getIdentifier(), offset, length);
+            return getFileStorage().getFile(storageIdentifier.getIdentifier(), offset, length);
         }
     }
 
