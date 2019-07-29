@@ -474,4 +474,14 @@ properties:
       configcascadeAware: true
       file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Calendar"]      
+      tags: ["Calendar"]
+    - key: com.openexchange.capability.calendar-printing
+      description: |
+        Enables or disables indicating the <i>calendar-printing</i> capability towards clients.
+      defaultValue: true
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: true
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Permission"]
