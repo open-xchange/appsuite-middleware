@@ -500,19 +500,6 @@ public abstract class AbstractAttachmentStorage implements AttachmentStorage {
         return saveAttachment(identifierAndSize, attachment, session, con);
     }
 
-    /**
-     * Enhances given INSERT statement.
-     *
-     * @param stmt The INSERT statement
-     * @param pos The position to start from
-     * @param session The session
-     * @throws OXException If enhancing fails
-     * @throws SQLException If an SQL error occurs
-     */
-    protected void enhanceInsertStatement(PreparedStatement stmt, int pos, Session session) throws OXException, SQLException {
-        stmt.setInt(pos, 0);
-    }
-
     private Attachment saveAttachment(StorageIdentifierAndSize identifierAndSize, AttachmentDescription attachment, Session session, Connection con) throws OXException {
         AttachmentStorageIdentifier storageIdentifierToDelete = identifierAndSize.storageIdentifier;
         PreparedStatement stmt = null;
