@@ -405,6 +405,7 @@ public final class OXFolderAdminHelper {
      */
     public void setGlobalAddressBookDisabled(final int cid, final int userId, final boolean disable, final Connection writeCon) throws OXException {
         setGlobalAddressBookDisabled(cid, userId, disable, writeCon, null, true);
+        LOG.debug("{} global address book for user {} in context {}", disable ? "Disabled" : "Enabled", Integer.valueOf(userId), Integer.valueOf(cid));
     }
 
     /**
@@ -1495,11 +1496,11 @@ public final class OXFolderAdminHelper {
     private static void setGABPermissions(final OCLPermission p) {
         p.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
     }
-    
-    
+
+
     /**
      * Get the unique folder name for a user's default folder
-     * 
+     *
      * @param context The {@link Context}
      * @param displayName The display name of the user to user as default folder name
      * @param defaultInfostoreFolderId The identifier of the users default folder
