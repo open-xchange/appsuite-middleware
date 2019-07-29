@@ -399,7 +399,7 @@ public final class OXFolderAdminHelper {
      *
      * @param cid The context ID
      * @param userId The user ID
-     * @param disable <code>true</code> to enabled user's global address book permission; otherwise <code>false</code>
+     * @param disable <code>true</code> to disable user's global address book permission; otherwise <code>false</code>
      * @param writeCon A writable connection
      * @throws OXException If an error occurs
      */
