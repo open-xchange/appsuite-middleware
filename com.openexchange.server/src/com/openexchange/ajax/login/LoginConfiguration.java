@@ -50,8 +50,6 @@
 package com.openexchange.ajax.login;
 
 import com.openexchange.configuration.CookieHashSource;
-import com.openexchange.java.util.Tools;
-import com.openexchange.log.LogProperties;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.
@@ -148,35 +146,4 @@ public final class LoginConfiguration {
     public boolean isCheckPunyCodeLoginString() {
         return checkPunyCodeLoginString;
     }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Retrieves the context identifier from the {@link LogProperties}
-     *
-     * @return the context identifier from the LogProperties
-     */
-    private int getContextId() {
-        return getLogPropertyValue(LogProperties.Name.SESSION_CONTEXT_ID);
-    }
-
-    /**
-     * Retrieves the user identifier from the {@link LogProperties}
-     *
-     * @return the user identifier from the {@link LogProperties}
-     */
-    private int getUserId() {
-        return getLogPropertyValue(LogProperties.Name.SESSION_USER_ID);
-    }
-
-    /**
-     * Retrieves value of the specified property from the {@link LogProperties}
-     *
-     * @param name The log property's name
-     * @return the property's value
-     */
-    private int getLogPropertyValue(LogProperties.Name name) {
-        return Tools.getUnsignedInteger(LogProperties.get(name));
-    }
-
 }

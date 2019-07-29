@@ -87,8 +87,7 @@ public class CookieRefresher implements SessionServletInterceptor {
         if (!Sessions.isStaySignedIn(session)) {
             return;
         }
-        String host = req.getServerName();
-        if (needsCookieRefresh(session, host)) {
+        if (needsCookieRefresh(session)) {
             String hash = session.getHash();
 
             // Write secret+public cookie
@@ -121,7 +120,7 @@ public class CookieRefresher implements SessionServletInterceptor {
         return false;
     }
 
-    private boolean needsCookieRefresh(Session session, String host) {
+    private boolean needsCookieRefresh(Session session) {
         Long stamp = (Long) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
         if (null == stamp) {
             // No time stamp available, yet

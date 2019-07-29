@@ -49,6 +49,7 @@
 
 package com.openexchange.session;
 
+import static com.openexchange.java.Autoboxing.b;
 import java.util.concurrent.locks.Lock;
 
 
@@ -111,9 +112,11 @@ public final class Sessions {
         if (session.containsParameter(Session.PARAM_STAY_SIGNED_IN)) {
             Object value = session.getParameter(Session.PARAM_STAY_SIGNED_IN);
             if (Boolean.class.isInstance(value)) {
-                return (Boolean) value;
+                return b((Boolean) value);
             }
-            return Boolean.parseBoolean((String) value);
+            if (String.class.isInstance(value)) {
+                return Boolean.parseBoolean((String) value);
+            }
         }
         return false;
     }
