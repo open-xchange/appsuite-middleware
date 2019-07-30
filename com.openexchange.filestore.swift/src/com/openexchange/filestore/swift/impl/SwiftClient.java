@@ -590,6 +590,12 @@ public class SwiftClient {
      * @return An OXException to re-throw or <code>null</code> to retry with another available end-point
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
+        if (org.apache.http.conn.ConnectionPoolTimeoutException.class.isInstance(e)) {
+            // Waiting for an available connection in HttpClient pool expired.
+            // Avoid additional stress for that pool by preventing unavailable check, which might in turn wait for a lease.
+            return FileStorageCodes.IOERROR.create(e, e.getMessage());
+        }
+
         Boolean unavailable = Utils.endpointUnavailable(endpoint, httpClient);
         if (null != unavailable && unavailable.booleanValue()) {
             LOG.warn("Swift end-point is unavailable: {}", endpoint);

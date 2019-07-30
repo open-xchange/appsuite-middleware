@@ -67,6 +67,6 @@ public interface StreamedUploadFile extends BasicUploadFile {
      * @return The <tt>InputStream</tt> instance
      * @throws IOException If stream cannot be returned
      */
-    InputStream getStream() throws IOException;
+    StreamedUploadFileInputStream getStream() throws IOException;
 
 }

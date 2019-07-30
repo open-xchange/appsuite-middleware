@@ -52,7 +52,13 @@ package com.openexchange.filestore.impl;
 import static com.openexchange.filestore.impl.groupware.unified.UnifiedQuotaUtils.isUnifiedQuotaEnabledFor;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import com.openexchange.configuration.ServerConfig;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -69,6 +75,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import org.apache.commons.io.FileUtils;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -80,12 +87,16 @@ import com.openexchange.filestore.Purpose;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageListener;
+import com.openexchange.filestore.Spool;
+import com.openexchange.filestore.SpoolingCapableQuotaFileStorage;
 import com.openexchange.filestore.event.FileStorageListener;
 import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.filestore.unified.KnownContributor;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.filestore.unified.UsageResult;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogProperties;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.ServiceListings;
 
@@ -96,7 +107,7 @@ import com.openexchange.osgi.ServiceListings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For cache service */{
+public class DBQuotaFileStorage implements SpoolingCapableQuotaFileStorage, Serializable /* For cache service */{
 
     private static final long serialVersionUID = -4048657112670657310L;
 
@@ -528,6 +539,17 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         }
     }
 
+    /**
+     * Checks if stream is supposed to be spooled.
+     *
+     * @param spoolToFile The flag to examine
+     * @param source The source to examine
+     * @return <code>true</code> to spool; otherwise <code>false</code>
+     */
+    private boolean spool(boolean spoolToFile, InputStream source) {
+        return (spoolToFile || (source.getClass().getAnnotation(Spool.class) != null) || "true".equals(LogProperties.get(LogProperties.Name.FILESTORE_SPOOL)));
+    }
+
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
         if (null == identifiers || identifiers.length == 0) {
@@ -637,28 +659,45 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public String saveNewFile(InputStream is, long sizeHint) throws OXException {
-        long quota = getQuota();
-        if (checkNoQuota(null, quota)) {
-            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
-        }
+        return saveNewFile(is, sizeHint, false);
+    }
 
-        boolean checked = false;
-        if (0 < sizeHint) {
-            checkAvailable(null, sizeHint, quota);
-            checked = true;
-        }
-
+    @Override
+    public String saveNewFile(InputStream source, long sizeHint, boolean spoolToFile) throws OXException {
+        InputStream is = source;
         String file = null;
+        File tmpFile = null;
         try {
-            // Store new file
-            if (checked || 0 > quota) {
-                file = fileStorage.saveNewFile(is);
-            } else {
+            // Check for no quota at all
+            long quota = getQuota();
+            if (checkNoQuota(null, quota)) {
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+            }
+
+            // Check in case size hint is given
+            boolean checked = false;
+            if (0 < sizeHint) {
+                checkAvailable(null, sizeHint, quota);
+                checked = true;
+            }
+
+            // Create limited stream based on free space in destination storage
+            if (!checked && 0 <= quota) {
                 long usage = getUsage();
                 long free = quota - usage;
-                file = fileStorage.saveNewFile(new LimitedInputStream(is, free));
+                is = new LimitedInputStream(is, free);
             }
-            String retval = file;
+
+            // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
+            if (spool(spoolToFile, source)) {
+                tmpFile = newTempFile();
+                if (tmpFile != null) {
+                    is = transferToFileAndCreateStream(is, tmpFile);
+                }
+            }
+
+            // Store new file
+            file = fileStorage.saveNewFile(is);
 
             // Check against quota limitation
             boolean full = incUsage(file, fileStorage.getFileSize(file));
@@ -669,15 +708,18 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             // Notify storage listeners
             for (FileStorageListener storageListener : storageListeners) {
                 try {
-                    storageListener.onFileCreated(retval, fileStorage);
+                    storageListener.onFileCreated(file, fileStorage);
                 } catch (Exception e) {
                     LOGGER.warn("", e);
                 }
             }
 
             // Null'ify reference (to avoid preliminary deletion) & return new file identifier
+            String retval = file;
             file = null;
             return retval;
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof StorageFullIOException) {
@@ -688,6 +730,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
             throw e;
         } finally {
+            Streams.close(is);
+            FileUtils.deleteQuietly(tmpFile);
             if (file != null) {
                 fileStorage.deleteFile(file);
             }
@@ -701,28 +745,46 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public long appendToFile(InputStream is, String name, long offset, long sizeHint) throws OXException {
-        long quota = getQuota();
-        if (checkNoQuota(name, quota)) {
-            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
-        }
+        return appendToFile(is, name, offset, sizeHint, false);
+    }
 
-        boolean checked = false;
-        if (0 < sizeHint) {
-            checkAvailable(name, sizeHint, quota);
-            checked = true;
-        }
-
+    @Override
+    public long appendToFile(InputStream source, String name, long offset, long sizeHint, boolean spoolToFile) throws OXException {
+        InputStream is = source;
         long newSize = -1;
         boolean notFoundError = false;
+        File tmpFile = null;
         try {
-            // Append to new file
-            if (checked || 0 > quota) {
-                newSize = fileStorage.appendToFile(is, name, offset);
-            } else {
+            // Check for no quota at all
+            long quota = getQuota();
+            if (checkNoQuota(name, quota)) {
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+            }
+
+            // Check in case size hint is given
+            boolean checked = false;
+            if (0 < sizeHint) {
+                checkAvailable(name, sizeHint, quota);
+                checked = true;
+            }
+
+            // Create limited stream based on free space in destination storage
+            if (!checked && 0 <= quota) {
                 long usage = getUsage();
                 long free = quota - usage;
-                newSize = fileStorage.appendToFile(new LimitedInputStream(is, free), name, offset);
+                is = new LimitedInputStream(is, free);
             }
+
+            // Spool to temporary file to not exhaust/block file storage resources (e.g. HTTP connection pool)
+            if (spool(spoolToFile, source)) {
+                tmpFile = newTempFile();
+                if (tmpFile != null) {
+                    is = transferToFileAndCreateStream(is, tmpFile);
+                }
+            }
+
+            // Append to new file
+            newSize = fileStorage.appendToFile(is, name, offset);
 
             // Check against quota limitation
             boolean full = incUsage(name, newSize - offset);
@@ -738,6 +800,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                     LOGGER.warn("", e);
                 }
             }
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof StorageFullIOException) {
@@ -751,6 +815,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
             throw e;
         } finally {
+            Streams.close(is);
+            FileUtils.deleteQuietly(tmpFile);
             if (false == notFoundError && -1 == newSize) {
                 try {
                     fileStorage.setFileLength(offset, name);
@@ -961,6 +1027,72 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     @Override
     public String toString() {
         return "DBQuotaFileStorage [contextId=" + contextId + ", quota=" + quota + ", ownerId=" + ownerInfo.getOwnerId() + ", uri=" + uri + "]";
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final int BUFFER_SIZE = 65536;
+
+    private static InputStream transferToFileAndCreateStream(InputStream source, File tmpFile) throws IOException, FileNotFoundException {
+        try (InputStream in = source; OutputStream out = FileUtils.openOutputStream(tmpFile)) {
+            byte[] buffer = new byte[BUFFER_SIZE];
+            for (int n; (n = in.read(buffer)) > 0;) {
+                out.write(buffer, 0, n);
+            }
+            out.flush();
+        }
+        return new FileInputStream(tmpFile);
+    }
+
+    private static volatile File uploadDirectory;
+    private static File uploadDirectory() {
+        File tmp = uploadDirectory;
+        if (null == tmp) {
+            synchronized (DBQuotaFileStorage.class) {
+                tmp = uploadDirectory;
+                if (null == tmp) {
+                    tmp = new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
+                    uploadDirectory = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.
+     * </ol>
+     *
+     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
+     */
+    private static File newTempFile() {
+        return newTempFile("open-xchange-spoolfile-");
+    }
+
+    /**
+     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.
+     * </ol>
+     *
+     * @param prefix The prefix to use for generated file
+     * @return An abstract pathname denoting a newly-created empty file or <code>null</code> if a file could not be created
+     */
+    private static File newTempFile(String prefix) {
+        try {
+            File tmpFile = File.createTempFile(null == prefix ? "open-xchange-spoolfile-" : prefix, ".tmp", uploadDirectory());
+            tmpFile.deleteOnExit();
+            return tmpFile;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to create new temporary file", e);
+            return null;
+        }
     }
 
 }
