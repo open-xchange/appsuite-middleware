@@ -177,8 +177,8 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             throw new NoSuchElementException();
         }
 
-        T retval = nextInstance();
         position = nextPosition;
+        T retval = nextInstance();
         innerNext();
         return retval;
     }
