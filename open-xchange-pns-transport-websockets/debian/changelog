@@ -1,3 +1,9 @@
+open-xchange-pns-transport-websockets (7.8.4-60) stable; urgency=medium
+
+  * Build for patch 2019-07-29 (5339)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 23 Jul 2019 09:03:05 +0200
+
 open-xchange-pns-transport-websockets (7.8.4-59) stable; urgency=medium
 
   * Build for patch 2019-06-11 (5275)
