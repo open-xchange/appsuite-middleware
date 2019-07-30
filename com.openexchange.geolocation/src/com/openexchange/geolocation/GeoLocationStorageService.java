@@ -49,6 +49,7 @@
 
 package com.openexchange.geolocation;
 
+import java.net.InetAddress;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 
@@ -64,31 +65,18 @@ public interface GeoLocationStorageService {
      * Retrieves the {@link GeoInformation} of the specified IP address from the storage
      * 
      * @param contextId The context identifier
-     * @param ipAddress The IP address as string
+     * @param address The IP address to lookup
      * @return The Geographical information for the specified IP address or <code>null</code> if no location could be determined
      * @throws OXException If the specified IP address is invalid or Geographical information cannot be returned
      *             or any other error is occurred
      */
     @Nullable
-    GeoInformation getGeoInformation(int contextId, long ipAddress) throws OXException;
-
-    /**
-     * Retrieves the {@link GeoInformation} of the specified geographical point within the specified radius
-     * 
-     * @param contextId The context identifier
-     * @param latitude The latitude
-     * @param longitude The longitude
-     * @param radius The radius
-     * @return The Geographical information of the closest point within the specified radius or <code>null</code> if no location could be found
-     * @throws OXException if Geographical information cannot be returned or any other error is occurred
-     */
-    @Nullable
-    GeoInformation getGeoInformation(int contextId, double latitude, double longitude, int radius) throws OXException;
+    GeoInformation getGeoInformation(int contextId, InetAddress address) throws OXException;
 
     /**
      * Returns the service provider identifier
      * 
-     * @return the sevice provider identifier
+     * @return the service provider identifier
      */
     String getProviderId();
 }

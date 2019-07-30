@@ -50,6 +50,8 @@
 package com.openexchange.ipcheck.countrycode;
 
 import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -63,8 +65,8 @@ import com.openexchange.ajax.ipcheck.IPCheckers;
 import com.openexchange.ajax.ipcheck.spi.IPChecker;
 import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
-import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationService;
+import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.MetricAware;
 import com.openexchange.server.ServiceLookup;
@@ -118,12 +120,12 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
         }
         try {
             GeoLocationService service = services.getServiceSafe(GeoLocationService.class);
-            GeoInformation geoInformationCurrent = service.getGeoInformation(session.getContextId(), current);
+            GeoInformation geoInformationCurrent = service.getGeoInformation(session.getContextId(), InetAddress.getByName(current));
             if (geoInformationCurrent == null) {
                 LOGGER.warn("No geo information could be retrieved for the current IP '{}'.", current);
                 return;
             }
-            GeoInformation geoInformationPrevious = service.getGeoInformation(session.getContextId(), previous);
+            GeoInformation geoInformationPrevious = service.getGeoInformation(session.getContextId(), InetAddress.getByName(previous));
             if (geoInformationPrevious == null) {
                 LOGGER.warn("No geo information could be retrieved for the previous IP '{}'.", previous);
                 return;
@@ -143,6 +145,9 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             }
             String message = e.getMessage();
             LOGGER.error("{}", message, e);
+            deny(current, previous, session, DenyReason.EXCEPTION, e);
+        } catch (UnknownHostException e) {
+            LOGGER.debug("Invalid addresses were specified: {}, {}", previous, current, e);
             deny(current, previous, session, DenyReason.EXCEPTION, e);
         }
 

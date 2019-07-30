@@ -57,9 +57,9 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.geolocation.GeoLocationStorageService;
+import com.openexchange.geolocation.exceptions.GeoLocationExceptionCodes;
 
 /**
  * {@link GeoLocationStorageServiceRegistryImpl}
@@ -69,7 +69,7 @@ import com.openexchange.geolocation.GeoLocationStorageService;
  */
 public class GeoLocationStorageServiceRegistry {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationRMIServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeoLocationStorageServiceRegistry.class);
 
     public static final GeoLocationStorageServiceRegistry INSTANCE = new GeoLocationStorageServiceRegistry();
 

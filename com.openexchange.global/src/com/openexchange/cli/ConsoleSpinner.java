@@ -71,6 +71,7 @@ public class ConsoleSpinner {
         this.optionalPrefix = Strings.isEmpty(optionalPrefix) ? "" : optionalPrefix;
         this.optionalSuffix = Strings.isEmpty(optionalSuffix) ? "" : optionalSuffix;
         animationThread = new Thread(new SpinnerAnimation(this.optionalPrefix, this.optionalSuffix), "spinnerThread");
+        animationThread.setDaemon(true);
     }
 
     /**
@@ -82,7 +83,6 @@ public class ConsoleSpinner {
 
     /**
      * Stops the spinning and sets an optional status.
-     *
      */
     public void stop(String status) {
         System.out.print("\r" + optionalPrefix + "[ " + status + " ]" + optionalSuffix + "\n");
@@ -132,5 +132,4 @@ public class ConsoleSpinner {
             }
         }
     }
-
 }

@@ -98,6 +98,7 @@ import com.openexchange.groupware.upload.StreamedUploadFileIterator;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
@@ -1342,7 +1343,12 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             if (uploadedAttachments.hasNext()) {
                 StreamedUploadFile uploadFile = uploadedAttachments.next();
                 AttachmentDescription attachment = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
-                newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+                LogProperties.put(LogProperties.Name.FILESTORE_SPOOL, "true");
+                try {
+                    newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+                } finally {
+                    LogProperties.remove(LogProperties.Name.FILESTORE_SPOOL);
+                }
             }
 
             if (newAttachments.isEmpty()) {
@@ -1422,10 +1428,17 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
 
         List<Attachment> newAttachments = new LinkedList<Attachment>();
         try {
-            while (uploadedAttachments.hasNext()) {
-                StreamedUploadFile uploadFile = uploadedAttachments.next();
-                AttachmentDescription attachment = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
-                newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+            if (uploadedAttachments.hasNext()) {
+                LogProperties.put(LogProperties.Name.FILESTORE_SPOOL, "true");
+                try {
+                    do {
+                        StreamedUploadFile uploadFile = uploadedAttachments.next();
+                        AttachmentDescription attachment = AttachmentStorages.createUploadFileAttachmentDescriptionFor(uploadFile, disposition, compositionSpaceId);
+                        newAttachments.add(AttachmentStorages.saveAttachment(uploadFile.getStream(), attachment, session, attachmentStorage));
+                    } while (uploadedAttachments.hasNext());
+                } finally {
+                    LogProperties.remove(LogProperties.Name.FILESTORE_SPOOL);
+                }
             }
 
             boolean retry = true;

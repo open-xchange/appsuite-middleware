@@ -294,6 +294,7 @@ public class ICalFeedClient {
                     tmp = httpClient;
                     if (tmp == null) {
                         ClientConfig config = ClientConfig.newInstance();
+                        config.setDenyLocalRedirect(true);
                         config.setUserAgent(initUserAgent());
                         initConfig(config);
                         tmp = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));

@@ -370,4 +370,24 @@
             <dropTable tableName="ip_locations"/>
         </rollback>
     </changeSet>
+    
+    <!-- ******************************************************** -->
+    <!-- ************** Release 7.10.3 starts here ************** -->
+    <!-- ******************************************************** -->   
+    <changeSet id="7.10.3:ip_blocks:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+         <dropTable tableName="ip_blocks"/>
+        <comment>Drops the MaxMind's ip_blocks table</comment>
+    </changeSet>
+	<changeSet id="7.10.3:ipv6_blocks:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+         <dropTable tableName="ipv6_blocks"/>
+        <comment>Drops the MaxMind's ipv6_blocks table</comment>
+    </changeSet>
+    <changeSet id="7.10.3:ip_locations:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+         <dropTable tableName="ip_locations"/>
+        <comment>Drops the MaxMind's ip_locations table</comment>
+    </changeSet>
+    <changeSet id="7.10.3:ip2location:drop" author="ioannis.chouklis@open-xchange.com" failOnError="false">
+         <dropTable tableName="ip2location"/>
+        <comment>Drops the Ip2Location's ip2location table</comment>
+    </changeSet>
 </databaseChangeLog>

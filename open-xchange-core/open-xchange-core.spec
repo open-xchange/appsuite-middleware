@@ -17,7 +17,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -35,6 +35,8 @@ Requires:      open-xchange-system >= @OXVERSION@
 Obsoletes:     open-xchange-freebusy < %{version}
 Conflicts:     open-xchange-publish < 7.10.2
 Obsoletes:     open-xchange-publish < 7.10.2
+Conflicts:     open-xchange-geoip-ip2location >= 7.10.2
+Obsoletes:     open-xchange-geoip-ip2location >= 7.10.2
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
@@ -748,6 +750,8 @@ exit 0
 %doc com.openexchange.database/doc/examples
 
 %changelog
+* Mon Jul 22 2019 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2019-07-29 (5341)
 * Tue Jul 09 2019 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2019-07-15 (5310)
 * Thu Jun 27 2019 Marcus Klein <marcus.klein@open-xchange.com>
