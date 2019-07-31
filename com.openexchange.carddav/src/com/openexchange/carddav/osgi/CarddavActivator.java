@@ -117,10 +117,8 @@ public class CarddavActivator extends HousekeepingActivator {
              * register CardDAV servlet & WebDAV path
              */
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            String carddavPath = insertPrefixPath(configViewFactory, "carddav");
-
-            getService(HttpService.class).registerServlet(carddavPath, new CardDAV(performer), null, null);
-            getService(HttpService.class).registerServlet("/.well-known/carddav", new WellKnownServlet(carddavPath, Interface.CARDDAV), null, null);
+            getService(HttpService.class).registerServlet(insertPrefixPath(configViewFactory, "carddav"), new CardDAV(performer), null, null);
+            getService(HttpService.class).registerServlet(insertPrefixPath(configViewFactory, "/.well-known/carddav"), new WellKnownServlet("/carddav", Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
 
                 @Override

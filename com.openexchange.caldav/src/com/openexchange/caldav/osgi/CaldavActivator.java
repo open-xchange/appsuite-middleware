@@ -49,7 +49,7 @@
 
 package com.openexchange.caldav.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caldav.CalDAVURLField;
@@ -104,7 +104,7 @@ import com.openexchange.xml.jdom.JDOMParser;
  */
 public class CaldavActivator extends HousekeepingActivator {
 
-    private static final String SERVLET_PATH = "caldav";
+    private static final String SERVLET_PATH = "/caldav";
 
     private static final String NULL_PATH = "dev/null";
 
@@ -134,11 +134,10 @@ public class CaldavActivator extends HousekeepingActivator {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
 
-            String pathPrefix = getPathPrefix(getServiceSafe(ConfigViewFactory.class));
-            httpService.registerServlet(pathPrefix + SERVLET_PATH, new CalDAV(performer), null, null);
-            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(pathPrefix + SERVLET_PATH, Interface.CALDAV), null, null);
-            httpService.registerServlet(pathPrefix + NULL_PATH, new DevNullServlet(), null, null);
-            httpService.registerServlet(pathPrexif + ".well-known/caldav", new WellKnownServlet("/caldav", Interface.CALDAV), null, null);
+            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
+            httpService.registerServlet(insertPrefixPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
+            httpService.registerServlet(insertPrefixPath(configViewFactory,"/.well-known/caldav"), new WellKnownServlet(SERVLET_PATH, Interface.CALDAV), null, null);
+            httpService.registerServlet(insertPrefixPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
