@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav.mixins;
 
-import com.openexchange.caldav.resources.EventCollection;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -64,9 +63,8 @@ public class SubscribedStripAlarms extends SingleXMLPropertyMixin {
     /**
      * Initializes a new {@link SubscribedStripAlarms}.
      *
-     * @param collection The event collection to initialize with
      */
-    public SubscribedStripAlarms(EventCollection collection) {
+    public SubscribedStripAlarms() {
         super(DAVProtocol.CALENDARSERVER_NS.getURI(), "subscribed-strip-alarms");
     }
 

@@ -147,9 +147,9 @@ public class EventCollection extends CalDAVFolderCollection<Event> {
             includeProperties(
                 new RefreshRate(this),
                 new Source(this),
-                new SubscribedStripAlarms(this),
-                new SubscribedStripAttachments(this),
-                new SubscribedStripTodos(this)
+                new SubscribedStripAlarms(),
+                new SubscribedStripAttachments(),
+                new SubscribedStripTodos()
             );
         }
         if (supportsPermissions(folder)) {
