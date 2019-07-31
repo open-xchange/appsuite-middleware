@@ -129,11 +129,14 @@ The quota for file storages covers the ``Size`` quota type. The file storage is 
  - PIM attachments
  - Snippets
  - Resource cache (e.g. thumbnail images)
+ - Mail compose attachments
  - ...
 
-Except Drive files all other files apply to the quota that is bound to a context.
+Except Drive files and Mail compose attachments all other files apply to the quota that is bound to a context.
 
 Drive files are special here, since it is also possible to define a user-associated file storage that carries its own user-sensitive quota. Moreover to Drive files also applies an ``Amount`` quota through the objects/items quota outlined in previous sections.
+
+Mail compose attachments are quota-less and thus do not count to the quota that is bound to a context. To see storage possibilites for mail compose attachments check [this]({{ site.baseurl }}/middleware/mail/mail_compose.html) arcticle.
 
 The file storage quotas is exclusively set through provisioning via [``createcontext``/``changecontext``](http://oxpedia.org/wiki/index.php?title=AppSuite:Context_management#Parameters) and ``createuser``/``changecuser`` command-line tools.
 
