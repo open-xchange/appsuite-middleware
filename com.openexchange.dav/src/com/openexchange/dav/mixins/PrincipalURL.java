@@ -49,12 +49,15 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.dav.Tools;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.osgi.Services;
+import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -73,7 +76,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The principal URL
      */
     public static String forUser(int userID) {
-        return Tools.getPathPrefix() + "/principals/users/" + userID;
+        return insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class),  "/principals/users/" + userID);
     }
 
     /**
@@ -83,7 +86,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The principal URL
      */
     public static String forGroup(int groupID) {
-        return Tools.getPathPrefix() + "/principals/groups/" + groupID;
+        return insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class),  "/principals/groups/" + groupID);
     }
 
     /**
@@ -93,7 +96,7 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
      * @return The principal URL
      */
     public static String forResource(int resourceID) {
-        return Tools.getPathPrefix() + "/principals/resources/" + resourceID;
+        return insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class),  "/principals/resources/" + resourceID);
     }
 
     /**
@@ -111,8 +114,10 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
                     // ignore
                 }
             }
-            if (principalURL.startsWith(Tools.getPathPrefix() + "/principals/")) {
-                Matcher matcher = URL_PATTERN.matcher(principalURL);
+            if (principalURL.startsWith(DAVTools.getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class)) + "/principals/")) {
+                // Compile pattern each time, services/configuration might not be ready when building pattern statically.
+                Pattern url_pattern = Pattern.compile(insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), "/principals/(resources|users|groups)/(\\d+)/?"));
+                Matcher matcher = url_pattern.matcher(principalURL);
                 if (matcher.find() && 2 == matcher.groupCount()) {
                     try {
                         switch (matcher.group(1)) {
@@ -134,7 +139,6 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
         return null;
     }
 
-    private static final Pattern URL_PATTERN = Pattern.compile(Tools.getPathPrefix() + "/principals/(resources|users|groups)/(\\d+)/?");
     private static final String PROPERTY_NAME = "principal-URL";
 
     private final int principalID;

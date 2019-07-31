@@ -97,6 +97,7 @@ public class GroupwareCaldavFactory extends DAVFactory {
     private final ICalEmitter icalEmitter;
     private final ICalParser icalParser;
     private final UserService users;
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link GroupwareCaldavFactory}.
@@ -111,6 +112,7 @@ public class GroupwareCaldavFactory extends DAVFactory {
         this.icalEmitter = services.getService(ICalEmitter.class);
         this.icalParser = services.getService(ICalParser.class);
         this.users = services.getService(UserService.class);
+        this.configViewFactory = services.getService(ConfigViewFactory.class);
     }
 
     @Override
@@ -270,6 +272,10 @@ public class GroupwareCaldavFactory extends DAVFactory {
 
     public User resolveUser(int userID) throws OXException {
         return users.getUser(userID, getContext());
+    }
+    
+    public ConfigViewFactory getConfigViewFactory() {
+        return configViewFactory;
     }
 
 }

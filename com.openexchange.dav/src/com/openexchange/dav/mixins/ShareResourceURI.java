@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.Tools;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -76,7 +78,7 @@ public class ShareResourceURI extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + Tools.getPathPrefix() + collection.getUrl() + "</D:href>";
+        return "<D:href>" + insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), collection.getUrl() + "</D:href>");
     }
 
 }

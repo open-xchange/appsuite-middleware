@@ -49,9 +49,12 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -143,7 +146,7 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      * @return <code>true</code> if it's the root path, <code>false</code>, otherwise
      */
     protected boolean isRoot(WebdavPath url) {
-        if (new WebdavPath(Tools.getPathPrefix()).equals(url)) {
+        if (new WebdavPath(getPathPrefix(getService(ConfigViewFactory.class))).equals(url)) {
             return true;
         }
         return 0 == url.size();
@@ -156,11 +159,13 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      * @return The sanitized path
      */
     protected WebdavPath sanitize(WebdavPath url) {
-        if (url.toString().startsWith(Tools.getPathPrefix())) {
-            url = new WebdavPath(url.toString().substring(Tools.getPathPrefix().length()));
+        WebdavPath sanitized = url;
+        String pathPrefix = getPathPrefix(getService(ConfigViewFactory.class));
+        if (Strings.isNotEmpty(sanitized.toString()) && sanitized.toString().startsWith(pathPrefix)) {
+            sanitized = new WebdavPath(sanitized.toString().substring(pathPrefix.length()));
         }
         WebdavPath prefixPath = new WebdavPath(getURLPrefix());
-        return 0 < prefixPath.size() && url.startsWith(prefixPath) ? url.subpath(1) : url;
+        return 0 < prefixPath.size() && sanitized.startsWith(prefixPath) ? sanitized.subpath(1) : sanitized;
     }
 
     /**

@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.osgi;
 
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilitySet;
@@ -63,7 +64,6 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.dav.WellKnownServlet;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -116,10 +116,13 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register CardDAV servlet & WebDAV path
              */
-            String pathPrefix = getServletPathPrefix();
-            getService(HttpService.class).registerServlet(pathPrefix + "/carddav", new CardDAV(performer), null, null);
-            getService(HttpService.class).registerServlet(pathprefix + ".well-known/carddav", new WellKnownServlet(pathPrefix + "/carddav", Interface.CARDDAV), null, null);
+            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
+            String carddavPath = insertPrefixPath(configViewFactory, "carddav");
+
+            getService(HttpService.class).registerServlet(carddavPath, new CardDAV(performer), null, null);
+            getService(HttpService.class).registerServlet("/.well-known/carddav", new WellKnownServlet(carddavPath, Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
+
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {
                     return capabilities.contains(Permission.CARDDAV.getCapabilityName());
@@ -128,7 +131,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register Photo performer for referenced contact images in vCards
              */
-            getService(HttpService.class).registerServlet(pathPrefix + "/photos", new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
+            getService(HttpService.class).registerServlet(insertPrefixPath(configViewFactory, "photos"), new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
             /*
              * track optional services
              */
@@ -158,20 +161,10 @@ public class CarddavActivator extends HousekeepingActivator {
          */
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            httpService.unregister(getServletPathPrefix() + "/carddav");
+            ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
+            String carddavPath = insertPrefixPath(configViewFactory, "carddav");
+            httpService.unregister(carddavPath);
         }
         super.stopBundle();
     }
-
-    private String getServletPathPrefix() {
-        ConfigViewFactory factory = getService(ConfigViewFactory.class);
-        try {
-            return factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
-        } catch (OXException e) {
-            LOG.debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
-            return "/servlet/dav";
-            
-        }
-    }
-
 }

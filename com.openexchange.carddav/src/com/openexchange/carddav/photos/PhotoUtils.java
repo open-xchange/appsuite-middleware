@@ -49,13 +49,15 @@
 
 package com.openexchange.carddav.photos;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
 import org.apache.http.client.utils.URIBuilder;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.Tools;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Charsets;
@@ -74,21 +76,24 @@ public class PhotoUtils {
 
     /**
      * Builds the full URI for a specific contact image.
-     *
+     * 
+     * @param configViewFactory The configuration 
      * @param hostData The host data to use for generating the link
      * @param contact The contact to build the image URI for
      * @return The image URI, or <code>null</code> if the contact does not contain an image
+     * @throws WebdavProtocolException If URI building fails
      */
-    public static URI buildURI(HostData hostData, Contact contact) throws WebdavProtocolException {
+    public static URI buildURI(ConfigViewFactory configViewFactory, HostData hostData, Contact contact) throws WebdavProtocolException {
         if (0 >= contact.getNumberOfImages()) {
             return null;
         }
         try {
+            String path = new StringBuilder().append("/photos/").append(encodeName(contact)).append('/')
+                .append("image1.").append(MimeType2ExtMap.getFileExtension(contact.getImageContentType(), "jpg")).toString();
             return new URI(new URIBuilder()
                 .setScheme(hostData.isSecure() ? "https" : "http")
                 .setHost(hostData.getHost())
-                .setPath(new StringBuilder(Tools.getPathPrefix()).append("/photos/").append(encodeName(contact)).append('/')
-                    .append("image1.").append(MimeType2ExtMap.getFileExtension(contact.getImageContentType(), "jpg")).toString())
+                .setPath(insertPrefixPath(configViewFactory, path))
             .toString());
         } catch (URISyntaxException e) {
             throw DAVProtocol.protocolException(new WebdavPath("/photos"), e);
@@ -97,21 +102,20 @@ public class PhotoUtils {
 
     /**
      * Decodes the targeted contact from the given URI.
-     *
+     * 
+     * @param configViewFactory The configuration 
      * @param uri The URI to decode
      * @return The decoded contact (with the object- and folder-id properties set)
+     * @throws IllegalArgumentException If path isn't valid
      */
-    public static Contact decodeURI(URI uri) throws IllegalArgumentException {
+    public static Contact decodeURI(ConfigViewFactory configViewFactory, URI uri) throws IllegalArgumentException {
         String path = uri.getPath();
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        String pathPrefix = Tools.getPathPrefix();
-        if (Strings.isNotEmpty(pathPrefix)) {
-            int index = path.indexOf(pathPrefix);
-            if (-1 == index) {
-                throw new IllegalArgumentException(String.valueOf(uri));
-            }
+        String pathPrefix = getPathPrefix(configViewFactory);
+        if (-1 == path.indexOf(pathPrefix)) {
+            throw new IllegalArgumentException(String.valueOf(uri));
         }
         int index = path.indexOf("photos/");
         if (-1 == index) {

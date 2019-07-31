@@ -65,6 +65,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.photos.PhotoUtils;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
@@ -381,7 +382,7 @@ public class ContactResource extends CommonResource<Contact> {
                 Date lastModified = contact.getLastModified();
                 int objectID = contact.getObjectID();
                 String vCardID = contact.getVCardId();
-                contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+                contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(factory.getServiceSafe(ConfigViewFactory.class), getHostData(), contact));
                 contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
                 vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
                 if (null == vCardImport || null == vCardImport.getContact()) {
@@ -537,7 +538,7 @@ public class ContactResource extends CommonResource<Contact> {
             factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
         applyAttachments(contact);
         if (isExportPhotoAsURI() && 0 < contact.getNumberOfImages()) {
-            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(factory.getServiceSafe(ConfigViewFactory.class), getHostData(), contact));
             contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
         }
         /*

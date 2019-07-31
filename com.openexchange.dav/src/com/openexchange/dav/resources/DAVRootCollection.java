@@ -49,13 +49,15 @@
 
 package com.openexchange.dav.resources;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
 import java.util.Date;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
-import com.openexchange.dav.Tools;
 import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
@@ -75,7 +77,7 @@ public abstract class DAVRootCollection extends DAVCollection {
         new BasicPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
             Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false))
     };
-    private static final WebdavPath ROOT_URL = new WebdavPath(Tools.getPathPrefix());
+    private static final WebdavPath ROOT_URL = new WebdavPath(getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class)));
 
     private final String displayName;
 

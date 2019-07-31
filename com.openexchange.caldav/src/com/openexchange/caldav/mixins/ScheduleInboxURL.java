@@ -49,8 +49,10 @@
 
 package com.openexchange.caldav.mixins;
 
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.dav.Tools;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -67,14 +69,17 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class ScheduleInboxURL extends SingleXMLPropertyMixin {
 
 	public static final String SCHEDULE_INBOX = "schedule-inbox";
+	
+	private final ServiceLookup serviceLookup;
 
-    public ScheduleInboxURL() {
+    public ScheduleInboxURL(ServiceLookup serviceLookup) {
         super(CaldavProtocol.CAL_NS.getURI(), "schedule-inbox-URL");
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
     protected String getValue() {
-        return "<D:href>" + Tools.getPathPrefix() + "/caldav/" + SCHEDULE_INBOX + "</D:href>";
+        return "<D:href>" + insertPrefixPath(serviceLookup.getService(ConfigViewFactory.class), "/caldav/" + SCHEDULE_INBOX + "</D:href>");
     }
 
 }

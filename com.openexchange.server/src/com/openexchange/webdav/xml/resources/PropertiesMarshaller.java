@@ -66,9 +66,9 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.java.Strings;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
@@ -91,7 +91,8 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	private final String charset;
 
-	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
+	@SuppressWarnings("unused") // used by children
+    protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
 		return new Multistatus<Iterable<WebdavProperty>>();
 	}
 
@@ -139,14 +140,16 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
     public Element marshalHREF(WebdavPath uri, boolean trailingSlash) {
         final Element href = new Element("href", DAV_NS);
-        final StringBuilder builder = new StringBuilder("/");
 
-        WebdavPath pathPrefix = new WebdavPath(getPathPrefix());
+        WebdavPath components = uri;
+        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        StringBuilder builder = new StringBuilder("/");
+        WebdavPath pathPrefix = new WebdavPath(DAVTools.getPathPrefix(configViewFactory));
         if (pathPrefix.size() > 0) {
             for (String s : pathPrefix) {
                 builder.append(escape(s)).append("/");
             }
-            uri = removePathPrefix(uri, pathPrefix);
+            components = new WebdavPath(DAVTools.removeProxyPrefixPath(uri.toString(), pathPrefix.toString()));
         }
         if (builder.charAt(builder.length() - 1) == '/') {
             builder.deleteCharAt(builder.length() - 1);
@@ -157,7 +160,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
         if (builder.charAt(builder.length() - 1) != '/') {
             builder.append('/');
         }
-        for (final String component : uri) {
+        for (final String component : components) {
             builder.append(escape(component)).append('/');
         }
         if (!trailingSlash) {
@@ -258,6 +261,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
                     return value.replaceAll(String.valueOf(character), replacement);
                 } catch (Exception e) {
                     // ignore
+                    LOG.trace("", e);
                 }
             }
         }
@@ -271,27 +275,4 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		}
 		return Namespace.getNamespace(namespace);
 	}
-
-	private WebdavPath removePathPrefix(WebdavPath path, WebdavPath toRemove) {
-	    String sPath = path.toString();
-	    String sToRemove = toRemove.toString();
-	    if (Strings.isNotEmpty(sPath) && Strings.isNotEmpty(sToRemove) && sPath.startsWith(sToRemove)) {
-	        return path.subpath(toRemove.size());
-	    }
-	    return path;
-	}
-	
-	private String getPathPrefix() {
-	    String prefix ="";
-	    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-	    if (null != service) {
-	        prefix = service.getProperty("com.openexchange.dav.pathPrefix");
-	    }
-	    if (Strings.isEmpty(prefix)) {
-	        org.slf4j.LoggerFactory.getLogger(PropertiesMarshaller.class).debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.");
-	        prefix = "/servlet/dav";
-	    }
-	    return prefix;
-	}
-
 }

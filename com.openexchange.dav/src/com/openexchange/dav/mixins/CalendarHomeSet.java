@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.mixins;
 
-import com.openexchange.dav.Tools;
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -74,7 +76,7 @@ public class CalendarHomeSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + Tools.getPathPrefix() + CALENDAR_HOME + "/</D:href>";
+        return "<D:href>" + insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class),  CALENDAR_HOME + "/</D:href>");
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.osgi;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
 import org.osgi.service.http.HttpService;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -61,7 +62,6 @@ import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.principals.PrincipalPerformer;
 import com.openexchange.dav.root.RootPerformer;
-import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.login.Interface;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,7 +74,7 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 /**
  * {@link DAVActivator}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
 public class DAVActivator extends HousekeepingActivator {
@@ -88,32 +88,25 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
-        String pathPrefix = "";
-        if (null != configViewFactory) {
-            try {
-                pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
-            } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(DAVActivator.class).debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
-                pathPrefix = "/servlet/dav";
-            }
-        }
+        Services.setServiceLookup(this);
+        String pathPrefix = getPathPrefix(getService(ConfigViewFactory.class));
+        
         HttpService httpService = getService(HttpService.class);
         /*
          * root
          */
         RootPerformer rootPerformer = new RootPerformer(this);
-        httpService.registerServlet(pathPrefix, new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(pathPrefix.substring(0, pathPrefix.length() -1), new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
         /*
          * attachments
          */
         AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
-        httpService.registerServlet(pathPrefix + "/attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(pathPrefix + "attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-        httpService.registerServlet(pathPrefix + "/principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
+        httpService.registerServlet(pathPrefix + "principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
         this.mixin = mixin;
@@ -128,7 +121,6 @@ public class DAVActivator extends HousekeepingActivator {
          */
         registerService(ClientInfoProvider.class, new DAVClientInfoProvider(getService(UserAgentParser.class)), 0);
         openTrackers();
-        Services.setServiceLookup(this);
     }
 
     @Override

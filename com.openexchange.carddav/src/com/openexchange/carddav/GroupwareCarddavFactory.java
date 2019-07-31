@@ -104,7 +104,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
     private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
     private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
     private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
     private final ThreadLocal<State> stateHolder;
 
@@ -179,7 +179,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
         return getService(FolderService.class);
     }
 
-    public ContactService getContactService() throws OXException {
+    public ContactService getContactService() {
         return getService(ContactService.class);
     }
 

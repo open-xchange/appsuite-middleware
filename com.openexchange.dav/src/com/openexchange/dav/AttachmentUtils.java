@@ -49,12 +49,15 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -152,7 +155,7 @@ public class AttachmentUtils {
      * @return The URI
      */
     public static URI buildURI(HostData hostData, AttachmentMetadata metadata) throws URISyntaxException {
-        String pathPrefix = Tools.getPathPrefix();
+        String pathPrefix = getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class));
         return new URI(new URIBuilder()
             .setScheme(hostData.isSecure() ? "https" : "http")
             .setHost(hostData.getHost())
@@ -165,18 +168,16 @@ public class AttachmentUtils {
      *
      * @param uri The URI to decode
      * @return The decoded attachment metadata
+     * @throws IllegalArgumentException If path isn't valid
      */
     public static AttachmentMetadata decodeURI(URI uri) throws IllegalArgumentException {
         String path = uri.getPath();
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        String pathPrefix = Tools.getPathPrefix();
-        if (Strings.isNotEmpty(pathPrefix)) {
-            int index = path.indexOf(pathPrefix);
-            if (-1 == index) {
-                throw new IllegalArgumentException(String.valueOf(uri));
-            }
+        String pathPrefix = getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class));
+        if (-1 == path.indexOf(pathPrefix)) {
+            throw new IllegalArgumentException(String.valueOf(uri));
         }
         int index = path.indexOf("attachments/");
         if (-1 == index) {

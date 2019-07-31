@@ -112,7 +112,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.groupware.contact.Bug59522Test.class,
     com.openexchange.folderstorage.internal.performers.UserSharedFoldersPerformerTest.class,
     com.openexchange.folderstorage.database.DatabaseFolderTest.class,
-    com.openexchange.config.admin.internal.HideAdminServiceImplTest.class
+    com.openexchange.config.admin.internal.HideAdminServiceImplTest.class,
+    com.openexchange.tools.dav.DAVToolsTest.class,
 })
 public class UnitTests {
 

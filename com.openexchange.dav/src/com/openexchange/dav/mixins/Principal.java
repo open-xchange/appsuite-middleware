@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.mixins;
 
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.Tools;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -67,7 +69,7 @@ public class Principal extends SingleXMLPropertyMixin {
     /**
      * Initializes a new {@link Principal}.
      * 
-     * @param principal The principal 
+     * @param principal The principal
      */
     public Principal(User principal) {
         super(DAVProtocol.DAV_NS.getURI(), "principal");
@@ -76,7 +78,7 @@ public class Principal extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + Tools.getPathPrefix() + PrincipalURL.forUser(principal.getId()) + "</D:href>";
+        return "<D:href>" + insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), PrincipalURL.forUser(principal.getId()) + "</D:href>");
     }
 
 }

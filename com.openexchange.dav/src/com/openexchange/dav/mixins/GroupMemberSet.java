@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.mixins;
 
-import com.openexchange.dav.Tools;
+import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.osgi.Services;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -65,6 +67,8 @@ public class GroupMemberSet extends SingleXMLPropertyMixin {
 
     /**
      * Initializes a new {@link GroupMemberSet}.
+     * 
+     * @param members The menbers
      */
     public GroupMemberSet(int[] members) {
         super(Protocol.DAV_NS.getURI(), "group-member-set");
@@ -75,7 +79,7 @@ public class GroupMemberSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (int member : members) {
-            stringBuilder.append("<D:href>").append(Tools.getPathPrefix()).append(PrincipalURL.forUser(member)).append("</D:href>");
+            stringBuilder.append("<D:href>").append(insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), PrincipalURL.forUser(member) + "</D:href>"));
         }
         return stringBuilder.toString();
     }

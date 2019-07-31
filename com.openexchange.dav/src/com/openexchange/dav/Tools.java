@@ -50,16 +50,10 @@
 package com.openexchange.dav;
 
 import java.util.Date;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
-
 
 /**
  * {@link Tools}
@@ -67,8 +61,9 @@ import com.openexchange.webdav.protocol.WebdavPath;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Tools {
-    
-    private final static Logger LOG = LoggerFactory.getLogger(Tools.class.getName());
+
+    // prevent instantiation
+    private Tools() {}
 
     public static Date getLatestModified(Date lastModified1, Date lastModified2) {
         return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
@@ -131,26 +126,4 @@ public class Tools {
         }
         return name;
     }
-
-    public static String getPathPrefix() {
-        String prefix = "";
-        try {
-            ConfigurationService configService = Services.getService(ConfigurationService.class);
-            if (null != configService) {
-                prefix = configService.getProperty("com.openexchange.dav.pathPrefix");
-            }
-        } catch (OXException e) {
-            LOG.warn("ConfigurationService is not available.");
-        }
-        if (Strings.isEmpty(prefix)) {
-            LOG.debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.");
-            prefix = "/servlet/dav";
-        }
-        return prefix;
-    }
-
-    private Tools() {
-    	// prevent instantiation
-    }
-
 }

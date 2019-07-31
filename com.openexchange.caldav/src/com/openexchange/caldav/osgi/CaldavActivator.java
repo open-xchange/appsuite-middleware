@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.osgi;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caldav.CalDAVURLField;
@@ -103,9 +104,9 @@ import com.openexchange.xml.jdom.JDOMParser;
  */
 public class CaldavActivator extends HousekeepingActivator {
 
-    private static final String SERVLET_PATH = "/caldav";
+    private static final String SERVLET_PATH = "caldav";
 
-    private static final String NULL_PATH = "/dev/null";
+    private static final String NULL_PATH = "dev/null";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
@@ -133,25 +134,17 @@ public class CaldavActivator extends HousekeepingActivator {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
 
-            String pathPrefix;
-            ConfigViewFactory factory = getService(ConfigViewFactory.class);
-            try {
-                pathPrefix = factory.getView().get("com.openexchange.dav.pathPrefix", String.class);
-            } catch (OXException e) {
-                LOG.debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
-                pathPrefix = "/servlet/dav";
-            }
-
+            String pathPrefix = getPathPrefix(getServiceSafe(ConfigViewFactory.class));
             httpService.registerServlet(pathPrefix + SERVLET_PATH, new CalDAV(performer), null, null);
-            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(pathPrefix + "/caldav", Interface.CALDAV), null, null);
+            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(pathPrefix + SERVLET_PATH, Interface.CALDAV), null, null);
             httpService.registerServlet(pathPrefix + NULL_PATH, new DevNullServlet(), null, null);
             httpService.registerServlet(pathPrexif + ".well-known/caldav", new WellKnownServlet("/caldav", Interface.CALDAV), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-            registerService(PropertyMixin.class, new ScheduleOutboxURL());
-            registerService(PropertyMixin.class, new ScheduleInboxURL());
+            registerService(PropertyMixin.class, new ScheduleOutboxURL(this));
+            registerService(PropertyMixin.class, new ScheduleInboxURL(this));
             registerService(PropertyMixin.class, new DefaultAlarmVeventDate());
             registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
             registerService(PreferencesItemService.class, new PreferencesItemService() {

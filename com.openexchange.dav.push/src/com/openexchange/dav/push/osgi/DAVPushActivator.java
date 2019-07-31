@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.push.osgi;
 
+import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -117,17 +118,8 @@ public class DAVPushActivator extends HousekeepingActivator implements Reloadabl
              */
             PushSubscribePerformer performer = new PushSubscribePerformer(this);
             this.factory = performer.getFactory();
-            ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
-            String pathPrefix = "";
-            if (null != configViewFactory) {
-                try {
-                    pathPrefix = configViewFactory.getView().get("com.openexchange.dav.pathPrefix", String.class);
-                } catch (OXException e) {
-                    org.slf4j.LoggerFactory.getLogger(DAVPushActivator.class).debug("\"com.openexchange.dav.pathPrefix\" not configured, using default value.", e);
-                    pathPrefix = "/servlet/dav";
-                }
-            }
-            getService(HttpService.class).registerServlet(pathPrefix + "/subscribe", new DAVServlet(performer, Interface.CALDAV), null, null);
+            String pathPrefix = getPathPrefix(getServiceSafe(ConfigViewFactory.class));
+            getService(HttpService.class).registerServlet(pathPrefix + "subscribe", new DAVServlet(performer, Interface.CALDAV), null, null);
             /*
              * register push message generators
              */
