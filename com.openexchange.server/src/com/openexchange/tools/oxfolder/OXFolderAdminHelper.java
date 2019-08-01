@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.ALL_GROUPS_AND_USERS;
 import static com.openexchange.server.impl.OCLPermission.ALL_GUESTS;
@@ -368,7 +369,7 @@ public final class OXFolderAdminHelper {
         try {
             final int[] perms = getPermissionValue(cid, globalAddressBookId, ALL_GROUPS_AND_USERS, readCon);
             if (null != perms) {
-                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", userId, cid);
+                LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", I(userId), I(cid));
                 return (perms[0] == NO_PERMISSIONS);
             }
         } catch (final SQLException e) {
@@ -441,7 +442,7 @@ public final class OXFolderAdminHelper {
                 /*
                  * Global permission enabled for global address book folder
                  */
-                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user={}, context={}", userId, cid);
+                LOG.warn("Cannot update individual permission on global address book folder since global permission is active. user={}, context={}", I(userId), I(cid));
                 // updateGABWritePermission(cid, enable, writeCon);
                 return;
             }
@@ -735,7 +736,7 @@ public final class OXFolderAdminHelper {
         if (!checkFolderExistence(cid, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, writeCon)) {
             createSystemPublicInfostoreFolder(cid, mailAdmin, writeCon, creatingTime);
         }
-        LOG.debug("All System folders successfully created for context {}", cid);
+        LOG.debug("All System folders successfully created for context {}", I(cid));
         /*
          * Add mailadmin's folder rights to context's system folders and create his standard folders
          */
@@ -786,7 +787,7 @@ public final class OXFolderAdminHelper {
                 writeCon);
         }
         addUserToOXFolders(mailAdmin, mailAdminDisplayName, language, cid, writeCon, OXFolderDefaultMode.DEFAULT);
-        LOG.debug("Folder rights for mail admin successfully added for context {}", cid);
+        LOG.debug("Folder rights for mail admin successfully added for context {}", I(cid));
     }
 
     /**
@@ -1396,7 +1397,7 @@ public final class OXFolderAdminHelper {
             final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
             final boolean globalPermEnabled = checkGlobalGABPermissionExistence(cid, writeCon);
             if (globalPermEnabled) {
-                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user={}, context={}", userId, cid);
+                LOG.warn("Individual user permission not added to global address book folder since global permission is active. user={}, context={}", I(userId), I(cid));
             } else {
                 if (!checkPermissionExistence(cid, globalAddressBookId, userId, writeCon)) {
                     final OCLPermission p = new OCLPermission();
@@ -1482,7 +1483,7 @@ public final class OXFolderAdminHelper {
             /*
              * TODO: Set standard special folders (projects, ...) located beneath system user folder
              */
-            LOG.info("User {} successfully created in context {}", userId, cid);
+            LOG.info("User {} successfully created in context {}", I(userId), I(cid));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
