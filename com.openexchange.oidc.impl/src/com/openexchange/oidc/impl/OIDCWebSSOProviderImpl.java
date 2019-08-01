@@ -260,7 +260,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String code = request.getParameter("code");
         AuthenticationRequestInfo storedRequestInformation = this.stateManagement.getAndRemoveAuthenticationInfo(request.getParameter("state"));
 
-        if (storedRequestInformation == null && code.isEmpty() == true) {
+        if (storedRequestInformation == null && Strings.isEmpty(code)) {
             throw OIDCExceptionCode.INVALID_AUTHENTICATION_STATE_NO_USER.create();
         }
 
@@ -348,7 +348,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
 
         String domainName = this.backend.getBackendConfig().getProxyName();
-        if (domainName.isEmpty()) {
+        if (Strings.isEmpty(domainName)) {
             domainName = storedRequestInformation != null ? storedRequestInformation.getDomainName() : request.getRemoteHost();
         }
 

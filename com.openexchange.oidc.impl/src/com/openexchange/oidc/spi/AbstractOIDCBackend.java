@@ -206,7 +206,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     public JWSAlgorithm getJWSAlgorithm() throws OXException {
         JWSAlgorithm algorithm = JWSAlgorithm.RS256;
         String algorithmString = this.getBackendConfig().getJWSAlgortihm();
-        if (algorithmString != null && !algorithmString.isEmpty()) {
+        if (algorithmString != null && Strings.isNotEmpty(algorithmString)) {
             algorithm = this.getAlgorithmFromString(algorithmString);
         }
         LOG.trace("getJWSAlgorithm() result: {}", algorithm.getName());
@@ -285,7 +285,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public void finishLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String afterLogoutURI = this.getBackendConfig().getRpRedirectURILogout();
-        if (!afterLogoutURI.isEmpty() && !response.isCommitted()) {
+        if (Strings.isNotEmpty(afterLogoutURI) && !response.isCommitted()) {
             response.sendRedirect(afterLogoutURI);
         }
     }

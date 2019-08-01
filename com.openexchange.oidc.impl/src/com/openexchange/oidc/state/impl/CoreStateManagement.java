@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.hz.PortableAuthenticationRequest;
 import com.openexchange.oidc.hz.PortableLogoutRequest;
@@ -94,7 +95,7 @@ public class CoreStateManagement implements StateManagement {
     @Override
     public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) throws OXException {
         LOG.trace("getAndRemoveAuthenticationInfo(state: {})", state);
-        if (state == null || state.isEmpty()) {
+        if (Strings.isEmpty(state)) {
             return null;
         }
         PortableAuthenticationRequest portable = null;
