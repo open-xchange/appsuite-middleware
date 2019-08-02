@@ -788,7 +788,7 @@ This chapter will describe the impact on calendar data during an import or an ex
 
 During the import all information about attendees and the organizer will be ignored. The following case that lead to this decision.  
 
-Lets consider the case that the event is organized by another entity than the user importing the event. Furthermore lets assume the user importing isn't attending the event (normally this is handled via iTIP or other internal mechanisms). Based on our current concept of "personal" calendar folders of internal user (see [Group-scheduled Events](#group-scheduled-events)) we aren't able to save the event without saving the current user as attendee. This means that the user would always become a 'party-crasher'. To avoid this the only feasible way is to remove the organizer. The attendees then get removed avoid the impression that the event was taken over by a new organizer. 
+Lets consider the case that the event is organized by another entity than the user importing the event. Furthermore lets assume the user importing isn't attending the event (normally this is handled via iTIP or other internal mechanisms). Based on our current concept of "personal" calendar folders of internal user (see [Group-scheduled Events](#group-scheduled-events)) we aren't able to save the event without adding the current user as attendee. This means that the user would always become a 'party-crasher'. To avoid this situation the only feasible way is to remove the organizer. Further to ensure data consistency and avoid struggles for other attendees, all other attendees are removed too. This is done to void the impression that the event was taken over by a new organizer.
 
 
 ## Export
