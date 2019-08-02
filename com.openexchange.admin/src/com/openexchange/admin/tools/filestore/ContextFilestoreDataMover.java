@@ -136,7 +136,11 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                 if (0 != output.exitstatus) {
                     throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
                 }
-                FileUtils.deleteDirectory(fsDirectory);
+                try {
+                    FileUtils.deleteDirectory(fsDirectory);
+                } catch (Exception e) {
+                    LOGGER.error("{} failed to delete source location {}", Thread.currentThread().getName(), fsDirectory.getAbsolutePath(), e);
+                }
 
                 reverter = new Reverter() {
 
@@ -148,7 +152,11 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                             if (0 != output.exitstatus) {
                                 throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
                             }
-                            FileUtils.deleteDirectory(dfsDirectory);
+                            try {
+                                FileUtils.deleteDirectory(dfsDirectory);
+                            } catch (Exception e) {
+                                LOGGER.error("{} failed to delete destination location {}", Thread.currentThread().getName(), fsDirectory.getAbsolutePath(), e);
+                            }
                         } catch (Exception e) {
                             LOGGER.error("{} failed to revert directory {}", Thread.currentThread().getName(), dfsDirectory.getAbsolutePath(), e);
                         }
