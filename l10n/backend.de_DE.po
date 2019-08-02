@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-06-19 16:19+0200\n"
+"PO-Revision-Date: 2019-08-01 15:52+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -31,37 +31,37 @@ msgstr ""
 "X-POOTLE-MTIME: 1409745551.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:82
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:83
 msgctxt "verb"
 msgid "accepted"
 msgstr "bestätigt"
 
 #. The adjective "accepted", like "The users status is 'accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:85
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:86
 msgctxt "adjective"
 msgid "accepted"
 msgstr "bestätigt"
 
 #. The verb "declined", like "User A has declined an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:101
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:115
 msgctxt "verb"
 msgid "declined"
 msgstr "abgelehnt"
 
 #. The adjective "declined", like "The users status is 'declined'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:104
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:118
 msgctxt "adjective"
 msgid "declined"
 msgstr "abgelehnt"
 
 #. The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:120
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:134
 msgctxt "verb"
 msgid "tentatively accepted"
 msgstr "vorläufig bestätigt"
 
 #. The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:123
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/ContextSensitiveMessages.java:137
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "vorläufig bestätigt"
@@ -606,7 +606,7 @@ msgstr "Die Anhänge zu dem Termin wurden geändert."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
 msgid "One or more other fields have been updated"
-msgstr "Ein oder mehrere andere Felder wurden aktualisiert"
+msgstr "Mindestens ein anderes Feld wurde aktualisiert"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:87
 msgid "Reserved"
@@ -1212,7 +1212,7 @@ msgid ""
 "An internal server error occurred on the feed provider side. There is "
 "nothing we can do about it."
 msgstr ""
-"Auf der Feed-Provider-Seite ist ein interner Server-Fehler aufgetreten. Wir "
+"Auf der Feed-Anbieter-Seite ist ein interner Server-Fehler aufgetreten. Wir "
 "haben darauf keinen Einfluss."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:83
@@ -1220,7 +1220,7 @@ msgid ""
 "A remote server error occurred on the feed provider side. There is nothing "
 "we can do about it."
 msgstr ""
-"Auf der Feed-Provider-Seite ist ein Remote-Server-Fehler aufgetreten. Wir "
+"Auf der Feed-Anbieter-Seite ist ein Remote-Server-Fehler aufgetreten. Wir "
 "haben darauf keinen Einfluss."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:85
@@ -1257,8 +1257,8 @@ msgid ""
 "account and add it again with correct credentials."
 msgstr ""
 "Die Authentifizierung ist aufgrund einer kürzlichen Änderung der "
-"Anmeldedaten fehlgeschlagen. Entfernen Sie bitte den Account und fügen Sie "
-"ihn mit den korrekten Anmeldedaten neu hinzu."
+"Anmeldedaten fehlgeschlagen. Entfernen Sie bitte das Konto und fügen Sie es "
+"mit den korrekten Anmeldedaten neu hinzu."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -1283,32 +1283,22 @@ msgstr "Sie haben keinen Zugriff auf diesen Kalender."
 msgid "The requested page was not found."
 msgstr "Die angeforderte Seite wurde nicht gefunden."
 
-#. The remote SchedJoules service is unavailable at the moment. There is nothing we can do about it. Please try again later.
+#. The remote calendar service is unavailable at the moment. Please try again later.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:68
 msgid ""
-"The remote SchedJoules service is unavailable at the moment. There is "
-"nothing we can do about it. Please try again later."
+"The remote calendar service is unavailable at the moment. Please try again "
+"later."
 msgstr ""
-"Der Remote-SchedJoules-Dienst ist derzeit nicht verfügbar. Wir haben darauf "
-"keinen Einfluss. Bitte versuchen Sie es später erneut."
+"Der Remote-Kalenderdienst ist derzeit nicht verfügbar. Bitte versuchen Sie "
+"es später erneut."
 
-#. An internal server error occurred on SchedJoules side. There is nothing we can do about it.
+#. An error occurred on the remote calendar service. Please try again later.
 #: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:70
 msgid ""
-"An internal server error occurred on SchedJoules side. There is nothing we "
-"can do about it."
+"An error occurred at the remote calendar service. Please try again later."
 msgstr ""
-"Auf der SchedJoules-Seite ist ein interner Server-Fehler aufgetreten. Wir "
-"haben darauf keinen Einfluss."
-
-#. A remote server error occurred on SchedJoules side. There is nothing we can do about it.
-#: com.openexchange.chronos.schedjoules/src/com/openexchange/chronos/schedjoules/exception/SchedJoulesAPIExceptionMessages.java:72
-msgid ""
-"A remote server error occurred on SchedJoules side. There is nothing we can "
-"do about it."
-msgstr ""
-"Auf der SchedJoules-Seite ist ein Remote-Server-Fehler aufgetreten. Wir "
-"haben darauf keinen Einfluss."
+"Beim Remote-Kalenderdienst ist ein Fehler aufgetreten. Bitte versuchen Sie "
+"es später erneut."
 
 #. * The summary that is inserted for <i>private</i> events the requesting user has no access to
 #. ------------------------- i18n strings for folder types ------------------------------------- //
@@ -1390,7 +1380,7 @@ msgstr "Der angeforderte Kalender wurde nicht gefunden."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:70
 msgid "The calendar provider \"%1$s\" is not available."
-msgstr "Der Kalender-Provider \"%1$s\" ist nicht verfügbar."
+msgstr "Der Kalender-Anbieter \"%1$s\" ist nicht verfügbar."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:72
 msgid ""
@@ -1404,8 +1394,8 @@ msgid ""
 "The requested calendar account is currently disabled. Please enable the "
 "account and try again."
 msgstr ""
-"Der angeforderte Kalender-Account ist derzeit deaktiviert. Bitte aktivieren "
-"Sie den Account und versuchen Sie es erneut."
+"Das angeforderte Kalender-Konto ist derzeit deaktiviert. Bitte aktivieren "
+"Sie das Konto und versuchen Sie es erneut."
 
 #. An I/O error occurred: %1$s
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
@@ -1418,7 +1408,7 @@ msgstr "Es trat ein E/A-Fehler auf: %1$s"
 msgid ""
 "The requested operation is not supported for calendar provider \"%1$s\"."
 msgstr ""
-"Der angeforderte Vorgang wird für den Kalender-Provider \"%1$s\" nicht "
+"Der angeforderte Vorgang wird für den Kalender-Anbieter \"%1$s\" nicht "
 "unterstützt."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
@@ -1671,13 +1661,13 @@ msgid ""
 "Unable to create account. There have been issues with the provided "
 "authentication."
 msgstr ""
-"Der Account konnte nicht angelegt werden. Es gab Probleme mit der "
+"Das Konto konnte nicht angelegt werden. Es gab Probleme mit der "
 "Authentifizierung."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr ""
-"Das Quota-Limit für den Account \"%1$s\" im Kontext \"%2$s\" wurde "
+"Das Quota-Limit für das Konto \"%1$s\" im Kontext \"%2$s\" wurde "
 "überschritten."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
@@ -2868,7 +2858,7 @@ msgstr ""
 #: com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: com.openexchange.subscribe.oauth/src/com/openexchange/subscribe/oauth/FormStrings.java:62
 msgid "Select an existing account"
-msgstr "Zu verwendender OAuth-Account"
+msgstr "Zu verwendendes OAuth-Konto"
 
 #: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:62
 msgid "The total upload size (%1$s) exceeds the available free space of %2$s."
@@ -3021,7 +3011,7 @@ msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
 #. The file storage account is currently not accessible.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:92
 msgid "The file storage account is currently not accessible."
-msgstr "Der Dateispeicher-Account ist derzeit nicht verfügbar."
+msgstr "Das Dateispeicher-Konto ist derzeit nicht verfügbar."
 
 #. The folder \"%1$s\" cannot be moved to \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:95
@@ -3040,7 +3030,7 @@ msgid ""
 "into the account \"%3$s\"."
 msgstr ""
 "Die Notizen zur Datei \"%1$s\" im Ordner \"%2$s\" gehen verloren, wenn die "
-"Datei in den Account \"%3$s\" verschoben wird."
+"Datei in das Konto \"%3$s\" verschoben wird."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:104
@@ -3049,7 +3039,7 @@ msgid ""
 "moving it into the account \"%3$s\"."
 msgstr ""
 "Alle vorherigen Versionen der Datei \"%1$s\" im Ordner \"%2$s\" gehen "
-"verloren, wenn die Datei in den Account \"%3$s\" verschoben wird."
+"verloren, wenn die Datei in das Konto \"%3$s\" verschoben wird."
 
 #. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:107
@@ -3058,7 +3048,7 @@ msgid ""
 "when moving it into the account \"%3$s\"."
 msgstr ""
 "Die zugewiesenen Kategorien der Datei \"%1$s\" im Ordner \"%2$s\" gehen "
-"verloren, wenn die Datei in den Account \"%3$s\" verschoben wird."
+"verloren, wenn die Datei in das Konto \"%3$s\" verschoben wird."
 
 #. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:110
@@ -3067,7 +3057,7 @@ msgid ""
 "users when moving it into the account \"%3$s\"."
 msgstr ""
 "Auf die geteilte Datei \"%1$s\" im Ordner \"%2$s\" kann durch andere "
-"Benutzer nicht mehr zugegriffen werden, wenn sie in den Account \"%3$s\" "
+"Benutzer nicht mehr zugegriffen werden, wenn sie in das Konto \"%3$s\" "
 "verschoben wird."
 
 #. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
@@ -3077,7 +3067,7 @@ msgid ""
 "moving it into the account \"%2$s\"."
 msgstr ""
 "Auf den geteilten Ordner \"%1$s\" kann durch andere Benutzer nicht mehr "
-"zugegriffen werden, wenn er in den Account \"%2$s\" verschoben wird."
+"zugegriffen werden, wenn er in das Konto \"%2$s\" verschoben wird."
 
 #. The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:116
@@ -3128,7 +3118,7 @@ msgstr "Löschvorgang verweigert für die \"%1$s\"-Ressource: %2$s"
 #. E.g. 'Missing configuration for boxcom account "3".'
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:139
 msgid "Missing configuration for %1$s account \"%2$s\"."
-msgstr "Fehlende Konfiguration für den %1$s-Account \"%2$s\"."
+msgstr "Fehlende Konfiguration für das %1$s-Konto \"%2$s\"."
 
 #. The provided %1$s resource does not exist: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:142
@@ -3143,29 +3133,29 @@ msgstr "Die Datei %1$s hat keinen Inhalt."
 #. The associated %2$s account no longer exists.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:148
 msgid "The associated %2$s account no longer exists."
-msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
+msgstr "Das zugehörige %2$s-Konto ist nicht mehr vorhanden."
 
 #. Individual permissions are not supported in account \"%1$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:151
 msgid "Individual permissions are not supported in account \"%1$s\"."
 msgstr ""
-"Für den Account \"%1$s\" werden keine individuellen Benutzerberechtigungen "
+"Für das Konto \"%1$s\" werden keine individuellen Benutzerberechtigungen "
 "unterstützt."
 
 #. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Das Speichern von Anmerkungen zur Datei \"%1$s\" wird für den Account \"%2$s"
-"\" nicht unterstützt."
+"Das Speichern von Anmerkungen zur Datei \"%1$s\" wird für das Konto \"%2$s\" "
+"nicht unterstützt."
 
 #. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
 msgstr ""
-"Das Zuweisen von Kategorien für die Datei \"%1$s\" wird für den Account "
-"\"%2$s\" nicht unterstützt."
+"Das Zuweisen von Kategorien für die Datei \"%1$s\" wird für das Konto \"%2$s"
+"\" nicht unterstützt."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
@@ -3245,15 +3235,15 @@ msgid ""
 "There is a problem with your AWS account that prevents the operation from "
 "completing successfully."
 msgstr ""
-"Es gibt ein Problem mit Ihrem AWS-Account. Dieses verhindert das "
-"erfolgreiche Abschließen des Vorgangs."
+"Es gibt ein Problem mit Ihrem AWS-Konto. Dieses verhindert das erfolgreiche "
+"Abschließen des Vorgangs."
 
 #. The e-mail address you provided is associated with more than one account
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:71
 msgid ""
 "The e-mail address you provided is associated with more than one account"
 msgstr ""
-"Die von Ihnen angegebene E-Mail-Adresse wird mit mehr als einem Account "
+"Die von Ihnen angegebene E-Mail-Adresse wird mit mehr als einem Konto "
 "assoziiert."
 
 #. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
@@ -3371,7 +3361,7 @@ msgstr "Der angegebene Schlüssel ist nicht vorhanden."
 #. Your account is not signed up for the Amazon S3 service.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:130
 msgid "Your account is not signed up for the Amazon S3 service."
-msgstr "Ihr Account ist nicht beim  Amazon S3-Dienst angemeldet."
+msgstr "Ihr Konto ist nicht beim Amazon S3-Dienst angemeldet."
 
 #. A conflicting conditional operation is currently in progress against this resource. Please try again.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:133
@@ -3412,7 +3402,7 @@ msgstr "Der angegebene Token muss aktualisiert werden."
 msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
 "Die von Ihnen angegebene E-Mail-Adresse stimmt mit keinem registrierten "
-"Account überein."
+"Konto überein."
 
 #. The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
@@ -3643,7 +3633,7 @@ msgstr "Ordner"
 #. Search within a certain account of a module
 #: com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:79
 msgid "Account"
-msgstr "Account"
+msgstr "Konto"
 
 #: com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:85
 msgid "Public"
@@ -3920,7 +3910,7 @@ msgstr "Die Zeichenkette konnte nicht in eine gültige URL aufgelöst werden. "
 #. %s is replaced with some login name.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:64
 msgid "The account \"%s\" is locked."
-msgstr "Der Account \"%s\" ist gesperrt."
+msgstr "Das Konto \"%s\" ist gesperrt."
 
 #. Provisioning of some account may take some time although the login is already possible. If creating the account has not finished on
 #. OX side the login mechanism can use this message to prevent the login.
@@ -3930,8 +3920,8 @@ msgid ""
 "Account \"%1$s\" is currently being created. This can take a while. Please "
 "try again later."
 msgstr ""
-"Der Account \"%1$s\" wird gerade angelegt. Dies kann eine Weile dauern. "
-"Bitte versuchen Sie es später erneut."
+"Das Konto \"%1$s\" wird gerade angelegt. Dies kann eine Weile dauern. Bitte "
+"versuchen Sie es später erneut."
 
 #. This message can be used if the authentication systems are not reachable. The customer should try some time later again.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:72
@@ -3983,7 +3973,7 @@ msgstr "Automatisches Anmelden wird nicht unterstützt."
 #. Indicates a deactivated user
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:101
 msgid "The user account is not activated."
-msgstr "Der Benutzer-Account ist nicht aktiviert."
+msgstr "Das Benutzer-Konto ist nicht aktiviert."
 
 #. You exceeded the maximum count of logins without password.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:104
@@ -4025,7 +4015,7 @@ msgstr "Zu wenige (%d) Login-Attribute."
 
 #: com.openexchange.global/src/com/openexchange/context/ContextExceptionMessages.java:61
 msgid "The account %2$s is disabled."
-msgstr "Der Account %2$s ist deaktiviert."
+msgstr "Das Konto %2$s ist deaktiviert."
 
 #. Text displayed to user if there is no message.
 #: com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:63
@@ -4138,8 +4128,8 @@ msgid ""
 "The maximum number of sessions is exceeded for your account. Please logout "
 "from other clients and try again."
 msgstr ""
-"Die maximale Anzahl von Sitzungen für Ihren Account ist erreicht. Bitte "
-"melden Sie sich von anderen Clients ab und versuchen Sie es erneut."
+"Die maximale Anzahl von Sitzungen für Ihr Konto ist erreicht. Bitte melden "
+"Sie sich von anderen Clients ab und versuchen Sie es erneut."
 
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:64
 msgid "Your session expired. Please login again."
@@ -4148,7 +4138,7 @@ msgstr "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an."
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:65
 msgid "The account \"%2$s\" is currently not enabled. Please try again later."
 msgstr ""
-"Der Account \"%2$s\" ist derzeit nicht aktiviert. Bitte versuchen Sie es "
+"Das Konto \"%2$s\" ist derzeit nicht aktiviert. Bitte versuchen Sie es "
 "später erneut."
 
 #: com.openexchange.global/src/com/openexchange/sessiond/SessionExceptionMessages.java:66
@@ -4852,8 +4842,7 @@ msgstr ""
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:68
 msgid "Managing mail filter rules is not available for your account."
-msgstr ""
-"Das Verwalten von Mailfilterregeln ist für Ihren Account nicht verfügbar."
+msgstr "Das Verwalten von Mailfilterregeln ist für Ihr Konto nicht verfügbar."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:70
 msgid ""
@@ -4879,8 +4868,8 @@ msgid ""
 "Invalid Twitter messaging account. Please delete and re-create your Twitter "
 "messaging account."
 msgstr ""
-"Ungültiger Twitter-Messaging-Account. Löschen Sie bitte Ihren Twitter "
-"Messaging-Account und legen Sie ihn erneut an."
+"Ungültiges Twitter-Messaging-Konto. Löschen Sie bitte Ihr Twitter Messaging-"
+"Konto und legen Sie es erneut an."
 
 #. A messaging error occurred: %1$s
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:64
@@ -4953,7 +4942,7 @@ msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 #. Invalid OAuth account specified.
 #: com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
-msgstr "Es wurde ein ungültiger OAuth-Account angegeben."
+msgstr "Es wurde ein ungültiges OAuth-Konto angegeben."
 
 #. An error has occurred on the remote Microsoft end-point. There is nothing we can do about it. Try again later.
 #: com.openexchange.microsoft.graph/src/com/openexchange/microsoft/graph/api/exception/MicrosoftGraphClientExceptionMessages.java:63
@@ -5016,8 +5005,8 @@ msgstr "Sie haben keine Berechtigung, den Root-Ordner zu löschen."
 msgid ""
 "This account has been locked out. Please wait %1$d minutes then try again."
 msgstr ""
-"Dieser Account wurde gesperrt. Bitte warten Sie %1$d Minuten und versuchen "
-"Sie es dann erneut."
+"Dieses Konto wurde gesperrt. Bitte warten Sie %1$d Minuten und versuchen Sie "
+"es dann erneut."
 
 #. *
 #. * Another authentication is already being processed, but in delay due to bad attempts.  User needs to wait
@@ -5294,7 +5283,7 @@ msgstr "Das Zertifikat ist nicht vertrauenswürdig"
 #. Successfully connected ExampleApp with your account
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:64
 msgid "Successfully connected %1$s with your account"
-msgstr "%1$s wurde erfolgreich mit Ihrem Account verbunden"
+msgstr "%1$s wurde erfolgreich mit Ihrem Konto verbunden"
 
 #. Salutation with name: "Hello Peter,"
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:67
@@ -5304,7 +5293,7 @@ msgstr "Hallo %1$s,"
 #. your account peter@example.com has been successfully connected to ExampleApp.
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:70
 msgid "your account %1$s has been successfully connected to %2$s."
-msgstr "Ihr Account %1$s wurde erfolgreich mit %2$s verbunden."
+msgstr "Ihr Konto %1$s wurde erfolgreich mit %2$s verbunden."
 
 #. You may revoke access for this application at any time, by visiting your settings page.
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:73
@@ -5323,13 +5312,12 @@ msgstr "Öffnen Sie die Einstellungen"
 #. Application example.com would like to connect with your account
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:63
 msgid "Application %1$s would like to connect with your account"
-msgstr ""
-"Die Applikation %1$s möchte eine Verbindung zu Ihrem Account herstellen"
+msgstr "Die Applikation %1$s möchte eine Verbindung zu Ihrem Konto herstellen"
 
 #. Sign in to OX App Suite to connect example.com with your account
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:66
 msgid "Sign in to %1$s to connect %2$s with your account"
-msgstr "Melden Sie sich bei %1$s an, um %2$s mit Ihrem Account zu verbinden"
+msgstr "Melden Sie sich bei %1$s an, um %2$s mit Ihrem Konto zu verbinden"
 
 #. The application example.com would like to access your account, and is requesting following permissions:
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:69
@@ -5337,8 +5325,8 @@ msgid ""
 "The application #split# would like to access your account, and is requesting "
 "following permissions:"
 msgstr ""
-"Die Applikation #split# möchte Zugriff auf Ihren Account und fordert "
-"folgende Berechtigungen an:"
+"Die Applikation #split# möchte Zugriff auf Ihr Konto und fordert folgende "
+"Berechtigungen an:"
 
 #. Only allow access for applications you trust. You may revoke access for this application at any time, by visiting your settings page.
 #: com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:72
@@ -5419,7 +5407,7 @@ msgstr ""
 #. There is no associated OAuth account for identifier %1$s.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:63
 msgid "There is no associated OAuth account for identifier %1$s."
-msgstr "Für die ID %1$s gibt es keinen zugehörigen OAuth-Account."
+msgstr "Für die ID %1$s gibt es kein zugehöriges OAuth-Konto."
 
 #. Missing argument: %1$s
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
@@ -5434,8 +5422,8 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 "Ihr '%1$s'-Passwort wurde geändert. Sie müssen den Server zur Nutzung Ihres "
-"Accounts mit dem neuen Passwort autorisieren: Konfiguration -> Meine Social-"
-"Einstellungen -> Accounts. Versuchen Sie es dann erneut."
+"Kontos mit dem neuen Passwort autorisieren: Konfiguration -> Meine Social-"
+"Einstellungen -> Konten. Versuchen Sie es dann erneut."
 
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:71
 msgid "The address %1$s is not white-listed as for the %2$s OAuth API"
@@ -5448,12 +5436,12 @@ msgstr "In der gesendeten Anfrage fehlt der Hauptteil"
 #. The account is invalid, please recreate it.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
-msgstr "Der Account ist ungültig. Bitte erstellen Sie ihn erneut."
+msgstr "Das Konto ist ungültig. Bitte erstellen Sie ihn erneut."
 
 #. The account "%1$s" is invalid, please recreate it.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
 msgid "The account \"%1$s\" is invalid, please recreate it."
-msgstr "Der Account \"%1$s\" ist ungültig. Bitte erstellen Sie ihn erneut."
+msgstr "Das Konto \"%1$s\" ist ungültig. Bitte erstellen Sie es erneut."
 
 #. Please provide a display name.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
@@ -5468,7 +5456,7 @@ msgstr "Bitte legen Sie mindestens eine Aktion fest."
 #. The associated OAuth provider denied the request: %1$s.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The associated OAuth provider denied the request: %1$s."
-msgstr "Der zugehörige OAuth-Provider hat die Anfrage verweigert: %1$s."
+msgstr "Der zugehörige OAuth-Anbieter hat die Anfrage verweigert: %1$s."
 
 #. The OAuth authentication process has been canceled.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
@@ -5479,7 +5467,7 @@ msgstr "Der OAuth-Authentifizierungsvorgang wurde abgebrochen."
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "Could not get a valid response from the associated OAuth provider."
 msgstr ""
-"Es konnte keine gültige Antwort vom zuständigen OAuth-Provider erhalten "
+"Es konnte keine gültige Antwort vom zuständigen OAuth-Anbieter erhalten "
 "werden."
 
 #. There was a problem while creating a connection to the remote service.
@@ -5502,9 +5490,8 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 "Ihr '%1$s'-Zugriff wurde verweigert. Sie müssen den Server zur Nutzung Ihres "
-"Accounts mit dem neuen Passwort autorisieren. Gehen Sie dafür zu "
-"Konfiguration -> Meine Social-Einstellungen -> Accounts. Versuchen Sie es "
-"dann erneut."
+"Kontos mit dem neuen Passwort autorisieren. Gehen Sie dafür zu Konfiguration "
+"-> Meine Social-Einstellungen -> Konten. Versuchen Sie es dann erneut."
 
 #. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:106
@@ -5514,9 +5501,9 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 "Ihr '%1$s'-Zugriff wurde zurückgesetzt. Sie müssen den Server zur Nutzung "
-"Ihres Accounts mit dem neuen Passwort autorisieren.  Gehen Sie dafür zu "
-"Konfiguration -> Meine Social-Einstellungen -> Accounts. Versuchen Sie es "
-"dann erneut."
+"Ihres Kontos mit dem neuen Passwort autorisieren. Gehen Sie dafür zu "
+"Konfiguration -> Meine Social-Einstellungen -> Konten. Versuchen Sie es dann "
+"erneut."
 
 #. Your access token for '%1$s' is invalid. You have to reauthorize your account.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
@@ -5524,7 +5511,7 @@ msgid ""
 "Your access token for '%1$s' is invalid. You have to reauthorize your "
 "account."
 msgstr ""
-"Ihr Zugriffstoken für '%1$s \"ist ungültig. Sie müssen Ihren Account neu "
+"Ihr Zugriffstoken für '%1$s \"ist ungültig. Sie müssen Ihr Konto neu "
 "aktivieren."
 
 #. You need to explicitly authorise %1$s to subscribe to %2$s
@@ -5536,7 +5523,7 @@ msgstr "Sie müssen %1$s explizit ermächtigen, %2$s zu abonnieren"
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
 msgid "The scope %1$s is not supported by the provider or has been disabled"
 msgstr ""
-"Der Bereich %1$s wird vom Provider nicht unterstützt oder wurde deaktiviert"
+"Der Bereich %1$s wird vom Anbieter nicht unterstützt oder wurde deaktiviert"
 
 #. Thrown in case OAuth for a certain provider access has been disabled for a user
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
@@ -6056,11 +6043,11 @@ msgid ""
 "account might not work if the supplied credentials are invalid."
 msgstr ""
 "Validierung der POP3-Anmeldedaten wurde aufgrund möglicher "
-"Anmeldebeschränkungen vom Provider deaktiviert. Andernfalls wären "
+"Anmeldebeschränkungen vom Anbieter deaktiviert. Andernfalls wären "
 "nachfolgende Anmeldeversuche möglicherweise nicht erfolgreich. Bitte "
 "beachten Sie, dass zwar das Ignorieren dieses Warnhinweises sicher ist, dass "
-"aber der POP3-Account möglicherweise nicht funktioniert, wenn die "
-"Anmeldedaten falsch sind."
+"aber das POP3-Konto möglicherweise nicht funktioniert, wenn die Anmeldedaten "
+"falsch sind."
 
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
@@ -6068,8 +6055,8 @@ msgid ""
 "POP3 messages cannot be imported because of existing quota constraints on "
 "primary mail account. Please free some space."
 msgstr ""
-"POP3-Nachrichten können aufgrund bestehender Quota-Beschränkungen für den "
-"primären E-Mail-Account nicht importiert werden. Bitte sorgen Sie für freien "
+"POP3-Nachrichten können aufgrund bestehender Quota-Beschränkungen für das "
+"primäre E-Mail-Konto nicht importiert werden. Bitte sorgen Sie für freien "
 "Speicherplatz."
 
 #: com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
@@ -7222,7 +7209,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
-msgstr "Der Account %1$d wurde nicht gefunden."
+msgstr "Das Konto %1$d wurde nicht gefunden."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:63
 msgid "The server is currently down for maintenance. Please try again later."
@@ -7235,7 +7222,7 @@ msgstr "Verbindung zum Kontext-Speicher fehlgeschlagen"
 
 #: com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
 msgid "The account \"%1$s\" was not found."
-msgstr "Der Account \"%1$s\" wurde nicht gefunden."
+msgstr "Das Konto \"%1$s\" wurde nicht gefunden."
 
 #. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
 #. This should happen in very rare conditions and is not visible to the client.
@@ -9881,7 +9868,7 @@ msgstr "Kein Anlegezugriff auf E-Mail-Ordner \"%1$s\"."
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:132
 msgid "Mail account \"%1$s\" with ID \"%2$s\" does not support mail transport."
 msgstr ""
-"Der Mail-Account \"%1$s\" mit der ID \"%2$s\" unterstützt keine Mail-"
+"Das E-Mail-Konto \"%1$s\" mit der ID \"%2$s\" unterstützt keine E-Mail-"
 "Weiterleitung."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
@@ -9946,8 +9933,7 @@ msgstr "Der E-Mail-Anhang ist abgelaufen oder fehlt."
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:162
 msgid "Account has been checked successfully but with a non-secure connection."
 msgstr ""
-"Der Account wurde erfolgreich geprüft, jedoch mit einer unsicheren "
-"Verbindung."
+"Das Konto wurde erfolgreich geprüft, jedoch mit einer unsicheren Verbindung."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid ""
@@ -9960,8 +9946,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
 msgid "Your account has been created but will not use a secure connection."
 msgstr ""
-"Ihr Account wurde angelegt. Jedoch wird er keine sichere Verbindung "
-"verwenden."
+"Ihr Konto wurde angelegt. Jedoch wird es keine sichere Verbindung verwenden."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:168
 msgid ""
@@ -10119,7 +10104,7 @@ msgstr ""
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
 msgid "Please check your mail account: %2$s"
-msgstr "Bitte überprüfen Sie Ihren E-Mail-Account: %2$s"
+msgstr "Bitte überprüfen Sie Ihr E-Mail-Konto: %2$s"
 
 #. Invalid name specified. Information from mail server: %1$s
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
@@ -10152,9 +10137,9 @@ msgid ""
 "Your mail account %2$s was disabled due to invalid credentials. Please edit "
 "the account and enter correct credentials to enable it again"
 msgstr ""
-"Ihr E-Mail-Account %2$s wurde aufgrund ungültiger Anmeldeinformationen "
-"deaktiviert. Bitte bearbeiten Sie den Account und geben Sie die korrekten "
-"Anmeldeinformationen ein, um ihn wieder zu aktivieren."
+"Ihr E-Mail-Konto %2$s wurde aufgrund ungültiger Anmeldeinformationen "
+"deaktiviert. Bitte bearbeiten Sie das Konto und geben Sie die korrekten "
+"Anmeldeinformationen ein, um es wieder zu aktivieren."
 
 #. Thrown when an oauth-associated mail access has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:255
@@ -10162,9 +10147,8 @@ msgid ""
 "Your mail account %2$s was disabled because of authorization issues. Please "
 "reauthorize the account %5$s to enable it again."
 msgstr ""
-"Ihr E-Mail-Account %2$s wurde aufgrund von Autorisationsproblemen "
-"deaktiviert. Bitte autorisieren Sie den Account %5$s erneut, um ihn wieder "
-"zu aktivieren."
+"Ihr E-Mail-Konto %2$s wurde aufgrund von Autorisationsproblemen deaktiviert. "
+"Bitte autorisieren Sie das Konto %5$s erneut, um es wieder zu aktivieren."
 
 #. Thrown when a mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:258
@@ -10173,8 +10157,8 @@ msgid ""
 "Please edit the account and enter correct credentials to enable it again"
 msgstr ""
 "Ihr Mail-Transport für %2$s wurde aufgrund ungültiger Anmeldeinformationen "
-"deaktiviert. Bittte bearbeiten Sie den Account  und geben Sie die korrekten "
-"Anmeldeinformationen ein, um ihn wieder zu aktivieren."
+"deaktiviert. Bittte bearbeiten Sie das Konto und geben Sie die korrekten "
+"Anmeldeinformationen ein, um es wieder zu aktivieren."
 
 #. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
@@ -10183,8 +10167,8 @@ msgid ""
 "Please reauthorize the account %5$s to enable it again."
 msgstr ""
 "Ihr E-Mail-Transport für %2$s wurde aufgrund von Autorisationsproblemen "
-"deaktiviert. Bitte autorisieren Sie den Account %5$s erneut, um ihn wieder "
-"zu aktivieren."
+"deaktiviert. Bitte autorisieren Sie das Konto %5$s erneut, um ihn wieder zu "
+"aktivieren."
 
 #. This error message is returned to the user in case he/she wants to apply a change to an in-compose message,
 #. which is only applicable in case a reply is generated, but in-compose message is not a reply
@@ -10280,7 +10264,7 @@ msgid ""
 "Send RFC822 data using primary account's transport. This requires master "
 "authentication to be active."
 msgstr ""
-"Senden von RFC822-Daten durch den Transport des primären Accounts. Dies "
+"Senden von RFC822-Daten durch den Transport des primären Kontos. Dies "
 "erfordert eine aktive Master-Authentifizierung."
 
 #. *
@@ -10512,8 +10496,7 @@ msgstr "Die zulässige Quota auf dem Mailserver wurde überschritten."
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid "The allowed storage limit for your account \"%6$s\" was exceeded."
 msgstr ""
-"Die zulässigen Speicherbegrenzung für Ihren Account \"%6$s\" wurde "
-"überschritten."
+"Die zulässigen Speicherbegrenzung für Ihr Konto \"%6$s\" wurde überschritten."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -10543,7 +10526,7 @@ msgid ""
 msgstr ""
 "Ungültige oder fehlende Anmeldedaten für einen Zugriff auf den Mail "
 "Transport Server %1$s. Bitte prüfen Sie die Einstellungen und Anmeldedaten "
-"für den entsprechenden Account. "
+"für das entsprechende Konto."
 
 #. *
 #. * The message could not be sent due to a mail server temporary failure. Please try again later.
@@ -10620,17 +10603,17 @@ msgstr ""
 #. The message advertising that affected account is broken and needs to be re-created
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:77
 msgid "Account is broken and needs to be re-created"
-msgstr "Der Account ist defekt und muss neu angelegt werden"
+msgstr "Das Konto ist defekt und muss neu angelegt werden"
 
 #. The message advertising that affected account has been disabled by administrator
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:80
 msgid "Account is disabled."
-msgstr "Account ist deaktiviert."
+msgstr "Konto ist deaktiviert."
 
 #. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
 msgid "Account is currently being set-up."
-msgstr "Account wird derzeit eingerichtet."
+msgstr "Konto wird derzeit eingerichtet."
 
 #. The message advertising that the affected account is facing an SSL problem
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:86
@@ -10640,12 +10623,12 @@ msgstr "Es gab ein SSL-Problem."
 #. Cannot find mail account for user "%2$s".
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
-msgstr "E-Mail-Account für den Benutzer \"%2$s\" konnte nicht gefunden werden."
+msgstr "E-Mail-Konto für den Benutzer \"%2$s\" konnte nicht gefunden werden."
 
 #. Shown when a mail account that already exists should be created
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
 msgid "Found two mail accounts with same identifier %1$s for user %2$s."
-msgstr "Zwei E-Mail-Accounts mit gleicher ID %1$s für Benutzer %2$s gefunden."
+msgstr "Zwei E-Mail-Konten mit gleicher ID %1$s für Benutzer %2$s gefunden."
 
 #. Shown when the requested host cannot be resolved
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
@@ -10659,7 +10642,7 @@ msgid ""
 "account."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Löschen des Standard-E-"
-"Mail-Accounts."
+"Mail-Kontos."
 
 #. You do not have the appropriate permissions to update the default mail account.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:74
@@ -10668,23 +10651,23 @@ msgid ""
 "account."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Aktualisieren des "
-"Standard-E-Mail-Accounts."
+"Standard-E-Mail-Kontos."
 
 #. The default mail account already exists.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
 msgid "The default mail account already exists."
-msgstr "Der Standard-E-Mail-Account ist bereits vorhanden."
+msgstr "Das Standard-E-Mail-Konto ist bereits vorhanden."
 
 #. The Unified Mail account already exists
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
 msgid "The Unified Mail account already exists."
-msgstr "Der Unified Mail-Account ist bereits vorhanden."
+msgstr "Das Unified Mail-Konto ist bereits vorhanden."
 
 #. It is not allowed to create a new mail account for Unified Mail.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "It is not allowed to create a new mail account for Unified Mail."
 msgstr ""
-"Das Erstellen eines neuen E-Mail-Accounts für Unified Mail ist nicht erlaubt."
+"Das Erstellen eines neuen E-Mail-Kontos für Unified Mail ist nicht erlaubt."
 
 #. Validation for Unified Mail failed.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
@@ -10698,28 +10681,28 @@ msgid ""
 "account."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Anlegen von mehr als "
-"einem E-Mail-Account."
+"einem E-Mail-Konto."
 
 #. A mail account with the given E-Mail address already exists.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
 msgid "A mail account with the given E-Mail address already exists."
 msgstr ""
-"Ein E-Mail-Account mit der angegebenen E-Mail-Adresse ist bereits vorhanden."
+"Ein E-Mail-Konto mit der angegebenen E-Mail-Adresse ist bereits vorhanden."
 
 #. The mail account name "%1$s" is not valid.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
 msgid "The mail account name \"%1$s\" is not valid."
-msgstr "Der E-Mail-Account-Name \"%1$s\" ist ungültig."
+msgstr "Der E-Mail-Kontoname \"%1$s\" ist ungültig."
 
 #. The selected mail account name already exists.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
 msgid "The selected mail account name already exists."
-msgstr "Der gewählte Name für den E-Mail-Account ist bereits vorhanden."
+msgstr "Der gewählte Name für das E-Mail-Konto ist bereits vorhanden."
 
 #. Shown when the transport account already exists
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
 msgid "Duplicate transport account for user %1$s in context %2$s."
-msgstr "Transport-Account-Duplikat für Benutzer %1$s in Kontext %2$s."
+msgstr "Transport-Konto-Duplikat für Benutzer %1$s in Kontext %2$s."
 
 #. Shown when a connection to the mail server is not possible for the given login
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:104
@@ -10795,14 +10778,14 @@ msgstr "Das Protokoll darf nicht von %1$s nach %2$s geändert werden."
 #. - ...
 #: com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:65
 msgid "Read all your mail accounts."
-msgstr "Alle Ihre E-Mail-Accounts lesen."
+msgstr "Alle Ihre E-Mail-Konten lesen."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete mail accounts.
 #. - ...
 #: com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:70
 msgid "Create, modify and delete mail accounts."
-msgstr "E-Mail-Accounts anlegen, ändern und löschen."
+msgstr "E-Mail-Konten anlegen, ändern und löschen."
 
 #. Found resource(s) with same identifier \"%1$s\".
 #: com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:78
@@ -10866,7 +10849,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
-msgstr "Freigegebene Ordner sind für Ihren Account nicht verfügbar."
+msgstr "Freigegebene Ordner sind für Ihr Konto nicht verfügbar."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
 msgid "You do not have appropriate permissions for the public folder."
@@ -12284,7 +12267,7 @@ msgstr "Die Aktion ist nicht zulässig."
 #: com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
 msgid "The OAuth Account to use"
-msgstr "Zu verwendender OAuth-Account "
+msgstr "Zu verwendendes OAuth-Konto"
 
 #. The message displayed if the requested cannot be found.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:62
@@ -12333,12 +12316,12 @@ msgstr ""
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:83
 msgid "You need to create an OAuth-account first to access this service."
 msgstr ""
-"Für den Zugriff auf diesen Dienst müssen Sie zunächst einen OAuth-Account "
+"Für den Zugriff auf diesen Dienst müssen Sie zunächst ein OAuth-Konto "
 "erstellen."
 
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:85
 msgid "Your account needs to be verified: %1$s"
-msgstr "Ihr Account muss verifiziert werden: %1$s"
+msgstr "Ihr Konto muss verifiziert werden: %1$s"
 
 #. The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
 #. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
@@ -12348,10 +12331,10 @@ msgid ""
 "some accounts and cannot fixed by us. It is in the provider's "
 "responsibility. For this reason, the subscription cannot be completed."
 msgstr ""
-"Der Service-Provider hat eine Identitätsbestätigung verlangt. Dies kann bei "
-"einigen Accounts vorkommen und kann nicht durch uns behoben werden. Es liegt "
-"in der alleinigen Verantwortung des Providers. Aus diesem Grund kann das "
-"Abonnement nicht abgeschlossen werden. "
+"Der Service-Anbieter hat eine Identitätsbestätigung verlangt. Dies kann bei "
+"einigen Konten vorkommen und kann nicht durch uns behoben werden. Es liegt "
+"in der alleinigen Verantwortung des Anbieters. Aus diesem Grund kann das "
+"Abonnement nicht abgeschlossen werden."
 
 #. You already have such a subscription.
 #: com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
@@ -12391,8 +12374,8 @@ msgid ""
 "Please (re-)authorize your Twitter accounts.\n"
 "Twitter responded with: %1$s"
 msgstr ""
-"Bitte autorisieren Sie Ihre Twitter-Accounts erneut.\n"
-"Twitter gab zurück: %1$s"
+"Bitte autorisieren Sie Ihre Twitter-Konten erneut.\n"
+"Antwort von Twitter: %1$s"
 
 #. The request is understood, but it has been refused or access is not allowed: %1$s
 #: com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:67
@@ -12588,7 +12571,7 @@ msgstr "Löschvorgang verweigert für die XING-Ressource: %1$s"
 #. Missing configuration for account "%1$s".
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
 msgid "Missing configuration for account \"%1$s\"."
-msgstr "Fehlende Konfiguration für den Account \"%1$s\"."
+msgstr "Fehlende Konfiguration für das Konto \"%1$s\"."
 
 #. E-Mail address is invalid
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:83
@@ -12654,7 +12637,7 @@ msgstr "Der XING-Server ist nicht verfügbar."
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:116
 msgid "A XING account has already been requested for E-Mail address %1$s."
 msgstr ""
-"Es wurde bereits ein XING-Account für die E-Mail-Adresse %1$s angefordert."
+"Es wurde bereits ein XING-Konto für die E-Mail-Adresse %1$s angefordert."
 
 #. The XING app that you are using does not hold the required permissions in order to perform the requested action
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:119
@@ -12669,8 +12652,7 @@ msgstr ""
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
 msgid "No XING OAuth access available. Please create a XING OAuth account."
 msgstr ""
-"Kein XING OAuth-Zugang verfügbar. Bitte erstellen Sie einen XING OAuth-"
-"Account."
+"Kein XING OAuth-Zugang verfügbar. Bitte erstellen Sie ein XING OAuth-Konto."
 
 #: TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -14803,6 +14785,27 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The remote SchedJoules service is unavailable at the moment. There is "
+#~ "nothing we can do about it. Please try again later."
+#~ msgstr ""
+#~ "Der Remote-SchedJoules-Dienst ist derzeit nicht verfügbar. Wir haben "
+#~ "darauf keinen Einfluss. Bitte versuchen Sie es später erneut."
+
+#~ msgid ""
+#~ "An internal server error occurred on SchedJoules side. There is nothing "
+#~ "we can do about it."
+#~ msgstr ""
+#~ "Auf der SchedJoules-Seite ist ein interner Server-Fehler aufgetreten. Wir "
+#~ "haben darauf keinen Einfluss."
+
+#~ msgid ""
+#~ "A remote server error occurred on SchedJoules side. There is nothing we "
+#~ "can do about it."
+#~ msgstr ""
+#~ "Auf der SchedJoules-Seite ist ein Remote-Server-Fehler aufgetreten. Wir "
+#~ "haben darauf keinen Einfluss."
 
 #~ msgid "The requested page does not denote to a calendar."
 #~ msgstr "Die angeforderte Seite bezeichnet keinen Kalender."
