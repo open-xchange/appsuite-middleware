@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-08-01 15:52+0200\n"
+"PO-Revision-Date: 2019-08-02 17:07+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -4824,7 +4824,7 @@ msgstr "Die Umleitungsadresse \"%1$s\" ist ungültig."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:62
 msgid "The redirect address \"%1$s\" has been rejected."
-msgstr "Der Umleitungsadresse \"%1$s\" wurde abgelehnt."
+msgstr "Die Umleitungsadresse \"%1$s\" wurde abgelehnt."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
