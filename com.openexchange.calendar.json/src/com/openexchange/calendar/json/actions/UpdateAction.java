@@ -107,6 +107,7 @@ public final class UpdateAction extends AppointmentAction {
         new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
         if (appointment.containsNotification()) {
             session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
+            session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.valueOf(false == appointment.getNotification()));
         }
         if (false == appointment.getIgnoreConflicts()) {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
