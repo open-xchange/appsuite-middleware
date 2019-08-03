@@ -64,6 +64,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -421,50 +423,64 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     private <R> R executePost(HttpDoveAdmCall call, String path, Map<String, String> parameters, JSONValue jBody, ResultType<R> resultType) throws OXException {
         CallProperties callProperties = getCallProperties(call);
 
-        HttpPost post = null;
-        try {
-            URI uri = buildUri(callProperties.uri, toQueryString(parameters), path);
-            post = new HttpPost(uri);
-
-            StringBuilder traceBuilder = null;
-            if (LOG.isTraceEnabled()) {
-                traceBuilder = new StringBuilder(2084);
-                traceBuilder.append("Request:").append(Strings.getLineSeparator());
-                traceBuilder.append("POST ").append(uri);
-            }
-
-            setCommonHeaders(post, traceBuilder);
-            post.setEntity(new InputStreamEntity(new JSONInputStream(jBody, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
-            if (null != traceBuilder) {
-                traceBuilder.append(Strings.getLineSeparator()).append(jBody);
-            }
-
+        int maxTries = 3;
+        int count = 1;
+        while (count <= maxTries) {
+            HttpPost post = null;
             try {
-                R response = handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType, traceBuilder);
+                URI uri = buildUri(callProperties.uri, toQueryString(parameters), path);
+                post = new HttpPost(uri);
+
+                StringBuilder traceBuilder = null;
+                if (LOG.isTraceEnabled()) {
+                    traceBuilder = new StringBuilder(2084);
+                    traceBuilder.append("Request:").append(Strings.getLineSeparator());
+                    traceBuilder.append("POST ").append(uri);
+                }
+
+                setCommonHeaders(post, traceBuilder);
+                post.setEntity(new InputStreamEntity(new JSONInputStream(jBody, "UTF-8"), -1L, ContentType.APPLICATION_JSON));
                 if (null != traceBuilder) {
-                    LOG.trace(traceBuilder.toString());
+                    traceBuilder.append(Strings.getLineSeparator()).append(jBody);
                 }
-                return response;
-            } catch (final HttpResponseException e) {
-                if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
-                    // Authentication failed
-                    throw DoveAdmClientExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+
+                try {
+                    R response = handleHttpResponse(execute(post, callProperties.targetHost, callProperties.httpClient), resultType, traceBuilder);
+                    if (null != traceBuilder) {
+                        LOG.trace(traceBuilder.toString());
+                    }
+                    return response;
+                } catch (HttpResponseException e) {
+                    if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                        // Authentication failed
+                        throw DoveAdmClientExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+                    }
+                    throw handleHttpResponseError(null, e);
+                } catch (IOException e) {
+                    if (null != traceBuilder) {
+                        String separator = Strings.getLineSeparator();
+                        traceBuilder.append(separator).append(separator).append("Response:").append(separator);
+                        traceBuilder.append("Encountered an I/O error: ").append(e.getMessage());
+                        LOG.trace(traceBuilder.toString());
+                    }
+                    throw handleIOError(e, callProperties.endpoint, call);
                 }
-                throw handleHttpResponseError(null, e);
-            } catch (final IOException e) {
-                if (null != traceBuilder) {
-                    String separator = Strings.getLineSeparator();
-                    traceBuilder.append(separator).append(separator).append("Response:").append(separator);
-                    traceBuilder.append("Encountered an I/O error: ").append(e.getMessage());
-                    LOG.trace(traceBuilder.toString());
+            } catch (NullPointerException e) {
+                if (++count <= maxTries) {
+                    long nanosToWait = TimeUnit.NANOSECONDS.convert((count * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                    LockSupport.parkNanos(nanosToWait);
+                } else {
+                    throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
-                throw handleIOError(e, callProperties.endpoint, call);
+            } catch (RuntimeException e) {
+                throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                reset(post);
             }
-        } catch (RuntimeException e) {
-            throw DoveAdmClientExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            reset(post);
         }
+
+        // Never reached...
+        return null;
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------
