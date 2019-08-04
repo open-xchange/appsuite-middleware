@@ -38,17 +38,6 @@ properties:
       file: openid.properties 
       packageName: open-xchange-oidc
       tags: ["OpenID"]
-    - key: com.openexchange.oidc.rpRedirectURIInit
-      description: |
-        The path to the init servlet of this backend
-      defaultValue:
-      version: 7.10.0
-      reloadable: true
-      configcascadeAware: false
-      related: 
-      file: openid.properties 
-      packageName: open-xchange-oidc
-      tags: ["OpenID"]
       
     - key: com.openexchange.oidc.rpRedirectURIAuth
       description: |

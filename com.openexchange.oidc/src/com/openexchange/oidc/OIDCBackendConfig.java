@@ -125,14 +125,6 @@ public interface OIDCBackendConfig {
     String getClientID();
 
     /**
-     * Get the redirect URI that should be used by the frontend to start the authentication
-     * process. Pointing to the init-Servlet. {@link InitService}
-     *
-     * @return the redirect URI
-     */
-    String getRpRedirectURIInit();
-
-    /**
      * Get the redirect URI that the OP should redirect to after token generation. Pointing to
      * the authentication servlet. {@link AuthenticationService}
      *

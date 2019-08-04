@@ -102,11 +102,6 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     }
 
     @Override
-    public String getRpRedirectURIInit() {
-        return this.loadStringProperty(OIDCBackendProperty.rpRedirectURIInit);
-    }
-
-    @Override
     public String getRpRedirectURIAuth() {
         return this.loadStringProperty(OIDCBackendProperty.rpRedirectURIAuth);
     }

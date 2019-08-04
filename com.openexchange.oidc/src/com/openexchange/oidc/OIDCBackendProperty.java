@@ -65,10 +65,6 @@ public enum OIDCBackendProperty implements Property {
      */
     clientId(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
-     * redirectURIInit - The path to the init servlet of this backend
-     */
-    rpRedirectURIInit(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
-    /**
      * redirectURIAuth - The path to the authentication servlet of this backend
      */
     rpRedirectURIAuth(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
