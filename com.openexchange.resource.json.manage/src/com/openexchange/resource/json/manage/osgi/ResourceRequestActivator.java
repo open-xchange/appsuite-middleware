@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.resource.managerequest.osgi;
+package com.openexchange.resource.json.manage.osgi;
 
 import org.osgi.framework.BundleActivator;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.managerequest.preferences.Module;
-import com.openexchange.resource.managerequest.request.ResourceActionFactory;
+import com.openexchange.resource.json.manage.preferences.Module;
+import com.openexchange.resource.json.manage.request.ResourceActionFactory;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.user.UserService;
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.resource.managerequest.request.actions;
+package com.openexchange.resource.json.manage.actions;
 
 import java.util.Date;
 import org.json.JSONArray;
@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
+import com.openexchange.resource.json.manage.request.ResourceAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;

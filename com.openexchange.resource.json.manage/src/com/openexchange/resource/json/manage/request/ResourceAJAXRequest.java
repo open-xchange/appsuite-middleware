@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.resource.managerequest.request;
+package com.openexchange.resource.json.manage.request;
 
 import java.util.Date;
 import java.util.TimeZone;

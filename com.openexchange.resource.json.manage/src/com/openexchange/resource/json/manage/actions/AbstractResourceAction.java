@@ -47,59 +47,80 @@
  *
  */
 
-package com.openexchange.resource.managerequest.request.actions;
+package com.openexchange.resource.json.manage.actions;
 
-import java.util.Date;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.resource.json.manage.request.ResourceAJAXRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link UpdateAction}
+ * {@link AbstractResourceAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UpdateAction extends AbstractResourceAction {
+public abstract class AbstractResourceAction implements AJAXActionService {
+
+    private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
+
+    protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link UpdateAction}.
-     * @param services
+     * Initializes a new {@link AbstractResourceAction}.
      */
-    public UpdateAction(final ServiceLookup services) {
-        super(services);
+    protected AbstractResourceAction(final ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    protected <S> S getService(final Class<? extends S> clazz) {
+        return services.getService(clazz);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ResourceAJAXRequest req) throws OXException, JSONException {
-        final ResourceService resourceService = getService(ResourceService.class);
-        if (null == resourceService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( ResourceService.class.getName());
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            final ResourceAJAXRequest reminderRequest = new ResourceAJAXRequest(requestData, session);
+            final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            if (null != sTimeZone) {
+                reminderRequest.setTimeZone(getTimeZone(sTimeZone));
+            }
+            return perform(reminderRequest);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        /*
-         * Check for "data"
-         */
-        final int identifier = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final JSONObject jData = req.getData();
-        final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser.parseResource(jData);
-        resource.setIdentifier(identifier);
-        final Date clientLastModified = req.getDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        /*
-         * Update resource
-         */
-        final ServerSession session = req.getSession();
-        resourceService.update(session.getUser(), session.getContext(), resource, clientLastModified);
-        /*
-         * Write empty JSON object
-         */
-        return new AJAXRequestResult(new JSONObject(0), resource.getLastModified(), "json");
     }
 
+    /**
+     * Performs specified group request.
+     *
+     * @param req The group request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult perform(ResourceAJAXRequest req) throws OXException, JSONException;
+
+    /**
+     * Gets the result filled with JSON <code>NULL</code>.
+     *
+     * @return The result with JSON <code>NULL</code>.
+     */
+    protected static AJAXRequestResult getJSONNullResult() {
+        return RESULT_JSON_NULL;
+    }
 }

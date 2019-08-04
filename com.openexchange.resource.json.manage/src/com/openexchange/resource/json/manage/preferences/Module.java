@@ -47,42 +47,58 @@
  *
  */
 
-package com.openexchange.resource.managerequest.request;
+package com.openexchange.resource.json.manage.preferences;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.resource.managerequest.request.actions.AbstractResourceAction;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link ResourceActionFactory}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@com.openexchange.ajax.requesthandler.Module(actions = {"new","update","delete"})
-public class ResourceActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractResourceAction> actions;
+public final class Module implements PreferencesItemService {
 
     /**
-     * Initializes a new {@link ResourceActionFactory}.
-     *
-     * @param services The service look-up
+     * Default constructor.
      */
-    public ResourceActionFactory(final ServiceLookup services) {
+    public Module() {
         super();
-        actions = new ConcurrentHashMap<String, AbstractResourceAction>(5, 0.9f, 1);
-        actions.put("new", new com.openexchange.resource.managerequest.request.actions.NewAction(services));
-        actions.put("update", new com.openexchange.resource.managerequest.request.actions.UpdateAction(services));
-        actions.put("delete", new com.openexchange.resource.managerequest.request.actions.DeleteAction(services));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.resource" };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                setting.setSingleValue(Boolean.valueOf(userConfig.isEditResource()));
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
     }
 
 }

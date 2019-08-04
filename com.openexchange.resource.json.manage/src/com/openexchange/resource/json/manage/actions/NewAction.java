@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.resource.managerequest.request.actions;
+package com.openexchange.resource.json.manage.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,7 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceFields;
-import com.openexchange.resource.managerequest.request.ResourceAJAXRequest;
+import com.openexchange.resource.json.manage.request.ResourceAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
