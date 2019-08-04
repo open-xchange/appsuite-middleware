@@ -166,7 +166,7 @@ public class FilteringGroupService implements GroupService {
         Group origGroup = getOriginalGroup(context, group.getIdentifier());
         int[] newGroupMember = hideAdminService.addAdminToGroupMemberList(context.getContextId(), origGroup.getMember(), group.getMember());
         group.setMember(newGroupMember);
-        delegate.update(context, user, origGroup, lastRead, checkI18nNames);
+        delegate.update(context, user, group, lastRead, checkI18nNames);
     }
 
     @Override
