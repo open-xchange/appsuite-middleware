@@ -262,10 +262,10 @@ F2 | <span style="color: red">fail</span>             |              _missing_  
 F2 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
 F2 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
 F2 | <span style="color: red">fail</span>             |              _missing_                 |               _missing_                |      -       | <span style="color: orange">suspicious</span>
-F3 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
-F3 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
-F3 | <span style="color: red">fail</span>             |              _missing_                 | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
-F3 | <span style="color: red">fail</span>             |              _missing_                 |               _missing_                |      -       | <span style="color: orange">suspicious</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |    reject    | <span style="color: red">fail</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |  quarantine  | <span style="color: orange">suspicious</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   | <span style="color: red">fail</span>   |     none     | <span style="color: blue">neutral</span>
+F3 | <span style="color: red">fail</span>             | <span style="color: red">fail</span>   |               _missing_                |      -       | <span style="color: orange">suspicious</span>
 
 Please note that the headers of messages in the "Drafts" or "Sent" folder are not analysed. Furthermore, only messages of the primary account of a user are evaluated.
 
