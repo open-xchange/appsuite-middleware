@@ -25,17 +25,17 @@ DriveSyncFilesBody:
 #DirectoryMetadata and FileMetadata use data structures from OX HTTP API, so import the necessary models
 #using a reference to the models' definitions in appropriate YAML file instead of redundantly redefine them
 FolderPermission:
-  $ref: ../../../http_api/components/schemas/index.yaml#/FolderPermission
+  $ref: ../../../http_api/components/schemas/folders/FolderPermission.yaml
 FolderExtendedPermission:
-  $ref: ../../../http_api/components/schemas/index.yaml#/FolderExtendedPermission
+  $ref: ../../../http_api/components/schemas/folders/FolderExtendedPermission.yaml
 ObjectPermission:
-  $ref: ../../../http_api/components/schemas/index.yaml#/InfoItemPermission
+  $ref: ../../../http_api/components/schemas/infostore/InfoItemPermission.yaml
 DistributionListMember:
-  $ref: ../../../http_api/components/schemas/index.yaml#/DistributionListMember
+  $ref: ../../../http_api/components/schemas/contacts/DistributionListMember.yaml
 ContactData:
-  $ref: ../../../http_api/components/schemas/index.yaml#/ContactData
+  $ref: ../../../http_api/components/schemas/contacts/ContactData.yaml
 ObjectExtendedPermission:
-  $ref: ../../../http_api/components/schemas/index.yaml#/InfoItemExtendedPermission
+  $ref: ../../../http_api/components/schemas/infostore/InfoItemExtendedPermission.yaml
 DriveFileVersionMetadata:
   $ref: ./DriveFileVersionMetadata.yaml
 DriveFileMetadata:

@@ -7,55 +7,52 @@
     description: |
       This request performs the selective synchronization of a single folder, resulting in different actions that should be
       executed on the client afterwards.
-    consumes:
-      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamRoot"
       - in: query
         name: version
-        type: string
+        schema:
+          type: string
+          default: "0"
         description: The current client version (matching the pattern `^[0-9]+(\\.[0-9]+)*$). If not set, the initial version 0 is assumed.
         required: false
-        default: "0"
       - in: query
         name: apiVersion
-        type: integer
+        schema:
+          type: integer
+          default: 0
         description: The API version that the client is using. If not set, the initial version 0 is assumed.
         required: false
-        default: 0
       - in: query
         name: diagnostics
-        type: boolean
+        schema:
+          type: boolean
         description: If set to `true`, an additional diagnostics trace is supplied in the response.
         required: false
       - in: query
         name: quota
-        type: boolean
+        schema:
+          type: boolean
         description: If set to `true`, additional quota information for the folder is supplied in the response.
         required: false
       - in: query
         name: pushToken
-        type: string
+        schema:
+          type: string
         description: The client's push registration token to associate it to generated events.
         required: false
-      - in: body
-        name: body
-        description: |
-          A JSON object containing the fields `clientVersion` and `originalVersion` of the targeted directory. Optionally, 
-          the `fileExclusions` array may be defined.
-        required: true
-        schema:
-          $ref: "#/definitions/DriveSyncFolderBody"
     responses:
-      200:
+      '200':
         description: |
           A JSON object containing an array of actions the client should execute for synchronization. If the
           `diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field
           `actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible
           fields in the response are filled.
-        schema:
-          $ref: "#/definitions/DriveActionsResponse"
+        content:
+          application/json:
+            schema:
+              $ref: "#/definitions/DriveActionsResponse"
     x-ox-examples:
       - Example:
         description: Basic example
@@ -85,3 +82,12 @@
                   }
                 ]
               }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveSyncFoldersBody'
+      description: |
+          A JSON object containing the fields `clientVersion` and `originalVersion` of the targeted directory. Optionally, 
+          the `fileExclusions` array may be defined.
+      required: true

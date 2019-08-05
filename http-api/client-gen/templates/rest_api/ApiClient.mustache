@@ -15,8 +15,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
-import com.openexchange.testing.httpclient.models.LoginResponse;
-import com.openexchange.testing.httpclient.modules.LoginApi;
 
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
@@ -54,8 +52,11 @@ import java.util.regex.Pattern;
 
 import {{invokerPackage}}.auth.Authentication;
 import {{invokerPackage}}.auth.HttpBasicAuth;
+import {{invokerPackage}}.auth.HttpBearerAuth;
 import {{invokerPackage}}.auth.ApiKeyAuth;
-import {{invokerPackage}}.auth.OAuth;
+{{#hasOAuthMethods}}
+  import {{invokerPackage}}.auth.OAuth;
+{{/hasOAuthMethods}}
 
  
 public class ApiClient {
@@ -213,18 +214,22 @@ public class ApiClient {
     throw new RuntimeException("No API key authentication configured!");
   }
 
+  {{#hasOAuthMethods}}
   /**
-   * Helper method to set access token for the first OAuth2 authentication.
-   */
+  * Helper method to set access token for the first OAuth2 authentication.
+  * @param accessToken Access token
+  */
   public void setAccessToken(String accessToken) {
     for (Authentication auth : authentications.values()) {
-    //  if (auth instanceof OAuth) {
-    //    ((OAuth) auth).setAccessToken(accessToken);
-    //    return;
-    //  }
-    }
+      if (auth instanceof OAuth) {
+        ((OAuth) auth).setAccessToken(accessToken);
+        return;
+        }
+      }
     throw new RuntimeException("No OAuth2 authentication configured!");
   }
+
+  {{/hasOAuthMethods}}
 
   /**
    * Set the User-Agent header's value (by adding to the default header map).
@@ -763,39 +768,7 @@ public class ApiClient {
     }
   }
 
-       public  void login(String username, String password) throws ApiException {
-        final LoginApi loginApi = new LoginApi(this);
-        LoginResponse loginResponse;
-        try {
-            loginResponse = loginApi.doLogin(username, password, null, null, null, null, null, null, null);
-        } catch (final ApiException e) {
-            if (e.getMessage().contains("CTX-0007")) {
-                // retry login caused by update tasks exception
-                try {
-                    loginResponse = loginApi.doLogin(username, password, null, null, null, null, null, null, null);
-                } catch (final ApiException e1) {
-                    throw new ApiException(e);
-                }
-            } else {
-                throw e;
-            }
-        }
-
-        if(loginResponse.getSession() != null && !loginResponse.getSession().isEmpty()) {
-            session = loginResponse.getSession();
-            user = loginResponse.getUser();
-            userId = loginResponse.getUserId();
-        } else {
-            throw new ApiException("Login failed! " + loginResponse);
-        }
-
-    }
-
-    public void logout() throws ApiException {
-      final LoginApi loginApi = new LoginApi(this);
-      loginApi.doLogout(getSession());
-    }
-
+    
     public String getSession() { return session; }
     public Integer getUserId() {return userId;}
     public String getUser() {return user;}
