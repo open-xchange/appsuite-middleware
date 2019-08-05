@@ -117,76 +117,6 @@ msgstr ""
 msgid "Create, modify and delete appointments."
 msgstr ""
 
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Calendar"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
-msgid "Week"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
-msgid "All-day events"
-msgstr ""
-
-#. *
-#. * The default file name for an ical event export, when using batch data
-#.
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
-msgid "Events"
-msgstr ""
-
-#. * The displayed name for the {@link EventField#LOCATION} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
-msgid "Location"
-msgstr ""
-
-#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
-msgid "Participants"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
-msgid "Comments"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
-#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
-msgid "The entire day"
-msgstr ""
-
-#. Status
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
-msgid "Accepted"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
-msgid "Declined"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
-msgid "Tentatively accepted"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
-msgid "Undecided"
-msgstr ""
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
-msgid "Resources"
-msgstr ""
-
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
 #. - ...
@@ -889,6 +819,15 @@ msgstr ""
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+msgid "Resources"
+msgstr ""
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
+msgid "The entire day"
+msgstr ""
+
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "New appointment: %1$s"
 msgstr ""
@@ -1197,6 +1136,12 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
+#. * The displayed name for the {@link EventField#LOCATION} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
+msgid "Location"
+msgstr ""
+
 #. * The displayed name for the {@link EventField#START_DATE} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
 msgid "Starts on"
@@ -1219,6 +1164,12 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
 msgid "Description"
+msgstr ""
+
+#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
+msgid "Participants"
 msgstr ""
 
 #. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
@@ -3278,6 +3229,15 @@ msgstr ""
 msgid "⁺∕₋ 1 year"
 msgstr ""
 
+#. Status
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
+msgid "Accepted"
+msgstr ""
+
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
+msgid "Declined"
+msgstr ""
+
 #: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:103
 msgid "Tentative"
 msgstr ""
@@ -4313,6 +4273,13 @@ msgstr ""
 #.
 #: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:71
 msgid "Appointments"
+msgstr ""
+
+#. *
+#. * The default file name for an ical event export, when using batch data
+#.
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
+msgid "Events"
 msgstr ""
 
 #. *
@@ -6538,6 +6505,10 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "Other infostore folders"
+msgstr ""
+
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
 msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:98
