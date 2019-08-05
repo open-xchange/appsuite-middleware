@@ -82,6 +82,7 @@ import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXPrincipal;
 import javax.management.remote.JMXServiceURL;
 import javax.security.auth.Subject;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementExceptionCode;
 import com.openexchange.management.services.ManagementServiceRegistry;
@@ -164,7 +165,9 @@ public abstract class AbstractAgent {
              */
             final String username = creds[0];
             final String password = creds[1];
-            String hashAlgorithm = creds.length > 2 && creds[2] != null ? creds[2] : "SHA";
+
+            ConfigurationService configurationService = ManagementServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+            String hashAlgorithm = configurationService.getProperty("JMXPasswordHashAlgorithm", "SHA");
 
             PasswordMechRegistry passwordMechRegistry = ManagementServiceRegistry.getServiceRegistry().getService(PasswordMechRegistry.class);
             PasswordMech passwordMech = passwordMechRegistry.get(hashAlgorithm);
@@ -387,13 +390,12 @@ public abstract class AbstractAgent {
      * @param urlstr The JMX URL as a string
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
-     * @param jmxPasswordHashAlgorithm The JMX password hash algorithm (only needed if previous parameter is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
      * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword, String jmxPasswordHashAlgorithm) throws OXException {
+    protected final JMXServiceURL addConnectorServer(final String urlstr, final String jmxLogin, final String jmxPassword) throws OXException {
         try {
-            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword, jmxPasswordHashAlgorithm);
+            return addConnectorServer(new JMXServiceURL(urlstr), jmxLogin, jmxPassword);
         } catch (final MalformedURLException e) {
             throw ManagementExceptionCode.MALFORMED_URL.create(e, urlstr);
         }
@@ -405,11 +407,10 @@ public abstract class AbstractAgent {
      * @param url The JMX URL
      * @param jmxLogin The JMX login or <code>null</code> to use no authentication for connecting to specified JMX URL
      * @param jmxPassword The JMX password (only needed if previous parameter is not <code>null</code>)
-     * @param jmxPasswordHashAlgorithm The JMX password hash algorithm (only needed if jmxLogin is not <code>null</code>)
      * @return The {@link JMXServiceURL} to which the connector is bound
      * @throws OXException If connector cannot be added
      */
-    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword, String jmxPasswordHashAlgorithm) throws OXException {
+    protected final JMXServiceURL addConnectorServer(final JMXServiceURL url, final String jmxLogin, final String jmxPassword) throws OXException {
         if (connectors.containsKey(url)) {
             throw ManagementExceptionCode.JMX_URL_ALREADY_BOUND.create(url);
         }
@@ -423,7 +424,7 @@ public abstract class AbstractAgent {
                 environment = null;
             } else {
                 environment = new HashMap<String, Object>(1);
-                environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword, jmxPasswordHashAlgorithm }));
+                environment.put(JMXConnectorServer.AUTHENTICATOR, new AbstractAgentJMXAuthenticator(new String[] { jmxLogin, jmxPassword }));
             }
             final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, environment, mbs);
             cs.start();
