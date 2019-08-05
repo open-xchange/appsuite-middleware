@@ -242,4 +242,3 @@ String version4ConfigDocProcessor(String branchName) {
         return branchName.substring(8)
     return null
 }
-
