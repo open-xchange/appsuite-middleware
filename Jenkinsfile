@@ -209,7 +209,7 @@ spec:
             steps {
                 writeFile file: 'gradle.properties', text: """org.gradle.warning.mode=all
                     artifactory_user=${artifactory_USR}
-                    artifactory_password=${artifactory_PSW}
+                    artifactory_password=${artifactory_PSW}""".stripIndent()
                 container('gradle') {
                     dir('backend/http-api') {
                         sh 'gradle clean resolve validate buildTestClient http_api_client:build rest_api_client:build http_api_client:publish rest_api_client:publish'
