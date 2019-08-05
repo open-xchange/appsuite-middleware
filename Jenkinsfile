@@ -203,20 +203,13 @@ spec:
             }
         }
         stage('Build Test Clients') {
-            when {
-                allOf {
-                    // Can be replaced with "triggeredBy('TimerTrigger')" once Pipeline: Declarative 1.3.4 is installed
-                    expression { Trigger.isStartedByTrigger(currentBuild.buildCauses, Trigger.Triggers.TIMER, Trigger.Triggers.USER) }
-                }
-            }
             environment {
-                artifactory = credentials('2cb98438-7e92-4038-af72-dad91b4ff6be')
+                artifactory = credentials('044a36e5-ec65-4319-8238-6cdf8e2db7f5')
             }
             steps {
                 writeFile file: 'gradle.properties', text: """org.gradle.warning.mode=all
                     artifactory_user=${artifactory_USR}
                     artifactory_password=${artifactory_PSW}
-                    ignoreTestFailures=true""".stripIndent()
                 container('gradle') {
                     dir('backend/http-api') {
                         sh "gradle clean resolve validate buildTestClient http_api_client:build rest_api_client:build http_api_client:publish rest_api_client:publish"
