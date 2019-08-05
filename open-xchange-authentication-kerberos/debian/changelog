@@ -1,3 +1,9 @@
+open-xchange-authentication-kerberos (7.10.1-18) stable; urgency=medium
+
+  * Build for patch 2019-08-12 (5358)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 05 Aug 2019 16:30:32 +0200
+
 open-xchange-authentication-kerberos (7.10.1-17) stable; urgency=medium
 
   * Build for patch 2019-07-29 (5340)
