@@ -212,7 +212,7 @@ spec:
                     artifactory_password=${artifactory_PSW}
                 container('gradle') {
                     dir('backend/http-api') {
-                        sh "gradle clean resolve validate buildTestClient http_api_client:build rest_api_client:build http_api_client:publish rest_api_client:publish"
+                        sh 'gradle clean resolve validate buildTestClient http_api_client:build rest_api_client:build http_api_client:publish rest_api_client:publish'
                     }
                 }
             }
