@@ -97,7 +97,7 @@ public class MaxMindGeoLocationBinaryActivator extends HousekeepingActivator imp
         try {
             reinit(configService);
         } catch (Exception e) {
-            LOG.error("Failed to re-initialize MaxMind ge-location storage", e);
+            LOG.error("Failed to re-initialize MaxMind geo-location storage", e);
         }
     }
 
