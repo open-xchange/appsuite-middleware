@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.oxfolder.userinterceptor;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
@@ -195,25 +196,27 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
     // Partly copied from OXFolderAdminCache, written by Thorben
     private void propagateDisplayNameModification(Context context, int userId, String displayName, Connection connection) throws OXException {
         long lastModified = System.currentTimeMillis();
-
-        updateLastModified(context, connection, lastModified);
-
-        /*
-         * Update user's default infostore folder name
-         */
         try {
-            int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, connection, context);
-            String folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, defaultInfostoreFolderId, connection);
-            OXFolderSQL.updateName(defaultInfostoreFolderId, folderName, lastModified, context.getMailadmin(), connection, context);
             /*
-             * Reload cache entry
+             * Determine the users default folder identifier
              */
-            if (FolderCacheManager.isInitialized()) {
-                /*
-                 * Distribute remove among remote caches
-                 */
-                FolderCacheManager.getInstance().removeFolderObject(defaultInfostoreFolderId, context);
+            int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, connection, context);
+            if (-1 == defaultInfostoreFolderId) {
+                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, I(userId), I(context.getContextId()));
             }
+            
+            /*
+             * Update folder name
+             */
+            String folderName = OXFolderAdminHelper.determineUserstoreFolderName(context, displayName, connection);
+            OXFolderSQL.updateName(defaultInfostoreFolderId, folderName, lastModified, context.getMailadmin(), connection, context);
+            
+            /*
+             * Clear caches
+             */
+            updateLastModified(context, connection, lastModified);
+            clearFolderCache(context, defaultInfostoreFolderId);
+            
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -235,17 +238,21 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
          */
         try {
             OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, context.getMailadmin(), connection, context);
-            /*
-             * Reload cache entry
-             */
-            if (FolderCacheManager.isInitialized()) {
-                /*
-                 * Distribute remove among remote caches
-                 */
-                FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, context);
-            }
+            clearFolderCache(context, FolderObject.SYSTEM_SHARED_FOLDER_ID);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+    
+    private void clearFolderCache(Context context, int folderId) throws OXException {
+        /*
+         * Reload cache entry
+         */
+        if (FolderCacheManager.isInitialized()) {
+            /*
+             * Distribute remove among remote caches
+             */
+            FolderCacheManager.getInstance().removeFolderObject(folderId, context);
         }
     }
 

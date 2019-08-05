@@ -1381,7 +1381,7 @@ public final class OXFolderAdminHelper {
             /*
              * Check infostore sibling
              */
-            if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE, writeCon, ctx) != -1) {
+            if (false == isUniqueInfostoreFolderName(ctx, displayName, writeCon)) {
                 /*
                  * Check if folder uniqueness is enforced
                  */
@@ -1504,14 +1504,13 @@ public final class OXFolderAdminHelper {
      *
      * @param context The {@link Context}
      * @param displayName The display name of the user to user as default folder name
-     * @param defaultInfostoreFolderId The identifier of the users default folder
      * @param connection A read connection
      * @return The folder name
      * @throws OXException In case {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID} or subfolder can't be loaded
      */
-    public static String determineUserstoreFolderName(Context context, String displayName, int defaultInfostoreFolderId, Connection connection) throws OXException {
+    public static String determineUserstoreFolderName(Context context, String displayName, Connection connection) throws OXException {
         try {
-            boolean isUnique = OXFolderSQL.isUniqueUserstoreFolderName(connection, context.getContextId(), displayName, defaultInfostoreFolderId);
+            boolean isUnique = isUniqueInfostoreFolderName(context, displayName, connection);
             if (isUnique) {
                 return displayName;
 
@@ -1521,7 +1520,7 @@ public final class OXFolderAdminHelper {
              */
             NameBuilder builder = NameBuilder.nameBuilderFor(displayName);
             do {
-                isUnique = OXFolderSQL.isUniqueUserstoreFolderName(connection, context.getContextId(), builder.advance().toString(), defaultInfostoreFolderId);
+                isUnique = isUniqueInfostoreFolderName(context, builder.advance().toString(), connection);
             } while (false == isUnique);
 
             /*
@@ -1532,5 +1531,9 @@ public final class OXFolderAdminHelper {
             LOG.debug("Unable to check the folder name for uniqueness.", e);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static boolean isUniqueInfostoreFolderName(Context context, String displayName, Connection connection) throws OXException, SQLException {
+        return -1 == OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE, connection, context);
     }
 }
