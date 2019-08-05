@@ -50,7 +50,6 @@
 	<classpathentry kind="src" path="/com.openexchange.subscribe.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.threadpool"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.user.json"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar.printing"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.generic"/>
