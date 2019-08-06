@@ -609,7 +609,7 @@ public class GmailSendTransport extends MailTransport {
 
             // Set header
             mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, "3 (normal)");
-            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
+            mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Normal");
 
             // Subject
             final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
