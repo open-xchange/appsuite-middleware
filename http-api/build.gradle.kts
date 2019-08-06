@@ -20,6 +20,10 @@ dependencies {
     openapiGenConfig("org.openapitools", "openapi-generator-cli", "4.0.2")
 }
 
+tasks.register("buildJars"){
+    dependsOn("http_api:buildTestClient", "drive_api:buildTestClient", "rest_api:buildTestClient")    
+}
+
 
 tasks.register("copyClients", Copy::class){
 
