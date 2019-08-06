@@ -207,11 +207,11 @@ spec:
                 artifactory = credentials('044a36e5-ec65-4319-8238-6cdf8e2db7f5')
             }
             steps {
-                writeFile file: 'gradle.properties', text: """org.gradle.warning.mode=all
-                    artifactory_user=${artifactory_USR}
-                    artifactory_password=${artifactory_PSW}""".stripIndent()
-                container('gradle') {
-                    dir('backend/http-api') {
+                dir('backend/http-api') {
+                    writeFile file: 'gradle.properties', text: """org.gradle.warning.mode=all
+                        artifactory_user=${artifactory_USR}
+                        artifactory_password=${artifactory_PSW}""".stripIndent()
+                    container('gradle') {
                         sh 'gradle clean resolve validate http_api_client:build rest_api_client:build http_api_client:publish rest_api_client:publish'
                     }
                 }
