@@ -382,7 +382,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             Priority priority = m.getPriority();
             sourceMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(priority.getLevel()));
             if (Priority.NORMAL == priority) {
-                sourceMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
+                sourceMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Normal");
             } else if (Priority.LOW == priority) {
                 sourceMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Low");
             } else {
@@ -733,7 +733,7 @@ public class CompositionSpaceServiceImpl implements CompositionSpaceService {
             Priority priority = m.getPriority();
             mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(priority.getLevel()));
             if (Priority.NORMAL == priority) {
-                mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Medium");
+                mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Normal");
             } else if (Priority.LOW == priority) {
                 mimeMessage.setHeader(MessageHeaders.HDR_IMPORTANCE, "Low");
             } else {
