@@ -202,7 +202,8 @@ public class UserFolderNameInterceptor extends AbstractUserServiceInterceptor {
              */
             int defaultInfostoreFolderId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, connection, context);
             if (-1 == defaultInfostoreFolderId) {
-                throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, I(userId), I(context.getContextId()));
+                LOGGER.debug("Unable to ensure folder name uniqueness", OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(FolderObject.SYSTEM_INFOSTORE_FOLDER_NAME, I(userId), I(context.getContextId())));
+                return;
             }
             
             /*
