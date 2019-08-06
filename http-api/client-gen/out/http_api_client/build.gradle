@@ -6,7 +6,6 @@ compileJava{
     dependsOn rootProject.buildJars
 }
 
-archivesBaseName = 'http_api'
 group = 'com.openexchange.appsuite.mw'
 version = '1.0-SNAPSHOT'
 sourceCompatibility = JavaVersion.VERSION_1_8

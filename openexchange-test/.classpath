@@ -143,10 +143,15 @@
 	<classpathentry kind="lib" path="lib/tempus-fugit-1.2-20140129.191141-5.jar" sourcepath="lib/source/tempus-fugit-1.2-20140129.191141-5-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.26-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.26.jar" sourcepath="/com.openexchange.bundles/source/slf4j-api-1.7.26-sources.jar"/>
+<<<<<<< HEAD
 	<classpathentry kind="lib" path="lib/httpClient-java.jar" sourcepath="lib/source/httpClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="lib/restClient-java.jar" sourcepath="lib/source/restClient-java-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.9.9.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.9.9-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-base-2.9.9.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-base-2.9.9-sources.jar"/>
+=======
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-json-provider-2.9.8.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-json-provider-2.9.8-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-jaxrs-base-2.9.8.jar" sourcepath="/com.openexchange.bundles/source/jackson-jaxrs-base-2.9.8-sources.jar"/>
+>>>>>>> Added eclipse builders. Removed test client jars. Removed transitive
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.media.multipart_2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.media.multipart.source_2.17.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.ws.rs-api-2.0.1.jar" sourcepath="/com.openexchange.bundles/source/javax.ws.rs-api-2.0.1-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.glassfish.jersey.core.jersey-client-2.17.jar" sourcepath="/com.openexchange.bundles/source/org.glassfish.jersey.core.jersey-client.source_2.17.jar"/>
@@ -199,5 +204,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.metrics.dropwizard"/>
 	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.9.9.jar" sourcepath="lib/source/jackson-datatype-joda-2.9.9-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-datatype-jsr310-2.9.9.jar" sourcepath="lib/source/jackson-datatype-jsr310-2.9.9-sources.jar"/>
+	<classpathentry kind="lib" path="lib/http_api_client-1.0-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/rest_api_client-1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
