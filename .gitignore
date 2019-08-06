@@ -223,5 +223,11 @@ com.openexchange.file.storage/doc
 http-api/build
 http-api/codegen/*/clients
 documentation/docu/configuration/properties.md
-http-api/client-gen/out
+http-api/client-gen/out/*
+!http-api/client-gen/out/http_api_client/
+http-api/client-gen/out/http_api_client/*
+!http-api/client-gen/out/http_api_client/build.gradle
+!http-api/client-gen/out/rest_api_client/
+http-api/client-gen/out/rest_api_client/*
+!http-api/client-gen/out/rest_api_client/build.gradle
 http-api/client-gen/openapi-generator-cli-4.0.0.jar
