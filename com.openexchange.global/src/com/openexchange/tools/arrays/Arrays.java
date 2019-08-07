@@ -56,8 +56,6 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Contains convenience methods for dealing with arrays.
@@ -138,14 +136,20 @@ public final class Arrays {
         if (toExtend == null || other == null) {
             return toExtend;
         }
-        final TIntSet tmp = new TIntHashSet(toExtend.length + other.length);
-        for (final int i : toExtend) {
-            tmp.add(i);
+        int[] retval = toExtend;
+        for (int i : other) {
+            boolean found = false;
+            for (int j = retval.length; !found && j-- > 0;) {
+                found = retval[j] == i;
+            }
+            if (!found) {
+                int[] newarr = new int[retval.length + 1];
+                System.arraycopy(retval, 0, newarr, 0, retval.length);
+                newarr[retval.length] = i;
+                retval = newarr;
+            }
         }
-        for (final int i : other) {
-            tmp.add(i);
-        }
-        return tmp.toArray();
+        return retval;
     }
 
     /**
