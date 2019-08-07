@@ -17,11 +17,15 @@
                         ${labels.comment}
                     </div>
                 </#if>
-                <div class="changes">
-                    <#list changes as change>
-                        <div class="change">${change}</div>
-                    </#list>
-                </div>
+                <#if (changes??)>
+                    <div class="changes">
+                        <ul>
+                            <#list changes as change>
+                                <li><div class="change">${change}</div></li>
+                            </#list>
+                        </ul>
+                    </div>
+                </#if>
             </div>
             ${templating.include( "notify.event.show.html.tmpl" )}
         </div>

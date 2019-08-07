@@ -63,6 +63,7 @@ import java.util.stream.Collectors;
 import org.dmfs.rfc5545.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
@@ -70,7 +71,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.changes.Change;
 import com.openexchange.chronos.scheduling.changes.ChangeAction;
@@ -135,7 +135,7 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Event must not be null");
         }
 
-        return describe(contextId, originator, recipient, comment, DELETE, removedEvents.get(0), ChangeAction.CANCEL, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+        return describe(contextId, originator, recipient, comment, DELETE, null, removedEvents, ChangeAction.CANCEL, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 
     @Override
@@ -153,7 +153,7 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             templateName = COUNTER_ATTENDEE;
         }
 
-        return describe(contextId, originator, recipient, comment, templateName, countered.get(0), ChangeAction.UPDATE, changes);
+        return describe(contextId, originator, recipient, comment, templateName, null, countered, ChangeAction.UPDATE, changes);
     }
 
     @Override
@@ -161,11 +161,11 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
         if (null == declinedEvent || declinedEvent.isEmpty()) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
         }
-        return describe(contextId, originator, recipient, comment, DECLINE_COUNTER, declinedEvent.get(0), ChangeAction.CANCEL, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+        return describe(contextId, originator, recipient, comment, DECLINE_COUNTER, null, declinedEvent, ChangeAction.CANCEL, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
     }
 
     @Override
-    public ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException {
+    public ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes, ParticipationStatus partStat) throws OXException {
         /*
          * Check constrains
          */
@@ -177,7 +177,6 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
          * Get correct template
          */
         String templateName;
-        ParticipationStatus partStat = CalendarUtils.find(updated.get(0).getAttendees(), originator).getPartStat();
         if (ParticipationStatus.ACCEPTED.matches(partStat)) {
             templateName = ACCEPT;
         } else if (ParticipationStatus.TENTATIVE.matches(partStat)) {
@@ -188,7 +187,7 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             // NEEDS_ACTION or unknown
             templateName = NONE;
         }
-        return describe(contextId, originator, recipient, comment, templateName, updated.get(0), ChangeAction.REPLY, changes);
+        return describe(contextId, originator, recipient, comment, templateName, partStat, updated, ChangeAction.REPLY, changes);
     }
 
     @Override
@@ -196,7 +195,7 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
         if (null == created || created.isEmpty()) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
         }
-        return describe(contextId, originator, recipient, comment, CREATE, created.get(0), ChangeAction.CREATE, Collections.emptyList());
+        return describe(contextId, originator, recipient, comment, CREATE, null, created, ChangeAction.CREATE, Collections.emptyList());
     }
 
     @Override
@@ -205,7 +204,7 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
         }
 
-        return describe(contextId, originator, recipient, comment, UPDATE, updated.get(0), determineChangeAction(changes), changes);
+        return describe(contextId, originator, recipient, comment, UPDATE, null, updated, determineChangeAction(changes), changes);
     }
 
     @Override
@@ -214,7 +213,7 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
         }
 
-        return describe(contextId, originator, recipient, comment, CREATE_EXCEPTION, updated.get(0), determineChangeAction(changes), changes);
+        return describe(contextId, originator, recipient, comment, CREATE_EXCEPTION, null, updated, determineChangeAction(changes), changes);
     }
 
     /*
@@ -240,22 +239,22 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
         return ChangeAction.UPDATE;
     }
 
-    private List<Attendee> getAttendees(Event update, CalendarUserType type) {
-        List<Attendee> attendees = update.getAttendees();
+    private List<Attendee> getAttendees(List<Event> events, CalendarUserType type) {
+        List<Attendee> attendees = events.get(0).getAttendees();
         if (null == attendees || attendees.isEmpty()) {
             return Collections.emptyList();
         }
         return attendees.stream().filter(a -> type.matches(a.getCuType())).collect(Collectors.toList());
     }
 
-    private ScheduleChange describe(int contextId, CalendarUser originator, CalendarUser recipient, String comment, String templateName, Event event, ChangeAction action, List<Change> changes) {
-        List<Attendee> attendees = new LinkedList<>(getAttendees(event, CalendarUserType.INDIVIDUAL));
-        attendees.addAll(getAttendees(event, CalendarUserType.GROUP));
-        List<Attendee> resources = getAttendees(event, CalendarUserType.RESOURCE);
-        return describe(contextId, originator, recipient, comment, templateName, event, action, changes, attendees, resources);
+    private ScheduleChange describe(int contextId, CalendarUser originator, CalendarUser recipient, String comment, String templateName, ParticipationStatus partStat, List<Event> events, ChangeAction action, List<Change> changes) {
+        List<Attendee> attendees = new LinkedList<>(getAttendees(events, CalendarUserType.INDIVIDUAL));
+        attendees.addAll(getAttendees(events, CalendarUserType.GROUP));
+        List<Attendee> resources = getAttendees(events, CalendarUserType.RESOURCE);
+        return describe(contextId, originator, recipient, comment, templateName, partStat, events, action, changes, attendees, resources);
     }
 
-    private ScheduleChange describe(int contextId, CalendarUser originator, CalendarUser recipient, String comment, String templateName, Event event, ChangeAction action, List<Change> changes, List<Attendee> attendees, List<Attendee> resources) {
+    private ScheduleChange describe(int contextId, CalendarUser originator, CalendarUser recipient, String comment, String templateName, ParticipationStatus partStat, List<Event> events, ChangeAction action, List<Change> changes, List<Attendee> attendees, List<Attendee> resources) {
         return new ScheduleChange() {
 
             private String text = null;
@@ -280,6 +279,12 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             }
 
             @Override
+            @Nullable
+            public ParticipationStatus getOriginatorPartStat() {
+                return partStat;
+            }
+
+            @Override
             public String getText() {
                 return null == text ? (text = render(TEXT_WRAPPER, templateName + ".txt.tmpl")) : text;
             }
@@ -294,6 +299,9 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
                 if (null == templateService) {
                     return "".intern();
                 }
+
+                // XXX Only describe one event to satisfy templates 
+                Event event = events.get(0);
                 Map<String, Object> env = new HashMap<String, Object>();
                 env.put("event", event);
                 env.put("templating", templateService.createHelper(env, null, false));
@@ -334,7 +342,5 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
                 return descriptions;
             }
         };
-
     }
-
 }

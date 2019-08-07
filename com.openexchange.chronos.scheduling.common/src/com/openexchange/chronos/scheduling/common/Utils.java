@@ -101,17 +101,14 @@ public class Utils {
         if (null == userService) {
             return TimeZone.getDefault();
         }
-        try {
-            if (CalendarUtils.isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
-                User user = userService.getUser(recipient.getEntity(), contextId);
-                return TimeZone.getTimeZone(user.getTimeZone());
-            }
-            User user = userService.getUser(originator.getEntity(), contextId);
-            return TimeZone.getTimeZone(user.getTimeZone());
-        } catch (OXException e) {
-            LOGGER.debug("Unable to retrtive user information", e);
+
+        User user = null;
+        if (null != recipient && CalendarUtils.isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+            user = getUser(userService, contextId, recipient.getEntity());
+        } else if (null != originator) {
+            user = getUser(userService, contextId, originator.getEntity());
         }
-        return TimeZone.getDefault();
+        return null == user ? TimeZone.getDefault() : TimeZone.getTimeZone(user.getTimeZone());
     }
 
     /**
@@ -128,17 +125,25 @@ public class Utils {
         if (null == userService) {
             return Locale.getDefault();
         }
-        try {
-            if (CalendarUtils.isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
-                User user = userService.getUser(recipient.getEntity(), contextId);
-                return user.getLocale();
-            }
-            User user = userService.getUser(originator.getEntity(), contextId);
-            return user.getLocale();
-        } catch (OXException e) {
-            LOGGER.debug("Unable to retrtive user information", e);
+
+        User user = null;
+        if (null != recipient && CalendarUtils.isInternal(recipient, CalendarUserType.INDIVIDUAL)) {
+            user = getUser(userService, contextId, recipient.getEntity());
+        } else if (null != originator) {
+            user = getUser(userService, contextId, originator.getEntity());
         }
-        return Locale.getDefault();
+        return null == user ? Locale.getDefault() : user.getLocale();
+    }
+
+    private static User getUser(UserService userService, int contextId, int userId) {
+        if (userId > 0 && contextId > 0) {
+            try {
+                return userService.getUser(userId, contextId);
+            } catch (OXException e) {
+                LOGGER.debug("Unable to retrtive user information", e);
+            }
+        }
+        return null;
     }
 
 }

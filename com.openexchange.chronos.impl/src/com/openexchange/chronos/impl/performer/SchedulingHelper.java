@@ -579,10 +579,9 @@ public class SchedulingHelper {
             updatedEvents.add(eventUpdate.getUpdate());
         }
         ScheduleChange scheduleChange = getSchedulingChangeService().describeReply(
-            session.getContextId(), originator, recipient, comment, updatedEvents, changeDescriptions);
+            session.getContextId(), originator, recipient, comment, updatedEvents, changeDescriptions, partStat);
         return new NotificationBuilder()
             .setMethod(ChangeAction.REPLY)
-//          .setPartStat(partStat)
             .setOriginator(originator)
             .setRecipient(recipient)
             .setResource(new DefaultCalendarObjectResource(updatedEvents))
@@ -597,10 +596,10 @@ public class SchedulingHelper {
         Attendee matchingAttendee = extractAttendee(updatedResource, originator);
         String comment = null != matchingAttendee ? matchingAttendee.getComment() : null;
         ScheduleChange scheduleChange = getSchedulingChangeService().describeReply(
-            session.getContextId(), originator, recipient, comment, updatedResource.getEvents(), changeDescriptions);
+            session.getContextId(), originator, recipient, comment, updatedResource.getEvents(), changeDescriptions, 
+            null != matchingAttendee ? matchingAttendee.getPartStat() : null);
         return new NotificationBuilder()
             .setMethod(ChangeAction.REPLY)
-//          .setPartStat(null != matchingAttendee ? matchingAttendee.getPartStat() : null)
             .setOriginator(originator)
             .setRecipient(recipient)
             .setResource(updatedResource)
@@ -664,10 +663,9 @@ public class SchedulingHelper {
             updatedEvents.add(eventUpdate.getUpdate());
         }
         ScheduleChange scheduleChange = getSchedulingChangeService().describeReply(
-            session.getContextId(), originator, recipient, comment, updatedEvents, changeDescriptions);
+            session.getContextId(), originator, recipient, comment, updatedEvents, changeDescriptions, partStat);
         return new MessageBuilder()
             .setMethod(SchedulingMethod.REPLY)
-//            .setPartStat(partStat)
             .setOriginator(originator)
             .setRecipient(recipient)
             .setResource(new DefaultCalendarObjectResource(updatedEvents))
@@ -682,10 +680,10 @@ public class SchedulingHelper {
         Attendee matchingAttendee = extractAttendee(updatedResource, originator);
         String comment = null != matchingAttendee ? matchingAttendee.getComment() : null;
         ScheduleChange scheduleChange = getSchedulingChangeService().describeReply(
-            session.getContextId(), originator, recipient, comment, updatedResource.getEvents(), changeDescriptions);
+            session.getContextId(), originator, recipient, comment, updatedResource.getEvents(), changeDescriptions, 
+            null != matchingAttendee ? matchingAttendee.getPartStat() : null);
         return new MessageBuilder()
             .setMethod(SchedulingMethod.REPLY)
-//          .setPartStat(null != matchingAttendee ? matchingAttendee.getPartStat() : null)
             .setOriginator(originator)
             .setRecipient(recipient)
             .setResource(updatedResource)

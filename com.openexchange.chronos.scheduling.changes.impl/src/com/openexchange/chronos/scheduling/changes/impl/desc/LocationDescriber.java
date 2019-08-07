@@ -49,12 +49,20 @@
 
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
+import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
 import com.openexchange.chronos.scheduling.common.Messages;
+import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.java.Strings;
 
 /**
  * {@link LocationDescriber}
@@ -62,18 +70,60 @@ import com.openexchange.chronos.scheduling.common.Messages;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.3
  */
-public class LocationDescriber extends AbstractChangeDescriber<String> {
+public class LocationDescriber implements ChangeDescriber {
 
     /**
      * Initializes a new {@link LocationDescriber}.
      */
     public LocationDescriber() {
-        super(EventField.LOCATION, String.class);
+        super();
     }
 
     @Override
-    List<SentenceImpl> describe(String original, String updated) {
-        return Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_LOCATION).add(updated, ArgumentType.UPDATED));
+    @NonNull
+    public EventField[] getFields() {
+        return new EventField[] { EventField.GEO, EventField.LOCATION };
+    }
+
+    @Override
+    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+        boolean changedLocation = eventUpdate.getUpdatedFields().contains(EventField.LOCATION);
+        boolean changedGeo = eventUpdate.getUpdatedFields().contains(EventField.GEO);
+
+        StringBuilder sb = new StringBuilder();
+        if (changedLocation) {
+            sb.append(eventUpdate.getUpdate().getLocation());
+        }
+        if (changedGeo) {
+            String description = describeGeo(eventUpdate);
+            if (Strings.isNotEmpty(description)) {
+                if (changedLocation) {
+                    sb.append(", ");
+                }
+                sb.append(description);
+            }
+        }
+
+        return new DefaultDescription(Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_LOCATION).add(sb.toString(), ArgumentType.UPDATED)), getEventFields(changedGeo, changedLocation));
+    }
+
+    private static String describeGeo(EventUpdate eventUpdate) {
+        double[] coordinates = eventUpdate.getUpdate().getGeo();
+        if (null != coordinates && coordinates.length == 2) {
+            return Double.toString(coordinates[0]) + ", " + Double.toString(coordinates[1]);
+        }
+        return null;
+    }
+
+    private List<EventField> getEventFields(boolean changedGeo, boolean changedLocation) {
+        ArrayList<EventField> fields = new ArrayList<EventField>(2);
+        if (changedGeo) {
+            fields.add(EventField.GEO);
+        }
+        if (changedLocation) {
+            fields.add(EventField.LOCATION);
+        }
+        return fields;
     }
 
 }

@@ -276,7 +276,7 @@ class Notification implements ChangeNotification {
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof Message)) {
+        if (!(obj instanceof Notification)) {
             return false;
         }
         Notification other = (Notification) obj;

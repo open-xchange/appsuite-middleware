@@ -76,4 +76,6 @@ public interface TypeWrapper {
     String shownAs(Object argument, ShownAsTransparency shownAs);
 
     String italic(Object argument);
+    
+    String getFormat();
 }

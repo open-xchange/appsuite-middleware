@@ -20,11 +20,13 @@ ${event.description!""}
 ${attendeeHelper.attendeeLine(attendee)}
 </#list>
 
+<#if resources??>
 == ${labels.resourcesLabel} ==
 
 <#list resources as resource>
 ${attendeeHelper.attendeeLine(resource)}
 </#list>
+</#if>
 
 == ${labels.detailsLabel} ==
 

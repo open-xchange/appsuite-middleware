@@ -51,6 +51,8 @@ package com.openexchange.chronos.scheduling.changes;
 
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
+import com.openexchange.annotation.Nullable;
+import com.openexchange.chronos.ParticipationStatus;
 
 /**
  * {@link ScheduleChange}
@@ -83,6 +85,15 @@ public interface ScheduleChange {
      * @return The changes or an empty list
      */
     List<Change> getChanges();
+    
+    
+    /**
+     * Get the participant status of the originator
+     *
+     * @return The participant status of the originator, or <code>null</code> if not set
+     */
+    @Nullable
+    ParticipationStatus getOriginatorPartStat();
 
     /**
      * Get the changes describes in text format

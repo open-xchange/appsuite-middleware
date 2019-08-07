@@ -148,5 +148,10 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<i>" + escapeHtml(argument.toString()) + "</i>";
     }
+    
+    @Override
+    public String getFormat() {
+        return "html";
+    }
 
 }

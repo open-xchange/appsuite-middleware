@@ -24,7 +24,7 @@
         <div class="attendee-list">
             <#list attendees as attendee>
             <div class="attendee">
-                <span class="person">${attendee.cn!attendee.eMail!""?html}</span>
+                <span class="person">${attendee.cn!""?html}</span>
                 <#if (attendee.partStat??)>
                     <#if (attendee.partStat == "ACCEPTED" )>
                     <span class="status accepted">&#10003</span>
@@ -41,16 +41,18 @@
         <div class="attendee-clear"></div>
     </div>
     <div class="participants">
-        <div class="label">
-            ${labels.resourcesLabel}
-        </div>
-        <div class="resource-list">
-            <#list resources as resource>
-            <div class="resource">
-                <span class="resource">${resource.cn?html}</span>
+        <#if resources??>
+            <div class="label">
+                ${labels.resourcesLabel}
             </div>
-            </#list>
-        </div>
+            <div class="resource-list">
+                <#list resources as resource>
+                <div class="resource">
+                    <span class="resource">${resource.cn?html}</span>
+                </div>
+                </#list>
+            </div>
+        </#if>
         <div class="resource-clear"></div>
     </div>
     <div>

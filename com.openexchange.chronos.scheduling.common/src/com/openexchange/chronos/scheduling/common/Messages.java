@@ -119,6 +119,8 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_RESCHEDULED = "The appointment was rescheduled. Original date: %1$s. New date: %2$s";
 
+    public static final String HAS_SPLIT = "The appointment series was updated, beginning at %1$s.";
+
     public static final String HAS_RESCHEDULED_TIMEZONE = "The timezone of the appointment was changed. Original timezone: %1$s. New timezone: %2$s";
 
     public static final String HAS_RESCHEDULED_TIMEZONE_START_DATE = "The timezone of the appointments start date was changed. Original timezone: %1$s. New timezone: %2$s";

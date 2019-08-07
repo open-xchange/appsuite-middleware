@@ -52,6 +52,7 @@ package com.openexchange.chronos.scheduling.changes;
 import java.util.List;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
@@ -116,10 +117,11 @@ public interface SchedulingChangeService {
      * @param comment An optional comment for ScheduleChange to the recipient
      * @param updated The events to reply to
      * @param change The changes done to the event
+     * @param partStat The participant status of the <b>originator</b>
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#REPLY}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> change) throws OXException;
+    ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> change, ParticipationStatus partStat) throws OXException;
 
     /**
      * 

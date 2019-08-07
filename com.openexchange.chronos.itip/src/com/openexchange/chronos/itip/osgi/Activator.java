@@ -65,6 +65,7 @@ import com.openexchange.chronos.itip.performers.DefaultITipActionPerformerFactor
 import com.openexchange.chronos.itip.sender.DefaultMailSenderService;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.sender.PoolingMailSenderService;
+import com.openexchange.chronos.scheduling.changes.DescriptionService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -99,7 +100,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { HostnameService.class };
+        return new Class<?>[] { HostnameService.class, DescriptionService.class };
     }
 
     @Override

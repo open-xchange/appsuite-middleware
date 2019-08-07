@@ -50,22 +50,19 @@
 package com.openexchange.chronos.scheduling.common;
 
 import static com.openexchange.chronos.scheduling.common.MailUtils.saveChangesSafe;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import javax.mail.internet.MimeMessage;
-import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
-import org.dmfs.rfc5545.recur.RecurrenceRule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
+import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.TransportProvider;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
@@ -79,8 +76,6 @@ import com.openexchange.session.Session;
  * @since v7.10.3
  */
 public abstract class AbstractMailTransportProvider implements TransportProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMailTransportProvider.class);
 
     protected final @NonNull ServiceLookup serviceLookup;
 
@@ -106,47 +101,33 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
 
         return ScheduleStatus.SENT;
     }
-
-    protected boolean endsInPast(List<Event> events) throws OXException {
-        // FIXME Do check for the changed event not the first in the list ..
-        return endsInPast(CalendarUtils.sortSeriesMasterFirst(events).get(0));
+    
+    protected Map<String, String> getAdditionalHeaders(ChangeNotification notification) {
+        return notification.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
+    }
+    
+    protected Map<String, String> getAdditionalHeaders(SchedulingMessage message) {
+        return message.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class);
     }
 
-    private boolean endsInPast(Event event) throws OXException {
-        Date now = new Date();
-        Date endDate = new Date(event.getEndDate().getTimestamp());
-
-        // In case of series master the date of the last occurrence has to be validated
-        if (CalendarUtils.isSeriesMaster(event)) {
-            try {
-                RecurrenceRule eventRule = new RecurrenceRule(event.getRecurrenceRule());
-                Date eventEnd = null;
-
-                RecurrenceService rService = serviceLookup.getServiceSafe(RecurrenceService.class);
-                if (eventRule.getUntil() != null) {
-                    eventEnd = new Date(eventRule.getUntil().getTimestamp());
-                } else if (eventRule.getCount() != null) {
-                    Iterator<Event> instances = rService.calculateInstances(event, null, null, null);
-                    Event last = null;
-                    while (instances.hasNext()) {
-                        last = instances.next();
-                    }
-                    if (null != last) {
-                        eventEnd = new Date(last.getEndDate().getTimestamp());
-                    }
-                } else {
-                    // Recurrence rule has no 'limit' defined. 
-                    return false;
-                }
-                if (eventEnd != null) {
-                    return eventEnd.before(now);
-                }
-            } catch (InvalidRecurrenceRuleException e) {
-                LOGGER.debug("Invalid recurrence rule. Fallback to notify", e);
-            }
-        }
-
-        return endDate.before(now);
+    /**
+     * Get the subject for an changed participant status
+     *
+     * @param originator The originator of the message
+     * @param partStat The participant status of the originator
+     * @param locale The locale
+     * @param summary The summary of the event
+     * @return The constructed and translated String {@link Messages#SUBJECT_STATE_CHANGED}
+     */
+    protected String getPartStatSubject(CalendarUser originator, ParticipationStatus partStat, Locale locale, String summary) {
+        //@formatter:off
+        StringHelper helper = StringHelper.valueOf(locale);
+        return String.format(
+            helper.getString(Messages.SUBJECT_STATE_CHANGED), 
+            originator.getCn(), 
+            ContextSensitiveMessages.getInstance().getDescription(partStat, locale, ContextSensitiveMessages.Context.VERB), 
+            summary);
+        //@formatter:on
     }
 
 }

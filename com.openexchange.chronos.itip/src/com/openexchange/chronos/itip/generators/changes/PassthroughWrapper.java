@@ -108,5 +108,10 @@ public class PassthroughWrapper implements TypeWrapper {
     public String italic(Object argument) {
         return none(argument);
     }
+    
+    @Override
+    public String getFormat() {
+        return "text";
+    }
 
 }

@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -79,10 +78,11 @@ import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.HTMLWrapper;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
-import com.openexchange.chronos.itip.generators.changes.ChangeDescriber;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.scheduling.changes.Description;
+import com.openexchange.chronos.scheduling.changes.DescriptionService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventConflict;
@@ -143,7 +143,6 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     public void describeDiff(final ITipChange change, final TypeWrapper wrapper, final CalendarSession session, ITipMessage message) throws OXException {
-
         final ContextService contexts = Services.getService(ContextService.class);
         final UserService users = Services.getService(UserService.class);
 
@@ -174,9 +173,22 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             return;
         }
 
-        final ChangeDescriber cd = new ChangeDescriber();
+        
+        final List<String> descriptions = new LinkedList<String>();
+        DescriptionService descriptionService = Services.getOptionalService(DescriptionService.class);
+        if (null != descriptionService) {
+            List<Description> descs = descriptionService.describe(change.getDiff(), ctx.getContextId(), null, session.getUtilities().getEntityResolver(ctx.getContextId()).prepareUserAttendee(user.getId()), (EventField) null);
+            /*
+             * XXX Describe first event only as we currently can't display this in an understandable manner
+             */
+            if (null != descs && descs.size() > 0) {
+                Description description = descs.get(0);
+                for (com.openexchange.chronos.scheduling.changes.Sentence sentence : description.getSentences()) {
+                    descriptions.add(sentence.getMessage(wrapper.getFormat(), user.getLocale()));
+                }
+            }
+        }
 
-        final List<String> descriptions = cd.getChanges(ctx, currentEvent, newEvent, change.getDiff(), wrapper, user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()), session.getUserId());
         change.setDiffDescription(descriptions);
 
         // Now let's choose an introduction sentence

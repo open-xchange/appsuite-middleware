@@ -49,26 +49,17 @@
 
 package com.openexchange.chronos.scheduling.impl.imip;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.common.AbstractMailTransportProvider;
 import com.openexchange.chronos.scheduling.common.Constants;
-import com.openexchange.chronos.scheduling.common.ContextSensitiveMessages;
 import com.openexchange.chronos.scheduling.common.MailUtils;
 import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.scheduling.common.MimeMessageBuilder;
@@ -118,10 +109,6 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
             if (false == canHandle(message)) {
                 return ScheduleStatus.REJECTED;
             }
-            if (false == shouldBeSent(message)) {
-                return ScheduleStatus.DELIVERED;
-            }
-
             return transportMail(session, build(session, message));
         } catch (OXException | MessagingException e) {
             LOGGER.debug("Unable to generate message", e);
@@ -139,7 +126,7 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
             .setTo(message.getRecipient())
             .setSubject(getSubject(serviceLookup.getServiceSafe(UserService.class), session.getContextId(), message))
             .setContent(new ExternalMimePartFactory(message, serviceLookup))
-            .setAdditionalHeader((Map<String, String>) message.getAdditional(Constants.ADDITIONAL_HEADER_MAIL_HEADERS, Map.class))
+            .setAdditionalHeader(getAdditionalHeaders(message))
             .setPriority()
             .setMailerInfo(serviceLookup.getOptionalService(VersionService.class))
             .setTracing(message.getResource().getUid())
@@ -177,30 +164,6 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
         return false;
     }
 
-    /**
-     * Gets a value indicating whether the message should be sent to the recipient as per
-     * {@link SchedulingMessage#getRecipient()}, or not.
-     *
-     * @param message The {@link SchedulingMessage}
-     * @return <code>true</code> if the scheduling message should be sent to the recipient,
-     *         <code>false</code> if not. E.g. a message should <b>not</b> be sent to the recipient if it exclusively ends in the past
-     *         or if no event fields of interest changed
-     * @throws OXException If calculating recurrences for a series fails or the admin user lookup fails
-     */
-    private boolean shouldBeSent(SchedulingMessage message) throws OXException {
-        List<Event> events = CalendarUtils.sortSeriesMasterFirst(message.getResource().getEvents());
-        if (null == events || events.size() < 1) {
-            // No event(s) to report
-            return false;
-        }
-
-        if (endsInPast(events)) {
-            // No mail for events in the past
-            return false;
-        }
-        return true;
-    }
-
     private String getSubject(UserService userService, int contextId, SchedulingMessage message) throws OXException {
         Locale locale = Utils.getLocale(userService, contextId, message.getOriginator(), message.getRecipient());
         StringHelper helper = StringHelper.valueOf(locale);
@@ -226,15 +189,7 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
                 subject = Messages.SUBJECT_REFRESH;
                 break;
             case REPLY:
-                subject = Messages.SUBJECT_STATE_CHANGED;
-                //@formatter:off
-                    return String.format(
-                            helper.getString(subject), 
-                            message.getOriginator().getCn(), 
-                            ContextSensitiveMessages.getInstance().getDescription(getOriginatorPartStat(message.getOriginator(), message.getResource().getEvents()), locale, ContextSensitiveMessages.Context.VERB),
-                            summary
-                            ); 
-                    //@formatter:on
+                return getPartStatSubject(message.getOriginator(), message.getScheduleChange().getOriginatorPartStat(), locale, summary);
             case REQUEST:
                 switch (message.getScheduleChange().getAction()) {
                     case CREATE:
@@ -252,24 +207,4 @@ public class IMipTransportProvider extends AbstractMailTransportProvider {
         subject = String.format(helper.getString(subject), summary);
         return subject;
     }
-
-    /**
-     * Get the updated {@link ParticipationStatus} of the originator based on the given events by {@link #message}
-     * 
-     * @return The {@link ParticipationStatus} of the originator
-     * @throws OXException In case participant status can't be found
-     */
-    private ParticipationStatus getOriginatorPartStat(CalendarUser originator, List<Event> events) throws OXException {
-        if (Attendee.class.isAssignableFrom(originator.getClass())) {
-            return ((Attendee) originator).getPartStat();
-        }
-        for (Event e : events) {
-            Attendee attendee = CalendarUtils.find(e.getAttendees(), originator.getEntity());
-            if (null != attendee) {
-                return attendee.getPartStat();
-            }
-        }
-        throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Unable to find correct participant status");
-    }
-
 }
