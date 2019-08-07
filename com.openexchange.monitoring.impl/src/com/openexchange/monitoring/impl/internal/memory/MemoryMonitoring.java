@@ -128,7 +128,7 @@ public class MemoryMonitoring implements Runnable {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() {
         try {
             GarbageCollectionInfos infos = getGarbageCollectionInfos(false);
             double gcTimePercentSum = infos.gcTimePercentSum;
@@ -176,7 +176,7 @@ public class MemoryMonitoring implements Runnable {
         return new StringBuilder(10).append(periodMinutes).append(" minutes").toString();
     }
 
-    private synchronized GarbageCollectionInfos getGarbageCollectionInfos(boolean withCpuTime) throws Exception {
+    private GarbageCollectionInfos getGarbageCollectionInfos(boolean withCpuTime) throws Exception {
         // Determine current runtime from this JVM
         long rtUptimeMs = getRuntimeMXBean().getUptime();
 
