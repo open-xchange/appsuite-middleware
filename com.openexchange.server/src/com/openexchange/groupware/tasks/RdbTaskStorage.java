@@ -202,7 +202,7 @@ public class RdbTaskStorage extends TaskStorage {
                     stmt.setInt(pos++, userId);
                 }
             }
-        }, folderId, columns, ACTIVE);
+        }, folderId, columns, false, ACTIVE);
     }
 
     /**
@@ -211,9 +211,10 @@ public class RdbTaskStorage extends TaskStorage {
     @Override
     public TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+        int[] columnsToUse = Arrays.addUniquely(columns, Task.OBJECT_ID);
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
-        sql.append(SQL.getFields(columns, true, true, null));
+        sql.append(SQL.getFields(columnsToUse, true, null));
         sql.append(" FROM task JOIN task_folder USING (cid,id) ");
         sql.append("WHERE task.cid=? AND ");
         sql.append(SQL.allFoldersWhere(all, own, shared));
@@ -227,7 +228,6 @@ public class RdbTaskStorage extends TaskStorage {
             sql.append(" AND ");
             sql.append(patternCondition);
         }
-        sql.append(" GROUP BY task.id");
         sql.append(SQL.getOrder(orderBy, order));
         return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
 
@@ -260,7 +260,7 @@ public class RdbTaskStorage extends TaskStorage {
                 }
                 LOG.trace(stmt.toString());
             }
-        }, -1, columns, ACTIVE);
+        }, -1, columnsToUse, true, ACTIVE);
     }
 
     /**
@@ -632,7 +632,7 @@ public class RdbTaskStorage extends TaskStorage {
                     stmt.setInt(pos++, userId);
                 }
             }
-        }, folderId, columns, ACTIVE, con);
+        }, folderId, columns, false, ACTIVE, con);
     }
 
     @Override
