@@ -49,10 +49,11 @@
 
 package com.openexchange.chronos.scheduling.changes;
 
+import java.util.Date;
 import java.util.List;
-import org.dmfs.rfc5545.DateTime;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.scheduling.RecipientSettings;
 
 /**
  * {@link ScheduleChange}
@@ -68,7 +69,7 @@ public interface ScheduleChange {
      *
      * @return The date of the change
      */
-    DateTime getTimeStamp();
+    Date getTimeStamp();
 
     /**
      * 
@@ -96,24 +97,28 @@ public interface ScheduleChange {
     ParticipationStatus getOriginatorPartStat();
 
     /**
-     * Get the changes describes in text format
-     *
-     * @return The changes described
+     * Renders a representation in plain text of the schedule changes for a specific recipient.
+     * 
+     * @param recipientSettings The recipient settings for the rendered schedule change
+     * @return The description of the schedule changes
      */
-    String getText();
+    String getText(RecipientSettings recipientSettings);
 
     /**
-     * Get the changes describes in HTML format
-     *
-     * @return The changes described
+     * Renders a representation in HTML of the schedule changes for a specific recipient.
+     * 
+     * @param recipientSettings The recipient settings for the rendered schedule change
+     * @return The description of the schedule changes
      */
-    String getHtml();
+    String getHtml(RecipientSettings recipientSettings);
 
     /*
      * Get the changes describes in XML format
      *
+     * @param recipientSettings The recipient settings for the rendered schedule change
+     * 
      * @return The changes described
      */
-    //    String getXml();
+    //    String getXml(RecipientSettings recipientSettings);
 
 }

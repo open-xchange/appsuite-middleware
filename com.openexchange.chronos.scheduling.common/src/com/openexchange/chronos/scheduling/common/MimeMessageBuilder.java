@@ -223,16 +223,20 @@ public class MimeMessageBuilder {
      * @throws MessagingException If header can't be set
      * @throws OXException In case folder can't be loaded
      */
-    public MimeMessageBuilder setOXHeader(CalendarUser recipient, ChangeAction action, Event event) throws MessagingException, OXException {
+    public MimeMessageBuilder setOXHeader(CalendarUser recipient, ChangeAction action, Event event) throws MessagingException {
         if (false == Utils.isInternalCalendarUser(recipient) || null == event) {
             return this;
         }
-        String folderId = CalendarUtils.getFolderView(event, recipient.getEntity());
-
-        mime.setHeader(Constants.HEADER_X_OX_REMINDER, new StringBuilder().append(event.getId()).append(',').append(folderId).append(',').append(1).toString());
+        try {
+            String folderId = CalendarUtils.getFolderView(event, recipient.getEntity());
+            mime.setHeader(Constants.HEADER_X_OX_REMINDER, new StringBuilder().append(event.getId()).append(',').append(folderId).append(',').append(1).toString());
+        } catch (OXException e) {
+            LOGGER.warn("Unable to get folder view for recipient {}, omitting {}-header.", recipient, Constants.HEADER_X_OX_REMINDER, e);
+        }
         mime.setHeader(Constants.HEADER_X_OX_MODULE, Constants.VALUE_X_OX_MODULE);
         mime.setHeader(Constants.HEADER_X_OX_TYPE, action.name());
         mime.setHeader(Constants.HEADER_X_OX_OBJECT, event.getId());
+        mime.setHeader(Constants.HEADER_X_OX_SEQUENCE, String.valueOf(event.getSequence()));
         mime.setHeader(Constants.HEADER_X_OX_UID, event.getUid());
         if (null != event.getRecurrenceId()) {
             mime.setHeader(Constants.HEADER_X_OX_RECURRENCE_DATE, event.getRecurrenceId().toString());

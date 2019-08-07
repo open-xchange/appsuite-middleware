@@ -54,7 +54,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.slf4j.Logger;
@@ -63,11 +62,13 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
+import com.openexchange.chronos.scheduling.changes.impl.FormattableArgument;
+import com.openexchange.chronos.scheduling.changes.impl.MessageContext;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
 
@@ -88,13 +89,13 @@ public class ReschedulingDescriber implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         List<SentenceImpl> sentences = new LinkedList<>();
 
         handleTimezoneChange(sentences, eventUpdate.getOriginal(), eventUpdate.getUpdate());
 
         if (hasTimeChanged(eventUpdate.getOriginal(), eventUpdate.getUpdate())) {
-            handleRescheduling(sentences, eventUpdate, timeZone, locale);
+            handleRescheduling(sentences, eventUpdate);
         }
 
         if (sentences.isEmpty()) {
@@ -146,43 +147,49 @@ public class ReschedulingDescriber implements ChangeDescriber {
         return false == (original.getStartDate().getTimestamp() == update.getStartDate().getTimestamp() && original.getEndDate().getTimestamp() == update.getEndDate().getTimestamp());
     }
 
-    private void handleRescheduling(List<SentenceImpl> sentences, EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
-        String originalDate = time(eventUpdate, eventUpdate.getOriginal(), timeZone, locale);
-        String updatedDate = time(eventUpdate, eventUpdate.getUpdate(), timeZone, locale);
+    private void handleRescheduling(List<SentenceImpl> sentences, EventUpdate eventUpdate) {
+        Object originalDate = time(eventUpdate, eventUpdate.getOriginal());
+        Object updatedDate = time(eventUpdate, eventUpdate.getUpdate());
         sentences.add(new SentenceImpl(Messages.HAS_RESCHEDULED).add(originalDate, ArgumentType.ORIGINAL).add(updatedDate, ArgumentType.UPDATED));
     }
 
-    private String time(EventUpdate eventUpdate, Event event, TimeZone timezone, Locale locale) {
-        Date startDate = new Date(event.getStartDate().getTimestamp());
-        Date endDate = new Date(event.getEndDate().getTimestamp());
+    private Object time(EventUpdate eventUpdate, Event event) {
+        return new FormattableArgument() {
 
-        DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, locale);
-        longDate.setTimeZone(timezone);
-        if (event.getStartDate().isAllDay()) {
-            longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-            endDate = forceCorrectDay(endDate);
-        }
+            @Override
+            public Object format(MessageContext context) {
+                Date startDate = new Date(event.getStartDate().getTimestamp());
+                Date endDate = new Date(event.getEndDate().getTimestamp());
 
-        DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
-        time.setTimeZone(timezone);
+                DateFormat longDate = DateFormat.getDateInstance(DateFormat.LONG, context.getLocale());
+                longDate.setTimeZone(context.getTimeZone());
+                if (event.getStartDate().isAllDay()) {
+                    longDate.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    endDate = forceCorrectDay(endDate);
+                }
 
-        if (isSameDay(eventUpdate, event)) {
-            if (event.getStartDate().isAllDay()) {
-                return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
+                DateFormat time = DateFormat.getTimeInstance(DateFormat.SHORT, context.getLocale());
+                time.setTimeZone(context.getTimeZone());
+
+                if (isSameDay(eventUpdate, event)) {
+                    if (event.getStartDate().isAllDay()) {
+                        return String.format("%s (%s)", longDate.format(startDate), Messages.FULL_TIME);
+                    }
+                    return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), time.format(endDate));
+                }
+                if (event.getStartDate().isAllDay()) {
+                    return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), Messages.FULL_TIME);
+                }
+                return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
             }
-            return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), time.format(endDate));
-        }
-        if (event.getStartDate().isAllDay()) {
-            return String.format("%s - %s (%s)", longDate.format(startDate), longDate.format(endDate), Messages.FULL_TIME);
-        }
-        return String.format("%s - %s", longDate.format(startDate) + " " + time.format(startDate), longDate.format(endDate) + " " + time.format(endDate));
+        };
     }
 
-    private static Date forceCorrectDay(Date endDate) {
+    static Date forceCorrectDay(Date endDate) {
         return new Date(endDate.getTime() - 1000); // Move this before midnight, so the time formatting routines don't lie
     }
 
-    private static boolean isSameDay(EventUpdate eventUpdate, Event event) {
+    static boolean isSameDay(EventUpdate eventUpdate, Event event) {
 
         if (eventUpdate.getUpdatedFields().contains(EventField.START_DATE)) {
             if (isDayChange(eventUpdate.getOriginal().getStartDate(), eventUpdate.getUpdate().getStartDate())) {

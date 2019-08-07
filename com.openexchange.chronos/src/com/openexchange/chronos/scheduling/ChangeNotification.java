@@ -111,6 +111,13 @@ public interface ChangeNotification {
     ScheduleChange getScheduleChange();
 
     /**
+     * Gets the recipient-specific settings for the notification.
+     * 
+     * @return The recipient specific settings
+     */
+    RecipientSettings getRecipientSettings();
+
+    /**
      * Get additional information.
      * 
      * @param key The key for the value

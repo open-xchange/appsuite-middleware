@@ -94,6 +94,7 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
 
@@ -185,6 +186,11 @@ public class ITipHandler implements CalendarHandler {
 
     protected boolean shouldHandle(CalendarEvent event) {
         if (event == null || event.getAccountId() != CalendarAccount.DEFAULT_ACCOUNT.getAccountId()) {
+            return false;
+        }
+
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (null == configurationService || false == configurationService.getBoolProperty("com.openexchange.calendar.useLegacyScheduling", false)) {
             return false;
         }
 

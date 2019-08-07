@@ -103,6 +103,8 @@ public class Constants {
 
     public final static String HEADER_X_OX_OBJECT = "X-Open-Xchange-Object";
 
+    public final static String HEADER_X_OX_SEQUENCE = "X-Open-Xchange-Sequence";
+
     public final static String HEADER_X_OX_UID = "X-Open-Xchange-UID";
 
     public final static String HEADER_X_OX_RECURRENCE_DATE = "X-Open-Xchange-RDATE";

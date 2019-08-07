@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -76,6 +77,7 @@ import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.mapping.AttendeeEventUpdate;
 import com.openexchange.chronos.common.mapping.DefaultEventUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -145,8 +147,14 @@ public class DeletePerformer extends AbstractUpdatePerformer {
              * deletion of not group-scheduled event / by organizer / last user attendee
              */
             requireDeletePermissions(originalEvent);
-            List<Event> deletedEvents = isSeriesException(originalEvent) ? deleteException(originalEvent) : delete(originalEvent);
-            schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents));
+            if (isSeriesException(originalEvent)) {
+                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                List<Event> deletedEvents = deleteException(originalSeriesMaster, originalEvent);
+                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents), originalSeriesMaster, null);
+            } else {
+                List<Event> deletedEvents = delete(originalEvent);
+                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents));
+            }
         } else {
             /*
              * deletion as one of the attendees
@@ -156,8 +164,14 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                 throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
             }
             requireDeletePermissions(originalEvent, userAttendee);
-            List<EventUpdate> attendeeEventUpdates = isSeriesException(originalEvent) ? deleteException(originalEvent, userAttendee) : delete(originalEvent, userAttendee);
-            schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
+            if (isSeriesException(originalEvent)) {
+                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                List<EventUpdate> attendeeEventUpdates = deleteException(originalSeriesMaster, originalEvent, userAttendee);
+                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
+            } else {
+                List<EventUpdate> attendeeEventUpdates = delete(originalEvent, userAttendee);
+                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
+            }
         }
     }
 
@@ -185,21 +199,28 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     rule.setUntil(until);
                     eventUpdate.setRecurrenceRule(rule.toString());
                     /*
-                     * remove any change- and delete exceptions after the occurrence
+                     * remove any change- and delete exceptions after the occurrence & remember one-off attendees not attending the series master event
                      */
                     Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedDeleteExceptionDates = splitExceptionDates(originalEvent.getDeleteExceptionDates(), until);
                     if (false == splittedDeleteExceptionDates.getValue().isEmpty()) {
                         eventUpdate.setDeleteExceptionDates(splittedDeleteExceptionDates.getKey());
                     }
+                    List<Event> deletedChangeExceptions = new ArrayList<Event>();
+                    List<Attendee> orphanedAttendees = new ArrayList<Attendee>();
                     Entry<SortedSet<RecurrenceId>, SortedSet<RecurrenceId>> splittedChangeExceptionDates = splitExceptionDates(originalEvent.getChangeExceptionDates(), until);
                     if (false == splittedChangeExceptionDates.getValue().isEmpty()) {
                         for (Event changeException : loadExceptionData(originalEvent, splittedChangeExceptionDates.getValue())) {
-                            delete(changeException);
+                            deletedChangeExceptions.addAll(delete(changeException));
+                            for (Attendee attendee : changeException.getAttendees()) {
+                                if (false == contains(originalEvent.getAttendees(), attendee) && false == contains(orphanedAttendees, attendee)) {
+                                    orphanedAttendees.add(attendee);
+                                }
+                            }
                         }
                         eventUpdate.setChangeExceptionDates(splittedChangeExceptionDates.getKey());
                     }
                     /*
-                     * update series master in storage & track results as updated request for adjusted event series
+                     * update series master in storage & track results as updated request for adjusted event series, or as cancel message for orphaned attendees
                      */
                     eventUpdate.setSequence(originalEvent.getSequence() + 1);
                     Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
@@ -209,6 +230,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     resultTracker.trackUpdate(originalEvent, updatedEvent);
                     CalendarObjectResource updatedResource = new DefaultCalendarObjectResource(updatedEvent, loadExceptionData(updatedEvent, updatedEvent.getChangeExceptionDates()));
                     schedulingHelper.trackUpdate(updatedResource, new DefaultEventUpdate(originalEvent, updatedEvent));
+                    if (0 < orphanedAttendees.size()) {
+                        schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedChangeExceptions), null, orphanedAttendees);
+                    }
                 } else if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                     /*
                      * deletion of existing change exception
@@ -222,16 +246,17 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                     /*
                      * create new delete exception in master & prepare cancel or reply scheduling message representing the delete operation
                      */
-                    Event virtualException = prepareException(originalEvent, recurrenceId, originalEvent.getId());
+                    Event virtualException = new EventOccurrence(originalEvent, recurrenceId);
                     addDeleteExceptionDate(originalEvent, recurrenceId);
-                    schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(virtualException));
+                    schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(virtualException), originalEvent, null);
                 }
             } else if (isSeriesException(originalEvent)) {
                 /*
                  * delete existing change exception & prepare cancel or reply scheduling message representing the delete operation
                  */
-                deleteException(originalEvent);
-                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(originalEvent));
+                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                List<Event> deletedEvents = deleteException(originalSeriesMaster, originalEvent);
+                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedEvents), originalSeriesMaster, null);
             } else {
                 /*
                  * unsupported, otherwise
@@ -265,14 +290,15 @@ public class DeletePerformer extends AbstractUpdatePerformer {
                      * creation of new delete exception
                      */
                     List<EventUpdate> attendeeEventUpdates = deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
-                    schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
+                    schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), originalEvent, attendeeEventUpdates);
                 }
             } else if (isSeriesException(originalEvent)) {
                 /*
                  * deletion of existing change exception
                  */
-                List<EventUpdate> attendeeEventUpdates = deleteException(originalEvent, userAttendee);
-                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
+                Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+                List<EventUpdate> attendeeEventUpdates = deleteException(originalSeriesMaster, originalEvent, userAttendee);
+                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), originalSeriesMaster, attendeeEventUpdates);
             } else {
                 /*
                  * unsupported, otherwise
@@ -358,20 +384,20 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * Deletes an existing change exception. Besides the removal of the change exception data via {@link #delete(Event)}, this also
      * includes adjusting the master event's change- and delete exception date arrays.
      *
+     * @param originalSeriesMaster The original series master event
      * @param originalExceptionEvent The original exception event
      * @return A list holding the deleted exception event
      */
-    private List<Event> deleteException(Event originalExceptionEvent) throws OXException {
+    private List<Event> deleteException(Event originalSeriesMaster, Event originalExceptionEvent) throws OXException {
         /*
          * delete the exception
          */
-        String seriesId = originalExceptionEvent.getSeriesId();
         RecurrenceId recurrenceId = originalExceptionEvent.getRecurrenceId();
         List<Event> deletedEvents = delete(originalExceptionEvent);
         /*
          * update the series master accordingly
          */
-        addDeleteExceptionDate(loadEventData(seriesId), recurrenceId);
+        addDeleteExceptionDate(originalSeriesMaster, recurrenceId);
         return deletedEvents;
     }
 
@@ -379,22 +405,21 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * Deletes a specific internal user attendee from an existing change exception. Besides the removal of the attendee via
      * {@link #delete(Event, Attendee)}, this also includes 'touching' the master event's last-modification timestamp.
      *
+     * @param originalSeriesMaster The original series master event
      * @param originalExceptionEvent The original exception event
      * @param originalAttendee The original attendee to delete
      * @return A list containing the performed event update as {@link AttendeeEventUpdate}
      */
-    private List<EventUpdate> deleteException(Event originalExceptionEvent, Attendee originalAttendee) throws OXException {
+    private List<EventUpdate> deleteException(Event originalSeriesMaster, Event originalExceptionEvent, Attendee originalAttendee) throws OXException {
         /*
          * delete the attendee in the exception
          */
-        String seriesId = originalExceptionEvent.getSeriesId();
         List<EventUpdate> attendeeEventUpdates = delete(originalExceptionEvent, originalAttendee);
         /*
          * 'touch' the series master accordingly & track result
          */
-        Event originalMasterEvent = loadEventData(seriesId);
-        touch(seriesId);
-        resultTracker.trackUpdate(originalMasterEvent, loadEventData(originalMasterEvent.getId()));
+        touch(originalSeriesMaster.getId());
+        resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
         return attendeeEventUpdates;
     }
 

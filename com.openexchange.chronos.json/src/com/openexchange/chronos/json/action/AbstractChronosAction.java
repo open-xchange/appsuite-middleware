@@ -108,6 +108,7 @@ public abstract class AbstractChronosAction implements AJAXActionService {
     protected static final String PARAM_SEND_INTERNAL_NOTIFICATIONS = "sendInternalNotifications";
     protected static final String PARAM_RECURRENCE_ID = "recurrenceId";
     protected static final String PARAM_RECURRENCE_RANGE = "recurrenceRange";
+    protected static final String PARAM_SEQUENCE = "sequence";
 
     /**
      * Initializes a new {@link AbstractChronosAction}.

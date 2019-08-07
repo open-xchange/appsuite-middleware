@@ -90,7 +90,7 @@ public class SchedulingChangesActivator extends HousekeepingActivator {
          * Register a description services
          */
         registerService(SchedulingChangeService.class, new SchedulingChangeServiceImpl(this));
-        registerService(DescriptionService.class, new DescriptionServiceImpl(this));
+        registerService(DescriptionService.class, new DescriptionServiceImpl());
     }
 
 }

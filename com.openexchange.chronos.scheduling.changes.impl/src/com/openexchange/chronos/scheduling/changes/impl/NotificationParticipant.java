@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,71 +47,37 @@
  *
  */
 
-package com.openexchange.chronos.itip.generators.changes;
+package com.openexchange.chronos.scheduling.changes.impl;
 
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.compat.ShownAsTransparency;
-import com.openexchange.chronos.itip.generators.TypeWrapper;
-
+import com.openexchange.chronos.scheduling.common.Utils;
 
 /**
- * {@link PassthroughWrapper}
+ * {@link NotificationParticipant}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.3
  */
-public class PassthroughWrapper implements TypeWrapper {
+public class NotificationParticipant {
 
-    @Override
-    public String none(final Object argument) {
-        if (argument != null) {
-            return argument.toString();
-        }
-        return "";
+    private final Attendee attendee;
+
+    public NotificationParticipant(Attendee attendee) {
+        super();
+        this.attendee = attendee;
     }
 
-    @Override
-    public String original(final Object argument) {
-        return none(argument);
+    public String getDisplayName() {
+        return Utils.getDisplayName(attendee);
     }
 
-    @Override
-    public String participant(final Object argument) {
-        return none(argument);
+    public ParticipationStatus getConfirmStatus() {
+        return attendee.getPartStat();
     }
 
-    @Override
-    public String state(final Object argument, final ParticipationStatus status) {
-        return none(argument);
-    }
-
-    @Override
-    public String updated(final Object argument) {
-        return none(argument);
-    }
-
-	@Override
-    public String emphasiszed(final Object argument) {
-		return none(argument);
-	}
-
-	@Override
-    public String reference(final Object argument) {
-		return none(argument);
-	}
-
-	@Override
-	public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
-		return none(argument);
-	}
-
-    @Override
-    public String italic(Object argument) {
-        return none(argument);
-    }
-    
-    @Override
-    public String getFormat() {
-        return "text";
+    public String getComment() {
+        return attendee.getComment();
     }
 
 }

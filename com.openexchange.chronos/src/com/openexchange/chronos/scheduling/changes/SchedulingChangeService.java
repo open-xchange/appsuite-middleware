@@ -50,6 +50,7 @@
 package com.openexchange.chronos.scheduling.changes;
 
 import java.util.List;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
@@ -68,104 +69,122 @@ public interface SchedulingChangeService {
     /**
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#CANCEL}
      * 
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param removedEvents The removed events to cancel
+     * @param resource The cancel calendar object resource
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#CANCEL}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeCancel(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> removedEvents) throws OXException;
+    ScheduleChange describeCancel(CalendarUser originator, String comment, CalendarObjectResource resource) throws OXException;
+
+    /**
+     * Generates the schedule change for a canceled instance of a recurring event series.
+     * 
+     * @param originator The originator of the message
+     * @param comment The optional scheduling comment left by the originator for the recipient
+     * @param resource The canceled calendar object resource
+     * @param seriesMaster The series master event the canceled instance belongs to, or <code>null</code> if not available
+     * @return The generated schedule change
+     */
+    ScheduleChange describeCancelInstance(CalendarUser originator, String comment, CalendarObjectResource resource, Event seriesMaster);
 
     /**
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#COUNTER}
      * 
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param countered A list of event to counter
+     * @param resource The countered calendar object resource
      * @param changes The changes done to the events, that triggered the counter
      * @param isExceptionCreate <code>true</code> if the update contains the master event as original event as per {@link EventUpdate#getOriginal()} and a new
      *            change exception as per {@link EventUpdate#getUpdate()}, <code>false</code> otherwise
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#CANCEL}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> countered, List<Change> changes, boolean isExceptionCreate) throws OXException;
+    ScheduleChange describeCounter(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes, boolean isExceptionCreate) throws OXException;
 
     /**
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#DECLINE_COUNTER}
      *
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param declinedEvent The declined event
+     * @param resource The declined resource
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#DECLINE_COUNTER}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeDeclineCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> declinedEvent) throws OXException;
+    ScheduleChange describeDeclineCounter(CalendarUser originator, String comment, CalendarObjectResource resource) throws OXException;
 
     /**
-     * 
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#REPLY}
      *
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param updated The events to reply to
+     * @param resource The calendar object resource being replied
      * @param change The changes done to the event
      * @param partStat The participant status of the <b>originator</b>
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#REPLY}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> change, ParticipationStatus partStat) throws OXException;
+    ScheduleChange describeReply(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> change, ParticipationStatus partStat) throws OXException;
 
     /**
+     * Generates the schedule change for a reply to an instance of a recurring event series.
      * 
+     * @param originator The originator of the message
+     * @param comment The optional scheduling comment left by the originator for the recipient
+     * @param resource The calendar object resource holding containing the reply
+     * @param seriesMaster The series master event the replied instance belongs to, or <code>null</code> if not available
+     * @param changes The descriptions of the particular changes
+     * @param partStat The new participation status of the reply
+     * @return The generated schedule change
+     */
+    ScheduleChange describeReplyInstance(CalendarUser originator, String comment, CalendarObjectResource resource, Event seriesMaster, List<Change> changes, ParticipationStatus partStat);
+
+    /**
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#REQUEST} in case of a new created event
      * 
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param created The newly created event
+     * @param resource The updated calendar object resource
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#REQUEST}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeCreationRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> created) throws OXException;
+    ScheduleChange describeCreationRequest(CalendarUser originator, String comment, CalendarObjectResource resource) throws OXException;
 
     /**
-     * 
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#REQUEST} in case of an updated event
      * 
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param updated The updated events
+     * @param resource The updated calendar object resource
      * @param changes The changes done to the events
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#REQUEST}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeUpdateRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException;
+    ScheduleChange describeUpdateRequest(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes) throws OXException;
 
     /**
+     * Generates the schedule change for an updated instance of a recurring event series.
      * 
+     * @param originator The originator of the message
+     * @param comment The optional scheduling comment left by the originator for the recipient
+     * @param resource The updated calendar object resource
+     * @param seriesMaster The series master event the updated instance belongs to, or <code>null</code> if not available
+     * @param changes The descriptions of the particular changes
+     * @return The generated schedule change
+     */
+    ScheduleChange describeUpdateInstance(CalendarUser originator, String comment, CalendarObjectResource resource, Event seriesMaster, List<Change> changes);
+
+    /**
      * Gets a {@link ScheduleChange} for a {@link SchedulingMethod#REQUEST} in case of an new change exception for an existing event
      * 
-     * @param contextId The context identifier
      * @param originator The originator of the message
-     * @param recipient The recipient of the message
      * @param comment An optional comment for ScheduleChange to the recipient
-     * @param updated The new change exceptions
+     * @param resource The updated calendar object resource
      * @param changes The changes done (compared to the master event) that caused the new exceptions
      * @param isExceptionCreate <code>true</code> if an exception has been created
      * @return A {@link ScheduleChange} for a {@link SchedulingMethod#REQUEST}
      * @throws OXException In case data is invalid or missing
      */
-    ScheduleChange describeNewException(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException;
+    ScheduleChange describeNewException(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes) throws OXException;
 
 }

@@ -884,7 +884,7 @@ public class Utils {
      * @return The passed event reference, with possibly adjusted exception dates
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.6">RFC 6638, section 3.2.6</a>
      */
-    private static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) {
+    public static Event applyExceptionDates(Event seriesMaster, SortedSet<RecurrenceId> attendedChangeExceptionDates) {
         /*
          * check which change exceptions exist where the user is attending
          */

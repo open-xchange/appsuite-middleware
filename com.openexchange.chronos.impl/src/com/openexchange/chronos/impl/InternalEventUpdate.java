@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl.performer;
+package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.impl.Utils.asList;
@@ -88,6 +88,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarObjectResource;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DeltaEvent;
+import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
@@ -125,8 +126,7 @@ public class InternalEventUpdate implements EventUpdate {
      */
     private static final EventField[] RESCHEDULE_FIELDS = new EventField[] {
         EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.ATTACHMENTS, EventField.GEO,
-        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP,
-        EventField.RECURRENCE_RULE, EventField.RECURRENCE_DATES, EventField.DELETE_EXCEPTION_DATES
+        EventField.ORGANIZER, EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.RECURRENCE_RULE
     };
 
     private final CalendarSession session;
@@ -139,7 +139,6 @@ public class InternalEventUpdate implements EventUpdate {
     private final ItemUpdate<Event, EventField> eventUpdate;
     private final Event deltaEvent;
     private final List<Event> originalChangeExceptions;
-    private final List<Event> changedChangeExceptions;
     private final CollectionUpdate<Event, EventField> exceptionUpdates;
 
     /**
@@ -176,7 +175,6 @@ public class InternalEventUpdate implements EventUpdate {
         this.attachmentUpdates = CalendarUtils.getAttachmentUpdates(originalEvent.getAttachments(), changedEvent.getAttachments());
         this.alarmUpdates = AlarmUtils.getAlarmUpdates(originalEvent.getAlarms(), changedEvent.getAlarms());
         this.exceptionUpdates = CalendarUtils.getEventUpdates(originalChangeExceptions, changedChangeExceptions, EventField.ID);
-        this.changedChangeExceptions = changedChangeExceptions;
         /*
          * generate special 'delta' event on top of the changed event data to indicate actual differences during storage update
          */
@@ -193,22 +191,31 @@ public class InternalEventUpdate implements EventUpdate {
     }
 
     /**
+     * Gets a list of newly deleted exceptions within a recurring event series, which includes both deleted change exceptions, as well as
+     * virtual event occurrences for newly indicated delete exception events.
+     * 
+     * @return The deleted exceptions, or an empty list of there are none
+     */
+    public List<Event> getDeletedExceptions() {
+        if (false == isSeriesMaster(getOriginal())) {
+            return Collections.emptyList();
+        }
+        List<Event> deletedExceptions = new ArrayList<Event>();
+        deletedExceptions.addAll(getExceptionUpdates().getRemovedItems());
+        SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(getOriginal().getDeleteExceptionDates(), getUpdate().getDeleteExceptionDates());
+        for (RecurrenceId recurrenceId : exceptionDateUpdates.getAddedItems()) {
+            deletedExceptions.add(new EventOccurrence(getOriginal(), recurrenceId));
+        }
+        return deletedExceptions;
+    }
+
+    /**
      * Gets a special 'delta' event on top of the changed event data to indicate actual property differences during the storage update.
      *
      * @return The generated delta event
      */
     public Event getDelta() {
         return deltaEvent;
-    }
-    
-    /**
-     * Gets the <i>updated</i> calendar object resource, i.e. the calendar resource after all changes to all affected events have been
-     * applied.
-     * 
-     * @return The updated calendar object resource
-     */
-    public CalendarObjectResource getUpdatedResource() {
-        return new DefaultCalendarObjectResource(getUpdate(), changedChangeExceptions);
     }
 
     /**
@@ -277,7 +284,7 @@ public class InternalEventUpdate implements EventUpdate {
 
     @Override
     public String toString() {
-        return "EventUpdateProcessor [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates + 
+        return "InternalEventUpdate [eventUpdate=" + eventUpdate + ", attendeeUpdates=" + attendeeUpdates + 
             ", attachmentUpdates=" + attachmentUpdates + ", exceptionUpdates=" + exceptionUpdates + "]";
     }
 
@@ -480,6 +487,12 @@ public class InternalEventUpdate implements EventUpdate {
                     }
                     updatedEvent.removeRecurrenceRule();
                 }
+                break;
+            case DELETE_EXCEPTION_DATES:
+                /*
+                 * (re-)check delete exception dates
+                 */
+                Check.recurrenceIdsExist(session.getRecurrenceService(), updatedEvent, updatedEvent.getDeleteExceptionDates());
                 break;
             case UID:
             case SERIES_ID:

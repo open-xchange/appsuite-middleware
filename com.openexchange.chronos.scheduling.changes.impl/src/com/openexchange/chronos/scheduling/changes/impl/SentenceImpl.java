@@ -52,13 +52,16 @@ package com.openexchange.chronos.scheduling.changes.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.ShownAsTransparency;
+import com.openexchange.chronos.itip.ContextSensitiveMessages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
+import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.scheduling.changes.Sentence;
-import com.openexchange.chronos.scheduling.common.ContextSensitiveMessages;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
@@ -96,16 +99,20 @@ public class SentenceImpl implements Sentence {
     }
 
     @Override
-    public String getMessage(String format, Locale locale) {
-        return "html".equalsIgnoreCase(format) ? getMessage(new HTMLWrapper(), locale) : getMessage(locale);
+    public String getMessage(String format, Locale locale, TimeZone timeZone) {
+        return getMessage(new DefaultMessageContext(TypeWrapper.WRAPPER.get(format), locale, timeZone));
     }
 
-    public String getMessage(TypeWrapper wrapper, Locale locale) {
+    public String getMessage(MessageContext context) {
+        TypeWrapper wrapper = context.getWrapper();
         List<String> wrapped = new ArrayList<String>(arguments.size());
-        StringHelper sh = StringHelper.valueOf(locale);
+        StringHelper sh = StringHelper.valueOf(context.getLocale());
 
         for (int i = 0, size = arguments.size(); i < size; i++) {
             Object argument = arguments.get(i);
+            if (FormattableArgument.class.isInstance(argument)) {
+                argument = ((FormattableArgument) argument).format(context);
+            }
             ArgumentType type = types.get(i);
             Object[] extraInfo = extra.get(i);
 
@@ -124,12 +131,12 @@ public class SentenceImpl implements Sentence {
                     break;
                 case STATUS:
                     ParticipationStatus status = (ParticipationStatus) extraInfo[0];
-                    if (ParticipationStatus.ACCEPTED.equals(status)) {
-                        argument = ContextSensitiveMessages.getInstance().accepted(locale, ContextSensitiveMessages.Context.VERB);
-                    } else if (ParticipationStatus.DECLINED.equals(status)) {
-                        argument = ContextSensitiveMessages.getInstance().declined(locale, ContextSensitiveMessages.Context.VERB);
-                    } else if (ParticipationStatus.TENTATIVE.equals(status)) {
-                        argument = ContextSensitiveMessages.getInstance().tentative(locale, ContextSensitiveMessages.Context.VERB);
+                    if (ParticipationStatus.ACCEPTED.matches(status)) {
+                        argument = ContextSensitiveMessages.accepted(context.getLocale(), ContextSensitiveMessages.Context.VERB);
+                    } else if (ParticipationStatus.DECLINED.matches(status)) {
+                        argument = ContextSensitiveMessages.declined(context.getLocale(), ContextSensitiveMessages.Context.VERB);
+                    } else if (ParticipationStatus.TENTATIVE.matches(status)) {
+                        argument = ContextSensitiveMessages.tentative(context.getLocale(), ContextSensitiveMessages.Context.VERB);
                     } else {
                         argument = sh.getString((String) argument);
                     }
@@ -171,10 +178,6 @@ public class SentenceImpl implements Sentence {
 
         String localized = sh.getString(message);
         return String.format(localized, wrapped.toArray(new Object[wrapped.size()]));
-    }
-
-    public String getMessage(Locale locale) {
-        return getMessage(new PassthroughWrapper(), locale);
     }
 
 }

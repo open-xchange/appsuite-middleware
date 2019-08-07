@@ -51,7 +51,6 @@ package com.openexchange.chronos.scheduling.changes.impl.desc;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
@@ -108,7 +107,7 @@ public abstract class AbstractChangeDescriber<T> implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         if (eventUpdate.getUpdatedFields().contains(field)) {
             return new DefaultDescription(describe(castValueTo(clazz, field, eventUpdate.getOriginal()), castValueTo(clazz, field, eventUpdate.getUpdate())), field);
         }

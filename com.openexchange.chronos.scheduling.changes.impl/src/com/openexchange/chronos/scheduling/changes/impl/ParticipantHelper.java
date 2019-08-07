@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,48 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes;
+package com.openexchange.chronos.scheduling.changes.impl;
 
-import java.util.List;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.EventUpdate;
+import java.util.Locale;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.itip.ContextSensitiveMessages;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link DescriptionService}
+ * {@link ParticipantHelper}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.3
  */
-public interface DescriptionService {
+public class ParticipantHelper {
 
-    /**
-     * Describes an event update.
-     *
-     * @param eventUpdate The event update to describe
-     * @param ignorees The fields to ignore
-     * @return A list of descriptions
-     */
-    List<Description> describe(EventUpdate eventUpdate, EventField... ignorees);
+    private final Locale recipientLocale;
 
-    /**
-     * Describes an event update, only considering given fields.
-     *
-     * @param eventUpdate The event update to describe
-     * @param toDescribe The fields to describe only
-     * @return A list of descriptions
-     */
-    List<Description> describeOnly(EventUpdate eventUpdate, EventField... toDescribe);
+    public ParticipantHelper(Locale recipientLocale) {
+        super();
+        this.recipientLocale = recipientLocale;
+    }
+
+    public String participantLine(NotificationParticipant participant) {
+        final String sConfirmStatus;
+        ParticipationStatus status = participant.getConfirmStatus();
+        if (status == null) {
+            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);
+        } else if (status.matches(ParticipationStatus.ACCEPTED)) {
+            sConfirmStatus = ContextSensitiveMessages.accepted(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
+        } else if (status.matches(ParticipationStatus.DECLINED)) {
+            sConfirmStatus = ContextSensitiveMessages.declined(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
+        } else if (status.matches(ParticipationStatus.TENTATIVE)) {
+            sConfirmStatus = ContextSensitiveMessages.tentative(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
+        } else {
+            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);
+        }
+        final String comment = participant.getComment();
+        if (com.openexchange.java.Strings.isEmpty(comment)) {
+            return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(')').toString();
+        }
+        return new StringBuilder(24).append(participant.getDisplayName()).append(" (").append(sConfirmStatus).append(") (\"").append(comment).append("\")").toString();
+    }
 
 }

@@ -296,9 +296,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public Event resolveEvent(String eventId) throws OXException {
+    public Event resolveEvent(String eventId, Integer sequence) throws OXException {
         try {
-            Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId);
+            Event event = getGroupwareAccess(DEFAULT_ACCOUNT).resolveEvent(eventId, sequence);
             return null == event ? null : withUniqueID(event, DEFAULT_ACCOUNT.getAccountId());
         } catch (OXException e) {
             throw withUniqueIDs(e, DEFAULT_ACCOUNT.getAccountId());

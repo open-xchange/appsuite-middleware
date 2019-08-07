@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,70 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes;
+package com.openexchange.chronos.itip.generators;
 
-import java.util.List;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.EventUpdate;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.compat.ShownAsTransparency;
+
 
 /**
- * {@link DescriptionService}
+ * {@link PassthroughWrapper}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
- * @since v7.10.3
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface DescriptionService {
+public class PassthroughWrapper implements TypeWrapper {
 
-    /**
-     * Describes an event update.
-     *
-     * @param eventUpdate The event update to describe
-     * @param ignorees The fields to ignore
-     * @return A list of descriptions
-     */
-    List<Description> describe(EventUpdate eventUpdate, EventField... ignorees);
+    @Override
+    public String none(final Object argument) {
+        if (argument != null) {
+            return argument.toString();
+        }
+        return "";
+    }
 
-    /**
-     * Describes an event update, only considering given fields.
-     *
-     * @param eventUpdate The event update to describe
-     * @param toDescribe The fields to describe only
-     * @return A list of descriptions
-     */
-    List<Description> describeOnly(EventUpdate eventUpdate, EventField... toDescribe);
+    @Override
+    public String original(final Object argument) {
+        return none(argument);
+    }
+
+    @Override
+    public String participant(final Object argument) {
+        return none(argument);
+    }
+
+    @Override
+    public String state(final Object argument, final ParticipationStatus status) {
+        return none(argument);
+    }
+
+    @Override
+    public String updated(final Object argument) {
+        return none(argument);
+    }
+
+	@Override
+    public String emphasiszed(final Object argument) {
+		return none(argument);
+	}
+
+	@Override
+    public String reference(final Object argument) {
+		return none(argument);
+	}
+
+	@Override
+	public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
+		return none(argument);
+	}
+
+    @Override
+    public String italic(Object argument) {
+        return none(argument);
+    }
+    
+    @Override
+    public String getFormat() {
+        return "text";
+    }
 
 }

@@ -275,9 +275,10 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * </ul>
      *
      * @param eventId The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
      * @return The resolved event from the user's point of view, or <code>null</code> if not found
      */
-    Event resolveEvent(String eventId) throws OXException;
+    Event resolveEvent(String eventId, Integer sequence) throws OXException;
 
     /**
      * Searches for events by one or more queries in the fields {@link EventField#SUMMARY}, {@link EventField#DESCRIPTION} and

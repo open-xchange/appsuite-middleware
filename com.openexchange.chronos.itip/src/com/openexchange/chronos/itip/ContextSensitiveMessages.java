@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip;
 import java.util.Locale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.i18n.I18nServiceRegistry;
@@ -139,4 +140,16 @@ public class ContextSensitiveMessages {
                 return "tentatively accepted";
         }
     }
+
+    public static String partStat(ParticipationStatus status, Locale locale, Context ctxt) {
+        if (ParticipationStatus.ACCEPTED.matches(status)) {
+            return accepted(locale, ctxt);
+        } else if (ParticipationStatus.DECLINED.matches(status)) {
+            return declined(locale, ctxt);
+        } else if (ParticipationStatus.TENTATIVE.matches(status)) {
+            return tentative(locale, ctxt);
+        }
+        return status.getValue();
+    }
+
 }

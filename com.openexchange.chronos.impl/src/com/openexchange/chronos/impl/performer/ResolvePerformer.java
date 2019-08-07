@@ -66,6 +66,7 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -118,14 +119,15 @@ public class ResolvePerformer extends AbstractQueryPerformer {
      * Performs the resolve by id operation.
      *
      * @param eventId The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
      * @return The resolved event, or <code>null</code> if not found
      */
-    public Event resolveById(String eventId) throws OXException {
+    public Event resolveById(String eventId, Integer sequence) throws OXException {
         /*
          * load event data, check permissions & apply folder identifier
          */
         Event event = storage.getEventStorage().loadEvent(eventId, null);
-        if (null == event) {
+        if (null == event || null != sequence && i(sequence) != event.getSequence()) {
             return null;
         }
         int calendarUserId = session.getUserId();

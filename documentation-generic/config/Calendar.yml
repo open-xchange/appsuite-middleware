@@ -485,3 +485,13 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar", "Permission"]
+    - key: com.openexchange.calendar.useLegacyScheduling
+      description: |
+        Configures to utilize the previously used, event-handler based logic for sending scheduling messages and notification mails.
+      defaultValue: false
+      version: 7.10.3
+      reloadable: true
+      configcascadeAware: false
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "Notification"]

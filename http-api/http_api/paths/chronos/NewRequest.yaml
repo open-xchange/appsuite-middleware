@@ -8,7 +8,7 @@
       - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosCheckConflicts'
-      - $ref: '#/components/parameters/QueryParamChronosNotification'
+      - $ref: '#/components/parameters/QueryParamScheduling'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - $ref: '#/components/parameters/QueryParamChronosPushToken'
       - in: query
@@ -88,7 +88,7 @@
       - $ref: '#/components/parameters/gblQueryParamSession'
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosCheckConflicts'
-      - $ref: '#/components/parameters/QueryParamChronosNotification'
+      - $ref: '#/components/parameters/QueryParamScheduling'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - in: query
         name: usedGroups

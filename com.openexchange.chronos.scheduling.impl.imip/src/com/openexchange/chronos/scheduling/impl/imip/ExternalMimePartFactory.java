@@ -113,8 +113,8 @@ public class ExternalMimePartFactory extends AbstractMimePartFactory {
      * @param serviceLookup The {@link ServiceLookup}
      * @throws OXException In case services are missing
      */
-    public ExternalMimePartFactory(SchedulingMessage message, ServiceLookup serviceLookup) throws OXException {
-        super(serviceLookup, message.getScheduleChange());
+    public ExternalMimePartFactory(ServiceLookup serviceLookup, SchedulingMessage message) throws OXException {
+        super(serviceLookup, message.getScheduleChange(), message.getRecipientSettings());
         this.iCalService = serviceLookup.getServiceSafe(ICalService.class);
         this.message = message;
     }

@@ -103,6 +103,14 @@ public interface CalendarObjectResource {
     Event getFirstEvent();
 
     /**
+     * Gets an overridden instance of this calendar object resource with a specific recurrence identifier.
+     * 
+     * @param recurrenceId The recurrence identifier of the overridden instance to lookup
+     * @return The matching overridden instance / change exception event, or <code>null</code> if not found
+     */
+    Event getChangeException(RecurrenceId recurrenceId);
+
+    /**
      * Gets the (maximum) timestamp of all contained events in this calendar object resource.
      * 
      * @return The timestamp

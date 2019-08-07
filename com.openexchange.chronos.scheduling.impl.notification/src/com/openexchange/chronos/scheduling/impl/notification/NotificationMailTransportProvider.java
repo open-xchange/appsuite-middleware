@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.scheduling.impl.notification;
 
-import java.util.Locale;
 import java.util.Map;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -58,15 +57,16 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.RecipientSettings;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.changes.ChangeAction;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.chronos.scheduling.common.AbstractMailTransportProvider;
-import com.openexchange.chronos.scheduling.common.MailUtils;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.scheduling.common.MimeMessageBuilder;
 import com.openexchange.chronos.scheduling.common.Utils;
 import com.openexchange.contact.ContactService;
@@ -74,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
 import com.openexchange.version.VersionService;
 
 /**
@@ -104,17 +103,17 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
     @Override
     @NonNull
     public ScheduleStatus send(@NonNull Session session, @NonNull ChangeNotification notification) {
-        return sendMail(session, notification.getOriginator(), notification.getRecipient(), notification.getAction(), notification.getScheduleChange(), notification.getResource(), getAdditionalHeaders(notification));
+        return sendMail(session, notification.getOriginator(), notification.getRecipient(), notification.getAction(), notification.getScheduleChange(), notification.getResource(), notification.getRecipientSettings(), getAdditionalHeaders(notification));
     }
 
     @Override
     @NonNull
     public ScheduleStatus send(@NonNull Session session, @NonNull SchedulingMessage message) {
-        return sendMail(session, message.getOriginator(), message.getRecipient(), message.getScheduleChange().getAction(), message.getScheduleChange(), message.getResource(), getAdditionalHeaders(message));
+        return sendMail(session, message.getOriginator(), message.getRecipient(), message.getScheduleChange().getAction(), message.getScheduleChange(), message.getResource(), message.getRecipientSettings(), getAdditionalHeaders(message));
     }
 
     @NonNull
-    private ScheduleStatus sendMail(Session session, CalendarUser originator, CalendarUser recipient, ChangeAction action, ScheduleChange scheduleChange, CalendarObjectResource resource, Map<String, String> additionals) {
+    private ScheduleStatus sendMail(Session session, CalendarUser originator, CalendarUser recipient, ChangeAction action, ScheduleChange scheduleChange, CalendarObjectResource resource, RecipientSettings recipientSettings, Map<String, String> additionals) {
         try {
             if (false == canHandle(recipient)) {
                 return ScheduleStatus.REJECTED;
@@ -124,19 +123,20 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
              * Build the message
              */
             //@formatter:off
-            String subject = getSubject(serviceLookup.getServiceSafe(UserService.class), session.getContextId(), action, originator, recipient, MailUtils.getSummary(resource.getEvents()), scheduleChange.getOriginatorPartStat());
+            Event event = Utils.selectDescribedEvent(resource, scheduleChange.getChanges());
+            String subject = getSubject(recipientSettings, action, originator, event.getSummary(), scheduleChange.getOriginatorPartStat());
             MimeMessage mime = new MimeMessageBuilder()
                 .setFrom(originator)
                 .setTo(recipient)
                 .setSubject(subject)
-                .setContent(new InternalMimePartFactory(serviceLookup, scheduleChange))
+                .setContent(new InternalMimePartFactory(serviceLookup, scheduleChange, recipientSettings))
                 .setAdditionalHeader(additionals)
                 .setPriority()
-                .setOXHeader(recipient, action, resource.getSeriesMaster())
+                .setOXHeader(recipient, action, event)
                 .setMailerInfo(serviceLookup.getOptionalService(VersionService.class))
                 .setTracing(resource.getUid())
                 .setOrganization(serviceLookup.getOptionalService(ContactService.class), session)
-                .setSentDate(Utils.getTimeZone(serviceLookup.getServiceSafe(UserService.class), session.getContextId(), originator, recipient))
+                .setSentDate(recipientSettings.getTimeZone())
                 .setAutoGenerated()
                 .build();
             //@formatter:on
@@ -155,11 +155,9 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
         return Utils.isInternalCalendarUser(recipient);
     }
 
-    private String getSubject(UserService userService, int contextId, ChangeAction action, CalendarUser originator, CalendarUser recipient, String summary, ParticipationStatus partStat) {
-        Locale locale = Utils.getLocale(userService, contextId, originator, recipient);
-        StringHelper helper = StringHelper.valueOf(locale);
+    private String getSubject(RecipientSettings recipientSettings, ChangeAction action, CalendarUser originator, String summary, ParticipationStatus partStat) {
+        StringHelper helper = StringHelper.valueOf(recipientSettings.getLocale());
         String subject;
-
         switch (action) {
             case CREATE:
                 subject = Messages.SUBJECT_NEW_APPOINTMENT;
@@ -168,7 +166,7 @@ public class NotificationMailTransportProvider extends AbstractMailTransportProv
                 subject = Messages.SUBJECT_CANCELLED_APPOINTMENT;
                 break;
             case REPLY:
-                return getPartStatSubject(originator, partStat, locale, summary);
+                return getPartStatSubject(originator, partStat, recipientSettings.getLocale(), summary);
             default:
                 subject = Messages.SUBJECT_CHANGED_APPOINTMENT;
                 break;

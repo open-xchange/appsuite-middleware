@@ -47,43 +47,57 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.changes.impl;
+package com.openexchange.chronos.scheduling;
 
-import java.util.List;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.compat.ShownAsTransparency;
+import java.util.Locale;
+import java.util.TimeZone;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link TypeWrapper}
+ * {@link RecipientSettings}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Moved with v7.10.3
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.3
  */
-public interface TypeWrapper {
+public interface RecipientSettings {
 
-    String participant(Object argument);
+    /**
+     * Gets the recipient.
+     * 
+     * @return The recipient
+     */
+    CalendarUser getRecipient();
 
-    String original(Object argument);
+    /**
+     * Gets a value indicating the preferred message format for the recipient.
+     * <p>
+     * The returned <code>int</code> value is wither <code>1</code> (text only), <code>2</code> (HTML only), or <code>3</code> (both).
+     *
+     * @return The desired message format
+     * @see com.openexchange.mail.usersetting.UserSettingMail#getMsgFormat()
+     */
+    int getMsgFormat();
 
-    String updated(Object argument);
+    /**
+     * Gets the preferred locale to use for the recipient.
+     * 
+     * @return The preferred locale
+     */
+    Locale getLocale();
 
-    String state(Object argument, ParticipationStatus confirmStatus);
+    /**
+     * Gets the preferred timezone to use for the recipient.
+     * 
+     * @return The preferred timezone
+     */
+    TimeZone getTimeZone();
 
-    String none(Object argument);
-
-    String emphasiszed(Object argument);
-
-    String reference(Object argument);
-
-    String shownAs(Object argument, ShownAsTransparency shownAs);
-
-    String italic(Object argument);
-
-    String convert(List<String> descriptions);
-
-    static final ImmutableMap<String, TypeWrapper> WRAPPER = ImmutableMap.of("text", new PassthroughWrapper(), "html", new HTMLWrapper());
-    
-    String getType();
+    /**
+     * Gets a direct link to a specific event, from the recipient point of view.
+     * 
+     * @return The direct link, or <code>null</code> if not applicable
+     */
+    String getDirectLink(Event event);
 
 }

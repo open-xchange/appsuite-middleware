@@ -56,7 +56,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedSet;
+import java.util.TimeZone;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -66,6 +69,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipChange;
@@ -76,9 +80,9 @@ import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.itip.generators.HTMLWrapper;
+import com.openexchange.chronos.itip.generators.PassthroughWrapper;
 import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
-import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.scheduling.changes.Description;
@@ -172,19 +176,19 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             change.setDiffDescription(new ArrayList<String>());
             return;
         }
-
         
         final List<String> descriptions = new LinkedList<String>();
         DescriptionService descriptionService = Services.getOptionalService(DescriptionService.class);
         if (null != descriptionService) {
-            List<Description> descs = descriptionService.describe(change.getDiff(), ctx.getContextId(), null, session.getUtilities().getEntityResolver(ctx.getContextId()).prepareUserAttendee(user.getId()), (EventField) null);
-            /*
-             * XXX Describe first event only as we currently can't display this in an understandable manner
-             */
-            if (null != descs && descs.size() > 0) {
-                Description description = descs.get(0);
-                for (com.openexchange.chronos.scheduling.changes.Sentence sentence : description.getSentences()) {
-                    descriptions.add(sentence.getMessage(wrapper.getFormat(), user.getLocale()));
+            List<Description> descs;
+            if (ITipMethod.REPLY.equals(message.getMethod())) {
+                descs = descriptionService.describeOnly(change.getDiff(), EventField.ATTENDEES);
+            } else {
+                descs = descriptionService.describe(change.getDiff());
+            }
+            for (Description desc : descs) {
+                for (com.openexchange.chronos.scheduling.changes.Sentence sentence : desc.getSentences()) {
+                    descriptions.add(sentence.getMessage(wrapper.getFormat(), user.getLocale(), TimeZone.getTimeZone(user.getTimeZone())));
                 }
             }
         }
@@ -420,6 +424,48 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             }
         }
         return false;
+    }
+
+    /**
+     * Attempts to restore (obviously) unchanged attachments in an incoming updated event compared to its stored representation. Matching
+     * is performed based on attachment metadata (filesize, format-type, filename).
+     * 
+     * @param original The original event
+     * @param update The updated event
+     * @return The updated event, possibly with restored attachments
+     */
+    protected static Event restoreAttachments(Event original, Event update) {
+        AbstractSimpleCollectionUpdate<Attachment> attachmentUpdates = new AbstractSimpleCollectionUpdate<Attachment>(original.getAttachments(), update.getAttachments()) {
+
+            @Override
+            protected boolean matches(Attachment item1, Attachment item2) {
+                /*
+                 * match via managed id or URI
+                 */
+                if (0 < item1.getManagedId() && 0 < item2.getManagedId()) {
+                    return item1.getManagedId() == item2.getManagedId();
+                }
+                if (null != item1.getUri() && null != item2.getUri()) {
+                    return item1.getUri().equals(item2.getUri());
+                }
+                /*
+                 * match via metadata
+                 */
+                if (Objects.equals(item1.getFilename(), item2.getFilename()) && item1.getSize() == item2.getSize() && 
+                    Objects.equals(item1.getFormatType(), item2.getFormatType())) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        List<Attachment> newAttachments = new ArrayList<Attachment>();
+        if (null != original.getAttachments()) {
+            newAttachments.addAll(original.getAttachments());
+        }
+        newAttachments.removeAll(attachmentUpdates.getRemovedItems());
+        newAttachments.addAll(attachmentUpdates.getAddedItems());
+        update.setAttachments(newAttachments);
+        return update;
     }
 
     protected void ensureParticipant(final Event original, final Event event, final CalendarSession session, int owner) throws OXException {

@@ -54,9 +54,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attendee;
@@ -65,11 +63,11 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -108,7 +106,7 @@ public class AttendeeDescriber implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         List<SentenceImpl> sentences = new LinkedList<>();
         CollectionUpdate<Attendee, AttendeeField> attendeeChanges = eventUpdate.getAttendeeUpdates();
         if (null == attendeeChanges || attendeeChanges.isEmpty()) {

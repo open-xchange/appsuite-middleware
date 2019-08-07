@@ -9,7 +9,7 @@
       - $ref: '#/components/parameters/QueryParamChronosFolder'
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosRecurrenceID'
-      - $ref: '#/components/parameters/QueryParamChronosNotification'
+      - $ref: '#/components/parameters/QueryParamScheduling'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
       - $ref: '#/components/parameters/QueryParamChronosPushToken'
       - $ref: '#/components/parameters/QueryParamChronosFields'

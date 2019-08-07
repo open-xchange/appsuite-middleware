@@ -49,16 +49,22 @@
 
 package com.openexchange.chronos.scheduling.common;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.scheduling.changes.Change;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.user.UserService;
 
 /**
@@ -72,6 +78,42 @@ public class Utils {
     private static final Logger LOGGER = LoggerFactory.getLogger(Utils.class);
 
     private Utils() {}
+
+    /**
+     * Selects a specific event from a calendar object resource that is referenced by the supplied list of changes.
+     * 
+     * @param resource The calendar object resource to select the event from
+     * @param changes The changes for which to get the event for
+     * @return The described event, or the resource's first event if no better match could be selected
+     */
+    public static Event selectDescribedEvent(CalendarObjectResource resource, List<Change> changes) {
+        if (null != changes && 0 < changes.size()) {
+            RecurrenceId recurrenceId = changes.get(0).getRecurrenceId();
+            if (null != recurrenceId) {
+                Event event = resource.getChangeException(recurrenceId);
+                if (null != event) {
+                    return event;
+                }
+            }
+        }
+        return resource.getFirstEvent();
+    }
+
+    /**
+     * Gets a calendar user's display name, falling back to his e-mail or URI properties as needed.
+     * 
+     * @param calendarUser The calendar user to get the display name from
+     * @return The display name
+     */
+    public static String getDisplayName(CalendarUser calendarUser) {
+        if (Strings.isNotEmpty(calendarUser.getCn())) {
+            return calendarUser.getCn();
+        }
+        if (Strings.isNotEmpty(calendarUser.getEMail())) {
+            return calendarUser.getEMail();
+        }
+        return CalendarUtils.extractEMailAddress(calendarUser.getUri());
+    }
 
     /**
      * Gets a value indicating whether a calendar user represents an <i>internal</i> entity, an internal user, group or resource , or not.

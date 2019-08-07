@@ -53,7 +53,6 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
@@ -61,11 +60,13 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
+import com.openexchange.chronos.scheduling.changes.impl.FormattableArgument;
+import com.openexchange.chronos.scheduling.changes.impl.MessageContext;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 
 /**
@@ -83,15 +84,21 @@ public class SplitDescriber implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         if (false == indicatesSplit(eventUpdate)) {
             return null;
         }
         DateTime startDate = eventUpdate.getUpdate().getStartDate();
-        DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, locale);
-        dateFormat.setTimeZone(startDate.isAllDay() ? TimeZone.getTimeZone("UTC") : timeZone);
-        String beginningDate = dateFormat.format(new Date(startDate.getTimestamp()));
-        SentenceImpl sentence = new SentenceImpl(Messages.HAS_SPLIT).add(beginningDate, ArgumentType.UPDATED);
+        FormattableArgument argument = new FormattableArgument() {
+            
+            @Override
+            public Object format(MessageContext context) {
+                DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG, context.getLocale());
+                dateFormat.setTimeZone(startDate.isAllDay() ? TimeZone.getTimeZone("UTC") : context.getTimeZone());
+                return  dateFormat.format(new Date(startDate.getTimestamp()));
+            }
+        };
+        SentenceImpl sentence = new SentenceImpl(Messages.HAS_SPLIT).add(argument, ArgumentType.UPDATED);
         return new DefaultDescription(Collections.singletonList(sentence), Arrays.asList(getFields()));
     }
     

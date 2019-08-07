@@ -120,9 +120,10 @@ public interface CalendarServiceUtilities {
      *
      * @param session The calendar session
      * @param id The identifier of the event to resolve
+     * @param sequence The expected sequence number to match, or <code>null</code> to resolve independently of the event's sequence number
      * @return The resolved event from the user's point of view, or <code>null</code> if not found
      */
-    Event resolveByID(CalendarSession session, String id) throws OXException;
+    Event resolveByID(CalendarSession session, String id, Integer sequence) throws OXException;
 
     /**
      * Resolves a specific event (and any overridden instances or <i>change exceptions</i>) by its externally used resource name, which

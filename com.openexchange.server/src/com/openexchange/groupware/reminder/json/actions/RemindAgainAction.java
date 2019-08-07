@@ -130,7 +130,7 @@ public final class RemindAgainAction extends AbstractReminderAction {
             CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
             CalendarSession calendarSession = calendarService.init(req.getSession());
             CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
-            Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
+            Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt), null);
             List<Alarm> alarms = event.getAlarms();
             Alarm alarmToSnooze = null;
             for (Alarm alarm : alarms) {

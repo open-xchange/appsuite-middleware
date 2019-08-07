@@ -155,6 +155,11 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
+    public int getMsgFormat(int userId) {
+        return getUserSettings(userId).getMsgFormat();
+    }
+
+    @Override
     public boolean isResolveGroupAttendees() {
         return getConfigValue("com.openexchange.calendar.resolveGroupAttendees", Boolean.class, Boolean.FALSE).booleanValue();
     }

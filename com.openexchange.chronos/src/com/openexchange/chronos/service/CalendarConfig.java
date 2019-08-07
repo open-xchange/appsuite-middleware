@@ -165,6 +165,17 @@ public interface CalendarConfig {
     boolean isNotifyOnReplyAsAttendee(int userId);
 
     /**
+     * Gets a value indicating the preferred message format of notification mails.
+     * <p>
+     * The returned <code>int</code> value is wither <code>1</code> (text only), <code>2</code> (HTML only), or <code>3</code> (both).
+     *
+     * @param userId The identifier of the user to get the notification preference for
+     * @return The desired message format
+     * @see com.openexchange.mail.usersetting.UserSettingMail#getMsgFormat()
+     */
+    int getMsgFormat(int userId);
+    
+    /**
      * Gets a value indicating whether newly added group attendees should be resolved to their individual members, without preserving the
      * group reference, or not.
      *

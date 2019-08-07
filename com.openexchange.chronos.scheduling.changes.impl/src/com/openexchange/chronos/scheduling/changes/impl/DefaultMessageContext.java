@@ -50,49 +50,48 @@
 package com.openexchange.chronos.scheduling.changes.impl;
 
 import java.util.Locale;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.scheduling.common.ContextSensitiveMessages;
-import com.openexchange.chronos.scheduling.common.Messages;
-import com.openexchange.i18n.tools.StringHelper;
+import java.util.TimeZone;
+import com.openexchange.chronos.itip.generators.TypeWrapper;
 
 /**
- * 
- * {@link AttendeeHelper} - Original from ParticipantHelper.
+ * {@link DefaultMessageContext}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> Adjusted to new stack
- * @since v7.10.3
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.3
  */
-public class AttendeeHelper {
+public class DefaultMessageContext implements MessageContext {
 
-    private final Locale recipientLocale;
+    private final TypeWrapper wrapper;
+    private final Locale locale;
+    private final TimeZone timeZone;
 
-    public AttendeeHelper(final Locale recipientLocale) {
-        super();
-        this.recipientLocale = recipientLocale;
-    }
-
-    /*
-     * Used by the templating mechanism, to not delete 
+    /**
+     * Initializes a new {@link DefaultMessageContext}.
+     * 
+     * @param wrapper The underlying type wrapper
+     * @param locale The target locale to use
+     * @param timeZone The timezone to consider when formatting date-/time-related properties.
      */
-    public String attendeeLine(Attendee attendee) {
-        final String sConfirmStatus;
-        ParticipationStatus status = attendee.getPartStat();
-        if (status == null) {
-            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);
-        } else if (status.equals(ParticipationStatus.ACCEPTED)) {
-            sConfirmStatus = ContextSensitiveMessages.getInstance().accepted(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
-        } else if (status.equals(ParticipationStatus.DECLINED)) {
-            sConfirmStatus = ContextSensitiveMessages.getInstance().declined(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
-        } else if (status.equals(ParticipationStatus.TENTATIVE)) {
-            sConfirmStatus = ContextSensitiveMessages.getInstance().tentative(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
-        } else {
-            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);
-        }
-        final String comment = attendee.getComment();
-        if (com.openexchange.java.Strings.isEmpty(comment)) {
-            return new StringBuilder(24).append(attendee.getCn()).append(" (").append(sConfirmStatus).append(')').toString();
-        }
-        return new StringBuilder(24).append(attendee.getCn()).append(" (").append(sConfirmStatus).append(") (\"").append(comment).append("\")").toString();
+    public DefaultMessageContext(TypeWrapper wrapper, Locale locale, TimeZone timeZone) {
+        super();
+        this.wrapper = wrapper;
+        this.locale = locale;
+        this.timeZone = timeZone;
     }
+
+    @Override
+    public TypeWrapper getWrapper() {
+        return wrapper;
+    }
+
+    @Override
+    public Locale getLocale() {
+        return locale;
+    }
+
+    @Override
+    public TimeZone getTimeZone() {
+        return timeZone;
+    }
+
 }

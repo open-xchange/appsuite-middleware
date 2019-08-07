@@ -215,18 +215,20 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          * track update & attendee reply as needed
          */
         resultTracker.trackUpdate(originalEvent, updatedEvent);
-        if (isReply(originalAttendee, updatedAttendee)) {
-            schedulingHelper.trackReply(updatedEvent, originalAttendee, updatedAttendee);
-        }
         if (isSeriesException(originalEvent)) {
+            Event originalSeriesMaster = loadEventData(originalEvent.getSeriesId());
+            if (isReply(originalAttendee, updatedAttendee)) {
+                schedulingHelper.trackReply(updatedEvent, originalSeriesMaster, originalAttendee, updatedAttendee);
+            }
             /*
              * also 'touch' the series master in case of an exception update
              */
-            Event originalMasterEvent = loadEventData(originalEvent.getSeriesId());
-            resultTracker.rememberOriginalEvent(originalMasterEvent);
+            resultTracker.rememberOriginalEvent(originalSeriesMaster);
             touch(originalEvent.getSeriesId());
             Event updatedMasterEvent = loadEventData(originalEvent.getSeriesId());
-            resultTracker.trackUpdate(originalMasterEvent, updatedMasterEvent);
+            resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+        } else {
+            schedulingHelper.trackReply(updatedEvent, originalAttendee, updatedAttendee);
         }
     }
 
@@ -267,7 +269,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Attendee updatedAttendee = find(updatedExceptionEvent.getAttendees(), originalAttendee);
                 resultTracker.trackUpdate(newExceptionEvent, updatedExceptionEvent);
                 if (isReply(originalAttendee, updatedAttendee)) {
-                    schedulingHelper.trackReply(updatedExceptionEvent, originalAttendee, updatedAttendee);
+                    schedulingHelper.trackReply(updatedExceptionEvent, originalSeriesMaster, originalAttendee, updatedAttendee);
                 }
                 /*
                  * add change exception date to series master & track results

@@ -52,9 +52,6 @@ package com.openexchange.chronos.scheduling.changes.impl;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.DescriptionService;
@@ -68,10 +65,7 @@ import com.openexchange.chronos.scheduling.changes.impl.desc.ReschedulingDescrib
 import com.openexchange.chronos.scheduling.changes.impl.desc.SplitDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.SummaryDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.desc.TransparencyDescriber;
-import com.openexchange.chronos.scheduling.common.Utils;
 import com.openexchange.chronos.service.EventUpdate;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
 
 /**
  * {@link DescriptionServiceImpl}
@@ -97,32 +91,19 @@ public class DescriptionServiceImpl implements DescriptionService {
     };
     //@formatter:on
 
-    private final ServiceLookup serviceLookup;
-
     /**
      * Initializes a new {@link DescriptionServiceImpl}.
-     * 
-     * @param serviceLookup The {@link ServiceLookup}
      */
-    public DescriptionServiceImpl(ServiceLookup serviceLookup) {
+    public DescriptionServiceImpl() {
         super();
-        this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public List<Description> describe(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... ignorees) {
-        UserService userService = serviceLookup.getOptionalService(UserService.class);
-        TimeZone timeZone = Utils.getTimeZone(userService, contextId, originator, recipient);
-        Locale locale = Utils.getLocale(userService, contextId, originator, recipient);
-        return describe(eventUpdate, timeZone, locale, ignorees);
-    }
-
-    @Override
-    public List<Description> describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... ignorees) {
+    public List<Description> describe(EventUpdate eventUpdate, EventField... ignorees) {
         List<Description> descriptions = new LinkedList<>();
         for (ChangeDescriber describer : DESCRIBERS) {
-            if (null == ignorees || false == contains(describer.getFields(), ignorees) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
-                Description description = describer.describe(eventUpdate, timeZone, locale);
+            if ((null == ignorees || false == contains(describer.getFields(), ignorees)) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
+                Description description = describer.describe(eventUpdate);
                 if (null != description) {
                     descriptions.add(description);
                 }
@@ -132,22 +113,17 @@ public class DescriptionServiceImpl implements DescriptionService {
     }
 
     @Override
-    public List<Description> describeOnly(EventUpdate eventUpdate, int contextId, CalendarUser originator, CalendarUser recipient, EventField... toDescribe) {
-        UserService userService = serviceLookup.getOptionalService(UserService.class);
-        TimeZone timeZone = Utils.getTimeZone(userService, contextId, originator, recipient);
-        Locale locale = Utils.getLocale(userService, contextId, originator, recipient);
-        return describeOnly(eventUpdate, timeZone, locale, toDescribe);
-    }
-
-    @Override
-    public List<Description> describeOnly(EventUpdate eventUpdate, TimeZone timeZone, Locale locale, EventField... toDescribe) {
+    public List<Description> describeOnly(EventUpdate eventUpdate, EventField... toDescribe) {
         if (null == toDescribe) {
             return Collections.emptyList();
         }
         List<Description> descriptions = new LinkedList<>();
         for (ChangeDescriber describer : DESCRIBERS) {
             if (contains(describer.getFields(), toDescribe) && eventUpdate.containsAnyChangeOf(describer.getFields())) {
-                descriptions.add(describer.describe(eventUpdate, timeZone, locale));
+                Description description = describer.describe(eventUpdate);
+                if (null != description) {
+                    descriptions.add(description);
+                }
             }
         }
         return descriptions;

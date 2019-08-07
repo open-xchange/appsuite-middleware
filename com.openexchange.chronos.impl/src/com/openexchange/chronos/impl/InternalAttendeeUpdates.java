@@ -180,6 +180,11 @@ public class InternalAttendeeUpdates implements CollectionUpdate<Attendee, Atten
         return attendeesToUpdate;
     }
 
+    @Override
+    public String toString() {
+        return "InternalAttendeeUpdates [" + attendeesToDelete.size() + " removed, " + attendeesToInsert.size() + " added, " + attendeesToUpdate.size() + " updated]";
+    }
+
     /**
      * Gets a value indicating whether the applied changes represent an attendee reply of a specific calendar user for the associated
      * calendar object resource or not, depending on the modified attendee fields.

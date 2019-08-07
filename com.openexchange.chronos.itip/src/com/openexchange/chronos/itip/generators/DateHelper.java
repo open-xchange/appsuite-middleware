@@ -112,7 +112,7 @@ public class DateHelper {
     public String getDateSpec() {
         StringBuilder b = new StringBuilder();
         b.append(formatDate(event));
-        if (event.getRecurrenceId() != null) {
+        if (CalendarUtils.isSeriesMaster(event)) {
             b.append(" - ").append(formatRecurrenceRule(event));
         }
         return b.toString();

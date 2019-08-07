@@ -52,15 +52,13 @@ package com.openexchange.chronos.scheduling.changes.impl.desc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.java.Strings;
 
@@ -86,9 +84,12 @@ public class LocationDescriber implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         boolean changedLocation = eventUpdate.getUpdatedFields().contains(EventField.LOCATION);
         boolean changedGeo = eventUpdate.getUpdatedFields().contains(EventField.GEO);
+        if (false == changedLocation && false == changedGeo) {
+            return null;
+        }
 
         StringBuilder sb = new StringBuilder();
         if (changedLocation) {

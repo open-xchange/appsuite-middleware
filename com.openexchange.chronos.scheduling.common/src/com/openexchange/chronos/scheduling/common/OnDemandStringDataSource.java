@@ -66,8 +66,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public class OnDemandStringDataSource implements DataSource {
 
-    private Supplier supplier;
-    private ContentType contentType;
+    private final Supplier supplier;
+    private final ContentType contentType;
+    private byte[] data;
 
     /**
      * Initializes a new {@link OnDemandStringDataSource}.
@@ -89,19 +90,22 @@ public class OnDemandStringDataSource implements DataSource {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        if (null == supplier) {
-            throw new IOException("Unable to get data.");
+        if (null == data) {
+            if (null == supplier) {
+                throw new IOException("Unable to get data.");
+            }
+            String content;
+            try {
+                content = supplier.get();
+            } catch (OXException e) {
+                throw new IOException(e.getMessage(), e);
+            }
+            if (null == content) {
+                throw new IOException("No content to add.");
+            }
+            data = content.getBytes(contentType.getCharsetParameter());
         }
-        String content;
-        try {
-            content = supplier.get();
-        } catch (OXException e) {
-            throw new IOException(e.getMessage(), e);
-        }
-        if (null == content) {
-            throw new IOException("No content to add.");
-        }
-        return new UnsynchronizedByteArrayInputStream(content.getBytes(contentType.getCharsetParameter()));
+        return new UnsynchronizedByteArrayInputStream(data);
     }
 
     @Override

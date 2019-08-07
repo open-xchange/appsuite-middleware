@@ -281,6 +281,24 @@ public class CalendarUserSettings {
         return true;
     }
 
+    /**
+     * Gets a value indicating the preferred message format of notification mails.
+     * <p>
+     * The returned <code>int</code> value is one of {@link UserSettingMail#MSG_FORMAT_TEXT_ONLY},
+     * {@link UserSettingMail#MSG_FORMAT_HTML_ONLY}, and {@link UserSettingMail#MSG_FORMAT_BOTH}.
+     *
+     * @return The desired message format
+     * @see com.openexchange.mail.usersetting.UserSettingMail#getMsgFormat()
+     */
+    public int getMsgFormat() {
+        try {
+            return getUserSettingMail().getMsgFormat();
+        } catch (OXException e) {
+            LOG.warn("Error getting notification preferences from mail settings", e);
+        }
+        return UserSettingMail.MSG_FORMAT_BOTH;
+    }
+
     private OXFolderAccess getFolderAccess() throws OXException {
         Connection connection = optConnection();
         Context context;

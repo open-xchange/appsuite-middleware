@@ -50,16 +50,14 @@
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.java.Strings;
@@ -84,7 +82,7 @@ public class AttachmentDescriber implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         SimpleCollectionUpdate<Attachment> updates = eventUpdate.getAttachmentUpdates();
         if (null == updates || updates.isEmpty()) {
             return null;

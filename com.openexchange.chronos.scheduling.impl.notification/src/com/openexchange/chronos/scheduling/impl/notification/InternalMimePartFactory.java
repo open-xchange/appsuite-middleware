@@ -53,6 +53,7 @@ import static com.openexchange.chronos.scheduling.common.Constants.ALTERNATIVE;
 import static com.openexchange.chronos.scheduling.common.Constants.MULTIPART_ALTERNATIVE;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
+import com.openexchange.chronos.scheduling.RecipientSettings;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.chronos.scheduling.common.AbstractMimePartFactory;
 import com.openexchange.exception.OXException;
@@ -73,10 +74,11 @@ public class InternalMimePartFactory extends AbstractMimePartFactory {
      * 
      * @param serviceLookup The {@link ServiceLookup}
      * @param scheduleChange The change to add to the mail
+     * @param recipient The recipient
      * @throws OXException In case services are missing
      */
-    public InternalMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange) throws OXException {
-        super(serviceLookup, scheduleChange);
+    public InternalMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange, RecipientSettings recipientSettings) throws OXException {
+        super(serviceLookup, scheduleChange, recipientSettings);
     }
 
     @Override

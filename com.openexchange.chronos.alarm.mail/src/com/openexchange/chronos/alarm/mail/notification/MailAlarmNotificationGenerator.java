@@ -62,13 +62,10 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.alarm.mail.impl.MailAlarmMailStrings;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.compat.ShownAsTransparency;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.chronos.itip.generators.DateHelper;
-import com.openexchange.chronos.itip.generators.HTMLWrapper;
 import com.openexchange.chronos.itip.generators.LabelHelper;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
@@ -225,7 +222,7 @@ public class MailAlarmNotificationGenerator {
 
         final Map<String, Object> env = new HashMap<String, Object>();
 
-        TypeWrapper wrapper = new PassthroughWrapper();
+        TypeWrapper wrapper = TypeWrapper.WRAPPER.get("text");
         env.put("mail", mail);
         env.put("templating", templateService.createHelper(env, null, false));
         env.put("formatters", dateHelperFor(mail.getRecipient()));
@@ -236,7 +233,7 @@ public class MailAlarmNotificationGenerator {
         textTemplate.process(env, writer);
         mail.setText(writer.toString());
 
-        wrapper = new HTMLWrapper();
+        wrapper = TypeWrapper.WRAPPER.get("html");
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         writer = new AllocatingStringWriter();
         htmlTemplate.process(env, writer);
@@ -251,65 +248,6 @@ public class MailAlarmNotificationGenerator {
 
     private DateHelper dateHelperFor(final NotificationParticipant participant) {
         return new DateHelper(event, participant.getLocale(), participant.getTimeZone(), participant.getContext().getContextId(), participant.getUser().getId());
-    }
-
-    private static class PassthroughWrapper implements TypeWrapper {
-
-        /**
-         * Initializes a new {@link PassthroughWrapper}.
-         */
-        public PassthroughWrapper() {
-            super();
-        }
-
-        @Override
-        public String none(final Object argument) {
-            if (argument != null) {
-                return argument.toString();
-            }
-            return "";
-        }
-
-        @Override
-        public String original(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String participant(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String state(final Object argument, final ParticipationStatus status) {
-            return none(argument);
-        }
-
-        @Override
-        public String updated(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String emphasiszed(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String reference(final Object argument) {
-            return none(argument);
-        }
-
-        @Override
-        public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
-            return none(argument);
-        }
-
-        @Override
-        public String italic(Object argument) {
-            return none(argument);
-        }
-
     }
 
     private static List<NotificationParticipant> getResources(ServiceLookup services, Event event, Context ctx, User user) throws OXException {

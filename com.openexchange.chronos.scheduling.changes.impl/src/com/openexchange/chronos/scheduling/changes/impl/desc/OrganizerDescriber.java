@@ -53,9 +53,9 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 
 /**
  * {@link OrganizerDescriber}

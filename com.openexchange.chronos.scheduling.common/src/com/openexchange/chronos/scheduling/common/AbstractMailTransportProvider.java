@@ -56,6 +56,8 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.itip.ContextSensitiveMessages.Context;
+import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.scheduling.ChangeNotification;
 import com.openexchange.chronos.scheduling.ScheduleStatus;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
@@ -124,8 +126,8 @@ public abstract class AbstractMailTransportProvider implements TransportProvider
         StringHelper helper = StringHelper.valueOf(locale);
         return String.format(
             helper.getString(Messages.SUBJECT_STATE_CHANGED), 
-            originator.getCn(), 
-            ContextSensitiveMessages.getInstance().getDescription(partStat, locale, ContextSensitiveMessages.Context.VERB), 
+            Utils.getDisplayName(originator),
+            com.openexchange.chronos.itip.ContextSensitiveMessages.partStat(partStat, locale, Context.VERB), 
             summary);
         //@formatter:on
     }

@@ -62,6 +62,7 @@ import java.util.Objects;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.RecurrenceId;
 
 /**
  * {@link DefaultCalendarObjectResource}
@@ -169,6 +170,16 @@ public class DefaultCalendarObjectResource implements CalendarObjectResource {
     @Override
     public Event getFirstEvent() {
         return events.get(0);
+    }
+
+    @Override
+    public Event getChangeException(RecurrenceId recurrenceId) {
+        for (Event event : events) {
+            if (Objects.equals(event.getRecurrenceId(), recurrenceId)) {
+                return event;
+            }
+        }
+        return null;
     }
 
     @Override

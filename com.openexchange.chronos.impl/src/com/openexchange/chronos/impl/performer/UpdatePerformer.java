@@ -53,6 +53,8 @@ import static com.openexchange.chronos.common.CalendarUtils.collectAttendees;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getSimpleAttendeeUpdates;
+import static com.openexchange.chronos.common.CalendarUtils.getUpdatedResource;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
@@ -87,12 +89,15 @@ import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarObjectResource;
+import com.openexchange.chronos.common.mapping.AbstractSimpleCollectionUpdate;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
+import com.openexchange.chronos.impl.InternalEventUpdate;
 import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -171,29 +176,78 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (null == recurrenceId && updatedEventData.containsRecurrenceId()) {
             recurrenceId = updatedEventData.getRecurrenceId();
         }
-        InternalEventUpdate eventUpdate;
-        if (null != recurrenceId) {
-            if (isSeriesMaster(originalEvent)) {
-                eventUpdate = updateRecurrence(originalEvent, recurrenceId, updatedEventData);
-            } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
-                eventUpdate = updateEvent(originalEvent, updatedEventData);
-            } else {
-                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
-            }
+        InternalUpdateResult result;
+        if (null == recurrenceId) {
+            result = updateEvent(originalEvent, updatedEventData);
+        } else if (isSeriesMaster(originalEvent)) {
+            result = updateRecurrence(originalEvent, recurrenceId, updatedEventData);
+        } else if (isSeriesException(originalEvent) && recurrenceId.equals(originalEvent.getRecurrenceId())) {
+            result = updateEvent(originalEvent, updatedEventData);
         } else {
-            eventUpdate = updateEvent(originalEvent, updatedEventData);
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), null);
         }
         /*
          * track scheduling-related notifications & return result
          */
-        if (eventUpdate.isReschedule()) {
-            schedulingHelper.trackDeletion(eventUpdate.getOriginalResource(), eventUpdate.getAttendeeUpdates().getRemovedItems());
-            schedulingHelper.trackUpdate(eventUpdate.getUpdatedResource(), eventUpdate, eventUpdate.getAttendeeUpdates().getRetainedItems());
-            schedulingHelper.trackCreation(eventUpdate.getUpdatedResource(), eventUpdate.getAttendeeUpdates().getAddedItems());
-        } else if (eventUpdate.getAttendeeUpdates().isReply(calendarUser)) {
-            schedulingHelper.trackReply(eventUpdate.getUpdatedResource(), eventUpdate);
-        }
+        handleScheduling(result);
         return resultTracker.getResult();
+    }
+
+    /**
+     * Handles any necessary scheduling after an update has been performed, i.e. tracks suitable scheduling messages and notifications.
+     * 
+     * @param result The update result
+     */
+    private void handleScheduling(InternalUpdateResult result) throws OXException {
+        /*
+         * prepare updated resource for scheduling messages and notifications
+         */
+        InternalEventUpdate eventUpdate = result.getEventUpdate();
+        if (eventUpdate.isReschedule() && false == hasExternalOrganizer(eventUpdate.getOriginal())) {
+            if (isSeriesMaster(eventUpdate.getOriginal())) {
+                /*
+                 * update of series, determine scheduling operations based on superset of attendees in all instances of the series
+                 */                
+                AbstractSimpleCollectionUpdate<Attendee> collectedAttendeeUpdates = getSimpleAttendeeUpdates(
+                    collectAttendees(result.getOriginalResource(), null, (CalendarUserType[]) null),
+                    collectAttendees(result.getUpdatedResource(), null, (CalendarUserType[]) null));
+                if (false == collectedAttendeeUpdates.getRemovedItems().isEmpty()) {
+                    schedulingHelper.trackDeletion(result.getOriginalResource(), result.getSeriesMaster(), collectedAttendeeUpdates.getRemovedItems());
+                }
+                if (false == collectedAttendeeUpdates.getRetainedItems().isEmpty()) {
+                    schedulingHelper.trackUpdate(result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate, collectedAttendeeUpdates.getRetainedItems());
+                }
+                if (false == collectedAttendeeUpdates.getAddedItems().isEmpty()) {
+                    schedulingHelper.trackCreation(result.getUpdatedResource(), collectedAttendeeUpdates.getAddedItems());
+                }
+            } else {
+                /*
+                 * update of change exception or non-recurring, determine scheduling operations based on attendee updates in this event
+                 */
+                if (false == eventUpdate.getAttendeeUpdates().getRemovedItems().isEmpty()) {
+                    schedulingHelper.trackDeletion(result.getOriginalResource(), result.getSeriesMaster(), eventUpdate.getAttendeeUpdates().getRemovedItems());
+                }
+                if (false == eventUpdate.getAttendeeUpdates().getRetainedItems().isEmpty()) {
+                    schedulingHelper.trackUpdate(result.getUpdatedResource(), result.getSeriesMaster(), eventUpdate, eventUpdate.getAttendeeUpdates().getRetainedItems());
+                }
+                if (false == eventUpdate.getAttendeeUpdates().getAddedItems().isEmpty()) {
+                    schedulingHelper.trackCreation(result.getUpdatedResource(), eventUpdate.getAttendeeUpdates().getAddedItems());
+                }
+            }
+        } else if (eventUpdate.getAttendeeUpdates().isReply(calendarUser)) {
+            /*
+             * track reply message from calendar user to organizer
+             */
+            schedulingHelper.trackReply(result.getUpdatedResource(), result.getSeriesMaster(), result.getEventUpdate());
+        } else {
+            /*
+             * track deletions for newly created delete exceptions
+             */
+            List<Event> deletedExceptions = eventUpdate.getDeletedExceptions();
+            if (0 < deletedExceptions.size()) {
+                schedulingHelper.trackDeletion(new DefaultCalendarObjectResource(deletedExceptions), result.getSeriesMaster(), null);
+            }
+        }
     }
 
     /**
@@ -205,7 +259,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
      * @return The processed event update
      */
-    protected InternalEventUpdate updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
+    protected InternalUpdateResult updateRecurrence(Event originalSeriesMaster, RecurrenceId recurrenceId, Event updatedEventData, EventField... ignoredFields) throws OXException {
         recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalSeriesMaster, recurrenceId);
         if (contains(originalSeriesMaster.getDeleteExceptionDates(), recurrenceId)) {
             /*
@@ -240,10 +294,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              */
             Check.recurrenceRangeMatches(recurrenceId, null);
             Event originalExceptionEvent = loadExceptionData(originalSeriesMaster, recurrenceId);
-            InternalEventUpdate eventUpdate = updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
+            InternalUpdateResult result = updateEvent(originalExceptionEvent, updatedEventData, ignoredFields);
             touch(originalSeriesMaster.getSeriesId());
             resultTracker.trackUpdate(originalSeriesMaster, loadEventData(originalSeriesMaster.getId()));
-            return eventUpdate;
+            return result;
         } else {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
@@ -263,8 +317,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * - recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
              * - sequence number is also ignored (since possibly incremented implicitly before)
              */
-            InternalEventUpdate eventUpdate = updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
-            Event updatedExceptionEvent = loadEventData(newExceptionEvent.getId());
+            InternalUpdateResult result = updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
+            Event updatedExceptionEvent = result.getUpdatedEvent();
             /*
              * add change exception date to series master & track results
              */
@@ -279,7 +333,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, seriesMasterAlarms);
             storage.getAlarmTriggerStorage().deleteTriggers(updatedExceptionEvent.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedExceptionEvent, storage.getAlarmStorage().loadAlarms(updatedExceptionEvent));
-            return eventUpdate;
+            return result;
         }
     }
 
@@ -291,7 +345,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param ignoredFields Additional fields to ignore during the update; {@link #SKIPPED_FIELDS} are always skipped
      * @return The processed event update
      */
-    protected InternalEventUpdate updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
+    protected InternalUpdateResult updateEvent(Event originalEvent, Event eventData, EventField... ignoredFields) throws OXException {
         /*
          * check if folder view on event is allowed as needed
          */
@@ -367,8 +421,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * recursively perform pending updates of change exceptions if required
          */
+        List<Event> updatedChangeExceptions = new ArrayList<Event>();
         for (ItemUpdate<Event, EventField> updatedException : eventUpdate.getExceptionUpdates().getUpdatedItems()) {
-            updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
+            InternalUpdateResult result = updateEvent(updatedException.getOriginal(), updatedException.getUpdate());
+            updatedChangeExceptions.add(result.getUpdatedEvent());
         }
         /*
          * track update result & update any stored alarm triggers of all users if required
@@ -389,7 +445,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
         }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
-        return eventUpdate;
+        /*
+         * wrap so far results for further processing
+         */
+        return new InternalUpdateResult(this, eventUpdate, updatedEvent, updatedChangeExceptions);
     }
 
     /**
@@ -466,21 +525,22 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.DELETE_EXCEPTION_DATES);
             }
             if (0 < exceptionDateUpdates.getAddedItems().size()) {
+                List<EventUpdate> attendeeEventUpdates = new ArrayList<EventUpdate>();
                 for (RecurrenceId newDeleteException : exceptionDateUpdates.getAddedItems()) {
                     RecurrenceId recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, newDeleteException);
                     if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                         /*
                          * remove attendee from existing change exception
                          */
-                        Event originalExceptionEvent = loadExceptionData(originalEvent, recurrenceId);
-                        delete(originalExceptionEvent, userAttendee);
+                        attendeeEventUpdates.addAll(delete(loadExceptionData(originalEvent, recurrenceId), userAttendee));
                     } else {
                         /*
                          * creation of new delete exception for this attendee
                          */
-                        deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
+                        attendeeEventUpdates.addAll(deleteFromRecurrence(originalEvent, recurrenceId, userAttendee));
                     }
                 }
+                schedulingHelper.trackReply(getUpdatedResource(attendeeEventUpdates), attendeeEventUpdates);
                 return true;
             }
         }
@@ -646,13 +706,13 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             /*
              * rrule not modified, nothing to do
              */
-            return adjustedClientUpdate;
+            return new UnmodifiableEvent(adjustedClientUpdate);
         }
         if (null == clientUpdate.getRecurrenceRule() || rruleMapping.equals(originalSeriesMaster, updatedSeriesMaster)) {
             /*
              * rrule is removed or was not changed by split, so take over new rrule from client as-is
              */
-            return adjustedClientUpdate;
+            return new UnmodifiableEvent(adjustedClientUpdate);
         }
         /*
          * rrule was modified during split, merge a possibly updated count value with client's rrule
@@ -664,10 +724,55 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             if (null != clientRule.getCount() && clientRule.getCount().equals(originalRule.getCount())) {
                 clientRule.setCount(updatedRule.getCount().intValue());
                 adjustedClientUpdate.setRecurrenceRule(clientRule.toString());
-                return new UnmodifiableEvent(adjustedClientUpdate);
             }
         }
-        return adjustedClientUpdate;
+        return new UnmodifiableEvent(adjustedClientUpdate);
+    }
+
+    private static class InternalUpdateResult {
+
+        private final AbstractUpdatePerformer performer;
+        private final InternalEventUpdate eventUpdate;
+        private final List<Event> updatedChangeExceptions;
+        private final Event updatedEvent;
+
+        private CalendarObjectResource updatedResource;
+
+        InternalUpdateResult(AbstractUpdatePerformer perfomer, InternalEventUpdate eventUpdate, Event updatedEvent, List<Event> updatedChangeExceptions) {
+            super();
+            this.performer = perfomer;
+            this.eventUpdate = eventUpdate;
+            this.updatedChangeExceptions = updatedChangeExceptions;
+            this.updatedEvent = updatedEvent;
+        }
+
+        Event getSeriesMaster() throws OXException {
+            return getUpdatedResource().getSeriesMaster();
+        }
+
+        CalendarObjectResource getOriginalResource() {
+            return eventUpdate.getOriginalResource();
+        }
+
+        CalendarObjectResource getUpdatedResource() throws OXException {
+            if (null == updatedResource) {
+                updatedResource = new DefaultCalendarObjectResource(updatedEvent, updatedChangeExceptions);
+                if (isSeriesException(updatedResource.getFirstEvent())) {
+                    Event seriesMaster = performer.loadEventData(updatedResource.getFirstEvent().getSeriesId());
+                    List<Event> changeExceptions = performer.loadExceptionData(seriesMaster);
+                    updatedResource = new DefaultCalendarObjectResource(seriesMaster, changeExceptions);
+                }
+            }
+            return updatedResource;
+        }
+
+        InternalEventUpdate getEventUpdate() {
+            return eventUpdate;
+        }
+
+        Event getUpdatedEvent() {
+            return updatedEvent;
+        }
     }
 
 }

@@ -2085,6 +2085,24 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new simple attendee collection update based on the supplied original and updated attendee lists, considering only
+     * the presence of the attendees in both collections, ignoring possibly changed properties within the attendee objects.
+     *
+     * @param originalAttendees The original attendees
+     * @param updatedAttendees The updated attendees
+     * @return The simple collection update
+     */
+    public static AbstractSimpleCollectionUpdate<Attendee> getSimpleAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) {
+        return new AbstractSimpleCollectionUpdate<Attendee>(originalAttendees, updatedAttendees) {
+
+            @Override
+            protected boolean matches(Attendee item1, Attendee item2) {
+                return CalendarUtils.matches(item1, item2);
+            }
+        };
+    }
+
+    /**
      * Initializes a new attendee collection update based on the supplied original and updated attendee lists.
      *
      * @param originalAttendees The original attendees

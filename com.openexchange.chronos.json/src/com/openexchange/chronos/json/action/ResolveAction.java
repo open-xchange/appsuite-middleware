@@ -92,7 +92,8 @@ public class ResolveAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         String eventId = requestData.requireParameter(AJAXServlet.PARAMETER_ID);
-        Event event = calendarAccess.resolveEvent(eventId);
+        Integer sequence = requestData.getParameter(PARAM_SEQUENCE, Integer.class, true);
+        Event event = calendarAccess.resolveEvent(eventId, sequence);
         if (null == event) {
             return AJAXRequestResult.EMPTY_REQUEST_RESULT;
         }

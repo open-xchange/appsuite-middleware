@@ -130,11 +130,9 @@ public class Activator extends HousekeepingActivator {
         Dictionary<String, Object> factoryProps = withRanking(DefaultITipActionPerformerFactoryService.RANKING); // Default
         registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, generatorFactory), factoryProps);
 
-        if (false == getServiceSafe(ConfigurationService.class).getBoolProperty("com.openexchange.chronos.itip.enableScheduling", false)) {
-            registerService(ITipMailGeneratorFactory.class, generatorFactory);
-            registerService(MailSenderService.class, sender);
-            registerService(CalendarHandler.class, new ITipHandler(generatorFactory, sender));
-        }
+        registerService(ITipMailGeneratorFactory.class, generatorFactory);
+        registerService(MailSenderService.class, sender);
+        registerService(CalendarHandler.class, new ITipHandler(generatorFactory, sender));
     }
 
 }

@@ -188,12 +188,12 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public Event resolveByID(CalendarSession session, String id) throws OXException {
+    public Event resolveByID(CalendarSession session, String id, Integer sequence) throws OXException {
         return new InternalCalendarStorageOperation<Event>(session) {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ResolvePerformer(session, storage).resolveById(id);
+                return new ResolvePerformer(session, storage).resolveById(id, sequence);
             }
         }.executeQuery();
     }

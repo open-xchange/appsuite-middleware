@@ -109,7 +109,7 @@ public final class DeleteAction extends AbstractReminderAction {
                     CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
                     CalendarSession calendarSession = calendarService.init(req.getSession());
                     CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
-                    Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
+                    Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt), null);
                     List<Alarm> alarms = event.getAlarms();
                     for (Alarm alarm : alarms) {
                         if (alarm.getId() == alarmId) {
@@ -161,7 +161,7 @@ public final class DeleteAction extends AbstractReminderAction {
                         CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
                         CalendarSession calendarSession = calendarService.init(req.getSession());
                         CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
-                        Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
+                        Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt), null);
                         List<Alarm> alarms = event.getAlarms();
                         for (Alarm alarm : alarms) {
                             if (alarm.getId() == alarmId) {

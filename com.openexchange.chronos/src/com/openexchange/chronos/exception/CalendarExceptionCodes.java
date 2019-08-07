@@ -61,6 +61,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.DIFFE
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_CONFLICTS_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_SEQUENCE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.FOLDER_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.IGNORED_INVALID_DATA_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INCOMPATIBLE_DATE_TYPES_MSG;
@@ -150,6 +151,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Attachment not found [attachment %1$d, event %2$s, folder %3$s]</li>
      */
     ATTACHMENT_NOT_FOUND("Attachment not found [attachment %1$d, event %2$s, folder %3$s]", ATTACHMENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4047),
+    /**
+     * <li>The requested version of the appointment was not found.</li>
+     * <li>Event not found with sequence [id %1$s, sequence [id %2$d]</li>
+     */
+    EVENT_SEQUENCE_NOT_FOUND("Event not found with sequence [id %1$s, sequence [id %2$d]", EVENT_SEQUENCE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4048),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$s]</li>
@@ -262,14 +268,14 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     END_BEFORE_START("End before start date [start %1$s, end %2$s]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
     /**
      * <li>Appointments in non-personal folders must not be classified as \"private\" or \"secret\".</li>
-     * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
+     * <li>Unsupported classification [classification %1$s, folder %2$s, type %3$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_FOLDER("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    UNSUPPORTED_CLASSIFICATION_FOR_FOLDER("Unsupported classification [classification %1$s, folder %2$s, type %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4222),
     /**
      * <li>Appointments with resources must not be classified as \"secret\".".</li>
-     * <li>Unsupported classification [classification %1$s, attendee %2$d]</li>
+     * <li>Unsupported classification [classification %1$s, attendee %2$s]</li>
      */
-    UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE("Unsupported classification [classification %1$s, attendee %2$d]", UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG, Category.CATEGORY_USER_INPUT, 42210),
+    UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE("Unsupported classification [classification %1$s, attendee %2$s]", UNSUPPORTED_CLASSIFICATION_FOR_RESOURCE_MSG, Category.CATEGORY_USER_INPUT, 42210),
     /**
      * <li>The supplied recurrence rule is not supported. Please use adjust the rule and try again.</li>
      * <li>Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]</li>

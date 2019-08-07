@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.scheduling.changes.impl;
 
-import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.scheduling.changes.Description;
@@ -71,14 +69,13 @@ public interface ChangeDescriber {
      */
     @NonNull
     EventField[] getFields();
+
     /**
      * Describe the change
      * 
      * @param eventUpdate The {@link EventUpdate} to describe
-     * @param timeZone The {@link TimeZone} of the user
-     * @param locale The locale of the messages text
      * @return A {@link Description}
      */
-    Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale);
+    Description describe(EventUpdate eventUpdate);
 
 }

@@ -61,6 +61,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.scheduling.RecipientSettings;
 import com.openexchange.chronos.scheduling.SchedulingMessage;
 import com.openexchange.chronos.scheduling.SchedulingMethod;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
@@ -80,6 +81,7 @@ public class MessageBuilder {
     protected CalendarObjectResource resource;
     protected ScheduleChange scheduleChange;
     protected AttachmentDataProvider attachmentDataProvider;
+    protected RecipientSettings recipientSettings;
     protected Map<String, Object> additionals = new HashMap<>();
 
     /**
@@ -156,6 +158,17 @@ public class MessageBuilder {
     }
 
     /**
+     * Set the recipient settings for the message.
+     *
+     * @param recipientSettings The recipient settings
+     * @return This {@link MessageBuilder} instance
+     */
+    public MessageBuilder setRecipientSettings(RecipientSettings recipientSettings) {
+        this.recipientSettings = recipientSettings;
+        return this;
+    }
+
+    /**
      * Add an additional information
      *
      * @param key The key to identify
@@ -197,6 +210,7 @@ class Message implements SchedulingMessage {
     private final @NonNull CalendarObjectResource resource;
     private final @NonNull ScheduleChange scheduleChange;
     private final AttachmentDataProvider attachmentDataProvider;
+    private final RecipientSettings recipientSettings;
     private final Map<String, Object> additionals;
 
     /**
@@ -213,6 +227,7 @@ class Message implements SchedulingMessage {
         this.resource = notNull(builder.resource);
         this.scheduleChange = notNull(builder.scheduleChange);
         this.attachmentDataProvider = builder.attachmentDataProvider;
+        this.recipientSettings = builder.recipientSettings;
         this.additionals = builder.additionals;
     }
 
@@ -258,6 +273,11 @@ class Message implements SchedulingMessage {
             throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(I(managedId), id);
         }
         return attachmentDataProvider.getAttachmentData(managedId);
+    }
+
+    @Override
+    public RecipientSettings getRecipientSettings() {
+        return recipientSettings;
     }
 
     @Override

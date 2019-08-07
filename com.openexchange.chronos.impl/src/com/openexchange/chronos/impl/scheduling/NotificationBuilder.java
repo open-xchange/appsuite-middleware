@@ -56,6 +56,7 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.scheduling.ChangeNotification;
+import com.openexchange.chronos.scheduling.RecipientSettings;
 import com.openexchange.chronos.scheduling.changes.ChangeAction;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.exception.OXException;
@@ -73,6 +74,7 @@ public class NotificationBuilder {
     protected CalendarUser recipient;
     protected CalendarObjectResource resource;
     protected ScheduleChange scheduleChange;
+    protected RecipientSettings recipientSettings;
     protected Map<String, Object> additionals = new HashMap<>();
 
     /**
@@ -138,6 +140,17 @@ public class NotificationBuilder {
     }
 
     /**
+     * Set the recipient settings for the message.
+     *
+     * @param recipientSettings The recipient settings
+     * @return This {@link NotificationBuilder} instance
+     */
+    public NotificationBuilder setRecipientSettings(RecipientSettings recipientSettings) {
+        this.recipientSettings = recipientSettings;
+        return this;
+    }
+
+    /**
      * Add an additional information
      *
      * @param key The key to identify
@@ -179,6 +192,7 @@ class Notification implements ChangeNotification {
     private final @NonNull CalendarUser recipient;
     private final @NonNull CalendarObjectResource resource;
     private final @NonNull ScheduleChange scheduleChange;
+    private final RecipientSettings recipientSettings;
     private final Map<String, Object> additionals;
 
     /**
@@ -195,6 +209,7 @@ class Notification implements ChangeNotification {
         this.resource = notNull(builder.resource);
         this.scheduleChange = notNull(builder.scheduleChange);
         this.additionals = builder.additionals;
+        this.recipientSettings = builder.recipientSettings;
     }
 
     @Override
@@ -225,6 +240,11 @@ class Notification implements ChangeNotification {
     @NonNull
     public ScheduleChange getScheduleChange() {
         return scheduleChange;
+    }
+
+    @Override
+    public RecipientSettings getRecipientSettings() {
+        return recipientSettings;
     }
 
     @Override

@@ -598,16 +598,21 @@ QueryParamChronosExpand:
   schema:
     type: boolean
     default: false
-QueryParamChronosNotification:
-  name: sendInternalNotifications
+QueryParamChronosScheduling:
+  name: scheduling
   in: query
   description: >-
-    Specifies that attendees should be notified about the changes when saving a
-    meeting or not.
+    Controls the generation of scheduling messages and notification mails for 
+    the current operation.
   required: false
   schema:
-    type: boolean
-    default: true
+    type: string
+    enum:
+      - all
+      - none
+      - internal-only
+      - external-only
+    default: all
 ChronosFromTimeRange:
   name: from
   in: query

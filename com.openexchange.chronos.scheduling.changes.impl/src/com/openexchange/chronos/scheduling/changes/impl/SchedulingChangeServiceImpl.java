@@ -49,41 +49,18 @@
 
 package com.openexchange.chronos.scheduling.changes.impl;
 
-import static com.openexchange.chronos.scheduling.common.Utils.getLocale;
-import static com.openexchange.chronos.scheduling.common.Utils.getTimeZone;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
-import org.dmfs.rfc5545.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.annotation.Nullable;
-import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarObjectResource;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.scheduling.changes.Change;
 import com.openexchange.chronos.scheduling.changes.ChangeAction;
-import com.openexchange.chronos.scheduling.changes.Description;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.chronos.scheduling.changes.SchedulingChangeService;
-import com.openexchange.chronos.scheduling.changes.Sentence;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.user.UserService;
 
 /**
  * {@link SchedulingChangeService}
@@ -96,28 +73,23 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
     /*
      * ---------------------------- TEMPLATES ----------------------------
      */
-    public final static String ACCEPT = "notify.event.accept";
-    public final static String COUNTER_ORGANIZER = "notify.event.counter.organizer";
-    public final static String COUNTER_ATTENDEE = "notify.event.counter.attendee";
-    public final static String CREATE = "notify.event.create";
-    public final static String CREATE_EXCEPTION = "notify.event.createexception";
-    public final static String DECLINE = "notify.event.decline";
-    public final static String DECLINE_COUNTER = "notify.event.declinecounter";
-    public final static String DELETE = "notify.event.delete";
-    public final static String NONE = "notify.event.none";
-    public final static String REFRESH = "notify.event.refresh";
-    public final static String TENTATIVE = "notify.event.tentative";
-    public final static String UPDATE = "notify.event.update";
+    private static final String ACCEPT = "notify.appointment.accept";
+    //private static final String COUNTER_ORGANIZER = "notify.event.counter.organizer";
+    private static final String COUNTER_ATTENDEE = "notify.appointment.counter.attendee";
+    private static final String CREATE = "notify.appointment.create";
+    private static final String CREATE_EXCEPTION = "notify.appointment.createexception";
+    private static final String DECLINE = "notify.appointment.decline";
+    private static final String DECLINE_COUNTER = "notify.appointment.declinecounter";
+    private static final String DELETE = "notify.appointment.delete";
+    private static final String NONE = "notify.appointment.none";
+    //    private static final String REFRESH = "notify.event.refresh";
+    private static final String TENTATIVE = "notify.appointment.tentative";
+    private static final String UPDATE = "notify.appointment.update";
     /*
      * -------------------------------------------------------------------
      */
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(SchedulingChangeServiceImpl.class);
-
-    protected static final HTMLWrapper HTML_WRAPPER = new HTMLWrapper();
-    protected static final PassthroughWrapper TEXT_WRAPPER = new PassthroughWrapper();
-
-    protected final ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link SchedulingChangeService}.
@@ -130,19 +102,17 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
     }
 
     @Override
-    public ScheduleChange describeCancel(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> removedEvents) throws OXException {
-        if (null == removedEvents || removedEvents.isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("Event must not be null");
-        }
-
-        return describe(contextId, originator, recipient, comment, DELETE, null, removedEvents, ChangeAction.CANCEL, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+    public ScheduleChange describeCancel(CalendarUser originator, String comment, CalendarObjectResource resource) throws OXException {
+        return describe(originator, comment, DELETE, null, resource, null, ChangeAction.CANCEL, Collections.emptyList());
     }
 
     @Override
-    public ScheduleChange describeCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> countered, List<Change> changes, boolean isExceptionCreate) throws OXException {
-        if (null == countered || countered.isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
-        }
+    public ScheduleChange describeCancelInstance(CalendarUser originator, String comment, CalendarObjectResource resource, Event seriesMaster) {
+        return describe(originator, comment, DELETE, null, resource, seriesMaster, ChangeAction.CANCEL, Collections.emptyList());
+    }
+
+    @Override
+    public ScheduleChange describeCounter(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes, boolean isExceptionCreate) throws OXException {
         /*
          * Get correct template
          */
@@ -153,194 +123,59 @@ public class SchedulingChangeServiceImpl implements SchedulingChangeService {
             templateName = COUNTER_ATTENDEE;
         }
 
-        return describe(contextId, originator, recipient, comment, templateName, null, countered, ChangeAction.UPDATE, changes);
+        return describe(originator, comment, templateName, null, resource, null, ChangeAction.UPDATE, changes);
     }
 
     @Override
-    public ScheduleChange describeDeclineCounter(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> declinedEvent) throws OXException {
-        if (null == declinedEvent || declinedEvent.isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
-        }
-        return describe(contextId, originator, recipient, comment, DECLINE_COUNTER, null, declinedEvent, ChangeAction.CANCEL, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
+    public ScheduleChange describeDeclineCounter(CalendarUser originator, String comment, CalendarObjectResource resource) throws OXException {
+        return describe(originator, comment, DECLINE_COUNTER, null, resource, null, ChangeAction.CANCEL, Collections.emptyList());
     }
 
     @Override
-    public ScheduleChange describeReply(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes, ParticipationStatus partStat) throws OXException {
-        /*
-         * Check constrains
-         */
-        if (null == updated || updated.isEmpty()) {
-            throw CalendarExceptionCodes.INVALID_DATA.create(EventField.ATTENDEES, "Scheduling resource doesn't contain the relevant update for a REPLY");
-        }
+    public ScheduleChange describeReply(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes, ParticipationStatus partStat) throws OXException {
+        return describe(originator, comment, getReplyTemplateName(partStat), partStat, resource, null, ChangeAction.REPLY, changes);
+    }
 
-        /*
-         * Get correct template
-         */
-        String templateName;
+    @Override
+    public ScheduleChange describeReplyInstance(CalendarUser originator, String comment, CalendarObjectResource resource, Event seriesMaster, List<Change> changes, ParticipationStatus partStat) {
+        return describe(originator, comment, getReplyTemplateName(partStat), partStat, resource, seriesMaster, ChangeAction.REPLY, changes);
+    }
+
+    @Override
+    public ScheduleChange describeCreationRequest(CalendarUser originator, String comment, CalendarObjectResource resource) throws OXException {
+        return describe(originator, comment, CREATE, null, resource, null, ChangeAction.CREATE, Collections.emptyList());
+    }
+
+    @Override
+    public ScheduleChange describeUpdateRequest(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes) throws OXException {
+        return describe(originator, comment, UPDATE, null, resource, null, ChangeAction.UPDATE, changes);
+    }
+
+    @Override
+    public ScheduleChange describeUpdateInstance(CalendarUser originator, String comment, CalendarObjectResource resource, Event seriesMaster, List<Change> changes) {
+        return describe(originator, comment, UPDATE, null, resource, seriesMaster, ChangeAction.UPDATE, changes);
+    }
+
+    @Override
+    public ScheduleChange describeNewException(CalendarUser originator, String comment, CalendarObjectResource resource, List<Change> changes) throws OXException {
+        return describe(originator, comment, CREATE_EXCEPTION, null, resource, null, ChangeAction.UPDATE, changes);
+    }
+
+    private ScheduleChange describe(CalendarUser originator, String comment, String templateName, ParticipationStatus partStat, CalendarObjectResource resource, Event seriesMaster, ChangeAction action, List<Change> changes) {
+        return new ScheduleChangeImpl(serviceLookup, originator, comment, templateName, partStat, resource, seriesMaster, action, changes);
+    }
+
+    private static String getReplyTemplateName(ParticipationStatus partStat) {
         if (ParticipationStatus.ACCEPTED.matches(partStat)) {
-            templateName = ACCEPT;
-        } else if (ParticipationStatus.TENTATIVE.matches(partStat)) {
-            templateName = TENTATIVE;
-        } else if (ParticipationStatus.DECLINED.matches(partStat)) {
-            templateName = DECLINE;
-        } else {
-            // NEEDS_ACTION or unknown
-            templateName = NONE;
+            return ACCEPT;
         }
-        return describe(contextId, originator, recipient, comment, templateName, partStat, updated, ChangeAction.REPLY, changes);
-    }
-
-    @Override
-    public ScheduleChange describeCreationRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> created) throws OXException {
-        if (null == created || created.isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
+        if (ParticipationStatus.TENTATIVE.matches(partStat)) {
+            return TENTATIVE;
         }
-        return describe(contextId, originator, recipient, comment, CREATE, null, created, ChangeAction.CREATE, Collections.emptyList());
-    }
-
-    @Override
-    public ScheduleChange describeUpdateRequest(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException {
-        if (null == updated || updated.isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
+        if (ParticipationStatus.DECLINED.matches(partStat)) {
+            return DECLINE;
         }
-
-        return describe(contextId, originator, recipient, comment, UPDATE, null, updated, determineChangeAction(changes), changes);
+        return NONE; // NEEDS_ACTION or unknown
     }
 
-    @Override
-    public ScheduleChange describeNewException(int contextId, CalendarUser originator, CalendarUser recipient, String comment, List<Event> updated, List<Change> changes) throws OXException {
-        if (null == updated || updated.isEmpty()) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create("No changes to propagate");
-        }
-
-        return describe(contextId, originator, recipient, comment, CREATE_EXCEPTION, null, updated, determineChangeAction(changes), changes);
-    }
-
-    /*
-     * ------------------------ HELPERS ------------------------
-     */
-
-    protected UserService getUserService() {
-        return serviceLookup.getOptionalService(UserService.class);
-    }
-
-    private ChangeAction determineChangeAction(List<Change> changes) {
-        /*
-         * Check if the update was triggered through a changed participant status (only)
-         */
-        if (null != changes && changes.size() == 1) {
-            Change change = changes.get(0);
-            for (Description description : change.getDescriptions()) {
-                if (description.getChangedFields().size() == 1 && EventField.ATTENDEES.equals(description.getChangedFields().get(0))) {
-                    return ChangeAction.REPLY;
-                }
-            }
-        }
-        return ChangeAction.UPDATE;
-    }
-
-    private List<Attendee> getAttendees(List<Event> events, CalendarUserType type) {
-        List<Attendee> attendees = events.get(0).getAttendees();
-        if (null == attendees || attendees.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return attendees.stream().filter(a -> type.matches(a.getCuType())).collect(Collectors.toList());
-    }
-
-    private ScheduleChange describe(int contextId, CalendarUser originator, CalendarUser recipient, String comment, String templateName, ParticipationStatus partStat, List<Event> events, ChangeAction action, List<Change> changes) {
-        List<Attendee> attendees = new LinkedList<>(getAttendees(events, CalendarUserType.INDIVIDUAL));
-        attendees.addAll(getAttendees(events, CalendarUserType.GROUP));
-        List<Attendee> resources = getAttendees(events, CalendarUserType.RESOURCE);
-        return describe(contextId, originator, recipient, comment, templateName, partStat, events, action, changes, attendees, resources);
-    }
-
-    private ScheduleChange describe(int contextId, CalendarUser originator, CalendarUser recipient, String comment, String templateName, ParticipationStatus partStat, List<Event> events, ChangeAction action, List<Change> changes, List<Attendee> attendees, List<Attendee> resources) {
-        return new ScheduleChange() {
-
-            private String text = null;
-            private String html = null;
-
-            final TimeZone timeZone = getTimeZone(getUserService(), contextId, originator, recipient);
-            final Locale locale = getLocale(getUserService(), contextId, originator, recipient);
-
-            @Override
-            public DateTime getTimeStamp() {
-                return new DateTime(System.currentTimeMillis());
-            }
-
-            @Override
-            public List<Change> getChanges() {
-                return changes;
-            }
-
-            @Override
-            public ChangeAction getAction() {
-                return null == action ? ChangeAction.NONE : action;
-            }
-
-            @Override
-            @Nullable
-            public ParticipationStatus getOriginatorPartStat() {
-                return partStat;
-            }
-
-            @Override
-            public String getText() {
-                return null == text ? (text = render(TEXT_WRAPPER, templateName + ".txt.tmpl")) : text;
-            }
-
-            @Override
-            public String getHtml() {
-                return null == html ? (html = render(HTML_WRAPPER, templateName + ".html.tmpl")) : html;
-            }
-
-            private String render(TypeWrapper wrapper, String templateName) {
-                TemplateService templateService = serviceLookup.getOptionalService(TemplateService.class);
-                if (null == templateService) {
-                    return "".intern();
-                }
-
-                // XXX Only describe one event to satisfy templates 
-                Event event = events.get(0);
-                Map<String, Object> env = new HashMap<String, Object>();
-                env.put("event", event);
-                env.put("templating", templateService.createHelper(env, null, false));
-                env.put("formatters", new DateHelper(event, locale, timeZone));
-                env.put("labels", new LabelHelper(wrapper, serviceLookup, event, contextId, originator, recipient, comment, locale, timeZone));
-                env.put("attendeeHelper", new AttendeeHelper(locale));
-                env.put("attendees", attendees);
-                env.put("resources", resources);
-                env.put("changes", convertToString(changes, event.getRecurrenceId(), wrapper.getType()));
-
-                try (AllocatingStringWriter writer = new AllocatingStringWriter()) {
-                    OXTemplate template = templateService.loadTemplate(templateName);
-                    template.process(env, writer);
-                    return writer.toString();
-                } catch (OXException e) {
-                    LOGGER.debug("Unable to generate Description with template {}", templateName, e);
-                    return "".intern();
-                }
-            }
-
-            private List<String> convertToString(List<Change> changes, RecurrenceId recurrenceId, String format) {
-                if (null == changes || changes.isEmpty()) {
-                    return Collections.emptyList();
-                }
-                List<String> descriptions = new ArrayList<>(changes.size());
-                for (Change change : changes) {
-                    /*
-                     * XXX Only describe one event to satisfy templates
-                     */
-                    if (null == recurrenceId && null == change.getRecurrenceId() || null != recurrenceId && 0 == recurrenceId.compareTo(change.getRecurrenceId())) {
-                        for (Description description : change.getDescriptions()) {
-                            for (Sentence sentence : description.getSentences()) {
-                                descriptions.add(sentence.getMessage(format, locale));
-                            }
-                        }
-                    }
-                }
-                return descriptions;
-            }
-        };
-    }
 }

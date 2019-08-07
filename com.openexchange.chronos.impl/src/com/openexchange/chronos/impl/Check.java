@@ -496,8 +496,7 @@ public class Check extends com.openexchange.chronos.common.Check {
                     try {
                         String eventId = storage.getAttachmentStorage().resolveAttachmentId(attachment.getManagedId());
                         if (null != eventId) {
-                            event = new ResolvePerformer(session, storage).resolveById(eventId);
-
+                            event = new ResolvePerformer(session, storage).resolveById(eventId, null);
                         }
                     } catch (OXException e) {
                         throw CalendarExceptionCodes.ATTACHMENT_NOT_FOUND.create(e, I(attachment.getManagedId()), null, null);

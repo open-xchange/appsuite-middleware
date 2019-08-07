@@ -49,79 +49,37 @@
 
 package com.openexchange.chronos.scheduling.changes.impl;
 
-import java.util.List;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.compat.ShownAsTransparency;
+import java.util.Locale;
+import java.util.TimeZone;
+import com.openexchange.chronos.itip.generators.TypeWrapper;
 
 /**
- * {@link PassthroughWrapper}
+ * {@link MessageContext}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Moved with v7.10.3
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.3
  */
-public class PassthroughWrapper implements TypeWrapper {
+public interface MessageContext {
 
-    @Override
-    public String none(final Object argument) {
-        if (argument != null) {
-            return argument.toString();
-        }
-        return "";
-    }
+    /**
+     * Gets the underlying wrapper.
+     * 
+     * @return The type wrapper
+     */
+    TypeWrapper getWrapper();
 
-    @Override
-    public String original(final Object argument) {
-        return none(argument);
-    }
+    /**
+     * Gets the target locale to use.
+     * 
+     * @return The target locale
+     */
+    Locale getLocale();
 
-    @Override
-    public String participant(final Object argument) {
-        return none(argument);
-    }
-
-    @Override
-    public String state(final Object argument, final ParticipationStatus status) {
-        return none(argument);
-    }
-
-    @Override
-    public String updated(final Object argument) {
-        return none(argument);
-    }
-
-    @Override
-    public String emphasiszed(final Object argument) {
-        return none(argument);
-    }
-
-    @Override
-    public String reference(final Object argument) {
-        return none(argument);
-    }
-
-    @Override
-    public String shownAs(final Object argument, final ShownAsTransparency shownAs) {
-        return none(argument);
-    }
-
-    @Override
-    public String italic(Object argument) {
-        return none(argument);
-    }
-    
-    @Override
-    public String convert(List<String> descriptions) {
-        StringBuilder sb = new StringBuilder();
-        descriptions.forEach(s -> {
-            sb.append(s).append("\n");
-        });
-        return sb.toString();
-    }
-    
-    
-    @Override
-    public String getType() {
-        return "text";
-    }
+    /**
+     * Gets the timezone to consider when formatting date-/time-related properties.
+     * 
+     * @return The timezone
+     */
+    TimeZone getTimeZone();
 
 }

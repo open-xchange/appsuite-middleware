@@ -50,16 +50,17 @@
 package com.openexchange.chronos.scheduling.changes.impl.desc;
 
 import java.util.Collections;
-import java.util.Locale;
-import java.util.TimeZone;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.itip.HumanReadableRecurrences;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.Description;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.ChangeDescriber;
-import com.openexchange.chronos.scheduling.changes.impl.HumanReadableRecurrences;
+import com.openexchange.chronos.scheduling.changes.impl.FormattableArgument;
+import com.openexchange.chronos.scheduling.changes.impl.MessageContext;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.java.Strings;
 
@@ -85,26 +86,32 @@ public class RRuleDescriber implements ChangeDescriber {
     }
 
     @Override
-    public Description describe(EventUpdate eventUpdate, TimeZone timeZone, Locale locale) {
+    public Description describe(EventUpdate eventUpdate) {
         if (eventUpdate.getUpdatedFields().contains(EventField.RECURRENCE_RULE)) {
-            HumanReadableRecurrences update = new HumanReadableRecurrences(eventUpdate.getUpdate(), locale);
-            return new DefaultDescription(Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_RRULE).add(getReadableUpdate(update), ArgumentType.NONE)), EventField.RECURRENCE_RULE);
+            Event updatedEvent = eventUpdate.getUpdate();
+            FormattableArgument argument = new FormattableArgument() {
+
+                @Override
+                public Object format(MessageContext context) {
+                    HumanReadableRecurrences readableRecurrences = new HumanReadableRecurrences(updatedEvent, context.getLocale());
+                    String string = readableRecurrences.getString();
+                    StringBuilder stringBuilder = new StringBuilder();
+                    if (Strings.isNotEmpty(string)) {
+                        stringBuilder.append(string);
+                    }
+                    String end = readableRecurrences.getEnd();
+                    if (Strings.isNotEmpty(end)) {
+                        if (0 < stringBuilder.length()) {
+                            stringBuilder.append(", ");
+                        }
+                        stringBuilder.append(end);
+                    }
+                    return stringBuilder.toString();
+                }
+            };
+            return new DefaultDescription(Collections.singletonList(new SentenceImpl(Messages.HAS_CHANGED_RRULE).add(argument, ArgumentType.NONE)), EventField.RECURRENCE_RULE);
         }
         return null;
-    }
-
-    private String getReadableUpdate(HumanReadableRecurrences update) {
-        StringBuilder sb = new StringBuilder();
-        if (Strings.isNotEmpty(update.getString())) {
-            sb.append(update.getString());
-        }
-        if (Strings.isNotEmpty(update.getEnd())) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-            sb.append(update.getEnd());
-        }
-        return sb.toString();
     }
 
 }

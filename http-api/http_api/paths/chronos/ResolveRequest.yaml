@@ -12,6 +12,12 @@
       - $ref: '#/components/parameters/QueryParamChronosID'
       - $ref: '#/components/parameters/QueryParamChronosFields'
       - $ref: '#/components/parameters/QueryParamChronosExtendedEntities'
+      - in: query
+        name: sequence
+        description: The expected sequence number to match. If set, a resolved event is only returned if the stored sequence number is equal to this value.
+        required: false
+        schema:
+          type: integer
     responses:
       '200':
         description: >

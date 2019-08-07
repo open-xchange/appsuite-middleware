@@ -52,6 +52,7 @@ package com.openexchange.chronos.scheduling.common;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
+import com.openexchange.chronos.scheduling.RecipientSettings;
 import com.openexchange.chronos.scheduling.changes.Change;
 import com.openexchange.chronos.scheduling.changes.ScheduleChange;
 import com.openexchange.exception.OXException;
@@ -74,9 +75,9 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
 
     protected String charset = MailProperties.getInstance().getDefaultMimeCharset();
 
-    protected HtmlService htmlService;
-
-    protected ScheduleChange scheduleChange;
+    protected final HtmlService htmlService;
+    protected final ScheduleChange scheduleChange;
+    protected final RecipientSettings recipientSettings;
 
     /**
      * Initializes a new {@link AbstractMimePartFactory}.
@@ -85,10 +86,11 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
      * @param description The {@link Change} to add to the mail
      * @throws OXException In case services are missing
      */
-    public AbstractMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange) throws OXException {
+    public AbstractMimePartFactory(ServiceLookup serviceLookup, ScheduleChange scheduleChange, RecipientSettings recipientSettings) throws OXException {
         super();
         this.htmlService = serviceLookup.getServiceSafe(HtmlService.class);
         this.scheduleChange = scheduleChange;
+        this.recipientSettings = recipientSettings;
     }
 
     /*
@@ -102,7 +104,7 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
         ct.setSubType("plain");
         ct.setCharsetParameter(charset);
         textPart.setDataHandler(new DataHandler(new OnDemandStringDataSource(() -> {
-            return scheduleChange.getText();
+            return scheduleChange.getText(recipientSettings);
         }, ct)));
         textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
@@ -116,7 +118,7 @@ public abstract class AbstractMimePartFactory implements MimePartFactory {
         ct.setSubType(HTML);
         ct.setCharsetParameter(charset);
         htmlPart.setDataHandler(new DataHandler(new OnDemandStringDataSource(() -> {
-            return htmlService.getConformHTML(scheduleChange.getHtml(), charset);
+            return htmlService.getConformHTML(scheduleChange.getHtml(recipientSettings), charset);
         }, ct)));
         htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());

@@ -49,13 +49,22 @@
 
 package com.openexchange.chronos.scheduling.changes.impl;
 
-
 /**
- * {@link ArgumentType}
+ * {@link FormattableArgument}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a> - Moved with v7.10.3
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.10.3
  */
-public enum ArgumentType {
-    PARTICIPANT, ORIGINAL, UPDATED, STATUS, NONE, EMPHASIZED, REFERENCE, SHOWN_AS, ITALIC
+@FunctionalInterface
+public interface FormattableArgument {
+
+    /**
+     * Pre-formats a message argument that is later inserted into a sentence's message string, considering regional specifics like
+     * timezone or locale from the message context.
+     * 
+     * @param context The message context to use
+     * @return The formatted argument
+     */
+    Object format(MessageContext context);
+
 }

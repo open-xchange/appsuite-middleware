@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,32 +47,54 @@
  *
  */
 
-package com.openexchange.chronos.scheduling.common.osgi;
+package com.openexchange.chronos.scheduling.changes.impl;
 
-import com.openexchange.chronos.scheduling.common.ContextSensitiveMessages;
-import com.openexchange.i18n.I18nServiceRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link SchedulingCommonActivator}
+ * {@link NotificationMail}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.3
  */
-public class SchedulingCommonActivator extends HousekeepingActivator {
+public class NotificationMail {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { I18nServiceRegistry.class };
+    private final Event event;
+    private final List<NotificationParticipant> participants;
+    private final List<NotificationParticipant> resources;
+
+    public NotificationMail(Event event, List<Attendee> participants, List<Attendee> resources) {
+        super();
+        this.event = event;
+        this.participants = getParticipants(participants);
+        this.resources = getParticipants(resources);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
+    public Event getEvent() {
+        return event;
+    }
 
-        /*
-         * Initialize ContextSensitiveMessages
-         */
-        ContextSensitiveMessages.getInstance().initialize(this);
+    public List<NotificationParticipant> getParticipants() {
+        return participants;
+    }
+
+    public List<NotificationParticipant> getResources() {
+        return resources;
+    }
+
+    private static final List<NotificationParticipant> getParticipants(List<Attendee> attendees) {
+        if (null == attendees) {
+            return Collections.emptyList();
+        }
+        List<NotificationParticipant> participants = new ArrayList<NotificationParticipant>(attendees.size());
+        for (Attendee attendee : attendees) {
+            participants.add(new NotificationParticipant(attendee));
+        }
+        return participants;
     }
 
 }

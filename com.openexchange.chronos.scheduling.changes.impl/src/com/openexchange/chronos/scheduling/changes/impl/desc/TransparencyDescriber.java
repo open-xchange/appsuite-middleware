@@ -54,9 +54,9 @@ import java.util.List;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.ShownAsTransparency;
-import com.openexchange.chronos.scheduling.changes.impl.ArgumentType;
+import com.openexchange.chronos.itip.Messages;
+import com.openexchange.chronos.itip.generators.ArgumentType;
 import com.openexchange.chronos.scheduling.changes.impl.SentenceImpl;
-import com.openexchange.chronos.scheduling.common.Messages;
 
 /**
  * {@link TransparencyDescriber}
@@ -75,7 +75,7 @@ public class TransparencyDescriber extends AbstractChangeDescriber<Transp> {
 
     @Override
     public List<SentenceImpl> describe(Transp original, Transp updated) {
-        SentenceImpl sentence = new SentenceImpl(Messages.HAS_CHANGED_TRANSPARENCY).add(transpToString(updated), ArgumentType.SHOWN_AS, shown(updated));
+        SentenceImpl sentence = new SentenceImpl(Messages.HAS_CHANGED_SHOWN_AS).add(transpToString(updated), ArgumentType.SHOWN_AS, shown(updated));
         return Collections.singletonList(sentence);
     }
 

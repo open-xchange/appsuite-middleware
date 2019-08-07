@@ -205,6 +205,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (differ && message.getEvent() != null) {
             Event event = session.getUtilities().copyEvent(message.getEvent(), (EventField[]) null);
             event = handleMicrosoft(message, analysis, original, event);
+            event = restoreAttachments(original, event);
             ensureParticipant(original, event, session, owner);
             if (original != null) {
                 event.setFolderId(original.getFolderId());
