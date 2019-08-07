@@ -118,6 +118,8 @@ import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * @author d7
@@ -1861,21 +1863,22 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         throw new StorageException("Missing connection to ConfigDB"); // Keep IDE happy...
                     }
 
-                    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
-                    stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                    stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id ORDER BY num ASC");
                     rs = stmt.executeQuery();
                     if (false == rs.next()) {
                         throw new StorageException("No filestore found");
                     }
 
                     // Iterate candidates
+                    TIntSet alreadyVisited = new TIntHashSet();
                     boolean checkNext = true;
                     do {
                         // Create appropriate candidate instance
+                        int filestoreId = rs.getInt(1);
                         int maxNumberOfEntities = rs.getInt(2);
-                        if (maxNumberOfEntities > 0) {
+                        if (maxNumberOfEntities > 0 && alreadyVisited.add(filestoreId)) {
                             int numberOfContexts = rs.getInt(3); // In case NULL, then 0 (zero) is returned
-                            Candidate candidate = new Candidate(rs.getInt(1), maxNumberOfEntities, numberOfContexts, rs.getString(4), toMB(rs.getLong(5)));
+                            Candidate candidate = new Candidate(filestoreId, maxNumberOfEntities, numberOfContexts, rs.getString(4), toMB(rs.getLong(5)));
 
                             int entityCount = candidate.numberOfEntities;
 
@@ -1963,8 +1966,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Load potential candidates
             List<Candidate> candidates = new LinkedList<>();
             {
-                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
-                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id GROUP BY filestore.id ORDER BY num ASC");
+                stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, contexts_per_filestore.count AS num, filestore.uri, filestore.size FROM filestore LEFT JOIN contexts_per_filestore ON filestore.id=contexts_per_filestore.filestore_id ORDER BY num ASC");
                 rs = stmt.executeQuery();
 
                 if (!rs.next()) {
@@ -1972,11 +1974,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     throw new StorageException("No filestore found");
                 }
 
+                TIntSet alreadyVisited = new TIntHashSet();
                 do {
+                    int filestoreId = rs.getInt(1);
                     int maxNumberOfContexts = rs.getInt(2);
-                    if (maxNumberOfContexts > 0) {
+                    if (maxNumberOfContexts > 0 && alreadyVisited.add(filestoreId)) {
                         int numberOfEntities = rs.getInt(3); // In case NULL, then 0 (zero) is returned
-                        candidates.add(new Candidate(rs.getInt(1), maxNumberOfContexts, numberOfEntities, rs.getString(4), toMB(rs.getLong(5))));
+                        candidates.add(new Candidate(filestoreId, maxNumberOfContexts, numberOfEntities, rs.getString(4), toMB(rs.getLong(5))));
                     }
                 } while (rs.next());
 
