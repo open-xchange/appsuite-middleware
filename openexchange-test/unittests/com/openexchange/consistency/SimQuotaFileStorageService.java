@@ -98,18 +98,6 @@ public class SimQuotaFileStorageService implements QuotaFileStorageService {
     }
 
     @Override
-    public void invalidateCacheFor(int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void invalidateCacheFor(int userId, int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
     public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
         return false;
     }
