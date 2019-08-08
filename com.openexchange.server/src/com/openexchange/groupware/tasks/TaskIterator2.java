@@ -297,21 +297,11 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
 
     @Override
     public void run() {
-        final Connection myCon;
-        if (null == con) {
-            try {
-                myCon = DBPool.pickup(ctx);
-            } catch (final OXException e) {
-                preread.finished();
-                exc = TaskExceptionCode.NO_CONNECTION.create(e);
-                return;
-            }
-        } else {
-            myCon = this.con;
-        }
+        Connection myCon = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            myCon = null == con ? DBPool.pickup(ctx) : this.con;
             stmt = myCon.prepareStatement(sql);
             setter.perform(stmt);
             result = stmt.executeQuery();
@@ -335,6 +325,8 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                     preread.offer(task);
                 }
             }
+        } catch (final OXException e) {
+            exc = TaskExceptionCode.NO_CONNECTION.create(e);
         } catch (final SQLException e) {
             exc = TaskExceptionCode.SQL_ERROR.create(e);
         } catch (final Throwable t) {
