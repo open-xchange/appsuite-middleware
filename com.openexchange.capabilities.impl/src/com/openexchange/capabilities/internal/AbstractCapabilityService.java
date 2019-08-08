@@ -286,7 +286,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
     }
 
-    // TODO: Remove capability for MW-1125?
     private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
 
     @Override
