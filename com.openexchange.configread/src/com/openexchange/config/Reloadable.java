@@ -56,7 +56,14 @@ package com.openexchange.config;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc
  * @since 7.6.0
  */
-public interface Reloadable extends ConfigurationInterestAware {
+public interface Reloadable {
+
+    /**
+     * Gets the interests in property names and/or configuration files.
+     *
+     * @return The interests
+     */
+    Interests getInterests();
 
     /**
      * Signals that the configuration has been reloaded.

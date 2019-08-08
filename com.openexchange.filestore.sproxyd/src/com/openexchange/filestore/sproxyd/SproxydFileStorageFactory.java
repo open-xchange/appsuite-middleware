@@ -63,13 +63,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
-import com.openexchange.config.ConfigurationInterestAware;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.ConfigurationInterestAware;
 import com.openexchange.filestore.DatabaseAccess;
 import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorage;
@@ -103,8 +103,6 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Configura
      * The URI scheme identifying sproxyd file storages.
      */
     private static final String SPROXYD_SCHEME = "sproxyd";
-    
-    private static final String CONFIG_FILENAME = "filestore-sproxyd.properties";
 
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
@@ -127,6 +125,10 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Configura
         this.sproxydConfigs = new ConcurrentHashMap<String, SproxydConfig>();
     }
 
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties("com.openexchange.filestore.sproxyd.*");
+    }
 
     @Override
     public SproxydFileStorage getFileStorage(URI uri) throws OXException {
@@ -380,8 +382,4 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Configura
         return authority;
     }
 
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForFiles(CONFIG_FILENAME);
-    }
 }

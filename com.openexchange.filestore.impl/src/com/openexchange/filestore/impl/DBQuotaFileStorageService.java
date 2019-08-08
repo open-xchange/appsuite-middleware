@@ -177,17 +177,20 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         }
 
         // Generate full URI
-        URI uri;
-        URI baseUri = filestore.getUri();
-        try {
-            String scheme = baseUri.getScheme();
-            uri = new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + storageInfo.getName(), baseUri.getQuery(), baseUri.getFragment());
-        } catch (URISyntaxException e) {
-            throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + storageInfo.getName());
-        }
+        URI uri = generateFullUri(filestore, storageInfo.getName());
 
         // Create appropriate file storage instance
         return new DBQuotaFileStorage(contextId, info, storageInfo.getOwnerInfo(), storageInfo.getQuota(), fileStorageService.getFileStorage(uri), uri, storageListeners, quotaListeners, unifiedQuotaServices);
+    }
+
+    private URI generateFullUri(Filestore filestore, String name) throws OXException {
+        URI baseUri = filestore.getUri();
+        try {
+            String scheme = baseUri.getScheme();
+            return new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + name, baseUri.getQuery(), baseUri.getFragment());
+        } catch (URISyntaxException e) {
+            throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + name);
+        }
     }
 
     private void invalidate(int userId, int contextId) throws OXException {

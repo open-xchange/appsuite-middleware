@@ -47,12 +47,16 @@
  *
  */
 
-package com.openexchange.config;
+package com.openexchange.filestore;
+
+import com.openexchange.config.Interests;
 
 /**
- * {@link ConfigurationInterestAware}
+ * {@link ConfigurationInterestAware} - Possibly implemented by a {@link FileStorageProvider} to announce certain interests in configuration
+ * properties that require re-initialization if changed.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
 public interface ConfigurationInterestAware {

@@ -72,13 +72,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationInterestAware;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.ConfigurationInterestAware;
 import com.openexchange.filestore.DatabaseAccess;
 import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorage;
@@ -122,8 +122,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider, Configurati
      */
     private static final String SWIFT_SCHEME = "swift";
 
-    private static final String CONFIG_FILENAME = "filestore-swift.properties";
-
     /**
      * The file storage's ranking compared to other sharing the same URL scheme.
      */
@@ -147,6 +145,11 @@ public class SwiftFileStorageFactory implements FileStorageProvider, Configurati
         this.storages = new ConcurrentHashMap<URI, Future<SwiftFileStorage>>();
         this.swiftConfigs = new ConcurrentHashMap<String, SwiftConfig>();
         tokenStorage = new TokenStorageImpl(services);
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("com.openexchange.filestore.swift.*");
     }
 
     @Override
@@ -498,11 +501,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider, Configurati
             throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
         }
         return authority;
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForFiles(CONFIG_FILENAME);
     }
 
 }

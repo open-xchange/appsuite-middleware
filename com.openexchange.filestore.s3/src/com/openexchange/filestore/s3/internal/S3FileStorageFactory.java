@@ -95,12 +95,12 @@ import com.amazonaws.services.s3.model.Region;
 import com.amazonaws.services.s3.model.SetBucketPolicyRequest;
 import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
 import com.openexchange.config.ConfigTools;
-import com.openexchange.config.ConfigurationInterestAware;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.ConfigurationInterestAware;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.java.Streams;
@@ -140,11 +140,6 @@ public class S3FileStorageFactory implements FileStorageProvider, ConfigurationI
      */
     private static final int RANKING = 5634;
 
-    /**
-     * The configuration filename of interest
-     */
-    private static final String CONFIG_FILENAME = "filestore-s3.properties";
-
     private final ServiceLookup services;
 
     /**
@@ -159,7 +154,7 @@ public class S3FileStorageFactory implements FileStorageProvider, ConfigurationI
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForFiles(CONFIG_FILENAME);
+        return Reloadables.interestsForProperties("com.openexchange.filestore.s3.*");
     }
 
     @Override

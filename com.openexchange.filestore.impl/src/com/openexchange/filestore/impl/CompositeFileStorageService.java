@@ -64,14 +64,15 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.openexchange.config.ConfigurationInterestAware;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.ConfigurationInterestAware;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
@@ -85,12 +86,15 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class CompositeFileStorageService implements FileStorageService, ServiceTrackerCustomizer<FileStorageProvider, FileStorageProvider> {
 
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositeFileStorageService.class);
+
     /** The list of known providers */
     private final List<FileStorageProvider> providers = new CopyOnWriteArrayList<FileStorageProvider>();
 
     /** The bundle context */
     private final BundleContext bundleContext;
-    
+
     private final Map<Long, ServiceRegistration<Reloadable>> reloadableRegistrations;
 
     /** The cache holding initialized storages for previously requested file storage URIs */
@@ -98,7 +102,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
 
     /**
      * Initializes a new {@link CompositeFileStorageService}.
-     * 
+     *
      * @param bundleContext A reference to the bundle context
      */
     public CompositeFileStorageService(BundleContext bundleContext) {
@@ -108,15 +112,15 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         this.storageCache = CacheBuilder.newBuilder()
             .maximumSize(50000)
             .expireAfterAccess(2, TimeUnit.HOURS)
-        .build(new CacheLoader<URI, FileStorage>() {
+            .build(new CacheLoader<URI, FileStorage>() {
 
-            @Override
-            public FileStorage load(URI key) throws Exception {
-                return initFileStorage(key);
-            }
-        });
+                @Override
+                public FileStorage load(URI key) throws Exception {
+                    return initFileStorage(key);
+                }
+            });
     }
-    
+
     @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
         try {
@@ -150,7 +154,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         return Integer.MAX_VALUE;
     }
 
-    private FileStorage initFileStorage(URI uri) throws OXException {
+    FileStorage initFileStorage(URI uri) throws OXException {
         /*
          * Lookup suitable provider with highest ranking
          */
@@ -188,6 +192,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
          */
         if (ConfigurationInterestAware.class.isInstance(provider)) {
             Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+            LoadingCache<URI, FileStorage> storageCache = this.storageCache;
             reloadableRegistrations.put(serviceId, bundleContext.registerService(Reloadable.class, new Reloadable() {
 
                 @Override
@@ -201,7 +206,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
                      * invalidate any cached storages upon configuration changes
                      */
                     storageCache.invalidateAll();
-                    org.slf4j.LoggerFactory.getLogger(CompositeFileStorageService.class).info("Cached file storages invalidated successfully.");
+                    LOG.info("Cached file storages invalidated successfully.");
                 }
             }, null));
         }
