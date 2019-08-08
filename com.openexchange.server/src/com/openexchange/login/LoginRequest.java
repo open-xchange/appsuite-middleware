@@ -141,6 +141,11 @@ public interface LoginRequest {
     
     boolean isStoreLocale();
 
+    /**
+     * Gets the value of 'staySignedIn' parameter
+     *
+     * @return <code>true</code> if parameter was set, <code>false</code> if not
+     */
     boolean isStaySignedIn();
 
 }

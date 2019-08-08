@@ -421,6 +421,13 @@ public final class LoginTools {
         return allowedRedirectUris.isEmpty() ? defaultValue : allowedRedirectUris.isAllowed(referrerUri);
     }
 
+    /**
+     * Parses staySignedIn parameter from login request
+     *
+     * @param req The request
+     * @return <code>true</code> if 'staySignedIn' parameter was set in login request,
+     *         <code>false</code> if not
+     */
     public static boolean parseStaySignedIn(HttpServletRequest req) {
         String staySignedIn = req.getParameter(LoginFields.STAY_SIGNED_IN);
         if (Strings.isNotEmpty(staySignedIn)) {

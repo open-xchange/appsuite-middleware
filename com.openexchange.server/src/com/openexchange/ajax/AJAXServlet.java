@@ -228,6 +228,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_LOGIN = "login";
 
+    /**
+     * @deprecated
+     * Since v7.10.3, not needed anymore. Use 'staySignedIn' parameter instead during login
+     */
     @Deprecated
     public static final String ACTION_STORE = "store";
 

@@ -323,6 +323,7 @@ public class LoginServlet extends AJAXServlet {
             @Override
             public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 LOG.debug("Deprecated action 'store' called by {}.", req.getParameter(PARAMETER_SESSION));
+                resp.setHeader("Deprecation", "version:7.10.3");
                 resp.setStatus(200);
                 resp.flushBuffer();
             }
@@ -1034,6 +1035,7 @@ public class LoginServlet extends AJAXServlet {
      * @param secure <code>true</code> to enforce the cookie's <code>secure</code>-flag, <code>false</code> to set the flag based on configuration
      * @param serverName The server name as extracted from the request
      * @param conf the login configuration
+     * @param staySignedIn <code>true</code> to persist cookie, <code>false</code> to delete cookie when web browser is closed
      * @return The cookie
      */
     public static Cookie configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf, boolean staySignedIn) {
@@ -1062,6 +1064,7 @@ public class LoginServlet extends AJAXServlet {
      * @param cookie The cookie to configure
      * @param request The underlying servlet request
      * @param loginConfig the login configuration
+     * @param staySignedIn <code>true</code> to persist cookie, <code>false</code> to delete cookie when web browser is closed
      * @return The cookie
      */
     public static Cookie configureCookie(Cookie cookie, HttpServletRequest request, LoginConfiguration loginConfig, boolean staySignedIn) {
