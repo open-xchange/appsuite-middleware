@@ -203,10 +203,10 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
      */
     private Event ensureAttendees(Event original, Event update) throws OXException {
         Event event = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
-        event = EventMapper.getInstance().copy(update, event, EventField.RECURRENCE_ID);
+        event = EventMapper.getInstance().copy(update, event, EventField.RECURRENCE_ID, EventField.START_DATE, EventField.END_DATE);
         event.removeId();
         event.removeSeriesId();
-        
+
         Attendee reply = getReply(update);
 
         List<Attendee> attendees = new LinkedList<>();
