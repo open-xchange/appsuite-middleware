@@ -1,3 +1,9 @@
+open-xchange-passwordchange-script (7.10.0-33) stable; urgency=medium
+
+  * Build for patch 2019-08-05 (5351)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 30 Jul 2019 13:28:26 +0200
+
 open-xchange-passwordchange-script (7.10.0-32) stable; urgency=medium
 
   * Build for patch 2019-07-09 (5303)

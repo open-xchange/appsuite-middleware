@@ -1,3 +1,9 @@
+open-xchange-oauth (7.10.0-33) stable; urgency=medium
+
+  * Build for patch 2019-08-05 (5351)
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 30 Jul 2019 13:27:53 +0200
+
 open-xchange-oauth (7.10.0-32) stable; urgency=medium
 
   * Build for patch 2019-07-09 (5303)
