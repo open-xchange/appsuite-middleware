@@ -48,6 +48,8 @@ If no OIDC cookie exists, the standard login procedure is triggered.
 ## Logout with redirect to OP and termination of session
 ![Logout via OP](openid_connect_1.0_sso/Logout via OP.png "Logout via OP")
 
+To enable the logout with previous termination of the OP session, the `com.openexchange.oidc.ssoLogout` property has to be set to `true`. Additionaly the `com.openexchange.oidc.rpRedirectURIPostSSOLogout` property has to be configured to redirect the user to the logout mechanism that handles the response on App Suite site. This location has to be registered and known for the client, otherwise the logout request will not be handled. Finally, property `com.openexchange.oidc.rpRedirectURILogout` holds the location, where the user should be redirected after a succesful logout, a custom goodbye page, for example.
+
 If an error occurs during the logout process, like an invalid response from the OP, the RP session is terminated anyways. Additionally there is an example implementation of the verification dialog in the `examples/backend-samples` repository which should work with a connect2ID OpenID server. 
 The according project is `com.openexchange.sample.c2id-logout-page-jsp`. The example is called with the following parameters:
 
@@ -64,6 +66,8 @@ The according project is `com.openexchange.sample.c2id-logout-page-jsp`. The exa
 
 ## Direct Logout from Appsuite
 ![Logout direct](openid_connect_1.0_sso/Logout direct.png "Logout direct")
+
+The direct logout without termination of the OP session is enabled by default, the property is `com.openexchange.oidc.ssoLogout` which is set to `false`.
 
 # Developers Guide
 There are three relevant bundles, the `com.openexchange.oidc` bundle, which contains all relevant interfaces. The default implementation, contained in the `com.openexchange.oidc.impl` bundle, which uses the Nimbus SDK
