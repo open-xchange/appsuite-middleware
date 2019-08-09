@@ -153,9 +153,7 @@ public enum OIDCBackendProperty implements Property {
      * failureRedirect - Defines where a user should be redirected if an error occurs that
      * does not need a special handling.
      */
-    failureRedirect(OIDCProperty.PREFIX, ""),
-
-    proxyName(OIDCProperty.PREFIX, OIDCProperty.EMPTY);
+    failureRedirect(OIDCProperty.PREFIX, "");
 
     private final String fqn;
     private final Object defaultValue;

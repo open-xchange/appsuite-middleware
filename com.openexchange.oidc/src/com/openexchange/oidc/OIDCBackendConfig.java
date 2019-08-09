@@ -268,5 +268,4 @@ public interface OIDCBackendConfig {
      */
     String getFailureRedirect();
 
-    String getProxyName();
 }

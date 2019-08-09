@@ -347,10 +347,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             authInfo.setProperty(OIDCTools.ACCESS_TOKEN_EXPIRY, String.valueOf(expiryDate));
         }
 
-        String domainName = this.backend.getBackendConfig().getProxyName();
-        if (Strings.isEmpty(domainName)) {
-            domainName = storedRequestInformation != null ? storedRequestInformation.getDomainName() : request.getRemoteHost();
-        }
+        String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
 
         String sessionToken = sessionReservationService.reserveSessionFor(
             authInfo.getUserId(),
