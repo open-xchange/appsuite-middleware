@@ -219,13 +219,14 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
          * register reloadable callback for this provider's interests if applicable
          */
         if (InterestsAware.class.isInstance(provider)) {
+            InterestsAware interestsAware = (InterestsAware) provider;
             Long serviceId = (Long) reference.getProperty(SERVICE_ID);
             LoadingCache<URI, FileStorage> storageCache = this.storageCache;
             reloadableRegistrations.put(serviceId, bundleContext.registerService(Reloadable.class, new Reloadable() {
 
                 @Override
                 public Interests getInterests() {
-                    return ((InterestsAware) provider).getInterests();
+                    return interestsAware.getInterests();
                 }
 
                 @Override
