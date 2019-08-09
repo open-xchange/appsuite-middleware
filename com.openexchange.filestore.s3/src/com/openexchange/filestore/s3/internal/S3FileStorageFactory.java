@@ -100,8 +100,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.ConfigurationInterestAware;
-import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -112,7 +111,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class S3FileStorageFactory implements FileStorageProvider, ConfigurationInterestAware {
+public class S3FileStorageFactory implements FileStorageProvider, InterestsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(S3FileStorageFactory.class);
 
@@ -190,11 +189,6 @@ public class S3FileStorageFactory implements FileStorageProvider, ConfigurationI
 
             throw ex;
         }
-    }
-
-    @Override
-    public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        return getFileStorage(uri);
     }
 
     @Override

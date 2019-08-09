@@ -78,10 +78,9 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.ConfigurationInterestAware;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.DatabaseAccess;
 import com.openexchange.filestore.DatabaseAccessService;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageInfo;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageProvider;
@@ -112,7 +111,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class SwiftFileStorageFactory implements FileStorageProvider, ConfigurationInterestAware {
+public class SwiftFileStorageFactory implements FileStorageProvider, InterestsAware {
 
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftFileStorageFactory.class);
@@ -225,11 +224,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider, Configurati
         }
 
         return databaseAccess;
-    }
-
-    @Override
-    public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        return getFileStorage(uri);
     }
 
     @Override

@@ -69,10 +69,9 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.ConfigurationInterestAware;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.DatabaseAccess;
 import com.openexchange.filestore.DatabaseAccessService;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageInfo;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageProvider;
@@ -95,7 +94,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SproxydFileStorageFactory implements FileStorageProvider, ConfigurationInterestAware {
+public class SproxydFileStorageFactory implements FileStorageProvider, InterestsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydFileStorageFactory.class);
 
@@ -183,11 +182,6 @@ public class SproxydFileStorageFactory implements FileStorageProvider, Configura
         }
 
         return databaseAccess;
-    }
-
-    @Override
-    public FileStorage getInternalFileStorage(URI uri) throws OXException {
-        return getFileStorage(uri);
     }
 
     @Override

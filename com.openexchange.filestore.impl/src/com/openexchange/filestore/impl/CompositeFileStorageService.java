@@ -72,7 +72,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.ConfigurationInterestAware;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
@@ -115,10 +115,36 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
             .build(new CacheLoader<URI, FileStorage>() {
 
                 @Override
-                public FileStorage load(URI key) throws Exception {
-                    return initFileStorage(key);
+                public FileStorage load(URI uri) throws Exception {
+                    return initFileStorage(uri);
                 }
             });
+    }
+
+    /**
+     * Initializes the appropriate file storage for specified URI; e.g. <code>"file:///var/files/1234_ctx_store"</code>.
+     *
+     * @param uri The URI
+     * @return The URI-associated file storage
+     * @throws OXException If file storage cannot be returned
+     */
+    FileStorage initFileStorage(URI uri) throws OXException {
+        /*
+         * Lookup suitable provider with highest ranking
+         */
+        FileStorageProvider candidate = null;
+        for (FileStorageProvider provider : providers) {
+            if (provider.supports(uri) && (null == candidate || provider.getRanking() > candidate.getRanking())) {
+                candidate = provider;
+            }
+        }
+        if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
+            return new CloseableTrackingFileStorage(candidate.getFileStorage(uri));
+        }
+        /*
+         * Fall back to default implementation
+         */
+        return new CloseableTrackingFileStorage(getInternalFileStorage(uri));
     }
 
     @Override
@@ -130,7 +156,15 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         }
     }
 
-    @Override
+    /**
+     * Gets the internal (if any) file storage.
+     * <p>
+     * If there is no internal representation, this method does the same as {@link #getFileStorage(URI)}.
+     *
+     * @param uri The URI to create the file storage from
+     * @return The internal file storage
+     * @throws OXException If storage cannot be returned
+     */
     public FileStorage getInternalFileStorage(URI uri) throws OXException {
         if (null == uri) {
             return null;
@@ -154,26 +188,16 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         return Integer.MAX_VALUE;
     }
 
-    FileStorage initFileStorage(URI uri) throws OXException {
-        /*
-         * Lookup suitable provider with highest ranking
-         */
-        FileStorageProvider candidate = null;
-        for (FileStorageProvider provider : providers) {
-            if (provider.supports(uri) && (null == candidate || provider.getRanking() > candidate.getRanking())) {
-                candidate = provider;
-            }
-        }
-        if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
-            return new CloseableTrackingFileStorage(candidate.getFileStorage(uri));
-        }
-        /*
-         * Fall back to default implementation
-         */
-        return new CloseableTrackingFileStorage(getInternalFileStorage(uri));
-    }
-
     // ---------------------------------------- ServiceTracker methods --------------------------------------------------
+
+    /**
+     * Service property identifying a service's registration number. The value of this property must be of type {@code Long}.
+     * <p>
+     * The value of this property is assigned by the Framework when a service is registered. The Framework assigns a unique, non-negative
+     * value that is larger than all previously assigned values since the Framework was started. These values are <b>NOT</b> persistent
+     * across restarts of the Framework.
+     */
+    private static final String SERVICE_ID = Constants.SERVICE_ID;
 
     @Override
     public synchronized FileStorageProvider addingService(ServiceReference<FileStorageProvider> reference) {
@@ -186,18 +210,22 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
             bundleContext.ungetService(reference);
             return null;
         }
-        providers.add(provider);
+        if (!providers.add(provider)) {
+            // Adding to list failed
+            bundleContext.ungetService(reference);
+            return null;
+        }
         /*
          * register reloadable callback for this provider's interests if applicable
          */
-        if (ConfigurationInterestAware.class.isInstance(provider)) {
-            Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+        if (InterestsAware.class.isInstance(provider)) {
+            Long serviceId = (Long) reference.getProperty(SERVICE_ID);
             LoadingCache<URI, FileStorage> storageCache = this.storageCache;
             reloadableRegistrations.put(serviceId, bundleContext.registerService(Reloadable.class, new Reloadable() {
 
                 @Override
                 public Interests getInterests() {
-                    return ((ConfigurationInterestAware) provider).getInterests();
+                    return ((InterestsAware) provider).getInterests();
                 }
 
                 @Override
@@ -224,8 +252,9 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
          * remove previously remembered provider & unregister appropriate reloadable callback if applicable
          */
         if (providers.remove(provider)) {
+            storageCache.invalidateAll();
             bundleContext.ungetService(reference);
-            Long serviceId = (Long) reference.getProperty(Constants.SERVICE_ID);
+            Long serviceId = (Long) reference.getProperty(SERVICE_ID);
             ServiceRegistration<Reloadable> reloadableRegistration = reloadableRegistrations.remove(serviceId);
             if (null != reloadableRegistration) {
                 reloadableRegistration.unregister();
