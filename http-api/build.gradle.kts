@@ -26,16 +26,9 @@ tasks.register("buildJars"){
 
 
 tasks.register("copyClients", Copy::class){
-
-    val target = Paths.get(project.findProperty("target").toString())
     from("client-gen/out/http_api_client/build/libs/")
     from("client-gen/out/rest_api_client/build/libs/")
-
-    if(Files.exists(target)){
-        into(target)
-    } else {
-        println("Could not find directory!")
-    }
+    into("../openexchange-test/lib")
 }
 
 allprojects {
@@ -88,4 +81,26 @@ configure(subprojects.filter { it.name == "http_api" || it.name == "rest_api" ||
             args(arguments)
         }
     }
+
+    tasks.register("buildHtml", JavaExec::class.java) {
+        val arguments = mutableListOf(
+            "../" + this.project.name,
+            "../../documentation-generic/${this.project.name}",
+            "openApi.json"
+        )
+
+        classpath = rootProject.configurations.getByName("openapiTools")
+        main = "src.com.openexchange.processor.generator.Main"
+        args(arguments)
+        
+    }
+
+
+    tasks.register("insertMarkdown", Exec::class) {
+        dependsOn("buildHtml")
+
+        workingDir("../../documentation-generic/${this.project.name}")
+        commandLine("./insertExtendedMarkdownDocu.sh")
+    }
+
 }

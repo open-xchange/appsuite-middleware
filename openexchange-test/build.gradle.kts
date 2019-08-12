@@ -18,7 +18,6 @@ dependencies {
     driveClient("com.openexchange.appsuite.mw", "rest_api_client", "1.+"){
         isTransitive = false
     }
-    //httpClient(files("../http-api/client-gen/out/http_api_client/build/libs/http_api_client-1.0-SNAPSHOT.jar"))
 }
 
 tasks.register("loadClients", Copy::class){
