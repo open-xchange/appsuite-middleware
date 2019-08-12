@@ -51,6 +51,7 @@ package com.openexchange.mail.compose.impl.security;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,9 +72,9 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -171,7 +172,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
     }
 
     Key loadOrCreateKeyfor(UUID compositionSpaceId, boolean createIfAbsent, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
+        FileStorage fileStorage = getFileStorage(session);
 
         String fileStorageLocation = loadFileStorageLocation(compositionSpaceId, session);
         if (null != fileStorageLocation) {
@@ -196,7 +197,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
         Key newRandomKey = generateRandomKey();
         String newObfuscatedBase64EncodedKey = obfuscate(key2Base64EncodedString(newRandomKey));
         byte[] bytes = Charsets.toAsciiBytes(newObfuscatedBase64EncodedKey);
-        String newFileStorageLocation = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes), bytes.length);
+        String newFileStorageLocation = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
         try {
             insertFileStorageLocation(newFileStorageLocation, compositionSpaceId, session);
             newFileStorageLocation = null;
@@ -210,7 +211,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
 
     @Override
     public List<UUID> deleteKeysFor(Collection<UUID> compositionSpaceIds, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
+        FileStorage fileStorage = getFileStorage(session);
 
         List<UUID> nonDeletedKeys = null;
         for (UUID compositionSpaceId : compositionSpaceIds) {
@@ -356,7 +357,7 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    private static QuotaFileStorage getFileStorage(Session session) throws OXException {
+    private static FileStorage getFileStorage(Session session) throws OXException {
         return getFileStorage(session.getContextId());
     }
 
@@ -367,12 +368,19 @@ public class FileStorageCompositionSpaceKeyStorage extends AbstractCompositionSp
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    private static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
-        if (null == storageService) {
+    private static FileStorage getFileStorage(int contextId) throws OXException {
+        FileStorageService fileStorageService = FileStorages.getFileStorageService();
+        if (null == fileStorageService) {
+            throw ServiceExceptionCode.absentService(FileStorageService.class);
+        }
+
+        QuotaFileStorageService quotaFileStorageService = FileStorages.getQuotaFileStorageService();
+        if (null == quotaFileStorageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
-        return storageService.getQuotaFileStorage(contextId, Info.general());
+
+        URI uri = quotaFileStorageService.getQuotaFileStorage(contextId, Info.general()).getUri();
+        return fileStorageService.getFileStorage(uri);
     }
 
 }

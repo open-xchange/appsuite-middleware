@@ -85,6 +85,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected DateTime next;
     protected int count;
     protected int position;
+    protected int nextPosition;
     protected RecurrenceSetIterator inner;
     protected final long[] exceptionDates;
 
@@ -134,7 +135,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         } else {
             inner = recurrenceData != null ? RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence) : null;
             next = null;
-            position = 0;
+            nextPosition = 0;
             count = 0;
             init();
         }
@@ -145,17 +146,16 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             while (_hasNext()) {
                 long candidate = inner.next();
                 if (isException(candidate)) {
-                    position++;
+                    nextPosition++;
                     continue;
                 }
                 if (start != null && candidate + eventDuration > start.getTimeInMillis() ||
                     start != null && 0L == eventDuration && candidate == start.getTimeInMillis() ||
-                    startPosition != null && position + 1 >= startPosition.intValue()) {
+                    startPosition != null && nextPosition + 1 >= startPosition.intValue()) {
                     lookAhead = Long.valueOf(candidate);
                     break;
-                } else {
-                    position++;
                 }
+                nextPosition++;
             }
         }
 
@@ -177,6 +177,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
             throw new NoSuchElementException();
         }
 
+        position = nextPosition;
         T retval = nextInstance();
         innerNext();
         return retval;
@@ -208,7 +209,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
 
         while (isException(lookAhead.longValue())) {
             ChronosLogger.debug("Next instance is exception.");
-            position++;
+            nextPosition++;
             if (_hasNext()) {
                 lookAhead = Long.valueOf(inner.next());
             } else {
@@ -226,7 +227,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         next = toDateTime(lookAhead.longValue());
         lookAhead = null;
         count++;
-        position++;
+        nextPosition++;
     }
 
     @Override
@@ -236,7 +237,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
 
     @Override
     public int getPosition() {
-        return null == next ? position : position - 1;
+        return position;
     }
 
     @Override

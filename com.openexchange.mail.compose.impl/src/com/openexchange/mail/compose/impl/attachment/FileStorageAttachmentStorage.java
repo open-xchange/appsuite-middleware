@@ -50,10 +50,12 @@
 package com.openexchange.mail.compose.impl.attachment;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -98,13 +100,13 @@ public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
 
     @Override
     protected String saveData(InputStream input, long size, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
-        return fileStorage.saveNewFile(input, size);
+        FileStorage fileStorage = getFileStorage(session);
+        return fileStorage.saveNewFile(input);
     }
 
     @Override
     protected boolean deleteData(String storageIdentifier, Session session) throws OXException {
-        QuotaFileStorage fileStorage = getFileStorage(session);
+        FileStorage fileStorage = getFileStorage(session);
         return fileStorage.deleteFile(storageIdentifier);
     }
 
@@ -115,7 +117,7 @@ public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    protected static QuotaFileStorage getFileStorage(Session session) throws OXException {
+    protected static FileStorage getFileStorage(Session session) throws OXException {
         return getFileStorage(session.getContextId());
     }
 
@@ -126,12 +128,19 @@ public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
      * @return The file storage
      * @throws OXException If file storage cannot be returned
      */
-    protected static QuotaFileStorage getFileStorage(int contextId) throws OXException {
-        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
-        if (null == storageService) {
+    protected static FileStorage getFileStorage(int contextId) throws OXException {
+        FileStorageService fileStorageService = FileStorages.getFileStorageService();
+        if (null == fileStorageService) {
+            throw ServiceExceptionCode.absentService(FileStorageService.class);
+        }
+
+        QuotaFileStorageService quotaFileStorageService = FileStorages.getQuotaFileStorageService();
+        if (null == quotaFileStorageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
-        return storageService.getQuotaFileStorage(contextId, Info.general());
+
+        URI uri = quotaFileStorageService.getQuotaFileStorage(contextId, Info.general()).getUri();
+        return fileStorageService.getFileStorage(uri);
     }
 
     /**
@@ -164,13 +173,13 @@ public class FileStorageAttachmentStorage extends AbstractAttachmentStorage {
 
         @Override
         public InputStream getData() throws OXException {
-            QuotaFileStorage fileStorage = getFileStorage(session);
+            FileStorage fileStorage = getFileStorage(session);
             return fileStorage.getFile(storageIdentifier);
         }
 
         @Override
         public InputStream getData(long offset, long length) throws OXException {
-            QuotaFileStorage fileStorage = getFileStorage(session);
+            FileStorage fileStorage = getFileStorage(session);
             return fileStorage.getFile(storageIdentifier, offset, length);
         }
     }

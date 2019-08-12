@@ -181,16 +181,9 @@ public class ITipChange {
             TimeZone timeZone = newEvent.getRecurrenceId().getValue().getTimeZone();
             Calendar recurrenceId = GregorianCalendar.getInstance(null == timeZone ? TimeZone.getTimeZone("UTC") : timeZone);
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
-            int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
-            if (position > 0) {
-                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), CalendarUtils.asDate(newEvent.getEndDate()));
-                while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
-                    Event event = recurrenceIterator.next();
-                    if (position == recurrenceIterator.getPosition()) {
-                        diff = new ITipEventUpdate(event, newEvent, true, AbstractITipAnalyzer.SKIP);
-                        return;
-                    }
-                }
+            Event occurrence = CalendarUtils.getOccurrence(recurrenceService, master, newEvent.getRecurrenceId());
+            if(null != occurrence) {
+                diff = new ITipEventUpdate(occurrence, newEvent, true, AbstractITipAnalyzer.SKIP);
             }
         }
     }
