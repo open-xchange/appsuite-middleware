@@ -62,7 +62,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
@@ -140,7 +139,7 @@ final class SessionData {
         }
         longTermList = new RotatableCopyOnWriteArrayList<SessionMap>(longTermInit);
     }
-    
+
     void clear() {
         sessionList.clear();
         randoms.clear();
@@ -153,33 +152,41 @@ final class SessionData {
      *
      * @return The removed sessions
      */
-    List<SessionControl> rotateShort() {
+    RotateShortResult rotateShort() {
         // This is the only location which alters 'sessionList' during runtime
-        List<SessionControl> removedSessions = new ArrayList<SessionControl>(sessionList.rotate(new SessionContainer()).getSessionControls());
-        if (false == removedSessions.isEmpty()) {
+        List<SessionControl> movedToLongTerm = null;
+        List<SessionControl> removed = null;
+        Collection<SessionControl> droppedSessions = sessionList.rotate(new SessionContainer()).getSessionControls();
+        if (false == droppedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
 
             try {
                 SessionMap first = longTermList.get(0);
-                for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
-                    final SessionControl control = it.next();
-                    final SessionImpl session = control.getSession();
-                    if (false == session.isTransient()) {
-                        if (Sessions.isStaySignedIn(session)) {
-                            // A regular, non-transient session
-                            first.putBySessionId(session.getSessionID(), control);
-                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
-                        } else {
-                            // User did not choose to stay signed in, let session time out
-                            continue;
-                        }
-                    } else {
+                for (SessionControl control : droppedSessions) {
+                    SessionImpl session = control.getSession();
+                    if (session.isTransient()) {
                         // A transient session -- do not move to long-term container
-                        it.remove();
                         if (null == transientSessions) {
-                            transientSessions = new LinkedList<SessionControl>();
+                            transientSessions = new ArrayList<SessionControl>();
                         }
                         transientSessions.add(control);
+                    } else {
+                        // A (non-transient) regular session
+                        if (session.isStaySignedIn()) {
+                            // Has "stay signed in" flag
+                            first.putBySessionId(session.getSessionID(), control);
+                            longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                            if (movedToLongTerm == null) {
+                                movedToLongTerm = new ArrayList<SessionControl>();
+                            }
+                            movedToLongTerm.add(control);
+                        } else {
+                            // No "stay signed in" flag; let session time out
+                            if (removed == null) {
+                                removed = new ArrayList<SessionControl>();
+                            }
+                            removed.add(control);
+                        }
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -192,7 +199,7 @@ final class SessionData {
             }
         }
 
-        return removedSessions;
+        return new RotateShortResult(movedToLongTerm, removed);
     }
 
     List<SessionControl> rotateLongTerm() {
@@ -260,7 +267,7 @@ final class SessionData {
                 }
             }
         }
-        
+
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
@@ -937,7 +944,7 @@ final class SessionData {
 
     /**
      * Gets the number of sessions in the short term container
-     * 
+     *
      * @return The number of sessions in the short term container
      */
     public int getNumShortTerm() {
@@ -947,10 +954,10 @@ final class SessionData {
         }
         return result;
     }
-    
+
     /**
      * Gets the number of sessions in the long term container
-     * 
+     *
      * @return the number of sessions in the long term container
      */
     public int getNumLongTerm() {

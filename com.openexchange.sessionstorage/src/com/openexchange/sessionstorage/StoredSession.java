@@ -85,6 +85,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
     protected String client;
     protected String userLogin;
     protected Origin origin;
+    protected boolean staySignedIn;
     protected final ConcurrentMap<String, Object> parameters;
 
     /**
@@ -99,7 +100,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
      * Initializes a new {@link StoredSession}.
      */
     public StoredSession(String sessionId, String loginName, String password, int contextId, int userId, String secret, String login,
-        String randomToken, String localIP, String authId, String hash, String client, Origin origin, Map<String, Object> parameters) {
+        String randomToken, String localIP, String authId, String hash, String client, boolean staySignedIn, Origin origin, Map<String, Object> parameters) {
         this();
         this.sessionId = sessionId;
         this.loginName = loginName;
@@ -115,6 +116,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.client = client;
         this.userLogin = "";
         this.origin = origin;
+        this.staySignedIn = staySignedIn;
         // Take over parameters (if not null)
         if (parameters != null) {
             this.parameters.putAll(parameters);
@@ -146,6 +148,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
         this.sessionId = session.getSessionID();
         this.userId = session.getUserId();
         this.userLogin = session.getUserlogin();
+        this.staySignedIn = session.isStaySignedIn();
         this.origin = session.getOrigin();
     }
 
@@ -340,6 +343,11 @@ public class StoredSession implements PutIfAbsent, Serializable {
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    @Override
+    public boolean isStaySignedIn() {
+        return staySignedIn;
     }
 
     @Override

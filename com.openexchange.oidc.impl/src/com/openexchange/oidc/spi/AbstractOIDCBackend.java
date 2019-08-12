@@ -129,6 +129,7 @@ import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionDescription;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -593,8 +594,10 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
                 return new EnhancedAuthenticated(authenticated) {
 
                     @Override
-                    protected void doEnhanceSession(Session session) {
-                        LOG.trace("doEnhanceSession(Session session: {})", session.getSessionID());
+                    protected void doEnhanceSession(Session ses) {
+                        LOG.trace("doEnhanceSession(Session session: {})", ses.getSessionID());
+                        SessionDescription session = (SessionDescription) ses;
+                        session.setStaySignedIn(false);
                         if (oidcAutologinCookieValue != null) {
                             session.setParameter(OIDCTools.SESSION_COOKIE, oidcAutologinCookieValue);
                         }

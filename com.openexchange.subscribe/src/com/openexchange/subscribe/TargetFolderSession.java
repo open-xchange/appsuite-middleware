@@ -248,6 +248,11 @@ public class TargetFolderSession implements Session {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return null == session ? false : session.isStaySignedIn();
+    }
+
+    @Override
     public Origin getOrigin() {
         return null == session ? null : session.getOrigin();
     }

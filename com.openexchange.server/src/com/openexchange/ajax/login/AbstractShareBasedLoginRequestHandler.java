@@ -94,7 +94,6 @@ import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -429,7 +428,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 /*
                  * set cookies
                  */
-                boolean staySignedIn = Sessions.isStaySignedIn(session);
+                boolean staySignedIn = session.isStaySignedIn();
                 response.addCookie(configureCookie(new Cookie(expectedSecretCookieName, session.getSecret()), request, loginConfig, staySignedIn));
                 response.addCookie(configureCookie(new Cookie(getShareCookieName(request), guest.getBaseToken()), request, loginConfig, staySignedIn));
                 response.addCookie(configureCookie(new Cookie(expectedSessionCookieName, session.getSessionID()), request, loginConfig, staySignedIn));

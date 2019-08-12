@@ -161,6 +161,11 @@ public class Bug36228Test {
             }
 
             @Override
+            public boolean isStaySignedIn() {
+                return false;
+            }
+
+            @Override
             public String getUserLoginInfo() {
                 return u.getLoginInfo();
             }

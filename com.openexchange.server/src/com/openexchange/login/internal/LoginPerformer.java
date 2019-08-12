@@ -49,13 +49,13 @@
 
 package com.openexchange.login.internal;
 
-import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
@@ -299,22 +299,23 @@ public final class LoginPerformer {
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
 
-            // Perform multi-factor authentication if enabled for the user and mark session
-            SessionEnhancement multifactorSessionEnhancement = null;
-            {
-                MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
-                if (multifactorCheck != null) {
-                    multifactorSessionEnhancement = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
-                }
-            }
-
             // Compile parameters for adding a session
             AddSessionParameterImpl addSessionParam = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
+
+            // Add SessionEnhancement instance (if any)
             if (SessionEnhancement.class.isInstance(authed)) {
                 addSessionParam.addEnhancement((SessionEnhancement) authed);
             }
-            if (multifactorSessionEnhancement != null) {
-                addSessionParam.addEnhancement(multifactorSessionEnhancement);
+
+            // Perform multi-factor authentication if enabled for the user and mark session
+            {
+                MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
+                if (multifactorCheck != null) {
+                    Optional<SessionEnhancement> optionalEnhancement = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
+                    if (optionalEnhancement.isPresent()) {
+                        addSessionParam.addEnhancement(optionalEnhancement.get());
+                    }
+                }
             }
 
             // Finally, add the session
@@ -322,13 +323,6 @@ public final class LoginPerformer {
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-            }
-
-            // Check if Session.PARAM_STAY_SIGNED_IN was set before via SessionEnhancement
-            // set value from login request otherwise
-            if (null == session.getParameter(Session.PARAM_STAY_SIGNED_IN)) {
-                boolean staySignedIn = request.isStaySignedIn();
-                session.setParameter(Session.PARAM_STAY_SIGNED_IN, B(staySignedIn));
             }
 
             LogProperties.putSessionProperties(session);

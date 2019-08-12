@@ -253,6 +253,11 @@ public class SimServerSession implements ServerSession {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return false;
+    }
+
+    @Override
     public Set<String> getParameterNames() {
         return Collections.emptySet();
     }

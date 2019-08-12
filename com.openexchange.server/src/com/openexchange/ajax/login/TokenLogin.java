@@ -113,7 +113,7 @@ public final class TokenLogin implements LoginRequestHandler {
 
         Tools.disableCaching(resp);
 
-        String redirectURL = generateRedirectURL(LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true), session, user.getPreferredLanguage(), conf.getUiWebPath(), request.getHttpSessionID(), serverToken);
+        String redirectURL = generateRedirectURL(LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true), LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true), session, user.getPreferredLanguage(), conf.getUiWebPath(), request.getHttpSessionID(), serverToken);
         if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("jsonResponse"))) {
             // Client demands no redirect, but a JSON response
             JSONObject response = new JSONObject();
@@ -132,7 +132,7 @@ public final class TokenLogin implements LoginRequestHandler {
         }
     }
 
-    private static String generateRedirectURL(String uiWebPathParam, Session session, String language, String uiWebPath, String httpSessionId, String serverToken) {
+    private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath, String httpSessionId, String serverToken) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;

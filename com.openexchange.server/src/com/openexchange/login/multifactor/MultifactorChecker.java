@@ -49,6 +49,7 @@
 
 package com.openexchange.login.multifactor;
 
+import java.util.Optional;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -84,36 +85,36 @@ public class MultifactorChecker {
      * @param context The user's context
      * @param user The user
      */
-    public SessionEnhancement checkMultiFactorAuthentication(LoginRequest request, Context context, User user) {
+    public Optional<SessionEnhancement> checkMultiFactorAuthentication(LoginRequest request, Context context, User user) {
         MultifactorLoginService multifactorService = serviceLookup.getOptionalService(MultifactorLoginService.class);
         if (multifactorService == null) {
-            return null;
+            return Optional.empty();
         }
 
         try {
             if (multifactorService.checkMultiFactorAuthentication(user.getId(), context.getContextId(), user.getLocale(), request)) {
-                return new SessionEnhancement() {
+                return Optional.of(new SessionEnhancement() {
 
                     @Override
                     public void enhanceSession(Session session) {
                         session.setParameter(Session.MULTIFACTOR_PARAMETER, Boolean.TRUE);
                         session.setParameter(Session.MULTIFACTOR_AUTHENTICATED, Boolean.TRUE);
                     }
-                };
+                });
             }
+
+            // No multifactor required
+            return Optional.empty();
         } catch (OXException ex) {
-            // Failed to auth
-            return new SessionEnhancement() {
+            // Failed to authenticate
+            return Optional.of(new SessionEnhancement() {
 
                 @Override
                 public void enhanceSession(Session session) {
                     session.setParameter(Session.MULTIFACTOR_PARAMETER, Boolean.TRUE);
                 }
-            };
+            });
         }
-
-        // No multifactor required
-        return null;
     }
 
     /**

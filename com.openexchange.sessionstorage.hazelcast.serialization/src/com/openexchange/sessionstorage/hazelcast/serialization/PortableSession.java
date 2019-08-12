@@ -249,10 +249,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             writer.writeLong(PARAMETER_LOCAL_LAST_ACTIVE, null != localLastActive ? localLastActive.longValue() : -1L);
         }
         writer.writeUTF(PARAMETER_ORIGIN, null == origin ? "" : origin.name());
-        {
-            Object staySignedIn = parameters.get(PARAM_STAY_SIGNED_IN);
-            writer.writeBoolean(PARAMETER_STAY_SIGNED_IN, null != staySignedIn ? ((Boolean) staySignedIn).booleanValue() : false);
-        }
+        writer.writeBoolean(PARAMETER_STAY_SIGNED_IN, staySignedIn);
         {
             Set<String> remoteParameterNames = this.remoteParameterNames;
             JSONObject jRemoteParameters = null;
@@ -340,10 +337,7 @@ public class PortableSession extends StoredSession implements CustomPortable, Ve
             String sOrigin = reader.readUTF(PARAMETER_ORIGIN);
             origin = Strings.isEmpty(sOrigin) ? null : Origin.originFor(sOrigin);
         }
-        {
-            boolean staySignedIn = reader.readBoolean(PARAMETER_STAY_SIGNED_IN);
-            parameters.put(PARAM_STAY_SIGNED_IN, Boolean.valueOf(staySignedIn));
-        }
+        staySignedIn = reader.readBoolean(PARAMETER_STAY_SIGNED_IN);
         {
             String sRemoteParameters = reader.readUTF(PARAMETER_REMOTE_PARAMETERS);
             if (null != sRemoteParameters) {

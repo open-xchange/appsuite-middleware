@@ -77,7 +77,6 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
-import com.openexchange.session.Sessions;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -136,7 +135,7 @@ public final class ShareServletUtils {
              * set secret & share cookies
              */
             LoginServlet.addHeadersAndCookies(loginResult, response);
-            boolean staySignedIn = Sessions.isStaySignedIn(session);
+            boolean staySignedIn = session.isStaySignedIn();
             response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig, staySignedIn));
             if (staySignedIn) {
                 response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig, true));

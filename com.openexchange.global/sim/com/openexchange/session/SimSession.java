@@ -228,6 +228,11 @@ public class SimSession implements Session {
         return false;
     }
 
+    @Override
+    public boolean isStaySignedIn() {
+        return false;
+    }
+
     public void setSecret(String secret) {
         this.secret = secret;
     }

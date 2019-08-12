@@ -268,11 +268,11 @@ public class LoginRequestImpl implements LoginRequest {
     }
 
     public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language, String locale) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false, locale, false);
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false, locale, false, false);
     }
 
     public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
-        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false, false);
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, requestParameters, cookies, secure, serverName, serverPort, httpSessionID, language, false, null, false, false);
     }
 
     public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Map<String, String[]> requestParameters, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
@@ -397,7 +397,7 @@ public class LoginRequestImpl implements LoginRequest {
     public boolean isStoreLanguage() {
         return storeLanguage;
     }
-    
+
     @Override
     public boolean isStaySignedIn() {
         return staySignedIn;

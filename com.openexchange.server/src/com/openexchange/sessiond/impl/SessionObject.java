@@ -87,6 +87,7 @@ public class SessionObject implements PutIfAbsent {
     private String hash;
     private String client;
     private Origin origin;
+    private boolean staySignedIn;
     private final ConcurrentMap<String, Object> parameters;
 
     /**
@@ -145,6 +146,10 @@ public class SessionObject implements PutIfAbsent {
 
     public void setOrigin(Origin origin) {
         this.origin = origin;
+    }
+
+    public void setStaySignedIn(boolean staySignedIn) {
+        this.staySignedIn = staySignedIn;
     }
 
     @Override
@@ -309,6 +314,11 @@ public class SessionObject implements PutIfAbsent {
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    @Override
+    public boolean isStaySignedIn() {
+        return staySignedIn;
     }
 
     @Override

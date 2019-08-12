@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,61 +47,62 @@
  *
  */
 
-package com.openexchange.ajax.login;
+package com.openexchange.sessiond.impl;
 
-import static com.openexchange.ajax.AJAXServlet.ACTION_AUTOLOGIN;
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.tools.servlet.http.Tools;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * {@link HasAutoLogin} implements the hasAutoLogin action.
+ * {@link RotateShortResult} - The result of invoking {@link SessionData#rotateShort()} providing a listing of sessions for
+ * <ul>
+ * <li>Sessions moved to long-term container</li>
+ * <li>Timed out sessions</li>
+ * </ul>
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @since 7.6.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public final class HasAutoLogin implements LoginRequestHandler {
+public class RotateShortResult {
 
-    /** Simple class to delay initialization until needed */
-    private static class LoggerHolder {
-        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HasAutoLogin.class);
-    }
-
-    private static final HasAutoLogin INSTANCE = new HasAutoLogin();
+    private final List<SessionControl> movedToLongTerm;
+    private final List<SessionControl> removed;
 
     /**
-     * Gets the instance
+     * Initializes a new {@link RotateShortResult}.
      *
-     * @return The instance
+     * @param movedToLongTerm A listing of sessions moved to long-term container or <code>null</code>
+     * @param removed A listing of timed out sessions or <code>null</code>
      */
-    public static HasAutoLogin getInstance() {
-        return INSTANCE;
-    }
-
-    // ------------------------------------------------------------------------------------------------------------------------------------
-
-    private HasAutoLogin() {
+    public RotateShortResult(List<SessionControl> movedToLongTerm, List<SessionControl> removed) {
         super();
+        this.movedToLongTerm = movedToLongTerm == null ? Collections.emptyList() : movedToLongTerm;
+        this.removed = removed == null ? Collections.emptyList() : removed;
     }
 
-    @Override
-    public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Tools.disableCaching(resp);
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(LoginServlet.CONTENTTYPE_JAVASCRIPT);
-        try {
-            final JSONObject json = new JSONObject(2);
-            json.put(ACTION_AUTOLOGIN, true); // Keeping this for compatibility...
-            json.write(resp.getWriter());
-        } catch (JSONException e) {
-            LoggerHolder.LOG.error(LoginServlet.RESPONSE_ERROR, e);
-            LoginServlet.sendError(resp);
-        }
+    /**
+     * Gets the sessions, which were moved to long-term container.
+     *
+     * @return The sessions, which were moved to long-term container
+     */
+    public List<SessionControl> getMovedToLongTerm() {
+        return movedToLongTerm;
     }
 
+    /**
+     * Gets the sessions, which were removed
+     *
+     * @return The sessions, which were removed
+     */
+    public List<SessionControl> getRemoved() {
+        return removed;
+    }
+
+    /**
+     * Checks if both collections are empty.
+     *
+     * @return <code>true</code> if both are empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty() {
+        return movedToLongTerm.isEmpty() && removed.isEmpty();
+    }
 }

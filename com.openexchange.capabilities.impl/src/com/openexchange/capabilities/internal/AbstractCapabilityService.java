@@ -286,8 +286,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         return (object instanceof CapabilitySet) ? ((CapabilitySet) object).clone() : null;
     }
 
-    private static final Capability CAP_AUTO_LOGIN = new Capability("autologin");
-
     @Override
     public CapabilitySet getCapabilities(int userId, int contextId) throws OXException {
         return getCapabilities(userId, contextId, false, true);
@@ -344,7 +342,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
          */
         CapabilitySet capabilities = new CapabilitySet(64);
         Map<Capability, Boolean> forcedCapabilities = new HashMap<Capability, Boolean>(4);
-        capabilities.add(CAP_AUTO_LOGIN);
         applyUserPermissions(capabilities, user, context);
         applyConfiguredCapabilities(capabilities, forcedCapabilities, user, context, allowCache);
         BoolReference putIntoCache = new BoolReference(true);
@@ -1298,6 +1295,11 @@ public abstract class AbstractCapabilityService implements CapabilityService {
 
         @Override
         public boolean isTransient() {
+            return false;
+        }
+
+        @Override
+        public boolean isStaySignedIn() {
             return false;
         }
 

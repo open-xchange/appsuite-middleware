@@ -127,10 +127,10 @@ public class FormLogin implements LoginRequestHandler {
         Tools.disableCaching(resp);
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         LoginServlet.addHeadersAndCookies(result, resp);
-        resp.sendRedirect(generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), session, user.getPreferredLanguage(), conf.getUiWebPath()));
+        resp.sendRedirect(generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), req.getParameter(LoginFields.AUTOLOGIN_PARAM), session, user.getPreferredLanguage(), conf.getUiWebPath()));
     }
 
-    private static String generateRedirectURL(String uiWebPathParam, Session session, String language, String uiWebPath) {
+    private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;

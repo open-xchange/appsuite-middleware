@@ -149,13 +149,18 @@ public final class AddSessionParameterImpl implements AddSessionParameter {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return request.isStaySignedIn();
+    }
+
+    @Override
     public List<SessionEnhancement> getEnhancements() {
         return enhancements;
     }
 
     /**
      * Add a sessionEnhancement
-     * 
+     *
      * @param enhancement
      */
     public void addEnhancement(SessionEnhancement enhancement) {

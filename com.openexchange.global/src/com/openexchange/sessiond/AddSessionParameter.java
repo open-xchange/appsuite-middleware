@@ -138,6 +138,13 @@ public interface AddSessionParameter {
     boolean isTransient();
 
     /**
+     * Checks whether "stay signed in" should be applied to new session.
+     *
+     * @return <code>true</code> to apply "stay signed in"; otherwise <code>false</code>
+     */
+    boolean isStaySignedIn();
+
+    /**
      * A list of callbacks for modifying the session after it is created. This allows to put arbitrary additional information into a newly created
      * session. Normally some parameters are added. Use this to get this arbitrary information published to the whole cluster.
      * @return a list of callbacks for modifying the session after its creation or <code>null</code> if no modification should take place.

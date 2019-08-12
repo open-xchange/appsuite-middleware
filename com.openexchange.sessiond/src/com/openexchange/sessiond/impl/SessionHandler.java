@@ -85,7 +85,6 @@ import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.SessionSerializationInterceptor;
-import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionFilter;
@@ -805,11 +804,11 @@ public final class SessionHandler {
      * @param login The full user's login; e.g. <i>test@foo.bar</i>
      * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      * @param origin The session's origin
-     * @param enhancement after creating the session, this callback will be called when not <code>null</code> for extending the session.
+     * @param enhancements After creating the session, these call-backs will be called for extending the session.
      * @return The created session
      * @throws OXException If creating a new session fails
      */
-    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, Origin origin, List<SessionEnhancement> enhancements, String userAgent) throws OXException {
+    protected static SessionImpl addSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, String clientToken, boolean tranzient, boolean staySignedIn, Origin origin, List<SessionEnhancement> enhancements, String userAgent) throws OXException {
         SessionData sessionData = SESSION_DATA_REF.get();
         if (null == sessionData) {
             throw SessionExceptionCodes.NOT_INITIALIZED.create();
@@ -823,11 +822,12 @@ public final class SessionHandler {
         // Create and optionally enhance new session instance
         SessionImpl newSession;
         {
-            if (null == enhancements) {
-                newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
+            // Create session instance
+            if (null == enhancements || enhancements.isEmpty()) {
+                newSession = createNewSession(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, staySignedIn, origin);
             } else {
                 // Create intermediate SessionDescription instance to offer more flexibility to possible SessionEnhancement implementations
-                SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, origin);
+                SessionDescription sessionDescription = createSessionDescription(userId, loginName, password, contextId, clientHost, login, authId, hash, client, tranzient, staySignedIn, origin);
                 for (SessionEnhancement enhancement: enhancements) {
                     enhancement.enhanceSession(sessionDescription);
                 }
@@ -878,10 +878,11 @@ public final class SessionHandler {
      * @param hash The hash string
      * @param client The client identifier
      * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @param staySignedIn Whether session is supposed to be annotated with "stay signed in"; otherwise <code>false</code>
      * @return The newly created {@code SessionImpl} instance
      * @throws OXException If create attempt fails
      */
-    private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, Origin origin) throws OXException {
+    private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, boolean staySignedIn, Origin origin) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionIdGenerator.getInstance();
         String sessionId = sessionIdGenerator.createSessionId(loginName);
@@ -889,7 +890,7 @@ public final class SessionHandler {
         String randomToken = sessionIdGenerator.createRandomId();
 
         // Create the instance
-        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient, origin);
+        SessionImpl newSession = new SessionImpl(userId, loginName, password, contextId, sessionId, secret, randomToken, clientHost, login, authId, hash, client, tranzient, staySignedIn, origin);
 
         // Return...
         return newSession;
@@ -908,10 +909,11 @@ public final class SessionHandler {
      * @param hash The hash string
      * @param client The client identifier
      * @param tranzient Whether the session is meant to be transient/volatile; typically the session gets dropped soon
+     * @param staySignedIn Whether session is supposed to be annotated with "stay signed in"; otherwise <code>false</code>
      * @return The newly created {@code SessionDescription} instance
      * @throws OXException If create attempt fails
      */
-    private static SessionDescription createSessionDescription(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, Origin origin) throws OXException {
+    private static SessionDescription createSessionDescription(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient, boolean staySignedIn, Origin origin) throws OXException {
         // Generate identifier, secret, and random
         SessionIdGenerator sessionIdGenerator = SessionIdGenerator.getInstance();
         String sessionId = sessionIdGenerator.createSessionId(loginName);
@@ -924,6 +926,7 @@ public final class SessionHandler {
         newSession.setLocalIp(clientHost);
         newSession.setAuthId(authId);
         newSession.setTransient(tranzient);
+        newSession.setStaySignedIn(staySignedIn);
         newSession.setClient(client);
         newSession.setRandomToken(randomToken);
         newSession.setHash(hash);
@@ -1375,7 +1378,7 @@ public final class SessionHandler {
             }
         }
     }
-    
+
     /**
      * Sets the user agent for given session.
      *
@@ -1705,16 +1708,23 @@ public final class SessionHandler {
             LOG.warn("\tSessionData instance is null.");
             return;
         }
-        List<SessionControl> controls = sessionData.rotateShort();
-        if (!controls.isEmpty()) {
-            for (final SessionControl sessionControl : controls) {
-                if (Sessions.isStaySignedIn(sessionControl.getSession())) {
+        RotateShortResult result = sessionData.rotateShort();
+        {
+            List<SessionControl> movedToLongTerm = result.getMovedToLongTerm();
+            if (!movedToLongTerm.isEmpty()) {
+                for (SessionControl sessionControl : movedToLongTerm) {
                     LOG.info("Session is moved to long life time container. All temporary session data will be cleaned up. ID: {}", sessionControl.getSession().getSessionID());
-                    postSessionDataRemoval(controls);
-                } else {
-                    LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
-                    postContainerRemoval(controls, true);
                 }
+                postSessionDataRemoval(movedToLongTerm);
+            }
+        }
+        {
+            List<SessionControl> removed = result.getRemoved();
+            if (!removed.isEmpty()) {
+                for (SessionControl sessionControl : removed) {
+                    LOG.info("Session timed out. ID: {}", sessionControl.getSession().getSessionID());
+                }
+                postContainerRemoval(removed, true);
             }
         }
     }
@@ -2317,4 +2327,5 @@ public final class SessionHandler {
             return true;
         }
     }
+
 }

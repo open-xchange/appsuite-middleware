@@ -86,6 +86,7 @@ import com.openexchange.saml.spi.SAMLBackend;
 import com.openexchange.saml.tools.SAMLLoginTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionDescription;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
@@ -278,7 +279,9 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
 
                 EnhancedAuthenticated wrapped = new EnhancedAuthenticated(enhanced) {
                     @Override
-                    protected void doEnhanceSession(Session session) {
+                    protected void doEnhanceSession(Session ses) {
+                        SessionDescription session = (SessionDescription) ses;
+                        session.setStaySignedIn(false);
                         session.setParameter(SAMLSessionParameters.AUTHENTICATED, Boolean.TRUE.toString());
                         String subjectID = reservationState.get(SAMLSessionParameters.SUBJECT_ID);
                         if (subjectID != null) {

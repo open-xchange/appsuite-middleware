@@ -1018,6 +1018,11 @@ public class SAMLWebSSOProviderTest {
             }
 
             @Override
+            public boolean isStaySignedIn() {
+                return false;
+            }
+
+            @Override
             public String getUserLoginInfo() {
                 return "test.user";
             }

@@ -272,7 +272,7 @@ public interface Session {
      */
     public static final String PARAM_PUSH_TOKEN = "__session.pushtoken".intern();
 
-    /** 
+    /**
      * Parameter if multifactor authentication enabled for the user
      */
     public final static String MULTIFACTOR_PARAMETER = "multifactor".intern();
@@ -281,11 +281,6 @@ public interface Session {
      * Parameter that the session has been multifactor authenticated successfully
      */
     public final static String MULTIFACTOR_AUTHENTICATED = "multifactorAuthenticated".intern();
-
-    /**
-     * The parameter indicating if 'staySignedIn' was set when session was created
-     */
-    public static final String PARAM_STAY_SIGNED_IN = "__session.staysignedin".intern();
 
     /**
      * Contains the time that the user last verified using multifactor.
@@ -434,7 +429,7 @@ public interface Session {
      * The client is remembered through the whole session. It should identify what client uses the back-end. Normally this is the web
      * front-end but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
      * back-end during the login request.
-     * 
+     *
      * @return the client identifier of the client using the back-end.
      */
     String getClient();
@@ -468,5 +463,12 @@ public interface Session {
      * @return The origin or <code>null</code>
      */
     Origin getOrigin();
+
+    /**
+     * Checks whether session is annotated with "stay signed in".
+     *
+     * @return <code>true</code> if annotated with "stay signed in"; otherwise <code>false</code>
+     */
+    boolean isStaySignedIn();
 
 }

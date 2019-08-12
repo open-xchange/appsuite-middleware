@@ -479,6 +479,11 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     }
 
     @Override
+    public boolean isStaySignedIn() {
+        return session().isStaySignedIn();
+    }
+
+    @Override
     public Origin getOrigin() {
         return session().getOrigin();
     }

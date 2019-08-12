@@ -518,6 +518,11 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
         }
 
         @Override
+        public boolean isStaySignedIn() {
+            return false;
+        }
+
+        @Override
         public Set<String> getParameterNames() {
             return parameters.keySet();
         }

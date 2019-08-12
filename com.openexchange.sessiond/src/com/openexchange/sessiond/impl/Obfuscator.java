@@ -197,7 +197,7 @@ public class Obfuscator implements ObfuscatorService {
         }
 
         // Instantiate & return appropriate stored session
-        return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(), session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(), session.getAuthId(), session.getHash(), session.getClient(), session.getOrigin(), parameters);
+        return new StoredSession(session.getSessionID(), session.getLoginName(), obfuscate(session.getPassword()), session.getContextId(), session.getUserId(), session.getSecret(), session.getLogin(), session.getRandomToken(), session.getLocalIp(), session.getAuthId(), session.getHash(), session.getClient(), session.isStaySignedIn(), session.getOrigin(), parameters);
     }
 
     /**
@@ -212,7 +212,7 @@ public class Obfuscator implements ObfuscatorService {
         }
 
         // Instantiate session
-        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient(), false, session.getOrigin());
+        SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(), session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(), session.getAuthId(), session.getHash(), session.getClient(), false, session.isStaySignedIn(), session.getOrigin());
         for (String name : session.getParameterNames()) {
             Object value = session.getParameter(name);
             sessionImpl.setParameter(name, value);

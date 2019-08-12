@@ -115,7 +115,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
-import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.io.IOTools;
@@ -742,7 +741,7 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_AUTOLOGIN, new AutoLogin(conf, shareConf, rampUpServices));
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
-        handlerMap.put("hasAutologin", new HasAutoLogin(conf));
+        handlerMap.put("hasAutologin", HasAutoLogin.getInstance());
         handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
         handlerMap.put(ACTION_GUEST, new GuestLogin(shareConf, rampUpServices));
         handlerMap.put(ACTION_ANONYMOUS, new AnonymousLogin(shareConf, rampUpServices));
@@ -896,7 +895,8 @@ public class LoginServlet extends AJAXServlet {
     private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie, LoginResult result) {
         Cookie servletCookie = new Cookie(cookie.getName(), cookie.getValue());
         LoginConfiguration loginConfig = getLoginConfiguration(result.getSession());
-        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), loginConfig, Sessions.isStaySignedIn(result.getSession()));
+        Session session = result.getSession();
+        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), loginConfig, null != session && session.isStaySignedIn());
         return servletCookie;
     }
 
@@ -942,7 +942,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) throws OXException {
-        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session), Sessions.isStaySignedIn(session)));
+        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, getLoginConfiguration(session), session.isStaySignedIn()));
     }
 
     /**
@@ -955,7 +955,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeShardCookie(final HttpServletResponse resp, final Session session, final boolean secure, final String serverName) {
-        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session), Sessions.isStaySignedIn(session)));
+        resp.addCookie(configureCookie(new Cookie(SHARD_COOKIE_NAME, SessionUtility.getShardCookieValue()), secure, serverName, getLoginConfiguration(session), null != session && session.isStaySignedIn()));
     }
 
     /**
@@ -971,7 +971,7 @@ public class LoginServlet extends AJAXServlet {
      * @param conf The login configuration
      */
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
-        resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf, Sessions.isStaySignedIn(session)));
+        resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf, session.isStaySignedIn()));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
         writeShardCookie(resp, session, secure, serverName);
         session.setParameter(Session.PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
@@ -1021,7 +1021,7 @@ public class LoginServlet extends AJAXServlet {
     private static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), altId), secure, serverName, conf, Sessions.isStaySignedIn(session)));
+            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), altId), secure, serverName, conf, session.isStaySignedIn()));
             return true;
         }
         return false;
