@@ -68,6 +68,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -133,6 +134,10 @@ public final class Tokens implements LoginRequestHandler {
         String hash = HashCalculator.getInstance().getHash(req, userAgent, client);
         if (null != service) {
             service.setHash(session.getSessionID(), hash);
+        }
+
+        if (null != service && Strings.isNotEmpty(userAgent)) {
+            service.setUserAgent(session.getSessionID(), userAgent);
         }
 
         Locale locale;
