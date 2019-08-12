@@ -336,7 +336,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
              */
             try {
                 accounts = Failsafe.with(new RetryPolicy()
-                    .withMaxRetries(5).withBackoff(100, 1000, TimeUnit.MILLISECONDS)
+                    .withMaxRetries(5).withBackoff(100, 1000, TimeUnit.MILLISECONDS).withJitter(0.25f)
                     .retryOn(f -> OXException.class.isInstance(f) && CalendarExceptionCodes.ACCOUNT_NOT_WRITTEN.equals((OXException) f)))
                     .onRetry(f -> LoggerFactory.getLogger(CalendarAccountServiceImpl.class).debug("New calendar account not stored, re-checking pending auto-provisioning tasks", f))
                 .get(() -> storageOperation.executeUpdate());

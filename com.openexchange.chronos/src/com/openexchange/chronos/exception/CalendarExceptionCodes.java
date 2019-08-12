@@ -339,7 +339,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Error while reading/writing data from/to the database.</li>
      * <li>Calendar account data not written in storage</li>
      */
-    ACCOUNT_NOT_WRITTEN("Calendar account data not written in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_WARNING, 3041),
+    ACCOUNT_NOT_WRITTEN("Calendar account data not written in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_CONFLICT, 3041),
     /**
      * An I/O error occurred: %1$s
      */

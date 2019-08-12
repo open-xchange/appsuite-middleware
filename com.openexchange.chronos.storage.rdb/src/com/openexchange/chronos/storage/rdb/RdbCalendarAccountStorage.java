@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.database.Databases.isPrimaryKeyConflictInMySQL;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
@@ -160,6 +161,9 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             updated = insertAccount(connection, context.getContextId(), account);
             txPolicy.commit(connection);
         } catch (SQLException e) {
+            if (isPrimaryKeyConflictInMySQL(e)) {
+                throw CalendarExceptionCodes.ACCOUNT_NOT_WRITTEN.create(e);
+            }
             throw asOXException(e);
         } finally {
             release(connection, updated);
@@ -179,6 +183,9 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
+            if (isPrimaryKeyConflictInMySQL(e)) {
+                throw CalendarExceptionCodes.ACCOUNT_NOT_WRITTEN.create(e);
+            }
             throw asOXException(e);
         } finally {
             release(connection, updated);
