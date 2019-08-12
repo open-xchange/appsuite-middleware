@@ -1395,7 +1395,7 @@ public final class SessionHandler {
                             @Override
                             public Void call() throws Exception {
                                 try {
-                                    sessionStorageService.addSession(session);
+                                    sessionStorageService.addSession(getObfuscator().wrap(session));
                                 } catch (OXException e) {
                                     LOG.warn("Failed to set user agent", e);
                                 } catch (Exception e) {
