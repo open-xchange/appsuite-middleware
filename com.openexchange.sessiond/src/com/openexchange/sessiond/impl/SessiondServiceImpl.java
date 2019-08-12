@@ -131,6 +131,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public void setUserAgent(final String sessionId, final String userAgent) throws OXException {
+        SessionHandler.setUserAgent(getSession(sessionId), userAgent);
+    }
+
+    @Override
     public void setLocalIp(final String sessionId, final String localIp) throws OXException {
         SessionHandler.setLocalIp(getSession(sessionId), localIp);
     }

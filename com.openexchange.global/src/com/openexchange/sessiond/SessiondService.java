@@ -318,4 +318,13 @@ public interface SessiondService {
      */
     public void setHash(String sessionId, String hash) throws OXException;
 
+    /**
+     * Sets the user agent for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param userAgent The new user agent
+     * @throws OXException If changing user agent fails
+     */
+    public void setUserAgent(String sessionId, String userAgent) throws OXException;
+
 }

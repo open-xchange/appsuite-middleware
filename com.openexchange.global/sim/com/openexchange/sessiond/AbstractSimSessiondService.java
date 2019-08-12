@@ -94,6 +94,11 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public void setUserAgent(String sessionId, String userAgent) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
     public void setLocalIp(String sessionId, String localIp) throws OXException {
         // Nothing to do
     }

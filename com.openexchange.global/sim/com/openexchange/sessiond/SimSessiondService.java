@@ -295,6 +295,14 @@ public class SimSessiondService implements SessiondService {
     }
 
     @Override
+    public void setUserAgent(String sessionId, String userAgent) throws OXException {
+        SimSession session = sessionsById.get(sessionId);
+        if (session != null) {
+            session.setParameter(Session.PARAM_USER_AGENT, userAgent);
+        }
+    }
+
+    @Override
     public boolean storeSession(String sessionId) throws OXException {
         return true;
     }

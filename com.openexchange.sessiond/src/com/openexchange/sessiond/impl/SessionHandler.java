@@ -1375,6 +1375,48 @@ public final class SessionHandler {
             }
         }
     }
+    
+    /**
+     * Sets the user agent for given session.
+     *
+     * @param session The session
+     * @param client The new user agent
+     * @throws OXException If changing user agent fails
+     */
+    protected static void setUserAgent(final SessionImpl session, final String userAgent) throws OXException {
+        if (null != session) {
+            try {
+                session.setParameter(Session.PARAM_USER_AGENT, userAgent);
+                if (useSessionStorage(session)) {
+                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
+                    if (sessionStorageService != null) {
+                        AbstractTask<Void> c = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    sessionStorageService.addSession(session);
+                                } catch (OXException e) {
+                                    LOG.warn("Failed to set user agent", e);
+                                } catch (Exception e) {
+                                    if (e.getCause() instanceof InterruptedException) {
+                                        // Timed out
+                                        LOG.warn("Failed to set user agent in time");
+                                    } else {
+                                        LOG.warn("Failed to set user agent", e);
+                                    }
+                                }
+                                return null;
+                            }
+                        };
+                        submit(c);
+                    }
+                }
+            } catch (RuntimeException e) {
+                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            }
+        }
+    }
 
     protected static Session getSessionByRandomToken(final String randomToken, final String newIP) {
         SessionData sessionData = SESSION_DATA_REF.get();
