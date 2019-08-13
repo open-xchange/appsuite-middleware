@@ -66,9 +66,6 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.JDOMParseException;
 import org.jdom2.input.SAXBuilder;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
@@ -103,12 +100,12 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 
 	public PropertiesMarshaller(final String uriPrefix, final String charset) {
-		this.uriPrefix = uriPrefix;
-		if (!this.uriPrefix.endsWith("/")) {
-			this.uriPrefix += "/";
-		}
-		this.charset = charset;
-	}
+        this.uriPrefix = uriPrefix;
+        if (!this.uriPrefix.endsWith("/")) {
+            this.uriPrefix += "/";
+        }
+        this.charset = charset;
+    }
 
 	@Override
 	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException {
@@ -140,27 +137,11 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
     public Element marshalHREF(WebdavPath uri, boolean trailingSlash) {
         final Element href = new Element("href", DAV_NS);
-
-        WebdavPath components = uri;
-        ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        StringBuilder builder = new StringBuilder("/");
-        WebdavPath pathPrefix = new WebdavPath(DAVTools.getPathPrefix(configViewFactory));
-        if (pathPrefix.size() > 0) {
-            for (String s : pathPrefix) {
-                builder.append(escape(s)).append("/");
-            }
-            components = new WebdavPath(DAVTools.removeProxyPrefixPath(uri.toString(), pathPrefix.toString()));
-        }
-        if (builder.charAt(builder.length() - 1) == '/') {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-
-        builder.append(this.uriPrefix);
-
+        final StringBuilder builder = new StringBuilder(uriPrefix);
         if (builder.charAt(builder.length() - 1) != '/') {
             builder.append('/');
         }
-        for (final String component : components) {
+        for (final String component : uri) {
             builder.append(escape(component)).append('/');
         }
         if (!trailingSlash) {

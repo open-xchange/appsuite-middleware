@@ -65,7 +65,6 @@ import org.powermock.api.mockito.PowerMockito;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.tools.dav.DAVTools;
 
 /**
  * {@link DAVToolsTest}
@@ -159,7 +158,7 @@ public class DAVToolsTest {
     @Test
     public void testCorrectPath() {
         for (Entry<String, String> entry : rawToExpected.entrySet()) {
-            String path = DAVTools.insertPrefixPath(factory, entry.getKey());
+            String path = DAVTools.adjustPath(factory, entry.getKey());
             Assert.assertEquals("Not the corect path", entry.getValue(), path);
         }
     }

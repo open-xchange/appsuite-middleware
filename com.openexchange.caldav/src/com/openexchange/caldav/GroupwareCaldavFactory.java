@@ -117,7 +117,7 @@ public class GroupwareCaldavFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/caldav/";
+        return getURLPrefix("/caldav/");
     }
 
     @Override

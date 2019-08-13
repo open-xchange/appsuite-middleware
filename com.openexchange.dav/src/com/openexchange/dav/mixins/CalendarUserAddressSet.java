@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import static com.openexchange.tools.dav.DAVTools.adjustPath;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -137,7 +137,7 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (String address : addresses) {
-            stringBuilder.append("<D:href>").append(insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), address + "</D:href>"));
+            stringBuilder.append("<D:href>").append(adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), address) + "</D:href>");
         }
         return stringBuilder.toString();
     }

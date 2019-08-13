@@ -1,6 +1,6 @@
 feature_name: DAV
 properties:
-    - key: com.openexchange.dav.pathPrefix
+    - key: com.openexchange.dav.prefixPath
       description: |
          Configures a static prefix for *DAV-servlets. Defaults to "/servlet/dav" for backwards compatibility.
          

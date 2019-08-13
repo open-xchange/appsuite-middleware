@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import static com.openexchange.tools.dav.DAVTools.adjustPath;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.osgi.Services;
 import com.openexchange.webdav.protocol.Protocol;
@@ -79,7 +79,7 @@ public class GroupMemberSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (int member : members) {
-            stringBuilder.append("<D:href>").append(insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), PrincipalURL.forUser(member) + "</D:href>"));
+            stringBuilder.append("<D:href>").append(adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), PrincipalURL.forUser(member)) + "</D:href>");
         }
         return stringBuilder.toString();
     }

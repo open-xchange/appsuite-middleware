@@ -28,14 +28,14 @@ com.openexchange.dav.proxyPathPrefix=/
 
 > Note: For further information about the properties, have a look at [com.openexchange.dav.pathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.pathPrefix) and [com.openexchange.dav.proxyPathPrefix](http://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.dav.proxyPathPrefix)
 
-With this configuration the server will register all *DAV servlets* with the prefix */dav/* thus e.g. the CalDAV servlet will be reachable under  <code>MYSERVER.TLD/dav/caldav</code>. To ensure requests will reach the server, the Apache server needs to be configured, too. However with the server managing the requests, the webserver configuration is reduced to a minimum. E.g.:
+With this configuration the server will register all *DAV servlets* with the prefix */dav/* thus e.g. the CalDAV servlet will be reachable under <code>MYSERVER.TLD/dav/caldav</code>. To ensure requests will reach the server, the Apache server needs to be configured, too. However with the server managing the requests, the webserver configuration is reduced to a minimum. E.g.:
 
 ```
   ProxyPass /.well-known balancer://oxserver/.well-known
   ProxyPass /dav balancer://oxserver-sync/dav
 ```
 
-It is highly recommended to use <code>/dav</code> as path prefix. Client like the MacOS Calendar will start searching at this directory when initializing a sync.
+It is highly recommended to use <code>/dav</code> as path prefix. Client like the MacOS Calendar will automatically search under this path if e.g. only <code>MYSERVER.TLD</code> is entered as server address.
 
 
 ## Via Apache <code>vhost</code>
@@ -143,21 +143,6 @@ In the case of not serving the DAV service on the vhost root additionally some D
  _carddavs._tcp.MYSERVER.TLD.     10800 IN TXT   path=/servlet/dav
  _carddav._tcp.MYSERVER.TLD.      10800 IN TXT   path=/servlet/dav
 ```
-
-
-# Migration from Open-Xchange server 7.10.2 or earlier to 7.10.3 or later
-
-Until v7.10.2 the Open-Xchange server depended on the Apache configuration and a static path for *DAV servlets*. With v7.10.3 and later the path of the *DAV servlets* can be adjusted and configured. This section will give a walk-through of the migration process to the new feature.
-
-## Properties 
-TBD
-
-## Migrate from Apache <code>vhost</code>
-TBD
-## Migrate from Apache UserAgent detection
-TBD
-## Migrate Autodiscovery
-TBD
 
 # Configuration
 ## CalDAV Configuration

@@ -49,7 +49,6 @@
 
 package com.openexchange.dav.resources;
 
-import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
 import java.util.Date;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
@@ -62,6 +61,7 @@ import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -77,7 +77,6 @@ public abstract class DAVRootCollection extends DAVCollection {
         new BasicPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
             Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false))
     };
-    private static final WebdavPath ROOT_URL = new WebdavPath(getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class)));
 
     private final String displayName;
 
@@ -88,7 +87,7 @@ public abstract class DAVRootCollection extends DAVCollection {
      * @param displayName The display name to use
      */
     protected DAVRootCollection(DAVFactory factory, String displayName) {
-        super(factory, ROOT_URL);
+        super(factory, new WebdavPath(DAVTools.adjustPath(Services.getService(ConfigViewFactory.class), null)));
         this.displayName = displayName;
         includeProperties(
             new CurrentUserPrincipal(factory), new SupportedPrivilegeSet(), new ACL(ROOT_PERMISSIONS), new ACLRestrictions()

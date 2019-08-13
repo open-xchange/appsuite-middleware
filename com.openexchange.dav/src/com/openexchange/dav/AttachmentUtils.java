@@ -49,7 +49,8 @@
 
 package com.openexchange.dav;
 
-import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
+import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -74,6 +75,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -155,11 +157,13 @@ public class AttachmentUtils {
      * @return The URI
      */
     public static URI buildURI(HostData hostData, AttachmentMetadata metadata) throws URISyntaxException {
-        String pathPrefix = getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class));
         return new URI(new URIBuilder()
             .setScheme(hostData.isSecure() ? "https" : "http")
             .setHost(hostData.getHost())
-            .setPath(new StringBuilder(pathPrefix).append("/attachments/").append(encodeName(metadata)).append('/').append(metadata.getFilename()).toString())
+            .setPath(new StringBuilder(DAVTools.adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), "/attachments/"))
+                .append(encodeName(metadata))
+                .append('/')
+                .append(metadata.getFilename()).toString())
         .toString());
     }
 
@@ -175,16 +179,9 @@ public class AttachmentUtils {
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        String pathPrefix = getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class));
-        if (-1 == path.indexOf(pathPrefix)) {
-            throw new IllegalArgumentException(String.valueOf(uri));
-        }
-        int index = path.indexOf("attachments/");
-        if (-1 == index) {
-            throw new IllegalArgumentException(String.valueOf(uri));
-        }
-        path = path.substring(13 + pathPrefix.length());
-        index = path.indexOf('/');
+        path = removePathPrefixFromPath(Services.getServiceLookup().getService(ConfigViewFactory.class), path);
+        path = removePrefixFromPath("/attachments", path);
+        int index = path.indexOf('/');
         if (-1 != index) {
             path = path.substring(0, index);
         }

@@ -49,7 +49,8 @@
 
 package com.openexchange.caldav.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import static com.openexchange.tools.dav.DAVTools.adjustPath;
+import static com.openexchange.tools.dav.DAVTools.concatPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.caldav.CalDAVURLField;
@@ -106,7 +107,7 @@ public class CaldavActivator extends HousekeepingActivator {
 
     private static final String SERVLET_PATH = "/caldav";
 
-    private static final String NULL_PATH = "dev/null";
+    private static final String NULL_PATH = "/dev/null";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CaldavActivator.class);
 
@@ -135,9 +136,9 @@ public class CaldavActivator extends HousekeepingActivator {
             final HttpService httpService = getService(HttpService.class);
 
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            httpService.registerServlet(insertPrefixPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
-            httpService.registerServlet(insertPrefixPath(configViewFactory,"/.well-known/caldav"), new WellKnownServlet(SERVLET_PATH, Interface.CALDAV), null, null);
-            httpService.registerServlet(insertPrefixPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
+            httpService.registerServlet(concatPath(configViewFactory, SERVLET_PATH), new CalDAV(performer), null, null);
+            httpService.registerServlet("/.well-known/caldav", new WellKnownServlet(adjustPath(configViewFactory, SERVLET_PATH), Interface.CALDAV), null, null);
+            httpService.registerServlet(concatPath(configViewFactory, NULL_PATH), new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
@@ -231,8 +232,9 @@ public class CaldavActivator extends HousekeepingActivator {
     protected synchronized void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
-            httpService.unregister(SERVLET_PATH);
-            httpService.unregister(NULL_PATH);
+            ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+            httpService.unregister(concatPath(configViewFactory, SERVLET_PATH));
+            httpService.unregister(concatPath(configViewFactory, NULL_PATH));
         }
         final OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {

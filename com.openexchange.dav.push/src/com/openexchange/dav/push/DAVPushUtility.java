@@ -49,13 +49,16 @@
 
 package com.openexchange.dav.push;
 
+import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Namespace;
 import com.google.common.io.BaseEncoding;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
+import com.openexchange.dav.push.osgi.Services;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.FolderCollection;
@@ -312,7 +315,7 @@ public class DAVPushUtility {
 
     private static String getClientId(DAVRootCollection rootCollection) {
         WebdavPath url = rootCollection.getUrl();
-        WebdavPath rootUrl = new WebdavPath(rootCollection.getFactory().getURLPrefix());
+        WebdavPath rootUrl = new WebdavPath(removePathPrefixFromPath(Services.getService(ConfigViewFactory.class), rootCollection.getFactory().getURLPrefix()));
         if (CalendarHomeSet.CALENDAR_HOME.equals(url) || (0 == url.size() && CalendarHomeSet.CALENDAR_HOME.equals(rootUrl))) {
             return CLIENT_CALDAV;
         }

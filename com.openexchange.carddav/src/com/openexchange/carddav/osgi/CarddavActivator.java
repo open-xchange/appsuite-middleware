@@ -49,7 +49,8 @@
 
 package com.openexchange.carddav.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import static com.openexchange.tools.dav.DAVTools.adjustPath;
+import static com.openexchange.tools.dav.DAVTools.concatPath;
 import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilitySet;
@@ -117,8 +118,8 @@ public class CarddavActivator extends HousekeepingActivator {
              * register CardDAV servlet & WebDAV path
              */
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            getService(HttpService.class).registerServlet(insertPrefixPath(configViewFactory, "carddav"), new CardDAV(performer), null, null);
-            getService(HttpService.class).registerServlet(insertPrefixPath(configViewFactory, "/.well-known/carddav"), new WellKnownServlet("/carddav", Interface.CARDDAV), null, null);
+            getService(HttpService.class).registerServlet(concatPath(configViewFactory, "/carddav"), new CardDAV(performer), null, null);
+            getService(HttpService.class).registerServlet("/.well-known/carddav", new WellKnownServlet(adjustPath(configViewFactory, "/carddav"), Interface.CARDDAV), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
 
                 @Override
@@ -129,7 +130,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register Photo performer for referenced contact images in vCards
              */
-            getService(HttpService.class).registerServlet(insertPrefixPath(configViewFactory, "photos"), new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
+            getService(HttpService.class).registerServlet(concatPath(configViewFactory, "/photos"), new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
             /*
              * track optional services
              */
@@ -160,7 +161,7 @@ public class CarddavActivator extends HousekeepingActivator {
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             ConfigViewFactory configViewFactory = getServiceSafe(ConfigViewFactory.class);
-            String carddavPath = insertPrefixPath(configViewFactory, "carddav");
+            String carddavPath = concatPath(configViewFactory, "/carddav");
             httpService.unregister(carddavPath);
         }
         super.stopBundle();

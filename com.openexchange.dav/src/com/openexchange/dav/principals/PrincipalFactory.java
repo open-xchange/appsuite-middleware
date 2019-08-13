@@ -107,7 +107,7 @@ public class PrincipalFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/principals/";
+        return getURLPrefix("/principals/");
     }
 
 }

@@ -92,9 +92,8 @@ public class AttachmentResource extends DAVResource {
     public String getETag() throws WebdavProtocolException {
         if (false == exists() || null == attachment || null == attachment.getCreationDate()) {
             return "";
-        } else {
-            return "http://www.open-xchange.com/etags/" + attachment.getId() + "-" + attachment.getCreationDate().getTime();
         }
+        return "http://www.open-xchange.com/etags/" + attachment.getId() + "-" + attachment.getCreationDate().getTime();
     }
 
     @Override

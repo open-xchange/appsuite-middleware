@@ -49,8 +49,9 @@
 
 package com.openexchange.carddav.photos;
 
-import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
-import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import static com.openexchange.tools.dav.DAVTools.adjustPath;
+import static com.openexchange.tools.dav.DAVTools.removePathPrefixFromPath;
+import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Date;
@@ -93,7 +94,7 @@ public class PhotoUtils {
             return new URI(new URIBuilder()
                 .setScheme(hostData.isSecure() ? "https" : "http")
                 .setHost(hostData.getHost())
-                .setPath(insertPrefixPath(configViewFactory, path))
+                .setPath(adjustPath(configViewFactory, path))
             .toString());
         } catch (URISyntaxException e) {
             throw DAVProtocol.protocolException(new WebdavPath("/photos"), e);
@@ -113,16 +114,9 @@ public class PhotoUtils {
         if (Strings.isEmpty(path)) {
             throw new IllegalArgumentException(String.valueOf(uri));
         }
-        String pathPrefix = getPathPrefix(configViewFactory);
-        if (-1 == path.indexOf(pathPrefix)) {
-            throw new IllegalArgumentException(String.valueOf(uri));
-        }
-        int index = path.indexOf("photos/");
-        if (-1 == index) {
-            throw new IllegalArgumentException(String.valueOf(uri));
-        }
-        path = path.substring(7 + pathPrefix.length());
-        index = path.indexOf('/');
+        path = removePathPrefixFromPath(configViewFactory, path);
+        path = removePrefixFromPath("/photos", path);
+        int index = path.indexOf('/');
         if (-1 != index) {
             path = path.substring(0, index);
         }

@@ -50,9 +50,11 @@
 package com.openexchange.dav.root;
 
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.SessionHolder;
+import com.openexchange.tools.dav.DAVTools;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -67,6 +69,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class RootFactory extends DAVFactory {
 
+    private final String urlPrefix;
+
     /**
      * Initializes a new {@link RootFactory}.
      *
@@ -76,6 +80,7 @@ public class RootFactory extends DAVFactory {
      */
     public RootFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
         super(protocol, services, sessionHolder);
+        urlPrefix = DAVTools.concatPath(getService(ConfigViewFactory.class), null);
     }
 
     @Override
@@ -98,7 +103,7 @@ public class RootFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/";
+        return urlPrefix;
     }
 
 }

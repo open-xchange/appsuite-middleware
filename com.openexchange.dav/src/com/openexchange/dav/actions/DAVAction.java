@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.actions;
 
-import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
+import static com.openexchange.tools.dav.DAVTools.removePrefixFromPath;
 import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.io.IOException;
 import java.net.URI;
@@ -64,10 +64,8 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.osgi.Services;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -425,14 +423,8 @@ public abstract class DAVAction extends AbstractAction {
             org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error instantiating an URI from {}", href, e);
             path = href;
         }
-        String pathPrefix = getPathPrefix(Services.getServiceLookup().getService(ConfigViewFactory.class));
-        if (Strings.isNotEmpty(path) && path.startsWith(pathPrefix)) {
-            path = path.substring(pathPrefix.length());
-        }
         String urlPrefix = request.getURLPrefix();
-        if (Strings.isNotEmpty(urlPrefix) && path.startsWith(urlPrefix)) {
-            path = path.substring(urlPrefix.length());
-        }
+        path = removePrefixFromPath(urlPrefix, path);
         return ((DAVFactory) request.getFactory()).decode(new WebdavPath(path));
     }
 

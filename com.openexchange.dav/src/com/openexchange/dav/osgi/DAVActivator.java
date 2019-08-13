@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.osgi;
 
-import static com.openexchange.tools.dav.DAVTools.getPathPrefix;
+import static com.openexchange.tools.dav.DAVTools.concatPath;
 import org.osgi.service.http.HttpService;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -89,24 +89,23 @@ public class DAVActivator extends HousekeepingActivator {
     @Override
     protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        String pathPrefix = getPathPrefix(getService(ConfigViewFactory.class));
-        
+        ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
         HttpService httpService = getService(HttpService.class);
         /*
          * root
          */
         RootPerformer rootPerformer = new RootPerformer(this);
-        httpService.registerServlet(pathPrefix.substring(0, pathPrefix.length() -1), new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(concatPath(configViewFactory, null), new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
         /*
          * attachments
          */
         AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
-        httpService.registerServlet(pathPrefix + "attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
+        httpService.registerServlet(concatPath(configViewFactory, "attachments"), new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-        httpService.registerServlet(pathPrefix + "principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
+        httpService.registerServlet(concatPath(configViewFactory, "principals"), new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
         this.mixin = mixin;

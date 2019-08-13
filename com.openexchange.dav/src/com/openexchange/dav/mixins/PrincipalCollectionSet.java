@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
-import static com.openexchange.tools.dav.DAVTools.insertPrefixPath;
+import static com.openexchange.tools.dav.DAVTools.adjustPath;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.osgi.Services;
 import com.openexchange.webdav.protocol.Protocol;
@@ -73,7 +73,7 @@ public class PrincipalCollectionSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + insertPrefixPath(Services.getServiceLookup().getService(ConfigViewFactory.class), "/principals/</D:href>");
+        return "<D:href>" + adjustPath(Services.getServiceLookup().getService(ConfigViewFactory.class), "/principals/") + "</D:href>";
     }
 
 }

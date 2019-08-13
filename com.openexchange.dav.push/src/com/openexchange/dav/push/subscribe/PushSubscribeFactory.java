@@ -149,7 +149,7 @@ public class PushSubscribeFactory extends DAVFactory {
 
     @Override
     public String getURLPrefix() {
-        return "/subscribe/";
+        return getURLPrefix("/subscribe/");
     }
 
 }

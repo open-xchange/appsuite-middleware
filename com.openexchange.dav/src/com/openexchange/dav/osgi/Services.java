@@ -93,10 +93,25 @@ public final class Services {
      *
      * @param clazz The service's class
      * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.dav\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+    
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
      * @throws OXException
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) throws OXException {
+    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
         final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
             throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.dav\" not started?");
