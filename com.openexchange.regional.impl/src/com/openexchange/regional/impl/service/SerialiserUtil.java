@@ -153,7 +153,9 @@ class SerialiserUtil {
                 }
                 break;
             case FIRST_DAY_OF_WEEK:
-                if (object instanceof String) {
+                if (WeekDay.class.isInstance(object)) {
+                    builder.withFirstDayOfWeek(((WeekDay) object).getNumber());
+                } else if (object instanceof String) {
                     WeekDay weekday;
                     try {
                         weekday = WeekDay.valueOf((String) object);
