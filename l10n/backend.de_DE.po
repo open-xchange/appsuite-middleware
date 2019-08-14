@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2019-08-02 17:07+0200\n"
+"PO-Revision-Date: 2019-08-14 13:09+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -132,76 +132,6 @@ msgstr "Alle Ihre Termine lesen."
 #: com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
 msgid "Create, modify and delete appointments."
 msgstr "Termine anlegen, ändern und löschen."
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
-#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
-msgid "Calendar"
-msgstr "Kalender"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:63
-msgid "Week"
-msgstr "Woche"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
-msgid "All-day events"
-msgstr "Ganztägige Ereignisse"
-
-#. *
-#. * The default file name for an ical event export, when using batch data
-#.
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
-#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
-msgid "Events"
-msgstr "Ereignisse"
-
-#. * The displayed name for the {@link EventField#LOCATION} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
-msgid "Location"
-msgstr "Ort"
-
-#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
-#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
-#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
-msgid "Participants"
-msgstr "Teilnehmer"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
-msgid "Comments"
-msgstr "Kommentare"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:75
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
-#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
-msgid "The entire day"
-msgstr "Der gesamte Tag."
-
-#. Status
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
-msgid "Accepted"
-msgstr "Bestätigt"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
-#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
-msgid "Declined"
-msgstr "Abgelehnt"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
-msgid "Tentatively accepted"
-msgstr "Vorläufig bestätigt"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
-msgid "Undecided"
-msgstr "Unschlüssig"
-
-#: com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
-#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
-msgid "Resources"
-msgstr "Ressourcen"
 
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your address books and contacts.
@@ -542,7 +472,7 @@ msgid ""
 "Best ignore it."
 msgstr ""
 "Dies ist eine Aktualisierung eines Termins, der zwischenzeitlich geändert "
-"wurde. Am besten, Sie ignorieren diese. "
+"wurde. Am besten, Sie ignorieren diese."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:75
 msgid ""
@@ -564,7 +494,7 @@ msgid ""
 msgstr ""
 "Der Organisator hat Ihren Gegenvorschlag zu dem Termin abgelehnt. Der Termin "
 "ist jedoch nicht vorhanden. Er wurde möglicherweise zwischenzeitlich "
-"gelöscht. "
+"gelöscht."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:78
 msgid ""
@@ -602,7 +532,7 @@ msgstr ""
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:83
 msgid "The appointment's attachments have been changed"
-msgstr "Die Anhänge zu dem Termin wurden geändert."
+msgstr "Die Anhänge zu dem Termin wurden geändert"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:85
 msgid "One or more other fields have been updated"
@@ -719,7 +649,7 @@ msgstr "Sie wurden von %1$s zu einem Ereignis eingeladen:"
 msgid "You have been invited to an event organized by %1$s on behalf of %2$s"
 msgstr ""
 "Sie wurden im Auftrag von %2$s zu einem von %1$s organisierten Ereignis "
-"eingeladen:"
+"eingeladen"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:158
 msgid "%1$s is organizing an event on your behalf."
@@ -818,7 +748,7 @@ msgstr "Der Termin wird nun folgendermaßen angezeigt: \"%1$s\"."
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:200
 msgid "The appointment timezone was changed to: %1$s"
-msgstr "Die Zeitzone des Termins wurde geändert zu: %1$s"
+msgstr "Die Zeitzone des Termins wurde geändert in: %1$s"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:202
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:204
@@ -961,6 +891,15 @@ msgstr ""
 msgid "Reschedule the event. Original date/time: %1$s. New date/time: %2$s"
 msgstr ""
 "Verschieben Sie das Ereignis. Ursprüngliches Datum: %1$s. Neues Datum: %2$s"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:275
+msgid "Resources"
+msgstr "Ressourcen"
+
+#: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:277
+#: com.openexchange.printing/src/com/openexchange/printing/Messages.java:62
+msgid "The entire day"
+msgstr "Der gesamte Tag"
 
 #: com.openexchange.chronos.itip/src/com/openexchange/chronos/itip/Messages.java:279
 msgid "New appointment: %1$s"
@@ -1228,8 +1167,8 @@ msgid ""
 "Access to this calendar is restricted. Please enter your credentials and try "
 "again."
 msgstr ""
-"Der Zugriff auf diesen Kalender ist beschränkt. Bitte geben Sie Ihre "
-"Zugangsdaten ein und versuchen Sie es erneut."
+"Die Zugriffsberechtigung für diesen Kalender ist eingeschränkt. Bitte geben "
+"Sie Ihre Zugangsdaten ein und versuchen Sie es erneut."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
 msgid "Authentication failed. Please enter your credentials and try again."
@@ -1242,8 +1181,8 @@ msgid ""
 "Access to this calendar is restricted. Please enter your password and try "
 "again."
 msgstr ""
-"Der Zugriff auf diesen Kalender ist beschränkt. Bitte geben Sie Ihr Passwort "
-"ein und versuchen Sie es erneut."
+"Die Zugriffsberechtigung für diesen Kalender ist eingeschränkt. Bitte geben "
+"Sie Ihr Passwort ein und versuchen Sie es erneut."
 
 #: com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
 msgid "Authentication failed. Please enter your password and try again."
@@ -1314,6 +1253,12 @@ msgstr "Privat"
 msgid "Subject"
 msgstr "Betreff"
 
+#. * The displayed name for the {@link EventField#LOCATION} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:69
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
+msgid "Location"
+msgstr "Ort"
+
 #. * The displayed name for the {@link EventField#START_DATE} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:72
 msgid "Starts on"
@@ -1337,6 +1282,12 @@ msgstr "Wiederholen"
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
 msgid "Description"
 msgstr "Beschreibung"
+
+#. * The displayed name for the {@link EventField#ATTENDEES} property of an event
+#: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:84
+#: com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
+msgid "Participants"
+msgstr "Teilnehmer"
 
 #. * The displayed name for the {@link EventField#CLASSIFICATION} property of an event
 #: com.openexchange.chronos/src/com/openexchange/chronos/CalendarStrings.java:90
@@ -1394,8 +1345,8 @@ msgid ""
 "The requested calendar account is currently disabled. Please enable the "
 "account and try again."
 msgstr ""
-"Das angeforderte Kalender-Konto ist derzeit deaktiviert. Bitte aktivieren "
-"Sie das Konto und versuchen Sie es erneut."
+"Das angeforderte Kalenderkonto ist derzeit deaktiviert. Bitte aktivieren Sie "
+"das Konto und versuchen Sie es erneut."
 
 #. An I/O error occurred: %1$s
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:76
@@ -1408,7 +1359,7 @@ msgstr "Es trat ein E/A-Fehler auf: %1$s"
 msgid ""
 "The requested operation is not supported for calendar provider \"%1$s\"."
 msgstr ""
-"Der angeforderte Vorgang wird für den Kalender-Anbieter \"%1$s\" nicht "
+"Der angeforderte Vorgang wird für den Kalenderanbieter \"%1$s\" nicht "
 "unterstützt."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
@@ -1449,7 +1400,7 @@ msgid ""
 "Please reload the data and try again."
 msgstr ""
 "Der Vorgang konnte wegen einer gleichzeitigen Änderung nicht abgeschlossen "
-"werden. Laden Sie die Daten neu und versuchen Sie es erneut."
+"werden. Bitte laden Sie die Daten neu und versuchen Sie es erneut."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
@@ -1551,7 +1502,7 @@ msgid ""
 "the appointment times and try again."
 msgstr ""
 "Die angegebenen Start- und Enddaten sind nicht kompatibel. Bitte korrigieren "
-"Sie die Terminzeiten und versuchen Sie es erneut. "
+"Sie die Terminzeiten und versuchen Sie es erneut."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
 msgid ""
@@ -1567,7 +1518,7 @@ msgid ""
 "a valid recurrence identifier and try again."
 msgstr ""
 "Der angezielte Einzeltermin ist nicht Teil des Serientermins. Bitte wählen "
-"sie eine gültige Serien-ID und versuchen  Sie es erneut."
+"sie eine gültige Serien-ID und versuchen Sie es erneut."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 msgid ""
@@ -1619,7 +1570,7 @@ msgid ""
 "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the "
 "problematic character and try again."
 msgstr ""
-"Das Zeichen \"%1$s\" im Feld \"%2$s\" kann nicht gespeichert werden.  Bitte "
+"Das Zeichen \"%1$s\" im Feld \"%2$s\" kann nicht gespeichert werden. Bitte "
 "entfernen Sie das Zeichen und versuchen Sie es erneut."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:140
@@ -1627,7 +1578,7 @@ msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$d, current: %3$d) and try again."
 msgstr ""
-"Einige der eingegebenen Daten übersteigen das Feldlimit. Bitte kürzen Sie "
+"Einige der eingegebenen Daten überschreiten das Feldlimit. Bitte kürzen Sie "
 "den Eintrag für \"%1$s\" (Limit: %2$s, aktuell: %3$s) und versuchen Sie es "
 "erneut."
 
@@ -1667,7 +1618,7 @@ msgstr ""
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:156
 msgid "The quota for account '%1$s' in context '%2$s' exceeded the limit."
 msgstr ""
-"Das Quota-Limit für das Konto \"%1$s\" im Kontext \"%2$s\" wurde "
+"Das Kontingentlimit für das Konto \"%1$s\" im Kontext \"%2$s\" wurde "
 "überschritten."
 
 #: com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:158
@@ -1713,8 +1664,8 @@ msgstr "Fehler beim Ausführen. Bitte wählen Sie eine andere Option."
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
 msgstr ""
-"Die Sende-Quota wurde überschritten. Sie dürfen nur 1 SMS in %1$s Sekunden "
-"senden."
+"Das Sendekontingent wurde überschritten. Sie dürfen nur 1 SMS in %1$s "
+"Sekunden senden."
 
 #. The download link is invalid.
 #: com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:85
@@ -2483,7 +2434,7 @@ msgstr ""
 #. A property defining the server name was not found in the configuration properties files.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
 msgid "Server name is not defined."
-msgstr "Kein Server-Name angegeben"
+msgstr "Kein Server-Name angegeben."
 
 #. %1$s is replaced with some class name where that class has not been initialized before calling its methods.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:96
@@ -2498,7 +2449,7 @@ msgstr "Verbindung %1$d Millisekunden verwendet."
 #. %1$d is replaced with the number of statements that have not been closed before returning the connection.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
 msgid "%1$d statements are not closed."
-msgstr "%1$d Statements sind nicht geschlossen."
+msgstr "%1$d Anweisungen sind nicht geschlossen."
 
 #. %1$s is replaced with the URL parameter string that is not parseable.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:105
@@ -2512,7 +2463,7 @@ msgstr "Konfigurationsdatei für Datenbankkonfiguration nicht vorhanden"
 #. %1$s is replaced with the name of the required property that is not found.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:110
 msgid "Property \"%1$s\" is not defined."
-msgstr "Eigenschaft \"%1$s\" nicht festgelegt"
+msgstr "Die Eigenschaft \"%1$s\" wurde nicht definiert."
 
 #. %1$s is replaced with the name of the java class that should be initialized a second time.
 #: com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:113
@@ -2563,7 +2514,7 @@ msgstr ""
 #. Problem with reading from or writing to database
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:63
 msgid "Problem with reading from or writing to database"
-msgstr "Problem beim Lesen oder Schreiben aus bzw. in die Datenbank"
+msgstr "Problem beim Lesen oder Schreiben aus der bzw. in die Datenbank"
 
 #. User specified an input text that contains certain characters, which are not supported by database. E.g. cannot be stored or cannot be queried by.
 #: com.openexchange.database/src/com/openexchange/database/DatabaseExceptionStrings.java:66
@@ -2686,8 +2637,8 @@ msgid ""
 "The directory version \"%1$s\" was not found. Please retry the "
 "synchronization."
 msgstr ""
-"Das Verzeichnisversion \"%1$s\" konnte nicht gefunden werden. Bitte starten "
-"Sie einen erneuten  Synchronisationsversuch."
+"Die Verzeichnisversion \"%1$s\" konnte nicht gefunden werden. Bitte starten "
+"Sie einen erneuten Synchronisationsversuch."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
 msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\"."
@@ -2714,7 +2665,7 @@ msgstr ""
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:74
 msgid "The allowed quota is reached."
-msgstr "Die zulässige Quota ist erreicht."
+msgstr "Das zulässige Kontingent ist erreicht."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:75
 msgid "The path \"%1$s\" is invalid."
@@ -2738,7 +2689,7 @@ msgstr "Die Dateiversion \"%1$s\" ist ungültig."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:80
 msgid "The directory version \"%1$s\" is invalid."
-msgstr "Die Verzeichnis-Version \"%1$s\" ist ungültig."
+msgstr "Die Verzeichnisversion \"%1$s\" ist ungültig."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:81
 msgid "Push updates are not available."
@@ -2788,7 +2739,7 @@ msgid ""
 "\"%2$s\"."
 msgstr ""
 "Konflikt für den Dateinamen \"%1$s\". Es gibt bereits ein gleichnamiges "
-"Verzeichnis unter \"%2$s\". "
+"Verzeichnis unter \"%2$s\"."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
 msgid ""
@@ -2817,7 +2768,7 @@ msgid ""
 msgstr ""
 "Die maximale Anzahl synchronisierbarer Verzeichnisse (%1$d) wurde "
 "überschritten. Bitte entfernen Sie einige Verzeichnisse und versuchen Sie es "
-"erneut, oder wählen Sie einen anderen Stammordner."
+"erneut, oder wählen Sie einen anderen Root-Ordner."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
 msgid ""
@@ -2830,7 +2781,7 @@ msgstr ""
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:95
 msgid "The token \"%1$s\" is already registered."
-msgstr "Der Token \"%1$s\" ist bereits registriert."
+msgstr "Das Token \"%1$s\" ist bereits registriert."
 
 #: com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
 msgid "Empty files indicated for directory \"%1$s\"."
@@ -2863,7 +2814,7 @@ msgstr "Zu verwendendes OAuth-Konto"
 #: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:62
 msgid "The total upload size (%1$s) exceeds the available free space of %2$s."
 msgstr ""
-"Die gesamte Upload-Größe (%1$s) übersteigt den verfügbaren freien "
+"Die gesamte Upload-Größe (%1$s) überschreitet den verfügbaren freien "
 "Speicherplatz von %2$s."
 
 #: com.openexchange.file.storage.limit/src/com/openexchange/file/storage/limit/exceptions/LimitExceptionMessages.java:64
@@ -3000,18 +2951,18 @@ msgid ""
 "The allowed quota is reached. Please delete some items in order to store new "
 "ones."
 msgstr ""
-"Die zulässige Quota wurde überschritten. Bitte löschen Sie einige Objekte, "
-"um neue speichern zu können."
+"Das zulässige Kontingent wurde überschritten. Bitte löschen Sie einige "
+"Objekte, um neue speichern zu können."
 
 #. ZIP archive exceeds max. allowed size of %1$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:89
 msgid "ZIP archive exceeds max. allowed size of %1$s"
-msgstr "ZIP-Archiv übersteigt die maximal zulässige Größe von %1$s"
+msgstr "ZIP-Archiv überschreitet die maximal zulässige Größe von %1$s"
 
 #. The file storage account is currently not accessible.
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:92
 msgid "The file storage account is currently not accessible."
-msgstr "Das Dateispeicher-Konto ist derzeit nicht verfügbar."
+msgstr "Das Dateispeicherkonto ist derzeit nicht verfügbar."
 
 #. The folder \"%1$s\" cannot be moved to \"%2$s\".
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:95
@@ -3056,7 +3007,7 @@ msgid ""
 "The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other "
 "users when moving it into the account \"%3$s\"."
 msgstr ""
-"Auf die geteilte Datei \"%1$s\" im Ordner \"%2$s\" kann durch andere "
+"Auf die freigegebene Datei \"%1$s\" im Ordner \"%2$s\" kann durch andere "
 "Benutzer nicht mehr zugegriffen werden, wenn sie in das Konto \"%3$s\" "
 "verschoben wird."
 
@@ -3066,7 +3017,7 @@ msgid ""
 "The shared folder \"%1$s\" is no longer accessible by other users when "
 "moving it into the account \"%2$s\"."
 msgstr ""
-"Auf den geteilten Ordner \"%1$s\" kann durch andere Benutzer nicht mehr "
+"Auf den freigegebenen Ordner \"%1$s\" kann durch andere Benutzer nicht mehr "
 "zugegriffen werden, wenn er in das Konto \"%2$s\" verschoben wird."
 
 #. The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
@@ -3106,7 +3057,7 @@ msgstr "Fehlender Dateiname"
 #. Update denied for %1$s resource: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:131
 msgid "Update denied for \"%1$s\" resource: %2$s"
-msgstr "Aktualisierung verweigert für die \"%1$s\"-Ressource: %2$s"
+msgstr "Aktualisierung für \"%1$s\"-Ressource verweigert: %2$s"
 
 #. Delete denied for \"%1$s\" resource: %2$s
 #: com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:134
@@ -3180,7 +3131,7 @@ msgid ""
 "Your rate limit has been exceeded and further access is not possible at the "
 "moment."
 msgstr ""
-"Ihr Quota-Limit wurde überschritten. Weiterer Zugriff ist derzeit nicht "
+"Ihr Kontingentlimit wurde überschritten. Weiterer Zugriff ist derzeit nicht "
 "möglich."
 
 #. You need to get sufficient permissions to perform the operation on the specified entity.
@@ -3243,8 +3194,7 @@ msgstr ""
 msgid ""
 "The e-mail address you provided is associated with more than one account"
 msgstr ""
-"Die von Ihnen angegebene E-Mail-Adresse wird mit mehr als einem Konto "
-"assoziiert."
+"Die von Ihnen angegebene E-Mail-Adresse ist mehr als einem Konto zugeordnet"
 
 #. The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:74
@@ -3295,19 +3245,19 @@ msgstr ""
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:92
 msgid "Your proposed upload exceeds the maximum allowed object size."
 msgstr ""
-"Ihr vorgeschlagener Upload übersteigt die maximal zulässige Objektgröße."
+"Ihr vorgeschlagener Upload überschreitet die maximal zulässige Objektgröße."
 
 #. The provided token has expired.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:95
 msgid "The provided token has expired."
-msgstr "Der angegebene Token ist abgelaufen."
+msgstr "Das angegebene Token ist abgelaufen."
 
 #. The AWS Access Key Id you provided does not exist in our records.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:98
 msgid "The AWS Access Key Id you provided does not exist in our records."
 msgstr ""
 "Die von Ihnen angegebene ID für den AWS-Zugriffsschlüssel ist in unseren "
-"Aufzeichnungen nicht vorhanden. "
+"Aufzeichnungen nicht vorhanden."
 
 #. The specified bucket is not valid.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:101
@@ -3327,7 +3277,7 @@ msgstr "Die angegebenen Sicherheits-Anmeldedaten sind ungültig."
 #. The provided token is malformed or otherwise invalid.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:110
 msgid "The provided token is malformed or otherwise invalid."
-msgstr "Der angegebene Token ist nicht wohlgeformt oder anderweitig ungültig."
+msgstr "Das angegebene Token ist nicht wohlgeformt oder anderweitig ungültig."
 
 #. Couldn't parse the specified URI.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:113
@@ -3370,7 +3320,7 @@ msgid ""
 "resource. Please try again."
 msgstr ""
 "Konflikt mit einer bedingten Aktion, die derzeit für diese Ressource läuft. "
-"Bitte erneut versuchen. "
+"Bitte erneut versuchen."
 
 #. At least one of the preconditions you specified did not hold.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:136
@@ -3395,7 +3345,7 @@ msgstr "Sie werden zum Bucket umgeleitet, während DNS aktualisiert."
 #. The provided token must be refreshed.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:148
 msgid "The provided token must be refreshed."
-msgstr "Der angegebene Token muss aktualisiert werden."
+msgstr "Das angegebene Token muss aktualisiert werden."
 
 #. The e-mail address you provided does not match any account on record.
 #: com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
@@ -3451,8 +3401,8 @@ msgid ""
 "The allowed quota is reached. Please delete some items in order to create "
 "new ones."
 msgstr ""
-"Die zulässige Quota wurde überschritten. Bitte löschen Sie einige Objekte, "
-"um Platz für neue zu schaffen."
+"Das zulässige Kontingent wurde überschritten. Bitte löschen Sie einige "
+"Objekte, um Platz für neue zu schaffen."
 
 #. The service you requested is currently not available. Please try again later.
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
@@ -3469,7 +3419,7 @@ msgid ""
 "%2$s."
 msgstr ""
 "Für das Feld '%1$s' fehlt ein Filter. Dieser wird zum Suchen im Modul %2$s "
-"benötigt. "
+"benötigt."
 
 #. A search filter did not contain a field to filter on.
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:72
@@ -3518,7 +3468,7 @@ msgid ""
 "be used within one request."
 msgstr ""
 "Die Facettentypen \"%1$s\" und \"%2$s\" dürfen nicht innerhalb derselben "
-"Anfrage verwendet werden, da dies einen Konflikt auslöst.  "
+"Anfrage verwendet werden, da dies einen Konflikt auslöst."
 
 #. You are not allowed to search in module \"%1$s\".
 #: com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
@@ -3598,6 +3548,15 @@ msgstr "⁺∕₋ 3 Monate"
 #: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:96
 msgid "⁺∕₋ 1 year"
 msgstr "⁺∕₋ 1 Jahr"
+
+#. Status
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:99
+msgid "Accepted"
+msgstr "Bestätigt"
+
+#: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:101
+msgid "Declined"
+msgstr "Abgelehnt"
 
 #: com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:103
 msgid "Tentative"
@@ -3844,7 +3803,7 @@ msgstr "Aufgabenordner"
 #. Search in persons.
 #: com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:72
 msgid "Task participants"
-msgstr "Aufgaben-Teilnehmer"
+msgstr "Aufgabenteilnehmer"
 
 #. Search in task type.
 #: com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:75
@@ -3885,12 +3844,12 @@ msgstr "Verschoben"
 
 #: com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:102
 msgid "Single Task"
-msgstr "Einzelne Aufgabe"
+msgstr "Einzelaufgabe"
 
 #. The uwa widget with the id %1$s could not be found
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 msgid "The uwa widget with the id %1$s could not be found"
-msgstr "Das UWA-Widget mit der ID %1$s kann nicht gefunden werden"
+msgstr "Das UWA-Widget mit der ID %1$s konnte nicht gefunden werden"
 
 #. The widget with the id %1$s is protected and only positional information can be updated
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:66
@@ -3904,7 +3863,7 @@ msgstr ""
 #. The string cannot be parsed to a valid URL.
 #: com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:69
 msgid "The string cannot be parsed to a valid URL."
-msgstr "Die Zeichenkette konnte nicht in eine gültige URL aufgelöst werden. "
+msgstr "Die Zeichenkette konnte nicht in eine gültige URL aufgelöst werden."
 
 #. The authentication mechanism is completely replaceable. Some hoster need to ban users. This message is used therefore.
 #. %s is replaced with some login name.
@@ -3933,7 +3892,7 @@ msgstr ""
 #. The supplied credentials for the authentication are invalid.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:75
 msgid "The user name or password is incorrect."
-msgstr "Der Benutzername oder das Passwort ist nicht korrekt."
+msgstr "Der Benutzername oder das Passwort ist falsch."
 
 #. This message is used if the password of the user expired and must be changed.
 #. %1$s is replaced by an URL for changing the password or by the name of the system that is able to do that.
@@ -3973,7 +3932,7 @@ msgstr "Automatisches Anmelden wird nicht unterstützt."
 #. Indicates a deactivated user
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:101
 msgid "The user account is not activated."
-msgstr "Das Benutzer-Konto ist nicht aktiviert."
+msgstr "Das Benutzerkonto ist nicht aktiviert."
 
 #. You exceeded the maximum count of logins without password.
 #: com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:104
@@ -4011,7 +3970,7 @@ msgstr "Zu viele Anmeldeversuche. Bitte versuchen Sie es später erneut."
 #. Too few (%d) login attributes.
 #: com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
 msgid "Too few (%d) login attributes."
-msgstr "Zu wenige (%d) Login-Attribute."
+msgstr "Zu wenige (%d) Anmeldeattribute."
 
 #: com.openexchange.global/src/com/openexchange/context/ContextExceptionMessages.java:61
 msgid "The account %2$s is disabled."
@@ -4332,7 +4291,7 @@ msgstr "Fehlender Standard-%1$s-Ordner"
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:102
 msgid "Update of folder failed"
-msgstr "Das Aktualisierung des Ordners ist fehlgeschlagen."
+msgstr "Aktualisierung des Ordners ist fehlgeschlagen"
 
 #. *
 #. * Default folder %1$s must not be deleted
@@ -4389,8 +4348,8 @@ msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
-"Wahrscheinlich ist Ihre Mailbox fast voll.\n"
+"Diese Nachricht konnte nicht in den Papierkorb verschoben werden. "
+"Wahrscheinlich ist Ihr Postfach fast voll.\n"
 "Entfernen Sie in diesem Fall Ihre gelöschten Objekte oder löschen Sie zuerst "
 "kleinere Nachrichten."
 
@@ -4425,8 +4384,7 @@ msgstr ""
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:134
 msgid "The raw content's input stream cannot be read"
-msgstr ""
-"Die Rohdaten des Inhalts des Eingabestreams konnten nicht gelesen werden."
+msgstr "Der Eingabestream des Rohinhalts kann nicht gelesen werden"
 
 #. *
 #. * No attachment was found with id %1$s in message
@@ -4438,7 +4396,7 @@ msgstr "Kein Anhang mit der ID %1$s in der Nachricht gefunden"
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
 msgid "Versit object could not be saved"
-msgstr "Versit-Objekt (vCard) konnte nicht gespeichert werden"
+msgstr "Das Versit-Objekt (vCard) konnte nicht gespeichert werden"
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:140
 msgid "No support of capability \"THREAD=REFERENCES\""
@@ -4462,7 +4420,7 @@ msgstr ""
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
 msgid "Sort field %1$s is not supported via IMAP SORT command"
-msgstr "Das Sortierfeld %1$s wird nicht vom IMAP SORT-Befehl unterstützt."
+msgstr "Das Sortierfeld %1$s wird nicht vom IMAP SORT-Befehl unterstützt"
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
 msgid "Missing personal namespace"
@@ -4470,7 +4428,7 @@ msgstr "Fehlender persönlicher Namensraum"
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:150
 msgid "Parsing thread-sort string failed: %1$s."
-msgstr "Fehler beim Analysieren des Thread-Sortierungsstrings"
+msgstr "Fehler beim Analysieren des Thread-Sortierungsstrings."
 
 #: com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:152
 msgid "A SQL error occurred: %1$s"
@@ -4551,7 +4509,7 @@ msgstr ""
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:75
 msgid "Tasks module is not enabled. Tasks cannot be imported."
 msgstr ""
-"Das Aufgaben-Modul ist nicht aktiviert. Aufgaben können nicht importiert "
+"Das Aufgabenmodul ist nicht aktiviert. Aufgaben können nicht importiert "
 "werden."
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:77
@@ -4634,7 +4592,7 @@ msgstr "Leere Datei hochgeladen"
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:107
 msgid "The file you selected does not exist."
-msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden"
+msgstr "Die von Ihnen gewählte Datei ist nicht vorhanden."
 
 #. Ignoring invalid value for field "%1$s": %2$s
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:110
@@ -4671,7 +4629,7 @@ msgstr ""
 
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:124
 msgid "The uploaded file did not contain any content"
-msgstr "Die hochgeladene Datei enthält keinen Inhalt."
+msgstr "Die hochgeladene Datei enthält keinen Inhalt"
 
 #. Something went wrong reading from specified file. Please try again.
 #: com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:127
@@ -4738,6 +4696,13 @@ msgstr ""
 #: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:71
 msgid "Appointments"
 msgstr "Termine"
+
+#. *
+#. * The default file name for an ical event export, when using batch data
+#.
+#: com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
+msgid "Events"
+msgstr "Ereignisse"
 
 #. *
 #. * The default file name for an ical task export, when using batch data
@@ -4809,14 +4774,14 @@ msgstr ""
 #. You are not allowed to change the name of the category %1$s.
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:80
 msgid "You are not allowed to change the name of the category %1$s."
-msgstr "Sie haben keine Berechtigung, den Namen der Kategorie %1$s zu ändern."
+msgstr "Sie haben keine Berechtigung zum Ändern des Namens der Kategorie %1$s."
 
 #. You are not allowed to enable or disable the category %1$s.
 #: com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:83
 msgid "You are not allowed to enable or disable the category %1$s."
 msgstr ""
-"Sie haben keine Berechtigung, die Kategorie %1$s zu aktivieren oder "
-"deaktivieren."
+"Sie haben keine Berechtigung zum Aktivieren oder Deaktivieren der Kategorie "
+"%1$s."
 
 #: com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
@@ -5089,12 +5054,12 @@ msgstr "JSON-Fehler: %s"
 #. * The type of multifactor provider is not known
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:78
 msgid "The requested provider %1$s is unknown."
-msgstr "Der angegebene Anbieter %1$s ist unbekannt."
+msgstr "Der angeforderte Anbieter %1$s ist unbekannt."
 
 #. * This multifactor provider is not available for the user
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:81
 msgid "The requested provider %1$s is not available for the user."
-msgstr "Der angegebene Anbieter %1$s ist für den Benutzer nicht verfügbar."
+msgstr "Der angeforderte Anbieter %1$s ist für den Benutzer nicht verfügbar."
 
 #. * Multifactor is required, but the device identifier is missing
 #: com.openexchange.multifactor/src/com/openexchange/multifactor/exceptions/MultifactorExceptionMessages.java:84
@@ -5195,8 +5160,8 @@ msgid ""
 "The SSL certificate with fingerprint '%1$s' was not found for user '%2$s' in "
 "context '%3$s'"
 msgstr ""
-"Das SSL-Zertifikat mit Fingerabdruck '%1$s' wurde für Benutzer '%2$s' im "
-"Kontext '%3$s' nicht gefunden."
+"Das SSL-Zertifikat mit dem Fingerabdruck '%1$s' wurde für den Benutzer "
+"'%2$s' im Kontext '%3$s' nicht gefunden."
 
 #. The certificate for domain '%2$s' is untrusted.
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:64
@@ -5229,7 +5194,7 @@ msgstr ""
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:76
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/internal/FailureReasonMessage.java:63
 msgid "The certificate is self-signed"
-msgstr "Das Zertifikat ist selbstsigniert."
+msgstr "Das Zertifikat ist selbstsigniert"
 
 #. The certificate is expired
 #: com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:79
@@ -5436,7 +5401,7 @@ msgstr "In der gesendeten Anfrage fehlt der Hauptteil"
 #. The account is invalid, please recreate it.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:76
 msgid "The account is invalid, please recreate it."
-msgstr "Das Konto ist ungültig. Bitte erstellen Sie ihn erneut."
+msgstr "Das Konto ist ungültig. Bitte erstellen Sie es erneut."
 
 #. The account "%1$s" is invalid, please recreate it.
 #: com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
@@ -5585,8 +5550,8 @@ msgstr "Mindestens ein angegebenes Thema ist ungültig."
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:75
 msgid "User %1$s has no mail module access due to user configuration"
 msgstr ""
-"Aufgrund der Benutzerkonfiguration hat Benutzer %1$s keinen Zugriff auf das "
-"E-Mail-Modul."
+"Aufgrund der Benutzerkonfiguration hat der Benutzer %1$s keinen Zugriff auf "
+"das E-Mail-Modul."
 
 #. *
 #. * No access to mail folder %1$s
@@ -5596,7 +5561,7 @@ msgid ""
 "You do not have the appropriate permissions to access the mail folder %1$s"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Zugriff auf den E-Mail-"
-"Ordner %1$s."
+"Ordner %1$s"
 
 #. *
 #. * No read access on mail folder %1$s
@@ -5604,8 +5569,8 @@ msgstr ""
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:83
 msgid "You do not have the appropriate permissions to read mail folder %1$s"
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen des E-Mail-"
-"Ordners %1$s."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Lesen des E-"
+"Mail-Ordners %1$s."
 
 #. *
 #. * No delete access on mail folder %1$s
@@ -5614,7 +5579,7 @@ msgstr ""
 msgid "You do not have the appropriate permissions to delete mail folder %1$s"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Löschen des E-Mail-"
-"Ordners %1$s."
+"Ordners %1$s"
 
 #. *
 #. * No insert access on mail folder %1$s
@@ -5624,7 +5589,7 @@ msgid ""
 "You do not have the appropriate permissions to insert to mail folder %1$s"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Einfügen in den E-Mail-"
-"Ordner %1$s."
+"Ordner %1$s"
 
 #. *
 #. * No administer access on mail folder %1$s
@@ -5634,7 +5599,7 @@ msgid ""
 "You do not have the appropriate permissions to administer mail folder %1$s"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Administrieren des E-"
-"Mail-Ordners %1$s."
+"Mail-Ordners %1$s"
 
 #. *
 #. * No write access to POP3 folder %1$s
@@ -5643,8 +5608,8 @@ msgstr ""
 msgid ""
 "You do not have the appropriate permissions to write to POP3 folder %1$s"
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Schreiben in den POP3-"
-"Ordner %1$s."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Schreiben in "
+"den POP3-Ordner %1$s"
 
 #. *
 #. * No keep-seen access on mail folder %1$s
@@ -5655,7 +5620,7 @@ msgid ""
 "mail folder %1$s"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen für einen Gelesen/"
-"Ungelesen-Zugriff im E-Mail-Ordner %1$s."
+"Ungelesen-Zugriff im E-Mail-Ordner %1$s"
 
 #. *
 #. * Folder %1$s does not allow subfolders.
@@ -5669,7 +5634,7 @@ msgstr "Sie können keine Unterordner im Ordner %1$s anlegen."
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:111
 msgid "POP3 does not support mail folder creation"
-msgstr "POP3 unterstützt das Anlegen von Mail-Ordnern nicht"
+msgstr "POP3 unterstützt das Anlegen von E-Mail-Ordnern nicht"
 
 #. *
 #. * The permissions set could not be applied to the new folder %1$s.
@@ -5725,7 +5690,7 @@ msgstr "Fehlender Standard-%1$s-Ordner in den Benutzer-Maileinstellungen"
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:140
 msgid "Update of folder %1$s failed"
-msgstr "Aktualisierung des Ordners %1$d fehlgeschlagen."
+msgstr "Aktualisierung des Ordners %1$d ist fehlgeschlagen"
 
 #. *
 #. * Folder %1$s must not be deleted
@@ -5749,7 +5714,7 @@ msgid ""
 "POP3 search failed due to the following reason: %1$s. Switching to "
 "application-based search"
 msgstr ""
-"Die POP3-Suche ist aus folgendem Grund fehlgeschlagen:%1$s. Es wird auf "
+"Die POP3-Suche ist aus folgendem Grund fehlgeschlagen: %1$s. Es wird auf "
 "applikationsbasierte Suche umgeschaltet."
 
 #. *
@@ -5760,7 +5725,7 @@ msgid ""
 "POP3 sort failed due to the following reason: %1$s Switching to application-"
 "based sorting"
 msgstr ""
-"POP3-Sortierung ist aus folgendem Grund fehlgeschlagen: %1$s Es wird auf "
+"Die POP3-Sortierung ist aus folgendem Grund fehlgeschlagen: %1$s Es wird auf "
 "applikationsbasierte Sortierung umgeschaltet."
 
 #. *
@@ -5789,8 +5754,8 @@ msgid ""
 "mailbox is nearly full. In that case, please try to empty your deleted items "
 "first, or delete smaller messages first."
 msgstr ""
-"Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
-"Wahrscheinlich ist Ihre Mailbox fast voll. Entfernen Sie in diesem Fall Ihre "
+"Diese Nachricht konnte nicht in den Papierkorb verschoben werden. "
+"Wahrscheinlich ist Ihr Postfach fast voll. Entfernen Sie in diesem Fall Ihre "
 "gelöschten Objekte oder löschen Sie zuerst kleinere Nachrichten."
 
 #. *
@@ -5847,8 +5812,8 @@ msgid ""
 "You do not have the appropriate permissions to open folder %1$s due to "
 "missing read access"
 msgstr ""
-"Aufgrund fehlendem Lesezugriffs haben Sie nicht die entsprechenden "
-"Berechtigungen zum Öffnen des Ordners %1$s."
+"Aufgrund fehlenden Lesezugriffs haben Sie nicht die entsprechenden "
+"Berechtigungen zum Öffnen des Ordners %1$s"
 
 #. *
 #. * The raw content's input stream of message %1$s in folder %2$s cannot be read
@@ -5857,8 +5822,8 @@ msgstr ""
 msgid ""
 "The raw content's input stream of message %1$s in folder %2$s cannot be read"
 msgstr ""
-"Die Rohdaten des Inhalts der Nachricht %1$s im Ordner %2$s konnten nicht "
-"gelesen werden."
+"Der Eingabestream des Rohinhalts der Nachricht %1$s im Ordner %2$s kann "
+"nicht gelesen werden"
 
 #. *
 #. * Versit object %1$s could not be saved
@@ -5866,8 +5831,7 @@ msgstr ""
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:213
 msgid "Versit object (i.e. vCard or vCalendar) could not be saved"
 msgstr ""
-"Das Versit-Objekt (z.B. vCard oder vCalendar) konnte nicht gespeichert "
-"werden."
+"Das Versit-Objekt (z.B. vCard oder vCalendar) konnte nicht gespeichert werden"
 
 #. *
 #. * POP3 server does not support capability "THREAD=REFERENCES"
@@ -5918,7 +5882,7 @@ msgstr "Das Löschen von Ordnern wird vom Server nicht unterstützt."
 #.
 #: com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:241
 msgid "Updating folders is not supported by the server."
-msgstr "Das Aktualisieren von Ordnern wird vom Server nicht unterstützt."
+msgstr "Die Aktualisierung von Ordnern wird vom Server nicht unterstützt."
 
 #. *
 #. * POP3 does not support to move messages.
@@ -6042,7 +6006,7 @@ msgid ""
 "Please be advised that while it is safe to ignore this warning, the POP3 "
 "account might not work if the supplied credentials are invalid."
 msgstr ""
-"Validierung der POP3-Anmeldedaten wurde aufgrund möglicher "
+"Die Validierung der POP3-Anmeldedaten wurde aufgrund möglicher "
 "Anmeldebeschränkungen vom Anbieter deaktiviert. Andernfalls wären "
 "nachfolgende Anmeldeversuche möglicherweise nicht erfolgreich. Bitte "
 "beachten Sie, dass zwar das Ignorieren dieses Warnhinweises sicher ist, dass "
@@ -6074,7 +6038,7 @@ msgstr "Die von Ihnen angegebenen Daten (%1$s) können nicht geändert werden."
 #. Thumbnail image not available.
 #: com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:67
 msgid "Thumbnail image not available."
-msgstr "Kein Vorschaubild verfügbar"
+msgstr "Kein Vorschaubild verfügbar."
 
 #. No preview service for MIME type %1$s
 #: com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:70
@@ -6083,7 +6047,7 @@ msgid ""
 "try again later"
 msgstr ""
 "Der Voransicht-Dienst für den MIME-Typ %1$s ist vorübergehend nicht "
-"verfügbar. Bitte  versuchen Sie es später erneut."
+"verfügbar. Bitte versuchen Sie es später erneut."
 
 #: com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:70
 msgid "Could not load data via proxy."
@@ -6094,9 +6058,10 @@ msgid ""
 "Quota exceeded. Please delete some items in order to create new ones. Please "
 "note: The quota refers to all items of all users in this context."
 msgstr ""
-"Quota überschritten. Bitte löschen Sie einige Objekte, um Platz für neue zu "
-"schaffen. Bitte beachten: Die Quota bezieht sich auf alle Objekte aller "
-"Benutzer in diesem Kontext."
+"Das Speicherkontingent wurde überschritten. Bitte löschen Sie einige "
+"Objekte, um Platz für neue zu schaffen. Bitte beachten Sie: Das "
+"Speicherkontingent bezieht sich auf alle Objekte aller Benutzer in diesem "
+"Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:64
 msgid ""
@@ -6104,9 +6069,10 @@ msgid ""
 "delete some appointments in order to create new ones. Please note: The quota "
 "refers to all appointments of all users in this context."
 msgstr ""
-"Quota für Kalender überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Termine, um Platz für neue zu schaffen. Bitte beachten: "
-"Die Quota bezieht sich auf alle Termine aller Benutzer in diesem Kontext."
+"Das Speicherkontingent für Kalender wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Termine, um Platz für neue zu "
+"schaffen. Bitte beachten Sie: Das Speicherkontingent bezieht sich auf alle "
+"Termine aller Benutzer in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 msgid ""
@@ -6114,9 +6080,10 @@ msgid ""
 "delete some contacts in order to create new ones. Please note: The quota "
 "refers to all contacts of all users in this context."
 msgstr ""
-"Quota für Kontakte überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Kontakte, um Platz für neue zu schaffen. Bitte beachten: "
-"Die Quota bezieht sich auf alle Kontakte aller Benutzer in diesem Kontext."
+"Das Speicherkontingent für Kontakte wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Kontakte, um Platz für neue zu "
+"schaffen. Bitte beachten Sie: Das Speicherkontingent bezieht sich auf alle "
+"Kontakte aller Benutzer in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:68
 msgid ""
@@ -6124,10 +6091,10 @@ msgid ""
 "some tasks in order to create new ones. Please note: The quota refers to all "
 "tasks of all users in this context."
 msgstr ""
-"Quota für Aufgaben überschritten. Quota-Limit: %2$s. Belegte Quota: %1$s. "
-"Bitte löschen Sie einige Aufgaben, um Platz für neue zu schaffen. Bitte "
-"beachten: Die Quota bezieht sich auf alle Aufgaben aller Benutzer in diesem "
-"Kontext."
+"Das Speicherkontingent für Aufgaben wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Aufgaben, um Platz für neue zu "
+"schaffen. Bitte beachten Sie: Das Speicherkontingent bezieht sich auf alle "
+"Aufgaben aller Benutzer in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:70
 msgid ""
@@ -6135,9 +6102,10 @@ msgid ""
 "some files in order to create new ones. Please note: The quota refers to all "
 "files of all users in this context."
 msgstr ""
-"Quota für Dateien überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Dateien, um Platz für neue zu schaffen. Bitte beachten: "
-"Die Quota bezieht sich auf alle Dateien aller Benutzer in diesem Kontext."
+"Das Speicherkontingent für Dateien wurde überschritten. Limit: %2$s. Belegt: "
+"%1$s. Bitte löschen Sie einige Dateien, um Platz für neue zu schaffen. Bitte "
+"beachten Sie: Das Speicherkontingent bezieht sich auf alle Dateien aller "
+"Benutzer in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
 msgid ""
@@ -6145,9 +6113,10 @@ msgid ""
 "delete some attachments in order to create new ones. Please note: The quota "
 "refers to all attachments of all users in this context."
 msgstr ""
-"Quota für Anhänge überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Anhänge, um neue anlegen zu können. Bitte beachten: Die "
-"Quota bezieht sich auf alle Anhänge aller Benutzer in diesem Kontext."
+"Das Speicherkontingent für Anhänge wurde überschritten. Limit: %2$s. Belegt: "
+"%1$s. Bitte löschen Sie einige Anhänge, um neue anlegen zu können. Bitte "
+"beachten Sie: Das Speicherkontingent bezieht sich auf alle Anhänge aller "
+"Benutzer in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid ""
@@ -6155,9 +6124,10 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"Quota für Freigaben überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte "
-"löschen Sie einige Freigaben, um neue anlegen zu können. Bitte beachten: Die "
-"Quota bezieht sich auf alle Freigaben eines Benutzers in diesem Kontext."
+"Das Speicherkontingent für Freigaben wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Freigaben, um neue anlegen zu können. "
+"Bitte beachten Sie: Das Speicherkontingent bezieht sich auf alle Freigaben "
+"eines Benutzers in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:76
 msgid ""
@@ -6165,10 +6135,10 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"Die Quota für Freigabe-Links wurde überschritten. Quota-Limit: %2$s. Belegte "
-"Quota: %1$s. Bitte löschen Sie einige Freigaben, um neue erstellen zu "
-"können. Hinweis: Die Quota bezieht sich auf alle Freigaben eines Benutzers "
-"in diesem Kontext."
+"Das Speicherkontingent für Freigabe-Links wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Freigaben, um neue erstellen zu "
+"können. Bitte beachten Sie: Das Speicherkontingent bezieht sich auf alle "
+"Freigaben eines Benutzers in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:78
 msgid ""
@@ -6176,18 +6146,18 @@ msgid ""
 "delete some shares in order to create new ones. Please note: The quota "
 "refers to all shares of one user in this context."
 msgstr ""
-"Die Quota für Gastbenutzer wurde überschritten. Quota-Limit: %2$s. Belegte "
-"Quota: %1$s. Bitte löschen Sie einige Freigaben, um neue erstellen zu "
-"können. Hinweis: Die Quota bezieht sich auf alle Freigaben eines Benutzers "
-"in diesem Kontext."
+"Das Speicherkontingent für Gastbenutzer wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Freigaben, um neue erstellen zu "
+"können. Bitte beachten Sie: Das Speicherkontingent bezieht sich auf alle "
+"Freigaben eines Benutzers in diesem Kontext."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:80
 msgid ""
 "Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please "
 "delete some signatures in order to create new ones."
 msgstr ""
-"Die Quota für Signaturen wurde überschritten. Quota-Limit: %2$s. Belegte "
-"Quota: %1$s. Bitte löschen Sie einige Signaturen, um neue zu anlegen zu "
+"Das Speicherkontingent für Signaturen wurde überschritten. Limit: %2$s. "
+"Belegt: %1$s. Bitte löschen Sie einige Signaturen, um neue zu anlegen zu "
 "können."
 
 #: com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:82
@@ -6290,7 +6260,7 @@ msgstr "HTTP-Fehler %1$s beim Laden des RSS-Feed von der URL: %2$s."
 #. Timeout while reading the RSS feed from URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:69
 msgid "Timeout while reading the RSS feed from URL: %1$s"
-msgstr "Zeitüberschreitung beim Lesen des RSS-Feed von der URL: %1$s."
+msgstr "Zeitüberschreitung beim Lesen des RSS-Feed von der URL: %1$s"
 
 #. Failed to read RSS feed from URL: %1$s
 #: com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
@@ -6363,7 +6333,7 @@ msgstr "Es wird eine lang andauernde Aktion ausgeführt"
 #. Such a long-running operation is already in progress
 #: com.openexchange.server/src/com/openexchange/ajax/requesthandler/jobqueue/JobQueueMessages.java:69
 msgid "Such a long-running operation is already in progress"
-msgstr "Eine derart lang andauernde Aktion läuft bereits"
+msgstr "Eine solche lang andauernde Aktion läuft bereits"
 
 #: com.openexchange.server/src/com/openexchange/authorization/AuthorizationExceptionMessages.java:60
 msgid "User is deactivated"
@@ -6464,7 +6434,7 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for appointments."
 msgstr ""
-"Die Konvertierung liefert einige Objekte, die aufgrund eines fehlenden "
+"Die Konvertierung ergibt einige Objekte, die aufgrund eines fehlenden "
 "Terminordners nicht gespeichert werden können."
 
 #: com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:104
@@ -6472,7 +6442,7 @@ msgid ""
 "The conversion yields some objects which could not be stored due to missing "
 "folder for tasks."
 msgstr ""
-"Die Konvertierung liefert einige Objekte, die aufgrund eines fehlenden "
+"Die Konvertierung ergibt einige Objekte, die aufgrund eines fehlenden "
 "Aufgabenordners nicht gespeichert werden können."
 
 #: com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
@@ -6578,7 +6548,7 @@ msgstr "Keine Gruppe angegeben"
 #. The mandatory field %1$s is not defined.
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:72
 msgid "Required value \"%1$s\" was not supplied."
-msgstr "Erforderlicher Wert \"%1$s\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"%1$s\" fehlt."
 
 #. The simple name contains invalid characters: "%1$s".
 #: com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:75
@@ -6716,8 +6686,8 @@ msgid ""
 "You do not have the appropriate permissions to read appointments in that "
 "folder."
 msgstr ""
-"Sie haben keine ausreichenden Berechtigungen zum Lesen von Terminen in "
-"diesem Ordner."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Lesen von "
+"Terminen in diesem Ordner."
 
 #. *
 #. * End date must not be before start date.
@@ -6740,7 +6710,7 @@ msgstr "Das Label (%d) wird nicht unterstützt."
 msgid "Private flag is only allowed inside of a private folder."
 msgstr ""
 "Privatmarkierung (private flag) ist nur innerhalb eines privaten Ordners "
-"erlaubt"
+"erlaubt."
 
 #. *
 #. * Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional
@@ -6768,21 +6738,21 @@ msgstr "Nicht unterstützter \"shown as\"-Wert %d"
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:108
 msgid "Required  value \"Start Date\" was not supplied."
-msgstr "Erfoderlicher Wert \"Beginnt am\" nicht angegeben"
+msgstr "Erforderliche Angabe \"Beginnt am\" fehlt."
 
 #. *
 #. * Required value \"End Date\" was not supplied.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:113
 msgid "Required value \"End Date\" was not supplied."
-msgstr "Erfoderlicher Wert \"Endet am\" nicht angegeben"
+msgstr "Erforderliche Angabe \"Endet am\" fehlt."
 
 #. *
 #. * Required value \"Title\" was not supplied.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:118
 msgid "Required value \"Title\" was not supplied."
-msgstr "Erfoderlicher Wert \"Titel\" nicht angegeben"
+msgstr "Erforderliche Angabe \"Titel\" fehlt."
 
 #. *
 #. * Move not supported. You cannot move an appointment into that folder.
@@ -6846,8 +6816,8 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:158
 msgid "You do not have the appropriate permissions to move this object."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Verschieben dieses "
-"Objekts."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Verschieben "
+"dieses Objekts."
 
 #. *
 #. * You do not have the appropriate permissions to read this object.
@@ -6856,7 +6826,8 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:119
 msgid "You do not have the appropriate permissions to read this object."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen dieses Objekts."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Lesen dieses "
+"Objekts."
 
 #. *
 #. * You do not have the appropriate permissions to create an object.
@@ -6915,8 +6886,8 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:193
 msgid "You can not use the private flag in a non private folder."
 msgstr ""
-"Privatmarkierungen (private flags) können nicht in einem nicht privaten "
-"Ordner verwendet werden."
+"Privatmarkierungen (private flags) können nur in privaten Ordnern verwendet "
+"werden."
 
 #. *
 #. * Invalid characters (%2$s) in field %1$s.
@@ -7008,11 +6979,11 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:69
 msgid "Unable to scale image down."
-msgstr "Bild kann nicht herunterskaliert werden"
+msgstr "Bild kann nicht herunterskaliert werden."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:71
 msgid "This feature has not been enabled"
-msgstr "Dieses Feature wurde nicht aktiviert."
+msgstr "Dieses Feature wurde nicht aktiviert"
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:73
 msgid ""
@@ -7031,8 +7002,8 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:77
 msgid "You are not allowed to mark this contact as private contact."
 msgstr ""
-"Sie haben keine Berechtigung, diesen Kontakt als privaten Kontakt zu "
-"markieren."
+"Sie haben keine Berechtigung zum Markieren dieses Kontakts als privaten "
+"Kontakt."
 
 #. Somebody else modified the same object just before the actual change should be saved. Actual change is denied and user should refresh
 #. his object.
@@ -7059,7 +7030,7 @@ msgid ""
 "Some data entered exceeded the field limit. Please shorten the value for "
 "\"%1$s\" (limit: %2$s, current: %3$s) and try again."
 msgstr ""
-"Einige der eingegebenen Daten übersteigen das Feldlimit. Bitte kürzen Sie "
+"Einige der eingegebenen Daten überschreiten das Feldlimit. Bitte kürzen Sie "
 "den Eintrag für \"%1$s\" (Limit: %2$s, aktuell: %3$s) und versuchen Sie es "
 "erneut."
 
@@ -7073,11 +7044,11 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:93
 msgid "Required  value \"first name\" was not supplied."
-msgstr "Erforderlicher Wert \"Vorname\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Vorname\" fehlt."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:95
 msgid "Required  value \"display name\" was not supplied."
-msgstr "Erforderlicher Wert \"Anzeigename\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Anzeigename\" fehlt."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:97
 msgid "Unable to move this contact because it is marked as private."
@@ -7090,7 +7061,7 @@ msgid ""
 "another display name."
 msgstr ""
 "Der von Ihnen eingegebene Name ist bereits an einen anderen Benutzer "
-"vergeben. Bitte wählen Sie einen anderen Anzeigenamen"
+"vergeben. Bitte wählen Sie einen anderen Anzeigenamen."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:101
 msgid "Bad character in field \"%2$s\"."
@@ -7120,7 +7091,7 @@ msgstr "Bild ist zu groß. Bildgröße: %1$s. Max. erlaubte Größe: %2$s."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
 msgid "Primary E-Mail address in system contact must not be edited."
-msgstr "Primäre E-Mail-Adresse in Systemkontakt darf nicht bearbeitet werden. "
+msgstr "Primäre E-Mail-Adresse in Systemkontakt darf nicht bearbeitet werden."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
 msgid "The contact %1$d is not located in folder %2$s (%3$d)."
@@ -7128,11 +7099,11 @@ msgstr "Die Kontakt %1$d befindet sich nicht im Ordner %2$s (%3$d)."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid "Required  value \"last name\" was not supplied."
-msgstr "Erforderlicher Wert \"Nachname\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Nachname\" fehlt."
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:117
 msgid "You are not allowed to modify that contact"
-msgstr "Sie haben keine Berechtigung, diesen Kontakt zu ändern."
+msgstr "Sie haben keine Berechtigung zum Ändern dieses Kontakts"
 
 #: com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
@@ -7288,6 +7259,10 @@ msgstr "Weitere Kontaktordner"
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "Other infostore folders"
 msgstr "Weitere InfoStore-Ordner"
+
+#: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
+msgid "Calendar"
+msgstr "Kalender"
 
 #: com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:98
 msgid "Collected addresses"
@@ -8714,7 +8689,7 @@ msgstr "Fehler in Zeile %1$s: %2$s"
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:98
 msgid "The document you requested does not exist."
-msgstr "Das von Ihnen angeforderte Dokument ist nicht vorhanden"
+msgstr "Das von Ihnen angeforderte Dokument ist nicht vorhanden."
 
 #. Unable to load the document(s). Please try again.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:65
@@ -8731,7 +8706,8 @@ msgstr "Der von Ihnen angeforderte Ordner %1$s ist kein InfoStore-Ordner."
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
 msgid "You do not have the appropriate permissions to read the document."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen des Dokuments."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Lesen des "
+"Dokuments."
 
 #. You do not have the appropriate permissions to create a document in this folder.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:74
@@ -8746,8 +8722,8 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:77
 msgid "You do not have the appropriate permissions to update the document."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Aktualisieren des "
-"Dokuments."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Aktualisieren "
+"des Dokuments."
 
 #. Unable to delete all documents. Please try again.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:80
@@ -8772,7 +8748,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
 msgid "You do not have the appropriate permissions to unlock the document."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Entsperren des "
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Entsperren des "
 "Dokuments."
 
 #. You do not have the appropriate permissions to lock a document.
@@ -8793,7 +8769,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:101
 msgid "The document name \"%1$s\" already exists. Please choose another."
 msgstr ""
-"Der Dokumenten-Name \"%1$s\" ist bereits vorhanden. Bitte wählen Sie einen "
+"Der Dokumentname \"%1$s\" ist bereits vorhanden. Bitte wählen Sie einen "
 "anderen Namen."
 
 #. You do not have the appropriate permissions to delete a document.
@@ -8820,7 +8796,7 @@ msgstr ""
 #. The file name must not contain slashes.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
 msgid "The file name must not contain slashes."
-msgstr "Der Dateiname darf keine Schrägstriche enthalten. "
+msgstr "Der Dateiname darf keine Schrägstriche enthalten."
 
 #. The file name contains invalid characters.
 #: com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:116
@@ -8896,7 +8872,7 @@ msgstr "Anmerkungen zur Version"
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:61
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:96
 msgid "Problem putting/removing an object into/from the cache."
-msgstr "Problem beim Legen/Verschieben eines Objekts in/aus dem Cache"
+msgstr "Problem beim Legen/Verschieben eines Objekts in/aus den/m Cache."
 
 #. *
 #. * Hash algorithm %s isn't found.
@@ -9017,7 +8993,7 @@ msgstr "Alias-Einträge für Benutzer %1$d im Kontext %2$d sind nicht vorhanden.
 #: com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:128
 msgid "Updating attributes failed in context %1$d for user %2$d."
 msgstr ""
-"Das Aktualisieren der Attribute im Kontext %1$d für Benutzer %2$d ist "
+"Die Aktualisierung der Attribute im Kontext %1$d für Benutzer %2$d ist "
 "fehlgeschlagen."
 
 #. *
@@ -9115,21 +9091,21 @@ msgstr ""
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:71
 msgid "Required  value \"user\" was not supplied."
-msgstr "Erforderlicher Wert \"Benutzer\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Benutzer\" fehlt."
 
 #. *
 #. * Identifier of the object is missing.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:76
 msgid "Required  value \"target id\" was not supplied."
-msgstr "Erforderlicher Wert \"target id\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"target id\" fehlt."
 
 #. *
 #. * Alarm date for the reminder is missing.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:81
 msgid "Required  value \"alarm date\" was not supplied."
-msgstr "Erforderlicher Wert \"alarm date\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Erinnerungsdatum\" fehlt."
 
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:83
 msgid "Unable to insert reminder."
@@ -9161,14 +9137,14 @@ msgstr "Erinnerung mit ID %1$s konnte nicht im Kontext %2$d gefunden werden."
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:99
 msgid "Required  value \"folder\" was not supplied."
-msgstr "Erforderlicher Wert \"Ordner\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Ordner\" fehlt."
 
 #. *
 #. * Module type of the object is missing.
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:104
 msgid "Required  value \"module\" was not supplied."
-msgstr "Erforderlicher Wert \"Modul\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe\"Modul\" fehlt."
 
 #. *
 #. * Updated too many reminders.
@@ -9187,7 +9163,7 @@ msgstr "Kein Zieldienst eingetragen für das Modul %1$d."
 #.
 #: com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:117
 msgid "Required  value \"identifier\" was not supplied."
-msgstr "Erforderlicher Wert \"Identifier\" wurde nicht angegeben."
+msgstr "Erforderliche Angabe \"Identifier\" fehlt."
 
 #. Application 'xyz' requires following permissions:
 #. - Read reminders for appointments and tasks.
@@ -9206,7 +9182,7 @@ msgstr "Termin- und Aufgabenerinnerungen festlegen oder ändern."
 #. * Writing the setting %1$s is not permitted.
 #: com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:69
 msgid "Writing the setting %1$s is not permitted."
-msgstr "Schreiben der Einstellung %1$s nicht erlaubt"
+msgstr "Das Schreiben der Einstellung %1$s ist nicht zulässig."
 
 #. * Invalid value %s written to setting %s.
 #: com.openexchange.server/src/com/openexchange/groupware/settings/SettingExceptionMessage.java:72
@@ -9303,8 +9279,8 @@ msgid ""
 "You do not have the appropriate permissions to read the contents in that "
 "folder."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Lesen der Inhalte "
-"dieses Ordners."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Lesen der "
+"Inhalte dieses Ordners."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:85
 msgid "Tasks are disabled for you."
@@ -9344,7 +9320,7 @@ msgid ""
 "You do not have the appropriate permissions to edit tasks in that folder"
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten von "
-"Aufgaben in diesem Ordner."
+"Aufgaben in diesem Ordner"
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:99
 msgid "Moving items from or into a shared folder is not allowed."
@@ -9358,7 +9334,7 @@ msgstr "Unbekannter Wiederholungstyp %d."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:103
 msgid "Value for the recurrence is missing: %d."
-msgstr "Fehlender Wert für Wiederholung: %d."
+msgstr "Fehlender Wert für die Wiederholung: %d."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:105
 msgid "Finished tasks need to have a percentage of 100 and not %d."
@@ -9376,8 +9352,8 @@ msgid ""
 "Current length \"%3$d\" is more than allowed length of \"%2$d\" characters."
 msgstr ""
 "Die Aufgabe konnte nicht gespeichert werden. Bitte kürzen Sie \"%1$s\" und "
-"versuchen Sie es erneut. Die aktuelle Länge \"%3$d\" übersteigt die erlaubte "
-"Länge von \"%2$d\" Zeichen."
+"versuchen Sie es erneut. Die aktuelle Länge \"%3$d\" überschreitet die "
+"erlaubte Länge von \"%2$d\" Zeichen."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder."
@@ -9389,7 +9365,7 @@ msgstr ""
 msgid "Only the task creator is allowed to set the private flag."
 msgstr ""
 "Nur der Ersteller der Aufgabe darf darauf eine Privatmarkierung (private "
-"flag) setzen"
+"flag) setzen."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
 msgid "External participants without E-Mail address can not be added."
@@ -9398,7 +9374,8 @@ msgstr "Externer Teilnehmer ohne E-Mail-Adresse kann nicht hinzugefügt werden."
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
 msgid "You do not have the appropriate permisson to see the task."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Sehen der Aufgabe."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Sehen der "
+"Aufgabe."
 
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:120
 msgid "Task contains invalid data: \"%1$s\"."
@@ -9421,7 +9398,8 @@ msgstr "Priorität ist %d, muss jedoch zwischen 1 und 3 liegen."
 #: com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:132
 msgid "You do not have the appropriate permisson to see the folder."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Sehen des Ordners."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Sehen des "
+"Ordners."
 
 #: com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:62
 msgid ""
@@ -9475,7 +9453,8 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:76
 msgid "Updating schema \"%1$s\" failed. Cause: \"%2$s\"."
 msgstr ""
-"Aktualisierung des Schemas \"%1$s\" ist fehlgeschlagen. Ursache: \"%2$s\"."
+"Die Aktualisierung des Schemas \"%1$s\" ist fehlgeschlagen. Ursache: \"%2$s"
+"\"."
 
 #: com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:78
 msgid ""
@@ -9533,8 +9512,8 @@ msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
 "of %2$s."
 msgstr ""
-"Anfrage abgelehnt. Die Größe (%1$s) übersteigt die maximal zulässige Größe "
-"von %2$s."
+"Anfrage abgelehnt. Die Größe (%1$s) überschreitet die maximal zulässige "
+"Größe von %2$s."
 
 #. Missing parameter %1$s
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:85
@@ -9561,7 +9540,8 @@ msgstr "Ungültiger Aktionswert: \"%1$s\"."
 #. Upload file with id %1$s could not be found
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:97
 msgid "Upload file with id \"%1$s\" could not be found."
-msgstr "Die Upload-Datei mit der ID \"%1$s\" konnte nicht gefunden werden."
+msgstr ""
+"Die hochgeladene Datei mit der ID \"%1$s\" konnte nicht gefunden werden."
 
 #. Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
@@ -9570,7 +9550,7 @@ msgid ""
 "Upload file's content type \"%1$s\" does not match given file filter \"%2$s"
 "\"."
 msgstr ""
-"Der Inhaltstyp \"%1$s\" der Upload-Datei passt nicht zu angegebenem "
+"Der Inhaltstyp \"%1$s\" der hochgeladenen Datei passt nicht zum angegebenen "
 "Dateifilter \"%2$s\"."
 
 #. Upload file is invalid or illegal
@@ -9585,8 +9565,8 @@ msgid ""
 "Request rejected because its size exceeds the maximum configured size of "
 "%1$s."
 msgstr ""
-"Anfrage abgelehnt. Die Größe übersteigt die maximal konfigurierte Größe von "
-"%1$s."
+"Anfrage abgelehnt. Die Größe überschreitet die maximal konfigurierte Größe "
+"von %1$s."
 
 #. Connection has been closed unexpectedly. Please try again.
 #: com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:111
@@ -9599,7 +9579,7 @@ msgid ""
 "Request rejected because file size (%1$s) exceeds the maximum configured "
 "file size of %2$s."
 msgstr ""
-"Anfrage abgelehnt. Die Dateigröße (%1$s) übersteigt die konfigurierte "
+"Anfrage abgelehnt. Die Dateigröße (%1$s) überschreitet die konfigurierte "
 "maximale Dateigröße von %2$s."
 
 #. Request rejected because file size exceeds the maximum configured file size of %1$s.
@@ -9608,7 +9588,7 @@ msgid ""
 "Request rejected because file size exceeds the maximum configured file size "
 "of %1$s."
 msgstr ""
-"Anfrage abgelehnt. Die Dateigröße übersteigt die konfigurierte maximale "
+"Anfrage abgelehnt. Die Dateigröße überschreitet die konfigurierte maximale "
 "Dateigröße von %1$s."
 
 #. Read timed out. Waited too long for incoming data from client.
@@ -9648,7 +9628,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:76
 msgid "User configuration could not be put into cache: \"%1$s\"."
 msgstr ""
-"Benutzerkonfiguration konnte nicht in den Cache gelegt werden: \"%1$s\". "
+"Die Benutzerkonfiguration konnte nicht in den Cache gelegt werden: \"%1$s\"."
 
 #. *
 #. * User configuration cache could not be cleared: %1$s
@@ -9732,11 +9712,12 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:82
 msgid "Upload quota (%1$s) exceeded for file %2$s (size=%3$s)."
 msgstr ""
-"Die Upload-Quota (%1$s) für die Datei %2$s (Größe=%3$s) wurde überschritten."
+"Das Upload-Kontingent (%1$s) für die Datei %2$s (Größe=%3$s) wurde "
+"überschritten."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:84
 msgid "Upload quota (%1$s) exceeded."
-msgstr "Upload-Quota (%1$s) wurde überschritten."
+msgstr "Upload-Kontingent (%1$s) wurde überschritten."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:86
 msgid "Mail could not be found."
@@ -9752,8 +9733,8 @@ msgid ""
 "full. Please try to empty your deleted items first, or delete smaller "
 "messages first."
 msgstr ""
-"Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
-"Wahrscheinlich ist Ihre Mailbox fast voll. Entfernen Sie in diesem Fall Ihre "
+"Diese Nachricht konnte nicht in den Papierkorb verschoben werden. "
+"Wahrscheinlich ist Ihr Postfach fast voll. Entfernen Sie in diesem Fall Ihre "
 "gelöschten Objekte oder löschen Sie zuerst kleinere Nachrichten."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
@@ -9770,11 +9751,11 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:96
 msgid "Unable to save draft, due to exceeded quota."
-msgstr "Entwurf kann nicht gespeichert werden. Quota ist überschritten."
+msgstr "Entwurf kann nicht gespeichert werden. Kontingent ist überschritten."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:98
 msgid "Unable to save the mail, due to exceeded quota."
-msgstr "E-Mail kann nicht gespeichert werden. Quota ist überschritten."
+msgstr "E-Mail kann nicht gespeichert werden. Kontingent ist überschritten."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:100
 msgid ""
@@ -9911,7 +9892,7 @@ msgstr ""
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 E-Mail in %1$s seconds."
 msgstr ""
-"Die Sende-Quota wurde überschritten. Sie dürfen nur 1 E-Mail in %1$s "
+"Das Sendekontingent wurde überschritten. Sie dürfen nur 1 E-Mail in %1$s "
 "Sekunden senden."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
@@ -9924,7 +9905,7 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid "Unable to parse mail server URI \"%1$s\"."
-msgstr "Analyse von Mail Server URI \"%1$s\" fehlgeschlagen."
+msgstr "Analyse von E-Mail-Server-URI \"%1$s\" fehlgeschlagen."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
 msgid "Mail attachment expired or absent."
@@ -9962,7 +9943,7 @@ msgid ""
 "%1$s."
 msgstr ""
 "Der E-Mail-Ordner kann nicht angelegt oder umbenannt werden. Der Ordnername "
-"übersteigt die maximale Länge von %1$s."
+"überschreitet die maximale Länge von %1$s."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:172
 msgid ""
@@ -9974,7 +9955,7 @@ msgstr ""
 "Die Anhänge dieser E-Mail überschreiten die zulässige Größe. Die Anhänge "
 "wurden deshalb nicht per E-Mail versandt, sondern an zentraler Stelle "
 "abgelegt und der Link darauf wurde Ihrer E-Mail hinzugefügt. Der oder die "
-"Empfänger können sich die Anhänge herunterladen.   "
+"Empfänger können sich die Anhänge herunterladen."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:174
 msgid "Draft message could not be saved."
@@ -9994,12 +9975,12 @@ msgstr ""
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
 msgid "Validation of server %1$s failed with reason: %3$s"
-msgstr "Validierung des Servers %1$s fehlgeschlagen. Grund: %3$s"
+msgstr "Die Validierung des Servers %1$s ist fehlgeschlagen. Grund: %3$s"
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
 msgid "Validation of server %1$s failed due to invalid credentials"
 msgstr ""
-"Validierung des Servers %1$s schlug aufgrund ungültiger Anmeldedaten fehl."
+"Die Validierung des Servers %1$s schlug aufgrund ungültiger Anmeldedaten fehl"
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:184
 msgid "Server %1$s does not support being accessed using a secure connection."
@@ -10066,7 +10047,8 @@ msgstr "Ungültiger Parameter-Wert: %1$s"
 msgid ""
 "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
 msgstr ""
-"Der Flag-Name %1$s ist nicht gültig. Flags können nicht mit ' \\' beginnen."
+"Der Markierungsname %1$s ist ungültig. Markierungen können nicht mit ' \\' "
+"beginnen."
 
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
 msgid ""
@@ -10084,7 +10066,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "You are not allowed to compose a message containing share links"
 msgstr ""
-"Sie haben keine Berechtigung, eine Nachricht mit Freigabe-Links zu erstellen"
+"Sie haben keine Berechtigung zum Erstellen einer Nachricht mit Freigabe-Links"
 
 #. User wants to compose a share message but does not specify an expiration date which is required
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
@@ -10157,8 +10139,8 @@ msgid ""
 "Please edit the account and enter correct credentials to enable it again"
 msgstr ""
 "Ihr Mail-Transport für %2$s wurde aufgrund ungültiger Anmeldeinformationen "
-"deaktiviert. Bittte bearbeiten Sie das Konto und geben Sie die korrekten "
-"Anmeldeinformationen ein, um es wieder zu aktivieren."
+"deaktiviert. Bitte bearbeiten Sie das Konto und geben Sie die korrekten "
+"Anmeldeinformationen ein, um ihn wieder zu aktivieren."
 
 #. Thrown when an oauth-associated mail transport has been disabled. That is it exceeded the limit for failed authentication count.
 #: com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:261
@@ -10362,7 +10344,7 @@ msgid ""
 "\"%1$s\"."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Ändern des Inhalts des "
-"Ordners \"%1$s\". "
+"Ordners \"%1$s\"."
 
 #. *
 #. * An attempt was made to open a read-only folder with read-write "%1$s" on mail server %2$s with login %3$s (user=%4$s, context=%5$s)
@@ -10488,7 +10470,7 @@ msgstr ""
 #.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The allowed quota on mail server exceeded."
-msgstr "Die zulässige Quota auf dem Mailserver wurde überschritten."
+msgstr "Das zulässige Kontingent auf dem Mailserver wurde überschritten."
 
 #. *
 #. * The allowed storage limit for your account \"%6$s\" was exceeded.
@@ -10504,7 +10486,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:190
 msgid "The mailbox is already in use. Please try again later."
 msgstr ""
-"Diese Mailbox wird bereits verwendet. Bitte versuchen Sie es später erneut. "
+"Dieses Postfach wird bereits verwendet. Bitte versuchen Sie es später erneut."
 
 #. *
 #. * The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later.
@@ -10514,9 +10496,9 @@ msgid ""
 "The mailbox on mail server %1$s for login %2$s is already in use by one of "
 "your other processes or clients. Please try again later."
 msgstr ""
-"Die Mailbox auf dem Mailserver %1$s für das Login %2$s wird bereits durch "
-"einen Ihrer anderen Prozesse oder Clients verwendet. Bitte versuchen Sie es "
-"später erneut."
+"Das Postfach auf dem Mailserver %1$s für die Anmeldung %2$s wird bereits "
+"durch einen Ihrer anderen Prozesse oder Clients verwendet. Bitte versuchen "
+"Sie es später erneut."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:198
@@ -10536,8 +10518,8 @@ msgid ""
 "The message could not be sent due to a mail server temporary failure. Please "
 "try again later."
 msgstr ""
-"Die Nachricht konnte aufgrund eines vorübergehenden Mail-Server-Ausfalls "
-"nicht gesendet werden. Bitte versuchen Sie es später erneut."
+"Die Nachricht konnte aufgrund eines vorübergehenden Mailserverausfalls nicht "
+"gesendet werden. Bitte versuchen Sie es später erneut."
 
 #. Timeout while trying to send to the following recipient: %1$s
 #: com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
@@ -10608,12 +10590,12 @@ msgstr "Das Konto ist defekt und muss neu angelegt werden"
 #. The message advertising that affected account has been disabled by administrator
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:80
 msgid "Account is disabled."
-msgstr "Konto ist deaktiviert."
+msgstr "Das Konto ist deaktiviert."
 
 #. The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:83
 msgid "Account is currently being set-up."
-msgstr "Konto wird derzeit eingerichtet."
+msgstr "Das Konto wird derzeit eingerichtet."
 
 #. The message advertising that the affected account is facing an SSL problem
 #: com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:86
@@ -10650,8 +10632,8 @@ msgid ""
 "You do not have the appropriate permissions to update the default mail "
 "account."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Aktualisieren des "
-"Standard-E-Mail-Kontos."
+"Sie verfügen nicht über die entsprechenden Berechtigungen zum Aktualisieren "
+"des Standard-E-Mail-Kontos."
 
 #. The default mail account already exists.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
@@ -10737,7 +10719,7 @@ msgid ""
 "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. "
 "Please review if appropriate."
 msgstr ""
-"Für das Mail-Protokoll \"%1$s\" wurde ein sicherer Port angegeben, jedoch "
+"Für das E-Mail-Protokoll \"%1$s\" wurde ein sicherer Port angegeben, jedoch "
 "ist SSL nicht aktiviert. Bitte überprüfen."
 
 #. Shown when no SSL port was set for transport protocol but SSL enabled
@@ -10766,7 +10748,7 @@ msgstr "Der angegebene Hostname \"%1$s\" ist ungültig."
 #. The given host name "%1$s" is not allowed.
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:125
 msgid "The given host name \"%1$s\" is not allowed."
-msgstr "Der angegebene Host-Name \"%1$s\" ist nicht zulässig."
+msgstr "Der angegebene Hostname \"%1$s\" ist nicht zulässig."
 
 #. The protocol must not changed from %1$s to %2$s
 #: com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:128
@@ -10845,7 +10827,8 @@ msgstr "Fehlende obligatorische E-Mail-Adresse in angegebener Ressource."
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:69
 msgid "You do not have appropriate permissions for module \"%2$s\"."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen für das Modul \"%2$s\". "
+"Sie verfügen nicht über die entsprechenden Berechtigungen für das Modul "
+"\"%2$s\"."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:71
 msgid "Shared folders are not available for your account."
@@ -10885,7 +10868,7 @@ msgstr "Der Ordner ist ein Standardordner und kann nicht umbenannt werden."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
 msgid "The folder already contains a folder with such a name."
-msgstr "Der Ordner enthält bereits einen Ordner mit solch einem Namen."
+msgstr "Der Ordner enthält bereits einen Ordner mit einem solchen Namen."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:79
 msgid "Folders of type \"%2$s\" can't be created below this folder."
@@ -10995,15 +10978,15 @@ msgid ""
 "characters. Current length: %3$d characters."
 msgstr ""
 "Der Wert für das Attribut %1$s enthält zu viele Zeichen. Aktuelle Anzahl "
-"%3$d übersteigt die zulässige Anzahl von %2$d Zeichen."
+"%3$d überschreitet die zulässige Anzahl von %2$d Zeichen."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:100
 msgid ""
 "The specified folder name exceeds the limit of %2$d characters. Please "
 "shorten the name and try again."
 msgstr ""
-"Der angegebene Ordnername übersteigt die maximal zulässige Anzahl von %2$d "
-"Zeichen. Bitte kürzen Sie den Namen und versuchen Sie es erneut."
+"Der angegebene Ordnername überschreitet die maximal zulässige Anzahl von "
+"%2$d Zeichen. Bitte kürzen Sie den Namen und versuchen Sie es erneut."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:101
 msgid ""
@@ -11053,8 +11036,8 @@ msgid ""
 "The folder already contains a folder with such a name. Please choose a "
 "different name and try again."
 msgstr ""
-"Der Ordner enthält bereits einen Ordner mit solch einem Namen. Bitte wählen "
-"Sie einen anderen Namen und versuchen Sie es erneut."
+"Der Ordner enthält bereits einen Ordner mit einem solchen Namen. Bitte "
+"wählen Sie einen anderen Namen und versuchen Sie es erneut."
 
 #: com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:108
 msgid "The folder name contains invalid characters."
@@ -11146,7 +11129,7 @@ msgstr ""
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
 msgstr ""
-"Die gewünschte Aktion ist über eine unsichere Verbindung nicht erlaubt. "
+"Die gewünschte Aktion ist über eine unsichere Verbindung nicht erlaubt."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:63
 msgid "The requested operation is disabled."
@@ -11154,7 +11137,8 @@ msgstr "Die angeforderte Aktion ist deaktiviert."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:64
 msgid "You do not have appropriate permissions for module %1$s."
-msgstr "Sie haben nicht die entsprechenden Berechtigungen für das Modul %1$s."
+msgstr ""
+"Sie verfügen nicht über die entsprechenden Berechtigungen für das Modul %1$s."
 
 #: com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:65
 msgid ""
@@ -11222,7 +11206,7 @@ msgstr "Der Wert \"%1$s\" für das Attribut %2$s darf nur Zahlen enthalten."
 #.
 #: com.openexchange.server/src/com/openexchange/tools/servlet/OXJSONExceptionMessage.java:81
 msgid "You inserted too many digits into field %1$s."
-msgstr "Sie haben zu viele Zahlen in das Feld %1$s eingegeben."
+msgstr "Sie haben zu viele Ziffern in das Feld %1$s eingegeben."
 
 #. *
 #. * %1$s is not a number.
@@ -11525,7 +11509,7 @@ msgstr "Die angeforderte Freigabe ist nicht vorhanden."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:66
 msgid "The token \"%1$s\" is invalid."
-msgstr "Token \"%1$s\" ist ungültig."
+msgstr "Das Token \"%1$s\" ist ungültig."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
 msgid "The link \"%1$s\" is invalid."
@@ -11547,19 +11531,19 @@ msgstr ""
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:74
 msgid "You don't have sufficient permissions to delete the share."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Löschen der Freigabe."
+"Sie verfügen nicht über ausreichende Berechtigungen zum Löschen der Freigabe."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:76
 msgid "You don't have sufficient permissions to edit the share."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Bearbeiten der "
+"Sie verfügen nicht über ausreichende Berechtigungen zum Bearbeiten der "
 "Freigabe."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:78
 msgid "You don't have sufficient permissions to share folder or item \"%2$s\"."
 msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Freigeben des Ordners "
-"bzw. Objekts \"%2$s\"."
+"Sie verfügen nicht über ausreichende Berechtigungen zum Freigeben des "
+"Ordners bzw. Objekts \"%2$s\"."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:80
 msgid "Module %1$s does not support sharing."
@@ -11580,11 +11564,13 @@ msgstr "Sie können keine Freigaben für sich selbst erstellen."
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:88
 msgid "You don't have sufficient permissions to share a link."
 msgstr ""
-"Sie haben keine ausreichenden Berechtigungen zum Freigeben eines Links."
+"Sie verfügen nicht über ausreichende Berechtigungen zum Freigeben eines "
+"Links."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:90
 msgid "You don't have sufficient permissions to invite guests."
-msgstr "Sie haben keine ausreichenden Berechtigungen zum Einladen von Gästen."
+msgstr ""
+"Sie verfügen nicht über ausreichende Berechtigungen zum Einladen von Gästen."
 
 #: com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:92
 msgid "You can't create links for multiple targets."
@@ -12190,7 +12176,7 @@ msgstr ""
 msgid ""
 "You don't have sufficient permissions to send notifications for this share."
 msgstr ""
-"Sie haben keine ausreichenden Berechtigungen zum Senden von "
+"Sie verfügen nicht über ausreichende Berechtigungen zum Senden von "
 "Benachrichtigungen für diese Freigabe."
 
 #. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
@@ -12200,7 +12186,7 @@ msgid ""
 "%1$s hours"
 msgstr ""
 "Sie haben die maximal erlaubte Anzahl an SMS überschritten. Bitte versuchen "
-"Sie es nach %1$s Stunden erneut."
+"Sie es nach %1$s Stunden erneut"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
@@ -12218,7 +12204,7 @@ msgstr "Die Telefonnummer %1$s konnte nicht analysiert werden."
 #. Unknown country tag: %1$s
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:67
 msgid "Unknown country tag: %1$s"
-msgstr "Unbekanntes Länder-Tag: %1$s"
+msgstr "Unbekanntes Länderkennzeichen: %1$s"
 
 #. Message is too long (%1$s characters). Maximum length is %2$s characters.
 #: com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:70
@@ -12248,7 +12234,7 @@ msgstr ""
 #. Thrown if a user must not modify a snippet/signature. Neither shared nor owned by that user.
 #: com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:80
 msgid "You are not allowed to modify the signature"
-msgstr "Sie haben keine Berechtigung, die Signatur zu ändern"
+msgstr "Sie haben keine Berechtigung zum Ändern der Signatur"
 
 #: com.openexchange.subscribe.dav/src/com/openexchange/subscribe/dav/FormStrings.java:61
 msgid "Login"
@@ -12331,7 +12317,7 @@ msgid ""
 "some accounts and cannot fixed by us. It is in the provider's "
 "responsibility. For this reason, the subscription cannot be completed."
 msgstr ""
-"Der Service-Anbieter hat eine Identitätsbestätigung verlangt. Dies kann bei "
+"Der Dienstanbieter hat eine Identitätsbestätigung verlangt. Dies kann bei "
 "einigen Konten vorkommen und kann nicht durch uns behoben werden. Es liegt "
 "in der alleinigen Verantwortung des Anbieters. Aus diesem Grund kann das "
 "Abonnement nicht abgeschlossen werden."
@@ -12361,7 +12347,7 @@ msgstr "Dateizugriff verweigert"
 
 #: com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "This template was not whitelisted,"
-msgstr "Dieses Template war nicht in der Whitelist."
+msgstr "Diese Vorlage war nicht in der Whitelist,"
 
 #: com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:64
 msgid "Unable to change data. (%1$s)"
@@ -12526,27 +12512,28 @@ msgstr "Der in der Eigenschaft %1$s angegebene Wert ist keine Ganzzahl."
 #. Property %1$s not set but required.
 #: com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:66
 msgid "Property %1$s not set but required."
-msgstr "Eigenschaft %1$s ist nicht festgelegt, wird jedoch benötigt."
+msgstr "Die Eigenschaft %1$s ist nicht festgelegt, wird jedoch benötigt."
 
 #. Property %1$s claims to have condition but condition not set.
 #: com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:69
 msgid "Property %1$s claims to have condition but condition not set."
 msgstr ""
-"Eigenschaft %1$s gibt vor, eine Bedingung zu enthalten, jedoch wurde keine "
-"festgelegt."
+"Die Eigenschaft %1$s gibt vor, eine Bedingung zu enthalten, jedoch wurde "
+"keine festgelegt."
 
 #. Property %1$s must be set if %2$s is set to %3$s
 #: com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:72
 msgid "Property %1$s must be set if %2$s is set to %3$s"
 msgstr ""
-"Die Eigenschaft %1$s muss gesetzt werden, wenn %2$s auf %3$s gesetzt ist."
+"Die Eigenschaft %1$s muss festgelegt werden, wenn %2$s auf %3$s festgelegt "
+"ist."
 
 #. The class %1$s cannot be used as a property type at the moment
 #: com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:75
 msgid "The %1$s cannot be used as a property type in the property %2$s"
 msgstr ""
 "Die Klasse %1$s kann in der Eigenschaft %2$s nicht als Eigenschaftstyp "
-"verwendet werden."
+"verwendet werden"
 
 #. A XING error occurred: %1$s
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:62
@@ -12561,7 +12548,7 @@ msgstr "Die XING-Ressource ist nicht vorhanden: %1$s"
 #. Update denied for XING resource: %1$s
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:68
 msgid "Update denied for XING resource: %1$s"
-msgstr "Aktualisierung verweigert für die XING-Ressource: %1$s"
+msgstr "Aktualisierung für die XING-Ressource verweigert: %1$s"
 
 #. Delete denied for XING resource: %1$s
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:71
@@ -12586,7 +12573,7 @@ msgstr "Einladung bereits an folgende E-Mail-Adresse gesendet: \"%1$s\""
 #. The E-Mail address already belongs to a XING user
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:89
 msgid "The E-Mail address already belongs to a XING user"
-msgstr "Die E-Mail-Adresse ist bereits an einen XING-Benutzer vergeben."
+msgstr "Die E-Mail-Adresse ist bereits an einen XING-Benutzer vergeben"
 
 #. Invitation attempt failed for any reason
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:92
@@ -12596,7 +12583,7 @@ msgstr "Einladungsversuch ist fehlgeschlagen"
 #. The E-Mail address does not belongs to a XING user
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:95
 msgid "The E-Mail address does not belongs to a XING user"
-msgstr "Die E-Mail-Adresse ist keinem XING-Benutzer zugewiesen."
+msgstr "Die E-Mail-Adresse ist keinem XING-Benutzer zugewiesen"
 
 #. XING user is already directly connected.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:98
@@ -12626,7 +12613,7 @@ msgstr ""
 #. The mandatory parameter \"%1$s\ is missing in the request body.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:110
 msgid "The mandatory parameter \"%1$s\" is missing in the request body"
-msgstr "Der Pflichtparameter \"%1$s\" fehlt im Anfrage-Body. "
+msgstr "Der Pflichtparameter \"%1$s\" fehlt im Anfragetext"
 
 #. The XING server is not available.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
@@ -12646,7 +12633,7 @@ msgid ""
 "order to perform the requested action"
 msgstr ""
 "Die von Ihnen verwendete XING-App verfügt nicht über ausreichende "
-"Berechtigungen zum Ausführen der gewünschten Aktion."
+"Berechtigungen zum Ausführen der gewünschten Aktion"
 
 #. No XING OAuth access available for user %1$s in context %2$s.
 #: com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
@@ -14785,6 +14772,21 @@ msgstr "UTC"
 #: TimeZones.java:534
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "Week"
+#~ msgstr "Woche"
+
+#~ msgid "All-day events"
+#~ msgstr "Ganztägige Ereignisse"
+
+#~ msgid "Comments"
+#~ msgstr "Kommentare"
+
+#~ msgid "Tentatively accepted"
+#~ msgstr "Vorläufig bestätigt"
+
+#~ msgid "Undecided"
+#~ msgstr "Unschlüssig"
 
 #~ msgid ""
 #~ "The remote SchedJoules service is unavailable at the moment. There is "
