@@ -115,11 +115,14 @@ public enum S3Properties implements Property {
      * "com.openexchange.filestore.s3.[filestoreID].maxConnectionPoolSize"
      */
     MAX_CONNECTION_POOL_SIZE("maxConnectionPoolSize", "50"),
-
     /**
      * "com.openexchange.filestore.s3.metricCollection"
      */
-    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", Boolean.FALSE)
+    METRIC_COLLECTION("com.openexchange.filestore.s3.", "metricCollection", Boolean.FALSE),
+    /**
+     * "com.openexchange.filestore.s3.[filestoreID].credentialsSource"
+     */
+    CREDENTIALS_SOURCE("credentialsSource", S3CredentialsSource.STATIC.getIdentifier())
     ;
 
     public static final String OPTIONAL_NAME = "filestoreID";

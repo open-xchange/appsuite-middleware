@@ -84,24 +84,26 @@ properties:
 
     - key: com.openexchange.filestore.s3.[filestoreID].accessKey
       description: |
-        Configures the AWS access key to use. This property is required.
+        Configures the AWS access key to use.
+        This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
       defaultValue: 
       version: 
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.filestore.s3.[filestoreID].credentialsSource"]
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
 
     - key: com.openexchange.filestore.s3.[filestoreID].secretKey
       description: |
-        Configures the AWS secret key to use. This property is required.
+        Configures the AWS secret key to use.
+        This property is required provided that property "com.openexchange.filestore.s3.[filestoreID].credentialsSource" is set to "static".
       defaultValue: 
       version: 
       reloadable: true
       configcascadeAware: false
-      related: 
+      related: ["com.openexchange.filestore.s3.[filestoreID].credentialsSource"]
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
@@ -201,7 +203,7 @@ properties:
       description: Enables metric collection for the S3 storage
       defaultValue: false
       version: 7.10.0
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related:
       file: filestore-s3.properties
@@ -237,6 +239,25 @@ properties:
         Defines the maximum number of allowed open HTTP connections.
       defaultValue: 50
       version: 7.10.2
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.[filestoreID].credentialsSource
+      description: |
+        Defines from what source to take credentials from, which are used to authenticate against S3 end-point.
+        Currently supported values are "static" and "iam".
+        
+        "static" refers to taking credentials from "com.openexchange.filestore.s3.[filestoreID].accessKey" property and
+        "com.openexchange.filestore.s3.[filestoreID].secretKey" property respectively.
+        
+        "iam" refers to using the integrated AWS Identity and Access Management (IAM); see also
+        https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html
+      defaultValue: static
+      version: 7.10.3
       reloadable: true
       configcascadeAware: false
       related: 
