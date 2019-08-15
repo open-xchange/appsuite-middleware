@@ -54,6 +54,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.RMIServerSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.config.ConfigurationService;
@@ -85,13 +86,18 @@ public class RMIUtility {
     public static Registry createRegistry(ConfigurationService configService) throws OXException {
         try {
             int port = configService.getIntProperty("com.openexchange.rmi.port", 1099);
-            String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost");
-            return LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), new LocalServerFactory(hostname));
+            String hostname = configService.getProperty("com.openexchange.rmi.host", "localhost").trim();
+            System.setProperty("java.rmi.server.useCodebaseOnly", "true");
+            return LocateRegistry.createRegistry(port, RMISocketFactory.getDefaultSocketFactory(), createServerSocketFactoryFor(hostname));
         } catch (RemoteException e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RMIUtility.class);
             logger.error("", e);
             throw RMIExceptionCodes.RMI_CREATE_REGISTRY_FAILED.create(e);
         }
+    }
+
+    private static RMIServerSocketFactory createServerSocketFactoryFor(String hostname) {
+        return hostname.equalsIgnoreCase("0") ? UnboundServerFactory.getInstance() : new BoundServerFactory(hostname);
     }
 
     /**
