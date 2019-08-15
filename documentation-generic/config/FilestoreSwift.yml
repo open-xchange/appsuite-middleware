@@ -18,7 +18,7 @@ properties:
         This property is required.
       defaultValue: https
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -32,7 +32,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -45,7 +45,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -58,7 +58,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -71,7 +71,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -85,7 +85,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -99,7 +99,7 @@ properties:
         This property is required.
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -113,7 +113,7 @@ properties:
         This property is required (for [[com.openexchange.filestore.swift.[filestoreID].authValue]] different from <code>raxkey</code>).
       defaultValue: 
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -127,7 +127,7 @@ properties:
         so that maxConnectionsPerHost < maxConnections <= n * maxConnectionsPerHost.
       defaultValue: 100
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -140,7 +140,7 @@ properties:
         swift endpoint.
       defaultValue: 100
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -155,7 +155,7 @@ properties:
         whether an endpoint is considered available again.
       defaultValue: 5000
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -170,7 +170,7 @@ properties:
         whether an endpoint is considered available again.
       defaultValue: 15000
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
@@ -188,7 +188,7 @@ properties:
         timeout happens for every still unavailable host.
       defaultValue: 60000
       version: 
-      reloadable: false
+      reloadable: true
       configcascadeAware: false
       related: 
       file: filestore-swift.properties
