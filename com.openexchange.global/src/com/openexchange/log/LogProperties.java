@@ -366,8 +366,11 @@ public final class LogProperties {
         /**
          * com.openexchange.rt2.admin.type
          */
-        RT2_ADMIN_MSG("com.openexchange.rt2.admin.type")
-
+        RT2_ADMIN_MSG("com.openexchange.rt2.admin.type"),
+        /**
+         * com.openexchange.rt2.filename
+         */
+        RT2_FILENAME("com.openexchange.rt2.filename")        
         ;
 
         private final String name;
