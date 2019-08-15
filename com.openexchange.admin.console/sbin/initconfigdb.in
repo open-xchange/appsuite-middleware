@@ -201,7 +201,29 @@ if [ -n "$CREATEADMIN" ]; then
     fi
 fi
 
-if [ "$(mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} -e "show databases;" -B 2>/dev/null | grep ${CONFIGDB_DBNAME})" == ${CONFIGDB_DBNAME} ] && [ "$DLETETECONFIGDB" != "true" ]; then
+# Check for existing database schemas on given database host
+MYSQL_RESULT="$(mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} -e "show databases;" -B 2>&1)"
+
+# Check if result hints to missing MySQL user; e.g. "ERROR 1045 (28000): Access denied for user 'nogo'@'localhost' (using password: YES)"
+ACCESS_DENIED="false"
+if [[ ${MYSQL_RESULT} == *"ERROR 1045"* ]] && [ "$DLETETECONFIGDB" != "true" ]; then
+    ACCESS_DENIED="true"
+fi
+
+# Check if result starts with "ERROR"
+if [[ ${MYSQL_RESULT} == ERROR* ]] && [ "$DLETETECONFIGDB" != "true" ] && [ "$ACCESS_DENIED" != "true" ]; then
+    # 'mysql' command returned an error
+    die "the database host $CONFIGDB_HOST is currently not reachable or wrong access parameters are specified. Therefore it cannot be checked if database $CONFIGDB_DBNAME already exists. Use the -i switch if you want to proceed (and automatically delete it) anyway"
+fi
+
+# As last resort check return code
+if [ $? -ne 0 ] && [ "$DLETETECONFIGDB" != "true" ] && [ "$ACCESS_DENIED" != "true" ]; then
+    # 'mysql' command returned an error
+    die "the database host $CONFIGDB_HOST is currently not reachable or wrong access parameters are specified. Therefore it cannot be checked if database $CONFIGDB_DBNAME already exists. Use the -i switch if you want to proceed (and automatically delete it) anyway"
+fi
+
+if [ "$(echo "$MYSQL_RESULT" | grep ${CONFIGDB_DBNAME})" == ${CONFIGDB_DBNAME} ] && [ "$DLETETECONFIGDB" != "true" ]; then
+    # Such a database schema already exists
 	die "the database $CONFIGDB_DBNAME exists, use the -i switch if you want to automatically delete it"
 fi
 
