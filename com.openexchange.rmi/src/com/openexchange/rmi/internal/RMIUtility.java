@@ -97,7 +97,7 @@ public class RMIUtility {
     }
 
     private static RMIServerSocketFactory createServerSocketFactoryFor(String hostname) {
-        return hostname.equalsIgnoreCase("0") ? UnboundServerFactory.getInstance() : new BoundServerFactory(hostname);
+        return "0".equals(hostname) ? UnboundServerFactory.getInstance() : new BoundServerFactory(hostname);
     }
 
     /**
