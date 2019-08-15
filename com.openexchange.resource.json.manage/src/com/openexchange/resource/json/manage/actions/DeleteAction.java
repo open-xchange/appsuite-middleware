@@ -57,12 +57,12 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.manage.request.ResourceAJAXRequest;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link DeleteAction}

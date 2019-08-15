@@ -62,8 +62,8 @@ import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

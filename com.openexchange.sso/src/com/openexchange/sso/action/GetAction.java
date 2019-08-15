@@ -60,11 +60,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.sso.SSOConstants;
 import com.openexchange.sso.services.SSOServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link GetAction} - Performs the <code>GET</code> action.

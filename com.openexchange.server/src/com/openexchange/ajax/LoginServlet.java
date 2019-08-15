@@ -99,7 +99,6 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -123,6 +122,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * Servlet doing the login and logout stuff.

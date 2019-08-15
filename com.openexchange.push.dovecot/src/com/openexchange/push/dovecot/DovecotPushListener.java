@@ -55,7 +55,6 @@ import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
@@ -68,6 +67,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

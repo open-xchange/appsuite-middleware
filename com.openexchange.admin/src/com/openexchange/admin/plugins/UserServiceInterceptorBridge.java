@@ -57,8 +57,8 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.exception.OXException;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 
 
 /**

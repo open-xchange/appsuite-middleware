@@ -62,12 +62,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * Implementes the formLogin action.

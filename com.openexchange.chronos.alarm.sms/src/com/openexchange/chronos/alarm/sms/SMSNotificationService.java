@@ -67,12 +67,12 @@ import com.openexchange.chronos.alarm.message.AlarmNotificationService;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.ratelimit.Rate;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

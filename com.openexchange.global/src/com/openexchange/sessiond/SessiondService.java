@@ -154,7 +154,7 @@ public interface SessiondService {
     /**
      * Removes all sessions which match the given {@link SessionFilter}. The filter is matched against all sessions
      * on the local node.
-     * 
+     *
      * @param filter The filter
      * @return The IDs of the removed sessions, possibly empty but never <code>null</code>
      * @throws OXException If an error occurs while removing
@@ -248,7 +248,7 @@ public interface SessiondService {
      * Picks up the session associated with the given client and server token. If a session exists for the given tokens and both tokens
      * match, the session object is put into the normal session container and into the session storage. It is removed from the session
      * container with tokens so a second request with the same tokens will fail.
-     * 
+     *
      * @param clientToken Client side token passed within the {@link #addSession(AddSessionParameter)} call.
      * @param serverToken Server side token returned inside the session from the {@link #addSession(AddSessionParameter)} call.
      * @return the matching session
@@ -257,7 +257,7 @@ public interface SessiondService {
     Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
 
     /**
-     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is applied to all sessions maintained in
      * <b>local</b> containers.
      *
      * @param filter The filter
@@ -267,7 +267,7 @@ public interface SessiondService {
     Collection<String> findSessions(SessionFilter filter) throws OXException;
 
     /**
-     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is applied to all sessions in the
      * (hazelcast-)cluster.
      *
      * @param filter The filter
@@ -288,7 +288,9 @@ public interface SessiondService {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @deprecated Subject for being removed in future versions
      */
+    @Deprecated
     public Session getAnyActiveSessionForUser(int userId, int contextId);
 
     /**

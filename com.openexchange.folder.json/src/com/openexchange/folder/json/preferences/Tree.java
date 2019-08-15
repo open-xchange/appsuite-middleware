@@ -55,7 +55,6 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -64,6 +63,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * Preferences tree item to allow the user to configure what folder tree he wants to use.

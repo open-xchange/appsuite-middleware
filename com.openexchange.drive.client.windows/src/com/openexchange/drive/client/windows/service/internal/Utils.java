@@ -64,12 +64,12 @@ import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.client.windows.service.Constants;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link Utils}

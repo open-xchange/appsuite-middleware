@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -67,6 +66,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 /**
  * This class contains everything for handling reminder for tasks.

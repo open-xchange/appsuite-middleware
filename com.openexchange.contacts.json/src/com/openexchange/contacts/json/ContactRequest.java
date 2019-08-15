@@ -77,7 +77,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Autoboxing;
@@ -90,6 +89,7 @@ import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ContactRequest}

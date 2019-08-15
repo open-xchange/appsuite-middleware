@@ -52,7 +52,7 @@ package com.openexchange.consistency;
 import java.io.Serializable;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link Entity}

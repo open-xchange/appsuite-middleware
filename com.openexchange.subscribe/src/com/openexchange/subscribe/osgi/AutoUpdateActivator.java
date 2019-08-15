@@ -191,12 +191,14 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
          *
          * @param login The {@link LoginResult} from which to build the {@link RequestContext}
          * @return The built {@link RequestContext}
+         * @throws OXException If session cannot be initialized
          */
-        private RequestContext buildRequestContext(LoginResult login) {
+        private RequestContext buildRequestContext(LoginResult login) throws OXException {
             DefaultRequestContext context = new DefaultRequestContext();
             HostData hostData = createHostData(login);
             context.setHostData(hostData);
             context.setUserAgent(login.getRequest().getUserAgent());
+            context.setSession(ServerSessionAdapter.valueOf(login.getSession()));
             return context;
         }
 

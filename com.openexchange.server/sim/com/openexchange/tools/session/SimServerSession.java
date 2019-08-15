@@ -56,11 +56,11 @@ import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Origin;
+import com.openexchange.user.User;
 
 /**
  * {@link SimServerSession}

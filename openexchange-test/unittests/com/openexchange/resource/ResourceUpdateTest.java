@@ -62,11 +62,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceUpdateTest}

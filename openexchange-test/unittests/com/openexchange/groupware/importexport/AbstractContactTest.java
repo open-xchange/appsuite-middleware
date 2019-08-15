@@ -71,7 +71,6 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.importexport.Format;
@@ -82,6 +81,7 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 
 /**
  * Basis for folder tests: Creates a folder and deletes it after testing.

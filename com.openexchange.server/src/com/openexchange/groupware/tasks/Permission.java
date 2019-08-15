@@ -55,11 +55,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.User;
 
 /**
  * Contains convenience methods for checking access rights.

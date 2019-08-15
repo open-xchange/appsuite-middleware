@@ -52,7 +52,7 @@ package com.openexchange.groupware.impl;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 public interface FolderTreeUtil {
 

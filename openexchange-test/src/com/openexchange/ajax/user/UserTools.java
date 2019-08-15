@@ -64,8 +64,8 @@ import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

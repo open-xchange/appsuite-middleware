@@ -54,12 +54,13 @@ import java.util.Locale;
 import java.util.Map;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.user.User;
 
 /**
  * This class implements the data container for the attributes of a user. This
  * class currently only contains the attributes of a user that are used oftenly
  * or stored in no.global and will be used from there.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UserImpl implements User, Cloneable {
@@ -205,7 +206,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Copy constructor.
-     * 
+     *
      * @param user object to copy.
      */
     public UserImpl(final User user) {
@@ -248,7 +249,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for id.
-     * 
+     *
      * @param id User identifier.
      */
     public void setId(final int id) {
@@ -282,7 +283,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for userPassword.
-     * 
+     *
      * @param userPassword Password.
      */
     public void setUserPassword(final String userPassword) {
@@ -291,7 +292,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for salt.
-     * 
+     *
      * @param salt The salt.
      */
     public void setSalt(final byte[] salt) {
@@ -308,7 +309,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for mailEnabled.
-     * 
+     *
      * @param mailEnabled <code>true</code> to enable user.
      */
     public void setMailEnabled(final boolean mailEnabled) {
@@ -325,7 +326,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for shadowLastChange.
-     * 
+     *
      * @param shadowLastChange Days since Jan 1, 1970 that password was last
      *            changed.
      */
@@ -342,7 +343,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for imapServer.
-     * 
+     *
      * @param imapServer IMAP server.
      */
     public void setImapServer(final String imapServer) {
@@ -359,7 +360,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for smtpServer.
-     * 
+     *
      * @param smtpServer SMTP server.
      */
     public void setSmtpServer(final String smtpServer) {
@@ -376,7 +377,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for mailDomain.
-     * 
+     *
      * @param mailDomain mail domain.
      */
     public void setMailDomain(final String mailDomain) {
@@ -393,7 +394,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for givenName.
-     * 
+     *
      * @param givenName given name.
      */
     public void setGivenName(final String givenName) {
@@ -410,7 +411,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for sure name.
-     * 
+     *
      * @param sureName sure name.
      */
     public void setSurname(final String sureName) {
@@ -427,7 +428,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for mail.
-     * 
+     *
      * @param mail Mail address.
      */
     public void setMail(final String mail) {
@@ -444,7 +445,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for displayName.
-     * 
+     *
      * @param displayName Display name.
      */
     public void setDisplayName(final String displayName) {
@@ -461,7 +462,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for timeZone.
-     * 
+     *
      * @param timeZone Timezone.
      */
     public void setTimeZone(final String timeZone) {
@@ -514,7 +515,7 @@ public class UserImpl implements User, Cloneable {
 
     /**
      * Setter for groups.
-     * 
+     *
      * @param groups the groups this user is member of.
      */
     public void setGroups(final int[] groups) {

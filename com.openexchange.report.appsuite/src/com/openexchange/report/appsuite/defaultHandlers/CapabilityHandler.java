@@ -79,7 +79,6 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReport;
@@ -97,6 +96,7 @@ import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
 import com.openexchange.report.appsuite.storage.ChunkingUtilities;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for

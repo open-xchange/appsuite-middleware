@@ -84,7 +84,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
@@ -97,6 +96,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 /**
  * {@link ITipNotificationMailGenerator}

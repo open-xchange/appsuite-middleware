@@ -60,7 +60,6 @@ import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.internal.LoginMethodClosure;
@@ -70,6 +69,7 @@ import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

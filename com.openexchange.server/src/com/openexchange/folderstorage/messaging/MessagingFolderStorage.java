@@ -86,7 +86,6 @@ import com.openexchange.folderstorage.messaging.contentType.TrashContentType;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.MessagingType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Collators;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -112,6 +111,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link MessagingFolderStorage} - The messaging folder storage.

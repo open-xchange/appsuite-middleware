@@ -55,12 +55,12 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.user.User;
 
 /**
  * Retrieves the arising reminder for a user.

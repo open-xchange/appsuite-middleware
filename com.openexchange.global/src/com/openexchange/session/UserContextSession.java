@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,40 +47,32 @@
  *
  */
 
-package com.openexchange.tools.session;
+package com.openexchange.session;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
- * {@link SessionHolder} - Provides a {@link Session} instance.
+ * {@link UserContextSession} - Extends <code>Session</code> by {@link #getUser()} and {@link #getContext()}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-@SingletonService
-public interface SessionHolder {
+public interface UserContextSession extends Session {
 
-	/**
-	 * Gets the <tt>Session</tt> instance.
-	 *
-	 * @return The <tt>Session</tt> instance
-	 */
-	public Session getSessionObject();
+    /**
+     * Gets the context reference.
+     *
+     * @return The context reference
+     */
+    Context getContext();
 
-	/**
-	 * Gets the context reference.
-	 *
-	 * @return The context reference
-	 */
-	public Context getContext();
-
-	/**
+    /**
      * Gets the user reference.
      *
      * @return The user reference
+     * @throws IllegalStateException If user object could not be loaded
      */
-	public User getUser();
+    User getUser();
+
 }

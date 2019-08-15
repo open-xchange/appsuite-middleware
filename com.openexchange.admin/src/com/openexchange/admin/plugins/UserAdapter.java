@@ -53,8 +53,8 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.user.User;
 
 
 /**

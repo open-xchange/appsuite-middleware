@@ -67,10 +67,10 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * The {@link InfostoreInformationImpl} class is an implementations of {@link InfostoreInformationService} class.

@@ -51,8 +51,8 @@ package com.openexchange.dav.mixins;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

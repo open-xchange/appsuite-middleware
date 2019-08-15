@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -82,6 +81,7 @@ import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
+import com.openexchange.user.User;
 
 /**
  * {@link FolderObject} - Represents a folder.

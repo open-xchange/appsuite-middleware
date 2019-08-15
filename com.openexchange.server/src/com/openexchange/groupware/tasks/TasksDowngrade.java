@@ -58,12 +58,12 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeListener;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 
 /**
  * This class implements the methods to delete tasks if a user loses

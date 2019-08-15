@@ -18,7 +18,6 @@ import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockExpiryListener;
 import com.openexchange.groupware.infostore.webdav.LockManager;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.setuptools.TestConfig;
@@ -26,6 +25,7 @@ import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 
 public class EntityLockManagerTest {
 

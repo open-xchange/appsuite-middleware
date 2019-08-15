@@ -53,9 +53,9 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * This class implements the method that are necessary for linking tasks.

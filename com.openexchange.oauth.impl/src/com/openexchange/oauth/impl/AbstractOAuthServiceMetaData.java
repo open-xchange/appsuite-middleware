@@ -59,7 +59,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.OAuthInteraction;
@@ -69,6 +68,7 @@ import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

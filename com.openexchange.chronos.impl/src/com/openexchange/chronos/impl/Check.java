@@ -95,13 +95,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link CalendarService}

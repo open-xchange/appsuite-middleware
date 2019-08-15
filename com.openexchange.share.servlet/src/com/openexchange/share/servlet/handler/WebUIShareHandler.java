@@ -53,7 +53,6 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -67,6 +66,7 @@ import com.openexchange.share.servlet.utils.LoginLocationRegistry;
 import com.openexchange.share.servlet.utils.LoginType;
 import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

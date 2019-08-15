@@ -74,8 +74,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.GuestInfo;
@@ -86,6 +84,8 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**

@@ -69,10 +69,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.MockUserLookup;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.NotificationConfig;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -219,7 +219,7 @@ public class ICalEmitterTest {
 
     /**
      * Serializes a task.
-     * 
+     *
      * @param task task to serialize.
      * @return an iCal file.
      * @throws IOException if serialization fails.

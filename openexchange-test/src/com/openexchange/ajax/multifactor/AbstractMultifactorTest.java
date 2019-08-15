@@ -58,6 +58,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.core.HttpHeaders;
+import org.apache.commons.codec.binary.Base64;
 import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -78,7 +79,6 @@ import com.openexchange.testing.httpclient.models.MultifactorStartRegistrationRe
 import com.openexchange.testing.httpclient.models.MultifactorStartRegistrationResponseData;
 import com.openexchange.testing.httpclient.modules.MultifactorApi;
 import com.openexchange.testing.restclient.modules.AdminApi;
-import org.apache.commons.codec.binary.Base64;
 
 /**
  * {@link AbstractMultifactorTest}

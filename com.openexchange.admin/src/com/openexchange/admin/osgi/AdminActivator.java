@@ -106,8 +106,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptorRegistry;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptorRegistry;
 import com.openexchange.version.VersionService;
 
 public class AdminActivator extends HousekeepingActivator {

@@ -64,7 +64,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
@@ -74,6 +73,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.StringParser;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

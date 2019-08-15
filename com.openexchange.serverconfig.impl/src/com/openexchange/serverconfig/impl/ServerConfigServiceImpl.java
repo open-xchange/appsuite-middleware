@@ -81,7 +81,7 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 
 
 /**

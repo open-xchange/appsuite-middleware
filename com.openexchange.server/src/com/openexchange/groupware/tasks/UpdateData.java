@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.mapping.Status;
@@ -78,6 +77,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to modify.

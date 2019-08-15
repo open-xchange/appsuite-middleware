@@ -35,12 +35,12 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCaches;
 //import org.mockito.Mockito;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ThreadPools.class, PreviewImageGenerator.class })

@@ -54,10 +54,10 @@ import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestService;
+import com.openexchange.user.User;
 
 /**
  * Delegate implementation of {@link GuestService} if cross context handling is enabled.

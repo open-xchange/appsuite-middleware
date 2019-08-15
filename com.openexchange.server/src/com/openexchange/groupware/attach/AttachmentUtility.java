@@ -64,7 +64,6 @@ import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
@@ -72,6 +71,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link AttachmentUtility} - Utility class for attachments.

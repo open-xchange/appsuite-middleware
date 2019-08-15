@@ -53,10 +53,10 @@ import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
 import com.openexchange.passwordchange.history.PasswordChangeRecorderRegistryService;
 import com.openexchange.passwordchange.history.impl.events.PasswordChangeHelper;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

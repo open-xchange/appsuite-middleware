@@ -49,19 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
-import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
-import static com.openexchange.chronos.common.CalendarUtils.hasFurtherOccurrences;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
-import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isInternal;
-import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
-import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CONNECTION;
@@ -124,7 +112,6 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -140,6 +127,7 @@ import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

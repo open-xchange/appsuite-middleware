@@ -66,7 +66,6 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Streams;
@@ -76,13 +75,14 @@ import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionThreadCounter;
+import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * Overridden service method that checks if a valid session can be found for the request.

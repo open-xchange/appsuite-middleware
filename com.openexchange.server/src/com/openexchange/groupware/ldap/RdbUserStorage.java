@@ -93,6 +93,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.internal.mapping.UserField;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.iterator.TIntIterator;
@@ -1423,7 +1425,7 @@ public class RdbUserStorage extends UserStorage {
                 }
                 return user;
             } catch (OXException e) {
-                if (com.openexchange.groupware.ldap.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                if (com.openexchange.user.UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                     //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }

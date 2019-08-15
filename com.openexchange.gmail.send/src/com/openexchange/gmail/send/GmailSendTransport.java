@@ -97,7 +97,6 @@ import com.openexchange.gmail.send.services.Services;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -148,6 +147,7 @@ import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

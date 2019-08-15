@@ -81,7 +81,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
 import com.openexchange.groupware.notify.State.Type;
@@ -124,6 +123,7 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 

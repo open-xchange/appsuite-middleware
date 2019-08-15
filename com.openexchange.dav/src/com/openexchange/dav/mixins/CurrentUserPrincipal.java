@@ -50,7 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -63,7 +63,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class CurrentUserPrincipal extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "current-user-principal";
-    private SessionHolder sessionHolder = null;
+    private final SessionHolder sessionHolder;
 
     /**
      * Initializes a new {@link CurrentUserPrincipal}.

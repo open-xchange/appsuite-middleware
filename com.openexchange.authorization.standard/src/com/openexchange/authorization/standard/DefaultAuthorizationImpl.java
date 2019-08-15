@@ -56,7 +56,7 @@ import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.context.ContextExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 
 /**

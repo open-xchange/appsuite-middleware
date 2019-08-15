@@ -58,11 +58,10 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.contact.vcard.VCardExport;
+import com.openexchange.contact.vcard.VCardUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -80,6 +79,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link CompositionSpaces} - Utility class for composition space.

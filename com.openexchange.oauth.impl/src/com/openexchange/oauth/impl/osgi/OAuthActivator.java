@@ -106,12 +106,12 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 
 /**

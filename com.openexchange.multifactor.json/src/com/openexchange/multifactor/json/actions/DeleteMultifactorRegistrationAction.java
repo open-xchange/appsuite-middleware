@@ -51,10 +51,10 @@ package com.openexchange.multifactor.json.actions;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.stream.Collectors;
-import org.json.JSONArray;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.multifactor.MultifactorAuthenticator;

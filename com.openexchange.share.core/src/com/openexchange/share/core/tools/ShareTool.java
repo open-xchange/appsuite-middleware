@@ -63,7 +63,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Enums;
 import com.openexchange.java.Strings;
@@ -76,6 +75,7 @@ import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.user.User;
 
 /**
  * {@link ShareTool}

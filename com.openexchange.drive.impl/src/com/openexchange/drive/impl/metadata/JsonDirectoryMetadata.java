@@ -77,11 +77,11 @@ import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.user.User;
 
 /**
  * {@link JsonDirectoryMetadata}

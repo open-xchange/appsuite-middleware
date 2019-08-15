@@ -55,7 +55,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
 import com.openexchange.quota.Quota;
@@ -67,6 +66,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.impl.ConnectionHelper;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

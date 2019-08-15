@@ -60,7 +60,6 @@ import javax.mail.internet.idn.IDNA;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
@@ -79,6 +78,7 @@ import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

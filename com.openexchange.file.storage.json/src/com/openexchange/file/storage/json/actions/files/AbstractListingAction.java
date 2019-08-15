@@ -67,9 +67,9 @@ import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewRe
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;

@@ -67,7 +67,6 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageObjectPermission;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
@@ -75,6 +74,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 /**
  * {@link JsonFileMetadata}

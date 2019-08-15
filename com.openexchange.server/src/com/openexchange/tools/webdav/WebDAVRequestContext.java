@@ -51,9 +51,11 @@ package com.openexchange.tools.webdav;
 
 import java.util.Enumeration;
 import javax.servlet.http.HttpServletRequest;
+import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.DefaultRequestContext;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link WebDAVRequestContext}
@@ -82,6 +84,11 @@ public class WebDAVRequestContext extends DefaultRequestContext {
             setHostData(Tools.createHostData(request, session.getContextId(), session.getUserId(), isGuest));
         } else {
             setHostData(Tools.createHostData(request, -1, -1, false));
+        }
+        try {
+            setSession(ServerSessionAdapter.valueOf(session));
+        } catch (OXException e) {
+            // Failed to set session
         }
     }
 

@@ -71,11 +71,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.annotation.NonNull;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
@@ -159,11 +161,10 @@ import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManager.Scope;
 import com.openexchange.groupware.infostore.webdav.LockManager.Type;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.results.CustomizableTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.SizeKnowingInputStream;
@@ -175,10 +176,12 @@ import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionHolder;
+import com.openexchange.session.Sessions;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.share.ShareService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -193,8 +196,9 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 import gnu.trove.impl.Constants;
@@ -1883,10 +1887,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 return InfostoreAutodeleteSettings.hasAutodeleteCapability(session);
             }
 
-            SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            Session otherSession;
-            if (null != service && (otherSession = service.getAnyActiveSessionForUser(folderAdmin, session.getContextId())) != null) {
-                return InfostoreAutodeleteSettings.hasAutodeleteCapability(otherSession);
+            Optional<Session> otherSession = findSessionFor(folderAdmin, session.getContextId());
+            if (otherSession.isPresent()) {
+                return InfostoreAutodeleteSettings.hasAutodeleteCapability(otherSession.get());
             }
 
             return InfostoreAutodeleteSettings.hasAutodeleteCapability(folderAdmin, session.getContextId());
@@ -1894,6 +1897,41 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             LoggerHolder.LOG.error("Failed to check for the capability required to perform auto-deletion of versions. Assumin that capability is not granted for now.", e);
             return false;
         }
+    }
+
+    private Optional<Session> findSessionFor(int userId, int contextId) {
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (sessiondService == null) {
+            return Optional.empty();
+        }
+
+        CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+        if (capabilityService == null) {
+            return Optional.empty();
+        }
+
+        Optional<Collection<String>> optionalSessions = Sessions.getSessionsOfUser(userId, contextId, sessiondService);
+        if (!optionalSessions.isPresent()) {
+            return Optional.empty();
+        }
+
+        Collection<String> foundSessions = optionalSessions.get();
+        for (String sessionId : foundSessions) {
+            Session session = sessiondService.getSession(sessionId);
+            if (session != null && (Origin.HTTP_JSON == session.getOrigin())) {
+                try {
+                    if (capabilityService.getCapabilities(session).contains(Permission.INFOSTORE.getCapabilityName())) {
+                        return Optional.of(session);
+                    }
+                } catch (Exception e) {
+                    // Ignore
+                    LoggerHolder.LOG.debug("Failed to obtain cababilities for user {} in context {}", I(userId), I(contextId), e);
+                }
+            }
+        }
+
+        // Found no suitable session
+        return Optional.empty();
     }
 
     @Override
@@ -3581,7 +3619,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     }
                 };
                 if (shouldTriggerMediaDataExtraction) {
-                    customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, getSession(optSession), customizer);
+                    ServerSession session = getSession(optSession);
+                    if (session != null) {
+                        customizer = new TriggerMediaMetaDataExtractionDocumentCustomizer(this, null, session, customizer);
+                    }
                 }
                 iterator.setCustomizer(customizer);
             } else {
@@ -3600,8 +3641,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                 }
                 if (shouldTriggerMediaDataExtraction) {
-                    QuotaFileStorage fileStorage = getFileStorage(folderPermission.getFolderOwner(), context.getContextId());
-                    iterator.setCustomizer(new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, getSession(optSession)));
+                    ServerSession session = getSession(optSession);
+                    if (session != null) {
+                        QuotaFileStorage fileStorage = getFileStorage(folderPermission.getFolderOwner(), context.getContextId());
+                        iterator.setCustomizer(new TriggerMediaMetaDataExtractionDocumentCustomizer(this, fileStorage, session));
+                    }
                 }
             }
             /*
@@ -3699,13 +3743,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return optSession;
         }
 
-        ServerSession session = ThreadLocalSessionHolder.getInstance().getSessionObject();
-        if (null != session) {
-            return session;
+        Optional<Session> optionalSession = Sessions.getSessionForCurrentThread();
+        if (!optionalSession.isPresent()) {
+            return null;
         }
 
-        String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
-        return null == sessionId ? null : ServerSessionAdapter.valueOf(SessiondService.SERVICE_REFERENCE.get().getSession(sessionId));
+        return ServerSessionAdapter.valueOf(optionalSession.get());
     }
 
 }

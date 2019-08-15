@@ -61,7 +61,6 @@ import com.openexchange.client.onboarding.osgi.Services;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
@@ -72,6 +71,7 @@ import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

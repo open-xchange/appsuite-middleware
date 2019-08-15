@@ -97,9 +97,9 @@
 
 package com.openexchange.ajax.conversion;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static com.openexchange.java.Autoboxing.L;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONObject;

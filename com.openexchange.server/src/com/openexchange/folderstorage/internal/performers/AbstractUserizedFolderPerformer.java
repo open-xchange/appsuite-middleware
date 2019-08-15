@@ -98,7 +98,6 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
@@ -115,6 +114,7 @@ import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractUserizedFolderPerformer} - Abstract super class for actions which return one or multiple instances of

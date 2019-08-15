@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
@@ -82,6 +81,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.user.User;
 
 /**
  * {@link AutoLoginTools}

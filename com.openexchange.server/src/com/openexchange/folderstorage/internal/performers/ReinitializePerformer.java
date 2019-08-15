@@ -55,8 +55,8 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ReinitializePerformer} - Serves the <code>REINITIALIZE</code> request.

@@ -65,7 +65,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mobile.configuration.json.action.ActionException;
 import com.openexchange.mobile.configuration.json.action.ActionService;
@@ -76,6 +75,7 @@ import com.openexchange.mobile.configuration.json.exception.MobileProvisioningJs
 import com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  *

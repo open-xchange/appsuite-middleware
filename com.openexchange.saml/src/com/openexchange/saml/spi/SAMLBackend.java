@@ -60,7 +60,6 @@ import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.SAMLConfig;
@@ -72,6 +71,7 @@ import com.openexchange.saml.validation.ResponseValidator;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
+import com.openexchange.user.User;
 
 /**
  * A {@link SAMLBackend} must be implemented and registered as OSGi service to enable

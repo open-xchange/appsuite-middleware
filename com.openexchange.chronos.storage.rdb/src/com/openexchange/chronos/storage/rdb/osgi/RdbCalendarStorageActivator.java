@@ -82,7 +82,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaService;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
 import com.openexchange.userconf.UserPermissionService;
 
 /**

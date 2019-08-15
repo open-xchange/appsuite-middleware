@@ -53,10 +53,10 @@ import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.user.User;
 
 /**
  * This is the central interface to the reminder component.

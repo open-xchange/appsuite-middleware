@@ -35,6 +35,7 @@ Import-Package: com.google.common.base,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ com.openexchange.user,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

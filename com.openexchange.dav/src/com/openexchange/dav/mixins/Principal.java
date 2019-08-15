@@ -50,7 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

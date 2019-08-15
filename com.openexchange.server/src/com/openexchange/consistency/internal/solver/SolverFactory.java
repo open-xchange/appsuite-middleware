@@ -53,7 +53,7 @@ import com.openexchange.consistency.RepairAction;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link SolverFactory}

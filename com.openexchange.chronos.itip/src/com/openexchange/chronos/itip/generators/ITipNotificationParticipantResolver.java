@@ -75,7 +75,6 @@ import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
@@ -84,6 +83,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

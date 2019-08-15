@@ -60,7 +60,6 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -68,6 +67,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tokenlogin.TokenLoginSecret;
 import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * {@link RedeemToken}

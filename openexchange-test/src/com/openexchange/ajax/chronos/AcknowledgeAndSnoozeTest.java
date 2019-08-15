@@ -68,7 +68,6 @@ import com.openexchange.ajax.chronos.factory.EventFactory;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
-import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;
 

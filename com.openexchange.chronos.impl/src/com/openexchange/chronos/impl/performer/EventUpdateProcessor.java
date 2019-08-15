@@ -49,21 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.add;
-import static com.openexchange.chronos.common.CalendarUtils.calculateEnd;
-import static com.openexchange.chronos.common.CalendarUtils.calculateStart;
-import static com.openexchange.chronos.common.CalendarUtils.combine;
-import static com.openexchange.chronos.common.CalendarUtils.contains;
-import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
-import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.coversDifferentTimePeriod;
 import static com.openexchange.chronos.impl.Utils.prepareOrganizer;

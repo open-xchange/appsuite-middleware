@@ -50,9 +50,9 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.container.EffectiveObjectPermission;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.User;
 
 public class EffectiveInfostorePermission {
 

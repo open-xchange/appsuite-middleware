@@ -70,10 +70,9 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorManagementService;
 import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
@@ -81,6 +80,7 @@ import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**

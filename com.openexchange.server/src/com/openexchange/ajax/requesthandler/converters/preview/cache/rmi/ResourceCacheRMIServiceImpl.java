@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.cache.ResourceCache;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;

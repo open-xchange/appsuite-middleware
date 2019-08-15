@@ -59,8 +59,8 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipRole;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.user.User;
 
 /**
  * {@link NotificationParticipant}

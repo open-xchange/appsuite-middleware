@@ -63,7 +63,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
@@ -73,6 +72,7 @@ import com.openexchange.share.core.groupware.AdministrativeFolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.spi.FolderHandlerModuleExtension;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

@@ -64,7 +64,6 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -77,6 +76,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 /**

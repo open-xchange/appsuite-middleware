@@ -58,7 +58,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -86,6 +85,7 @@ import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link Forward} - Utility class to open a composition space for a forward.

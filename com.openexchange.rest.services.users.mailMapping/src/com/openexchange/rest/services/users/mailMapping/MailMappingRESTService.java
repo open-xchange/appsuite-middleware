@@ -61,7 +61,6 @@ import javax.ws.rs.core.PathSegment;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.MailResolverService;
 import com.openexchange.mailmapping.ResolvedMail;
@@ -70,6 +69,7 @@ import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

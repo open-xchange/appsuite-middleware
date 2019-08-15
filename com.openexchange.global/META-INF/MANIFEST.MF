@@ -56,7 +56,8 @@ Export-Package: com.openexchange.ajax.fileholder,
  com.openexchange.tools.iterator,
  com.openexchange.tools.stream,
  com.openexchange.tools.strings,
- com.openexchange.tools.validate
+ com.openexchange.tools.validate,
+ com.openexchange.user
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
  ch.qos.logback.classic.db,

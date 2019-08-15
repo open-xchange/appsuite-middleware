@@ -62,8 +62,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**

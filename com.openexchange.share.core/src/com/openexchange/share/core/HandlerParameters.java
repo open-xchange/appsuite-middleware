@@ -52,8 +52,8 @@ package com.openexchange.share.core;
 import java.sql.Connection;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 
 /**

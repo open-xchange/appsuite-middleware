@@ -57,7 +57,6 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.AbstractWarningAwareReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -72,6 +71,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractStandardFolderItemValue}

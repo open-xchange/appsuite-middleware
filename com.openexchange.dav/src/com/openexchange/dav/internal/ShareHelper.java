@@ -71,9 +71,9 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 

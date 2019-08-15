@@ -72,9 +72,9 @@ import com.openexchange.contact.storage.ldap.config.LdapConfig.AuthType;
 import com.openexchange.contact.storage.ldap.config.LdapConfig.SearchScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

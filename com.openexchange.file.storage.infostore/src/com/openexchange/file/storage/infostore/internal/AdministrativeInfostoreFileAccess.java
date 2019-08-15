@@ -72,9 +72,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacades;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 

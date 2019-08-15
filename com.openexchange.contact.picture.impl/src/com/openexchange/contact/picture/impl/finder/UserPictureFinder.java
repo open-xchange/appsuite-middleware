@@ -60,8 +60,8 @@ import com.openexchange.contact.picture.finder.PictureResult;
 import com.openexchange.contact.picture.impl.ContactPictureUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

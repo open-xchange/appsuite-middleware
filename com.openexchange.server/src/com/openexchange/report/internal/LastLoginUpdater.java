@@ -56,13 +56,13 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

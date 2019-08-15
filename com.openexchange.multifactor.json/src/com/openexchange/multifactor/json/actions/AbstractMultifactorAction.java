@@ -55,13 +55,13 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.multifactor.MultifactorDevice;
 import com.openexchange.multifactor.MultifactorProvider;
 import com.openexchange.multifactor.MultifactorProviderRegistry;
 import com.openexchange.multifactor.exceptions.MultifactorExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

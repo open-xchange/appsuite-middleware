@@ -69,9 +69,9 @@ import com.openexchange.download.limit.limiter.exceptions.DownloadLimitedExcepti
 import com.openexchange.download.limit.storage.RdbFileAccessStorage;
 import com.openexchange.download.limit.util.LimitConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link GuestDownloadLimiter} Implementation of {@link DispatcherListener} to limit download actions.

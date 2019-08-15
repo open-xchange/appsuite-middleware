@@ -98,7 +98,6 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.compose.CompositionSpaceErrorCode;
@@ -109,6 +108,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.snippet.QuotaAwareSnippetService;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 
 /**
  * {@link ConsistencyServiceImpl}

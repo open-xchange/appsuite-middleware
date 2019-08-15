@@ -75,7 +75,6 @@ import com.google.common.io.ByteStreams;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -99,6 +98,7 @@ import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 
 /**

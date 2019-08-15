@@ -47,59 +47,75 @@
  *
  */
 
-package com.openexchange.user;
+package com.openexchange.session;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
+import com.openexchange.session.SessionHolderExtended;
+import com.openexchange.user.User;
+
 
 /**
- * {@link AbstractUserServiceInterceptor}
+ * {@link ThreadLocalSessionHolder} - The session holder using a {@link ThreadLocal} instance.
  *
- * Stub implementation of the {@link UserServiceInterceptor} interface.
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class AbstractUserServiceInterceptor implements UserServiceInterceptor {
+public class ThreadLocalSessionHolder implements SessionHolderExtended {
 
-    /** The default interceptor ranking */
-    protected static final int DEFAULT_RANKING = 100;
+    private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
 
-    @Override
-    public int getRanking() {
-        return DEFAULT_RANKING;
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static ThreadLocalSessionHolder getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ThreadLocal<UserContextSession> session;
+
+    /**
+     * Initializes a new {@link ThreadLocalSessionHolder}.
+     */
+    private ThreadLocalSessionHolder() {
+        super();
+        session = new ThreadLocal<UserContextSession>();
+    }
+
+    /**
+     * Sets the specified <tt>Session</tt> instance.
+     *
+     * @param serverSession The <tt>Session</tt> instance
+     */
+    public void setSession(final UserContextSession serverSession) {
+        session.set(serverSession);
+    }
+
+    public void clear() {
+        session.remove();
     }
 
     @Override
-    public void beforeCreate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public Context getContext() {
+        return getSessionObject().getContext();
     }
 
     @Override
-    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public Session optSessionObject() {
+        return session.get();
     }
 
     @Override
-    public void beforeUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        // no
+    public UserContextSession getSessionObject() {
+        return session.get();
     }
 
     @Override
-    public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
-        // no
-    }
-
-    @Override
-    public void beforeDelete(Context context, User user, Contact contactData) throws OXException {
-        // no
-    }
-
-    @Override
-    public void afterDelete(Context context, User user, Contact contactData) throws OXException {
-        // no
+    public User getUser() {
+        return getSessionObject().getUser();
     }
 
 }

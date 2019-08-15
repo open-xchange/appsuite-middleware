@@ -65,7 +65,6 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
@@ -76,6 +75,7 @@ import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
+import com.openexchange.user.User;
 
 
 /**

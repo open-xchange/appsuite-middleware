@@ -58,7 +58,7 @@ import java.util.Map;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;

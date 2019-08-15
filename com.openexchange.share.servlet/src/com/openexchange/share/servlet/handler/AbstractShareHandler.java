@@ -57,10 +57,10 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

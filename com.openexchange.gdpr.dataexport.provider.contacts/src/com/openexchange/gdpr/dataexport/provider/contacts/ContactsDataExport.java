@@ -105,7 +105,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.i18n.tools.StringHelper;
@@ -118,6 +117,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 

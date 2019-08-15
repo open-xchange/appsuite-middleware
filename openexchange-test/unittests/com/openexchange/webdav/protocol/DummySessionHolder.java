@@ -6,11 +6,11 @@ package com.openexchange.webdav.protocol;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 
 public class DummySessionHolder implements SessionHolder {
 

@@ -78,7 +78,6 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
@@ -99,6 +98,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.User;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 /**

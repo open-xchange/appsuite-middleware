@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccounts;
@@ -87,11 +88,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogProperties;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
+import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -313,12 +313,12 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     private ServerSession getSession() throws OXException {
-        ServerSession session = ThreadLocalSessionHolder.getInstance().getSessionObject();
-        if (null != session) {
-            return session;
+        Optional<Session> optionalSession = Sessions.getSessionForCurrentThread();
+        if (!optionalSession.isPresent()) {
+            return null;
         }
-        final String sessionId = LogProperties.getLogProperty(LogProperties.Name.SESSION_SESSION_ID);
-        return null == sessionId ? null : ServerSessionAdapter.valueOf(SessiondService.SERVICE_REFERENCE.get().getSession(sessionId));
+
+        return ServerSessionAdapter.valueOf(optionalSession.get());
     }
 
     /**

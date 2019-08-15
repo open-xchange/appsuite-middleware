@@ -55,11 +55,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.user.User;
 
 /**
  * {@link ShareToken}

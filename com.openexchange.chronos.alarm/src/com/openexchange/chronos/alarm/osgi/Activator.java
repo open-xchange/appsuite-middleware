@@ -55,7 +55,7 @@ import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
 
 /**
  * {@link Activator}

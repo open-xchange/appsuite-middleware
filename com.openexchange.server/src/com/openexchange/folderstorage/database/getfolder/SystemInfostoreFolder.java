@@ -73,7 +73,6 @@ import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -84,6 +83,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 
 /**

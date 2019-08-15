@@ -48,7 +48,7 @@
  */
 
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.user;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;

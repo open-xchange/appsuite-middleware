@@ -59,13 +59,13 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

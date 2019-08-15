@@ -16,6 +16,7 @@ Import-Package: com.openexchange.authorization,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

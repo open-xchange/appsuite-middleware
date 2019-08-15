@@ -116,4 +116,14 @@ public class OAuthProviderJSONActivator extends AJAXModuleActivator {
         openTrackers();
     }
 
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
 }

@@ -62,7 +62,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;

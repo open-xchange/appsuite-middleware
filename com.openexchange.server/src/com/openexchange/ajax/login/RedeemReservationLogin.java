@@ -64,7 +64,6 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
@@ -78,6 +77,7 @@ import com.openexchange.session.reservation.Enhancer;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 
 /**

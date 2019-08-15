@@ -51,13 +51,13 @@ package com.openexchange.chronos.alarm.mail.impl;
 
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.User;
 
 /**
  * {@link MailAlarmMailHandler}

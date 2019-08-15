@@ -85,12 +85,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

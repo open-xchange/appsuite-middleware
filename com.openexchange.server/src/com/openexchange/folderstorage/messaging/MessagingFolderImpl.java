@@ -69,12 +69,12 @@ import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolder.DefaultFolderType;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.tools.id.IDMangler;
+import com.openexchange.user.User;
 
 /**
  * {@link MessagingFolderImpl} - A messaging folder.

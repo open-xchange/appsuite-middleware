@@ -67,8 +67,8 @@ import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.UpdateRequest;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.user.User;
 
 /**
  * {@link Bug41537Test}

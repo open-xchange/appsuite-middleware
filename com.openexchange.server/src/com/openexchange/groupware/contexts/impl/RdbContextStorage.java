@@ -71,13 +71,13 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.Sets;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.update.Tools;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * This class implements a storage for contexts in a relational database.

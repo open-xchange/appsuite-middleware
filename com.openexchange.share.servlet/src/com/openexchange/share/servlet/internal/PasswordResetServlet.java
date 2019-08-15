@@ -63,7 +63,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
@@ -90,6 +89,7 @@ import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

@@ -58,10 +58,10 @@ import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveMetaMode;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FilePattern;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link DefaultDriveSession}

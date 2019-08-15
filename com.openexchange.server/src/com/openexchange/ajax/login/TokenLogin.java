@@ -63,12 +63,12 @@ import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * Implements the tokenLogin action.

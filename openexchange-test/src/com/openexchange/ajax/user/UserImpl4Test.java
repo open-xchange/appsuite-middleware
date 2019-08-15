@@ -12,7 +12,7 @@ package com.openexchange.ajax.user;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  *

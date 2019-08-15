@@ -88,11 +88,11 @@ import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCod
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link BasicSchedJoulesCalendarProvider}

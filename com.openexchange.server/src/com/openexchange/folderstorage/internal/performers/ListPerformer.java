@@ -82,7 +82,6 @@ import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -92,6 +91,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 

@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * Provides information for a Halo contact query.

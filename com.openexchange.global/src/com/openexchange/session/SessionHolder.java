@@ -47,74 +47,39 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.session;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SessionHolderExtended;
-
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.user.User;
 
 /**
- * {@link ThreadLocalSessionHolder} - The session holder using a {@link ThreadLocal} instance.
+ * {@link SessionHolder} - Provides a {@link Session} instance.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ThreadLocalSessionHolder implements SessionHolderExtended {
+@SingletonService
+public interface SessionHolder {
 
-    private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
+	/**
+	 * Gets the <tt>Session</tt> instance.
+	 *
+	 * @return The <tt>Session</tt> instance
+	 */
+	Session getSessionObject();
 
-    /**
-     * Gets the instance.
+	/**
+	 * Gets the context reference.
+	 *
+	 * @return The context reference
+	 */
+	Context getContext();
+
+	/**
+     * Gets the user reference.
      *
-     * @return The instance
+     * @return The user reference
      */
-    public static ThreadLocalSessionHolder getInstance() {
-        return INSTANCE;
-    }
-
-    private final ThreadLocal<ServerSession> session;
-
-    /**
-     * Initializes a new {@link ThreadLocalSessionHolder}.
-     */
-    private ThreadLocalSessionHolder() {
-        super();
-        session = new ThreadLocal<ServerSession>();
-    }
-
-    /**
-     * Sets the specified <tt>ServerSession</tt> instance.
-     *
-     * @param serverSession The <tt>ServerSession</tt> instance
-     */
-    public void setSession(final ServerSession serverSession) {
-        session.set(serverSession);
-    }
-
-    public void clear() {
-        session.remove();
-    }
-
-    @Override
-    public Context getContext() {
-        return getSessionObject().getContext();
-    }
-
-    @Override
-    public Session optSessionObject() {
-        return session.get();
-    }
-
-    @Override
-    public ServerSession getSessionObject() {
-        return session.get();
-    }
-
-    @Override
-    public User getUser() {
-        return getSessionObject().getUser();
-    }
-
+	User getUser();
 }

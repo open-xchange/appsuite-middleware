@@ -92,7 +92,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
@@ -106,6 +105,7 @@ import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 

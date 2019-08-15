@@ -78,10 +78,10 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.file.InMemoryFileStorage;
+import com.openexchange.user.User;
 
 /**
  * {@link ConsistencyTest}

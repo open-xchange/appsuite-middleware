@@ -61,7 +61,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
@@ -77,6 +76,7 @@ import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.impl.LinkCreatedNotification;
 import com.openexchange.share.notification.impl.TextSnippets;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

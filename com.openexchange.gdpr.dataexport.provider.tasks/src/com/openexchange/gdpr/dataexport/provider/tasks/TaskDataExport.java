@@ -101,7 +101,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.i18n.Translator;
@@ -121,6 +120,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

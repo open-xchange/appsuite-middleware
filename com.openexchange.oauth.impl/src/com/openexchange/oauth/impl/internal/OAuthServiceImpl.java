@@ -91,8 +91,6 @@ import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.session.SessionHolder;
 
 /**
  * An {@link OAuthService} Implementation using the RDB for storage and Scribe OAuth library for the OAuth interaction.
@@ -342,7 +340,7 @@ public class OAuthServiceImpl implements OAuthService {
     @Override
     public void deleteAccount(Session session, final int accountId) throws OXException {
         oauthAccountStorage.deleteAccount(session, accountId);
-        postOAuthDeleteEvent(accountId, session.getUserId(), session.getContextId());
+        postOAuthDeleteEvent(accountId, session);
     }
 
     @Override
@@ -463,48 +461,20 @@ public class OAuthServiceImpl implements OAuthService {
      * Posts an OSGi delete {@link Event} for the specified account
      *
      * @param accountId The account identifier
-     * @param userId The user identifier
-     * @param contextId The context identifier
+     * @param session The session
      */
-    private void postOAuthDeleteEvent(final int accountId, final int userId, final int contextId) {
-        final Session session = getUserSession(userId, contextId);
-        if (null == session) {
-            return;
-        }
+    private void postOAuthDeleteEvent(final int accountId, final Session session) {
         final EventAdmin eventAdmin = Services.getService(EventAdmin.class);
         if (null == eventAdmin) {
             return;
         }
         final Dictionary<String, Object> props = new Hashtable<String, Object>(4);
         props.put(OAuthEventConstants.PROPERTY_SESSION, session);
-        props.put(OAuthEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
-        props.put(OAuthEventConstants.PROPERTY_USER, Integer.valueOf(userId));
+        props.put(OAuthEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
+        props.put(OAuthEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
         props.put(OAuthEventConstants.PROPERTY_ID, Integer.valueOf(accountId));
         final Event event = new Event(OAuthEventConstants.TOPIC_DELETE, props);
         eventAdmin.sendEvent(event);
-    }
-
-    /**
-     * Retrieves a {@link Session} for the specified user in the specified context
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The {@link Session} or <code>null</code> if none exists
-     */
-    private Session getUserSession(final int userId, final int contextId) {
-        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
-        final SessionHolder sessionHolder = Services.getService(SessionHolder.class);
-        if (sessionHolder != null) {
-            final Session session = sessionHolder.getSessionObject();
-            if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
-                return session;
-            }
-        }
-        final SessiondService service = Services.getService(SessiondService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getAnyActiveSessionForUser(userId, contextId);
     }
 
     /**

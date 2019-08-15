@@ -50,7 +50,7 @@
 package com.openexchange.user.copy.internal.user;
 
 import static com.openexchange.java.Autoboxing.I;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.user.copy.internal.IntegerToObjectMapping;
 
 

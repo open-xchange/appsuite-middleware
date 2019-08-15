@@ -71,13 +71,13 @@ import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link CreatePerformer} - Serves the <code>CREATE</code> request.

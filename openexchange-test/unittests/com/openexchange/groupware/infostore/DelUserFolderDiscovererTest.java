@@ -12,7 +12,6 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.CapabilityUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -25,6 +24,7 @@ import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.user.User;
 
 public class DelUserFolderDiscovererTest {
 

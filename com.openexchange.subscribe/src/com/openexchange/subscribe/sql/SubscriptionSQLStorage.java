@@ -74,7 +74,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -89,6 +88,7 @@ import com.openexchange.subscribe.AdministrativeSubscriptionStorage;
 import com.openexchange.subscribe.EncryptedField;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

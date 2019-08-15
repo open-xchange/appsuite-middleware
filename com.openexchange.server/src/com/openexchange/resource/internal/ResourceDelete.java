@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
@@ -69,6 +68,7 @@ import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceDelete} - Performs update of a {@link Resource resource}.

@@ -71,7 +71,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
@@ -83,6 +82,7 @@ import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.appsuite.storage.ChunkingUtilities;
 import com.openexchange.report.appsuite.storage.ContextLoader;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * {@link LocalReportService}

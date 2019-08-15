@@ -51,8 +51,8 @@ package com.openexchange.mobile.configuration.json.container;
 
 import java.util.HashMap;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  *

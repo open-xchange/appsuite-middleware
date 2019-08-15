@@ -89,8 +89,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -425,7 +425,7 @@ public abstract class FolderCollection<T> extends DAVCollection {
      * <p/>
      * The default implementation delegates to {@link #getSyncStatus(Date)} if no limit is specified and throws an exception otherwise.
      * Override if applicable.
-     * 
+     *
      * @param since The time, or <code>null</code> for the initial synchronization
      * @param limit The maximum number of items to return in the response, or <code>-1</code> if unlimited
      * @return The sync status

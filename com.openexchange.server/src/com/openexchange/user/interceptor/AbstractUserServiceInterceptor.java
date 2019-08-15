@@ -47,22 +47,59 @@
  *
  */
 
-package com.openexchange.tools.session;
+package com.openexchange.user.interceptor;
 
-import com.openexchange.session.Session;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.user.User;
 
 /**
- * {@link SessionHolderExtended} - Extends the {@link SessionHolder} interface by {@link #optSessionObject()} method.
+ * {@link AbstractUserServiceInterceptor}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Stub implementation of the {@link UserServiceInterceptor} interface.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface SessionHolderExtended extends SessionHolder {
+public abstract class AbstractUserServiceInterceptor implements UserServiceInterceptor {
 
-    /**
-     * Optionally gets the {@link Session session}.
-     *
-     * @return The session or <code>null</code>
-     */
-    public Session optSessionObject();
+    /** The default interceptor ranking */
+    protected static final int DEFAULT_RANKING = 100;
+
+    @Override
+    public int getRanking() {
+        return DEFAULT_RANKING;
+    }
+
+    @Override
+    public void beforeCreate(Context context, User user, Contact contactData) throws OXException {
+        // no
+    }
+
+    @Override
+    public void afterCreate(Context context, User user, Contact contactData) throws OXException {
+        // no
+    }
+
+    @Override
+    public void beforeUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
+        // no
+    }
+
+    @Override
+    public void afterUpdate(Context context, User user, Contact contactData, Map<String, Object> properties) throws OXException {
+        // no
+    }
+
+    @Override
+    public void beforeDelete(Context context, User user, Contact contactData) throws OXException {
+        // no
+    }
+
+    @Override
+    public void afterDelete(Context context, User user, Contact contactData) throws OXException {
+        // no
+    }
 
 }

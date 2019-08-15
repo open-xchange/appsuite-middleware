@@ -51,11 +51,11 @@ package com.openexchange.groupware.infostore.autodelete;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 
 /**

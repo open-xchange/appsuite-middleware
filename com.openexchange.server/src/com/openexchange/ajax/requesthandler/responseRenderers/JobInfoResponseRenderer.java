@@ -66,9 +66,9 @@ import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
 import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link JobInfoResponseRenderer}

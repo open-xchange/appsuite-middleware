@@ -50,7 +50,6 @@
 package com.openexchange.share.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestInfo;
@@ -58,6 +57,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.user.User;
 
 /**
  * {@link DefaultShareInfo}

@@ -60,13 +60,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceCreate} - Performs insertion of a {@link Resource resource}.

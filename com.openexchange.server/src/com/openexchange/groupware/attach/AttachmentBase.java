@@ -54,13 +54,13 @@ import java.util.Date;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionException;
+import com.openexchange.user.User;
 import gnu.trove.map.TIntObjectMap;
 
 public interface AttachmentBase extends TransactionAware {
@@ -88,7 +88,7 @@ public interface AttachmentBase extends TransactionAware {
 
     /**
      * This method is used to get all file_ids which are refered to by attachments. This is used by the consistency tool at the moment
-     * 
+     *
      * @param ctx The Context
      * @return A sorted set of the file_ids
      */
@@ -96,7 +96,7 @@ public interface AttachmentBase extends TransactionAware {
 
     /**
      * This method is used to get all file_ids which are refered to by attachments. This is used by the consistency tool at the moment
-     * 
+     *
      * @param ctx The Context
      * @param user the user
      * @return A sorted set of the file_ids

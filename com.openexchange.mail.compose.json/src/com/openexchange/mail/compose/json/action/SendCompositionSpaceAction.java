@@ -60,9 +60,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.StreamedUpload;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.mail.compose.CompositionSpaceService;
 import com.openexchange.mail.compose.MessageDescription;
-import com.openexchange.mail.compose.Attachment.ContentDisposition;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 

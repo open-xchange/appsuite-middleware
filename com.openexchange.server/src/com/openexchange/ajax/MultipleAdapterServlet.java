@@ -63,7 +63,6 @@ import org.json.JSONTokener;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
@@ -73,6 +72,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**

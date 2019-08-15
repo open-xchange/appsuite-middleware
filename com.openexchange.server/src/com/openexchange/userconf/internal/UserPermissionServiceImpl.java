@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
@@ -62,6 +61,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
+import com.openexchange.user.User;
 import com.openexchange.userconf.UserPermissionService;
 
 
@@ -72,11 +72,11 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class UserPermissionServiceImpl implements UserPermissionService {
 
-    private AccessCombinationNameCache cache;
+    private final AccessCombinationNameCache cache;
 
     /**
      * Initializes a new {@link UserPermissionServiceImpl}.
-     * 
+     *
      * @throws OXException
      * @throws ClassNotFoundException
      */

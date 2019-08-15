@@ -49,24 +49,7 @@
 
 package com.openexchange.groupware.container;
 
-import static com.openexchange.groupware.container.CalendarObject.DAYS;
-import static com.openexchange.groupware.container.CalendarObject.DAY_IN_MONTH;
-import static com.openexchange.groupware.container.CalendarObject.END_DATE;
-import static com.openexchange.groupware.container.CalendarObject.INTERVAL;
-import static com.openexchange.groupware.container.CalendarObject.MONTH;
-import static com.openexchange.groupware.container.CalendarObject.NOTE;
-import static com.openexchange.groupware.container.CalendarObject.NOTIFICATION;
-import static com.openexchange.groupware.container.CalendarObject.PARTICIPANTS;
-import static com.openexchange.groupware.container.CalendarObject.RECURRENCE_CALCULATOR;
-import static com.openexchange.groupware.container.CalendarObject.RECURRENCE_COUNT;
-import static com.openexchange.groupware.container.CalendarObject.RECURRENCE_DATE_POSITION;
-import static com.openexchange.groupware.container.CalendarObject.RECURRENCE_ID;
-import static com.openexchange.groupware.container.CalendarObject.RECURRENCE_POSITION;
-import static com.openexchange.groupware.container.CalendarObject.RECURRENCE_TYPE;
-import static com.openexchange.groupware.container.CalendarObject.START_DATE;
-import static com.openexchange.groupware.container.CalendarObject.TITLE;
-import static com.openexchange.groupware.container.CalendarObject.UNTIL;
-import static com.openexchange.groupware.container.CalendarObject.USERS;
+import static com.openexchange.groupware.container.CalendarObject.*;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static org.junit.Assert.assertEquals;

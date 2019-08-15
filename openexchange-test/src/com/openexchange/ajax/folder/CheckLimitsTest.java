@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax.folder;
 
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

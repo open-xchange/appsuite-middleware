@@ -21,12 +21,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.user.User;
 
 public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 

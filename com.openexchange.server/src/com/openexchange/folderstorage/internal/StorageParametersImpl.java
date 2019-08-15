@@ -61,10 +61,10 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link StorageParametersImpl} - Implementation of {@link StorageParameters}.

@@ -56,7 +56,7 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.principals.PrincipalFactory;
 import com.openexchange.dav.principals.users.UserPrincipalResource;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;

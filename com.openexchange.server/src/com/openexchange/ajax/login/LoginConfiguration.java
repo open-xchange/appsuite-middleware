@@ -50,6 +50,13 @@
 package com.openexchange.ajax.login;
 
 import com.openexchange.configuration.CookieHashSource;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Tools;
+import com.openexchange.log.LogProperties;
+import com.openexchange.login.ConfigurationProperty;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.session.ThreadLocalSessionHolder;
 
 /**
  * Object to store the configuration parameters for the different login process mechanisms.

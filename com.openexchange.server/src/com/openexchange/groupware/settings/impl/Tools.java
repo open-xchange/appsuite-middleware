@@ -52,10 +52,10 @@ package com.openexchange.groupware.settings.impl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.user.User;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

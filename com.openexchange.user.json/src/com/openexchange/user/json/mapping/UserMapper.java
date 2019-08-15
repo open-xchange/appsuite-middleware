@@ -59,7 +59,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapper;
 import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
@@ -70,6 +69,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.parser.ParsedUser;
 

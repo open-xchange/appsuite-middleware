@@ -52,9 +52,9 @@ package com.openexchange.ajax.chronos.bugs;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.AbstractChronosTest;
 import com.openexchange.ajax.chronos.factory.EventFactory;
-import com.openexchange.ajax.chronos.factory.RRuleFactory;
 import com.openexchange.ajax.chronos.factory.EventFactory.RecurringFrequency;
 import com.openexchange.ajax.chronos.factory.EventFactory.Weekday;
+import com.openexchange.ajax.chronos.factory.RRuleFactory;
 import com.openexchange.testing.httpclient.models.EventData;
 
 /**

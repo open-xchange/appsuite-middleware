@@ -67,7 +67,6 @@ import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.IdAndName;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
@@ -91,7 +90,6 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Reference;
 import com.openexchange.messaging.MessagingPermission;
@@ -99,6 +97,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link FileStorageFolderStorage} - The file storage folder storage.

@@ -58,7 +58,6 @@ import org.json.JSONObject;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.IValueHandlerExtended;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -72,6 +71,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.user.User;
 
 /**
  * {@link MailCategoriesPreferenceItem}

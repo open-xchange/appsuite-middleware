@@ -67,7 +67,6 @@ import com.openexchange.gdpr.dataexport.DataExportExceptionCode;
 import com.openexchange.gdpr.dataexport.HostInfo;
 import com.openexchange.gdpr.dataexport.impl.osgi.Services;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -77,6 +76,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

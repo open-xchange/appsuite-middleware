@@ -54,8 +54,8 @@ import java.util.Date;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.internal.RdbReminderStorage;
+import com.openexchange.user.User;
 
 /**
  * {@link ReminderStorage}

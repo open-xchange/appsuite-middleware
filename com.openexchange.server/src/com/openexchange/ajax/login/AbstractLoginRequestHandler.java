@@ -58,7 +58,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
@@ -77,7 +76,6 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
@@ -89,19 +87,18 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.session.Sessions;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
+import com.openexchange.session.ThreadLocalSessionHolder;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.Key;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.servlet.ratelimit.RateLimiter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * {@link AbstractLoginRequestHandler}

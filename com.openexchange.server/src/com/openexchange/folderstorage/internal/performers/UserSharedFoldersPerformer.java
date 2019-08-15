@@ -74,10 +74,10 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 

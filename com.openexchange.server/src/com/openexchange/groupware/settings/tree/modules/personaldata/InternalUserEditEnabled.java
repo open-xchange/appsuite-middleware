@@ -51,7 +51,6 @@ package com.openexchange.groupware.settings.tree.modules.personaldata;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
@@ -60,6 +59,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.user.User;
 
 /**
  * {@link InternalUserEditEnabled} - Indicates if permission to edit internal user setting is enabled.

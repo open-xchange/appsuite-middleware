@@ -79,7 +79,7 @@ import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link ReplyITipAnalyzer} - 'Reply' is a action only performed as answer on a 'request'

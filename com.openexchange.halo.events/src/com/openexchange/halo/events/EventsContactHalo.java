@@ -85,13 +85,13 @@ import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.halo.AbstractContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link EventsContactHalo}
@@ -102,7 +102,7 @@ import com.openexchange.tools.session.ServerSession;
 public class EventsContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
     private final IDBasedCalendarAccessFactory calendarAccessFactory;
-    private FolderService folderService;
+    private final FolderService folderService;
 
     /**
      * Initializes a new {@link EventsContactHalo}.

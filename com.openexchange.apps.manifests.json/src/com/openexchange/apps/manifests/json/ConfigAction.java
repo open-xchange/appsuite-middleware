@@ -66,13 +66,13 @@ import com.openexchange.apps.manifests.json.exception.ManifestsExceptionCodes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ConfigAction}

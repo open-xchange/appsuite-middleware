@@ -84,10 +84,10 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.User;
 
 /**
  * {@link UpdateITipAnalyzer}

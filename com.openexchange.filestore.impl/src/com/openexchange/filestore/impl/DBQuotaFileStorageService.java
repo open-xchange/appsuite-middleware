@@ -71,8 +71,8 @@ import com.openexchange.groupware.contexts.FileStorageInfo;
 import com.openexchange.groupware.filestore.Filestore;
 import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.osgi.ServiceListing;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

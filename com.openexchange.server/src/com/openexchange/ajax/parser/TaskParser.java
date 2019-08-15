@@ -55,7 +55,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.exception.OXException;

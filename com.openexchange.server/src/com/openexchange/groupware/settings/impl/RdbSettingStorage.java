@@ -59,7 +59,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.IValueHandlerExtended;
 import com.openexchange.groupware.settings.Setting;
@@ -68,6 +67,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * This class implements the storage for settings using a relational database.

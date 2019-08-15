@@ -17,6 +17,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.mobile.configuration.json.servlet,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

@@ -81,7 +81,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.GeoLocation;
 import com.openexchange.java.Strings;
@@ -91,6 +90,7 @@ import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.SearchStrings;
+import com.openexchange.user.User;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 

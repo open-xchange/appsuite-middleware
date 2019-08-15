@@ -51,7 +51,6 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Collections;
-import java.util.HashMap;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;

@@ -101,13 +101,13 @@ import com.openexchange.gdpr.dataexport.TimeOfTheDay;
 import com.openexchange.gdpr.dataexport.TimeRange;
 import com.openexchange.gdpr.dataexport.impl.notification.DataExportNotificationSender;
 import com.openexchange.gdpr.dataexport.impl.notification.Reason;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.ISO8601Utils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

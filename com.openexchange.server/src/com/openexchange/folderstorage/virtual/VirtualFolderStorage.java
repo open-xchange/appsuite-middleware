@@ -99,7 +99,6 @@ import com.openexchange.folderstorage.virtual.sql.Delete;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
 import com.openexchange.folderstorage.virtual.sql.Update;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Collators;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -108,6 +107,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 

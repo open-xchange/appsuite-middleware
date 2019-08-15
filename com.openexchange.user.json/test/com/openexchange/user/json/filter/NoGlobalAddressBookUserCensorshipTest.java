@@ -62,8 +62,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import org.junit.Test;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.user.User;
 import com.openexchange.user.json.field.UserField;
 
 

@@ -65,14 +65,14 @@ import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 
 /**
  * {@link FilteringInfostoreFacadeImpl}

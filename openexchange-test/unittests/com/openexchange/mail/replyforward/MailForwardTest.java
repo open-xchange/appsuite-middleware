@@ -60,7 +60,6 @@ import org.junit.Test;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
@@ -72,6 +71,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.user.User;
 
 /**
  * {@link MailForwardTest}

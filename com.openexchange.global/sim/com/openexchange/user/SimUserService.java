@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.groupware.ldap.User;
 
 
 /**

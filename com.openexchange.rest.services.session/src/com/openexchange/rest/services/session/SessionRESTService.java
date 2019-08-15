@@ -60,7 +60,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
@@ -74,6 +73,7 @@ import com.openexchange.sessionstorage.StoredSession;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  *

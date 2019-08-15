@@ -11,6 +11,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.user.User;
 
 /**
  *

@@ -67,8 +67,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

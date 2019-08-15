@@ -50,10 +50,10 @@
 package com.openexchange.user.internal.mapping;
 
 import java.util.EnumMap;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.user.User;
 
 /**
  * {@link UserMapper}

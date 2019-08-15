@@ -65,14 +65,14 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
-import com.openexchange.user.AbstractUserServiceInterceptor;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.User;
+import com.openexchange.user.interceptor.AbstractUserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
 
 /**
  * {@link UserFolderNameInterceptor} - Ensures unique folder name under {@link FolderObject#SYSTEM_USER_INFOSTORE_FOLDER_ID}

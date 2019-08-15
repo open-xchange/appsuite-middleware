@@ -58,7 +58,7 @@ import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.user.interceptor.UserServiceInterceptor;
 
 /**
  * {@link SchedJoulesProviderActivator}

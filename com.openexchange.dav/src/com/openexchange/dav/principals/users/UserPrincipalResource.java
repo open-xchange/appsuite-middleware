@@ -64,7 +64,7 @@ import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
 import com.openexchange.dav.resources.DAVResource;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 

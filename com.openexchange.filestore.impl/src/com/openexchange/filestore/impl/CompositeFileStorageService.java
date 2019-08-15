@@ -72,11 +72,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.InterestsAware;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.InterestsAware;
 import com.openexchange.threadpool.ThreadPools;
 
 /**

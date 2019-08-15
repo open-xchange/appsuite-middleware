@@ -53,9 +53,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link ResolvedShare}

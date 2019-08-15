@@ -68,10 +68,10 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.custom.parallels.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.User;
 
 /**
  *

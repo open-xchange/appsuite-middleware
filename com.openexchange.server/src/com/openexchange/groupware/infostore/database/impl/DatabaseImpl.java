@@ -84,7 +84,6 @@ import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
@@ -94,6 +93,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public class DatabaseImpl extends DBService {
 

@@ -114,7 +114,6 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
@@ -189,6 +188,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.user.User;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.

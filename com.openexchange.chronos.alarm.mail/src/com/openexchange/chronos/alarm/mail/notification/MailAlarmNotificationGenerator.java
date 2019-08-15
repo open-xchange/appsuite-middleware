@@ -77,7 +77,6 @@ import com.openexchange.chronos.itip.generators.TypeWrapper;
 import com.openexchange.chronos.provider.composition.IDMangling;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -88,6 +87,7 @@ import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 /**
  *

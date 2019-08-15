@@ -51,9 +51,9 @@ package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 

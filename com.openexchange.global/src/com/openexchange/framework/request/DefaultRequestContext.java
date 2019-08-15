@@ -50,7 +50,7 @@
 package com.openexchange.framework.request;
 
 import com.openexchange.groupware.notify.hostname.HostData;
-
+import com.openexchange.session.UserContextSession;
 
 /**
  * Default implementation of {@link RequestContext}.
@@ -62,6 +62,14 @@ public class DefaultRequestContext implements RequestContext {
 
     private HostData hostData;
     private String userAgent;
+    private UserContextSession session;
+
+    /**
+     * Initializes a new {@link DefaultRequestContext}.
+     */
+    public DefaultRequestContext() {
+        super();
+    }
 
     @Override
     public HostData getHostData() {
@@ -69,9 +77,9 @@ public class DefaultRequestContext implements RequestContext {
     }
 
     /**
-     * Sets the hostData
+     * Sets the host data
      *
-     * @param hostData The hostData to set
+     * @param hostData The host data to set
      */
     public void setHostData(HostData hostData) {
         this.hostData = hostData;
@@ -89,6 +97,20 @@ public class DefaultRequestContext implements RequestContext {
      */
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    @Override
+    public UserContextSession getSession() {
+        return session;
+    }
+
+    /**
+     * Sets the session
+     *
+     * @param session The session to set
+     */
+    public void setSession(UserContextSession session) {
+        this.session = session;
     }
 
 }

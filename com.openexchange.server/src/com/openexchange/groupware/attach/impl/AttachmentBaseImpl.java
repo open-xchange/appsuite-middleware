@@ -90,7 +90,6 @@ import com.openexchange.groupware.attach.util.SetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
@@ -106,6 +105,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 

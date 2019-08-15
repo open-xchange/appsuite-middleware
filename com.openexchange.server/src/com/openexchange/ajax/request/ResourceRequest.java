@@ -61,7 +61,6 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -71,6 +70,7 @@ import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link ResourceRequest} - Executes a resource request.

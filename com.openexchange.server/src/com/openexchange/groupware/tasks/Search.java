@@ -56,7 +56,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -65,6 +64,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.sql.SearchStrings;
+import com.openexchange.user.User;
 
 /**
  * Implements the search operation logic.

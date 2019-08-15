@@ -81,7 +81,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.LoginResult;
@@ -105,6 +104,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
+import com.openexchange.user.User;
 
 
 /**

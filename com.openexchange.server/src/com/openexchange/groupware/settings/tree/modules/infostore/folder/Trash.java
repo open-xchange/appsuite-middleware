@@ -60,7 +60,6 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreFacades;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
@@ -70,6 +69,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.User;
 
 /**
  * {@link Trash}

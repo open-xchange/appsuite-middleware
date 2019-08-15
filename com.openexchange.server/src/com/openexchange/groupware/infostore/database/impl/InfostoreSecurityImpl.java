@@ -68,7 +68,6 @@ import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.impl.EffectivePermission;
@@ -78,6 +77,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 

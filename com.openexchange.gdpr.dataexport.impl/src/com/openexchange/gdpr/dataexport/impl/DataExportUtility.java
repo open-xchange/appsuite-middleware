@@ -61,12 +61,12 @@ import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.gdpr.dataexport.DataExportTask;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.ISO8601Utils;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.filename.FileNameTools;
+import com.openexchange.user.User;
 
 /**
  * {@link DataExportUtility} - Utility class for data export.

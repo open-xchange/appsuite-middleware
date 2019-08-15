@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -62,6 +61,7 @@ import com.openexchange.regional.RegionalSettings;
 import com.openexchange.regional.RegionalSettingsService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.user.User;
 
 /**
  * {@link RegionalSettingsValueHandler}

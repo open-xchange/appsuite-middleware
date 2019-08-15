@@ -67,8 +67,8 @@ import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 /**
  * {@link DeletePerformer} - Serves the <code>DELETE</code> request.

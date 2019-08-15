@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.user;
+package com.openexchange.user.internal;
 
 import java.sql.Connection;
 import java.util.Date;
@@ -55,8 +55,9 @@ import com.openexchange.config.admin.HideAdminService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.User;
+import com.openexchange.user.UserService;
 
 /**
  * {@link FilteringUserService}
@@ -66,8 +67,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class FilteringUserService implements UserService {
 
-    private UserService delegate;
-    private ServiceLookup services;
+    private final UserService delegate;
+    private final ServiceLookup services;
 
     public FilteringUserService(UserService lDelegate, ServiceLookup lServices) {
         this.delegate = lDelegate;

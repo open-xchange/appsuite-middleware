@@ -73,12 +73,12 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamassassin.api.SpamdProvider;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 public class ParallelsSpamdService implements SpamdService {

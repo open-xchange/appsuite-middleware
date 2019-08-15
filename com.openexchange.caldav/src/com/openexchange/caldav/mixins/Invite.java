@@ -57,8 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

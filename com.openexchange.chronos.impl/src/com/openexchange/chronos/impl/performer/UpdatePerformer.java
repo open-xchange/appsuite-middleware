@@ -49,17 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
-import static com.openexchange.chronos.common.CalendarUtils.contains;
-import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
-import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
-import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
-import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
-import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;

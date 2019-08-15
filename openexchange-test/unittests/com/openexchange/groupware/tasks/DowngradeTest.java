@@ -68,7 +68,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.folder.FolderToolkit;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserToolkit;
 import com.openexchange.groupware.userconfiguration.AllowAllUserConfiguration;
 import com.openexchange.groupware.userconfiguration.AllowAllUserPermissionBits;
@@ -81,6 +80,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.user.User;
 
 /**
  *

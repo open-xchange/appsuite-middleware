@@ -75,7 +75,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upgrade.SegmentedUpdateService;
@@ -105,6 +104,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

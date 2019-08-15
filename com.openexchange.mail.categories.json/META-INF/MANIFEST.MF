@@ -6,7 +6,10 @@ Bundle-Version: 7.10.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: com.openexchange.mail.categories.osgi.Activator
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.writer,
  com.openexchange.capabilities,
  com.openexchange.exception,
@@ -26,9 +29,7 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.session,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
- com.google.common.annotations,
- com.google.common.base,
- com.google.common.collect,
+ com.openexchange.user,
  javax.servlet.http,
  org.json,
  org.osgi.framework,

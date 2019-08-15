@@ -81,7 +81,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig;
@@ -98,6 +97,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
+import com.openexchange.user.User;
 
 /**
  *
@@ -159,7 +159,7 @@ public final class MyServletRequest {
         this.configView = configViewFactory.getView(sessionObj.getUserId(), sessionObj.getContextId());
     }
 
-    // Keep method 
+    // Keep method
     public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
         Object retval = null;
         if (action.equalsIgnoreCase(ACTION_GET_CONFIGURED_METHOD)) {
@@ -357,7 +357,7 @@ public final class MyServletRequest {
 
     /**
      * If context has special login mapping "UPSELL_DIRECT_URL||<URL>" we use this URL instead of configured one.
-     * 
+     *
      * @return
      * @throws ServiceException
      */

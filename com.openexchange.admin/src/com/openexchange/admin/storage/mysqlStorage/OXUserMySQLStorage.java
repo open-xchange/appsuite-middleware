@@ -2158,7 +2158,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 }
 
-                com.openexchange.groupware.ldap.User gwUser = null;
+                com.openexchange.user.User gwUser = null;
                 try {
                     com.openexchange.groupware.contexts.Context gwCtx = AdminServiceRegistry.getInstance().getService(ContextService.class).getContext(contextId);
                     gwUser = AdminServiceRegistry.getInstance().getService(UserService.class).getUser(userId, gwCtx);

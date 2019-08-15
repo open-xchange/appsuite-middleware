@@ -58,7 +58,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
@@ -70,6 +69,7 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.user.User;
 
 /**
  * The {@link AnalyzeContextBatch} class is the workhorse of the reporting system. It runs the reports on a batch of

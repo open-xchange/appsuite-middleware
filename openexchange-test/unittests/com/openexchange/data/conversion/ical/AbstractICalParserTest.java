@@ -64,9 +64,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUserLookup;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.resource.Resource;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

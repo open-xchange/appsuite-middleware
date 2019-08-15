@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.user;
 
 import com.openexchange.i18n.LocalizableStrings;
 

@@ -59,7 +59,7 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link CreateDummyFileForInfostoreItemSolver}

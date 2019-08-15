@@ -99,7 +99,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
@@ -144,6 +143,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -4180,7 +4180,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         // Clear possible cached MailAccess instances
         final int contextId = session.getContextId();
         final int userId = session.getUserId();
-        cleanUp(userId, contextId);
+        cleanUp(session);
         // Migrate password
         Connection con = null;
         PreparedStatement selectStmt = null;
@@ -4310,7 +4310,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         // Clear possible cached MailAccess instances
-        cleanUp(userId, contextId);
+        cleanUp(session);
         // Migrate password
         Connection con = null;
         PreparedStatement selectStmt = null;
@@ -4427,7 +4427,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
         // Clear possible cached MailAccess instances
-        cleanUp(userId, contextId);
+        cleanUp(session);
         // Migrate password
         Connection con = null;
         PreparedStatement selectStmt = null;
@@ -4528,25 +4528,21 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 Database.back(contextId, true, con);
             }
         }
-        cleanUp(userId, contextId);
+        cleanUp(session);
     }
 
-    private void cleanUp(final int userId, final int contextId) {
-        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != service) {
-            final Session session = service.getAnyActiveSessionForUser(userId, contextId);
-            if (null != session) {
-                try {
-                    final IMailAccessCache mac = MailAccess.getMailAccessCache();
-                    final int[] ids = getUserMailAccountIDs(userId, contextId);
-                    for (final int id : ids) {
-                        while (mac.removeMailAccess(session, id) != null) {
-                            // Nope...
-                        }
+    private void cleanUp(Session session) {
+        if (null != session) {
+            try {
+                final IMailAccessCache mac = MailAccess.getMailAccessCache();
+                final int[] ids = getUserMailAccountIDs(session.getUserId(), session.getContextId());
+                for (final int id : ids) {
+                    while (mac.removeMailAccess(session, id) != null) {
+                        // Nope...
                     }
-                } catch (Exception exc) {
-                    LOG.error("Unable to clear cached mail accesses.", exc);
                 }
+            } catch (Exception exc) {
+                LOG.error("Unable to clear cached mail accesses.", exc);
             }
         }
     }

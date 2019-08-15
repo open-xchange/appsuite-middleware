@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.find.contacts;
 
-import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

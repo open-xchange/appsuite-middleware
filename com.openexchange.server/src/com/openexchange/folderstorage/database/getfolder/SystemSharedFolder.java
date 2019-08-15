@@ -69,7 +69,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -81,6 +80,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import com.openexchange.user.User;
 
 /**
  * {@link SystemSharedFolder} - Gets the system shared folder.

@@ -68,11 +68,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFinishedListenerRegistry;
 import com.openexchange.groupware.delete.DeleteRegistry;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * This class integrates all operations to be done for deleting a group.

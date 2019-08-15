@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
@@ -71,6 +70,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

@@ -54,13 +54,13 @@ import java.net.URLEncoder;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
+import com.openexchange.user.User;
 
 /**
  * Utility methods to handle share redirects.

@@ -64,11 +64,11 @@ import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
+import com.openexchange.user.User;
 
 public abstract class AttachmentEventAction extends AbstractUndoable implements
         UndoableAction {

@@ -94,7 +94,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.groupware.upload.quotachecker.MailUploadQuotaCheckerTest.class,
     com.openexchange.mail.text.TextProcessingTest.class,
     com.openexchange.login.internal.format.CompositeLoginFormatterTest.class,
-    com.openexchange.user.UserServiceInterceptorRegistryTest.class,
+    com.openexchange.user.interceptor.UserServiceInterceptorRegistryTest.class,
     com.openexchange.groupware.infostore.search.impl.ToMySqlQueryVisitorTest.class,
     com.openexchange.mail.text.HtmlProcessingTest.class,
     com.openexchange.mailaccount.json.actions.ValidateActionTest.class,

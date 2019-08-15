@@ -68,11 +68,11 @@ import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  * Response data object.

@@ -70,6 +70,8 @@ import com.openexchange.lock.LockService;
 import com.openexchange.log.LogProperties;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
+import com.openexchange.user.UserExceptionCode;
 import com.openexchange.user.internal.mapping.UserMapper;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;

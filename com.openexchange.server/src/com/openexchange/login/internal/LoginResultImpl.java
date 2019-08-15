@@ -58,10 +58,10 @@ import com.openexchange.authentication.ResultCode;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link LoginResultImpl} - The {@link LoginResult} implementation.

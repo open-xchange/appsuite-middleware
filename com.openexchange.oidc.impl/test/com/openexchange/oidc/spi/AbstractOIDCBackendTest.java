@@ -37,7 +37,6 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oidc.OIDCBackend;
@@ -51,6 +50,7 @@ import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 @RunWith(PowerMockRunner.class)

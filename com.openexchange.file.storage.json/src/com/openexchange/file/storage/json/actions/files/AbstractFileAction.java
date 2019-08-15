@@ -79,10 +79,9 @@ import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.tools.id.IDMangler;
 import com.openexchange.tools.iterator.SearchIterators;
-import com.openexchange.java.Strings;
-import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

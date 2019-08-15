@@ -22,7 +22,6 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.InMemoryAliases;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.setuptools.TestConfig;
@@ -31,6 +30,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class PathResolverTest {

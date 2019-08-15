@@ -64,9 +64,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.AbstractAssertTool;
+import com.openexchange.user.User;
 
 /**
  *

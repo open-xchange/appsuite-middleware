@@ -59,8 +59,8 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.report.appsuite.internal.Services;
+import com.openexchange.user.UserExceptionCode;
 
 /**
  * The {@link ContextLoader} class is used to load data from the database, that is needed

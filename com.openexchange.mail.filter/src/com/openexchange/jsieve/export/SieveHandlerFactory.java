@@ -54,7 +54,6 @@ import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -65,6 +64,7 @@ import com.openexchange.mailfilter.properties.PasswordSource;
 import com.openexchange.mailfilter.services.Services;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
+import com.openexchange.user.User;
 
 /**
  * {@link SieveHandlerFactory}

@@ -69,7 +69,6 @@ import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.junit.Assert;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTrigger;
-import com.openexchange.testing.httpclient.models.AlarmTriggerData;
 import com.openexchange.testing.httpclient.models.CalendarResult;
 import com.openexchange.testing.httpclient.models.DateTimeData;
 import com.openexchange.testing.httpclient.models.EventData;

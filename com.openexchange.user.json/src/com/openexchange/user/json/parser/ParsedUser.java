@@ -51,7 +51,7 @@ package com.openexchange.user.json.parser;
 
 import java.util.Locale;
 import java.util.Map;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link ParsedUser} - A parsed user.

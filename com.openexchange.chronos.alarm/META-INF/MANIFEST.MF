@@ -20,5 +20,6 @@ Import-Package: com.openexchange.chronos.exception,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.user,
+ com.openexchange.user.interceptor,
  org.osgi.framework,
  org.slf4j

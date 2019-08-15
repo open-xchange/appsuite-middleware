@@ -65,7 +65,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.internal.GetArisingReminder;
 import com.openexchange.groupware.reminder.internal.RemindAgain;
 import com.openexchange.groupware.reminder.internal.SQL;
@@ -74,6 +73,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 
 /**
  * ReminderHandler

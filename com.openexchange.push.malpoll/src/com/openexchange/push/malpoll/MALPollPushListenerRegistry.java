@@ -58,8 +58,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
-import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.session.Sessions;
 import com.openexchange.tools.Collections;
 
 /**
@@ -177,11 +176,14 @@ public final class MALPollPushListenerRegistry {
      * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removePushListener(final int contextId, final int userId) {
-        final SessiondService sessiondService = MALPollServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
+        if (isThereAnySessionFor(userId, contextId)) {
             return removeListener(SimpleKey.valueOf(contextId, userId));
         }
         return false;
+    }
+
+    private boolean isThereAnySessionFor(int userId, int contextId) {
+        return Sessions.getSessionsOfUser(userId, contextId).isPresent();
     }
 
     /**

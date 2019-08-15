@@ -64,10 +64,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public class FolderLockManagerImpl extends LockManagerImpl<FolderLock> implements
         FolderLockManager {

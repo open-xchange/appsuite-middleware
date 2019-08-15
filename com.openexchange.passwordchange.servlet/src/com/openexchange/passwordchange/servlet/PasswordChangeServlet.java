@@ -66,7 +66,6 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.multifactor.MultifactorLoginService;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeEvent;
@@ -76,6 +75,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

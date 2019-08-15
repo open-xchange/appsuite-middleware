@@ -83,7 +83,6 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
@@ -109,6 +108,7 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**

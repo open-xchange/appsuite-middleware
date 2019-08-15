@@ -51,12 +51,12 @@ package com.openexchange.mail.json.compose.share.settings;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 
 /**

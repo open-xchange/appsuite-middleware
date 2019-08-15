@@ -67,7 +67,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
@@ -75,6 +74,7 @@ import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 
 /**

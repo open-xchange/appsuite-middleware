@@ -54,8 +54,8 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link NotificationParticipantResolver}

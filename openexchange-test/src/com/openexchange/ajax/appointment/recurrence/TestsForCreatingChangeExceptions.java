@@ -64,8 +64,8 @@ import com.openexchange.groupware.container.Expectations;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
+import com.openexchange.user.User;
 
 /**
  * These tests use the recurrence_position field to access change exceptions.

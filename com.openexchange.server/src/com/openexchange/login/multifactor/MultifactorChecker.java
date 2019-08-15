@@ -53,10 +53,10 @@ import java.util.Optional;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link MultifactorChecker}

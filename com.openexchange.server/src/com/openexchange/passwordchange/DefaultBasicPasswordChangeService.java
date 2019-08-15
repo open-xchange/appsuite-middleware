@@ -51,7 +51,6 @@ package com.openexchange.passwordchange;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
@@ -61,6 +60,7 @@ import com.openexchange.password.mechanism.PasswordMechRegistry;
 import com.openexchange.password.mechanism.stock.StockPasswordMechs;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

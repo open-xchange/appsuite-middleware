@@ -69,9 +69,9 @@ import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.AbstractUserServiceInterceptor;
+import com.openexchange.user.User;
+import com.openexchange.user.interceptor.AbstractUserServiceInterceptor;
 
 /**
  * {@link AlarmTriggerServiceInterceptor}

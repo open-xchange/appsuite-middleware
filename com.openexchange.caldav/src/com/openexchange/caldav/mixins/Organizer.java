@@ -53,7 +53,7 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

@@ -83,13 +83,13 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.User;
 
 /**
  * This class contains logic methods for the tasks.

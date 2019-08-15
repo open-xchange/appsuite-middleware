@@ -68,7 +68,6 @@ import com.hazelcast.core.Member;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.java.Strings;
 import com.openexchange.lock.LockService;
@@ -90,6 +89,7 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionCollection;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

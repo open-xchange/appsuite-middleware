@@ -50,7 +50,6 @@
 package com.openexchange.ajax.mailcompose;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.b;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;

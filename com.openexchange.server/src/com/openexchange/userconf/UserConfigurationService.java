@@ -52,10 +52,10 @@ package com.openexchange.userconf;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link UserConfigurationService} - The user configuration service.

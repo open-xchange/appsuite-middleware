@@ -58,8 +58,8 @@ import com.openexchange.ajax.user.actions.GetResponse;
 import com.openexchange.ajax.user.actions.SearchRequest;
 import com.openexchange.ajax.user.actions.SearchResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.user.User;
 
 /**
  * {@link UserResolver}

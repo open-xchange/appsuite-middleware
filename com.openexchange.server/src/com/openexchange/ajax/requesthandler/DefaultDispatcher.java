@@ -359,6 +359,7 @@ public class DefaultDispatcher implements Dispatcher {
         DefaultRequestContext context = new DefaultRequestContext();
         context.setHostData(hostData);
         context.setUserAgent(requestData.getUserAgent());
+        context.setSession(requestData.getSession());
         return context;
     }
 

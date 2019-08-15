@@ -81,7 +81,6 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.alias.UserAliasUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -93,6 +92,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

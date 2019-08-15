@@ -49,16 +49,7 @@
 
 package com.openexchange.caldav;
 
-import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
-import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getEventID;
-import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
-import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.common.CalendarUtils.optExtendedProperty;
-import static com.openexchange.chronos.common.CalendarUtils.removeExtendedProperties;
+import static com.openexchange.chronos.common.CalendarUtils.*;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -57,10 +57,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 public class EnhancedTaskOrAppointment {

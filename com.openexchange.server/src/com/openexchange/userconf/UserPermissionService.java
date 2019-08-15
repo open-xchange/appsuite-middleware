@@ -52,9 +52,9 @@ package com.openexchange.userconf;
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.user.User;
 
 
 /**
@@ -182,7 +182,7 @@ public interface UserPermissionService {
 
     /**
      * Retrieves the accessCombinationName for the given user
-     * 
+     *
      * @param context The context
      * @param userId The user id
      * @return The accessCombinationName

@@ -63,12 +63,12 @@ import com.openexchange.folderstorage.database.LocalizedDatabaseFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.user.User;
 
 /**
  * {@link SystemPrivateFolder} - Gets the system shared folder.

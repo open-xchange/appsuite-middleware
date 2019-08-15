@@ -73,7 +73,6 @@ import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -88,6 +87,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.user.User;
 
 /**
  * {@link HTTPAuthLogin}

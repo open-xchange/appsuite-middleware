@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.user;
 
 import java.io.Serializable;
 import java.util.Locale;

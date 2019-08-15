@@ -64,7 +64,6 @@ import com.openexchange.groupware.attach.AttachmentMetadataFactory;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -74,6 +73,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import com.openexchange.user.User;
 
 
 /**

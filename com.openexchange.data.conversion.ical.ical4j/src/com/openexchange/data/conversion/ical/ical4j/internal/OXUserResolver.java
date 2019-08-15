@@ -54,8 +54,8 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

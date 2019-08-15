@@ -77,7 +77,6 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.GeoLocation;
@@ -85,6 +84,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.user.User;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 

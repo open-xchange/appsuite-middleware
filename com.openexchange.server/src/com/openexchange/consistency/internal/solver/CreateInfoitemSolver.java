@@ -61,7 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link CreateInfoitemSolver}

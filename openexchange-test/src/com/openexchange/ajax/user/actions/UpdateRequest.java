@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link UpdateRequest}
@@ -69,9 +69,9 @@ import com.openexchange.groupware.ldap.User;
  */
 public class UpdateRequest extends AbstractUserRequest<UpdateResponse> {
 
-    private Contact contactData;
+    private final Contact contactData;
 
-    private User userData;
+    private final User userData;
 
     private String stringifiedJSON;
 

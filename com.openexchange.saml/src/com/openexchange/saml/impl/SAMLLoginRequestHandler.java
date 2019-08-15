@@ -71,7 +71,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -95,6 +94,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 

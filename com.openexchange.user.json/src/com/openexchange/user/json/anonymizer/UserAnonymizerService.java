@@ -56,8 +56,8 @@ import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link UserAnonymizerService}

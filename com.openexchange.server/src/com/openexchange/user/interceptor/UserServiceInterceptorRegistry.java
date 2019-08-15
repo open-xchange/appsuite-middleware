@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.user;
+package com.openexchange.user.interceptor;
 
 import java.util.ArrayList;
 import java.util.Collections;

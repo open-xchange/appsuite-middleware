@@ -52,6 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.user.User;
 
 public class MockUser implements User {
 

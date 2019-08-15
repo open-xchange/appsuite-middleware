@@ -52,7 +52,7 @@ package com.openexchange.ajax.user.actions;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link GetResponse}

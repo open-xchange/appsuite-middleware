@@ -67,7 +67,6 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
@@ -76,6 +75,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import com.openexchange.user.User;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

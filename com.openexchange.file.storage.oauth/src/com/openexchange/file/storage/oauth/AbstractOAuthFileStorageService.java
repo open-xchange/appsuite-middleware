@@ -86,8 +86,6 @@ import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.tools.session.SessionHolder;
 
 /**
  * {@link AbstractOAuthFileStorageService}
@@ -408,29 +406,6 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
         return lookupService.getAccountManagerFor(getId());
-    }
-
-    /**
-     * Retrieves a {@link Session} for the specified user in the specified context
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The {@link Session} or <code>null</code> if none exists
-     */
-    private Session getUserSession(final int userId, final int contextId) {
-        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
-        final SessionHolder sessionHolder = services.getService(SessionHolder.class);
-        if (sessionHolder != null) {
-            final Session session = sessionHolder.getSessionObject();
-            if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
-                return session;
-            }
-        }
-        final SessiondService service = services.getService(SessiondService.class);
-        if (null == service) {
-            return null;
-        }
-        return service.getAnyActiveSessionForUser(userId, contextId);
     }
 
     /**

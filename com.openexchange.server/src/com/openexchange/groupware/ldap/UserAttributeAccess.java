@@ -56,6 +56,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.user.User;
 
 /**
  * {@link UserAttributeAccess} - Provides utility methods to access/update a user's attributes.

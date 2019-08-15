@@ -77,7 +77,6 @@ import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.MockUser;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.results.Delta;
@@ -91,6 +90,7 @@ import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.test.OXTestToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.User;
 
 public class AttachmentBaseTest extends AbstractAttachmentTest {
 
@@ -600,6 +600,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         assertTrue(d1 + " != " + d2 + " diff is " + diff, diff <= clockSkew);
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -612,6 +613,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
         clean.clear();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         for (final AttachmentMetadata m : clean) {

@@ -53,10 +53,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.User;
 
 /**
  * Encapsulates all data that is necessary to compose notification mails.

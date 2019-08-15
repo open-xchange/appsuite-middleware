@@ -51,13 +51,13 @@ package com.openexchange.dav;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionHolder;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;

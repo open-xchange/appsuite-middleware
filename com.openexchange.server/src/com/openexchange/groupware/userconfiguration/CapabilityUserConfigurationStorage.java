@@ -59,10 +59,10 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 /**
  * {@link CapabilityUserConfigurationStorage} - The database storage implementation of a user configuration storage.

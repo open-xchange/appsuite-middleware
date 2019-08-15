@@ -57,10 +57,10 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.sessiond.osgi.Services;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

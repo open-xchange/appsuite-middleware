@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -71,6 +70,7 @@ import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.user.User;
 
 /**
  * This class implements the methods needed by the tasks interface of the API version 2.

@@ -54,8 +54,8 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.LockManager;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
+import com.openexchange.user.User;
 
 public interface FolderLockManager extends LockManager{
 

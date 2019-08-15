@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.TreeMap;
@@ -96,7 +97,7 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.session.Sessions;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.version.VersionService;
 
@@ -567,9 +568,9 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If instantiation fails or a caching error occurs
      */
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getInstance(int userId, int contextId, int accountId) throws OXException {
-        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null != sessiondService) {
-            Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
+        Optional<Session> optionalSession = Sessions.getValidatedSessionForCurrentThread(userId, contextId);
+        if (optionalSession.isPresent()) {
+            Session session = optionalSession.get();
             if (session != null) {
                 return getInstance(session, accountId);
             }

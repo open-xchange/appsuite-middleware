@@ -59,12 +59,12 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.principalusecount.PrincipalUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.user.User;
 
 /**
  *

@@ -56,9 +56,9 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.group.Group;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
+import com.openexchange.user.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**

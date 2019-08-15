@@ -64,7 +64,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestAssignment;
 import com.openexchange.guest.GuestExceptionCodes;
@@ -74,6 +73,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.password.mechanism.PasswordMech;
 import com.openexchange.password.mechanism.PasswordMechRegistry;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

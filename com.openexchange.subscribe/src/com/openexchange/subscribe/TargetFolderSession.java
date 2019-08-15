@@ -49,13 +49,17 @@
 
 package com.openexchange.subscribe;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import org.slf4j.Logger;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -65,6 +69,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class TargetFolderSession implements Session {
+
+    /** Simple class to delay initialization until needed */
+    private static class LoggerHolder {
+        static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TargetFolderSession.class);
+    }
 
     private final int                 contextId;
     private final int                 userId;
@@ -77,10 +86,9 @@ public class TargetFolderSession implements Session {
         userId = target.getUserId();
 
         // Initialize
-        final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
-        Session ses = null;
-        if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
-            session = ServerSessionAdapter.valueOf(ses, target.getContext());
+        Optional<Session> optionalSession = findSessionFor(target.getUserId(), target.getContext().getContextId());
+        if (optionalSession.isPresent()) {
+            session = ServerSessionAdapter.valueOf(optionalSession.get(), target.getContext());
             params = null;
         } else {
             session = null;
@@ -288,4 +296,29 @@ public class TargetFolderSession implements Session {
         }
         return retval.toString();
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private static Optional<Session> findSessionFor(int userId, int contextId) {
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (sessiondService == null) {
+            return Optional.empty();
+        }
+
+        Optional<Collection<String>> optionalSessions = Sessions.getSessionsOfUser(userId, contextId, sessiondService);
+        if (!optionalSessions.isPresent()) {
+            return Optional.empty();
+        }
+
+        for (String sessionId : optionalSessions.get()) {
+            Session session = sessiondService.getSession(sessionId);
+            if (session != null && (Origin.HTTP_JSON == session.getOrigin())) {
+                return Optional.of(session);
+            }
+        }
+
+        // Found no suitable session
+        return Optional.empty();
+    }
+
 }

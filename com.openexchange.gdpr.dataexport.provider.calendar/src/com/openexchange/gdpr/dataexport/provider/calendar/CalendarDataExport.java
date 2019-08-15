@@ -104,7 +104,6 @@ import com.openexchange.gdpr.dataexport.provider.general.Folder;
 import com.openexchange.gdpr.dataexport.provider.general.SavePointAndReason;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.FolderStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.i18n.tools.StringHelper;
@@ -113,6 +112,7 @@ import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.user.User;
 import com.openexchange.user.UserService;
 
 /**

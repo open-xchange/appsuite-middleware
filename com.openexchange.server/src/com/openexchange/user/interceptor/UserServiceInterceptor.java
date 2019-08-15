@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.user;
+package com.openexchange.user.interceptor;
 
 import java.util.Collections;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.user.User;
 
 /**
  * {@link UserServiceInterceptor}
@@ -67,7 +67,7 @@ public interface UserServiceInterceptor {
      * The constant for empty properties.
      */
     public static final Map<String, Object> EMPTY_PROPS = Collections.emptyMap();
-    
+
     public static final String PROP_CONNECTION = "connection";
 
     /**
