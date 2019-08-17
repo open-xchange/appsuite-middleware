@@ -565,7 +565,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                     if (cause instanceof Error) {
                                         throw (Error) cause;
                                     }
-                                    throw new IllegalStateException("Not unchecked", cause);
+                                    throw new IllegalStateException("Not unchecked", cause == null ? e : cause);
                                 }
 
                                 // Timeout while awaiting remote result
