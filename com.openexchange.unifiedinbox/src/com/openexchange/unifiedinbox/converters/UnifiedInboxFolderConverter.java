@@ -167,7 +167,7 @@ public final class UnifiedInboxFolderConverter {
         {
             final MailPermission ownPermission = new DefaultMailPermission();
             ownPermission.setFolderPermission(OCLPermission.READ_FOLDER);
-            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
+            ownPermission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
             ownPermission.setFolderAdmin(false);
             tmp.setOwnPermission(ownPermission);
         }
@@ -176,7 +176,7 @@ public final class UnifiedInboxFolderConverter {
             permission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
             permission.setGroupPermission(true);
             permission.setFolderPermission(OCLPermission.READ_FOLDER);
-            permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.DELETE_ALL_OBJECTS);
+            permission.setAllObjectPermission(OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
             permission.setFolderAdmin(false);
             tmp.addPermission(permission);
         }
