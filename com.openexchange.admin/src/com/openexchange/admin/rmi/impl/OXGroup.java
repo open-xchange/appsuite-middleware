@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.rmi.RemoteException;
@@ -115,130 +116,24 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     @Override
     public void addMember(final Context ctx, final Group grp, final User[] members, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(grp, members);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the arguments for addMember is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
-
-        try {
-            setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchGroupException(e);
-        }
-
-        LOGGER.debug("{} - {} - {} - {}", ctx, grp, Arrays.toString(members), auth);
-
-        checkContextAndSchema(ctx);
-
-        if (!tool.existsGroup(ctx, grp)) {
-            throw new NoSuchGroupException("No such group");
-        }
-
-        try {
-            setUserIdInArrayOfUsers(ctx, members);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchUserException(e);
-        }
-        if (!tool.existsUser(ctx, members)) {
-            throw new NoSuchUserException("No such user");
-        }
-        for (User user : members) {
-            int userId = user.getId().intValue();
-            if (tool.isGuestUser(ctx, userId)) {
-                throw new NoSuchUserException("Cannot add guest user to group");
-            }
-        }
-
-        final int grp_id = grp.getId().intValue();
-        try {
-            if (tool.existsGroupMember(ctx, grp_id, members)) {
-                throw new InvalidDataException("Member already exists in group");
-            }
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
-
-        oxGroup.addMember(ctx, grp_id, members);
-
-        // JCS
-        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
-                final Cache cache = cacheService.getCache("User");
-                final int contextId = ctx.getId().intValue();
-                for (final User user : members) {
-                    cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
-                }
-            } catch (final OXException e) {
+                doNullCheck(grp, members);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the arguments for addMember is null", e3);
+                throw e3;
+            }
+
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
                 LOGGER.error("", e);
-            }
-        }
-        // END OF JCS
-    }
-
-    @Override
-    public void change(final Context ctx, final Group grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        try {
-            doNullCheck(grp);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for change is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        }
-
-        LOGGER.debug("{} - {} - {}", ctx, grp, auth);
-
-        try {
-            checkContextAndSchema(ctx);
-
-            if (!grp.mandatoryChangeMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
-            }
-
-            if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
-                grp.setName(grp.getName().toLowerCase());
-            }
-
-            if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
-                validateGroupName(grp.getName());
-            }
-
-            // if members sent, check existence
-            if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                final Integer[] mems = grp.getMembers();
-                final int[] tmp_mems = new int[mems.length];
-                for (int i = 0; i < mems.length; i++) {
-                    tmp_mems[i] = mems[i].intValue();
-                }
-                if (!tool.existsUser(ctx, tmp_mems)) {
-                    throw new NoSuchUserException("No such user");
-                }
+                throw e;
             }
 
             try {
@@ -246,199 +141,320 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             } catch (NoSuchObjectException e) {
                 throw new NoSuchGroupException(e);
             }
-            grp.testMandatoryCreateFieldsNull();
-            if (!tool.existsGroup(ctx, grp.getId().intValue())) {
+
+            LOGGER.debug("{} - {} - {} - {}", ctx, grp, Arrays.toString(members), auth);
+
+            checkContextAndSchema(ctx);
+
+            if (!tool.existsGroup(ctx, grp)) {
                 throw new NoSuchGroupException("No such group");
             }
 
-            if (grp.getName() != null && tool.existsGroupName(ctx, grp)) {
-                throw new InvalidDataException("Group " + grp.getName() + " already exists in this context");
+            try {
+                setUserIdInArrayOfUsers(ctx, members);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            if (!tool.existsUser(ctx, members)) {
+                throw new NoSuchUserException("No such user");
+            }
+            for (User user : members) {
+                int userId = user.getId().intValue();
+                if (tool.isGuestUser(ctx, userId)) {
+                    throw new NoSuchUserException("Cannot add guest user to group");
+                }
             }
 
-            oxGroup.change(ctx, grp);
+            final int grp_id = grp.getId().intValue();
+            try {
+                if (tool.existsGroupMember(ctx, grp_id, members)) {
+                    throw new InvalidDataException("Member already exists in group");
+                }
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
 
-            //JCS
-            final User[] new_members = oxGroup.getMembers(ctx, grp.getId().intValue());
+            oxGroup.addMember(ctx, grp_id, members);
+
+            // JCS
             final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
                     final Cache cache = cacheService.getCache("User");
-                    if (new_members != null) {
-                        for (final User user : new_members) {
-                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
-                        }
-                    }
-
-                    if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                        for (final Integer old_user_id : grp.getMembers()) {
-                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id.intValue()));
-                        }
+                    final int contextId = ctx.getId().intValue();
+                    for (final User user : members) {
+                        cache.remove(cacheService.newCacheKey(contextId, user.getId().intValue()));
                     }
                 } catch (final OXException e) {
                     LOGGER.error("", e);
                 }
             }
-
-        } catch (final EnforceableDataObjectException e2) {
-            final InvalidDataException invalidDataException = new InvalidDataException(e2.getMessage());
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        } catch (final StorageException e) {
+            // END OF JCS
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final InvalidDataException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        } catch (final NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final NoSuchGroupException e) {
-            LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
+    }
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
-                    final String bundlename = oxgroup.getClass().getName();
+    @Override
+    public void change(final Context ctx, final Group grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
+        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(grp);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for change is null", e3);
+                throw e3;
+            }
+
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e1) {
+                LOGGER.error("", e1);
+                throw e1;
+            }
+
+            LOGGER.debug("{} - {} - {}", ctx, grp, auth);
+
+            try {
+                checkContextAndSchema(ctx);
+
+                if (!grp.mandatoryChangeMembersSet()) {
+                    throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
+                }
+
+                if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
+                    grp.setName(grp.getName().toLowerCase());
+                }
+
+                if (null != grp.getName() && prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    validateGroupName(grp.getName());
+                }
+
+                // if members sent, check existence
+                if (grp.getMembers() != null && grp.getMembers().length > 0) {
+                    final Integer[] mems = grp.getMembers();
+                    final int[] tmp_mems = new int[mems.length];
+                    for (int i = 0; i < mems.length; i++) {
+                        tmp_mems[i] = mems[i].intValue();
+                    }
+                    if (!tool.existsUser(ctx, tmp_mems)) {
+                        throw new NoSuchUserException("No such user");
+                    }
+                }
+
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, grp);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchGroupException(e);
+                }
+                grp.testMandatoryCreateFieldsNull();
+                if (!tool.existsGroup(ctx, grp.getId().intValue())) {
+                    throw new NoSuchGroupException("No such group");
+                }
+
+                if (grp.getName() != null && tool.existsGroupName(ctx, grp)) {
+                    throw new InvalidDataException("Group " + grp.getName() + " already exists in this context");
+                }
+
+                oxGroup.change(ctx, grp);
+
+                //JCS
+                final User[] new_members = oxGroup.getMembers(ctx, grp.getId().intValue());
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
                     try {
-                        LOGGER.debug("Calling change for plugin: {}", bundlename);
-                        oxgroup.change(ctx, grp, auth);
-                    } catch (final PluginException e) {
-                        LOGGER.error("Error while calling change for plugin: {}", bundlename, e);
-                        throw StorageException.wrapForRMI(e);
+                        final Cache cache = cacheService.getCache("User");
+                        if (new_members != null) {
+                            for (final User user : new_members) {
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                            }
+                        }
+
+                        if (grp.getMembers() != null && grp.getMembers().length > 0) {
+                            for (final Integer old_user_id : grp.getMembers()) {
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id.intValue()));
+                            }
+                        }
+                    } catch (final OXException e) {
+                        LOGGER.error("", e);
+                    }
+                }
+
+            } catch (final EnforceableDataObjectException e2) {
+                final InvalidDataException invalidDataException = new InvalidDataException(e2.getMessage());
+                LOGGER.error("", invalidDataException);
+                throw invalidDataException;
+            } catch (final StorageException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final DatabaseUpdateException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final NoSuchContextException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final InvalidDataException e1) {
+                LOGGER.error("", e1);
+                throw e1;
+            } catch (final NoSuchUserException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final NoSuchGroupException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                        final String bundlename = oxgroup.getClass().getName();
+                        try {
+                            LOGGER.debug("Calling change for plugin: {}", bundlename);
+                            oxgroup.change(ctx, grp, auth);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling change for plugin: {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
                     }
                 }
             }
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
         }
     }
 
     @Override
     public Group create(final Context ctx, final Group grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(grp);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for create is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e2) {
-            LOGGER.error("", e2);
-            throw e2;
-        }
-
-        LOGGER.debug("{} - {} - {}", ctx, grp, auth);
-
-        checkContextAndSchema(ctx);
-
-        try {
-            if (!grp.mandatoryCreateMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(grp);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for create is null", e3);
+                throw e3;
             }
 
-            if (prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
-                grp.setName(grp.getName().toLowerCase());
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            if (prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
-                validateGroupName(grp.getName());
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e2) {
+                LOGGER.error("", e2);
+                throw e2;
             }
 
-            if (tool.existsGroupName(ctx, grp.getName())) {
-                throw new InvalidDataException("Group already exists!");
-            }
+            LOGGER.debug("{} - {} - {}", ctx, grp, auth);
 
-            // if members sent, check exist
-            if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                if (!tool.existsUser(ctx, I2i(grp.getMembers()))) {
-                    throw new NoSuchUserException("No such user");
+            checkContextAndSchema(ctx);
+
+            try {
+                if (!grp.mandatoryCreateMembersSet()) {
+                    throw new InvalidDataException("Mandatory fields not set: " + grp.getUnsetMembers());
                 }
-                for (Integer userId : grp.getMembers()) {
-                    if (tool.isGuestUser(ctx, userId.intValue())) {
-                        throw new NoSuchUserException("Cannot add guest user to group");
+
+                if (prop.getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, true)) {
+                    grp.setName(grp.getName().toLowerCase());
+                }
+
+                if (prop.getGroupProp(AdminProperties.Group.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    validateGroupName(grp.getName());
+                }
+
+                if (tool.existsGroupName(ctx, grp.getName())) {
+                    throw new InvalidDataException("Group already exists!");
+                }
+
+                // if members sent, check exist
+                if (grp.getMembers() != null && grp.getMembers().length > 0) {
+                    if (!tool.existsUser(ctx, I2i(grp.getMembers()))) {
+                        throw new NoSuchUserException("No such user");
+                    }
+                    for (Integer userId : grp.getMembers()) {
+                        if (tool.isGuestUser(ctx, userId.intValue())) {
+                            throw new NoSuchUserException("Cannot add guest user to group");
+                        }
                     }
                 }
+            } catch (final InvalidDataException e2) {
+                LOGGER.error("", e2);
+                throw e2;
+            } catch (final NoSuchUserException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (EnforceableDataObjectException e) {
+                throw new InvalidDataException(e.getMessage());
             }
-        } catch (final InvalidDataException e2) {
-            LOGGER.error("", e2);
-            throw e2;
-        } catch (final NoSuchUserException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (EnforceableDataObjectException e) {
-            throw new InvalidDataException(e.getMessage());
-        }
 
-        final int retval = oxGroup.create(ctx, grp);
-        grp.setId(I(retval));
-        final List<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
+            final int retval = oxGroup.create(ctx, grp);
+            grp.setId(I(retval));
+            final List<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
-                    final String bundlename = oxgroup.getClass().getName();
-                    try {
-                        LOGGER.debug("Calling create for plugin: {}", bundlename);
-                        oxgroup.create(ctx, grp, auth);
-                        interfacelist.add(oxgroup);
-                    } catch (final PluginException e) {
-                        LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
-                        LOGGER.info("Now doing rollback for everything until now...");
-                        for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
-                            try {
-                                oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
-                            } catch (final PluginException e1) {
-                                LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
-                            }
-                        }
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                        final String bundlename = oxgroup.getClass().getName();
                         try {
-                            oxGroup.delete(ctx, new Group[] { grp });
-                        } catch (final StorageException e1) {
-                            LOGGER.error("Error doing rollback for creating resource in database", e1);
+                            LOGGER.debug("Calling create for plugin: {}", bundlename);
+                            oxgroup.create(ctx, grp, auth);
+                            interfacelist.add(oxgroup);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
+                            LOGGER.info("Now doing rollback for everything until now...");
+                            for (final OXGroupPluginInterface oxgroupinterface : interfacelist) {
+                                try {
+                                    oxgroupinterface.delete(ctx, new Group[] { grp }, auth);
+                                } catch (final PluginException e1) {
+                                    LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                }
+                            }
+                            try {
+                                oxGroup.delete(ctx, new Group[] { grp });
+                            } catch (final StorageException e1) {
+                                LOGGER.error("Error doing rollback for creating resource in database", e1);
+                            }
+                            throw StorageException.wrapForRMI(e);
                         }
-                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
-        }
 
-        // JCS
-        // If members sent, remove each from cache
-        if (grp.getMembers() != null && grp.getMembers().length > 0) {
-            final Integer[] mems = grp.getMembers();
-            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    final Cache cache = cacheService.getCache("User");
-                    for (final Integer member_id : mems) {
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id.intValue()));
+            // JCS
+            // If members sent, remove each from cache
+            if (grp.getMembers() != null && grp.getMembers().length > 0) {
+                final Integer[] mems = grp.getMembers();
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final Cache cache = cacheService.getCache("User");
+                        for (final Integer member_id : mems) {
+                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id.intValue()));
+                        }
+                    } catch (final OXException e) {
+                        LOGGER.error("", e);
                     }
-                } catch (final OXException e) {
-                    LOGGER.error("", e);
                 }
             }
-        }
-        // END OF JCS
+            // END OF JCS
 
-        return grp;
-        // MonitoringInfos.incrementNumberOfCreateGroupCalled();
+            return grp;
+            // MonitoringInfos.incrementNumberOfCreateGroupCalled();
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
@@ -451,324 +467,358 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e3;
         }
 
-        delete(ctx, new Group[] { grp }, auth);
+        try {
+            delete(ctx, new Group[] { grp }, auth);
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public void delete(final Context ctx, final Group[] grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck((Object[]) grp);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for delete is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-
-            for (final Group elem : grp) {
-                // should we allow of deleting the users group?
-                try {
-                    setIdOrGetIDFromNameAndIdObject(ctx, elem);
-                } catch (NoSuchObjectException e) {
-                    throw new NoSuchGroupException(e);
-                }
-                final int grp_id = elem.getId().intValue();
-                if (1 == grp_id) {
-                    throw new InvalidDataException("Group with id " + grp_id + " cannot be deleted");
-                }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck((Object[]) grp);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for delete is null", e3);
+                throw e3;
             }
 
-            LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(grp), auth);
-
-            checkContextAndSchema(ctx);
-
-            if (!tool.existsGroup(ctx, grp)) {
-                throw new NoSuchGroupException("No such group");
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
             }
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final NoSuchGroupException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
 
-        final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
+            try {
+                basicauth.doAuthentication(auth, ctx);
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
-                    final String bundlename = oxgroup.getClass().getName();
+                for (final Group elem : grp) {
+                    // should we allow of deleting the users group?
                     try {
-                        LOGGER.debug("Calling delete for plugin: {}", bundlename);
-                        oxgroup.delete(ctx, grp, auth);
-                        interfacelist.add(oxgroup);
-                    } catch (final PluginException e) {
-                        LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
-                        throw StorageException.wrapForRMI(e);
+                        setIdOrGetIDFromNameAndIdObject(ctx, elem);
+                    } catch (NoSuchObjectException e) {
+                        throw new NoSuchGroupException(e);
+                    }
+                    final int grp_id = elem.getId().intValue();
+                    if (1 == grp_id) {
+                        throw new InvalidDataException("Group with id " + grp_id + " cannot be deleted");
                     }
                 }
+
+                LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(grp), auth);
+
+                checkContextAndSchema(ctx);
+
+                if (!tool.existsGroup(ctx, grp)) {
+                    throw new NoSuchGroupException("No such group");
+                }
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final StorageException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final InvalidCredentialsException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final DatabaseUpdateException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final NoSuchContextException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final NoSuchGroupException e) {
+                LOGGER.error("", e);
+                throw e;
             }
-        }
 
-        try {
+            final ArrayList<OXGroupPluginInterface> interfacelist = new ArrayList<OXGroupPluginInterface>();
 
-            // remember the old members for later cache invalidation
-            List<User[]> del_groups_members = new ArrayList<User[]>();
-            for (Group del_group : grp) {
-                del_groups_members.add(oxGroup.getMembers(ctx, del_group.getId().intValue()));
-            }
-
-            oxGroup.delete(ctx, grp);
-
-            //JCS
-            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            if (null != cacheService) {
-                try {
-                    final Cache cache = cacheService.getCache("User");
-                    for (final User[] membaz : del_groups_members) {
-                        for (final User user : membaz) {
-                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                        final String bundlename = oxgroup.getClass().getName();
+                        try {
+                            LOGGER.debug("Calling delete for plugin: {}", bundlename);
+                            oxgroup.delete(ctx, grp, auth);
+                            interfacelist.add(oxgroup);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
                         }
                     }
-                } catch (final OXException e) {
-                    LOGGER.error("", e);
                 }
             }
-            // END OF JCS
 
-        } catch (final StorageException e) {
+            try {
+
+                // remember the old members for later cache invalidation
+                List<User[]> del_groups_members = new ArrayList<User[]>();
+                for (Group del_group : grp) {
+                    del_groups_members.add(oxGroup.getMembers(ctx, del_group.getId().intValue()));
+                }
+
+                oxGroup.delete(ctx, grp);
+
+                //JCS
+                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        final Cache cache = cacheService.getCache("User");
+                        for (final User[] membaz : del_groups_members) {
+                            for (final User user : membaz) {
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                            }
+                        }
+                    } catch (final OXException e) {
+                        LOGGER.error("", e);
+                    }
+                }
+                // END OF JCS
+
+            } catch (final StorageException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
-
     }
 
     @Override
     public Group getData(final Context ctx, final Group grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(grp);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for get is null", e3);
-            throw e3;
-        }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(grp);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for get is null", e3);
+                throw e3;
+            }
 
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
 
-        try {
-            setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchGroupException(e);
-        }
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, grp);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchGroupException(e);
+            }
 
-        final int grp_id = grp.getId().intValue();
+            final int grp_id = grp.getId().intValue();
 
-        LOGGER.debug("{} - {} - {}", ctx, I(grp_id), auth);
-        checkContextAndSchema(ctx);
+            LOGGER.debug("{} - {} - {}", ctx, I(grp_id), auth);
+            checkContextAndSchema(ctx);
 
-        if (!tool.existsGroup(ctx, grp_id)) {
-            throw new NoSuchGroupException("No such group");
-        }
+            if (!tool.existsGroup(ctx, grp_id)) {
+                throw new NoSuchGroupException("No such group");
+            }
 
-        Group retgrp = oxGroup.get(ctx, grp);
+            Group retgrp = oxGroup.get(ctx, grp);
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
-                    final String bundlename = oxgroup.getClass().getName();
-                    LOGGER.debug("Calling getData for plugin: {}", bundlename);
-                    retgrp = oxgroup.get(ctx, retgrp, auth);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                        final String bundlename = oxgroup.getClass().getName();
+                        LOGGER.debug("Calling getData for plugin: {}", bundlename);
+                        retgrp = oxgroup.get(ctx, retgrp, auth);
+                    }
                 }
             }
-        }
 
-        return retgrp;
+            return retgrp;
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public Group[] getData(final Context ctx, final Group[] groups, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck((Object[]) groups);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for getData is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-            LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(groups), auth);
-            checkContextAndSchema(ctx);
-
-            // resolve group id/username
-            for (final Group group : groups) {
-                // FIXME: cleanup this if constructions for better performance
-                if (group.getId() != null && !tool.existsGroup(ctx, group.getId().intValue())) {
-                    throw new NoSuchGroupException("No such group " + group.getId().intValue());
-                }
-                if (group.getName() != null && !tool.existsGroupName(ctx, group.getName())) {
-                    throw new NoSuchGroupException("No such group " + group.getName());
-                }
-                if (group.getName() == null && group.getId() == null) {
-                    throw new InvalidDataException("Groupname and groupid missing! Cannot resolve group data");
-                }
-
-                if (group.getName() == null) {
-                    // resolve name by id
-                    group.setName(tool.getGroupnameByGroupID(ctx, group.getId().intValue()));
-                }
-                if (group.getId() == null) {
-                    group.setId(I(tool.getGroupIDByGroupname(ctx, group.getName())));
-                }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck((Object[]) groups);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for getData is null", e3);
+                throw e3;
             }
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
 
-        final ArrayList<Group> retval = new ArrayList<Group>();
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
-        for (final Group group : groups) {
-            retval.add(oxGroup.get(ctx, group));
-        }
+            try {
+                basicauth.doAuthentication(auth, ctx);
+                LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(groups), auth);
+                checkContextAndSchema(ctx);
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
-                    final String bundlename = oxgroup.getClass().getName();
-                    LOGGER.debug("Calling get for plugin: {}", bundlename);
-                    for (Group group : retval) {
-                        group = oxgroup.get(ctx, group, auth);
+                // resolve group id/username
+                for (final Group group : groups) {
+                    // FIXME: cleanup this if constructions for better performance
+                    if (group.getId() != null && !tool.existsGroup(ctx, group.getId().intValue())) {
+                        throw new NoSuchGroupException("No such group " + group.getId().intValue());
+                    }
+                    if (group.getName() != null && !tool.existsGroupName(ctx, group.getName())) {
+                        throw new NoSuchGroupException("No such group " + group.getName());
+                    }
+                    if (group.getName() == null && group.getId() == null) {
+                        throw new InvalidDataException("Groupname and groupid missing! Cannot resolve group data");
+                    }
+
+                    if (group.getName() == null) {
+                        // resolve name by id
+                        group.setName(tool.getGroupnameByGroupID(ctx, group.getId().intValue()));
+                    }
+                    if (group.getId() == null) {
+                        group.setId(I(tool.getGroupIDByGroupname(ctx, group.getName())));
+                    }
+                }
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            final ArrayList<Group> retval = new ArrayList<Group>();
+
+            for (final Group group : groups) {
+                retval.add(oxGroup.get(ctx, group));
+            }
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXGroupPluginInterface oxgroup : pluginInterfaces.getGroupPlugins().getServiceList()) {
+                        final String bundlename = oxgroup.getClass().getName();
+                        LOGGER.debug("Calling get for plugin: {}", bundlename);
+                        for (Group group : retval) {
+                            group = oxgroup.get(ctx, group, auth);
+                        }
                     }
                 }
             }
-        }
 
-        return retval.toArray(new Group[retval.size()]);
+            return retval.toArray(new Group[retval.size()]);
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public Group getDefaultGroup(final Context ctx, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-        basicauth.doAuthentication(auth, ctx);
-        LOGGER.debug("{} - {}", ctx, auth);
-        checkContextAndSchema(ctx);
-
         try {
-            return new Group(I(tool.getDefaultGroupForContextWithOutConnection(ctx)));
-        } catch (final StorageException e) {
-            LOGGER.error("Error resolving default group for context", e);
-            throw e;
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+            basicauth.doAuthentication(auth, ctx);
+            LOGGER.debug("{} - {}", ctx, auth);
+            checkContextAndSchema(ctx);
+
+            try {
+                return new Group(I(tool.getDefaultGroupForContextWithOutConnection(ctx)));
+            } catch (final StorageException e) {
+                LOGGER.error("Error resolving default group for context", e);
+                throw e;
+            }
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
         }
     }
 
     @Override
     public User[] getMembers(final Context ctx, final Group grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(grp);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for getMembers is null", e3);
-            throw e3;
-        }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(grp);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for getMembers is null", e3);
+                throw e3;
+            }
 
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, grp);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchGroupException(e);
+            }
+            final int grp_id = grp.getId().intValue();
+
+            LOGGER.debug("{} - {} - {}", ctx, I(grp_id), auth);
+
+            checkContextAndSchema(ctx);
+
+            if (!tool.existsGroup(ctx, grp_id)) {
+                throw new NoSuchGroupException("No such group");
+
+            }
+
+            return oxGroup.getMembers(ctx, grp_id);
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
-
-        try {
-            setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchGroupException(e);
-        }
-        final int grp_id = grp.getId().intValue();
-
-        LOGGER.debug("{} - {} - {}", ctx, I(grp_id), auth);
-
-        checkContextAndSchema(ctx);
-
-        if (!tool.existsGroup(ctx, grp_id)) {
-            throw new NoSuchGroupException("No such group");
-
-        }
-
-        return oxGroup.getMembers(ctx, grp_id);
     }
 
     @Override
     public Group[] list(final Context ctx, final String pattern, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(pattern);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for list is null", e3);
-            throw e3;
-        }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(pattern);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for list is null", e3);
+                throw e3;
+            }
 
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            LOGGER.debug("{} - {} - {}", ctx, pattern, auth);
+
+            checkContextAndSchema(ctx);
+
+            return oxGroup.list(ctx, pattern);
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
-
-        LOGGER.debug("{} - {} - {}", ctx, pattern, auth);
-
-        checkContextAndSchema(ctx);
-
-        return oxGroup.list(ctx, pattern);
     }
 
     @Override
@@ -778,101 +828,110 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     @Override
     public Group[] listGroupsForUser(final Context ctx, final User usr, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(usr);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for getMembers is null", e3);
-            throw e3;
-        }
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(usr);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for getMembers is null", e3);
+                throw e3;
+            }
 
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            LOGGER.debug("{} - {} - {}", ctx, usr, auth);
+
+            checkContextAndSchema(ctx);
+
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, usr);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            if (!tool.existsUser(ctx, usr)) {
+                throw new NoSuchUserException("No such user");
+            }
+
+            return oxGroup.getGroupsForUser(ctx, usr);
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
-
-        LOGGER.debug("{} - {} - {}", ctx, usr, auth);
-
-        checkContextAndSchema(ctx);
-
-        try {
-            setIdOrGetIDFromNameAndIdObject(ctx, usr);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchUserException(e);
-        }
-        if (!tool.existsUser(ctx, usr)) {
-            throw new NoSuchUserException("No such user");
-        }
-
-        return oxGroup.getGroupsForUser(ctx, usr);
     }
 
     @Override
     public void removeMember(final Context ctx, final Group grp, final User[] members, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(grp, members);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for removeMember is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
-
-        try {
-            setIdOrGetIDFromNameAndIdObject(ctx, grp);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchGroupException(e);
-        }
-        final int grp_id = grp.getId().intValue();
-        LOGGER.debug("{} - {} - {} - {}", ctx, I(grp_id), Arrays.toString(members), auth);
-
-        checkContextAndSchema(ctx);
-
-        try {
-            setUserIdInArrayOfUsers(ctx, members);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchUserException(e);
-        }
-        if (!tool.existsUser(ctx, members)) {
-            throw new NoSuchUserException("No such user");
-        }
-
-        if (!tool.existsGroup(ctx, grp_id)) {
-            throw new NoSuchGroupException("No such group");
-        }
-
-        oxGroup.removeMember(ctx, grp_id, members);
-
-        // JCS
-        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
+            final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
-                final Cache cache = cacheService.getCache("User");
-                for (final User user : members) {
-                    cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
-                }
-            } catch (final OXException e) {
-                LOGGER.error("", e);
+                doNullCheck(grp, members);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for removeMember is null", e3);
+                throw e3;
             }
-        }
-        // END OF JCS
 
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, grp);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchGroupException(e);
+            }
+            final int grp_id = grp.getId().intValue();
+            LOGGER.debug("{} - {} - {} - {}", ctx, I(grp_id), Arrays.toString(members), auth);
+
+            checkContextAndSchema(ctx);
+
+            try {
+                setUserIdInArrayOfUsers(ctx, members);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            if (!tool.existsUser(ctx, members)) {
+                throw new NoSuchUserException("No such user");
+            }
+
+            if (!tool.existsGroup(ctx, grp_id)) {
+                throw new NoSuchGroupException("No such group");
+            }
+
+            oxGroup.removeMember(ctx, grp_id, members);
+
+            // JCS
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            if (null != cacheService) {
+                try {
+                    final Cache cache = cacheService.getCache("User");
+                    for (final User user : members) {
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId().intValue()));
+                    }
+                } catch (final OXException e) {
+                    LOGGER.error("", e);
+                }
+            }
+            // END OF JCS
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     private void validateGroupName(final String groupName) throws InvalidDataException {

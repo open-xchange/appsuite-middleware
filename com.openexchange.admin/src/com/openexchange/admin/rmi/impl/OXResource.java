@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import static com.openexchange.java.Autoboxing.I;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -102,429 +103,459 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface {
 
     @Override
     public void change(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(res);
-        } catch (final InvalidDataException e3) {
-            final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
-            LOGGER.error("", invalidDataException);
-            throw invalidDataException;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        }
-
-        LOGGER.debug("{} - {} - {}", ctx, res, auth);
-
-        try {
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
             try {
-                setIdOrGetIDFromNameAndIdObject(ctx, res);
-            } catch (NoSuchObjectException e) {
-                throw new NoSuchResourceException(e);
+                doNullCheck(res);
+            } catch (final InvalidDataException e3) {
+                final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
+                LOGGER.error("", invalidDataException);
+                throw invalidDataException;
             }
 
-            res.testMandatoryCreateFieldsNull();
-
-            final int resource_ID = res.getId().intValue();
-
-            checkContextAndSchema(ctx);
-
-            if (!tool.existsResource(ctx, resource_ID)) {
-                throw new NoSuchResourceException("Resource with this id does not exists");
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            if (res.getName() != null && tool.existsResourceName(ctx, res)) {
-                throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e1) {
+                LOGGER.error("", e1);
+                throw e1;
             }
 
-            if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(), res.getId())) {
-                throw new InvalidDataException("Resource with this email address already exists");
+            LOGGER.debug("{} - {} - {}", ctx, res, auth);
+
+            try {
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, res);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchResourceException(e);
+                }
+
+                res.testMandatoryCreateFieldsNull();
+
+                final int resource_ID = res.getId().intValue();
+
+                checkContextAndSchema(ctx);
+
+                if (!tool.existsResource(ctx, resource_ID)) {
+                    throw new NoSuchResourceException("Resource with this id does not exists");
+                }
+
+                if (res.getName() != null && tool.existsResourceName(ctx, res)) {
+                    throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
+                }
+
+                if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(), res.getId())) {
+                    throw new InvalidDataException("Resource with this email address already exists");
+                }
+
+                tool.primaryMailExists(ctx, res.getEmail());
+
+                if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
+                    final String rid = res.getName().toLowerCase();
+                    res.setName(rid);
+                }
+
+                if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    validateResourceName(res.getName());
+                }
+
+                final String resmail = res.getEmail();
+                if (resmail != null && resmail.trim().length() > 0 && !GenericChecks.isValidMailAddress(resmail)) {
+                    throw new InvalidDataException("Invalid email address");
+                }
+            } catch (final InvalidDataException e1) {
+                LOGGER.error("", e1);
+                throw e1;
+            } catch (final StorageException e1) {
+                LOGGER.error("", e1);
+                throw e1;
+            } catch (final DatabaseUpdateException e1) {
+                LOGGER.error("", e1);
+                throw e1;
+            } catch (final NoSuchContextException e1) {
+                LOGGER.error("", e1);
+                throw e1;
+            } catch (final NoSuchResourceException e1) {
+                LOGGER.error("", e1);
+                throw e1;
             }
 
-            tool.primaryMailExists(ctx, res.getEmail());
+            oxRes.change(ctx, res);
 
-            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
-                final String rid = res.getName().toLowerCase();
-                res.setName(rid);
-            }
-
-            if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
-                validateResourceName(res.getName());
-            }
-
-            final String resmail = res.getEmail();
-            if (resmail != null && resmail.trim().length() > 0 && !GenericChecks.isValidMailAddress(resmail)) {
-                throw new InvalidDataException("Invalid email address");
-            }
-        } catch (final InvalidDataException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        } catch (final StorageException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        } catch (final DatabaseUpdateException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        } catch (final NoSuchContextException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        } catch (final NoSuchResourceException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        }
-
-        oxRes.change(ctx, res);
-
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
-                    final String bundlename = oxresource.getClass().getName();
-                    try {
-                        LOGGER.info("Calling change for plugin: {}", bundlename);
-                        oxresource.change(ctx, res, auth);
-                    } catch (final PluginException e) {
-                        LOGGER.error("Error while calling change for plugin: {}", bundlename, e);
-                        throw StorageException.wrapForRMI(e);
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                        final String bundlename = oxresource.getClass().getName();
+                        try {
+                            LOGGER.info("Calling change for plugin: {}", bundlename);
+                            oxresource.change(ctx, res, auth);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling change for plugin: {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
                     }
                 }
             }
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
         }
     }
 
     @Override
     public Resource create(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(res);
-            doNullCheck(res.getName());
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for create is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
-
-        LOGGER.debug("{} - {} - {}", ctx, res, auth);
-
-        checkContextAndSchema(ctx);
-
-        try {
-
-            if (tool.existsResourceName(ctx, res.getName())) {
-                throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(res);
+                doNullCheck(res.getName());
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for create is null", e3);
+                throw e3;
             }
 
-            if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
-                throw new InvalidDataException("Resource with this email address already exists");
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
             }
 
-            tool.primaryMailExists(ctx, res.getEmail());
-
-            if (!res.mandatoryCreateMembersSet()) {
-                throw new InvalidDataException("Mandatory fields not set: " + res.getUnsetMembers());
-                // TODO: cutmasta look here
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
             }
 
-            if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
-                final String uid = res.getName().toLowerCase();
-                res.setName(uid);
+            LOGGER.debug("{} - {} - {}", ctx, res, auth);
+
+            checkContextAndSchema(ctx);
+
+            try {
+
+                if (tool.existsResourceName(ctx, res.getName())) {
+                    throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
+                }
+
+                if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
+                    throw new InvalidDataException("Resource with this email address already exists");
+                }
+
+                tool.primaryMailExists(ctx, res.getEmail());
+
+                if (!res.mandatoryCreateMembersSet()) {
+                    throw new InvalidDataException("Mandatory fields not set: " + res.getUnsetMembers());
+                    // TODO: cutmasta look here
+                }
+
+                if (prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
+                    final String uid = res.getName().toLowerCase();
+                    res.setName(uid);
+                }
+
+                if (prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    validateResourceName(res.getName());
+                }
+
+                final String resmail = res.getEmail();
+                if (resmail != null && !GenericChecks.isValidMailAddress(resmail)) {
+                    throw new InvalidDataException("Invalid email address");
+                }
+            } catch (final InvalidDataException e2) {
+                LOGGER.error("", e2);
+                throw e2;
+            } catch (EnforceableDataObjectException e) {
+                throw new InvalidDataException(e.getMessage());
             }
 
-            if (prop.getResourceProp(AdminProperties.Resource.CHECK_NOT_ALLOWED_CHARS, true)) {
-                validateResourceName(res.getName());
-            }
+            final int retval = oxRes.create(ctx, res);
+            res.setId(I(retval));
+            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-            final String resmail = res.getEmail();
-            if (resmail != null && !GenericChecks.isValidMailAddress(resmail)) {
-                throw new InvalidDataException("Invalid email address");
-            }
-        } catch (final InvalidDataException e2) {
-            LOGGER.error("", e2);
-            throw e2;
-        } catch (EnforceableDataObjectException e) {
-            throw new InvalidDataException(e.getMessage());
-        }
-
-        final int retval = oxRes.create(ctx, res);
-        res.setId(I(retval));
-        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
-
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
-                    final String bundlename = oxresource.getClass().getName();
-                    try {
-                        LOGGER.debug("Calling create for plugin: {}", bundlename);
-                        oxresource.create(ctx, res, auth);
-                        interfacelist.add(oxresource);
-                    } catch (final PluginException e) {
-                        LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
-                        LOGGER.info("Now doing rollback for everything until now...");
-                        for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
-                            try {
-                                oxresourceinterface.delete(ctx, res, auth);
-                            } catch (final PluginException e1) {
-                                LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
-                            }
-                        }
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                        final String bundlename = oxresource.getClass().getName();
                         try {
-                            oxRes.delete(ctx, res);
-                        } catch (final StorageException e1) {
-                            LOGGER.error("Error doing rollback for creating resource in database", e1);
+                            LOGGER.debug("Calling create for plugin: {}", bundlename);
+                            oxresource.create(ctx, res, auth);
+                            interfacelist.add(oxresource);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling create for plugin: {}", bundlename, e);
+                            LOGGER.info("Now doing rollback for everything until now...");
+                            for (final OXResourcePluginInterface oxresourceinterface : interfacelist) {
+                                try {
+                                    oxresourceinterface.delete(ctx, res, auth);
+                                } catch (final PluginException e1) {
+                                    LOGGER.error("Error doing rollback for plugin: {}", bundlename, e1);
+                                }
+                            }
+                            try {
+                                oxRes.delete(ctx, res);
+                            } catch (final StorageException e1) {
+                                LOGGER.error("Error doing rollback for creating resource in database", e1);
+                            }
+                            throw StorageException.wrapForRMI(e);
                         }
-                        throw StorageException.wrapForRMI(e);
                     }
                 }
             }
-        }
 
-        return res;
+            return res;
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public void delete(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(res);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for delete is null", e3);
-            throw e3;
-        }
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(res);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for delete is null", e3);
+                throw e3;
+            }
 
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
+            try {
+                basicauth.doAuthentication(auth, ctx);
+
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, res);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchResourceException(e);
+                }
+                LOGGER.debug("{} - {} - {}", ctx, res, auth);
+                checkContextAndSchema(ctx);
+                if (!tool.existsResource(ctx, res.getId().intValue())) {
+                    throw new NoSuchResourceException("Resource with this id does not exist");
+                }
+            } catch (final StorageException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final InvalidCredentialsException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final DatabaseUpdateException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final NoSuchContextException e) {
+                LOGGER.error("", e);
+                throw e;
+            } catch (final NoSuchResourceException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+            final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                        final String bundlename = oxresource.getClass().getName();
+                        try {
+                            LOGGER.info("Calling delete for plugin: {}", bundlename);
+                            oxresource.delete(ctx, res, auth);
+                            interfacelist.add(oxresource);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
+                }
+            }
+
+            oxRes.delete(ctx, res);
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
+    }
+
+    @Override
+    public Resource getData(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
-            basicauth.doAuthentication(auth, ctx);
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(res);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for get is null", e3);
+                throw e3;
+            }
+
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            try {
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
 
             try {
                 setIdOrGetIDFromNameAndIdObject(ctx, res);
             } catch (NoSuchObjectException e) {
                 throw new NoSuchResourceException(e);
             }
-            LOGGER.debug("{} - {} - {}", ctx, res, auth);
-            checkContextAndSchema(ctx);
-            if (!tool.existsResource(ctx, res.getId().intValue())) {
-                throw new NoSuchResourceException("Resource with this id does not exist");
-            }
-        } catch (final StorageException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final InvalidCredentialsException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final DatabaseUpdateException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final NoSuchContextException e) {
-            LOGGER.error("", e);
-            throw e;
-        } catch (final NoSuchResourceException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
-        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
-                    final String bundlename = oxresource.getClass().getName();
-                    try {
-                        LOGGER.info("Calling delete for plugin: {}", bundlename);
-                        oxresource.delete(ctx, res, auth);
-                        interfacelist.add(oxresource);
-                    } catch (final PluginException e) {
-                        LOGGER.error("Error while calling delete for plugin: {}", bundlename, e);
-                        throw StorageException.wrapForRMI(e);
+            LOGGER.debug("{} - {} - {}", ctx, res.getId(), auth);
+
+            checkContextAndSchema(ctx);
+
+            final int resource_id = res.getId().intValue();
+            if (!tool.existsResource(ctx, resource_id)) {
+                throw new NoSuchResourceException("resource with with this id does not exist");
+            }
+
+            Resource retres = oxRes.getData(ctx, res);
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                        final String bundlename = oxresource.getClass().getName();
+                        LOGGER.info("Calling getData for plugin: {}", bundlename);
+                        retres = oxresource.get(ctx, retres, auth);
                     }
                 }
             }
-        }
 
-        oxRes.delete(ctx, res);
-    }
-
-    @Override
-    public Resource getData(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
-        try {
-            doNullCheck(res);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for get is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
+            return retres;
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
-
-        try {
-            setIdOrGetIDFromNameAndIdObject(ctx, res);
-        } catch (NoSuchObjectException e) {
-            throw new NoSuchResourceException(e);
-        }
-
-        LOGGER.debug("{} - {} - {}", ctx, res.getId(), auth);
-
-        checkContextAndSchema(ctx);
-
-        final int resource_id = res.getId().intValue();
-        if (!tool.existsResource(ctx, resource_id)) {
-            throw new NoSuchResourceException("resource with with this id does not exist");
-        }
-
-        Resource retres = oxRes.getData(ctx, res);
-
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
-                    final String bundlename = oxresource.getClass().getName();
-                    LOGGER.info("Calling getData for plugin: {}", bundlename);
-                    retres = oxresource.get(ctx, retres, auth);
-                }
-            }
-        }
-
-        return retres;
     }
 
     @Override
     public Resource[] getData(final Context ctx, final Resource[] resources, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck((Object[]) resources);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for getData is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-
-            LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(resources), auth);
-
-            checkContextAndSchema(ctx);
-
-            // check if all resources exists
-            for (final Resource resource : resources) {
-                if (resource.getId() != null && !tool.existsResource(ctx, resource.getId().intValue())) {
-                    throw new NoSuchResourceException("No such resource " + resource.getId().intValue());
-                }
-                if (resource.getName() != null && !tool.existsResourceName(ctx, resource.getName())) {
-                    throw new NoSuchResourceException("No such resource " + resource.getName());
-                }
-                if (resource.getName() == null && resource.getId() == null) {
-                    throw new InvalidDataException("Resourcename and resourceid missing!Cannot resolve resource data");
-                }
-
-                if (resource.getName() == null) {
-                    // resolv name by id
-                    resource.setName(tool.getResourcenameByResourceID(ctx, resource.getId().intValue()));
-                }
-                if (resource.getId() == null) {
-                    resource.setId(I(tool.getResourceIDByResourcename(ctx, resource.getName())));
-                }
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck((Object[]) resources);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for getData is null", e3);
+                throw e3;
             }
-        } catch (final InvalidDataException e) {
-            LOGGER.error("", e);
-            throw e;
-        }
 
-        final ArrayList<Resource> retval = new ArrayList<Resource>();
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
 
-        for (final Resource resource : resources) {
-            // not nice, but works ;)
-            final Resource tmp = oxRes.getData(ctx, resource);
-            retval.add(tmp);
-        }
+            try {
+                basicauth.doAuthentication(auth, ctx);
 
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
-                    final String bundlename = oxresource.getClass().getName();
-                    LOGGER.info("Calling get for plugin: {}", bundlename);
-                    for (Resource resource : retval) {
-                        resource = oxresource.get(ctx, resource, auth);
+                LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(resources), auth);
+
+                checkContextAndSchema(ctx);
+
+                // check if all resources exists
+                for (final Resource resource : resources) {
+                    if (resource.getId() != null && !tool.existsResource(ctx, resource.getId().intValue())) {
+                        throw new NoSuchResourceException("No such resource " + resource.getId().intValue());
+                    }
+                    if (resource.getName() != null && !tool.existsResourceName(ctx, resource.getName())) {
+                        throw new NoSuchResourceException("No such resource " + resource.getName());
+                    }
+                    if (resource.getName() == null && resource.getId() == null) {
+                        throw new InvalidDataException("Resourcename and resourceid missing!Cannot resolve resource data");
+                    }
+
+                    if (resource.getName() == null) {
+                        // resolv name by id
+                        resource.setName(tool.getResourcenameByResourceID(ctx, resource.getId().intValue()));
+                    }
+                    if (resource.getId() == null) {
+                        resource.setId(I(tool.getResourceIDByResourcename(ctx, resource.getName())));
+                    }
+                }
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            final ArrayList<Resource> retval = new ArrayList<Resource>();
+
+            for (final Resource resource : resources) {
+                // not nice, but works ;)
+                final Resource tmp = oxRes.getData(ctx, resource);
+                retval.add(tmp);
+            }
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXResourcePluginInterface oxresource : pluginInterfaces.getResourcePlugins().getServiceList()) {
+                        final String bundlename = oxresource.getClass().getName();
+                        LOGGER.info("Calling get for plugin: {}", bundlename);
+                        for (Resource resource : retval) {
+                            resource = oxresource.get(ctx, resource, auth);
+                        }
                     }
                 }
             }
-        }
 
-        return retval.toArray(new Resource[retval.size()]);
+            return retval.toArray(new Resource[retval.size()]);
+        } catch (RuntimeException e) {
+            LOGGER.error("", e);
+            throw convertException(e);
+        }
     }
 
     @Override
     public Resource[] list(final Context ctx, final String pattern, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
-            doNullCheck(pattern);
-        } catch (final InvalidDataException e3) {
-            LOGGER.error("One of the given arguments for list is null", e3);
-            throw e3;
-        }
-
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
-            auth.setLogin(auth.getLogin().toLowerCase());
-        }
-
-        try {
-            if (pattern.length() == 0) {
-                throw new InvalidDataException("Invalid pattern!");
+            Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+            try {
+                doNullCheck(pattern);
+            } catch (final InvalidDataException e3) {
+                LOGGER.error("One of the given arguments for list is null", e3);
+                throw e3;
             }
 
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
+            if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                auth.setLogin(auth.getLogin().toLowerCase());
+            }
+
+            try {
+                if (pattern.length() == 0) {
+                    throw new InvalidDataException("Invalid pattern!");
+                }
+
+                basicauth.doAuthentication(auth, ctx);
+            } catch (final InvalidDataException e) {
+                LOGGER.error("", e);
+                throw e;
+            }
+
+            LOGGER.debug("{} - {} - {}", ctx, pattern, auth);
+
+            checkContextAndSchema(ctx);
+
+            return oxRes.list(ctx, pattern);
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
-            throw e;
+            throw convertException(e);
         }
-
-        LOGGER.debug("{} - {} - {}", ctx, pattern, auth);
-
-        checkContextAndSchema(ctx);
-
-        return oxRes.list(ctx, pattern);
     }
 
     @Override

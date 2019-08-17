@@ -47,45 +47,42 @@
  *
  */
 
-package com.openexchange.admin.plugin.hosting.rmi.impl;
+package com.openexchange.admin.rmi.exceptions;
 
-import static com.openexchange.admin.rmi.exceptions.RemoteExceptionUtils.convertException;
 import java.rmi.RemoteException;
-import com.openexchange.admin.plugin.hosting.services.AdminServiceRegistry;
-import com.openexchange.admin.plugin.hosting.storage.interfaces.OXContextGroupStorageInterface;
-import com.openexchange.admin.rmi.OXContextGroupInterface;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link OXContextGroup}
+ * {@link RemoteExceptionUtils} - Utility class for handling of exceptions occurring during administrative RMI invocations.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.3
  */
-public class OXContextGroup implements OXContextGroupInterface {
+public final class RemoteExceptionUtils {
 
     /**
-     * Initializes a new {@link OXContextGroup}.
+     * Initializes a new {@link RemoteExceptionUtils}.
      */
-    public OXContextGroup() {
+    private RemoteExceptionUtils() {
         super();
     }
 
-    @Override
-    public void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException {
-        OXContextGroupStorageInterface storage = AdminServiceRegistry.getInstance().getService(OXContextGroupStorageInterface.class);
-
-        if (contextGroupId == null) {
-            throw new IllegalArgumentException("The contextGroupId is null");
+    /**
+     * Converts given exception to a {@link RemoteException} for safe passing through RMI marshaling stack.
+     *
+     * @param e The exception to convert
+     * @return The resulting instance of <code>RemoteException</code>
+     */
+    public static RemoteException convertException(Exception e) {
+        if (e == null) {
+            // Garbage in, garbage out...
+            return null;
         }
-
-        try {
-            storage.deleteContextGroup(contextGroupId);
-        } catch (OXException e) {
-            throw StorageException.wrapForRMI(e);
-        } catch (RuntimeException e) {
-            throw convertException(e);
+        if (e instanceof RemoteException) {
+            return (RemoteException) e;
         }
+        RemoteException cme = new RemoteException(e.getMessage());
+        cme.setStackTrace(e.getStackTrace());
+        return cme;
     }
 
 }
