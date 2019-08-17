@@ -84,7 +84,7 @@ final class BasicPropertyImpl implements BasicProperty {
     BasicPropertyImpl(final String property, final int userId, final int contextId, final ServiceLookup services) throws OXException {
         super();
         // Preload value
-        User user = services.getService(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
+        User user = services.getServiceSafe(UserService.class).getUser(userId, services.getService(ContextService.class).getContext(contextId));
         value = ConvertUtils.loadConvert(user.getAttributes().get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString()));
         // Assign rest
         this.contextId = contextId;
