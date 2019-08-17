@@ -122,7 +122,7 @@ public final class CommonActivator implements BundleActivator {
                 mailcapRegistration.unregister();
                 this.mailcapRegistration = null;
             }
-            com.mysql.jdbc.AbandonedConnectionCleanupThread.shutdown();
+            com.mysql.jdbc.AbandonedConnectionCleanupThread.uncheckedShutdown();
         } catch (final Exception e) {
             logger.error("Stopping bundle 'com.openexchange.common' failed", e);
             throw e;
