@@ -321,7 +321,6 @@ public class LogbackLogConfigurationService implements LogConfigurationService {
         }
         builder.append("filter with ");
         fillBuilderWithPairs(builder, keyElements);
-        builder.setLength(builder.length() - 1);
         builder.append("' and policy 'ACCEPT'");
         responseBuilder.withMessage(builder.toString(), MessageType.INFO);
 
@@ -388,10 +387,17 @@ public class LogbackLogConfigurationService implements LogConfigurationService {
      * @param keyElements The key elements to add to the builder
      */
     private void fillBuilderWithPairs(StringBuilder builder, List<Pair<Name, String>> keyElements) {
-        for (Pair<Name, String> pair : keyElements) {
-            builder.append("key ").append(pair.getFirst().getName()).append("' and value '").append(pair.getSecond()).append(",");
+        int size;
+        if (keyElements == null || (size = keyElements.size()) <= 0) {
+            return;
         }
-        builder.setLength(builder.length() - 1);
+
+        Pair<Name, String> firstKeyElement = keyElements.get(0);
+        builder.append("key='").append(firstKeyElement.getFirst().getName()).append("' and value='").append(firstKeyElement.getSecond()).append('\'');
+        for (int i = 1; i < size; i++) {
+            Pair<Name, String> keyElement = keyElements.get(i);
+            builder.append(", key='").append(keyElement.getFirst().getName()).append("' and value='").append(keyElement.getSecond()).append('\'');
+        }
     }
 
     /**
