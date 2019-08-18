@@ -52,6 +52,8 @@ package com.openexchange.logging.osgi;
 import java.net.URL;
 import java.rmi.Remote;
 import java.util.Collection;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -163,7 +165,9 @@ public class Activator implements BundleActivator, Reloadable {
 
         // Register RMI logback config service
         logbackConfigurationRMIService = new LogbackConfigurationRMIServiceImpl(logbackConfigService);
-        context.registerService(Remote.class, logbackConfigurationRMIService, null);
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", LogbackConfigurationRMIServiceImpl.RMI_NAME);
+        context.registerService(Remote.class, logbackConfigurationRMIService, serviceProperties);
 
         logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
     }

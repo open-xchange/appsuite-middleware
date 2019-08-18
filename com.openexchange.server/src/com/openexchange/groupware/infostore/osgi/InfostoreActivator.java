@@ -221,7 +221,9 @@ public class InfostoreActivator implements BundleActivator {
             this.qfsTracker = qfsTracker;
             qfsTracker.open();
 
-            context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), null);
+            serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", FileChecksumsRMIServiceImpl.RMI_NAME);
+            context.registerService(Remote.class, new FileChecksumsRMIServiceImpl(), serviceProperties);
 
             // Register settings
             List<ServiceRegistration<ConfigTreeEquivalent>> registeredSettings = new ArrayList<ServiceRegistration<ConfigTreeEquivalent>>(4);

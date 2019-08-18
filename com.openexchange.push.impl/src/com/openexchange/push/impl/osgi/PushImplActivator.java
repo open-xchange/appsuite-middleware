@@ -175,10 +175,12 @@ public final class PushImplActivator extends HousekeepingActivator {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PushCreateTableTask()));
 
             registerService(PushListenerService.class, pushManagerRegistry);
-            registerService(Remote.class, new PushRMIServiceImpl());
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", PushRMIServiceImpl.RMI_NAME);
+            registerService(Remote.class, new PushRMIServiceImpl(), serviceProperties);
 
             // Register event handler to detect removed sessions
-            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
         } catch (Exception e) {

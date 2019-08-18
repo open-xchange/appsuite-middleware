@@ -52,6 +52,8 @@ package com.openexchange.monitoring.impl.osgi;
 import java.io.IOException;
 import java.rmi.Remote;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
@@ -382,7 +384,9 @@ public final class MonitoringActivator extends HousekeepingActivator implements 
                 return;
             }
 
-            registerService(Remote.class, new SocketLoggerRMIServiceImpl(this));
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", SocketLoggerRMIService.RMI_NAME);
+            registerService(Remote.class, new SocketLoggerRMIServiceImpl(this), serviceProperties);
             registerService(SocketLoggerRegistryService.class, new SocketLoggerRegistryServiceImpl(createSocketLogConfig(configService)));
             trackService(SocketLoggerRegistryService.class);
 

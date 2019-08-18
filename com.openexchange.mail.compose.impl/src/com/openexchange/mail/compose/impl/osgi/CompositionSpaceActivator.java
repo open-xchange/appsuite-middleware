@@ -326,7 +326,9 @@ public class CompositionSpaceActivator extends HousekeepingActivator {
         ));
         registerService(DeleteListener.class, new CompositionSpaceDeleteListener(this));
 
-        registerService(Remote.class, new RemoteCompositionSpaceServiceImpl(this));
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", RemoteCompositionSpaceServiceImpl.RMI_NAME);
+        registerService(Remote.class, new RemoteCompositionSpaceServiceImpl(this), serviceProperties);
     }
 
     @Override

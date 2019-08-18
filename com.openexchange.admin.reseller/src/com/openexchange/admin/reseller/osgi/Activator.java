@@ -50,6 +50,7 @@
 package com.openexchange.admin.reseller.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.admin.daemons.AdminDaemonService;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -85,8 +86,9 @@ public class Activator extends HousekeepingActivator {
             AdminCache.compareAndSetConfigurationService(null, configurationService);
             initCache(configurationService);
 
-            final OXReseller reseller = new OXReseller();
-            registerService(Remote.class, reseller, null);
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", OXReseller.RMI_NAME);
+            registerService(Remote.class, new OXReseller(), serviceProperties);
             LOG.info("RMI Interface for reseller bundle bound to RMI registry");
 
             Hashtable<String, String> props = new Hashtable<String, String>(2);

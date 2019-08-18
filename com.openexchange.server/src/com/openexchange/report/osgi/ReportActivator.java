@@ -98,7 +98,9 @@ public final class ReportActivator extends HousekeepingActivator {
         LoginCounterService counterService = new LoginCounterImpl();
         registerService(LoginCounterService.class, counterService);
         registerService(InfostoreInformationService.class, new InfostoreInformationImpl());
-        registerService(Remote.class, new LoginCounterRMIServiceImpl(counterService));
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", LoginCounterRMIServiceImpl.RMI_NAME);
+        registerService(Remote.class, new LoginCounterRMIServiceImpl(counterService), serviceProperties);
     }
 
     private final void track(DependentServiceRegisterer<?> registerer) throws InvalidSyntaxException {

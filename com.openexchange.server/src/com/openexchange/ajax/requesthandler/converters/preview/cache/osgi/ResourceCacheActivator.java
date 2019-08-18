@@ -106,7 +106,9 @@ public final class ResourceCacheActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(Remote.class, new ResourceCacheRMIServiceImpl());
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", ResourceCacheRMIServiceImpl.RMI_NAME);
+        registerService(Remote.class, new ResourceCacheRMIServiceImpl(), serviceProperties);
         track(TimerService.class, new SimpleRegistryListener<TimerService>() {
 
             @Override

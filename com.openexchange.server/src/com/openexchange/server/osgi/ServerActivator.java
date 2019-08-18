@@ -698,7 +698,11 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
         registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
-        registerService(Remote.class, new GABRestorerRMIServiceImpl());
+        {
+            Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put("RMI_NAME", GABRestorerRMIServiceImpl.RMI_NAME);
+            registerService(Remote.class, new GABRestorerRMIServiceImpl(), serviceProperties);
+        }
 
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));

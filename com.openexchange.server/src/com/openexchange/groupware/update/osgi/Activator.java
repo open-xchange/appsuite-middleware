@@ -50,6 +50,8 @@
 package com.openexchange.groupware.update.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -104,7 +106,9 @@ public class Activator extends HousekeepingActivator {
 
         registerService(CreateTableService.class, new CreateUpdateTaskTable());
         registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
-        registerService(Remote.class, new UpdateTaskServiceImpl());
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put("RMI_NAME", UpdateTaskServiceImpl.RMI_NAME);
+        registerService(Remote.class, new UpdateTaskServiceImpl(), serviceProperties);
     }
 
     @Override

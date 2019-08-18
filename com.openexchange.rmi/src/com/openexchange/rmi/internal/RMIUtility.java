@@ -110,11 +110,11 @@ public class RMIUtility {
     public static String findRMIName(ServiceReference<Remote> reference, Remote r) {
         // Check for "RMIName"/"RMI_NAME" service property
         {
-            Object name = reference.getProperty("RMIName");
+            Object name = reference.getProperty("RMI_NAME");
             if (name != null) {
                 return (String) name;
             }
-            name = reference.getProperty("RMI_NAME");
+            name = reference.getProperty("RMIName");
             if (name != null) {
                 return (String) name;
             }

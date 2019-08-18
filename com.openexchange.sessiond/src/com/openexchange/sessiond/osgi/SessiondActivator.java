@@ -327,7 +327,11 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
             registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
             registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
-            registerService(Remote.class, new SessiondRMIServiceImpl());
+            {
+                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+                serviceProperties.put("RMI_NAME", SessiondRMIServiceImpl.RMI_NAME);
+                registerService(Remote.class, new SessiondRMIServiceImpl(), serviceProperties);
+            }
             registerService(SessiondRESTService.class, new SessiondRESTService(this));
 
             track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
