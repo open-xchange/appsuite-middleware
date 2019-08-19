@@ -72,6 +72,7 @@ import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.impl.usertype.UserTypeSessiondConfigInterface;
@@ -282,7 +283,7 @@ public class SessionHandlerTest {
         String v1 = UUID.randomUUID().toString();
         SessionImpl s1 = addSession(v1);
         Assert.assertEquals(1, SessionHandler.getSessions().size());
-        SessionHandler.setLocalIp(s1, "172.16.33.66");
+        SessionHandler.setSessionAttributes(s1, DefaultSessionAttributes.builder().withLocalIp("172.16.33.66").build());
         List<String> sessions = SessionHandler.findRemoteSessions(SessionFilter.create("(" + PROP_NAMES[0] + "=" + v1 + ")"));
         Assert.assertEquals(1, sessions.size());
         Assert.assertEquals(s1.getSessionID(), sessions.get(0));

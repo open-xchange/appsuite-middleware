@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Origin;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 import com.openexchange.session.SessionDescription;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
@@ -1255,186 +1256,62 @@ public final class SessionHandler {
         removeRemoteUserSessions(userId, contextId);
     }
 
-    /**
-     * Sets the local IP address for given session.
-     *
-     * @param session The session
-     * @param localIp The new local IP address
-     * @throws OXException If changing local IP address fails or any reason
-     */
-    protected static void setLocalIp(final SessionImpl session, final String localIp) throws OXException {
-        if (null != session) {
-            try {
-                session.setLocalIp(localIp, false);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.setLocalIp(session.getSessionID(), localIp);
-                                } catch (OXException e) {
-                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        // No such session held in session storage
-                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
-                                    } else {
-                                        LOG.warn("Failed to set local IP address", e);
-                                    }
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set local IP address in time");
-                                    } else {
-                                        LOG.warn("Failed to set local IP address", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
-            }
+    protected static void setSessionAttributes(SessionImpl session, SessionAttributes attrs) throws OXException {
+        if (null == session) {
+            return;
         }
-    }
 
-    /**
-     * Sets the client identifier for given session.
-     *
-     * @param session The session
-     * @param client The new client identifier
-     * @throws OXException If changing client identifier fails or any reason
-     */
-    protected static void setClient(final SessionImpl session, final String client) throws OXException {
-        if (null != session) {
-            try {
-                session.setClient(client, false);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.setClient(session.getSessionID(), client);
-                                } catch (OXException e) {
-                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        // No such session held in session storage
-                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
-                                    } else {
-                                        LOG.warn("Failed to set client", e);
-                                    }
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set client in time");
-                                    } else {
-                                        LOG.warn("Failed to set client", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+        try {
+            boolean anySet = false;
+            if (attrs.getLocalIp().isSet()) {
+                session.setLocalIp(attrs.getLocalIp().get(), false);
+                anySet = true;
             }
-        }
-    }
-
-    /**
-     * Sets the hash identifier for given session.
-     *
-     * @param session The session
-     * @param client The new hash identifier
-     * @throws OXException If changing hash identifier fails or any reason
-     */
-    protected static void setHash(final SessionImpl session, final String hash) throws OXException {
-        if (null != session) {
-            try {
-                session.setHash(hash, false);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.setHash(session.getSessionID(), hash);
-                                } catch (OXException e) {
-                                    if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
-                                        // No such session held in session storage
-                                        LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
-                                    } else {
-                                        LOG.warn("Failed to set hash", e);
-                                    }
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set hash in time");
-                                    } else {
-                                        LOG.warn("Failed to set hash", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            if (attrs.getClient().isSet()) {
+                session.setClient(attrs.getClient().get(), false);
+                anySet = true;
             }
-        }
-    }
-
-    /**
-     * Sets the user agent for given session.
-     *
-     * @param session The session
-     * @param client The new user agent
-     * @throws OXException If changing user agent fails
-     */
-    protected static void setUserAgent(final SessionImpl session, final String userAgent) throws OXException {
-        if (null != session) {
-            try {
-                session.setParameter(Session.PARAM_USER_AGENT, userAgent);
-                if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
-                    if (sessionStorageService != null) {
-                        AbstractTask<Void> c = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws Exception {
-                                try {
-                                    sessionStorageService.addSession(getObfuscator().wrap(session));
-                                } catch (OXException e) {
-                                    LOG.warn("Failed to set user agent", e);
-                                } catch (Exception e) {
-                                    if (e.getCause() instanceof InterruptedException) {
-                                        // Timed out
-                                        LOG.warn("Failed to set user agent in time");
-                                    } else {
-                                        LOG.warn("Failed to set user agent", e);
-                                    }
-                                }
-                                return null;
-                            }
-                        };
-                        submit(c);
-                    }
-                }
-            } catch (RuntimeException e) {
-                throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
+            if (attrs.getHash().isSet()) {
+                session.setHash(attrs.getHash().get(), false);
+                anySet = true;
             }
+            if (attrs.getUserAgent().isSet()) {
+                session.setParameter(Session.PARAM_USER_AGENT, attrs.getUserAgent().get());
+                anySet = true;
+            }
+
+            if (anySet && useSessionStorage(session)) {
+                SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
+                if (sessionStorageService != null) {
+                    AbstractTask<Void> c = new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                sessionStorageService.setSessionAttributes(session.getSessionID(), attrs);
+                            } catch (OXException e) {
+                                if (SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
+                                    // No such session held in session storage
+                                    LOG.debug("Session {} not available in session storage.", session.getSessionID(), e);
+                                } else {
+                                    LOG.warn("Failed to set session attributes", e);
+                                }
+                            } catch (Exception e) {
+                                if (e.getCause() instanceof InterruptedException) {
+                                    // Timed out
+                                    LOG.warn("Failed to set session attributes in time");
+                                } else {
+                                    LOG.warn("Failed to set session attributes", e);
+                                }
+                            }
+                            return null;
+                        }
+                    };
+                    submit(c);
+                }
+            }
+        } catch (RuntimeException e) {
+            throw SessionExceptionCodes.SESSIOND_EXCEPTION.create(e, e.getMessage());
         }
     }
 

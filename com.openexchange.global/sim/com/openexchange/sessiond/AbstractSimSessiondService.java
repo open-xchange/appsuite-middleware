@@ -55,6 +55,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionAttributes;
 
 /**
  * {@link AbstractSimSessiondService}
@@ -84,22 +85,7 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public void setClient(String sessionId, String client) throws OXException {
-        // Nothing to do
-    }
-
-    @Override
-    public void setHash(String sessionId, String hash) throws OXException {
-        // Nothing to do
-    }
-
-    @Override
-    public void setUserAgent(String sessionId, String userAgent) throws OXException {
-        // Nothing to do
-    }
-
-    @Override
-    public void setLocalIp(String sessionId, String localIp) throws OXException {
+    public void setSessionAttributes(String sessionId, SessionAttributes attrs) throws OXException {
         // Nothing to do
     }
 

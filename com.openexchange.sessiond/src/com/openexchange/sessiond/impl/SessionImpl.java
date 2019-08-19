@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Origin;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -472,7 +473,7 @@ public final class SessionImpl implements PutIfAbsent {
                     @Override
                     public Void call() throws Exception {
                         try {
-                            storageService.setLocalIp(sessionId, localIp);
+                            storageService.setSessionAttributes(sessionId, DefaultSessionAttributes.builder().withLocalIp(localIp).build());
                         } catch (Exception e) {
                             // Ignore
                         }
@@ -554,7 +555,7 @@ public final class SessionImpl implements PutIfAbsent {
                     @Override
                     public Void call() throws Exception {
                         try {
-                            storageService.setHash(sessionId, hash);
+                            storageService.setSessionAttributes(sessionId, DefaultSessionAttributes.builder().withHash(hash).build());
                         } catch (Exception e) {
                             // Ignore
                         }
@@ -621,7 +622,7 @@ public final class SessionImpl implements PutIfAbsent {
                     @Override
                     public Void call() throws Exception {
                         try {
-                            storageService.setClient(sessionId, client);
+                            storageService.setSessionAttributes(sessionId, DefaultSessionAttributes.builder().withClient(client).build());
                         } catch (Exception e) {
                             // Ignore
                         }

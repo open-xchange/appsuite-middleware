@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,72 +47,42 @@
  *
  */
 
-package com.openexchange.dav.wellknown;
-
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.annotation.NonNull;
-import com.openexchange.dav.DAVFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.SessionHolder;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+package com.openexchange.session;
 
 /**
- * {@link WellknownFactory}
+ * {@link SessionAttributes} - Specifies certain session attributes, which should be changed for an existent session.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.3
  */
-public class WellknownFactory extends DAVFactory {
+public interface SessionAttributes {
 
     /**
-     * Initializes a new {@link WellknownFactory}.
+     * Gets the optional local IP address to set.
      *
-     * @param protocol The protocol
-     * @param sessionHolder The session holder to use
+     * @return The local IP address or an empty instance
      */
-    public WellknownFactory(Protocol protocol, SessionHolder sessionHolder) {
-        super(protocol, null, sessionHolder);
-    }
+    SessionAttribute<String> getLocalIp();
 
-    @Override
-    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
-        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
-    }
-
-    @Override
-    public String getURLPrefix() {
-        return "/";
-    }
-
-    /*
-     * ----------------------------------------
-     *    Avoid service lookup functionality
-     * ----------------------------------------
+    /**
+     * Gets the optional client identifier to set.
+     *
+     * @return The client identifier or an empty instance
      */
+    SessionAttribute<String> getClient();
 
-    @Override
-    public <S> S getService(Class<? extends S> clazz) {
-        return null;
-    }
+    /**
+     * Gets the optional hash identifier to set.
+     *
+     * @return The hash identifier or an empty instance
+     */
+    SessionAttribute<String> getHash();
 
-    @Override
-    public @NonNull <S> S getServiceSafe(Class<? extends S> clazz) throws OXException {
-        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
-    }
-
-    @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
-        return null;
-    }
+    /**
+     * Gets the optional User-Agent identifier to set.
+     *
+     * @return The User-Agent identifier or an empty instance
+     */
+    SessionAttribute<String> getUserAgent();
 
 }

@@ -111,6 +111,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionResult;
@@ -449,7 +450,7 @@ public class LoginServlet extends AJAXServlet {
                                     String newIP = req.getRemoteAddr();
                                     if (!newIP.equals(oldIP)) {
                                         LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
-                                        sessiondService.setLocalIp(session.getSessionID(), newIP);
+                                        sessiondService.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(newIP).build());
                                     }
                                 }
                             } catch (OXException e) {
@@ -621,7 +622,7 @@ public class LoginServlet extends AJAXServlet {
                                     String newIP = req.getRemoteAddr();
                                     if (!newIP.equals(oldIP)) {
                                         LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
-                                        sessiondService.setLocalIp(session.getSessionID(), newIP);
+                                        sessiondService.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(newIP).build());
                                     }
                                 }
                             } catch (OXException e) {

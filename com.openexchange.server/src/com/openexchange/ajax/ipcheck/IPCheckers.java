@@ -54,6 +54,7 @@ import com.openexchange.ajax.SessionUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -184,7 +185,7 @@ public class IPCheckers {
             return false;
         }
         try {
-            service.setLocalIp(session.getSessionID(), current);
+            service.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(current).build());
             LOG.debug("Successfully updated the session's IP address to '{}'", current);
             return true;
         } catch (OXException e) {

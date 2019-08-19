@@ -82,6 +82,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.DefaultSessionAttributes;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.GuestInfo;
@@ -313,8 +314,9 @@ public final class LoginTools {
 
     /**
      * Updates session's IP address if different to specified IP address. This is only possible if the server is configured to be IP wise
-     * insecure. @See configuration property com.openexchange.ajax.login.insecure.
+     * insecure. See configuration property <code>"com.openexchange.ajax.login.insecure"</code>.
      *
+     * @param conf The login configuration to determine if insecure IP change is enabled
      * @param newIP The possibly new IP address
      * @param session The session to update if IP addresses differ
      */
@@ -326,7 +328,7 @@ public final class LoginTools {
                 SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
                 if (null != service) {
                     try {
-                        service.setLocalIp(session.getSessionID(), newIP);
+                        service.setSessionAttributes(session.getSessionID(), DefaultSessionAttributes.builder().withLocalIp(newIP).build());
                     } catch (OXException e) {
                         LOG.info("Failed to update session's IP address. authID: {}, sessionID: {}, old IP address: {}, new IP address: {}", session.getAuthId(), session.getSessionID(), oldIP, newIP, e);
                     }
