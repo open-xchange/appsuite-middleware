@@ -1,3 +1,9 @@
+open-xchange-userfeedback (7.8.4-61) stable; urgency=medium
+
+  * Build for patch 2019-08-26 (5372)
+
+ -- Martin Schneider <martin.schneider@open-xchange.com>  Mon, 19 Aug 2019 11:19:06 +0200
+
 open-xchange-userfeedback (7.8.4-60) stable; urgency=medium
 
   * Build for patch 2019-07-29 (5339)
