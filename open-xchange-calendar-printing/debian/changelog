@@ -1,3 +1,9 @@
+open-xchange-calendar-printing (7.10.2-11) stable; urgency=medium
+
+  * Build for patch 2019-08-26 (5374)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 19 Aug 2019 13:34:11 +0200
+
 open-xchange-calendar-printing (7.10.2-10) stable; urgency=medium
 
   * Build for patch 2019-08-12 (5359)

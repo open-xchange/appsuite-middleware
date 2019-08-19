@@ -15,7 +15,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -72,6 +72,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
+* Mon Aug 19 2019 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2019-08-26 (5374)
 * Fri Aug 09 2019 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2019-08-12 (5359)
 * Mon Jul 22 2019 Carsten Hoeger <choeger@open-xchange.com>
