@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 19
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -97,6 +97,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/grizzly.properties
 
 %changelog
+* Mon Aug 19 2019 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2019-08-26 (5373)
 * Fri Aug 09 2019 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2019-08-12 (5358)
 * Tue Jul 23 2019 Marc Arens <marc.arens@open-xchange.com>
